@@ -2,6 +2,7 @@ import { useForm } from "@tanstack/react-form"
 import * as v from "valibot"
 import { useTranslation } from "react-i18next"
 import { Input } from "~/components/ui/input"
+import { Textarea } from "~/components/ui/textarea"
 import { Button } from "~/components/ui/button"
 import {
   FormField,
@@ -10,7 +11,7 @@ import {
   FormDescription,
   FormMessage,
 } from "~/components/ui/form"
-import { ModHjsonSchema, defaultModHjson, type ModHjsonData } from "./schema"
+import { ModHjsonSchema, ModNameSchema, defaultModHjson, type ModHjsonData } from "@project/validation"
 
 interface ModHjsonEditorProps {
   initialData?: Partial<ModHjsonData>
@@ -68,7 +69,7 @@ export function ModHjsonEditor({ initialData }: ModHjsonEditorProps) {
       name: "minGameVersion",
       label: t("editor.modHjson.minGameVersion"),
       description: t("editor.modHjson.minGameVersionDescription"),
-      placeholder: "145",
+      placeholder: "146",
     },
   ]
 
@@ -105,14 +106,25 @@ export function ModHjsonEditor({ initialData }: ModHjsonEditorProps) {
               <FormField>
                 <FormLabel>{field.label}</FormLabel>
                 <FormControl>
-                  <Input
-                    name={fieldApi.name}
-                    value={fieldApi.state.value ?? ""}
-                    onChange={(e) => fieldApi.handleChange(e.target.value as any)}
-                    onBlur={fieldApi.handleBlur}
-                    placeholder={field.placeholder}
-                    aria-invalid={fieldApi.state.meta.errors.length > 0}
-                  />
+                  {field.name === "description" ? (
+                    <Textarea
+                      name={fieldApi.name}
+                      value={fieldApi.state.value ?? ""}
+                      onChange={(e) => fieldApi.handleChange(e.target.value as any)}
+                      onBlur={fieldApi.handleBlur}
+                      placeholder={field.placeholder}
+                      aria-invalid={fieldApi.state.meta.errors.length > 0}
+                    />
+                  ) : (
+                    <Input
+                      name={fieldApi.name}
+                      value={fieldApi.state.value ?? ""}
+                      onChange={(e) => fieldApi.handleChange(e.target.value as any)}
+                      onBlur={fieldApi.handleBlur}
+                      placeholder={field.placeholder}
+                      aria-invalid={fieldApi.state.meta.errors.length > 0}
+                    />
+                  )}
                 </FormControl>
                 <FormDescription>{field.description}</FormDescription>
                 {fieldApi.state.meta.errors.length > 0 && (
@@ -125,43 +137,81 @@ export function ModHjsonEditor({ initialData }: ModHjsonEditorProps) {
           </form.Field>
         ))}
 
-        <form.Field name="dependencies">
-          {(fieldApi) => (
-            <FormField>
-              <FormLabel>{t("editor.modHjson.dependencies")}</FormLabel>
-              <FormDescription>
-                {t("editor.modHjson.dependenciesDescription")}
-              </FormDescription>
-              <FormControl>
-                <Input
-                  name={fieldApi.name}
-                  value={Array.isArray(fieldApi.state.value) ? fieldApi.state.value.join(", ") : ""}
-                  onChange={(e) =>
-                    fieldApi.handleChange(
-                      e.target.value
-                        .split(",")
-                        .map((s) => s.trim())
-                        .filter(Boolean) as any
-                    )
-                  }
-                  onBlur={fieldApi.handleBlur}
-                  placeholder="mod-a, mod-b"
-                  aria-invalid={fieldApi.state.meta.errors.length > 0}
-                />
-              </FormControl>
-              {fieldApi.state.meta.errors.length > 0 && (
-                <FormMessage>
-                  {fieldApi.state.meta.errors.join(", ")}
-                </FormMessage>
-              )}
-            </FormField>
-          )}
-        </form.Field>
+        <form.Field
+          name="dependencies"
+          validators={{
+            onChange: ({ value }) => {
+              const result = v.safeParse(v.array(ModNameSchema), value)
+              if (!result.success) {
+                return result.issues[0]?.message ?? "Invalid"
+              }
+              return undefined
+            },
+          }}
+        >
+          {(fieldApi) => {
+            const deps = (Array.isArray(fieldApi.state.value) ? fieldApi.state.value : [""]) as string[]
 
-        <div className="flex gap-2 pt-2">
-          <Button type="submit" size="sm">Save</Button>
-          <Button type="button" variant="outline" size="sm">Reset</Button>
-        </div>
+            const updateDep = (index: number, val: string) => {
+              const newDeps = [...deps]
+              newDeps[index] = val
+              fieldApi.handleChange(newDeps as any)
+            }
+
+            const addDep = () => {
+              fieldApi.handleChange([...deps, ""] as any)
+            }
+
+            const removeDep = (index: number) => {
+              fieldApi.handleChange(deps.filter((_, i) => i !== index) as any)
+            }
+
+            return (
+              <FormField>
+                <FormLabel>{t("editor.modHjson.dependencies")}</FormLabel>
+                <FormDescription>
+                  {t("editor.modHjson.dependenciesDescription")}
+                </FormDescription>
+                <FormControl>
+                  <div className="flex flex-col gap-2">
+                    {deps.map((dep, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Input
+                          value={dep}
+                          onChange={(e) => updateDep(index, e.target.value)}
+                          placeholder="mod-name"
+                          aria-invalid={index < (fieldApi.state.meta.errors.length ? fieldApi.state.value?.length ?? 0 : 0)}
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeDep(index)}
+                        >
+                          X
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addDep}
+                    >
+                      Add
+                    </Button>
+                  </div>
+                </FormControl>
+                {fieldApi.state.meta.errors.length > 0 && (
+                  <FormMessage>
+                    {fieldApi.state.meta.errors.join(", ")}
+                  </FormMessage>
+                )}
+              </FormField>
+            )
+          }}
+        </form.Field>
       </form>
     </div>
   )

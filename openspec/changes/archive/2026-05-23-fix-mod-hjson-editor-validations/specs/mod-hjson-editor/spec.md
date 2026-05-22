@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: mod.hjson form editor renders with fields
 The system SHALL render a form-based editor in the SplitView center panel when `?path=mod.hjson` is selected, with labeled input fields for each mod metadata property. The form SHALL NOT include save or reset buttons.
@@ -45,17 +45,6 @@ The mod.hjson form SHALL use `@tanstack/react-form` for form state management an
 #### Scenario: dependencies validated as mod-names
 - **WHEN** the user enters a dependency that does not match the mod-name format
 - **THEN** the field SHALL display a validation error
-
-### Requirement: Field labels and descriptions are translated
-All mod.hjson form field labels and descriptions SHALL use i18n translation keys.
-
-#### Scenario: Fields show translated labels
-- **WHEN** the mod.hjson form renders
-- **THEN** each field label SHALL be rendered via `t()` with keys under `editor.modHjson.*`
-
-#### Scenario: Fields show translated descriptions
-- **WHEN** the mod.hjson form renders
-- **THEN** each field description SHALL be rendered via `t()` with keys under `editor.modHjson.*`
 
 ### Requirement: description field uses Textarea
 The system SHALL render the `description` field using a `<textarea>` element instead of a single-line `<input>`.

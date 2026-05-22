@@ -21,3 +21,6 @@ export const SettingsSchema = v.object({
   autoSave: v.boolean(),
   autoSaveDelay: v.pipe(v.number(), v.minValue(500), v.maxValue(10000)),
 })
+
+export { ModNameSchema, ModHjsonSchema, defaultModHjson } from "./mod-hjson"
+export type { ModHjsonData } from "./mod-hjson"
