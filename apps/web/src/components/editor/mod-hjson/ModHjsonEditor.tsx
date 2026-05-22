@@ -74,7 +74,7 @@ export function ModHjsonEditor({ initialData }: ModHjsonEditorProps) {
   ]
 
   return (
-    <div className="flex h-full flex-col overflow-auto px-4 py-4">
+    <div className="flex h-full flex-col overflow-auto px-4 py-4 md:w-md">
       <h2 className="mb-4 text-sm font-semibold">mod.hjson</h2>
       <form
         onSubmit={(e) => {
@@ -184,9 +184,9 @@ export function ModHjsonEditor({ initialData }: ModHjsonEditorProps) {
                           className="flex-1"
                         />
                         <Button
+                          className="size-9"
                           type="button"
                           variant="outline"
-                          size="sm"
                           onClick={() => removeDep(index)}
                         >
                           X

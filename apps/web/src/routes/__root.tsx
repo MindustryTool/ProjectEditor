@@ -2,6 +2,7 @@ import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { NuqsAdapter } from 'nuqs/adapters/tanstack-router'
+import { Toaster } from '~/components/ui/sonner'
 import i18n from '../i18n/i18n'
 
 import appCss from '../styles.css?url'
@@ -35,6 +36,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <main className="flex flex-1 flex-col">
           <NuqsAdapter>{children}</NuqsAdapter>
         </main>
+        <Toaster />
         <TanStackDevtools
           config={{ position: 'bottom-right' }}
           plugins={[
