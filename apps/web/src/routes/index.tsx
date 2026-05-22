@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 import {
   Package,
   FileCode2,
@@ -81,12 +83,14 @@ const iconMap: Record<string, typeof Palette> = {
 
 function HomePage() {
   return (
-    <div>
+    <div className="flex flex-1 flex-col">
+      <Header />
       <Hero />
       {features.map((group, i) => (
         <FeatureGroup key={group.title} group={group} index={i} />
       ))}
       <CTA />
+      <Footer />
     </div>
   );
 }
@@ -103,15 +107,15 @@ function Hero() {
             Mindustry Mod Development Environment
           </p>
 
-          <h1 className="display-title mb-6 text-5xl leading-[1.02] font-bold tracking-tight text-[var(--sea-ink)] sm:text-7xl fade-in-up" style={{ animationDelay: "80ms" }}>
+          <h1 className="display-title mb-6 text-5xl leading-[1.02] font-bold tracking-tight text-foreground sm:text-7xl fade-in-up" style={{ animationDelay: "80ms" }}>
             Project
             <br />
-            <span className="bg-gradient-to-r from-[var(--lagoon)] to-[var(--palm)] bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-accent to-accent bg-clip-text text-transparent">
               Editor
             </span>
           </h1>
 
-          <p className="mb-10 max-w-xl text-base leading-relaxed text-[var(--sea-ink-soft)] sm:text-lg fade-in-up" style={{ animationDelay: "160ms" }}>
+          <p className="mb-10 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg fade-in-up" style={{ animationDelay: "160ms" }}>
             A full-featured offline editor for Mindustry mods. Edit metadata, manage
             assets, build logic graphs, and pack your mod — all from your browser,
             no server required.
@@ -142,11 +146,11 @@ function FeatureGroup({ group, index }: { group: typeof features[number]; index:
 
       <div className="page-wrap">
         <div className="mb-8 flex items-center gap-3 fade-in-up" style={{ animationDelay: "0ms" }}>
-          <div className={`feature-icon bg-gradient-to-br ${group.color}`}>
+          <div className={`feature-icon bg-linear-to-br ${group.color}`}>
             <Icon className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="display-title text-2xl font-bold text-[var(--sea-ink)] sm:text-3xl">
+            <h2 className="display-title text-2xl font-bold text-foreground sm:text-3xl">
               {group.title}
             </h2>
           </div>
@@ -162,11 +166,11 @@ function FeatureGroup({ group, index }: { group: typeof features[number]; index:
                 style={{ animationDelay: `${i * 60}ms` }}
               >
                 <div className="flex items-start gap-3">
-                  <div className={`rounded-lg p-2 ${group.bg} text-[var(--sea-ink)]`}>
+                  <div className={`rounded-lg p-2 ${group.bg} text-foreground`}>
                     <ItemIcon className="h-4 w-4" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="m-0 text-sm font-semibold text-[var(--sea-ink)]">
+                    <h3 className="m-0 text-sm font-semibold text-foreground">
                       {item.label}
                     </h3>
                   </div>
@@ -186,16 +190,16 @@ function CTA() {
       <hr className="section-divider page-wrap mb-12 sm:mb-16" />
 
       <div className="page-wrap">
-        <div className="island-shell relative overflow-hidden rounded-[2rem] px-8 py-12 text-center sm:px-16 sm:py-16">
+        <div className="island-shell relative overflow-hidden rounded-4xl px-8 py-12 text-center sm:px-16 sm:py-16">
           <div className="hero-glow h-64 w-64 bg-emerald-500/15 -right-20 -top-20" />
           <div className="hero-glow h-64 w-64 bg-teal-500/10 -left-20 -bottom-20" />
 
           <div className="relative">
             <p className="island-kicker mb-3">Ready to build?</p>
-            <h2 className="display-title mb-5 text-3xl font-bold text-[var(--sea-ink)] sm:text-4xl">
+            <h2 className="display-title mb-5 text-3xl font-bold text-foreground sm:text-4xl">
               Start editing your mod
             </h2>
-            <p className="mb-8 text-[var(--sea-ink-soft)]">
+            <p className="mb-8 text-muted-foreground">
               No sign-up, no server, no fuss. Everything runs locally in your browser.
             </p>
             <div className="flex flex-wrap justify-center gap-3">

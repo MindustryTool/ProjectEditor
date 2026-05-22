@@ -1,0 +1,20 @@
+{
+  "app.title": "Project Editor",
+  "nav.home": "Home",
+  "nav.about": "About",
+  "editor.selectFile": "Select a file to start editing",
+  "editor.properties": "Properties",
+  "editor.propertiesPlaceholder": "Select an element to view its properties.",
+  "editor.explorer": "Explorer",
+  "filesMenu.label": "Files",
+  "filesMenu.openFile": "Open File",
+  "filesMenu.save": "Save",
+  "filesMenu.saveAs": "Save As",
+  "exportMenu.label": "Export",
+  "exportMenu.exportJson": "Export as JSON",
+  "exportMenu.exportImage": "Export as Image",
+  "statusBar.noProject": "No project",
+  "statusBar.ready": "Ready",
+  "statusBar.files": "{{count}} files",
+  "statusBar.project": "{{name}}"
+}

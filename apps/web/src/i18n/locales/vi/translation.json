@@ -1,0 +1,20 @@
+{
+  "app.title": "Project Editor",
+  "nav.home": "Trang chủ",
+  "nav.about": "Giới thiệu",
+  "editor.selectFile": "Chọn tệp để bắt đầu chỉnh sửa",
+  "editor.properties": "Thuộc tính",
+  "editor.propertiesPlaceholder": "Chọn phần tử để xem thuộc tính.",
+  "editor.explorer": "Trình khám phá",
+  "filesMenu.label": "Tệp",
+  "filesMenu.openFile": "Mở tệp",
+  "filesMenu.save": "Lưu",
+  "filesMenu.saveAs": "Lưu thành",
+  "exportMenu.label": "Xuất",
+  "exportMenu.exportJson": "Xuất dưới dạng JSON",
+  "exportMenu.exportImage": "Xuất dưới dạng ảnh",
+  "statusBar.noProject": "Không có dự án",
+  "statusBar.ready": "Sẵn sàng",
+  "statusBar.files": "{{count}} tệp",
+  "statusBar.project": "{{name}}"
+}
