@@ -1,6 +1,8 @@
 import { useTranslation } from "react-i18next"
 import { FilesMenu } from "./FilesMenu"
+import { ViewMenu } from "./ViewMenu"
 import { ExportMenu } from "./ExportMenu"
+import { LocalizationMenu } from "./LocalizationMenu"
 import { Toolbar } from "./Toolbar"
 import { StatusBar } from "./StatusBar"
 import { SplitView } from "./SplitView"
@@ -16,7 +18,9 @@ export function EditorPage() {
     >
       <Toolbar>
         <FilesMenu />
+        <ViewMenu />
         <ExportMenu />
+        <LocalizationMenu />
       </Toolbar>
 
       <SplitView

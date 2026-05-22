@@ -14,6 +14,11 @@ i18n
       vi: { translation: vi },
     },
     fallbackLng: "en",
+    detection: {
+      order: ["path", "localStorage", "navigator", "htmlTag"],
+      lookupFromPathIndex: 0,
+      caches: ["localStorage"],
+    },
     interpolation: {
       escapeValue: false,
     },
