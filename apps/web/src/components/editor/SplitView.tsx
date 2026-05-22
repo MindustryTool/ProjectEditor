@@ -4,8 +4,8 @@ import { cn } from "~/lib/utils";
 
 interface SplitViewProps {
 	left: ReactNode;
-	center: ReactNode;
-	right: ReactNode;
+	center?: ReactNode;
+	right?: ReactNode;
 	defaultLeftWidth?: number;
 	defaultRightWidth?: number;
 	minPanelWidth?: number;
@@ -77,31 +77,42 @@ export function SplitView({
 		};
 	}, [onMouseMove, onMouseUp]);
 
+	const showCenter = center !== undefined
+	const showRight = right !== undefined
+
 	return (
 		<div ref={containerRef} className={cn("flex min-h-0 flex-1 overflow-hidden w-full", className)}>
-			<div style={{ width: leftWidth, minWidth: minPanelWidth }} className="shrink-0 border-r bg-muted">
+			<div style={{ width: showCenter ? leftWidth : undefined, minWidth: showCenter ? minPanelWidth : undefined }} className={cn("shrink-0 border-r bg-muted", !showCenter && "flex-1")}>
 				{left}
 			</div>
 
-			<div
-				className="group flex w-1.5 shrink-0 cursor-col-resize items-center justify-center bg-border transition-colors hover:bg-accent active:bg-accent"
-				onMouseDown={onMouseDown("left")}
-			>
-				<div className="h-8 w-0.5 rounded-full bg-muted-foreground opacity-0 transition-opacity group-hover:opacity-60" />
-			</div>
+			{showCenter && (
+				<div
+					className="group flex w-1.5 shrink-0 cursor-col-resize items-center justify-center bg-border transition-colors hover:bg-accent active:bg-accent"
+					onMouseDown={onMouseDown("left")}
+				>
+					<div className="h-8 w-0.5 rounded-full bg-muted-foreground opacity-0 transition-opacity group-hover:opacity-60" />
+				</div>
+			)}
 
-			<div className="flex flex-1 overflow-hidden bg-background w-full items-center justify-center">{center}</div>
+			{showCenter && (
+				<div className="flex flex-1 overflow-hidden bg-background w-full items-center justify-center">{center}</div>
+			)}
 
-			<div
-				className="group flex w-1.5 shrink-0 cursor-col-resize items-center justify-center bg-border transition-colors hover:bg-accent active:bg-accent"
-				onMouseDown={onMouseDown("right")}
-			>
-				<div className="h-8 w-0.5 rounded-full bg-muted-foreground opacity-0 transition-opacity group-hover:opacity-60" />
-			</div>
+			{showRight && (
+				<div
+					className="group flex w-1.5 shrink-0 cursor-col-resize items-center justify-center bg-border transition-colors hover:bg-accent active:bg-accent"
+					onMouseDown={onMouseDown("right")}
+				>
+					<div className="h-8 w-0.5 rounded-full bg-muted-foreground opacity-0 transition-opacity group-hover:opacity-60" />
+				</div>
+			)}
 
-			<div style={{ width: rightWidth, minWidth: minPanelWidth }} className="shrink-0 border-l bg-muted">
-				{right}
-			</div>
+			{showRight && (
+				<div style={{ width: rightWidth, minWidth: minPanelWidth }} className="shrink-0 border-l bg-muted">
+					{right}
+				</div>
+			)}
 		</div>
 	);
 }

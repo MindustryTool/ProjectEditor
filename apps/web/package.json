@@ -27,6 +27,8 @@
     "@project/zip": "workspace:*",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "^0.10.5",
+    "@tanstack/react-form": "^1.32.0",
+    "@tanstack/react-form-start": "^1.32.0",
     "@tanstack/react-router": "^1.120.0",
     "@tanstack/react-router-devtools": "^1.120.0",
     "@tanstack/react-router-ssr-query": "^1.120.0",
@@ -43,7 +45,8 @@
     "react-dom": "^19.2.0",
     "react-i18next": "^17.0.8",
     "tailwind-merge": "^3.6.0",
-    "tailwindcss": "^4.1.18"
+    "tailwindcss": "^4.1.18",
+    "valibot": "^1.4.0"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.38.0",

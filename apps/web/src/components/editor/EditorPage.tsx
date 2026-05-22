@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next"
+import { useQueryState } from "nuqs"
 import { FilesMenu } from "./FilesMenu"
 import { ViewMenu } from "./ViewMenu"
 import { ExportMenu } from "./ExportMenu"
@@ -8,10 +9,36 @@ import { Toolbar } from "./Toolbar"
 import { StatusBar } from "./StatusBar"
 import { SplitView } from "./SplitView"
 import { Panel } from "./Panel"
+import { findTreeNodeByPath } from "./file-explorer-data"
+import { ModHjsonEditor } from "./mod-hjson/ModHjsonEditor"
 import { FileJson, Image } from "lucide-react"
 
 export function EditorPage() {
   const { t } = useTranslation()
+  const [path] = useQueryState("path")
+
+  const selectedNode = path ? findTreeNodeByPath(path) : null
+  const hasSelection = selectedNode !== null
+
+  function renderCenter() {
+    if (!hasSelection) return undefined
+
+    if (path === "mod.hjson") {
+      return (
+        <Panel header={t("editor.editor")}>
+          <ModHjsonEditor />
+        </Panel>
+      )
+    }
+
+    return (
+      <Panel header={t("editor.editor")}>
+        <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+          {path}
+        </div>
+      </Panel>
+    )
+  }
 
   return (
     <div
@@ -33,19 +60,17 @@ export function EditorPage() {
             <FileExplorer />
           </Panel>
         }
-        center={
-          <Panel>
-            <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-              {t("editor.selectFile")}
-            </div>
-          </Panel>
-        }
+        center={renderCenter()}
         right={
-          <Panel header={t("editor.properties")}>
-            <div className="space-y-2 px-3 py-2 text-xs text-muted-foreground">
-              <p>{t("editor.propertiesPlaceholder")}</p>
-            </div>
-          </Panel>
+          hasSelection
+            ? (
+              <Panel header={t("editor.properties")}>
+                <div className="space-y-2 px-3 py-2 text-xs text-muted-foreground">
+                  <p>{t("editor.propertiesPlaceholder")}</p>
+                </div>
+              </Panel>
+            )
+            : undefined
         }
       />
 

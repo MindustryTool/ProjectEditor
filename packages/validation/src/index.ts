@@ -1,23 +1,23 @@
-import { z } from "zod";
+import * as v from "valibot"
 
-export const ProjectFileSchema = z.object({
-  path: z.string().min(1),
-  content: z.string(),
-  size: z.number().nonnegative(),
-});
+export const ProjectFileSchema = v.object({
+  path: v.pipe(v.string(), v.minLength(1)),
+  content: v.string(),
+  size: v.pipe(v.number(), v.minValue(0)),
+})
 
-export const ProjectSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string().min(1).max(100),
-  files: z.array(ProjectFileSchema),
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
-});
+export const ProjectSchema = v.object({
+  id: v.pipe(v.string(), v.uuid()),
+  name: v.pipe(v.string(), v.minLength(1), v.maxLength(100)),
+  files: v.array(ProjectFileSchema),
+  createdAt: v.pipe(v.unknown(), v.toDate()),
+  updatedAt: v.pipe(v.unknown(), v.toDate()),
+})
 
-export const SettingsSchema = z.object({
-  theme: z.enum(["light", "dark", "system"]),
-  fontSize: z.number().min(8).max(32),
-  tabSize: z.number().min(1).max(8),
-  autoSave: z.boolean(),
-  autoSaveDelay: z.number().min(500).max(10000),
-});
+export const SettingsSchema = v.object({
+  theme: v.picklist(["light", "dark", "system"]),
+  fontSize: v.pipe(v.number(), v.minValue(8), v.maxValue(32)),
+  tabSize: v.pipe(v.number(), v.minValue(1), v.maxValue(8)),
+  autoSave: v.boolean(),
+  autoSaveDelay: v.pipe(v.number(), v.minValue(500), v.maxValue(10000)),
+})

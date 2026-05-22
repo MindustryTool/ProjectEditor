@@ -17,7 +17,8 @@
   "dependencies": {
     "@project/validation": "workspace:*",
     "@project/utils": "workspace:*",
-    "@project/config": "workspace:*"
+    "@project/config": "workspace:*",
+    "valibot": "^1.4.0"
   },
   "devDependencies": {
     "typescript": "^5.7.0"

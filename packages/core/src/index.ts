@@ -1,4 +1,5 @@
-import { ProjectSchema } from "@project/validation";
+import { ProjectSchema } from "@project/validation"
+import * as v from "valibot"
 
 export interface Project {
   id: string;
@@ -25,5 +26,5 @@ export function createProject(name: string): Project {
 }
 
 export function validateProject(data: unknown): Project {
-  return ProjectSchema.parse(data) as Project;
+  return v.parse(ProjectSchema, data) as Project;
 }

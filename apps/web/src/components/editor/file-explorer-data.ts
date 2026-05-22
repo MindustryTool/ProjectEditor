@@ -28,3 +28,20 @@ export const projectTree: TreeNode[] = [
 export function getNodePath(node: TreeNode, parents: string[] = []): string {
   return [...parents, node.name].join("/")
 }
+
+export function findTreeNodeByPath(
+  path: string,
+  nodes: TreeNode[] = projectTree
+): TreeNode | null {
+  for (const node of nodes) {
+    if (node.name === path) return node
+    if (node.children) {
+      const parts = path.split("/")
+      if (parts[0] === node.name) {
+        const result = findTreeNodeByPath(parts.slice(1).join("/"), node.children)
+        if (result) return result
+      }
+    }
+  }
+  return null
+}
