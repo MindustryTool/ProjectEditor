@@ -3,11 +3,12 @@ import { FilesMenu } from "./FilesMenu"
 import { ViewMenu } from "./ViewMenu"
 import { ExportMenu } from "./ExportMenu"
 import { LocalizationMenu } from "./LocalizationMenu"
+import { FileExplorer } from "./FileExplorer"
 import { Toolbar } from "./Toolbar"
 import { StatusBar } from "./StatusBar"
 import { SplitView } from "./SplitView"
 import { Panel } from "./Panel"
-import { File, FileJson, Image } from "lucide-react"
+import { FileJson, Image } from "lucide-react"
 
 export function EditorPage() {
   const { t } = useTranslation()
@@ -29,16 +30,7 @@ export function EditorPage() {
         minPanelWidth={200}
         left={
           <Panel header={t("editor.explorer")}>
-            <div className="space-y-0.5 px-1 py-1">
-              <div className="flex cursor-pointer items-center gap-1.5 rounded px-2 py-1 text-xs text-foreground hover:bg-accent">
-                <File className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                mod.json
-              </div>
-              <div className="flex cursor-pointer items-center gap-1.5 rounded px-2 py-1 text-xs text-foreground hover:bg-accent">
-                <File className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                content.json
-              </div>
-            </div>
+            <FileExplorer />
           </Panel>
         }
         center={

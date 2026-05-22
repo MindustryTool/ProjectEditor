@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: Editor page layout
 The system SHALL provide an EditorPage component that arranges the toolbar, left panel, editor area, right panel, and status bar in a VS Code-inspired layout using CSS flexbox.

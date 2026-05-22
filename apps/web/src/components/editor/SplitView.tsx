@@ -78,7 +78,7 @@ export function SplitView({
 	}, [onMouseMove, onMouseUp]);
 
 	return (
-		<div ref={containerRef} className={cn("flex min-h-0 flex-1 overflow-hidden", className)}>
+		<div ref={containerRef} className={cn("flex min-h-0 flex-1 overflow-hidden w-full", className)}>
 			<div style={{ width: leftWidth, minWidth: minPanelWidth }} className="shrink-0 border-r bg-muted">
 				{left}
 			</div>
@@ -90,7 +90,7 @@ export function SplitView({
 				<div className="h-8 w-0.5 rounded-full bg-muted-foreground opacity-0 transition-opacity group-hover:opacity-60" />
 			</div>
 
-			<div className="flex flex-1 overflow-hidden bg-background">{center}</div>
+			<div className="flex flex-1 overflow-hidden bg-background w-full items-center justify-center">{center}</div>
 
 			<div
 				className="group flex w-1.5 shrink-0 cursor-col-resize items-center justify-center bg-border transition-colors hover:bg-accent active:bg-accent"
