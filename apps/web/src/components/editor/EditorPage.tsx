@@ -79,7 +79,7 @@ function LoadingDot() {
 	return (
 		<div>
 			{Array.from({ length: 4 }, (_, i) => (
-				<span className={i >= value ? "opacity-0" : ""}>.</span>
+				<span key={i} className={i >= value ? "opacity-0" : ""}>.</span>
 			))}
 		</div>
 	);
