@@ -1,18 +1,14 @@
 import * as v from "valibot"
 
-export const ProjectFileSchema = v.object({
-  path: v.pipe(v.string(), v.minLength(1)),
-  content: v.string(),
-  size: v.pipe(v.number(), v.minValue(0)),
-})
-
-export const ProjectSchema = v.object({
+export const ProjectInfoSchema = v.object({
   id: v.pipe(v.string(), v.uuid()),
   name: v.pipe(v.string(), v.minLength(1), v.maxLength(100)),
-  files: v.array(ProjectFileSchema),
   createdAt: v.pipe(v.unknown(), v.toDate()),
   updatedAt: v.pipe(v.unknown(), v.toDate()),
 })
+
+/** @deprecated Use ProjectInfoSchema instead */
+export const ProjectSchema = ProjectInfoSchema
 
 export const SettingsSchema = v.object({
   theme: v.picklist(["light", "dark", "system"]),

@@ -1,10 +1,3 @@
-export { EditorPage } from "./EditorPage"
-export { Toolbar } from "./Toolbar"
-export { StatusBar } from "./StatusBar"
-export { Panel } from "./Panel"
-export { SplitView } from "./SplitView"
-export { FilesMenu } from "./FilesMenu"
-export { ViewMenu } from "./ViewMenu"
-export { ExportMenu } from "./ExportMenu"
-export { LocalizationMenu } from "./LocalizationMenu"
-export { FileExplorer } from "./FileExplorer"
+export { EditorPage } from "./EditorPage";
+export { FileTree } from "./FileTree";
+export { Editor } from "./Editor";

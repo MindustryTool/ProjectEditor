@@ -1,8 +1,8 @@
-import { Button } from "@project/ui";
+import { Button } from "./components";
 import { useProjectStore } from "@project/state";
 
 export function App() {
-  const currentProject = useProjectStore((s) => s.currentProject);
+  const projectContext = useProjectStore((s) => s.projectContext);
   const createNewProject = useProjectStore((s) => s.createNewProject);
 
   return (
@@ -12,8 +12,8 @@ export function App() {
       <Button onClick={() => createNewProject("Untitled")}>
         New Project
       </Button>
-      {currentProject && (
-        <p>Current project: {currentProject.name}</p>
+      {projectContext && (
+        <p>Current project: {projectContext.project.name}</p>
       )}
     </main>
   );

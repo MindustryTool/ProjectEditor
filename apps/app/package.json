@@ -15,7 +15,6 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.0.0",
-    "@project/ui": "workspace:*",
     "@project/core": "workspace:*",
     "@project/state": "workspace:*",
     "@project/fs": "workspace:*",

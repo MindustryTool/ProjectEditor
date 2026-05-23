@@ -17,6 +17,7 @@
   "dependencies": {
     "zustand": "^5.0.0",
     "@project/core": "workspace:*",
+    "@project/fs": "workspace:*",
     "@project/config": "workspace:*"
   },
   "devDependencies": {

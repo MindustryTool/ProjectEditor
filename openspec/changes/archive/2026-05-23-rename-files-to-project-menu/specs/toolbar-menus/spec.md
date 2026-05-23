@@ -1,7 +1,9 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: Toolbar with Project and Export menus
 The Toolbar component SHALL render a horizontal bar at the top with localized "Project" and "Export" dropdown menu buttons.
+
+**Reason:** FilesMenu renamed to ProjectMenu; menu items changed from file operations to project operations.
 
 #### Scenario: Toolbar renders menus
 - **WHEN** the Toolbar is rendered
@@ -15,16 +17,17 @@ The Toolbar component SHALL render a horizontal bar at the top with localized "P
 - **WHEN** a menu is open and user clicks outside it
 - **THEN** the menu SHALL close
 
-### Requirement: Project menu items
+### Requirement: Project menu items (replaces Files menu)
 The Project menu SHALL contain items for project CRUD operations: Create Project, Open Project, Change Project, and Close Project, with labels rendered via translation keys.
+
+**Reason:** Replaced file operations (Open File, Save, Save As) with project-level operations.
 
 #### Scenario: Project menu structure
 - **WHEN** the Project menu is open
 - **THEN** it SHALL display localized items: "Create Project", "Open Project", "Change Project", "Close Project"
 
-### Requirement: Export menu items
-The Export menu SHALL contain placeholder items for project export operations, with labels rendered via translation keys.
+## REMOVED Requirements
 
-#### Scenario: Export menu structure
-- **WHEN** the Export menu is open
-- **THEN** it SHALL display localized items: "Export as JSON", "Export as Image"
+### Requirement: Files menu items
+**Reason:** Replaced by Project menu with project-level actions instead of file-level actions.
+**Migration:** Use `ProjectMenu` component instead of `FilesMenu`; file-level operations are handled by FileExplorer and Editor components.

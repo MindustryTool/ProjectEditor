@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { createProject, type Project } from "@project/core";
+import { createProjectInfo, createEventBus, type ProjectInfo, type EventBus, type ProjectEventMap } from "@project/core";
+import { createOPFSAdapter, type VirtualFileSystem } from "@project/fs";
 import { DEFAULT_SETTINGS } from "@project/config";
 
 export interface AppSettings {
@@ -10,31 +11,45 @@ export interface AppSettings {
   autoSaveDelay: number;
 }
 
+export interface ProjectContext {
+  project: ProjectInfo;
+  fs: VirtualFileSystem;
+  events: EventBus<ProjectEventMap>;
+}
+
 interface ProjectState {
-  currentProject: Project | null;
-  projects: Project[];
+  projectContext: ProjectContext | null;
+  projects: ProjectInfo[];
   settings: AppSettings;
 
   createNewProject: (name: string) => void;
-  setCurrentProject: (project: Project | null) => void;
+  setCurrentProject: (context: ProjectContext | null) => void;
+  closeProject: () => void;
   updateSettings: (settings: Partial<AppSettings>) => void;
 }
 
 export const useProjectStore = create<ProjectState>((set) => ({
-  currentProject: null,
+  projectContext: null,
   projects: [],
   settings: DEFAULT_SETTINGS as AppSettings,
 
-  createNewProject: (name: string) => {
-    const project = createProject(name);
+  createNewProject: async (name: string) => {
+    const project = createProjectInfo(name);
+    const events = createEventBus<ProjectEventMap>();
+    const fs = await createOPFSAdapter();
+    const context: ProjectContext = { project, fs, events };
     set((state) => ({
       projects: [...state.projects, project],
-      currentProject: project,
+      projectContext: context,
     }));
   },
 
-  setCurrentProject: (project) => {
-    set({ currentProject: project });
+  setCurrentProject: (context) => {
+    set({ projectContext: context });
+  },
+
+  closeProject: () => {
+    set({ projectContext: null });
   },
 
   updateSettings: (settings) => {

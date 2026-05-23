@@ -3,7 +3,7 @@ import { openDB, type IDBPDatabase } from "idb";
 const DB_NAME = "ProjectEditorDB";
 const DB_VERSION = 1;
 
-interface ProjectRecord {
+export interface ProjectRecord {
   id: string;
   name: string;
   data: string;

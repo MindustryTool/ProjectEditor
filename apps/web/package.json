@@ -22,7 +22,6 @@
     "@project/fs": "workspace:*",
     "@project/state": "workspace:*",
     "@project/storage": "workspace:*",
-    "@project/ui": "workspace:*",
     "@project/utils": "workspace:*",
     "@project/validation": "workspace:*",
     "@project/zip": "workspace:*",

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import type { FileHandle } from "@project/fs";
+import type { FileEntry } from "@project/fs";
 
 interface FileTreeProps {
-  files: FileHandle[];
+  files: FileEntry[];
   onSelect: (path: string) => void;
   selectedPath?: string;
 }
@@ -23,7 +23,7 @@ export function FileTree({ files, onSelect, selectedPath }: FileTreeProps) {
 }
 
 interface FileTreeNodeProps {
-  handle: FileHandle;
+  handle: FileEntry;
   onSelect: (path: string) => void;
   isSelected: boolean;
 }
