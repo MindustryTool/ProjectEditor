@@ -13,6 +13,7 @@ import { EditorCenterPanel } from "./EditorCenterPanel";
 import { EditorRightPanel } from "./EditorRightPanel";
 import { FileJson, Image } from "lucide-react";
 import { useFileContent } from "@project/state";
+import { Spinner } from "#/components/ui/spinner";
 
 const ProjectPickerDialog = lazy(() => import("./ProjectPickerDialog").then((m) => ({ default: m.ProjectPickerDialog })));
 const ProjectSettingsDialog = lazy(() => import("./ProjectSettingsDialog").then((m) => ({ default: m.ProjectSettingsDialog })));
@@ -75,7 +76,7 @@ export const EditorShell = memo(function EditorShell({
 		[pickerMode, onCloseProject, onOpenProject],
 	);
 
-	const { data, update } = useFileContent(path || "");
+	const { data, update, isLoading, error } = useFileContent(path || "");
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col bg-background text-foreground">
@@ -98,8 +99,10 @@ export const EditorShell = memo(function EditorShell({
 				defaultRightWidth={360}
 				minPanelWidth={300}
 				left={<EditorToolPanel />}
-				center={<EditorCenterPanel path={path} value={data} onChange={update} />}
-				right={<EditorRightPanel path={path} value={data} onChange={update} />}
+				center={
+					isLoading ? <Spinner /> : error ? <span>{error}</span> : <EditorCenterPanel path={path} value={data} onChange={update} />
+				}
+				right={isLoading ? <Spinner /> : error ? <span>{error}</span> : <EditorRightPanel path={path} value={data} onChange={update} />}
 			/>
 
 			<StatusBar
