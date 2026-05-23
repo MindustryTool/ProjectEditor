@@ -71,7 +71,7 @@ function TreeNodeItem({
       <button
         onClick={handleClick}
         className={cn(
-          "flex w-full cursor-pointer items-center gap-1 rounded px-2 py-1 text-xs text-foreground hover:bg-accent",
+          "flex w-full cursor-pointer items-center gap-1 rounded px-2 py-1 text-sm text-foreground hover:bg-accent",
           isSelected && "bg-accent font-medium"
         )}
         style={{ paddingLeft: `${8 + depth * 16}px` }}

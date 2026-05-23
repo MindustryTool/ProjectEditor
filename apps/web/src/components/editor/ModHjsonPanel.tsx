@@ -42,6 +42,8 @@ function parseModHjson(data: string): ModHjsonData {
 				minGameVersion = line.split(":")[1]!.trimStart();
 			} else if (line.startsWith("dependencies:")) {
 				dependencies = line
+					.replaceAll("[", "")
+					.replaceAll("]", "")
 					.split(":")[1]!
 					.trimStart()
 					.split(",")
@@ -75,7 +77,7 @@ function toHjson(data: ModHjsonData): string {
 	result += `minGameVersion: ${data.minGameVersion.trimStart()}\n`;
 
 	if (data.dependencies.filter((dep) => dep.trim() !== "").length > 0) {
-		result += `dependencies: ${data.dependencies.join(",").trimStart()}\n`;
+		result += `dependencies: [${data.dependencies.join(",").trimStart()}]\n`;
 	}
 
 	result += `hidden: ${data.hidden}\n`;
