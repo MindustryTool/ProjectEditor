@@ -2,7 +2,9 @@ import * as v from "valibot"
 
 export const ModNameSchema = v.pipe(
   v.string(),
-  v.regex(/^[a-z][a-z0-9-]*$/, "Must be lowercase letters, digits, and hyphens only")
+  v.regex(/^[a-z][a-z0-9-]*$/, "Must be lowercase letters, digits, hyphens"),
+  v.minLength(2),
+  v.maxLength(127),
 )
 
 export const ModHjsonSchema = v.object({
@@ -28,9 +30,9 @@ export const defaultModHjson: ModHjsonData = {
   name: "my-hjson-mod",
   displayName: "Cool mod",
   author: "Me",
-  description: "",
+  description: "A cool mod",
   version: "1.0.0",
   minGameVersion: "146",
-  dependencies: [""],
+  dependencies: [],
   hidden: false,
 }
