@@ -24,6 +24,7 @@
   "editor.modHjson.hiddenDescription": "Ẩn mod này khỏi danh sách mod trực tuyến",
   "editor.modHjson.dependencies": "Phụ thuộc",
   "editor.modHjson.dependenciesDescription": "Các mod khác mà mod này phụ thuộc",
+  "editor.loading": "Đang tải",
   "projectMenu.label": "Dự án",
   "projectMenu.createProject": "Tạo dự án",
   "projectMenu.openProject": "Mở dự án",

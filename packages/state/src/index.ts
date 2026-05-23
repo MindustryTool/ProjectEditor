@@ -62,18 +62,15 @@ export const useProjectStore = create<ProjectState>()(
 				const events = createEventBus<ProjectEventMap>();
 				const fs = await createProjectFileSystem(project, {
 					onTreeSnapshotChange: (snapshot) => {
-						console.log("Project file system tree snapshot changed successfully");
 						set({ treeSnapshot: snapshot });
 					},
 				});
-				console.log("Project file system created successfully");
 				const context: ProjectContext = { project, fs, events };
 				set((state) => ({
 					projects: [...state.projects, project],
 					projectContext: context,
 					lastProjectId: project.id,
 				}));
-				console.log("Project context set successfully");
 			},
 
 			setCurrentProject: (context) => {

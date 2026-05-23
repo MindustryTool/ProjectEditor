@@ -24,6 +24,7 @@
   "editor.modHjson.hiddenDescription": "Hide this mod from online mod lists",
   "editor.modHjson.dependencies": "Dependencies",
   "editor.modHjson.dependenciesDescription": "Other mods this mod depends on",
+  "editor.loading": "Loading",
   "projectMenu.label": "Project",
   "projectMenu.createProject": "Create Project",
   "projectMenu.openProject": "Open Project",
