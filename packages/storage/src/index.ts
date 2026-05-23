@@ -6,6 +6,7 @@ const DB_VERSION = 1;
 export interface ProjectRecord {
   id: string;
   name: string;
+  language?: string;
   data: string;
   createdAt: Date;
   updatedAt: Date;

@@ -1,9 +1,10 @@
 import { memo } from "react";
 import { ProjectPickerScreen } from "./ProjectPickerScreen";
+import type { ProjectLanguage } from "@project/core";
 import type { ProjectRecord } from "@project/storage";
 
 interface NoProjectScreenProps {
-  onCreateProject: (name: string) => void;
+  onCreateProject: (name: string, language?: ProjectLanguage) => void;
   onOpenProject: (record: ProjectRecord) => void;
 }
 

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { createProjectInfo, createEventBus, type ProjectInfo, type EventBus, type ProjectEventMap } from "@project/core";
+import { createProjectInfo, createEventBus, type ProjectInfo, type ProjectLanguage, type EventBus, type ProjectEventMap } from "@project/core";
 import { createProjectFileSystem, type ProjectFileSystem } from "@project/fs";
 import { DEFAULT_SETTINGS } from "@project/config";
 
@@ -24,7 +24,7 @@ interface ProjectState {
   settings: AppSettings;
   lastProjectId: string | null;
 
-  createNewProject: (name: string) => void;
+  createNewProject: (name: string, language?: ProjectLanguage) => void;
   setCurrentProject: (context: ProjectContext | null) => void;
   closeProject: () => void;
   updateSettings: (settings: Partial<AppSettings>) => void;
@@ -38,8 +38,8 @@ export const useProjectStore = create<ProjectState>()(
       settings: DEFAULT_SETTINGS as AppSettings,
       lastProjectId: null,
 
-      createNewProject: async (name: string) => {
-        const project = createProjectInfo(name);
+      createNewProject: async (name: string, language?: ProjectLanguage) => {
+        const project = createProjectInfo(name, language);
         const events = createEventBus<ProjectEventMap>();
         const fs = await createProjectFileSystem(project);
         const context: ProjectContext = { project, fs, events };

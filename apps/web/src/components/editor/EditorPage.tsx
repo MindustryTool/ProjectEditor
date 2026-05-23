@@ -1,7 +1,7 @@
 import { useQueryState } from "nuqs";
 import { useState, useCallback, useEffect } from "react";
 import { useProjectStore } from "@project/state";
-import { createEventBus, type ProjectInfo, type ProjectEventMap } from "@project/core";
+import { createEventBus, type ProjectInfo, type ProjectLanguage, type ProjectEventMap } from "@project/core";
 import { createProjectFileSystem } from "@project/fs";
 import { getProject, saveProject, type ProjectRecord } from "@project/storage";
 import { projectTree, type TreeNode } from "./file-explorer-data";
@@ -32,6 +32,7 @@ export function EditorPage() {
     const project: ProjectInfo = {
       id: record.id,
       name: record.name,
+      language: (record.language ?? "json") as ProjectLanguage,
       createdAt: new Date(record.createdAt),
       updatedAt: new Date(record.updatedAt),
     };
@@ -52,13 +53,14 @@ export function EditorPage() {
     return () => { cancelled = true; };
   }, [lastProjectId, projectContext, openProjectFromRecord]);
 
-  const handleCreateProject = useCallback(async (name: string) => {
-    await createNewProject(name);
+  const handleCreateProject = useCallback(async (name: string, language?: ProjectLanguage) => {
+    await createNewProject(name, language);
     const ctx = useProjectStore.getState().projectContext;
     if (ctx) {
       await saveProject({
         id: ctx.project.id,
         name: ctx.project.name,
+        language: ctx.project.language,
         data: "",
         createdAt: ctx.project.createdAt,
         updatedAt: ctx.project.updatedAt,

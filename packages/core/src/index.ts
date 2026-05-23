@@ -1,17 +1,21 @@
 import { ProjectInfoSchema } from "@project/validation"
 import * as v from "valibot"
 
+export type ProjectLanguage = "json" | "java" | "javascript";
+
 export interface ProjectInfo {
   id: string;
   name: string;
+  language: ProjectLanguage;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export function createProjectInfo(name: string): ProjectInfo {
+export function createProjectInfo(name: string, language: ProjectLanguage = "json"): ProjectInfo {
   return {
     id: crypto.randomUUID(),
     name,
+    language,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
