@@ -3,9 +3,9 @@
 ### Requirement: mod.hjson form editor renders with fields
 The system SHALL render a form-based editor in the SplitView center panel when `?path=mod.hjson` is selected, with labeled input fields for each mod metadata property. The form SHALL NOT include save or reset buttons.
 
-#### Scenario: Form renders seven fields
+#### Scenario: Form renders eight fields
 - **WHEN** `?path=mod.hjson` is active
-- **THEN** the center panel SHALL display a form with labeled inputs for: `name`, `displayName`, `author`, `description`, `version`, `minGameVersion`, and `dependencies` as a list
+- **THEN** the center panel SHALL display a form with labeled inputs for: `name`, `displayName`, `author`, `description`, `version`, `minGameVersion`, `dependencies` as a list, and `hidden` as a checkbox
 
 #### Scenario: Field descriptions visible
 - **WHEN** the form is rendered
@@ -74,6 +74,25 @@ The `dependencies` array SHALL be rendered as a list of individual input fields,
 #### Scenario: Add button appends a new input
 - **WHEN** the user clicks the "Add" button in the dependencies section
 - **THEN** a new empty dependency input SHALL appear below the existing ones
+
+#### Scenario: Remove button deletes a dependency input
+- **WHEN** the user clicks the remove button on a dependency input
+- **THEN** that input SHALL be removed from the list
+
+### Requirement: hidden field renders as checkbox
+The system SHALL render the `hidden` field as a checkbox in the mod.hjson form. The value SHALL be `true` (checked), `false` (unchecked), or `undefined` (indeterminate/unset).
+
+#### Scenario: Checkbox renders with label and description
+- **WHEN** the mod.hjson form renders
+- **THEN** the `hidden` field SHALL appear as a checkbox with a translated label and description
+
+#### Scenario: Checkbox unchecked represents false
+- **WHEN** the checkbox is unchecked
+- **THEN** the field value SHALL be `false`
+
+#### Scenario: Checkbox checked represents true
+- **WHEN** the checkbox is checked
+- **THEN** the field value SHALL be `true`
 
 #### Scenario: Remove button deletes a dependency input
 - **WHEN** the user clicks the remove button on a dependency input

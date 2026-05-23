@@ -19,16 +19,18 @@ export const ModHjsonSchema = v.object({
     }, "Must be a number greater than 145")
   ),
   dependencies: v.array(ModNameSchema),
+  hidden: v.optional(v.boolean()),
 })
 
 export type ModHjsonData = v.InferOutput<typeof ModHjsonSchema>
 
 export const defaultModHjson: ModHjsonData = {
-  name: "",
-  displayName: "",
-  author: "",
+  name: "my-hjson-mod",
+  displayName: "Cool mod",
+  author: "Me",
   description: "",
   version: "1.0.0",
   minGameVersion: "146",
   dependencies: [""],
+  hidden: false,
 }

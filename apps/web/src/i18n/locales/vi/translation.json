@@ -20,6 +20,8 @@
   "editor.modHjson.versionDescription": "Phiên bản ngữ nghĩa (vd: '1.0.0')",
   "editor.modHjson.minGameVersion": "Phiên bản game tối thiểu",
   "editor.modHjson.minGameVersionDescription": "Phiên bản Mindustry tối thiểu yêu cầu",
+  "editor.modHjson.hidden": "Ẩn",
+  "editor.modHjson.hiddenDescription": "Ẩn mod này khỏi danh sách mod trực tuyến",
   "editor.modHjson.dependencies": "Phụ thuộc",
   "editor.modHjson.dependenciesDescription": "Các mod khác mà mod này phụ thuộc",
   "projectMenu.label": "Dự án",

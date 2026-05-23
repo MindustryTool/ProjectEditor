@@ -74,3 +74,8 @@ export const useProjectStore = create<ProjectState>()(
     },
   ),
 );
+
+export type { FileContentEntry, FileContentStore } from "./file-content-store";
+export { useFileContentStore } from "./file-content-store";
+export type { UseFileContentOptions, UseFileContentResult } from "./use-file-content";
+export { useFileContent } from "./use-file-content";

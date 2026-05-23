@@ -4,25 +4,25 @@ import { Panel } from "./Panel";
 import { HjsonEditor } from "#/components/editor/HjsonEditor";
 
 interface EditorCenterPanelProps {
-  path: string | null;
-  value: string;
-  onChange: (value: string) => void;
+	path: string | null;
+	value: string | null;
+	onChange: (value: string) => void;
 }
 
-export const EditorCenterPanel = memo(function EditorCenterPanel({
-  path,
-  value,
-  onChange,
-}: EditorCenterPanelProps) {
-  const { t } = useTranslation();
+export const EditorCenterPanel = memo(function EditorCenterPanel({ path, value, onChange }: EditorCenterPanelProps) {
+	const { t } = useTranslation();
 
-  if (path === "mod.hjson") {
-    return <HjsonEditor value={value} onChange={onChange} />;
-  }
+	if (path === null) {
+		return null;
+	}
 
-  return (
-    <Panel header={t("editor.editor")}>
-      <div className="flex h-full items-center justify-center text-xs text-muted-foreground">{path}</div>
-    </Panel>
-  );
+	if (path === "mod.hjson") {
+		return <HjsonEditor value={value} onChange={onChange} />;
+	}
+
+	return (
+		<Panel header={t("editor.editor")}>
+			<div className="flex h-full items-center justify-center text-xs text-muted-foreground">{path}</div>
+		</Panel>
+	);
 });

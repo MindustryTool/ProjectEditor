@@ -20,6 +20,8 @@
   "editor.modHjson.versionDescription": "Semantic version (e.g., '1.0.0')",
   "editor.modHjson.minGameVersion": "Min Game Version",
   "editor.modHjson.minGameVersionDescription": "Minimum Mindustry version required",
+  "editor.modHjson.hidden": "Hidden",
+  "editor.modHjson.hiddenDescription": "Hide this mod from online mod lists",
   "editor.modHjson.dependencies": "Dependencies",
   "editor.modHjson.dependenciesDescription": "Other mods this mod depends on",
   "projectMenu.label": "Project",
