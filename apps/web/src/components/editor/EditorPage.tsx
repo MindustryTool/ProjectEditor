@@ -1,9 +1,9 @@
 import { useQueryState } from "nuqs";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useProjectStore } from "@project/state";
 import { createEventBus, type ProjectInfo, type ProjectEventMap } from "@project/core";
-import { createOPFSAdapter } from "@project/fs";
-import { saveProject, type ProjectRecord } from "@project/storage";
+import { createProjectFileSystem } from "@project/fs";
+import { getProject, saveProject, type ProjectRecord } from "@project/storage";
 import { projectTree, type TreeNode } from "./file-explorer-data";
 import { NoProjectScreen } from "./NoProjectScreen";
 import { EditorShell } from "./EditorShell";
@@ -22,7 +22,8 @@ export function EditorPage() {
   const [path] = useQueryState("path");
   const [value, setValue] = useState("");
 
-  const { projectContext } = useProjectStore((state) => state);
+  const projectContext = useProjectStore((state) => state.projectContext);
+  const lastProjectId = useProjectStore((state) => state.lastProjectId);
   const createNewProject = useProjectStore((state) => state.createNewProject);
   const setCurrentProject = useProjectStore((state) => state.setCurrentProject);
   const closeProject = useProjectStore((state) => state.closeProject);
@@ -35,9 +36,21 @@ export function EditorPage() {
       updatedAt: new Date(record.updatedAt),
     };
     const events = createEventBus<ProjectEventMap>();
-    const fs = await createOPFSAdapter();
+    const fs = await createProjectFileSystem(project);
     setCurrentProject({ project, fs, events });
   }, [setCurrentProject]);
+
+  useEffect(() => {
+    if (projectContext !== null || !lastProjectId) return;
+    let cancelled = false;
+    (async () => {
+      const record = await getProject(lastProjectId);
+      if (record && !cancelled) {
+        openProjectFromRecord(record);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [lastProjectId, projectContext, openProjectFromRecord]);
 
   const handleCreateProject = useCallback(async (name: string) => {
     await createNewProject(name);

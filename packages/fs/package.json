@@ -15,6 +15,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@project/core": "workspace:*",
     "@project/storage": "workspace:*",
     "@project/zip": "workspace:*"
   },

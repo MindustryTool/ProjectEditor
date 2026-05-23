@@ -251,6 +251,9 @@ importers:
 
   packages/fs:
     dependencies:
+      '@project/core':
+        specifier: workspace:*
+        version: link:../core
       '@project/storage':
         specifier: workspace:*
         version: link:../storage

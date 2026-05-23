@@ -31,6 +31,8 @@ The system SHALL provide a `ProjectFileSystem` class that wraps `VirtualFileSyst
 - **WHEN** any `VirtualFileSystem` method (readFile, writeFile, delete, mkdir, readdir, stat, exists, rename, move, copy, watch) is called
 - **THEN** the call is delegated to the underlying VFS with the project root prefix applied to all path arguments
 
+## MODIFIED Requirements
+
 ### Requirement: VirtualFileSystem interface
 The system SHALL provide a `VirtualFileSystem` interface with methods for reading, writing, deleting, and managing files and directories.
 

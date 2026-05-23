@@ -8,9 +8,6 @@ export interface ProjectInfo {
   updatedAt: Date;
 }
 
-/** @deprecated Use ProjectInfo instead */
-export type Project = ProjectInfo
-
 export function createProjectInfo(name: string): ProjectInfo {
   return {
     id: crypto.randomUUID(),
@@ -20,8 +17,6 @@ export function createProjectInfo(name: string): ProjectInfo {
   };
 }
 
-/** @deprecated Use createProjectInfo instead */
-export const createProject = createProjectInfo
 
 export function validateProject(data: unknown): ProjectInfo {
   return v.parse(ProjectInfoSchema, data) as ProjectInfo;

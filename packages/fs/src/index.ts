@@ -1,3 +1,4 @@
+import type { ProjectInfo } from "@project/core"
 import { getOPFSRoot } from "@project/storage"
 
 // Types
@@ -34,19 +35,81 @@ export interface VirtualFileSystem {
   watch(callback: FileWatchCallback): Unsubscribe;
 }
 
-// ProjectFileSystem convenience wrapper
+// ProjectFileSystem — project-scoped filesystem with convenience methods
 
 export class ProjectFileSystem {
-  constructor(private vfs: VirtualFileSystem) {}
+  private projectRoot: string;
+
+  constructor(
+    projectInfo: ProjectInfo,
+    private vfs: VirtualFileSystem,
+  ) {
+    this.projectRoot = `/projects/${projectInfo.id}/`;
+  }
+
+  private scopePath(path: string): string {
+    const normalized = path.startsWith("/") ? path : `/${path}`;
+    if (normalized.startsWith(this.projectRoot)) {
+      return normalized;
+    }
+    return `${this.projectRoot}${normalized.replace(/^\//, "")}`;
+  }
+
+  async readFile(path: string): Promise<ArrayBuffer> {
+    return this.vfs.readFile(this.scopePath(path));
+  }
+
+  async writeFile(path: string, data: BufferSource): Promise<void> {
+    return this.vfs.writeFile(this.scopePath(path), data);
+  }
+
+  async delete(path: string): Promise<void> {
+    return this.vfs.delete(this.scopePath(path));
+  }
+
+  async mkdir(path: string): Promise<void> {
+    return this.vfs.mkdir(this.scopePath(path));
+  }
+
+  async readdir(path: string): Promise<FileEntry[]> {
+    return this.vfs.readdir(this.scopePath(path));
+  }
+
+  async stat(path: string): Promise<FileStat> {
+    return this.vfs.stat(this.scopePath(path));
+  }
+
+  async exists(path: string): Promise<boolean> {
+    return this.vfs.exists(this.scopePath(path));
+  }
+
+  async rename(oldPath: string, newPath: string): Promise<void> {
+    return this.vfs.rename(this.scopePath(oldPath), this.scopePath(newPath));
+  }
+
+  async move(src: string, dst: string): Promise<void> {
+    return this.vfs.move(this.scopePath(src), this.scopePath(dst));
+  }
+
+  async copy(src: string, dst: string): Promise<void> {
+    return this.vfs.copy(this.scopePath(src), this.scopePath(dst));
+  }
+
+  watch(callback: FileWatchCallback): Unsubscribe {
+    return this.vfs.watch((path) => {
+      const relative = path.replace(this.projectRoot, "");
+      callback(relative);
+    });
+  }
 
   async readTextFile(path: string): Promise<string> {
-    const bytes = await this.vfs.readFile(path);
+    const bytes = await this.readFile(path);
     return new TextDecoder().decode(bytes);
   }
 
   async writeTextFile(path: string, content: string): Promise<void> {
     const bytes = new TextEncoder().encode(content);
-    await this.vfs.writeFile(path, bytes);
+    await this.writeFile(path, bytes);
   }
 
   async readJsonFile<T>(path: string): Promise<T> {
@@ -59,12 +122,13 @@ export class ProjectFileSystem {
   }
 
   async copyFile(source: string, destination: string): Promise<void> {
-    await this.vfs.copy(source, destination);
+    return this.copy(source, destination);
   }
+}
 
-  async exists(path: string): Promise<boolean> {
-    return this.vfs.exists(path);
-  }
+export async function createProjectFileSystem(projectInfo: ProjectInfo): Promise<ProjectFileSystem> {
+  const vfs = await createOPFSAdapter();
+  return new ProjectFileSystem(projectInfo, vfs);
 }
 
 // OPFSAdapter

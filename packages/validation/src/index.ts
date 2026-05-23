@@ -7,8 +7,6 @@ export const ProjectInfoSchema = v.object({
   updatedAt: v.pipe(v.unknown(), v.toDate()),
 })
 
-/** @deprecated Use ProjectInfoSchema instead */
-export const ProjectSchema = ProjectInfoSchema
 
 export const SettingsSchema = v.object({
   theme: v.picklist(["light", "dark", "system"]),
