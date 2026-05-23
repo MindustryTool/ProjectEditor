@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useLocation } from "@tanstack/react-router"
 import {
@@ -15,28 +14,9 @@ import {
 import { ChevronDown } from "lucide-react"
 import { cn } from "~/lib/utils"
 import { SUPPORTED_LOCALES, type Locale } from "~/lib/locales"
+import { useTheme } from "~/components/theme-provider"
 
-type ThemeMode = "light" | "dark" | "auto"
-
-function getInitialTheme(): ThemeMode {
-  if (typeof window === "undefined") return "auto"
-  const stored = window.localStorage.getItem("theme")
-  if (stored === "light" || stored === "dark" || stored === "auto") return stored
-  return "auto"
-}
-
-function applyTheme(mode: ThemeMode) {
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-  const resolved = mode === "auto" ? (prefersDark ? "dark" : "light") : mode
-  document.documentElement.classList.remove("light", "dark")
-  document.documentElement.classList.add(resolved)
-  if (mode === "auto") {
-    document.documentElement.removeAttribute("data-theme")
-  } else {
-    document.documentElement.setAttribute("data-theme", mode)
-  }
-  document.documentElement.style.colorScheme = resolved
-}
+type Theme = "light" | "dark" | "system"
 
 const locales = [
   { code: "en", label: "English" },
@@ -51,16 +31,10 @@ export function ViewMenu({ className }: ViewMenuProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
-  const [theme, setTheme] = useState<ThemeMode>("auto")
+  const { theme, setTheme } = useTheme()
 
-  useEffect(() => {
-    setTheme(getInitialTheme())
-  }, [])
-
-  function handleThemeChange(mode: ThemeMode) {
+  function handleThemeChange(mode: Theme) {
     setTheme(mode)
-    applyTheme(mode)
-    window.localStorage.setItem("theme", mode)
   }
 
   function handleLanguageChange(code: Locale) {
@@ -95,7 +69,7 @@ export function ViewMenu({ className }: ViewMenuProps) {
             <DropdownMenuRadioGroup
               value={theme}
               onValueChange={(value) =>
-                handleThemeChange(value as ThemeMode)
+                handleThemeChange(value as Theme)
               }
             >
               <DropdownMenuRadioItem value="light">
@@ -104,7 +78,7 @@ export function ViewMenu({ className }: ViewMenuProps) {
               <DropdownMenuRadioItem value="dark">
                 {t("viewMenu.themeDark")}
               </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="auto">
+              <DropdownMenuRadioItem value="system">
                 {t("viewMenu.themeAuto")}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>

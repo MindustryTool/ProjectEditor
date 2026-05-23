@@ -17,7 +17,7 @@ interface ModHjsonEditorProps {
   initialData?: Partial<ModHjsonData>
 }
 
-export function ModHjsonEditor({ initialData }: ModHjsonEditorProps) {
+export function ModHjsonPanel({ initialData }: ModHjsonEditorProps) {
   const { t } = useTranslation()
   const form = useForm({
     defaultValues: { ...defaultModHjson, ...initialData },
@@ -74,8 +74,7 @@ export function ModHjsonEditor({ initialData }: ModHjsonEditorProps) {
   ]
 
   return (
-    <div className="flex h-full flex-col overflow-auto px-4 py-4 md:w-md">
-      <h2 className="mb-4 text-sm font-semibold">mod.hjson</h2>
+    <div className="flex h-full flex-col overflow-auto px-4 py-4">
       <form
         onSubmit={(e) => {
           e.preventDefault()

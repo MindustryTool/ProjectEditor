@@ -9,27 +9,39 @@ import { Toolbar } from "./Toolbar";
 import { StatusBar } from "./StatusBar";
 import { SplitView } from "./SplitView";
 import { Panel } from "./Panel";
-import { findTreeNodeByPath } from "./file-explorer-data";
-import { ModHjsonEditor } from "./mod-hjson/ModHjsonEditor";
+import { ModHjsonPanel } from "./ModHjsonPanel";
 import { FileJson, Image } from "lucide-react";
+import { HjsonEditor } from "#/components/editor/HjsonEditor";
+import { useState } from "react";
 
 export function EditorPage() {
 	const { t } = useTranslation();
 	const [path] = useQueryState("path");
 
-	const selectedNode = path ? findTreeNodeByPath(path) : null;
-	const hasSelection = selectedNode !== null;
+	const [value, setValue] = useState("");
 
 	function renderCenter() {
-		if (!hasSelection) return undefined;
-
 		if (path === "mod.hjson") {
-			return <ModHjsonEditor />;
+			return <HjsonEditor value={value} onChange={setValue} />;
 		}
 
 		return (
 			<Panel header={t("editor.editor")}>
 				<div className="flex h-full items-center justify-center text-xs text-muted-foreground">{path}</div>
+			</Panel>
+		);
+	}
+
+	function renderRight() {
+		if (path === "mod.hjson") {
+			return <ModHjsonPanel />;
+		}
+	}
+
+	function renderLeft() {
+		return (
+			<Panel header={t("editor.explorer")}>
+				<FileExplorer />
 			</Panel>
 		);
 	}
@@ -45,23 +57,11 @@ export function EditorPage() {
 
 			<SplitView
 				defaultLeftWidth={260}
-				defaultRightWidth={260}
-				minPanelWidth={200}
-				left={
-					<Panel header={t("editor.explorer")}>
-						<FileExplorer />
-					</Panel>
-				}
+				defaultRightWidth={360}
+				minPanelWidth={300}
+				left={renderLeft()}
 				center={renderCenter()}
-				right={
-					hasSelection ? (
-						<Panel header={t("editor.properties")}>
-							<div className="space-y-2 px-3 py-2 text-xs text-muted-foreground">
-								<p>{t("editor.propertiesPlaceholder")}</p>
-							</div>
-						</Panel>
-					) : undefined
-				}
+				right={renderRight()}
 			/>
 
 			<StatusBar
