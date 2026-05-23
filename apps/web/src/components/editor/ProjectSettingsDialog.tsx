@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { deleteProject, getProject, saveProject } from "@project/storage";
 import { deleteProjectFiles } from "@project/fs";
 import { useProjectStore } from "@project/state";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "~/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -28,25 +28,18 @@ function validateName(name: string): NameError {
 }
 
 interface ProjectSettingsDialogProps {
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
-	onCloseProject: () => void;
+	trigger: ReactNode;
 }
 
-export function ProjectSettingsDialog({ open, onOpenChange, onCloseProject }: ProjectSettingsDialogProps) {
+export function ProjectSettingsDialog({ trigger }: ProjectSettingsDialogProps) {
 	const { t } = useTranslation();
 	const projectContext = useProjectStore((s) => s.projectContext);
 	const updateCurrentProject = useProjectStore((s) => s.updateCurrentProject);
+	const closeProject = useProjectStore((s) => s.closeProject);
 	const [name, setName] = useState("");
 	const [nameError, setNameError] = useState<NameError>(null);
 	const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-	useEffect(() => {
-		if (!open) return;
-		setName(projectContext?.project.name ?? "");
-		setNameError(null);
-	}, [open, projectContext?.project.id, projectContext?.project.name]);
 
 	useEffect(() => {
 		return () => {
@@ -55,6 +48,15 @@ export function ProjectSettingsDialog({ open, onOpenChange, onCloseProject }: Pr
 			}
 		};
 	}, []);
+
+	const handleOpenChange = useCallback(
+		(nextOpen: boolean) => {
+			if (!nextOpen) return;
+			setName(projectContext?.project.name ?? "");
+			setNameError(null);
+		},
+		[projectContext?.project.name],
+	);
 
 	const persistName = useCallback(
 		async (projectId: string, nextName: string) => {
@@ -113,12 +115,12 @@ export function ProjectSettingsDialog({ open, onOpenChange, onCloseProject }: Pr
 			console.error("Failed to delete project files:", err);
 		}
 		setDeleteConfirmOpen(false);
-		onOpenChange(false);
-		onCloseProject();
-	}, [projectContext, onOpenChange, onCloseProject]);
+		closeProject();
+	}, [projectContext, closeProject]);
 
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
+		<Dialog onOpenChange={handleOpenChange}>
+			<DialogTrigger asChild>{trigger}</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>{t("projectSettings.dialogTitle")}</DialogTitle>

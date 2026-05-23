@@ -38,27 +38,23 @@ export interface VirtualFileSystem {
 
 // ProjectFileSystem — project-scoped filesystem with convenience methods
 
-export type TreeSnapshotGetter = () => FileEntry[];
 export type TreeSnapshotChangeCallback = (snapshot: FileEntry[]) => void;
 
 export interface ProjectFileSystemOptions {
-	getTreeSnapshot?: TreeSnapshotGetter;
-	onTreeSnapshotChange?: TreeSnapshotChangeCallback;
+	onTreeSnapshotChange: TreeSnapshotChangeCallback;
 }
 
 export class ProjectFileSystem {
 	private projectRoot: string;
-	private getTreeSnapshot?: TreeSnapshotGetter;
-	private onTreeSnapshotChange?: TreeSnapshotChangeCallback;
+	private onTreeSnapshotChange: TreeSnapshotChangeCallback;
 
 	constructor(
 		projectInfo: ProjectInfo,
 		private vfs: VirtualFileSystem,
-		options?: ProjectFileSystemOptions,
+		options: ProjectFileSystemOptions,
 	) {
 		this.projectRoot = `/projects/${projectInfo.id}/`;
-		this.getTreeSnapshot = options?.getTreeSnapshot;
-		this.onTreeSnapshotChange = options?.onTreeSnapshotChange;
+		this.onTreeSnapshotChange = options.onTreeSnapshotChange;
 	}
 
 	private scopePath(path: string): string {
@@ -93,37 +89,34 @@ export class ProjectFileSystem {
 	}
 
 	async refreshTree(): Promise<FileEntry[]> {
-		const snapshot: FileEntry[] = [];
-
-		const walk = async (currentDir: string): Promise<void> => {
-			const entries = await this.readdir(currentDir || "/");
-			for (const entry of entries) {
-				snapshot.push(entry);
-				if (entry.kind === "directory") {
-					const nextDir = currentDir ? `${currentDir}/${entry.name}` : entry.name;
-					await walk(nextDir);
-				}
-			}
-		};
-
-		await walk("");
-		this.onTreeSnapshotChange?.(snapshot);
+		const snapshot = await this.listFiles("/", { recursive: true });
+		this.onTreeSnapshotChange(snapshot);
 		return snapshot;
 	}
 
 	async listFiles(dir: string, options?: { recursive?: boolean }): Promise<FileEntry[]> {
+		await this.vfs.mkdir(this.scopePath("/"));
 		const recursive = options?.recursive ?? false;
-		const scoped = this.scopePath(dir || "/").replace(/\/+$/, "");
-		const basePrefix = `${scoped}/`;
-		const treeSnapshot = this.getTreeSnapshot?.() ?? [];
+		const scopedDir = this.scopePath(dir || "/");
 
-		return treeSnapshot.filter((entry) => {
-			if (!entry.path.startsWith(basePrefix)) return false;
-			const remainder = entry.path.slice(basePrefix.length);
-			if (remainder.length === 0) return false;
-			if (recursive) return true;
-			return !remainder.includes("/");
-		});
+		if (!recursive) {
+			return this.vfs.readdir(scopedDir);
+		}
+
+		const results: FileEntry[] = [];
+
+		const walk = async (currentScopedDir: string): Promise<void> => {
+			const entries = await this.vfs.readdir(currentScopedDir);
+			for (const entry of entries) {
+				results.push(entry);
+				if (entry.kind === "directory") {
+					await walk(entry.path);
+				}
+			}
+		};
+
+		await walk(scopedDir);
+		return results;
 	}
 
 	async stat(path: string): Promise<FileStat> {
@@ -180,20 +173,11 @@ export class ProjectFileSystem {
 	}
 }
 
-export async function createProjectFileSystem(
-	projectInfo: ProjectInfo,
-	options?: ProjectFileSystemOptions,
-): Promise<ProjectFileSystem> {
+export async function createProjectFileSystem(projectInfo: ProjectInfo, options: ProjectFileSystemOptions): Promise<ProjectFileSystem> {
 	const vfs = await createOPFSAdapter();
-
-	let localSnapshot: FileEntry[] = [];
-	const getTreeSnapshot: TreeSnapshotGetter = options?.getTreeSnapshot ?? (() => localSnapshot);
-	const onTreeSnapshotChange: TreeSnapshotChangeCallback = (snapshot) => {
-		localSnapshot = snapshot;
-		options?.onTreeSnapshotChange?.(snapshot);
-	};
-
-	const fs = new ProjectFileSystem(projectInfo, vfs, { getTreeSnapshot, onTreeSnapshotChange });
+	const fs = new ProjectFileSystem(projectInfo, vfs, {
+		onTreeSnapshotChange: options.onTreeSnapshotChange,
+	});
 	await fs.refreshTree();
 	return fs;
 }

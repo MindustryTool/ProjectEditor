@@ -1,23 +1,10 @@
 import { memo } from "react";
 import { ProjectPickerScreen } from "./ProjectPickerScreen";
-import type { ProjectLanguage } from "@project/core";
-import type { ProjectRecord } from "@project/storage";
 
-interface NoProjectScreenProps {
-  onCreateProject: (name: string, language?: ProjectLanguage) => void;
-  onOpenProject: (record: ProjectRecord) => void;
-}
-
-export const NoProjectScreen = memo(function NoProjectScreen({
-  onCreateProject,
-  onOpenProject,
-}: NoProjectScreenProps) {
+export const NoProjectScreen = memo(function NoProjectScreen() {
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-background text-foreground">
-      <ProjectPickerScreen
-        onCreateProject={onCreateProject}
-        onOpenProject={onOpenProject}
-      />
+      <ProjectPickerScreen />
     </div>
   );
 });

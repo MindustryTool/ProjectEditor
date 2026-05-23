@@ -279,6 +279,9 @@ importers:
       '@project/fs':
         specifier: workspace:*
         version: link:../fs
+      '@project/storage':
+        specifier: workspace:*
+        version: link:../storage
       react:
         specifier: ^19.0.0
         version: 19.2.6

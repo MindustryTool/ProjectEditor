@@ -18,7 +18,8 @@
     "zustand": "^5.0.0",
     "@project/core": "workspace:*",
     "@project/fs": "workspace:*",
-    "@project/config": "workspace:*"
+    "@project/config": "workspace:*",
+    "@project/storage": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.0.0",

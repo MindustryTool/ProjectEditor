@@ -10,6 +10,7 @@ import {
 } from "@project/core";
 import { createProjectFileSystem, type FileEntry, type ProjectFileSystem } from "@project/fs";
 import { DEFAULT_SETTINGS } from "@project/config";
+import { saveProject } from "@project/storage";
 
 export interface AppSettings {
 	theme: "light" | "dark" | "system";
@@ -32,7 +33,7 @@ interface ProjectState {
 	lastProjectId: string | null;
 	treeSnapshot: FileEntry[];
 
-	createNewProject: (name: string, language?: ProjectLanguage) => void;
+	createNewProject: (name: string, language?: ProjectLanguage) => Promise<void>;
 	setCurrentProject: (context: ProjectContext | null) => void;
 	updateCurrentProject: (patch: Partial<ProjectInfo>) => void;
 	closeProject: () => void;
@@ -41,7 +42,7 @@ interface ProjectState {
 
 export const useProjectStore = create<ProjectState>()(
 	persist(
-		(set, get) => ({
+		(set) => ({
 			projectContext: null,
 			projects: [],
 			settings: DEFAULT_SETTINGS as AppSettings,
@@ -50,17 +51,29 @@ export const useProjectStore = create<ProjectState>()(
 
 			createNewProject: async (name: string, language?: ProjectLanguage) => {
 				const project = createProjectInfo(name, language);
+				await saveProject({
+					id: project.id,
+					name: project.name,
+					language: project.language,
+					data: "",
+					createdAt: project.createdAt,
+					updatedAt: project.updatedAt,
+				});
 				const events = createEventBus<ProjectEventMap>();
 				const fs = await createProjectFileSystem(project, {
-					getTreeSnapshot: () => get().treeSnapshot,
-					onTreeSnapshotChange: (snapshot) => set({ treeSnapshot: snapshot }),
+					onTreeSnapshotChange: (snapshot) => {
+						console.log("Project file system tree snapshot changed successfully");
+						set({ treeSnapshot: snapshot });
+					},
 				});
+				console.log("Project file system created successfully");
 				const context: ProjectContext = { project, fs, events };
 				set((state) => ({
 					projects: [...state.projects, project],
 					projectContext: context,
 					lastProjectId: project.id,
 				}));
+				console.log("Project context set successfully");
 			},
 
 			setCurrentProject: (context) => {
@@ -108,7 +121,7 @@ export function useCurrentProject() {
 
 	if (state === null) throw new Error("No project project context");
 
-    return state;
+	return state;
 }
 
 export type { FileContentEntry, FileContentStore } from "./file-content-store";
