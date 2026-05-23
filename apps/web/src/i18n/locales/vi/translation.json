@@ -33,6 +33,8 @@
   "exportMenu.exportFailed": "Xuất thất bại",
   "exportMenu.dialogTitle": "Xuất dự án",
   "exportMenu.filenameLabel": "Tên tệp",
+  "exportMenu.filenameWarning": "Một số ký tự đã được thay thế. Chỉ cho phép chữ cái, số, dấu gạch ngang, gạch dưới và dấu chấm.",
+  "exportMenu.filenameEmpty": "Tên tệp không được để trống.",
   "exportMenu.download": "Tải xuống",
   "exportMenu.cancel": "Hủy",
   "viewMenu.label": "Xem",

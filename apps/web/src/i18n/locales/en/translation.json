@@ -33,6 +33,8 @@
   "exportMenu.exportFailed": "Export failed",
   "exportMenu.dialogTitle": "Export Project",
   "exportMenu.filenameLabel": "File name",
+  "exportMenu.filenameWarning": "Some characters were replaced. Only letters, numbers, hyphens, underscores, and periods are allowed.",
+  "exportMenu.filenameEmpty": "Filename cannot be empty.",
   "exportMenu.download": "Download",
   "exportMenu.cancel": "Cancel",
   "viewMenu.label": "View",
