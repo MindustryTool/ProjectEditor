@@ -35,3 +35,16 @@ export function formatFileSize(bytes: number): string {
   }
   return `${size.toFixed(1)} ${units[unitIndex]!}`;
 }
+
+export function sanitizeFilename(
+  name: string,
+  options?: { maxLength?: number; fallback?: string },
+): string {
+  const maxLength = options?.maxLength ?? 200;
+  const fallback = options?.fallback ?? "export";
+  let result = name.replace(/[^a-zA-Z0-9._-]/g, "-");
+  result = result.replace(/-+/g, "-");
+  result = result.replace(/^[-.]+|[-.]+$/g, "");
+  result = result.slice(0, maxLength);
+  return result || fallback;
+}

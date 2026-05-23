@@ -74,7 +74,7 @@ function toHjson(data: ModHjsonData): string {
 	result += `version: ${data.version.trimStart()}\n`;
 	result += `minGameVersion: ${data.minGameVersion.trimStart()}\n`;
 
-	if (data.dependencies.length > 0) {
+	if (data.dependencies.filter((dep) => dep.trim() !== "").length > 0) {
 		result += `dependencies: ${data.dependencies.join(",").trimStart()}\n`;
 	}
 

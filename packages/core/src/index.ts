@@ -1,4 +1,5 @@
 import { ProjectInfoSchema } from "@project/validation"
+import { sanitizeFilename } from "@project/utils"
 import * as v from "valibot"
 
 export type ProjectLanguage = "json" | "java" | "javascript";
@@ -23,6 +24,19 @@ export function createProjectInfo(name: string, language: ProjectLanguage = "jso
 
 
 export function validateProject(data: unknown): ProjectInfo {
+  const parsed = v.safeParse(ProjectInfoSchema, data);
+  if (parsed.success) return parsed.output as ProjectInfo;
+
+  if (typeof data === "object" && data !== null && "name" in data && typeof (data as { name: unknown }).name === "string") {
+    const originalName = (data as { name: string }).name;
+    const sanitizedName = sanitizeFilename(originalName, { maxLength: 100, fallback: "project" });
+
+    if (sanitizedName !== originalName) {
+      console.warn(`Project name "${originalName}" contained invalid characters; sanitized to "${sanitizedName}".`);
+      return v.parse(ProjectInfoSchema, { ...(data as object), name: sanitizedName }) as ProjectInfo;
+    }
+  }
+
   return v.parse(ProjectInfoSchema, data) as ProjectInfo;
 }
 
