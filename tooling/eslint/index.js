@@ -13,9 +13,11 @@ export default tseslint.config(
       "react-hooks": reactHooksPlugin,
     },
     rules: {
+      "no-var": "error",
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/consistent-type-imports": "error",
     },
     settings: {
