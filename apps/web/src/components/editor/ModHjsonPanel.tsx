@@ -29,21 +29,25 @@ function parseModHjson(data: string): ModHjsonData {
 	for (const line of lines) {
 		try {
 			if (line.startsWith("name:")) {
-				name = line.split(":")[1]!.trim();
+				name = line.split(":")[1]!.trimStart();
 			} else if (line.startsWith("displayName:")) {
-				displayName = line.split(":")[1]!.trim();
+				displayName = line.split(":")[1]!.trimStart();
 			} else if (line.startsWith("author:")) {
-				author = line.split(":")[1]!.trim();
+				author = line.split(":")[1]!.trimStart();
 			} else if (line.startsWith("description:")) {
-				description = line.split(":")[1]!.trim();
+				description = line.split(":")[1]!.trimStart();
 			} else if (line.startsWith("version:")) {
-				version = line.split(":")[1]!.trim();
+				version = line.split(":")[1]!.trimStart();
 			} else if (line.startsWith("minGameVersion:")) {
-				minGameVersion = line.split(":")[1]!.trim();
+				minGameVersion = line.split(":")[1]!.trimStart();
 			} else if (line.startsWith("dependencies:")) {
-				dependencies = line.split(":")[1]!.trim().split(",");
+				dependencies = line
+					.split(":")[1]!
+					.trimStart()
+					.split(",")
+					.map((dep) => dep.trim());
 			} else if (line.startsWith("hidden:")) {
-				hidden = line.split(":")[1]!.trim() === "true";
+				hidden = line.split(":")[1]!.trimStart() === "true";
 			}
 		} catch (e) {
 			console.error(e);
@@ -63,16 +67,15 @@ function parseModHjson(data: string): ModHjsonData {
 }
 
 function toHjson(data: ModHjsonData): string {
-	let result = "";
-	result += `name: ${data.name}\n`;
-	result += `displayName: ${data.displayName}\n`;
-	result += `author: ${data.author}\n`;
-	result += `description: ${data.description}\n`;
-	result += `version: ${data.version}\n`;
-	result += `minGameVersion: ${data.minGameVersion}\n`;
+	let result = `name: ${data.name.trimStart()}\n`;
+	result += `displayName: ${data.displayName.trimStart()}\n`;
+	result += `author: ${data.author.trimStart()}\n`;
+	result += `description: ${data.description.trimStart()}\n`;
+	result += `version: ${data.version.trimStart()}\n`;
+	result += `minGameVersion: ${data.minGameVersion.trimStart()}\n`;
 
 	if (data.dependencies.length > 0) {
-		result += `dependencies: ${data.dependencies.join(",")}\n`;
+		result += `dependencies: ${data.dependencies.join(",").trimStart()}\n`;
 	}
 
 	result += `hidden: ${data.hidden}\n`;
@@ -84,13 +87,6 @@ export function ModHjsonPanel({ value, onChange }: ModHjsonEditorProps) {
 
 	const form = useForm({
 		defaultValues: { ...defaultModHjson },
-		onSubmit: async ({ value }) => {
-			const result = v.safeParse(ModHjsonSchema, value);
-			if (!result.success) {
-				return;
-			}
-			onChange(toHjson(result.output));
-		},
 	});
 
 	useEffect(() => {
@@ -105,6 +101,7 @@ export function ModHjsonPanel({ value, onChange }: ModHjsonEditorProps) {
 		}
 
 		form.reset(parseModHjson(value));
+		form.validateAllFields("blur");
 	}, [value]);
 
 	const fields: {
@@ -158,17 +155,20 @@ export function ModHjsonPanel({ value, onChange }: ModHjsonEditorProps) {
 				onChange={() => {
 					onChange(toHjson(form.state.values));
 				}}
-				onSubmit={(e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					form.handleSubmit();
-				}}
 			>
 				{fields.map((field) => (
 					<form.Field
 						key={field.name}
 						name={field.name}
 						validators={{
+							onBlur: ({ value }) => {
+								const result = v.safeParse(v.pick(ModHjsonSchema, [field.name]), { [field.name]: value } as ModHjsonData);
+								if (!result.success) {
+									const issue = result.issues[0];
+									return issue ? issue.message : "Invalid";
+								}
+								return undefined;
+							},
 							onChange: ({ value }) => {
 								const result = v.safeParse(v.pick(ModHjsonSchema, [field.name]), { [field.name]: value } as ModHjsonData);
 								if (!result.success) {
