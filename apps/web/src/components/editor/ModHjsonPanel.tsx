@@ -70,9 +70,11 @@ function toHjson(data: ModHjsonData): string {
 	result += `description: ${data.description}\n`;
 	result += `version: ${data.version}\n`;
 	result += `minGameVersion: ${data.minGameVersion}\n`;
+
 	if (data.dependencies.length > 0) {
 		result += `dependencies: ${data.dependencies.join(",")}\n`;
 	}
+
 	result += `hidden: ${data.hidden}\n`;
 	return result;
 }

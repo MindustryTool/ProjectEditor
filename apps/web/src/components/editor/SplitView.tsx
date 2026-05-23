@@ -88,7 +88,7 @@ export function SplitView({
 
 			{showCenter && (
 				<div
-					className="group flex w-1.5 shrink-0 cursor-col-resize items-center justify-center bg-border transition-colors hover:bg-accent active:bg-accent"
+					className="group flex w-1.5 shrink-0 cursor-col-resize items-center justify-center transition-colors hover:bg-accent active:bg-accent bg-background"
 					onMouseDown={onMouseDown("left")}
 				>
 					<div className="h-8 w-0.5 rounded-full bg-muted-foreground opacity-0 transition-opacity group-hover:opacity-60" />
@@ -101,7 +101,7 @@ export function SplitView({
 
 			{showRight && (
 				<div
-					className="group flex w-1.5 shrink-0 cursor-col-resize items-center justify-center bg-border transition-colors hover:bg-accent active:bg-accent"
+					className="group flex w-1.5 shrink-0 cursor-col-resize items-center justify-center transition-colors hover:bg-accent active:bg-accent bg-background"
 					onMouseDown={onMouseDown("right")}
 				>
 					<div className="h-8 w-0.5 rounded-full bg-muted-foreground opacity-0 transition-opacity group-hover:opacity-60" />
