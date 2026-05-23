@@ -1,16 +1,20 @@
 import { memo } from "react";
-import { ModHjsonPanel } from "./ModHjsonPanel";
+import { ModHjsonPanel } from "./panel/ModHjsonPanel";
 
 interface EditorRightPanelProps {
 	path: string | null;
-	value: string | null;
-	onChange: (value: string) => void;
 }
 
-export const EditorRightPanel = memo(function EditorRightPanel({ path, value, onChange }: EditorRightPanelProps) {
-	if (path === "mod.hjson") {
-		return <ModHjsonPanel value={value} onChange={onChange} />;
+export const EditorRightPanel = memo(function EditorRightPanel({ path }: EditorRightPanelProps) {
+	if (path === null) {
+		return null;
 	}
 
-	return null;
+	if (path === "mod.hjson") {
+		return <ModHjsonPanel path={path} />;
+	}
+
+	if (path.startsWith("content")) {
+		return null;
+	}
 });

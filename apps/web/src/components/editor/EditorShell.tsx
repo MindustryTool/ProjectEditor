@@ -12,8 +12,6 @@ import { EditorToolPanel } from "./EditorToolPanel";
 import { EditorCenterPanel } from "./EditorCenterPanel";
 import { EditorRightPanel } from "./EditorRightPanel";
 import { FileJson, Image } from "lucide-react";
-import { useFileContent } from "@project/state";
-import { Spinner } from "#/components/ui/spinner";
 
 const ProjectPickerDialog = lazy(() => import("./ProjectPickerDialog").then((m) => ({ default: m.ProjectPickerDialog })));
 const ProjectSettingsDialog = lazy(() => import("./ProjectSettingsDialog").then((m) => ({ default: m.ProjectSettingsDialog })));
@@ -21,7 +19,6 @@ const ProjectSettingsDialog = lazy(() => import("./ProjectSettingsDialog").then(
 interface EditorShellProps {
 	path: string | null;
 	projectName: string;
-	fileCount: number;
 	onCloseProject: () => void;
 	onOpenProject: (record: ProjectRecord) => void;
 	onCreateProject: (name: string) => void;
@@ -30,7 +27,6 @@ interface EditorShellProps {
 export const EditorShell = memo(function EditorShell({
 	path,
 	projectName,
-	fileCount,
 	onCloseProject,
 	onOpenProject,
 	onCreateProject,
@@ -76,8 +72,6 @@ export const EditorShell = memo(function EditorShell({
 		[pickerMode, onCloseProject, onOpenProject],
 	);
 
-	const { data, update, isLoading, error } = useFileContent(path || "");
-
 	return (
 		<div className="flex min-h-0 flex-1 flex-col bg-background text-foreground">
 			<Toolbar>
@@ -99,10 +93,8 @@ export const EditorShell = memo(function EditorShell({
 				defaultRightWidth={360}
 				minPanelWidth={300}
 				left={<EditorToolPanel />}
-				center={
-					isLoading ? <Spinner /> : error ? <span>{error}</span> : <EditorCenterPanel path={path} value={data} onChange={update} />
-				}
-				right={isLoading ? <Spinner /> : error ? <span>{error}</span> : <EditorRightPanel path={path} value={data} onChange={update} />}
+				center={<EditorCenterPanel path={path} />}
+				right={<EditorRightPanel path={path} />}
 			/>
 
 			<StatusBar
@@ -110,7 +102,7 @@ export const EditorShell = memo(function EditorShell({
 					<>
 						<span>{t("statusBar.project", { name: projectName })}</span>
 						<span className="text-muted-foreground">|</span>
-						<span>{t("statusBar.files", { count: fileCount })}</span>
+						<span>{t("statusBar.files", { count: 0 })}</span>
 					</>
 				}
 				center={<span>{t("statusBar.ready")}</span>}

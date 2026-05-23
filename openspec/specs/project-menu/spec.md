@@ -1,11 +1,11 @@
 ## ADDED Requirements
 
 ### Requirement: Project menu with CRUD actions
-The ProjectMenu component SHALL render a dropdown with items for Create Project, Open Project, Change Project, and Close Project, with all labels rendered via translation keys.
+The ProjectMenu component SHALL render a dropdown with items for Create Project, Open Project, Change Project, Project Settings, and Close Project, with all labels rendered via translation keys.
 
 #### Scenario: Project menu renders with correct items
 - **WHEN** the ProjectMenu is rendered
-- **THEN** it SHALL display a button labeled via `t("projectMenu.label")` that opens a dropdown with items: "Create Project", "Open Project", "Change Project", "Close Project"
+- **THEN** it SHALL display a button labeled via `t("projectMenu.label")` that opens a dropdown with items: "Create Project", "Open Project", "Change Project", "Project Settings", "Close Project"
 
 #### Scenario: Create Project opens creation dialog
 - **WHEN** user clicks "Create Project" in the ProjectMenu dropdown
@@ -22,6 +22,13 @@ The ProjectMenu component SHALL render a dropdown with items for Create Project,
 #### Scenario: Close Project closes current project
 - **WHEN** user clicks "Close Project" in the ProjectMenu dropdown
 - **THEN** the system SHALL call `closeProject()` on the store, setting `projectContext` to null
+
+### Requirement: Project Settings disabled when no project open
+The "Project Settings" menu item SHALL be disabled when `projectContext` is null.
+
+#### Scenario: Project Settings disabled
+- **WHEN** no project is currently open (`projectContext === null`)
+- **THEN** the "Project Settings" menu item SHALL be disabled (grayed out, non-interactive)
 
 ### Requirement: Close Project disabled when no project open
 The "Close Project" menu item SHALL be disabled when `projectContext` is null.

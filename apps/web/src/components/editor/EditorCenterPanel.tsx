@@ -1,15 +1,15 @@
 import { memo } from "react";
 import { useTranslation } from "react-i18next";
 import { Panel } from "./Panel";
-import { HjsonEditor } from "#/components/editor/HjsonEditor";
+import { HjsonEditor } from "#/components/editor/center/HjsonEditor";
+import { JsonEditor } from "#/components/editor/center/JsonEditor";
+import { ContentList } from "#/components/editor/center/ContentList";
 
 interface EditorCenterPanelProps {
 	path: string | null;
-	value: string | null;
-	onChange: (value: string) => void;
 }
 
-export const EditorCenterPanel = memo(function EditorCenterPanel({ path, value, onChange }: EditorCenterPanelProps) {
+export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: EditorCenterPanelProps) {
 	const { t } = useTranslation();
 
 	if (path === null) {
@@ -17,7 +17,15 @@ export const EditorCenterPanel = memo(function EditorCenterPanel({ path, value, 
 	}
 
 	if (path === "mod.hjson") {
-		return <HjsonEditor value={value} onChange={onChange} />;
+		return <HjsonEditor path={path} />;
+	}
+
+	if (path.startsWith("content")) {
+		if (path.endsWith(".json")) {
+			return <JsonEditor path={path} />;
+		} else {
+			return <ContentList path={path} />;
+		}
 	}
 
 	return (

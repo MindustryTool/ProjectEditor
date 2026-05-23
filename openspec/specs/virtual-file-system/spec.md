@@ -31,6 +31,24 @@ The system SHALL provide a `ProjectFileSystem` class that wraps `VirtualFileSyst
 - **WHEN** any `VirtualFileSystem` method (readFile, writeFile, delete, mkdir, readdir, stat, exists, rename, move, copy, watch) is called
 - **THEN** the call is delegated to the underlying VFS with the project root prefix applied to all path arguments
 
+#### Scenario: listFiles lists file paths
+- **WHEN** `listFiles(dir)` is called without options
+- **THEN** it returns entries that are direct children of `dir`
+- **AND** it MUST include both files and directories in the result
+
+#### Scenario: listFiles can be recursive
+- **WHEN** `listFiles(dir, { recursive: true })` is called
+- **THEN** it returns entries contained in `dir` and all nested subdirectories
+
+#### Scenario: listFiles returns full-path entries
+- **WHEN** `listFiles(dir)` is called
+- **THEN** each returned entry MUST include `{ name, kind, path }`
+- **AND** `path` MUST be the full scoped VFS path (including the `/projects/<project.id>/` prefix)
+
+#### Scenario: listFiles normalizes paths
+- **WHEN** `listFiles()` is called with `""`, `"/"`, `"subdir"`, or `"/subdir"`
+- **THEN** it MUST treat these inputs consistently with existing `ProjectFileSystem` path scoping rules
+
 ### Requirement: VirtualFileSystem interface
 The system SHALL provide a `VirtualFileSystem` interface with methods for reading, writing, deleting, and managing files and directories.
 
@@ -94,11 +112,12 @@ The system SHALL provide an `OPFSAdapter` class that implements `VirtualFileSyst
 - **THEN** the adapter throws at construction with a clear error message
 
 ### Requirement: FileEntry and FileStat types
-The system SHALL export `FileEntry` (name, kind) and `FileStat` (name, kind, size, lastModified) types for directory listings and file metadata.
+The system SHALL export `FileEntry` (name, path, kind) and `FileStat` (name, kind, size, lastModified) types for directory listings and file metadata.
 
-#### Scenario: FileEntry has name and kind
+#### Scenario: FileEntry has name, path, and kind
 - **WHEN** listing a directory
-- **THEN** each entry has `{ name: string, kind: "file" | "directory" }`
+- **THEN** each entry has `{ name: string, path: string, kind: "file" | "directory" }`
+- **AND** `path` MUST be a full VFS path (including leading `/`)
 
 #### Scenario: FileStat has full metadata
 - **WHEN** calling `stat()` on a file

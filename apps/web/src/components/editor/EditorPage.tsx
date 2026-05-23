@@ -2,21 +2,10 @@ import { useQueryState } from "nuqs";
 import { useCallback, useEffect } from "react";
 import { useProjectStore } from "@project/state";
 import { createEventBus, type ProjectInfo, type ProjectLanguage, type ProjectEventMap } from "@project/core";
-import { createProjectFileSystem } from "@project/fs";
+import { createProjectFileSystem, jsonProjectTree, type TreeNode } from "@project/fs";
 import { getProject, saveProject, type ProjectRecord } from "@project/storage";
-import { projectTree, type TreeNode } from "./file-explorer-data";
 import { NoProjectScreen } from "./NoProjectScreen";
 import { EditorShell } from "./EditorShell";
-
-function countFiles(nodes: TreeNode[]): number {
-	return nodes.reduce((acc, node) => {
-		if (node.type === "file") return acc + 1;
-		if (node.children) return acc + countFiles(node.children);
-		return acc;
-	}, 0);
-}
-
-const fileCount = countFiles(projectTree);
 
 export function EditorPage() {
 	const [path] = useQueryState("path");
@@ -37,7 +26,26 @@ export function EditorPage() {
 				updatedAt: new Date(record.updatedAt),
 			};
 			const events = createEventBus<ProjectEventMap>();
-			const fs = await createProjectFileSystem(project);
+			const fs = await createProjectFileSystem(project, {
+				getTreeSnapshot: () => useProjectStore.getState().treeSnapshot,
+				onTreeSnapshotChange: (snapshot) => useProjectStore.setState({ treeSnapshot: snapshot }),
+			});
+			const ensureNode = async (node: TreeNode, parentPath: string): Promise<void> => {
+				const currentPath = parentPath ? `${parentPath}/${node.name}` : node.name;
+				if (node.type === "folder") {
+					await fs.mkdir(currentPath).catch();
+					for (const child of node.children ?? []) {
+						await ensureNode(child, currentPath);
+					}
+				} else {
+					await fs.writeTextFile(currentPath, "");
+				}
+			};
+
+			for (const node of jsonProjectTree.projectTree) {
+				await ensureNode(node, "");
+			}
+
 			setCurrentProject({ project, fs, events });
 		},
 		[setCurrentProject],
@@ -83,7 +91,6 @@ export function EditorPage() {
 		<EditorShell
 			path={path}
 			projectName={projectContext.project.name}
-			fileCount={fileCount}
 			onCloseProject={closeProject}
 			onOpenProject={openProjectFromRecord}
 			onCreateProject={handleCreateProject}

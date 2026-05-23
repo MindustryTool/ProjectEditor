@@ -38,6 +38,7 @@ export function useFileContent(path: string, options?: UseFileContentOptions): U
 					setFileContent(path, "");
                     return;
 				}
+                console.error(`Failed to read ${path}:`, err);
 				setFileError(path, err instanceof Error ? err.name + ": " + err.message : String(err));
 			},
 		);

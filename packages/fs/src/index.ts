@@ -1,18 +1,19 @@
-import type { ProjectInfo } from "@project/core"
-import { getOPFSRoot } from "@project/storage"
+import type { ProjectInfo } from "@project/core";
+import { getOPFSRoot } from "@project/storage";
 
 // Types
 
 export interface FileEntry {
-  name: string;
-  kind: "file" | "directory";
+	name: string;
+	path: string;
+	kind: "file" | "directory";
 }
 
 export interface FileStat {
-  name: string;
-  kind: "file" | "directory";
-  size: number;
-  lastModified: Date;
+	name: string;
+	kind: "file" | "directory";
+	size: number;
+	lastModified: Date;
 }
 
 export type FileWatchCallback = (path: string) => void;
@@ -22,242 +23,359 @@ export type Unsubscribe = () => void;
 // VirtualFileSystem interface
 
 export interface VirtualFileSystem {
-  readFile(path: string): Promise<ArrayBuffer>;
-  writeFile(path: string, data: BufferSource): Promise<void>;
-  delete(path: string): Promise<void>;
-  mkdir(path: string): Promise<void>;
-  readdir(path: string): Promise<FileEntry[]>;
-  stat(path: string): Promise<FileStat>;
-  exists(path: string): Promise<boolean>;
-  rename(oldPath: string, newPath: string): Promise<void>;
-  move(src: string, dst: string): Promise<void>;
-  copy(src: string, dst: string): Promise<void>;
-  watch(callback: FileWatchCallback): Unsubscribe;
+	readFile(path: string): Promise<ArrayBuffer>;
+	writeFile(path: string, data: BufferSource): Promise<void>;
+	delete(path: string): Promise<void>;
+	mkdir(path: string): Promise<void>;
+	readdir(path: string): Promise<FileEntry[]>;
+	stat(path: string): Promise<FileStat>;
+	exists(path: string): Promise<boolean>;
+	rename(oldPath: string, newPath: string): Promise<void>;
+	move(src: string, dst: string): Promise<void>;
+	copy(src: string, dst: string): Promise<void>;
+	watch(callback: FileWatchCallback): Unsubscribe;
 }
 
 // ProjectFileSystem — project-scoped filesystem with convenience methods
 
-export class ProjectFileSystem {
-  private projectRoot: string;
+export type TreeSnapshotGetter = () => FileEntry[];
+export type TreeSnapshotChangeCallback = (snapshot: FileEntry[]) => void;
 
-  constructor(
-    projectInfo: ProjectInfo,
-    private vfs: VirtualFileSystem,
-  ) {
-    this.projectRoot = `/projects/${projectInfo.id}/`;
-  }
-
-  private scopePath(path: string): string {
-    const normalized = path.startsWith("/") ? path : `/${path}`;
-    if (normalized.startsWith(this.projectRoot)) {
-      return normalized;
-    }
-    return `${this.projectRoot}${normalized.replace(/^\//, "")}`;
-  }
-
-  async readFile(path: string): Promise<ArrayBuffer> {
-    return this.vfs.readFile(this.scopePath(path));
-  }
-
-  async writeFile(path: string, data: BufferSource): Promise<void> {
-    return this.vfs.writeFile(this.scopePath(path), data);
-  }
-
-  async delete(path: string): Promise<void> {
-    return this.vfs.delete(this.scopePath(path));
-  }
-
-  async mkdir(path: string): Promise<void> {
-    return this.vfs.mkdir(this.scopePath(path));
-  }
-
-  async readdir(path: string): Promise<FileEntry[]> {
-    return this.vfs.readdir(this.scopePath(path));
-  }
-
-  async stat(path: string): Promise<FileStat> {
-    return this.vfs.stat(this.scopePath(path));
-  }
-
-  async exists(path: string): Promise<boolean> {
-    return this.vfs.exists(this.scopePath(path));
-  }
-
-  async rename(oldPath: string, newPath: string): Promise<void> {
-    return this.vfs.rename(this.scopePath(oldPath), this.scopePath(newPath));
-  }
-
-  async move(src: string, dst: string): Promise<void> {
-    return this.vfs.move(this.scopePath(src), this.scopePath(dst));
-  }
-
-  async copy(src: string, dst: string): Promise<void> {
-    return this.vfs.copy(this.scopePath(src), this.scopePath(dst));
-  }
-
-  watch(callback: FileWatchCallback): Unsubscribe {
-    return this.vfs.watch((path) => {
-      const relative = path.replace(this.projectRoot, "");
-      callback(relative);
-    });
-  }
-
-  async readTextFile(path: string): Promise<string> {
-    const bytes = await this.readFile(path);
-    return new TextDecoder().decode(bytes);
-  }
-
-  async writeTextFile(path: string, content: string): Promise<void> {
-    const bytes = new TextEncoder().encode(content);
-    await this.writeFile(path, bytes);
-  }
-
-  async readJsonFile<T>(path: string): Promise<T> {
-    const text = await this.readTextFile(path);
-    return JSON.parse(text) as T;
-  }
-
-  async writeJsonFile(path: string, data: unknown): Promise<void> {
-    await this.writeTextFile(path, JSON.stringify(data, null, 2));
-  }
-
-  async copyFile(source: string, destination: string): Promise<void> {
-    return this.copy(source, destination);
-  }
+export interface ProjectFileSystemOptions {
+	getTreeSnapshot?: TreeSnapshotGetter;
+	onTreeSnapshotChange?: TreeSnapshotChangeCallback;
 }
 
-export async function createProjectFileSystem(projectInfo: ProjectInfo): Promise<ProjectFileSystem> {
-  const vfs = await createOPFSAdapter();
-  return new ProjectFileSystem(projectInfo, vfs);
+export class ProjectFileSystem {
+	private projectRoot: string;
+	private getTreeSnapshot?: TreeSnapshotGetter;
+	private onTreeSnapshotChange?: TreeSnapshotChangeCallback;
+
+	constructor(
+		projectInfo: ProjectInfo,
+		private vfs: VirtualFileSystem,
+		options?: ProjectFileSystemOptions,
+	) {
+		this.projectRoot = `/projects/${projectInfo.id}/`;
+		this.getTreeSnapshot = options?.getTreeSnapshot;
+		this.onTreeSnapshotChange = options?.onTreeSnapshotChange;
+	}
+
+	private scopePath(path: string): string {
+		const normalized = path.startsWith("/") ? path : `/${path}`;
+		if (normalized.startsWith(this.projectRoot)) {
+			return normalized;
+		}
+		return `${this.projectRoot}${normalized.replace(/^\//, "")}`;
+	}
+
+	async readFile(path: string): Promise<ArrayBuffer> {
+		return this.vfs.readFile(this.scopePath(path));
+	}
+
+	async writeFile(path: string, data: BufferSource): Promise<void> {
+		await this.vfs.writeFile(this.scopePath(path), data);
+		await this.refreshTree();
+	}
+
+	async delete(path: string): Promise<void> {
+		await this.vfs.delete(this.scopePath(path));
+		await this.refreshTree();
+	}
+
+	async mkdir(path: string): Promise<void> {
+		await this.vfs.mkdir(this.scopePath(path));
+		await this.refreshTree();
+	}
+
+	async readdir(path: string): Promise<FileEntry[]> {
+		return this.vfs.readdir(this.scopePath(path));
+	}
+
+	async refreshTree(): Promise<FileEntry[]> {
+		const snapshot: FileEntry[] = [];
+
+		const walk = async (currentDir: string): Promise<void> => {
+			const entries = await this.readdir(currentDir || "/");
+			for (const entry of entries) {
+				snapshot.push(entry);
+				if (entry.kind === "directory") {
+					const nextDir = currentDir ? `${currentDir}/${entry.name}` : entry.name;
+					await walk(nextDir);
+				}
+			}
+		};
+
+		await walk("");
+		this.onTreeSnapshotChange?.(snapshot);
+		return snapshot;
+	}
+
+	async listFiles(dir: string, options?: { recursive?: boolean }): Promise<FileEntry[]> {
+		const recursive = options?.recursive ?? false;
+		const scoped = this.scopePath(dir || "/").replace(/\/+$/, "");
+		const basePrefix = `${scoped}/`;
+		const treeSnapshot = this.getTreeSnapshot?.() ?? [];
+
+		return treeSnapshot.filter((entry) => {
+			if (!entry.path.startsWith(basePrefix)) return false;
+			const remainder = entry.path.slice(basePrefix.length);
+			if (remainder.length === 0) return false;
+			if (recursive) return true;
+			return !remainder.includes("/");
+		});
+	}
+
+	async stat(path: string): Promise<FileStat> {
+		return this.vfs.stat(this.scopePath(path));
+	}
+
+	async exists(path: string): Promise<boolean> {
+		return this.vfs.exists(this.scopePath(path));
+	}
+
+	async rename(oldPath: string, newPath: string): Promise<void> {
+		await this.vfs.rename(this.scopePath(oldPath), this.scopePath(newPath));
+		await this.refreshTree();
+	}
+
+	async move(src: string, dst: string): Promise<void> {
+		await this.vfs.move(this.scopePath(src), this.scopePath(dst));
+		await this.refreshTree();
+	}
+
+	async copy(src: string, dst: string): Promise<void> {
+		await this.vfs.copy(this.scopePath(src), this.scopePath(dst));
+		await this.refreshTree();
+	}
+
+	watch(callback: FileWatchCallback): Unsubscribe {
+		return this.vfs.watch((path) => {
+			const relative = path.replace(this.projectRoot, "");
+			callback(relative);
+		});
+	}
+
+	async readTextFile(path: string): Promise<string> {
+		const bytes = await this.readFile(path);
+		return new TextDecoder().decode(bytes);
+	}
+
+	async writeTextFile(path: string, content: string): Promise<void> {
+		const bytes = new TextEncoder().encode(content);
+		await this.writeFile(path, bytes);
+	}
+
+	async readJsonFile<T>(path: string): Promise<T> {
+		const text = await this.readTextFile(path);
+		return JSON.parse(text) as T;
+	}
+
+	async writeJsonFile(path: string, data: unknown): Promise<void> {
+		await this.writeTextFile(path, JSON.stringify(data, null, 2));
+	}
+
+	async copyFile(source: string, destination: string): Promise<void> {
+		return this.copy(source, destination);
+	}
+}
+
+export async function createProjectFileSystem(
+	projectInfo: ProjectInfo,
+	options?: ProjectFileSystemOptions,
+): Promise<ProjectFileSystem> {
+	const vfs = await createOPFSAdapter();
+
+	let localSnapshot: FileEntry[] = [];
+	const getTreeSnapshot: TreeSnapshotGetter = options?.getTreeSnapshot ?? (() => localSnapshot);
+	const onTreeSnapshotChange: TreeSnapshotChangeCallback = (snapshot) => {
+		localSnapshot = snapshot;
+		options?.onTreeSnapshotChange?.(snapshot);
+	};
+
+	const fs = new ProjectFileSystem(projectInfo, vfs, { getTreeSnapshot, onTreeSnapshotChange });
+	await fs.refreshTree();
+	return fs;
 }
 
 export async function deleteProjectFiles(projectId: string): Promise<void> {
-  const root = await getOPFSRoot();
-  try {
-    const projectsDir = await root.getDirectoryHandle("projects");
-    await projectsDir.removeEntry(projectId, { recursive: true });
-  } catch (err) {
-    if (err instanceof DOMException && err.name === "NotFoundError") return;
-    throw err;
-  }
+	const root = await getOPFSRoot();
+	try {
+		const projectsDir = await root.getDirectoryHandle("projects");
+		await projectsDir.removeEntry(projectId, { recursive: true });
+	} catch (err) {
+		if (err instanceof DOMException && err.name === "NotFoundError") return;
+		throw err;
+	}
 }
 
 // OPFSAdapter
 
 async function resolveHandle(
-  root: FileSystemDirectoryHandle,
-  path: string,
-  create: boolean = false,
+	root: FileSystemDirectoryHandle,
+	path: string,
+	create: boolean = false,
 ): Promise<[FileSystemDirectoryHandle, string]> {
-  const parts = path.replace(/^\/+/, "").split("/").filter(Boolean);
-  if (parts.length === 0) return [root, ""];
-  let dir: FileSystemDirectoryHandle = root;
-  for (let i = 0; i < parts.length - 1; i++) {
-    dir = create
-      ? await dir.getDirectoryHandle(parts[i]!, { create: true })
-      : await dir.getDirectoryHandle(parts[i]!);
-  }
-  const name = parts[parts.length - 1]!;
-  return [dir, name];
+	const parts = path.replace(/^\/+/, "").split("/").filter(Boolean);
+	if (parts.length === 0) return [root, ""];
+	let dir: FileSystemDirectoryHandle = root;
+	for (let i = 0; i < parts.length - 1; i++) {
+		dir = create ? await dir.getDirectoryHandle(parts[i]!, { create: true }) : await dir.getDirectoryHandle(parts[i]!);
+	}
+	const name = parts[parts.length - 1]!;
+	return [dir, name];
 }
 
-async function getDirHandle(
-  dir: FileSystemDirectoryHandle,
-  name: string,
-): Promise<FileSystemDirectoryHandle> {
-  return dir.getDirectoryHandle(name);
+async function getDirHandle(dir: FileSystemDirectoryHandle, name: string): Promise<FileSystemDirectoryHandle> {
+	return dir.getDirectoryHandle(name);
 }
 
 export class OPFSAdapter implements VirtualFileSystem {
-  constructor(private root: FileSystemDirectoryHandle) {}
+	constructor(private root: FileSystemDirectoryHandle) {}
 
-  async readFile(path: string): Promise<ArrayBuffer> {
-    const [dir, name] = await resolveHandle(this.root, path);
-    const fileHandle = await dir.getFileHandle(name);
-    const file = await fileHandle.getFile();
-    return file.arrayBuffer();
-  }
+	async readFile(path: string): Promise<ArrayBuffer> {
+		const [dir, name] = await resolveHandle(this.root, path);
+		const fileHandle = await dir.getFileHandle(name);
+		const file = await fileHandle.getFile();
+		return file.arrayBuffer();
+	}
 
-  async writeFile(path: string, data: BufferSource): Promise<void> {
-    const [dir, name] = await resolveHandle(this.root, path, true);
-    const fileHandle = await dir.getFileHandle(name, { create: true });
-    const writable = await fileHandle.createWritable();
-    await writable.write(data);
-    await writable.close();
-  }
+	async writeFile(path: string, data: BufferSource): Promise<void> {
+		const [dir, name] = await resolveHandle(this.root, path, true);
+		const fileHandle = await dir.getFileHandle(name, { create: true });
+		const writable = await fileHandle.createWritable();
+		await writable.write(data);
+		await writable.close();
+	}
 
-  async delete(path: string): Promise<void> {
-    const [dir, name] = await resolveHandle(this.root, path);
-    await dir.removeEntry(name, { recursive: true });
-  }
+	async delete(path: string): Promise<void> {
+		const [dir, name] = await resolveHandle(this.root, path);
+		await dir.removeEntry(name, { recursive: true });
+	}
 
-  async mkdir(path: string): Promise<void> {
-    const [dir, name] = await resolveHandle(this.root, path);
-    await dir.getDirectoryHandle(name, { create: true });
-  }
+	async mkdir(path: string): Promise<void> {
+		const [dir, name] = await resolveHandle(this.root, path);
+		await dir.getDirectoryHandle(name, { create: true });
+	}
 
-  async readdir(path: string): Promise<FileEntry[]> {
-    const dir: FileSystemDirectoryHandle = path.replace(/^\/+/, "") === ""
-      ? this.root
-      : await getDirHandle(...await resolveHandle(this.root, path));
-    const entries: FileEntry[] = [];
-    for await (const entry of (dir as any).values()) {
-      entries.push({ name: entry.name as string, kind: entry.kind as "file" | "directory" });
-    }
-    return entries;
-  }
+	async readdir(path: string): Promise<FileEntry[]> {
+		const dir: FileSystemDirectoryHandle =
+			path.replace(/^\/+/, "") === "" ? this.root : await getDirHandle(...(await resolveHandle(this.root, path)));
+		const entries: FileEntry[] = [];
+		const base = `/${path.replace(/^\/+/, "").replace(/\/+$/, "")}`;
+		const basePrefix = base === "/" ? "" : base;
+		for await (const entry of (dir as any).values()) {
+			const name = entry.name as string;
+			entries.push({
+				name,
+				path: `${basePrefix}/${name}`,
+				kind: entry.kind as "file" | "directory",
+			});
+		}
+		return entries;
+	}
 
-  async stat(path: string): Promise<FileStat> {
-    const [dir, name] = await resolveHandle(this.root, path);
-    try {
-      const fileHandle = await dir.getFileHandle(name);
-      const file = await fileHandle.getFile();
-      return {
-        name,
-        kind: "file",
-        size: file.size,
-        lastModified: new Date(file.lastModified),
-      };
-    } catch {
-      return {
-        name,
-        kind: "directory",
-        size: 0,
-        lastModified: new Date(0),
-      };
-    }
-  }
+	async stat(path: string): Promise<FileStat> {
+		const [dir, name] = await resolveHandle(this.root, path);
+		try {
+			const fileHandle = await dir.getFileHandle(name);
+			const file = await fileHandle.getFile();
+			return {
+				name,
+				kind: "file",
+				size: file.size,
+				lastModified: new Date(file.lastModified),
+			};
+		} catch {
+			return {
+				name,
+				kind: "directory",
+				size: 0,
+				lastModified: new Date(0),
+			};
+		}
+	}
 
-  async exists(path: string): Promise<boolean> {
-    try {
-      await this.stat(path);
-      return true;
-    } catch {
-      return false;
-    }
-  }
+	async exists(path: string): Promise<boolean> {
+		try {
+			await this.stat(path);
+			return true;
+		} catch {
+			return false;
+		}
+	}
 
-  async rename(oldPath: string, newPath: string): Promise<void> {
-    const data = await this.readFile(oldPath);
-    await this.writeFile(newPath, data);
-    await this.delete(oldPath);
-  }
+	async rename(oldPath: string, newPath: string): Promise<void> {
+		const data = await this.readFile(oldPath);
+		await this.writeFile(newPath, data);
+		await this.delete(oldPath);
+	}
 
-  async move(src: string, dst: string): Promise<void> {
-    await this.rename(src, dst);
-  }
+	async move(src: string, dst: string): Promise<void> {
+		await this.rename(src, dst);
+	}
 
-  async copy(src: string, dst: string): Promise<void> {
-    const data = await this.readFile(src);
-    await this.writeFile(dst, data);
-  }
+	async copy(src: string, dst: string): Promise<void> {
+		const data = await this.readFile(src);
+		await this.writeFile(dst, data);
+	}
 
-  watch(_callback: FileWatchCallback): Unsubscribe {
-    return () => {};
-  }
+	watch(_callback: FileWatchCallback): Unsubscribe {
+		return () => {};
+	}
 }
 
+export interface TreeNode {
+	name: string;
+	type: "file" | "folder";
+	children?: TreeNode[];
+}
+
+export class DefaultProjectFileTree {
+	projectTree: TreeNode[];
+
+	constructor(projectTree: TreeNode[]) {
+		this.projectTree = projectTree;
+	}
+
+	walkTree(callback: (node: TreeNode) => void) {
+		for (const node of this.projectTree) {
+			this.walkTreeI(node, callback);
+		}
+	}
+
+	private walkTreeI(node: TreeNode, callback: (node: TreeNode) => void) {
+		callback(node);
+		if (node.children) {
+			for (const child of node.children) {
+				this.walkTreeI(child, callback);
+			}
+		}
+	}
+}
+
+export const jsonProjectTree = new DefaultProjectFileTree([
+	{ name: "mod.hjson", type: "file" },
+	{
+		name: "content",
+		type: "folder",
+		children: [
+			{ name: "items", type: "folder" },
+			{ name: "blocks", type: "folder" },
+			{ name: "liquids", type: "folder" },
+			{ name: "units", type: "folder" },
+		],
+	},
+	{ name: "maps", type: "folder" },
+	{ name: "bundles", type: "folder" },
+	{ name: "sounds", type: "folder" },
+	{ name: "schematics", type: "folder" },
+	{ name: "scripts", type: "folder" },
+	{ name: "sprites-override", type: "folder" },
+	{ name: "sprites", type: "folder" },
+]);
+
 export async function createOPFSAdapter(): Promise<OPFSAdapter> {
-  const root = await getOPFSRoot();
-  return new OPFSAdapter(root);
+	const root = await getOPFSRoot();
+	return new OPFSAdapter(root);
 }

@@ -24,5 +24,5 @@
 
 ## 5. Verification
 
-- [ ] 5.1 Manual check: rename persists and updates status bar without explicit Save
-- [ ] 5.2 Manual check: delete removes the project from the picker list and closes the editor project context
+- [x] 5.1 Manual check: rename persists and updates status bar without explicit Save
+- [x] 5.2 Manual check: delete removes the project from the picker list and closes the editor project context

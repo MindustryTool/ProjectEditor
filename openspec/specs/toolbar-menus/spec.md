@@ -16,11 +16,11 @@ The Toolbar component SHALL render a horizontal bar at the top with localized "P
 - **THEN** the menu SHALL close
 
 ### Requirement: Project menu items
-The Project menu SHALL contain items for project CRUD operations: Create Project, Open Project, Change Project, and Close Project, with labels rendered via translation keys.
+The Project menu SHALL contain items for project actions: Create Project, Open Project, Change Project, Project Settings, and Close Project, with labels rendered via translation keys.
 
 #### Scenario: Project menu structure
 - **WHEN** the Project menu is open
-- **THEN** it SHALL display localized items: "Create Project", "Open Project", "Change Project", "Close Project"
+- **THEN** it SHALL display localized items: "Create Project", "Open Project", "Change Project", "Project Settings", "Close Project"
 
 ### Requirement: Export menu items
 The Export menu SHALL contain a single export button that triggers a ZIP download using the language-appropriate exporter.

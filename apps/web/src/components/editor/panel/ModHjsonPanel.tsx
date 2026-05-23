@@ -9,11 +9,7 @@ import { FormField, FormLabel, FormControl, FormDescription, FormMessage } from 
 import { Field, FieldContent, FieldLabel, FieldDescription } from "~/components/ui/field";
 import { ModHjsonSchema, ModNameSchema, defaultModHjson, type ModHjsonData } from "@project/validation";
 import { useEffect } from "react";
-
-interface ModHjsonEditorProps {
-	value: string | null;
-	onChange: (value: string) => void;
-}
+import { useFileContent } from "@project/state";
 
 function parseModHjson(data: string): ModHjsonData {
 	let name: string = "";
@@ -84,27 +80,32 @@ function toHjson(data: ModHjsonData): string {
 	return result;
 }
 
-export function ModHjsonPanel({ value, onChange }: ModHjsonEditorProps) {
+interface ModHjsonEditorProps {
+	path: string;
+}
+
+export function ModHjsonPanel({ path }: ModHjsonEditorProps) {
 	const { t } = useTranslation();
+	const { data, update } = useFileContent(path);
 
 	const form = useForm({
 		defaultValues: { ...defaultModHjson },
 	});
 
 	useEffect(() => {
-		if (value === null) {
+		if (data === null) {
 			return;
 		}
 
-		if (value === "") {
+		if (data === "") {
 			form.reset(defaultModHjson);
-			onChange(toHjson(defaultModHjson));
+			update(toHjson(defaultModHjson));
 			return;
 		}
 
-		form.reset(parseModHjson(value));
+		form.reset(parseModHjson(data));
 		form.validateAllFields("blur");
-	}, [value]);
+	}, [data]);
 
 	const fields: {
 		name: keyof ModHjsonData;
@@ -155,7 +156,7 @@ export function ModHjsonPanel({ value, onChange }: ModHjsonEditorProps) {
 			<form
 				className="flex flex-col gap-4"
 				onChange={() => {
-					onChange(toHjson(form.state.values));
+					update(toHjson(form.state.values));
 				}}
 			>
 				{fields.map((field) => (
@@ -255,7 +256,7 @@ export function ModHjsonPanel({ value, onChange }: ModHjsonEditorProps) {
 
 						const removeDep = (index: number) => {
 							fieldApi.handleChange(deps.filter((_, i) => i !== index) as any);
-							onChange(toHjson(form.state.values));
+							update(toHjson(form.state.values));
 						};
 
 						return (
