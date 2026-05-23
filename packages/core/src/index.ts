@@ -55,6 +55,10 @@ export function createEventBus<T extends EventMap = EventMap>(): EventBus<T> {
   return { on, emit };
 }
 
+export { getExporter } from "./exporter.js";
+export type { Exporter, ExportContext, ExportFs } from "./exporter.js";
+export { JsonExporter } from "./json-exporter.js";
+
 export interface ProjectEventMap extends EventMap {
   "file:changed": [{ path: string; kind: "write" | "delete" | "rename" }];
   "project:saved": [];

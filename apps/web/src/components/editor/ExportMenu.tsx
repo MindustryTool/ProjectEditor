@@ -1,11 +1,7 @@
+import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu"
-import { ChevronDown } from "lucide-react"
+import { getExporter } from "@project/core"
+import { useProjectStore } from "@project/state"
 import { cn } from "~/lib/utils"
 
 interface ExportMenuProps {
@@ -14,24 +10,41 @@ interface ExportMenuProps {
 
 export function ExportMenu({ className }: ExportMenuProps) {
   const { t } = useTranslation()
+  const projectContext = useProjectStore((s) => s.projectContext)
+
+  const handleExport = useCallback(async () => {
+    if (!projectContext) return
+
+    try {
+      const exporter = getExporter(projectContext.project.language)
+      const zipData = await exporter.export(projectContext)
+
+      const bytes = new Uint8Array(zipData.byteLength)
+      bytes.set(zipData)
+      const blob = new Blob([bytes], { type: "application/zip" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${projectContext.project.name}.zip`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error("Export failed:", err)
+      alert(t("exportMenu.exportFailed"))
+    }
+  }, [projectContext, t])
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          className={cn(
-            "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-foreground hover:bg-accent active:bg-accent",
-            className
-          )}
-        >
-          {t("exportMenu.label")}
-          <ChevronDown className="h-3 w-3 text-muted-foreground" />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-44">
-        <DropdownMenuItem>{t("exportMenu.exportJson")}</DropdownMenuItem>
-        <DropdownMenuItem>{t("exportMenu.exportImage")}</DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <button
+      onClick={handleExport}
+      className={cn(
+        "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-foreground hover:bg-accent active:bg-accent",
+        className,
+      )}
+    >
+      {t("exportMenu.label")}
+    </button>
   )
 }

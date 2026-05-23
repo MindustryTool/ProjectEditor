@@ -241,6 +241,9 @@ importers:
       '@project/validation':
         specifier: workspace:*
         version: link:../validation
+      '@project/zip':
+        specifier: workspace:*
+        version: link:../zip
       valibot:
         specifier: ^1.4.0
         version: 1.4.0(typescript@5.9.3)

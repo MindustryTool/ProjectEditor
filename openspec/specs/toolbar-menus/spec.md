@@ -23,8 +23,10 @@ The Project menu SHALL contain items for project CRUD operations: Create Project
 - **THEN** it SHALL display localized items: "Create Project", "Open Project", "Change Project", "Close Project"
 
 ### Requirement: Export menu items
-The Export menu SHALL contain placeholder items for project export operations, with labels rendered via translation keys.
+The Export menu SHALL contain a single export button that triggers a ZIP download using the language-appropriate exporter.
 
 #### Scenario: Export menu structure
-- **WHEN** the Export menu is open
-- **THEN** it SHALL display localized items: "Export as JSON", "Export as Image"
+- **WHEN** the Export button is rendered
+- **THEN** it SHALL display a localized "Export" label rendered via `t()`
+- **THEN** it SHALL NOT display "Export as JSON" or "Export as Image" items
+- **THEN** it SHALL NOT have a dropdown chevron
