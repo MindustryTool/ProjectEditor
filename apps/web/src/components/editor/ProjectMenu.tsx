@@ -14,10 +14,11 @@ interface ProjectMenuProps {
   onCreateProject: () => void
   onOpenProject: () => void
   onChangeProject: () => void
+  onProjectSettings: () => void
   onCloseProject: () => void
 }
 
-export function ProjectMenu({ className, hasProject, onCreateProject, onOpenProject, onChangeProject, onCloseProject }: ProjectMenuProps) {
+export function ProjectMenu({ className, hasProject, onCreateProject, onOpenProject, onChangeProject, onProjectSettings, onCloseProject }: ProjectMenuProps) {
   const { t } = useTranslation()
 
   return (
@@ -42,6 +43,9 @@ export function ProjectMenu({ className, hasProject, onCreateProject, onOpenProj
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onChangeProject} disabled={!hasProject}>
           {t("projectMenu.changeProject")}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onProjectSettings} disabled={!hasProject}>
+          {t("projectMenu.projectSettings")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onCloseProject} disabled={!hasProject}>
           {t("projectMenu.closeProject")}

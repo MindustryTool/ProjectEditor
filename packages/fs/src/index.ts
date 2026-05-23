@@ -131,6 +131,17 @@ export async function createProjectFileSystem(projectInfo: ProjectInfo): Promise
   return new ProjectFileSystem(projectInfo, vfs);
 }
 
+export async function deleteProjectFiles(projectId: string): Promise<void> {
+  const root = await getOPFSRoot();
+  try {
+    const projectsDir = await root.getDirectoryHandle("projects");
+    await projectsDir.removeEntry(projectId, { recursive: true });
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "NotFoundError") return;
+    throw err;
+  }
+}
+
 // OPFSAdapter
 
 async function resolveHandle(

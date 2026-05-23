@@ -26,6 +26,7 @@ interface ProjectState {
 
   createNewProject: (name: string, language?: ProjectLanguage) => void;
   setCurrentProject: (context: ProjectContext | null) => void;
+  updateCurrentProject: (patch: Partial<ProjectInfo>) => void;
   closeProject: () => void;
   updateSettings: (settings: Partial<AppSettings>) => void;
 }
@@ -52,6 +53,17 @@ export const useProjectStore = create<ProjectState>()(
 
       setCurrentProject: (context) => {
         set({ projectContext: context, lastProjectId: context?.project.id ?? null });
+      },
+
+      updateCurrentProject: (patch) => {
+        set((state) => {
+          if (!state.projectContext) return state;
+          const nextProject: ProjectInfo = { ...state.projectContext.project, ...patch };
+          return {
+            projectContext: { ...state.projectContext, project: nextProject },
+            projects: state.projects.map((p) => (p.id === nextProject.id ? nextProject : p)),
+          };
+        });
       },
 
       closeProject: () => {

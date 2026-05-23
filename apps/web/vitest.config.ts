@@ -6,6 +6,7 @@ export default defineConfig({
 	resolve: { tsconfigPaths: true },
 	plugins: [viteReact(), tailwindcss()],
 	test: {
-		environment: "node",
+		environment: "jsdom",
+		setupFiles: ["./src/test/setup.ts"],
 	},
 });

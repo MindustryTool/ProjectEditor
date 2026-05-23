@@ -15,6 +15,7 @@ import { FileJson, Image } from "lucide-react";
 import { useFileContent } from "@project/state";
 
 const ProjectPickerDialog = lazy(() => import("./ProjectPickerDialog").then((m) => ({ default: m.ProjectPickerDialog })));
+const ProjectSettingsDialog = lazy(() => import("./ProjectSettingsDialog").then((m) => ({ default: m.ProjectSettingsDialog })));
 
 interface EditorShellProps {
 	path: string | null;
@@ -36,6 +37,7 @@ export const EditorShell = memo(function EditorShell({
 	const { t } = useTranslation();
 	const [pickerOpen, setPickerOpen] = useState(false);
 	const [pickerMode, setPickerMode] = useState<"create" | "open" | "change">("open");
+	const [settingsOpen, setSettingsOpen] = useState(false);
 
 	const handleOpenPicker = useCallback(() => {
 		setPickerMode("open");
@@ -50,6 +52,10 @@ export const EditorShell = memo(function EditorShell({
 	const handleCreatePicker = useCallback(() => {
 		setPickerMode("create");
 		setPickerOpen(true);
+	}, []);
+
+	const handleOpenSettings = useCallback(() => {
+		setSettingsOpen(true);
 	}, []);
 
 	const handleCreateProject = useCallback(
@@ -79,6 +85,7 @@ export const EditorShell = memo(function EditorShell({
 					onCreateProject={handleCreatePicker}
 					onOpenProject={handleOpenPicker}
 					onChangeProject={handleChangePicker}
+					onProjectSettings={handleOpenSettings}
 					onCloseProject={onCloseProject}
 				/>
 				<ViewMenu />
@@ -120,6 +127,10 @@ export const EditorShell = memo(function EditorShell({
 					onCreateProject={handleCreateProject}
 					mode={pickerMode}
 				/>
+			</Suspense>
+
+			<Suspense fallback={null}>
+				<ProjectSettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} onCloseProject={onCloseProject} />
 			</Suspense>
 		</div>
 	);
