@@ -23,7 +23,8 @@ export function EditorPage() {
 		if (projectContext !== null) return;
 
 		if (!lastProjectId) {
-			setLoading(20);
+            setLoading(100)
+            setIsLoading(false);
 			return;
 		}
 
