@@ -27,6 +27,7 @@ export interface ProjectContext {
 }
 
 interface ProjectState {
+	hydrated: boolean;
 	projectContext: ProjectContext | null;
 	projects: ProjectInfo[];
 	settings: AppSettings;
@@ -38,11 +39,13 @@ interface ProjectState {
 	updateCurrentProject: (patch: Partial<ProjectInfo>) => void;
 	closeProject: () => void;
 	updateSettings: (settings: Partial<AppSettings>) => void;
+    setHydrated: () => void;
 }
 
 export const useProjectStore = create<ProjectState>()(
 	persist(
 		(set) => ({
+			hydrated: false,
 			projectContext: null,
 			projects: [],
 			settings: DEFAULT_SETTINGS as AppSettings,
@@ -101,6 +104,8 @@ export const useProjectStore = create<ProjectState>()(
 					settings: { ...state.settings, ...settings },
 				}));
 			},
+
+			setHydrated: () => set({ hydrated: true }),
 		}),
 		{
 			name: "project-store",
@@ -109,6 +114,9 @@ export const useProjectStore = create<ProjectState>()(
 				projects: state.projects,
 				lastProjectId: state.lastProjectId,
 			}),
+			onRehydrateStorage: (state) => {
+				return () => state.setHydrated();
+			},
 		},
 	),
 );

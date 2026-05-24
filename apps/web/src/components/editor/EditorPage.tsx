@@ -10,12 +10,13 @@ import { Progress } from "#/components/ui/progress";
 
 export function EditorPage() {
 	const [path] = useQueryState("path");
-    const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(true);
 	const [loading, setLoading] = useState(0);
 	const { t } = useTranslation();
 
 	const projectContext = useProjectStore((state) => state.projectContext);
 	const lastProjectId = useProjectStore((state) => state.lastProjectId);
+	const hydrated = useProjectStore((state) => state.hydrated);
 
 	const { openProjectFromRecord } = useProjectActions();
 
@@ -23,8 +24,12 @@ export function EditorPage() {
 		if (projectContext !== null) return;
 
 		if (!lastProjectId) {
-            setLoading(100)
-            setIsLoading(false);
+			if (hydrated) {
+				setLoading(100);
+				setIsLoading(false);
+			} else {
+                setLoading(20);
+			}
 			return;
 		}
 
@@ -35,11 +40,11 @@ export function EditorPage() {
 				const record = await getProject(lastProjectId);
 				if (record && !cancelled) {
 					await openProjectFromRecord(record);
-                    setLoading(50);
+					setLoading(50);
 				}
 			} finally {
 				setLoading(100);
-                setTimeout(() => setIsLoading(false), 1000);
+				setTimeout(() => setIsLoading(false), 1000);
 			}
 		})();
 
@@ -80,7 +85,9 @@ function LoadingDot() {
 	return (
 		<div>
 			{Array.from({ length: 4 }, (_, i) => (
-				<span key={i} className={i >= value ? "opacity-0" : ""}>.</span>
+				<span key={i} className={i >= value ? "opacity-0" : ""}>
+					.
+				</span>
 			))}
 		</div>
 	);
