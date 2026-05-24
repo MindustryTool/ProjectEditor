@@ -16,7 +16,6 @@ export function EditorPage() {
 
 	const projectContext = useProjectStore((state) => state.projectContext);
 	const lastProjectId = useProjectStore((state) => state.lastProjectId);
-	const hydrated = useProjectStore((state) => state.hydrated);
 
 	const { openProjectFromRecord } = useProjectActions();
 
@@ -24,12 +23,8 @@ export function EditorPage() {
 		if (projectContext !== null) return;
 
 		if (!lastProjectId) {
-			if (hydrated) {
-				setLoading(100);
-				setIsLoading(false);
-			} else {
-                setLoading(20);
-			}
+			setLoading(100);
+			setIsLoading(false);
 			return;
 		}
 
@@ -79,6 +74,7 @@ function LoadingDot() {
 		const interval = setInterval(() => {
 			setValue((v) => (v + 1) % 4);
 		}, 400);
+
 		return () => clearInterval(interval);
 	}, []);
 
