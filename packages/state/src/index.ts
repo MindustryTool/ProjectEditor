@@ -27,6 +27,7 @@ export interface ProjectContext {
 }
 
 interface ProjectState {
+	hydrated: boolean;
 	projectContext: ProjectContext | null;
 	projects: ProjectInfo[];
 	settings: AppSettings;
@@ -43,6 +44,7 @@ interface ProjectState {
 export const useProjectStore = create<ProjectState>()(
 	persist(
 		(set) => ({
+			hydrated: false,
 			projectContext: null,
 			projects: [],
 			settings: DEFAULT_SETTINGS as AppSettings,
@@ -109,6 +111,9 @@ export const useProjectStore = create<ProjectState>()(
 				projects: state.projects,
 				lastProjectId: state.lastProjectId,
 			}),
+			onRehydrateStorage(state) {
+				if (state) state.hydrated = true;
+			},
 		},
 	),
 );

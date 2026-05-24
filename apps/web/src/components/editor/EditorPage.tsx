@@ -16,6 +16,7 @@ export function EditorPage() {
 
 	const projectContext = useProjectStore((state) => state.projectContext);
 	const lastProjectId = useProjectStore((state) => state.lastProjectId);
+	const hydrated = useProjectStore((state) => state.hydrated);
 
 	const { openProjectFromRecord } = useProjectActions();
 
@@ -23,8 +24,12 @@ export function EditorPage() {
 		if (projectContext !== null) return;
 
 		if (!lastProjectId) {
-			setLoading(100);
-			setIsLoading(false);
+			if (hydrated) {
+				setLoading(100);
+				setTimeout(() => setIsLoading(false), 1000);
+			} else {
+				setLoading(20);
+			}
 			return;
 		}
 
@@ -46,7 +51,7 @@ export function EditorPage() {
 		return () => {
 			cancelled = true;
 		};
-	}, [lastProjectId, projectContext, openProjectFromRecord]);
+	}, [lastProjectId, projectContext, hydrated, setLoading, setIsLoading, openProjectFromRecord]);
 
 	if (isLoading) {
 		return (
