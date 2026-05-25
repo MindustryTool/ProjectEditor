@@ -36,8 +36,8 @@ export function MonacoEditor({ value, onChange, language, readOnly }: MonacoEdit
       beforeMount={handleBeforeMount}
       options={{
         readOnly,
-        minimap: { enabled: true },
-        fontSize: 13,
+        minimap: { enabled: false },
+        fontSize: 15,
         lineNumbers: "on",
         renderWhitespace: "selection",
         bracketPairColorization: { enabled: true },

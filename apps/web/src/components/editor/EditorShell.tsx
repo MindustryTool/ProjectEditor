@@ -1,14 +1,14 @@
 import { memo } from "react";
 import { useTranslation } from "react-i18next";
 import { useProjectStore } from "@project/state";
-import { ProjectMenu } from "./ProjectMenu";
-import { ViewMenu } from "./ViewMenu";
+import { ProjectMenu } from "./toolbar/ProjectMenu";
+import { ViewMenu } from "./toolbar/ViewMenu";
 import { ExportMenu } from "./ExportMenu";
-import { LocalizationMenu } from "./LocalizationMenu";
+import { LocalizationMenu } from "./toolbar/LocalizationMenu";
 import { Toolbar } from "./Toolbar";
 import { StatusBar } from "./StatusBar";
 import { SplitView } from "./SplitView";
-import { EditorToolPanel } from "./EditorToolPanel";
+import { EditorToolPanel } from "./toolbar/EditorToolPanel";
 import { EditorCenterPanel } from "./EditorCenterPanel";
 import { EditorRightPanel } from "./EditorRightPanel";
 import { FileJson, Image } from "lucide-react";

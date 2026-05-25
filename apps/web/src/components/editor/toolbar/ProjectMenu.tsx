@@ -5,9 +5,9 @@ import { ChevronDown } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { useProjectStore } from "@project/state";
 import { toast } from "sonner";
-import { ProjectPickerDialog } from "./ProjectPickerDialog";
+import { ProjectPickerDialog } from "../ProjectPickerDialog";
 import { ProjectSettingsDialog } from "./ProjectSettingsDialog";
-import { useProjectActions } from "./useProjectActions";
+import { useProjectActions } from "../useProjectActions";
 import type { ProjectRecord } from "@project/storage";
 import type { ProjectLanguage } from "@project/core";
 
