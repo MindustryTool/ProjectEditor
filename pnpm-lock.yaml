@@ -288,12 +288,18 @@ importers:
       '@project/storage':
         specifier: workspace:*
         version: link:../storage
+      '@project/validation':
+        specifier: workspace:*
+        version: link:../validation
       react:
         specifier: ^19.0.0
         version: 19.2.6
       react-dom:
         specifier: ^19.0.0
         version: 19.2.6(react@19.2.6)
+      valibot:
+        specifier: ^1.4.0
+        version: 1.4.0(typescript@5.9.3)
       zustand:
         specifier: ^5.0.0
         version: 5.0.13(@types/react@19.2.15)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6))

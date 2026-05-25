@@ -19,7 +19,9 @@
     "@project/core": "workspace:*",
     "@project/fs": "workspace:*",
     "@project/config": "workspace:*",
-    "@project/storage": "workspace:*"
+    "@project/storage": "workspace:*",
+    "@project/validation": "workspace:*",
+    "valibot": "^1.4.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",

@@ -78,5 +78,20 @@
   "statusBar.noProject": "No project",
   "statusBar.ready": "Ready",
   "statusBar.files": "{{count}} files",
-  "statusBar.project": "{{name}}"
+  "statusBar.project": "{{name}}",
+  "statusBar.validationErrors": "{{count}} error(s)",
+  "statusBar.validationWarnings": "{{count}} warning(s)",
+
+
+  "validation.content.invalidJson": "Invalid JSON syntax: {{error}}",
+  "validation.content.missingField": "Entry #{{index}} is missing required field '{{field}}'",
+  "validation.content.unknownType": "Unknown content type '{{type}}'",
+  "validation.content.duplicateName": "Duplicate name '{{name}}' at entries #{{firstIndex}} and #{{secondIndex}}",
+
+  "validation.internal.validatorError": "Validator '{{name}}' failed: {{error}}",
+
+  "exportMenu.validationTitle": "Validation Errors",
+  "exportMenu.validationMessage": "The following errors were found. Export may produce broken files.",
+  "exportMenu.exportAnyway": "Export Anyway",
+  "exportMenu.validationCancel": "Cancel"
 }

@@ -3,6 +3,7 @@ import { useQueryState } from "nuqs";
 import { File, Folder, FolderOpen, ChevronRight, ChevronDown } from "lucide-react";
 import type { FileEntry, TreeNode } from "@project/fs";
 import { useCurrentProject, useProjectStore } from "@project/state";
+import { useValidationStore } from "@project/state";
 import { cn } from "~/lib/utils";
 
 interface FileExplorerProps {
@@ -106,6 +107,10 @@ function TreeNodeItem({ node, parentPath, selectedPath, onSelect, depth = 0 }: T
 	const isSelected = selectedPath === currentPath;
 	const isFolder = node.type === "folder";
 
+	const fileResults = useValidationStore((s) => (isFolder ? null : s.resultsByPath[currentPath]));
+	const errorCount = fileResults?.filter((r) => r.severity === 0).length ?? 0;
+	const warningCount = fileResults?.filter((r) => r.severity === 1).length ?? 0;
+
 	function handleClick() {
 		if (isFolder) {
 			setExpanded(!expanded);
@@ -135,6 +140,16 @@ function TreeNodeItem({ node, parentPath, selectedPath, onSelect, depth = 0 }: T
 				)}
 				{getIcon(node, expanded)}
 				<span className="truncate">{node.name}</span>
+				{!isFolder && errorCount > 0 && (
+					<span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+						{errorCount}
+					</span>
+				)}
+				{!isFolder && errorCount === 0 && warningCount > 0 && (
+					<span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-yellow-500 px-1 text-[10px] font-bold text-white">
+						{warningCount}
+					</span>
+				)}
 			</button>
 			{isFolder && expanded && node.children && (
 				<div>

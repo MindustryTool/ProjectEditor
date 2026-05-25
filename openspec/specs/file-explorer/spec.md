@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: File explorer renders directory tree
-The system SHALL render a file explorer in the editor left panel showing the active Mindustry mod project directory structure as a collapsible tree.
+The system SHALL render a file explorer in the editor left panel showing the active Mindustry mod project directory structure as a collapsible tree, with validation status badges on files.
 
 #### Scenario: Tree displays top-level items from the project snapshot
 - **WHEN** the editor page renders with a project file-tree snapshot containing entries at the project root
@@ -22,6 +22,14 @@ The system SHALL render a file explorer in the editor left panel showing the act
 #### Scenario: Folder items show folder icon
 - **WHEN** a folder item is rendered
 - **THEN** it SHALL display a folder icon next to the name
+
+#### Scenario: File items show validation badge
+- **WHEN** a file item has validation results with "error" or "warning" severity
+- **THEN** it SHALL display a colored badge (red for errors, yellow for warnings) with the count
+
+#### Scenario: Validation badge clears
+- **WHEN** validation re-runs and a file's error/warning results become empty
+- **THEN** the badge SHALL be removed
 
 ### Requirement: Selected item is highlighted
 The system SHALL visually highlight the currently selected item in the explorer tree based on the `?path=` URL query parameter.

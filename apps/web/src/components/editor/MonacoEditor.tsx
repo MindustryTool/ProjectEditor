@@ -1,24 +1,23 @@
 import { useRef } from "react";
-import Editor, { type BeforeMount } from "@monaco-editor/react";
-import { configureMonaco } from "~/lib/monaco/setup";
+import Editor, { type BeforeMount, type OnMount } from "@monaco-editor/react";
 import { HJSON_LANGUAGE_ID, hjsonMonarchGrammar, hjsonLanguageConfig } from "~/lib/monaco/hjsonLanguage";
-import { useMonacoTheme } from "~/lib/monaco/useMonacoTheme";
-
-configureMonaco();
+import { useEditorContext } from "./EditorContext";
 
 interface MonacoEditorProps {
   value: string;
   onChange: (value: string) => void;
   language?: string;
   readOnly?: boolean;
+  filePath?: string;
 }
 
 export function MonacoEditor({ value, onChange, language, readOnly }: MonacoEditorProps) {
-  const theme = useMonacoTheme();
+  const { monacoRef, editorRef, theme, updateMarkers } = useEditorContext();
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
 
   const handleBeforeMount: BeforeMount = (monaco) => {
+    monacoRef.current = monaco;
     const existingLang = monaco.languages.getLanguages().find((l) => l.id === HJSON_LANGUAGE_ID);
     if (!existingLang) {
       monaco.languages.register({ id: HJSON_LANGUAGE_ID });
@@ -27,13 +26,22 @@ export function MonacoEditor({ value, onChange, language, readOnly }: MonacoEdit
     }
   };
 
+  const handleMount: OnMount = (editor) => {
+    editorRef.current = editor;
+    updateMarkers();
+  };
+
   return (
     <Editor
       theme={theme}
       language={language}
       value={value}
-      onChange={(newValue) => onChangeRef.current(newValue ?? "")}
+      onChange={(newValue) => {
+        const next = newValue ?? "";
+        onChangeRef.current(next);
+      }}
       beforeMount={handleBeforeMount}
+      onMount={handleMount}
       options={{
         readOnly,
         minimap: { enabled: false },

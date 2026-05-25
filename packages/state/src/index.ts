@@ -126,7 +126,26 @@ export function useCurrentProject() {
 	return state;
 }
 
-export type { FileContentEntry, FileContentStore } from "./file-content-store";
-export { useFileContentStore } from "./file-content-store";
-export type { UseFileContentOptions, UseFileContentResult } from "./use-file-content";
-export { useFileContent } from "./use-file-content";
+export type { FileContentEntry, FileContentStore } from "./stores/file-content";
+export { useFileContentStore, isDirty } from "./stores/file-content";
+
+export { WriteQueue, getWriteQueue, disposeWriteQueue } from "./services/write-queue";
+export type { UseFileContentResult } from "./hooks/use-file-content";
+export { useFileContent } from "./hooks/use-file-content";
+export { registerValidationListener } from "./validation/listener";
+
+export { Severity, severityLabel, isErrorOrWarning } from "./validation/types";
+export type {
+  SeverityLevel,
+  ValidationResult,
+  ValidatorFn,
+  ValidatorRegistration,
+  ValidatorRegistry,
+  ValidationSummary,
+  ValidationStore,
+} from "./validation/types";
+export { createValidatorRegistry } from "./validation/registry";
+export { createValidationRunner } from "./validation/runner";
+export type { ValidationRunner } from "./validation/runner";
+export { useValidationStore } from "./validation/store";
+export { createDefaultValidators } from "./validation/validators";

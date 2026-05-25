@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { getExporter } from "@project/core";
 import { useProjectStore } from "@project/state";
+import { useValidationStore } from "@project/state";
 import { cn } from "~/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
@@ -22,7 +23,9 @@ interface ExportMenuProps {
 export function ExportMenu({ className }: ExportMenuProps) {
 	const { t } = useTranslation();
 	const projectContext = useProjectStore((s) => s.projectContext);
+	const validationResults = useValidationStore((s) => s.resultsByPath);
 	const [open, setOpen] = useState(false);
+	const [validationOpen, setValidationOpen] = useState(false);
 	const [filename, setFilename] = useState("");
 	const [warning, setWarning] = useState<string | null>(null);
 
@@ -72,14 +75,34 @@ export function ExportMenu({ className }: ExportMenuProps) {
 		}
 	}, []);
 
+	const hasErrors = Object.values(validationResults).some((results) => results.some((r) => r.severity === 0));
+
 	const handleDownload = useCallback(() => {
+		if (hasErrors) {
+			setValidationOpen(true);
+		} else {
+			handleExport(filename);
+			setOpen(false);
+		}
+	}, [filename, handleExport, hasErrors]);
+
+	const handleExportAnyway = useCallback(() => {
+		setValidationOpen(false);
 		handleExport(filename);
 		setOpen(false);
 	}, [filename, handleExport]);
 
+	const handleValidationCancel = useCallback(() => {
+		setValidationOpen(false);
+	}, []);
+
 	const handleCancel = useCallback(() => {
 		setOpen(false);
 	}, []);
+
+	const allErrors = Object.entries(validationResults).flatMap(([filePath, results]) =>
+		results.filter((r) => r.severity === 0).map((r) => ({ filePath, ...r })),
+	);
 
 	return (
 		<>
@@ -110,18 +133,38 @@ export function ExportMenu({ className }: ExportMenuProps) {
 								<InputGroupText>.zip</InputGroupText>
 							</InputGroupAddon>
 						</InputGroup>
-						{warning === "invalid" && (
-							<p className="text-xs text-destructive">{t("exportMenu.filenameWarning")}</p>
-						)}
-						{warning === "empty" && (
-							<p className="text-xs text-destructive">{t("exportMenu.filenameEmpty")}</p>
-						)}
+						{warning === "invalid" && <p className="text-xs text-destructive">{t("exportMenu.filenameWarning")}</p>}
+						{warning === "empty" && <p className="text-xs text-destructive">{t("exportMenu.filenameEmpty")}</p>}
 					</div>
 					<DialogFooter>
 						<Button variant="outline" onClick={handleCancel}>
 							{t("exportMenu.cancel")}
 						</Button>
 						<Button onClick={handleDownload}>{t("exportMenu.download")}</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+			<Dialog open={validationOpen} onOpenChange={setValidationOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>{t("exportMenu.validationTitle")}</DialogTitle>
+					</DialogHeader>
+					<div className="flex flex-col gap-2">
+						<p className="text-xs text-muted-foreground">{t("exportMenu.validationMessage")}</p>
+						<div className="max-h-48 overflow-y-auto">
+							{allErrors.map((err, i) => (
+								<div key={i} className="flex gap-2 rounded bg-destructive/10 p-1.5 text-xs">
+									<span className="shrink-0 font-medium text-destructive">{err.filePath}</span>
+									<span className="text-muted-foreground">{t(err.messageKey, err.messageParams)}</span>
+								</div>
+							))}
+						</div>
+					</div>
+					<DialogFooter>
+						<Button variant="outline" onClick={handleValidationCancel}>
+							{t("exportMenu.validationCancel")}
+						</Button>
+						<Button onClick={handleExportAnyway}>{t("exportMenu.exportAnyway")}</Button>
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>

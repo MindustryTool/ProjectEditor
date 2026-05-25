@@ -76,5 +76,20 @@
   "statusBar.noProject": "Không có dự án",
   "statusBar.ready": "Sẵn sàng",
   "statusBar.files": "{{count}} tệp",
-  "statusBar.project": "{{name}}"
+  "statusBar.project": "{{name}}",
+  "statusBar.validationErrors": "{{count}} lỗi",
+  "statusBar.validationWarnings": "{{count}} cảnh báo",
+
+
+  "validation.content.invalidJson": "Cú pháp JSON không hợp lệ: {{error}}",
+  "validation.content.missingField": "Mục #{{index}} thiếu trường bắt buộc '{{field}}'",
+  "validation.content.unknownType": "Loại nội dung không xác định '{{type}}'",
+  "validation.content.duplicateName": "Tên trùng lặp '{{name}}' tại mục #{{firstIndex}} và #{{secondIndex}}",
+
+  "validation.internal.validatorError": "Trình xác thực '{{name}}' thất bại: {{error}}",
+
+  "exportMenu.validationTitle": "Lỗi xác thực",
+  "exportMenu.validationMessage": "Các lỗi sau được tìm thấy. Xuất có thể tạo tệp bị lỗi.",
+  "exportMenu.exportAnyway": "Vẫn xuất",
+  "exportMenu.validationCancel": "Hủy"
 }
