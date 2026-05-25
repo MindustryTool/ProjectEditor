@@ -1,16 +1,15 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: Status bar displays live project info
-The StatusBar component SHALL render a horizontal bar at the bottom showing the active project name, file count, a status indicator, and validation error/warning counts, with all text rendered via translation keys. The project name and file count SHALL be derived from the current `projectContext` in the Zustand store, not hardcoded.
+The `StatusBar` component SHALL compose three sub-components (`StatusBarLeft`, `StatusBarCenter`, `StatusBarRight`) as slot children. Each sub-component subscribes to its own store slices independently and SHALL be defined in its own spec:
+- `status-bar-left/spec.md` — project name and file count
+- `status-bar-center/spec.md` — editor status indicator
+- `status-bar-right/spec.md` — validation error/warning counts and document type icons
 
 #### Scenario: Status bar with project data
-- **WHEN** a project is open and the StatusBar receives projectName and fileCount props derived from the store
-- **THEN** it SHALL display the project name on the left via `t("statusBar.project", { name })`, files count on the right via `t("statusBar.files", { count })`, "Ready" status in the center via `t("statusBar.ready")`, and validation counts on the right via `t("statusBar.validationErrors", { count })` and `t("statusBar.validationWarnings", { count })`
+- **WHEN** a project is open
+- **THEN** the left section SHALL display the project name and file count, the center SHALL display "Ready", and the right SHALL display validation counts and icons
 
 #### Scenario: Status bar with no project
-- **WHEN** no project is open (`projectContext === null`)
-- **THEN** the StatusBar SHALL display "No project" on the left via `t("statusBar.noProject")` and SHALL NOT show validation counts
-
-#### Scenario: Validation counts shown on right
-- **WHEN** the validation store has errors or warnings
-- **THEN** the StatusBar SHALL display error count and warning count on the right side, each as a clickable or non-clickable label
+- **WHEN** no project is open
+- **THEN** the left section SHALL display an empty project name, the center SHALL display "Ready", and the right SHALL NOT show validation counts

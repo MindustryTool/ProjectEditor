@@ -132,7 +132,6 @@ function TreeNodeItem({ node, parentPath, selectedPath, onSelect, projectId, dep
 	function handleClick() {
 		if (isFolder) {
 			setExpanded(!expanded);
-			return;
 		}
 		onSelect(currentPath);
 	}

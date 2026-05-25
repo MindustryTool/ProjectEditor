@@ -21,7 +21,11 @@ export function EditorPage() {
 	const { openProjectFromRecord } = useProjectActions();
 
 	useEffect(() => {
-		if (projectContext !== null) return;
+		if (projectContext !== null) {
+			setLoading(100);
+			setIsLoading(false);
+			return;
+		}
 
 		if (!lastProjectId) {
 			if (hydrated) {
