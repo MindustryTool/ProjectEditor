@@ -190,3 +190,18 @@ The file-content-store SHALL provide a function that registers a validation subs
 #### Scenario: Subscriber registered
 - **WHEN** `registerValidationListener()` is called
 - **THEN** it SHALL subscribe to `fileContents` changes and trigger validation on each `currentVersion` change
+
+### Requirement: Store provides selectEntry, selectIsSaving, and getEntry selector/accessor functions
+The file-content-store SHALL export selector factory functions that encapsulate the composite key construction (`cacheKey(projectId, path)`), so consumers do not need to build `${projectId}::${path}` strings manually.
+
+#### Scenario: selectEntry returns entry for given project and path
+- **WHEN** `selectEntry(projectId, path)` is passed to `useFileContentStore`
+- **THEN** it SHALL return the entry at `fileContents[cacheKey(projectId, path)]`
+
+#### Scenario: selectIsSaving returns saving status for given project and path
+- **WHEN** `selectIsSaving(projectId, path)` is passed to `useFileContentStore`
+- **THEN** it SHALL return whether `savingPaths` includes `cacheKey(projectId, path)`
+
+#### Scenario: getEntry returns entry directly via getState
+- **WHEN** `getEntry(projectId, path)` is called
+- **THEN** it SHALL return the entry at `fileContents[cacheKey(projectId, path)]` using `useFileContentStore.getState()`

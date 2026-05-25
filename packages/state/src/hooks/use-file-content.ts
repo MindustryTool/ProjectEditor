@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
-import { useFileContentStore, isDirty, isError } from "../stores/file-content";
+import { useFileContentStore, isDirty, isError, selectEntry, selectIsSaving, getEntry } from "../stores/file-content";
 import { useProjectStore } from "../index";
 import { getWriteQueue, disposeWriteQueue } from "../services/write-queue";
 
@@ -19,11 +19,8 @@ export interface UseFileContentResult {
 export function useFileContent(path: string): UseFileContentResult {
   const projectContext = useProjectStore((s) => s.projectContext);
   const projectId = projectContext?.project.id;
-  const compositeKey = projectId ? `${projectId}::${path}` : "";
-
-  const entry = useFileContentStore((s) => (compositeKey ? s.fileContents[compositeKey] : undefined));
-
-  const savingPaths = useRef(new Set<string>());
+  const entry = useFileContentStore(projectId ? selectEntry(projectId, path) : () => undefined);
+  const isSaving = useFileContentStore(projectId ? selectIsSaving(projectId, path) : () => false);
 
   useEffect(() => {
     if (!projectId || !path) return;
@@ -33,11 +30,11 @@ export function useFileContent(path: string): UseFileContentResult {
   }, [path, projectId, projectContext, entry]);
 
   const previousProjectId = useRef(projectId ?? null);
+
   useEffect(() => {
     if (projectId !== previousProjectId.current) {
       if (previousProjectId.current !== null) {
         disposeWriteQueue(previousProjectId.current);
-        savingPaths.current.clear();
       }
       previousProjectId.current = projectId ?? null;
     }
@@ -50,24 +47,24 @@ export function useFileContent(path: string): UseFileContentResult {
       const store = useFileContentStore.getState();
       store.writeBuffer(projectId, path, content);
 
-      const currentEntry = store.fileContents[`${projectId}::${path}`];
+      const currentEntry = getEntry(projectId, path);
       const version = currentEntry?.currentVersion ?? 0;
 
-      savingPaths.current.add(path);
+      store.markSaving(projectId, path);
       const queue = getWriteQueue(projectId, projectContext.fs);
       queue.enqueue(path, content, version).then(
         () => {
-          const updatedEntry = useFileContentStore.getState().fileContents[`${projectId}::${path}`];
+          const updatedEntry = getEntry(projectId, path);
           if (!updatedEntry || updatedEntry.currentVersion !== version) return;
           useFileContentStore.getState().markPersisted(projectId, path);
-          savingPaths.current.delete(path);
+          useFileContentStore.getState().clearSaving(projectId, path);
         },
         (err: unknown) => {
-          const updatedEntry = useFileContentStore.getState().fileContents[`${projectId}::${path}`];
+          const updatedEntry = getEntry(projectId, path);
           if (!updatedEntry || updatedEntry.currentVersion !== version) return;
           console.error(`Failed to write ${path}:`, err);
           useFileContentStore.getState().setBufferError(projectId, path, err instanceof Error ? err.message : String(err));
-          savingPaths.current.delete(path);
+          useFileContentStore.getState().clearSaving(projectId, path);
         },
       );
     },
@@ -81,7 +78,7 @@ export function useFileContent(path: string): UseFileContentResult {
     savedAt: entry?.savedAt ?? null,
     error: entry?.error ?? null,
     isDirty: isDirty(entry),
-    isSaving: savingPaths.current.has(path),
+    isSaving,
     isLoading: entry?.loading ?? false,
     isError: isError(entry),
     update,

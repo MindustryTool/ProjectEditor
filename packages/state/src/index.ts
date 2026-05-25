@@ -127,7 +127,7 @@ export function useCurrentProject() {
 }
 
 export type { FileContentEntry, FileContentStore } from "./stores/file-content";
-export { useFileContentStore, isDirty } from "./stores/file-content";
+export { useFileContentStore, isDirty, selectEntry, selectIsSaving } from "./stores/file-content";
 
 export { WriteQueue, getWriteQueue, disposeWriteQueue } from "./services/write-queue";
 export type { UseFileContentResult } from "./hooks/use-file-content";

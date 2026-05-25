@@ -58,6 +58,7 @@ export class WriteQueue {
       batch.map(async (write) => {
         try {
           await this.fs.writeTextFile(write.path, write.content);
+          console.log(`Wrote ${write.path}`);
           write.resolve();
         } catch (err) {
           write.reject(err);

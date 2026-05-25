@@ -27,14 +27,32 @@ export function isError(entry: FileContentEntry | undefined): boolean {
   return entry.error !== null && entry.currentVersion === entry.savedVersion;
 }
 
+export function selectEntry(projectId: string, path: string) {
+  const key = cacheKey(projectId, path);
+  return (state: FileContentStore) => state.fileContents[key];
+}
+
+export function selectIsSaving(projectId: string, path: string) {
+  const key = cacheKey(projectId, path);
+  return (state: FileContentStore) => state.savingPaths.includes(key);
+}
+
+export function getEntry(projectId: string, path: string) {
+  const key = cacheKey(projectId, path);
+  return useFileContentStore.getState().fileContents[key];
+}
+
 const abortMap = new Map<string, AbortController>();
 const eventUnsubs = new Map<string, () => void>();
 
 export interface FileContentStore {
   fileContents: Record<string, FileContentEntry>;
+  savingPaths: string[];
   writeBuffer: (projectId: string, path: string, content: string) => void;
   markPersisted: (projectId: string, path: string) => void;
   setBufferError: (projectId: string, path: string, error: string) => void;
+  markSaving: (projectId: string, path: string) => void;
+  clearSaving: (projectId: string, path: string) => void;
   clearFileContent: (projectId: string, path: string) => void;
   clearAllFileContents: (projectId?: string) => void;
   readFile: (projectId: string, path: string, fs: ProjectFileSystem) => void;
@@ -70,6 +88,7 @@ function buildFileContents(): Record<string, FileContentEntry> {
 
 export const useFileContentStore = create<FileContentStore>()((set, get) => ({
   fileContents: {},
+  savingPaths: [],
 
   writeBuffer: (projectId, path, content) => {
     const key = cacheKey(projectId, path);
@@ -115,6 +134,20 @@ export const useFileContentStore = create<FileContentStore>()((set, get) => ({
     });
 
     set({ fileContents: buildFileContents() });
+  },
+
+  markSaving: (projectId, path) => {
+    const key = cacheKey(projectId, path);
+    set((state) => ({
+      savingPaths: state.savingPaths.includes(key) ? state.savingPaths : [...state.savingPaths, key],
+    }));
+  },
+
+  clearSaving: (projectId, path) => {
+    const key = cacheKey(projectId, path);
+    set((state) => ({
+      savingPaths: state.savingPaths.filter((p) => p !== key),
+    }));
   },
 
   clearFileContent: (projectId, path) => {

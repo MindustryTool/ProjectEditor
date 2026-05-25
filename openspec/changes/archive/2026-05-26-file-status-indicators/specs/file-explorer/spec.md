@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: File explorer renders directory tree
 The system SHALL render a file explorer in the editor left panel showing the active Mindustry mod project directory structure as a collapsible tree, with validation status badges and buffer state indicators on files.
@@ -54,25 +54,3 @@ The system SHALL render a file explorer in the editor left panel showing the act
 #### Scenario: No dot for clean files
 - **WHEN** a file has `isDirty === false` and `isSaving === false`
 - **THEN** its row SHALL NOT show any status dot
-
-### Requirement: Selected item is highlighted
-The system SHALL visually highlight the currently selected item in the explorer tree based on the `?path=` URL query parameter.
-
-#### Scenario: Selected file is highlighted
-- **WHEN** the URL contains `?path=<file-path>` that matches an existing file in the tree
-- **THEN** the file explorer SHALL highlight that file item on mount
-
-#### Scenario: Folder clicks do not change selection highlight
-- **WHEN** the user clicks a folder item
-- **THEN** the file explorer SHALL NOT change which item is highlighted
-
-### Requirement: Selection synced to URL
-The system SHALL sync the selected file path to a `?path=` URL query parameter.
-
-#### Scenario: URL updates on file selection
-- **WHEN** the user clicks a file item (e.g., `content/items/some-file.hjson`)
-- **THEN** the URL SHALL update to `?path=content/items/some-file.hjson`
-
-#### Scenario: URL does not update on folder selection
-- **WHEN** the user clicks a folder item (e.g., `content/items`)
-- **THEN** the URL SHALL NOT change its `?path=` value

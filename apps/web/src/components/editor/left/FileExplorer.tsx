@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useQueryState } from "nuqs";
 import { File, Folder, FolderOpen, ChevronRight, ChevronDown } from "lucide-react";
 import type { FileEntry, TreeNode } from "@project/fs";
-import { useCurrentProject, useProjectStore } from "@project/state";
+import { useCurrentProject, useProjectStore, useFileContentStore, isDirty, selectEntry, selectIsSaving } from "@project/state";
 import { useValidationStore } from "@project/state";
 import { cn } from "~/lib/utils";
 
@@ -19,7 +19,14 @@ export function FileExplorer({ className }: FileExplorerProps) {
 	return (
 		<div className={cn("space-y-0.5 px-1 py-1", className)}>
 			{projectTree.map((node) => (
-				<TreeNodeItem key={node.name} node={node} parentPath="" selectedPath={path ?? null} onSelect={setPath} />
+				<TreeNodeItem
+					key={node.name}
+					node={node}
+					parentPath=""
+					selectedPath={path ?? null}
+					onSelect={setPath}
+					projectId={context.project.id}
+				/>
 			))}
 		</div>
 	);
@@ -41,6 +48,7 @@ interface TreeNodeItemProps {
 	parentPath: string;
 	selectedPath: string | null;
 	onSelect: (value: string | null) => void;
+	projectId: string;
 	depth?: number;
 }
 
@@ -101,15 +109,25 @@ function sortTreeNodes(nodes: TreeNode[]) {
 	}
 }
 
-function TreeNodeItem({ node, parentPath, selectedPath, onSelect, depth = 0 }: TreeNodeItemProps) {
+function TreeNodeItem({ node, parentPath, selectedPath, onSelect, projectId, depth = 0 }: TreeNodeItemProps) {
 	const [expanded, setExpanded] = useState(depth === 0 && node.type === "folder");
 	const currentPath = parentPath ? `${parentPath}/${node.name}` : node.name;
 	const isSelected = selectedPath === currentPath;
 	const isFolder = node.type === "folder";
-
 	const fileResults = useValidationStore((s) => (isFolder ? null : s.resultsByPath[currentPath]));
 	const errorCount = fileResults?.filter((r) => r.severity === 0).length ?? 0;
 	const warningCount = fileResults?.filter((r) => r.severity === 1).length ?? 0;
+
+	const bufferEntry = useFileContentStore(isFolder ? () => undefined : selectEntry(projectId, currentPath));
+	const isItemDirty = !isFolder && isDirty(bufferEntry);
+	const isItemSaving = useFileContentStore(isFolder ? () => false : selectIsSaving(projectId, currentPath));
+
+	const isItemError = !isFolder && bufferEntry?.error != null && bufferEntry.currentVersion === bufferEntry.savedVersion;
+	const filenameColor = isItemError
+		? "text-red-500"
+		: !isFolder && warningCount > 0 && errorCount === 0
+			? "text-yellow-400"
+			: "text-foreground";
 
 	function handleClick() {
 		if (isFolder) {
@@ -124,7 +142,7 @@ function TreeNodeItem({ node, parentPath, selectedPath, onSelect, depth = 0 }: T
 			<button
 				onClick={handleClick}
 				className={cn(
-					"flex w-full cursor-pointer items-center gap-1 rounded px-2 py-1 text-sm text-foreground hover:bg-accent",
+					"flex w-full cursor-pointer items-center gap-1 rounded px-2 py-1 text-sm hover:bg-accent",
 					isSelected && "bg-accent font-medium",
 				)}
 				style={{ paddingLeft: `${8 + depth * 16}px` }}
@@ -139,17 +157,9 @@ function TreeNodeItem({ node, parentPath, selectedPath, onSelect, depth = 0 }: T
 					</span>
 				)}
 				{getIcon(node, expanded)}
-				<span className="truncate">{node.name}</span>
-				{!isFolder && errorCount > 0 && (
-					<span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-						{errorCount}
-					</span>
-				)}
-				{!isFolder && errorCount === 0 && warningCount > 0 && (
-					<span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-yellow-500 px-1 text-[10px] font-bold text-white">
-						{warningCount}
-					</span>
-				)}
+				<span className={cn("truncate", filenameColor)}>{node.name}</span>
+				{!isFolder && isItemSaving && <span className="h-2 w-2 shrink-0 rounded-full bg-amber-400 ml-auto" />}
+				{!isFolder && !isItemSaving && isItemDirty && <span className="h-2 w-2 shrink-0 rounded-full bg-white ml-auto" />}
 			</button>
 			{isFolder && expanded && node.children && (
 				<div>
@@ -160,6 +170,7 @@ function TreeNodeItem({ node, parentPath, selectedPath, onSelect, depth = 0 }: T
 							parentPath={currentPath}
 							selectedPath={selectedPath}
 							onSelect={onSelect}
+							projectId={projectId}
 							depth={depth + 1}
 						/>
 					))}
