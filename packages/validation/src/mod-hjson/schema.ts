@@ -32,7 +32,7 @@ export const defaultModHjson: ModHjsonData = {
 	author: "Me",
 	description: "A cool mod",
 	version: "1.0.0",
-	minGameVersion: "146",
+	minGameVersion: "158",
 	dependencies: [],
 	hidden: false,
 };

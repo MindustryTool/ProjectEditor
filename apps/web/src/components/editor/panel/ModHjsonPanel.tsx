@@ -172,7 +172,7 @@ export function ModHjsonPanel({ path }: ModHjsonEditorProps) {
 			name: "minGameVersion",
 			label: t("editor.modHjson.minGameVersion"),
 			description: t("editor.modHjson.minGameVersionDescription"),
-			placeholder: "146",
+			placeholder: "158",
 		},
 	];
 
