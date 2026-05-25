@@ -39,7 +39,10 @@ export function useProjectActions() {
 						await ensureNode(child, currentPath);
 					}
 				} else {
-					await fs.writeTextFile(currentPath, "");
+					const exists = await fs.exists(currentPath);
+					if (!exists) {
+						await fs.writeTextFile(currentPath, "");
+					}
 				}
 			};
 

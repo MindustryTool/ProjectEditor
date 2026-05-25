@@ -103,7 +103,7 @@ interface ModHjsonEditorProps {
 
 export function ModHjsonPanel({ path }: ModHjsonEditorProps) {
 	const { t } = useTranslation();
-	const { data, update } = useFileContent(path);
+	const { data, isLoading, update } = useFileContent(path);
 	const linesRef = useRef<string[]>([]);
 	const prevValuesRef = useRef<ModHjsonData>({ ...defaultModHjson });
 
@@ -113,6 +113,10 @@ export function ModHjsonPanel({ path }: ModHjsonEditorProps) {
 
 	useEffect(() => {
 		if (data === null) {
+			return;
+		}
+
+		if (isLoading) {
 			return;
 		}
 
@@ -130,7 +134,7 @@ export function ModHjsonPanel({ path }: ModHjsonEditorProps) {
 		prevValuesRef.current = { ...parsed };
 		form.reset(parsed);
 		form.validateAllFields("blur");
-	}, [data]);
+	}, [data, isLoading, update]);
 
 	const fields: {
 		name: keyof ModHjsonData;
