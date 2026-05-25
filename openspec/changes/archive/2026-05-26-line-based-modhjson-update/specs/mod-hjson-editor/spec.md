@@ -1,6 +1,7 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: mod.hjson form editor renders with fields
+
 The system SHALL render a form-based editor in the SplitView center panel when `?path=mod.hjson` is selected, with labeled input fields for each mod metadata property. The form SHALL NOT include save or reset buttons. Changes SHALL be applied line-by-line to the file content rather than rebuilding the entire file.
 
 #### Scenario: Form renders eight fields
@@ -16,6 +17,7 @@ The system SHALL render a form-based editor in the SplitView center panel when `
 - **THEN** the form SHALL NOT contain save or reset buttons
 
 ### Requirement: Form uses TanStack Form with Valibot validation
+
 The mod.hjson form SHALL use `@tanstack/react-form` for form state management and Valibot for field validation.
 
 #### Scenario: name field validates mod-name format
@@ -47,6 +49,7 @@ The mod.hjson form SHALL use `@tanstack/react-form` for form state management an
 - **THEN** the field SHALL display a validation error
 
 ### Requirement: Field labels and descriptions are translated
+
 All mod.hjson form field labels and descriptions SHALL use i18n translation keys.
 
 #### Scenario: Fields show translated labels
@@ -58,6 +61,7 @@ All mod.hjson form field labels and descriptions SHALL use i18n translation keys
 - **THEN** each field description SHALL be rendered via `t()` with keys under `editor.modHjson.*`
 
 ### Requirement: description field uses Textarea
+
 The system SHALL render the `description` field using a `<textarea>` element instead of a single-line `<input>`.
 
 #### Scenario: description renders as textarea
@@ -65,6 +69,7 @@ The system SHALL render the `description` field using a `<textarea>` element ins
 - **THEN** the description field SHALL be a multi-line textarea element
 
 ### Requirement: dependencies rendered as field list with add button
+
 The `dependencies` array SHALL be rendered as a list of individual input fields, each validating against the mod-name schema. The form SHALL show one input by default and include an "Add" button below to append additional dependency inputs. An "X" remove button SHALL appear on each dependency input (except the last remaining). Adding or removing dependencies SHALL update only the `dependencies:` line.
 
 #### Scenario: One default dependency input
@@ -80,6 +85,7 @@ The `dependencies` array SHALL be rendered as a list of individual input fields,
 - **THEN** that input SHALL be removed from the list
 
 ### Requirement: hidden field renders as checkbox
+
 The system SHALL render the `hidden` field as a checkbox in the mod.hjson form. The value SHALL be `true` (checked), `false` (unchecked), or `undefined` (indeterminate/unset).
 
 #### Scenario: Checkbox renders with label and description
@@ -95,6 +101,7 @@ The system SHALL render the `hidden` field as a checkbox in the mod.hjson form. 
 - **THEN** the field value SHALL be `true`
 
 ### Requirement: Changes applied line-by-line
+
 When the user modifies a field, the system SHALL update only the corresponding line in the file content. The line SHALL be identified by its key prefix (e.g., `name:` for the name field) and replaced with the new value. Other lines SHALL remain unchanged.
 
 #### Scenario: Line-by-line update on change

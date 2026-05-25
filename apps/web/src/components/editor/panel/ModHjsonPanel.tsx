@@ -8,7 +8,7 @@ import { Checkbox } from "~/components/ui/checkbox";
 import { FormField, FormLabel, FormControl, FormDescription, FormMessage } from "~/components/ui/form";
 import { Field, FieldContent, FieldLabel, FieldDescription } from "~/components/ui/field";
 import { ModHjsonSchema, ModNameSchema, defaultModHjson, type ModHjsonData } from "@project/validation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useFileContent } from "@project/state";
 
 function parseModHjson(data: string): ModHjsonData {
@@ -80,6 +80,23 @@ function toHjson(data: ModHjsonData): string {
 	return result;
 }
 
+function replaceLine(lines: string[], key: string, value: string): string[] {
+	const prefix = `${key}:`;
+	const index = lines.findIndex((line) => line.startsWith(prefix));
+	const newLine = `${key}: ${value}`;
+	if (index !== -1) {
+		const result = [...lines];
+		result[index] = newLine;
+		return result;
+	}
+
+	if (lines.at(-1)?.trim() === "") {
+		lines.pop();
+	}
+
+	return [...lines, newLine];
+}
+
 interface ModHjsonEditorProps {
 	path: string;
 }
@@ -87,6 +104,8 @@ interface ModHjsonEditorProps {
 export function ModHjsonPanel({ path }: ModHjsonEditorProps) {
 	const { t } = useTranslation();
 	const { data, update } = useFileContent(path);
+	const linesRef = useRef<string[]>([]);
+	const prevValuesRef = useRef<ModHjsonData>({ ...defaultModHjson });
 
 	const form = useForm({
 		defaultValues: { ...defaultModHjson },
@@ -98,12 +117,18 @@ export function ModHjsonPanel({ path }: ModHjsonEditorProps) {
 		}
 
 		if (data === "") {
+			const content = toHjson(defaultModHjson);
+			linesRef.current = content.split("\n");
+			prevValuesRef.current = { ...defaultModHjson };
 			form.reset(defaultModHjson);
-			update(toHjson(defaultModHjson));
+			update(content);
 			return;
 		}
 
-		form.reset(parseModHjson(data));
+		const parsed = parseModHjson(data);
+		linesRef.current = data.split("\n");
+		prevValuesRef.current = { ...parsed };
+		form.reset(parsed);
 		form.validateAllFields("blur");
 	}, [data]);
 
@@ -156,7 +181,21 @@ export function ModHjsonPanel({ path }: ModHjsonEditorProps) {
 			<form
 				className="flex flex-col gap-4"
 				onChange={() => {
-					update(toHjson(form.state.values));
+					const current = form.state.values as ModHjsonData;
+					const changedKey = (Object.keys(current) as (keyof ModHjsonData)[]).find((k) => current[k] !== prevValuesRef.current[k]);
+					if (!changedKey) return;
+					let lineValue: string;
+					if (changedKey === "dependencies") {
+						const deps = current.dependencies.filter((d) => d.trim() !== "");
+						lineValue = deps.length > 0 ? `[${deps.join(",")}]` : "[]";
+					} else if (changedKey === "hidden") {
+						lineValue = String(current.hidden);
+					} else {
+						lineValue = String(current[changedKey] ?? "");
+					}
+					prevValuesRef.current = { ...current };
+					linesRef.current = replaceLine(linesRef.current, changedKey, lineValue);
+					update(linesRef.current.join("\n"));
 				}}
 			>
 				{fields.map((field) => (
@@ -251,12 +290,19 @@ export function ModHjsonPanel({ path }: ModHjsonEditorProps) {
 						};
 
 						const addDep = () => {
-							fieldApi.handleChange([...deps, ""] as any);
+							const newDeps = [...deps, ""];
+							fieldApi.handleChange(newDeps as any);
+							prevValuesRef.current.dependencies = newDeps as any;
 						};
 
 						const removeDep = (index: number) => {
-							fieldApi.handleChange(deps.filter((_, i) => i !== index) as any);
-							update(toHjson(form.state.values));
+							const newDeps = deps.filter((_, i) => i !== index);
+							fieldApi.handleChange(newDeps as any);
+							const filtered = newDeps.filter((d: string) => d.trim() !== "");
+							const lineValue = filtered.length > 0 ? `[${filtered.join(",")}]` : "[]";
+							linesRef.current = replaceLine(linesRef.current, "dependencies", lineValue);
+							update(linesRef.current.join("\n"));
+							prevValuesRef.current.dependencies = newDeps;
 						};
 
 						return (
