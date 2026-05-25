@@ -95,16 +95,13 @@ export function ProjectPickerDialog({ mode, trigger, onSelectProject, onCreatePr
 							</div>
 							<div className="flex flex-col gap-2">
 								<label className="text-xs font-medium text-muted-foreground">{t("projectPickerDialog.language")}</label>
-								<Select
-									value={newLanguage}
-									onValueChange={(v: ProjectLanguage) => setNewLanguage(v)}
-								>
+								<Select value={newLanguage} onValueChange={(v: ProjectLanguage) => setNewLanguage(v)}>
 									<SelectTrigger className="h-7 w-32 text-xs">
 										<SelectValue />
 									</SelectTrigger>
 									<SelectContent>
 										{LANGUAGE_OPTIONS.map((opt) => (
-											<SelectItem key={opt.value} value={opt.value} className="text-xs">
+											<SelectItem key={opt.value} value={opt.value} className="text-xs" disabled={opt.value !== "json"}>
 												{opt.label}
 											</SelectItem>
 										))}
