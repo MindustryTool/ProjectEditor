@@ -1,12 +1,31 @@
-import { memo } from "react";
+import { lazy, memo, Suspense } from "react";
+import { useFileContent } from "@project/state";
 import { useTranslation } from "react-i18next";
 import { Panel } from "./Panel";
-import { HjsonEditor } from "#/components/editor/center/HjsonEditor";
-import { JsonEditor } from "#/components/editor/center/JsonEditor";
 import { ContentList } from "#/components/editor/center/ContentList";
+import { getLanguageFromPath } from "~/lib/monaco/languageMap";
+
+const MonacoEditor = lazy(() => import("./MonacoEditor").then((m) => ({ default: m.MonacoEditor })));
 
 interface EditorCenterPanelProps {
 	path: string | null;
+}
+
+function EditorWithMonaco({ path }: { path: string }) {
+	const { data, update } = useFileContent(path);
+	const language = getLanguageFromPath(path);
+
+	return (
+		<Suspense
+			fallback={
+				<div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+					Loading editor...
+				</div>
+			}
+		>
+			<MonacoEditor value={data ?? ""} onChange={update} language={language} />
+		</Suspense>
+	);
 }
 
 export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: EditorCenterPanelProps) {
@@ -16,16 +35,12 @@ export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: Edito
 		return null;
 	}
 
-	if (path === "mod.hjson") {
-		return <HjsonEditor path={path} />;
+	if (path === "mod.hjson" || (path.startsWith("content") && path.endsWith(".json"))) {
+		return <EditorWithMonaco path={path} />;
 	}
 
 	if (path.startsWith("content")) {
-		if (path.endsWith(".json")) {
-			return <JsonEditor path={path} />;
-		} else {
-			return <ContentList path={path} />;
-		}
+		return <ContentList path={path} />;
 	}
 
 	return (
