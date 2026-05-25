@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { Panel } from "./Panel";
 import { ContentList } from "#/components/editor/center/ContentList";
 import { getLanguageFromPath } from "~/lib/monaco/languageMap";
-import { EditorProvider } from "./EditorContext";
 
 const MonacoEditor = lazy(() => import("./MonacoEditor").then((m) => ({ default: m.MonacoEditor })));
 
@@ -17,17 +16,15 @@ function EditorWithMonaco({ path }: { path: string }) {
 	const language = getLanguageFromPath(path);
 
 	return (
-		<EditorProvider path={path}>
-			<Suspense
-				fallback={
-					<div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-						Loading editor...
-					</div>
-				}
-			>
-				<MonacoEditor value={data ?? ""} onChange={update} language={language} />
-			</Suspense>
-		</EditorProvider>
+		<Suspense
+			fallback={
+				<div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+					Loading editor...
+				</div>
+			}
+		>
+			<MonacoEditor value={data ?? ""} onChange={update} language={language} filePath={path} />
+		</Suspense>
 	);
 }
 
