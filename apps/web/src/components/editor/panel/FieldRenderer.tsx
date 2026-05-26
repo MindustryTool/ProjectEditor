@@ -38,7 +38,7 @@ export function FieldRenderer({ fields, values, updater }: FieldRendererProps) {
 					name,
 					value: values[name] || defaultValue || "",
 					onChange: (v) => {
-						if (hiddenIfDefault && v === defaultValue) {
+						if (hiddenIfDefault === true && v === defaultValue) {
 							updater(name, Number.NaN);
 						} else {
 							updater(name, v);
@@ -95,6 +95,7 @@ const fieldRenderers: Record<FieldType, (value: { name: string; value: any; onCh
 		<FormField>
 			<FormLabel>{name}</FormLabel>
 			<FormControl>
+				{value}
 				<Input value={value} onChange={(v) => onChange(v.currentTarget.value)} type="color" />
 			</FormControl>
 		</FormField>

@@ -81,7 +81,7 @@ export function ItemPanel({ path }: ItemPanelProps) {
 	function handleUpdate(field: string, value: any | undefined) {
 		const newValue = { ...values };
 
-		if (value === undefined || value === null || isNaN(value)) {
+		if (value === undefined || value === null || (typeof value === "number" && isNaN(value))) {
 			delete newValue[field];
 		} else {
 			newValue[field] = value;
