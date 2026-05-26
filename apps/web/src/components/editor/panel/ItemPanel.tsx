@@ -68,16 +68,21 @@ export function ItemPanel({ path }: ItemPanelProps) {
 		{
 			name: "buildable",
 			type: "Boolean",
+			defaultValue: false,
+			hiddenIfDefault: true,
 		},
 		{
 			name: "hidden",
 			type: "Boolean",
+			defaultValue: false,
+			hiddenIfDefault: true,
 		},
 	] satisfies Field[];
 
 	function handleUpdate(field: string, value: any | undefined) {
-        const newValue = {...values};
-		if (value === undefined || value === null) {
+		const newValue = { ...values };
+
+		if (value === undefined || value === null || isNaN(value)) {
 			delete newValue[field];
 		} else {
 			newValue[field] = value;

@@ -26,13 +26,21 @@ The system SHALL define four severity levels: error, warning, info, deprecated, 
 - **WHEN** the runner or consumer filters results by minimum severity
 - **THEN** only results at or above that severity SHALL be included
 
-### Requirement: Validation result includes location and message
-Each validation result SHALL include a message key (for i18n), optional message params, and optional source location (line, column).
+### Requirement: Validation result includes location, field, and message
+Each validation result SHALL include a message key (for i18n), optional message params, optional source location (line, column), and optional field name.
 
 #### Scenario: Basic result
 - **WHEN** a validator detects an issue
-- **THEN** the result SHALL contain `{severity, messageKey, messageParams?, line?, column?, path?, code?}`
+- **THEN** the result SHALL contain `{severity, messageKey, messageParams?, line?, column?, path?, code?, field?}`
 
 #### Scenario: No location for file-level issues
 - **WHEN** a validator detects a file-level issue (e.g., "file is empty")
 - **THEN** the result SHALL omit line and column fields
+
+#### Scenario: File-level validation result
+- **WHEN** a validator detects a file-level issue (e.g., "file is empty")
+- **THEN** the result SHALL omit the `field` property
+
+#### Scenario: Field-level validation result
+- **WHEN** a validator detects an issue on a specific field
+- **THEN** the result SHALL include the `field` property set to the field name

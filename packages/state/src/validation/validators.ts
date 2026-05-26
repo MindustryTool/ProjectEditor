@@ -89,7 +89,8 @@ export const contentJsonValidator: ValidatorFn = ({ path, content }) => {
         path,
         severity: Severity.error,
         messageKey: "validation.content.missingField",
-        messageParams: { index: i + 1, field: "type" },
+        messageParams: { index: i + 1 },
+        field: "type",
       });
       continue;
     }

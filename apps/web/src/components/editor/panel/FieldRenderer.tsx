@@ -9,16 +9,19 @@ export type FieldType = (typeof FieldTypes)[number];
 export interface Field {
 	name: string;
 	type: FieldType;
+	defaultValue?: any;
+	hiddenIfDefault?: boolean;
 }
 
 interface FieldRendererProps {
 	fields: Field[];
 	values: Record<string, string>;
-	updater: (field: string, value: string | undefined) => void;
+	updater: (field: string, value: any | undefined) => void;
 }
 
 export function FieldRenderer({ fields, values, updater }: FieldRendererProps) {
-	return fields.map(({ name, type }) => {
+	return fields.map((field) => {
+		const { name, type, defaultValue, hiddenIfDefault } = field;
 		const renderer = fieldRenderers[type];
 
 		if (renderer === undefined) {
@@ -29,7 +32,21 @@ export function FieldRenderer({ fields, values, updater }: FieldRendererProps) {
 			);
 		}
 
-		return <Fragment key={name}>{renderer({ name, value: values[name] || "", onChange: (v) => updater(name, v) })}</Fragment>;
+		return (
+			<Fragment key={name}>
+				{renderer({
+					name,
+					value: values[name] || defaultValue || "",
+					onChange: (v) => {
+						if (hiddenIfDefault && v === defaultValue) {
+							updater(name, Number.NaN);
+						} else {
+							updater(name, v);
+						}
+					},
+				})}
+			</Fragment>
+		);
 	});
 }
 
