@@ -47,15 +47,18 @@ export interface ProjectFileSystemOptions {
 export class ProjectFileSystem {
 	private projectRoot: string;
 	private onTreeSnapshotChange: TreeSnapshotChangeCallback;
+	readonly defaultProjectTree: DefaultProjectFileTree;
 
 	constructor(
 		projectInfo: ProjectInfo,
 		private vfs: VirtualFileSystem,
 		private events: EventBus<ProjectEventMap>,
 		options: ProjectFileSystemOptions,
+		defaultProjectTree: DefaultProjectFileTree,
 	) {
 		this.projectRoot = `/projects/${projectInfo.id}/`;
 		this.onTreeSnapshotChange = options.onTreeSnapshotChange;
+		this.defaultProjectTree = defaultProjectTree;
 	}
 
 	private scopePath(path: string): string {
@@ -199,7 +202,7 @@ export async function createProjectFileSystem(
 	const vfs = await createOPFSAdapter();
 	const fs = new ProjectFileSystem(projectInfo, vfs, events, {
 		onTreeSnapshotChange: options.onTreeSnapshotChange,
-	});
+	}, jsonProjectTree);
 
 	const rootExists = await fs.exists("/");
 	if (!rootExists) {
@@ -440,6 +443,18 @@ export class DefaultProjectFileTree {
 			}
 		}
 	}
+}
+
+export function isDefaultPath(tree: DefaultProjectFileTree, path: string): boolean {
+	function walk(nodes: TreeNode[], parentPath: string): boolean {
+		for (const node of nodes) {
+			const nodePath = parentPath ? `${parentPath}/${node.name}` : node.name;
+			if (nodePath === path) return true;
+			if (node.children && walk(node.children, nodePath)) return true;
+		}
+		return false;
+	}
+	return walk(tree.projectTree, "");
 }
 
 export const jsonProjectTree = new DefaultProjectFileTree([

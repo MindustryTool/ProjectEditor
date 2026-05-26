@@ -16,13 +16,7 @@ function EditorWithMonaco({ path }: { path: string }) {
 	const language = getLanguageFromPath(path);
 
 	return (
-		<Suspense
-			fallback={
-				<div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-					Loading editor...
-				</div>
-			}
-		>
+		<Suspense fallback={<div className="flex h-full items-center justify-center text-xs text-muted-foreground">Loading editor...</div>}>
 			<MonacoEditor value={data ?? ""} onChange={update} language={language} filePath={path} />
 		</Suspense>
 	);
@@ -39,7 +33,10 @@ export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: Edito
 		return <EditorWithMonaco path={path} />;
 	}
 
-	if (path.startsWith("content")) {
+	if (
+		path.startsWith("content") &&
+		(path.endsWith("blocks") || path.endsWith("items") || path.endsWith("liquids") || path.endsWith("units"))
+	) {
 		return <ContentList path={path} />;
 	}
 
