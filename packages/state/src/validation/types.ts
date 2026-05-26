@@ -31,6 +31,7 @@ export interface ValidationResult {
   messageParams?: Record<string, string | number>;
   line?: number;
   column?: number;
+  field?: string;
   code?: string;
 }
 

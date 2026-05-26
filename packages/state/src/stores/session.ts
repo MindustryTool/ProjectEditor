@@ -23,9 +23,13 @@ function evictLRU(entries: RecentFileEntry[]): RecentFileEntry[] {
 }
 
 function touchEntry(entries: RecentFileEntry[], path: string, now: number): RecentFileEntry[] {
-	const filtered = entries.filter((e) => e.path !== path);
-	const updated: RecentFileEntry[] = [{ path, lastAccessedAt: now }, ...filtered];
-	return evictLRU(updated);
+	const idx = entries.findIndex((e) => e.path === path);
+	if (idx >= 0) {
+		const updated = [...entries];
+		updated[idx] = { ...updated[idx]!, lastAccessedAt: now };
+		return evictLRU(updated);
+	}
+	return evictLRU([...entries, { path, lastAccessedAt: now }]);
 }
 
 function removeEntry(entries: RecentFileEntry[], path: string): RecentFileEntry[] {

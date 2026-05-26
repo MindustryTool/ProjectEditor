@@ -1,7 +1,5 @@
 import { lazy, memo, Suspense, useEffect } from "react";
 import { useFileContent, useProjectSession } from "@project/state";
-import { useTranslation } from "react-i18next";
-import { Panel } from "./Panel";
 import { ContentList } from "#/components/editor/center/ContentList";
 import { getLanguageFromPath } from "~/lib/monaco/languageMap";
 import { RecentlyOpenedFilesBar } from "./recently-opened/RecentlyOpenedFilesBar";
@@ -24,8 +22,6 @@ function EditorWithMonaco({ path }: { path: string }) {
 }
 
 function EditorContent({ path }: { path: string }) {
-	const { t } = useTranslation();
-
 	if (path === "mod.hjson" || (path.startsWith("content") && path.endsWith(".json"))) {
 		return <EditorWithMonaco path={path} />;
 	}
@@ -37,11 +33,7 @@ function EditorContent({ path }: { path: string }) {
 		return <ContentList path={path} />;
 	}
 
-	return (
-		<Panel header={t("editor.editor")}>
-			<div className="flex h-full items-center justify-center text-xs text-muted-foreground">{path}</div>
-		</Panel>
-	);
+	return <div className="flex h-full items-center justify-center text-xs text-muted-foreground">{path}</div>;
 }
 
 export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: EditorCenterPanelProps) {
@@ -57,9 +49,7 @@ export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: Edito
 	return (
 		<div className="flex min-h-0 flex-1 flex-col">
 			{path && projectContext && <RecentlyOpenedFilesBar />}
-			<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-				{path === null ? null : <EditorContent path={path} />}
-			</div>
+			<div className="flex min-h-0 flex-1 flex-col overflow-hidden">{path === null ? null : <EditorContent path={path} />}</div>
 		</div>
 	);
 });

@@ -10,6 +10,7 @@ import { Field, FieldContent, FieldLabel, FieldDescription } from "~/components/
 import { ModHjsonSchema, ModNameSchema, defaultModHjson, type ModHjsonData } from "@project/validation";
 import { useEffect, useRef } from "react";
 import { useFileContent } from "@project/state";
+import { Panel } from "@/components/editor/Panel";
 
 function parseModHjson(data: string): ModHjsonData {
 	let name: string = "";
@@ -181,7 +182,7 @@ export function ModHjsonPanel({ path }: ModHjsonEditorProps) {
 	];
 
 	return (
-		<div className="flex h-full flex-col overflow-auto px-4 py-4">
+		<Panel>
 			<form
 				className="flex flex-col gap-4"
 				onChange={() => {
@@ -340,6 +341,6 @@ export function ModHjsonPanel({ path }: ModHjsonEditorProps) {
 					}}
 				</form.Field>
 			</form>
-		</div>
+		</Panel>
 	);
 }
