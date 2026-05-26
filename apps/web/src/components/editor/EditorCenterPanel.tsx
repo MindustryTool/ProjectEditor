@@ -1,5 +1,5 @@
 import { lazy, memo, Suspense, useEffect, useMemo } from "react";
-import { useFileContent, useProjectSession } from "@project/state";
+import { useFileContentString, useProjectSession } from "@project/state";
 import { ContentList } from "#/components/editor/center/ContentList";
 import { getLanguageFromPath } from "~/lib/monaco/languageMap";
 import { RecentlyOpenedFilesBar } from "./recently-opened/RecentlyOpenedFilesBar";
@@ -11,7 +11,7 @@ interface EditorCenterPanelProps {
 }
 
 function EditorWithMonaco({ path }: { path: string }) {
-	const { data, write } = useFileContent(path);
+	const { data, write } = useFileContentString(path);
 	const language = getLanguageFromPath(path);
 
 	return (

@@ -94,9 +94,10 @@ export const useFileContentStore = create<FileContentStore>()((set, get) => ({
     const key = cacheKey(projectId, path);
     const existing = lruMap.get(key);
     const nextVersion = (existing?.currentVersion ?? 0) + 1;
+    const data = typeof content === "string" ? new TextEncoder().encode(content).buffer as ArrayBuffer : content;
 
     lruMap.set(key, {
-      data: content,
+      data,
       currentVersion: nextVersion,
       savedVersion: existing?.savedVersion ?? 0,
       savedAt: existing?.savedAt ?? null,
@@ -225,7 +226,7 @@ export const useFileContentStore = create<FileContentStore>()((set, get) => ({
     touchLRU(key);
     set({ fileContents: buildFileContents() });
 
-    fs.readTextFile(path).then(
+    fs.readFile(path).then(
       (data) => {
         if (controller.signal.aborted) return;
         const current = lruMap.get(key);
@@ -250,7 +251,7 @@ export const useFileContentStore = create<FileContentStore>()((set, get) => ({
 
         if (err instanceof Error && err.name === "NotFoundError") {
           lruMap.set(key, {
-            data: "",
+            data: new ArrayBuffer(0),
             currentVersion: versionAtStart,
             savedVersion: versionAtStart,
             savedAt: Date.now(),

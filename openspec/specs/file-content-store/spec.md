@@ -4,11 +4,11 @@ The system SHALL provide a Zustand store slice within `@project/state` that cach
 
 #### Scenario: Store holds file contents with version pair
 - **WHEN** the store slice is initialized
-- **THEN** it SHALL expose a `fileContents` record mapping cache keys (string) to entries containing `data` (string | null), `currentVersion` (number), `savedVersion` (number), `savedAt` (number | null), `error` (string | null), and `loading` (boolean)
+- **THEN** it SHALL expose a `fileContents` record mapping cache keys (string) to entries containing `data` (`ArrayBuffer | null | undefined`), `currentVersion` (number), `savedVersion` (number), `savedAt` (number | null), `error` (string | null), and `loading` (boolean)
 
 #### Scenario: writeBuffer sets buffer content
-- **WHEN** `writeBuffer("mod.hjson", '{"name":"test"}')` is called
-- **THEN** `data` SHALL be set to the content, `currentVersion` SHALL increment by 1, `savedVersion` SHALL remain unchanged, `error` SHALL be cleared, and `loading` SHALL be set to `false`
+- **WHEN** `writeBuffer("mod.hjson", '{"name":"test"}')` is called with text content
+- **THEN** `data` SHALL be set to the `TextEncoder.encode()` result (an `ArrayBuffer`), `currentVersion` SHALL increment by 1, `savedVersion` SHALL remain unchanged, `error` SHALL be cleared, and `loading` SHALL be set to `false`
 
 #### Scenario: markPersisted syncs savedVersion
 - **WHEN** `markPersisted("mod.hjson")` is called
@@ -27,18 +27,18 @@ The system SHALL provide a `useFileContent(path)` React hook that returns `{ dat
 
 #### Scenario: Returns derived state
 - **WHEN** the hook is called with `"mod.hjson"`
-- **THEN** it SHALL return `{ data: string | null, currentVersion: number, savedVersion: number, savedAt: number | null, error: string | null, isDirty: boolean, isSaving: boolean, isLoading: boolean, isError: boolean, update: (content: string) => void }`
+- **THEN** it SHALL return `{ data: ArrayBuffer | null, currentVersion: number, savedVersion: number, savedAt: number | null, error: string | null, isDirty: boolean, isSaving: boolean, isLoading: boolean, isError: boolean, update: (content: ArrayBuffer | string) => void }`
 
 #### Scenario: Loads from disk on first access
 - **WHEN** the hook is called with a path that has no cached entry
-- **THEN** it SHALL call `ProjectFileSystem.readTextFile(path)` and populate the cache
+- **THEN** it SHALL call `ProjectFileSystem.readFile(path)` and populate the cache
 
 #### Scenario: Sets loading flag during fetch
 - **WHEN** the file is being loaded from disk
 - **THEN** `isLoading` SHALL be `true` until the read completes
 
 #### Scenario: Sets error on read failure
-- **WHEN** `readTextFile` throws an error
+- **WHEN** `readFile` throws an error
 - **THEN** `error` SHALL be set and `isError` SHALL be `true`
 
 #### Scenario: Stale read result discarded
@@ -102,12 +102,12 @@ The file-content-store SHALL provide a `readFile(projectId, path, fs)` action th
 
 #### Scenario: readFile loads from disk without resetting version
 - **WHEN** `readFile(projectId, "mod.hjson", fs)` is called
-- **THEN** the store SHALL set `loading` to `true`, call `ProjectFileSystem.readTextFile("mod.hjson")`, and on success set `data` to the file content, set `loading` to `false`, and set `savedVersion = currentVersion` (currentVersion is NOT reset)
+- **THEN** the store SHALL set `loading` to `true`, call `ProjectFileSystem.readFile("mod.hjson")`, and on success set `data` to the `ArrayBuffer` content, set `loading` to `false`, and set `savedVersion = currentVersion` (currentVersion is NOT reset)
 - **AND** if a previous read for the same path is in-flight, it SHALL be aborted
 
 #### Scenario: readFile handles not found
-- **WHEN** `readTextFile` throws a `NotFoundError`
-- **THEN** the store SHALL set `data` to empty string, `loading` to `false`, and `savedVersion = currentVersion`
+- **WHEN** `ProjectFileSystem.readFile` throws a `NotFoundError`
+- **THEN** the store SHALL set `data` to an empty `ArrayBuffer` (byte length 0), `loading` to `false`, and `savedVersion = currentVersion`
 
 #### Scenario: readFile discards stale results
 - **WHEN** a read completes but `currentVersion` has been incremented since the read started
@@ -205,3 +205,10 @@ The file-content-store SHALL export selector factory functions that encapsulate 
 #### Scenario: getEntry returns entry directly via getState
 - **WHEN** `getEntry(projectId, path)` is called
 - **THEN** it SHALL return the entry at `fileContents[cacheKey(projectId, path)]` using `useFileContentStore.getState()`
+
+### Requirement: FileContentEntry data defaults to undefined for uncached entries
+The system SHALL represent uncached (not-yet-loaded) entries as `undefined` in the store's `fileContents` record, while loaded entries use `ArrayBuffer | null`.
+
+#### Scenario: Uncached entry returns undefined
+- **WHEN** `selectEntry(projectId, path)` is called for a path that has never been loaded
+- **THEN** the selector SHALL return `undefined`

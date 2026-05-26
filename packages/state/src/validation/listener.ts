@@ -14,7 +14,13 @@ function extractPath(compositeKey: string): string {
   return idx >= 0 ? compositeKey.slice(idx + 2) : compositeKey;
 }
 
-function scheduleValidation(compositeKey: string, content: string) {
+function decodeContent(data: ArrayBuffer | null | undefined): string {
+  if (data == null) return "";
+  if (data.byteLength === 0) return "";
+  return new TextDecoder().decode(data);
+}
+
+function scheduleValidation(compositeKey: string, data: ArrayBuffer | null | undefined) {
   const path = extractPath(compositeKey);
   const existing = debounceTimers.get(path);
   if (existing) clearTimeout(existing);
@@ -25,6 +31,7 @@ function scheduleValidation(compositeKey: string, content: string) {
       debounceTimers.delete(path);
 
       try {
+        const content = decodeContent(data);
         const results = runner.validate(path, content);
         useValidationStore.getState().setResults(path, results);
       } catch (err) {
@@ -53,7 +60,7 @@ export function registerValidationListener() {
       const currEntry = curr[key]!;
       const prevEntry = prev[key];
       if (currEntry.currentVersion !== (prevEntry?.currentVersion ?? 0)) {
-        scheduleValidation(key, currEntry.data ?? "");
+        scheduleValidation(key, currEntry.data);
       }
     }
 

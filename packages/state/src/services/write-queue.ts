@@ -2,7 +2,7 @@ import type { ProjectFileSystem } from "@project/fs";
 
 interface PendingWrite {
   path: string;
-  content: string;
+  content: ArrayBuffer | string;
   version: number;
   resolve: () => void;
   reject: (err: unknown) => void;
@@ -25,7 +25,7 @@ export class WriteQueue {
     this.debounceMs = options?.debounceMs ?? 500;
   }
 
-  enqueue(path: string, content: string, version: number): Promise<void> {
+  enqueue(path: string, content: ArrayBuffer | string, version: number): Promise<void> {
     if (this.disposed) return Promise.resolve();
 
     const existing = this.pending.get(path);
@@ -57,7 +57,11 @@ export class WriteQueue {
     await Promise.all(
       batch.map(async (write) => {
         try {
-          await this.fs.writeTextFile(write.path, write.content);
+          if (typeof write.content === "string") {
+            await this.fs.writeTextFile(write.path, write.content);
+          } else {
+            await this.fs.writeFile(write.path, write.content);
+          }
           write.resolve();
         } catch (err) {
           write.reject(err);

@@ -4,7 +4,7 @@ import { useProjectSession } from "../stores/session";
 import { getWriteQueue, disposeWriteQueue } from "../services/write-queue";
 
 export interface UseFileContentResult {
-	data: string | null;
+	data: ArrayBuffer | null;
 	currentVersion: number;
 	savedVersion: number;
 	savedAt: number | null;
@@ -13,7 +13,7 @@ export interface UseFileContentResult {
 	isSaving: boolean;
 	isLoading: boolean;
 	isError: boolean;
-	write: (content: string) => void;
+	write: (content: ArrayBuffer | string) => void;
 }
 
 export function useFileContent(path: string): UseFileContentResult {
@@ -41,7 +41,7 @@ export function useFileContent(path: string): UseFileContentResult {
 	}, [projectId]);
 
 	const write = useCallback(
-		(content: string) => {
+		(content: ArrayBuffer | string) => {
 			if (!projectId || !projectContext) return;
 
 			const store = useFileContentStore.getState();

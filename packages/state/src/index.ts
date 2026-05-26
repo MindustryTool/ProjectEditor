@@ -12,6 +12,8 @@ export { useFileContentStore, isDirty, selectEntry, selectIsSaving } from "./sto
 export { WriteQueue, getWriteQueue, disposeWriteQueue } from "./services/write-queue";
 export type { UseFileContentResult } from "./hooks/use-file-content";
 export { useFileContent } from "./hooks/use-file-content";
+export type { UseFileContentStringResult } from "./hooks/use-file-content-string";
+export { useFileContentString } from "./hooks/use-file-content-string";
 export { registerValidationListener } from "./validation/listener";
 
 export { Severity, severityLabel, isErrorOrWarning } from "./validation/types";

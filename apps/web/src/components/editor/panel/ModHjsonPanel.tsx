@@ -9,7 +9,7 @@ import { FormField, FormLabel, FormControl, FormDescription, FormMessage } from 
 import { Field, FieldContent, FieldLabel, FieldDescription } from "~/components/ui/field";
 import { ModHjsonSchema, ModNameSchema, defaultModHjson, type ModHjsonData } from "@project/validation";
 import { useEffect, useRef } from "react";
-import { useFileContent } from "@project/state";
+import { useFileContentString } from "@project/state";
 import { Panel } from "@/components/editor/Panel";
 
 function toHjson(data: ModHjsonData): string {
@@ -51,7 +51,7 @@ interface ModHjsonEditorProps {
 
 export function ModHjsonPanel({ path }: ModHjsonEditorProps) {
 	const { t } = useTranslation();
-	const { data, isLoading, write } = useFileContent(path);
+	const { data, isLoading, write } = useFileContentString(path);
 	const linesRef = useRef<string[]>([]);
 	const prevValuesRef = useRef<ModHjsonData>({ ...defaultModHjson });
 

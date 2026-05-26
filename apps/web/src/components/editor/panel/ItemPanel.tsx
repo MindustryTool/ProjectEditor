@@ -1,6 +1,6 @@
 import { Panel } from "@/components/editor/Panel";
 import { FieldRenderer, type Field } from "#/components/editor/panel/FieldRenderer";
-import { useFileContent } from "@project/state";
+import { useFileContentString } from "@project/state";
 import { useEffect, useState } from "react";
 import { SpritePicker } from "#/components/editor/panel/SpritePicker";
 
@@ -9,7 +9,7 @@ interface ItemPanelProps {
 }
 
 export function ItemPanel({ path }: ItemPanelProps) {
-	const { data, isLoading, write } = useFileContent(path);
+	const { data, isLoading, write } = useFileContentString(path);
 	const [values, setValues] = useState<Record<string, string>>({});
 
 	useEffect(() => {

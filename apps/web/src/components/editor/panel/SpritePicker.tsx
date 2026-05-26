@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useCurrentProject, useProjectSession } from "@project/state";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCurrentProject, useProjectSession, useFileContent } from "@project/state";
 import { Button } from "#/components/ui/button";
 import { FormControl, FormField, FormLabel } from "#/components/ui/form";
 import { resolveContentSprite, findFileInTree } from "~/lib/utils";
@@ -28,32 +28,8 @@ export function SpritePicker({ path }: SpritePickerProps) {
 
 function SpriteViewer({ path: spritePath }: { path: string }) {
 	const { fs } = useCurrentProject();
-	const [data, setData] = useState<ArrayBuffer | null>(null);
-	const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
-	const [error, setError] = useState<string | null>(null);
+	const { data, isLoading, isError, error, write } = useFileContent(spritePath);
 	const inputRef = useRef<HTMLInputElement>(null);
-
-	useEffect(() => {
-		let cancelled = false;
-		setStatus("loading");
-		setError(null);
-
-		fs.readFile(spritePath)
-			.then((buf) => {
-				if (cancelled) return;
-				setData(buf);
-				setStatus("loaded");
-			})
-			.catch((e) => {
-				if (cancelled) return;
-				setError(e instanceof Error ? e.message : "Failed to load sprite");
-				setStatus("error");
-			});
-
-		return () => {
-			cancelled = true;
-		};
-	}, [fs, spritePath]);
 
 	const objectUrl = useMemo(() => {
 		if (!data) return null;
@@ -75,25 +51,22 @@ function SpriteViewer({ path: spritePath }: { path: string }) {
 		async (e: React.ChangeEvent<HTMLInputElement>) => {
 			const file = e.target.files?.[0];
 			if (!file) return;
-
 			const buf = await file.arrayBuffer();
-			await fs.writeFile(spritePath, buf);
-			setData(buf);
+			write(buf);
 			e.target.value = "";
 		},
-		[fs, spritePath],
+		[write],
 	);
 
 	const handleRemove = useCallback(async () => {
 		await fs.delete(spritePath);
-		setData(null);
 	}, [fs, spritePath]);
 
-	if (status === "loading") {
+	if (isLoading) {
 		return <p className="text-sm text-muted-foreground">Loading sprite...</p>;
 	}
 
-	if (status === "error") {
+	if (isError) {
 		return (
 			<div className="flex flex-col items-center gap-3 py-4">
 				<File className="text-destructive w-16 h-16" strokeWidth={1} />
