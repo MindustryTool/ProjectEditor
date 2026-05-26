@@ -110,7 +110,7 @@ export class ProjectFileSystem {
 		const scopedDir = this.scopePath(dir);
 
 		if (!recursive) {
-			return this.vfs.readdir(scopedDir);
+			return this.readdir(scopedDir);
 		}
 
 		const results: FileEntry[] = [];
@@ -118,7 +118,7 @@ export class ProjectFileSystem {
 		const walk = async (currentScopedDir: string): Promise<void> => {
 			const entries = await this.vfs.readdir(currentScopedDir);
 			for (const entry of entries) {
-				results.push(entry);
+				results.push({ ...entry, path: this.unscopePath(entry.path) });
 				if (entry.kind === "directory") {
 					await walk(entry.path);
 				}
@@ -126,7 +126,7 @@ export class ProjectFileSystem {
 		};
 
 		await walk(scopedDir);
-		return results.map((f) => ({ ...f, path: this.unscopePath(f.path) }));
+		return results;
 	}
 
 	async stat(path: string): Promise<FileStat> {
@@ -200,9 +200,15 @@ export async function createProjectFileSystem(
 	options: ProjectFileSystemOptions,
 ): Promise<ProjectFileSystem> {
 	const vfs = await createOPFSAdapter();
-	const fs = new ProjectFileSystem(projectInfo, vfs, events, {
-		onTreeSnapshotChange: options.onTreeSnapshotChange,
-	}, jsonProjectTree);
+	const fs = new ProjectFileSystem(
+		projectInfo,
+		vfs,
+		events,
+		{
+			onTreeSnapshotChange: options.onTreeSnapshotChange,
+		},
+		jsonProjectTree,
+	);
 
 	const rootExists = await fs.exists("/");
 	if (!rootExists) {
@@ -383,6 +389,7 @@ export class OPFSAdapter implements VirtualFileSystem {
 
 	async rename(oldPath: string, newPath: string): Promise<void> {
 		try {
+			if (oldPath === newPath) return;
 			const data = await this.readFile(oldPath);
 			await this.writeFile(newPath, data);
 			await this.delete(oldPath);
