@@ -28,9 +28,7 @@ export function ItemPanel({ path }: ItemPanelProps) {
 
 		try {
 			setValues(JSON.parse(data));
-		} catch (e) {
-			console.error("Failed to parse item data", e);
-		}
+		} catch {}
 	}, [data]);
 
 	const fields = [

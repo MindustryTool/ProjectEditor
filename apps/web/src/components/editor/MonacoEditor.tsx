@@ -54,7 +54,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 
 			markers.push({
 				severity: monacoSeverity as editor.IMarkerData["severity"],
-				message: t(r.messageKey, r.messageParams),
+				message: t(r.messageKey as any, r.messageParams),
 				startLineNumber: r.line,
 				startColumn: r.column ?? 1,
 				endLineNumber: r.line,

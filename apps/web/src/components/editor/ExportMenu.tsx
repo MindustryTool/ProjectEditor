@@ -155,7 +155,7 @@ export function ExportMenu({ className }: ExportMenuProps) {
 							{allErrors.map((err, i) => (
 								<div key={i} className="flex gap-2 rounded bg-destructive/10 p-1.5 text-xs">
 									<span className="shrink-0 font-medium text-destructive">{err.filePath}</span>
-									<span className="text-muted-foreground">{t(err.messageKey, err.messageParams)}</span>
+									<span className="text-muted-foreground">{t(err.messageKey as any, err.messageParams)}</span>
 								</div>
 							))}
 						</div>

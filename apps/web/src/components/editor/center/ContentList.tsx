@@ -1,5 +1,5 @@
-import { useCurrentProject } from "@project/state";
-import React, { useEffect, type ReactNode } from "react";
+import { useCurrentProject, useFileContent } from "@project/state";
+import React, { useEffect, useMemo, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useQueryState } from "nuqs";
 import { File, Folder } from "lucide-react";
@@ -37,7 +37,7 @@ export function ContentList({ path }: { path: string }) {
 	}
 
 	return (
-		<div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-2 p-2 w-full mb-auto">
+		<div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-2 w-full mb-auto p-2">
 			<CreateNewContentDialog />
 			{data?.map((entry) => (
 				<Item key={entry.path} onClick={() => setPath(entry.path)}>
@@ -58,14 +58,30 @@ export function ContentList({ path }: { path: string }) {
 }
 
 function SpritePreview({ path }: { path: string }) {
-	const [error, setError] = useState<boolean>();
-	const src = resolveContentSprite(path);
+	const spritePath = resolveContentSprite(path);
+	const { data, isLoading, isError } = useFileContent(spritePath ?? "");
 
-	if (error || src === null) {
+	const objectUrl = useMemo(() => {
+		if (!data) return null;
+		const blob = new Blob([data], { type: "image/png" });
+		return URL.createObjectURL(blob);
+	}, [data]);
+
+	useEffect(() => {
+		return () => {
+			if (objectUrl) URL.revokeObjectURL(objectUrl);
+		};
+	}, [objectUrl]);
+
+	if (spritePath === null || isError || isLoading || !data || data.byteLength === 0) {
 		return <File className="text-muted-foreground w-full h-full" strokeWidth={1} />;
 	}
 
-	return <img className="object-contain text-xs w-full h-full" src={src} alt={path} onError={() => setError(true)} />;
+	if (objectUrl === null) {
+		return <div className="flex h-full w-full" />;
+	}
+
+	return <img className="object-cover text-xs w-full h-full" src={objectUrl} alt={path} />;
 }
 
 function Item({ className, children, ...props }: React.ComponentProps<"button">) {
@@ -78,7 +94,7 @@ function Item({ className, children, ...props }: React.ComponentProps<"button">)
 
 function ItemPreview({ children }: { children: ReactNode }) {
 	return (
-		<div className="flex flex-col w-full items-center rounded-md bg-background border border-border p-2 aspect-square hover:bg-accent transition-colors">
+		<div className="flex flex-col w-full items-center rounded-md bg-background border border-border overflow-hidden aspect-square hover:bg-accent hover:ring transition-colors">
 			{children}
 		</div>
 	);
