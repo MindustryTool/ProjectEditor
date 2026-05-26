@@ -9,7 +9,7 @@ function cacheKey(projectId: string, path: string): string {
 }
 
 export interface FileContentEntry {
-  data: string | null;
+  data: ArrayBuffer | null | undefined;
   currentVersion: number;
   savedVersion: number;
   savedAt: number | null;
@@ -48,7 +48,7 @@ const eventUnsubs = new Map<string, () => void>();
 export interface FileContentStore {
   fileContents: Record<string, FileContentEntry>;
   savingPaths: string[];
-  writeBuffer: (projectId: string, path: string, content: string) => void;
+  writeBuffer: (projectId: string, path: string, content: ArrayBuffer | string) => void;
   markPersisted: (projectId: string, path: string) => void;
   setBufferError: (projectId: string, path: string, error: string) => void;
   markSaving: (projectId: string, path: string) => void;

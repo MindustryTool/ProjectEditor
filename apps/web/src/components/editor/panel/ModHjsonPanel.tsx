@@ -12,59 +12,6 @@ import { useEffect, useRef } from "react";
 import { useFileContent } from "@project/state";
 import { Panel } from "@/components/editor/Panel";
 
-function parseModHjson(data: string): ModHjsonData {
-	let name: string = "";
-	let displayName: string = "";
-	let author: string = "";
-	let description: string = "";
-	let version: string = "";
-	let minGameVersion: string = "";
-	let dependencies: string[] = [];
-	let hidden: boolean = false;
-
-	const lines = data.split("\n");
-	for (const line of lines) {
-		try {
-			if (line.startsWith("name:")) {
-				name = line.split(":")[1]!.trimStart();
-			} else if (line.startsWith("displayName:")) {
-				displayName = line.split(":")[1]!.trimStart();
-			} else if (line.startsWith("author:")) {
-				author = line.split(":")[1]!.trimStart();
-			} else if (line.startsWith("description:")) {
-				description = line.split(":")[1]!.trimStart();
-			} else if (line.startsWith("version:")) {
-				version = line.split(":")[1]!.trimStart();
-			} else if (line.startsWith("minGameVersion:")) {
-				minGameVersion = line.split(":")[1]!.trimStart();
-			} else if (line.startsWith("dependencies:")) {
-				dependencies = line
-					.replaceAll("[", "")
-					.replaceAll("]", "")
-					.split(":")[1]!
-					.trimStart()
-					.split(",")
-					.map((dep) => dep.trim());
-			} else if (line.startsWith("hidden:")) {
-				hidden = line.split(":")[1]!.trimStart() === "true";
-			}
-		} catch (e) {
-			console.error(e);
-		}
-	}
-
-	return {
-		name,
-		displayName,
-		author,
-		description,
-		version,
-		minGameVersion,
-		dependencies,
-		hidden,
-	};
-}
-
 function toHjson(data: ModHjsonData): string {
 	let result = `name: ${data.name.trimStart()}\n`;
 	result += `displayName: ${data.displayName.trimStart()}\n`;
@@ -104,7 +51,7 @@ interface ModHjsonEditorProps {
 
 export function ModHjsonPanel({ path }: ModHjsonEditorProps) {
 	const { t } = useTranslation();
-	const { data, isLoading, update } = useFileContent(path);
+	const { data, isLoading, write } = useFileContent(path);
 	const linesRef = useRef<string[]>([]);
 	const prevValuesRef = useRef<ModHjsonData>({ ...defaultModHjson });
 
@@ -126,16 +73,9 @@ export function ModHjsonPanel({ path }: ModHjsonEditorProps) {
 			linesRef.current = content.split("\n");
 			prevValuesRef.current = { ...defaultModHjson };
 			form.reset(defaultModHjson);
-			update(content);
-			return;
+			write(content);
 		}
-
-		const parsed = parseModHjson(data);
-		linesRef.current = data.split("\n");
-		prevValuesRef.current = { ...parsed };
-		form.reset(parsed);
-		form.validateAllFields("blur");
-	}, [data, isLoading, update]);
+	}, [data, isLoading, write]);
 
 	const fields: {
 		name: keyof ModHjsonData;
@@ -200,7 +140,7 @@ export function ModHjsonPanel({ path }: ModHjsonEditorProps) {
 					}
 					prevValuesRef.current = { ...current };
 					linesRef.current = replaceLine(linesRef.current, changedKey, lineValue);
-					update(linesRef.current.join("\n"));
+					write(linesRef.current.join("\n"));
 				}}
 			>
 				{fields.map((field) => (
@@ -306,7 +246,7 @@ export function ModHjsonPanel({ path }: ModHjsonEditorProps) {
 							const filtered = newDeps.filter((d: string) => d.trim() !== "");
 							const lineValue = filtered.length > 0 ? `[${filtered.join(",")}]` : "[]";
 							linesRef.current = replaceLine(linesRef.current, "dependencies", lineValue);
-							update(linesRef.current.join("\n"));
+							write(linesRef.current.join("\n"));
 							prevValuesRef.current.dependencies = newDeps;
 						};
 

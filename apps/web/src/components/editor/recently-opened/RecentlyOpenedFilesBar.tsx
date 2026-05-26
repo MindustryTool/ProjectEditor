@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useQueryState } from "nuqs";
 import { X } from "lucide-react";
 import { useProjectSession, useCurrentProject } from "@project/state";
@@ -9,16 +9,23 @@ export function RecentlyOpenedFilesBar() {
 	const [path, setPath] = useQueryState("path");
 	const projectId = context.project.id;
 
+	const treeSnapshot = useProjectSession((state) => state.treeSnapshot);
 	const recentFiles = useProjectSession((state) => state.recentlyOpenedFiles[projectId] ?? []);
 	const recordFileAccess = useProjectSession((state) => state.recordFileAccess);
 	const removeFromRecentFiles = useProjectSession((state) => state.removeFromRecentFiles);
 
+	const filePaths = useMemo(() => {
+		return new Set(treeSnapshot.filter((e) => e.kind === "file").map((e) => e.path));
+	}, [treeSnapshot]);
+
 	const handleTabClick = useCallback(
 		(filePath: string) => {
-			recordFileAccess(projectId, filePath);
+			if (filePaths.has(filePath)) {
+				recordFileAccess(projectId, filePath);
+			}
 			setPath(filePath);
 		},
-		[projectId, recordFileAccess, setPath],
+		[projectId, recordFileAccess, setPath, filePaths],
 	);
 
 	const handleClose = useCallback(

@@ -3,7 +3,7 @@ import React, { useEffect, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useQueryState } from "nuqs";
 import { File, Folder } from "lucide-react";
-import { cn, resolveJsonContentImage } from "~/lib/utils";
+import { cn, resolveContentSprite } from "~/lib/utils";
 import { Button } from "#/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
 import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from "#/components/ui/input-group";
@@ -59,7 +59,7 @@ export function ContentList({ path }: { path: string }) {
 
 function SpritePreview({ path }: { path: string }) {
 	const [error, setError] = useState<boolean>();
-	const src = resolveJsonContentImage(path);
+	const src = resolveContentSprite(path);
 
 	if (error || src === null) {
 		return <File className="text-muted-foreground w-full h-full" strokeWidth={1} />;

@@ -2,13 +2,14 @@ import { Panel } from "@/components/editor/Panel";
 import { FieldRenderer, type Field } from "#/components/editor/panel/FieldRenderer";
 import { useFileContent } from "@project/state";
 import { useEffect, useState } from "react";
+import { SpritePicker } from "#/components/editor/panel/SpritePicker";
 
 interface ItemPanelProps {
 	path: string;
 }
 
 export function ItemPanel({ path }: ItemPanelProps) {
-	const { data, isLoading, update } = useFileContent(path);
+	const { data, isLoading, write } = useFileContent(path);
 	const [values, setValues] = useState<Record<string, string>>({});
 
 	useEffect(() => {
@@ -87,12 +88,13 @@ export function ItemPanel({ path }: ItemPanelProps) {
 		} else {
 			newValue[field] = value;
 		}
-		update(JSON.stringify(newValue, null, 4));
+		write(JSON.stringify(newValue, null, 4));
 	}
 
 	return (
 		<Panel>
 			<div className="space-y-4">
+				<SpritePicker path={path} />
 				<FieldRenderer fields={fields} values={values} updater={handleUpdate} />
 			</div>
 		</Panel>

@@ -1,4 +1,4 @@
-import { lazy, memo, Suspense, useEffect } from "react";
+import { lazy, memo, Suspense, useEffect, useMemo } from "react";
 import { useFileContent, useProjectSession } from "@project/state";
 import { ContentList } from "#/components/editor/center/ContentList";
 import { getLanguageFromPath } from "~/lib/monaco/languageMap";
@@ -11,12 +11,12 @@ interface EditorCenterPanelProps {
 }
 
 function EditorWithMonaco({ path }: { path: string }) {
-	const { data, update } = useFileContent(path);
+	const { data, write } = useFileContent(path);
 	const language = getLanguageFromPath(path);
 
 	return (
 		<Suspense fallback={<div className="flex h-full items-center justify-center text-xs text-muted-foreground">Loading editor...</div>}>
-			<MonacoEditor value={data ?? ""} onChange={update} language={language} filePath={path} />
+			<MonacoEditor value={data ?? ""} onChange={write} language={language} filePath={path} />
 		</Suspense>
 	);
 }
@@ -38,13 +38,18 @@ function EditorContent({ path }: { path: string }) {
 
 export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: EditorCenterPanelProps) {
 	const projectContext = useProjectSession((s) => s.projectContext);
+	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
 	const recordFileAccess = useProjectSession((s) => s.recordFileAccess);
 
+	const filePaths = useMemo(() => {
+		return new Set(treeSnapshot.filter((e) => e.kind === "file").map((e) => e.path));
+	}, [treeSnapshot]);
+
 	useEffect(() => {
-		if (path && projectContext) {
+		if (path && projectContext && filePaths.has(path)) {
 			recordFileAccess(projectContext.project.id, path);
 		}
-	}, [path, projectContext, recordFileAccess]);
+	}, [path, projectContext, filePaths, recordFileAccess]);
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col">

@@ -13,7 +13,7 @@ export interface UseFileContentResult {
 	isSaving: boolean;
 	isLoading: boolean;
 	isError: boolean;
-	update: (content: string) => void;
+	write: (content: string) => void;
 }
 
 export function useFileContent(path: string): UseFileContentResult {
@@ -40,7 +40,7 @@ export function useFileContent(path: string): UseFileContentResult {
 		}
 	}, [projectId]);
 
-	const update = useCallback(
+	const write = useCallback(
 		(content: string) => {
 			if (!projectId || !projectContext) return;
 
@@ -81,6 +81,6 @@ export function useFileContent(path: string): UseFileContentResult {
 		isSaving,
 		isLoading: entry?.loading ?? false,
 		isError: isError(entry),
-		update,
+		write,
 	};
 }

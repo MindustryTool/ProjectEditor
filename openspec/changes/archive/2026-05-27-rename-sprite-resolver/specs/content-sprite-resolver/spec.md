@@ -1,7 +1,11 @@
-## ADDED Requirements
+## RENAMED Requirements
 
-### Requirement: resolveContentSprite resolves sprite path from JSON content path
-The helper function `resolveContentSprite(path: string): string | null` SHALL derive a sprite image path from a content JSON file path.
+### Requirement: resolveJsonContentImage resolves sprite path from JSON content path
+
+**FROM**: `resolveJsonContentImage(path: string): string | null`
+**TO**: `resolveContentSprite(path: string): string | null`
+
+Behavior is unchanged — the function SHALL derive a sprite image path from a content JSON file path.
 
 #### Scenario: Valid content JSON path
 - **WHEN** given a path like `content/items/copper.json`
@@ -16,7 +20,9 @@ The helper function `resolveContentSprite(path: string): string | null` SHALL de
 - **THEN** it returns `null`
 
 ### Requirement: Helper is exported from ~/lib/utils
-The function SHALL be exported from `~/lib/utils` for reuse across the codebase.
+
+**FROM**: `resolveJsonContentImage` exported from `~/lib/utils`
+**TO**: `resolveContentSprite` exported from `~/lib/utils`
 
 #### Scenario: Importable from utils
 - **WHEN** another module imports `resolveContentSprite` from `~/lib/utils`
