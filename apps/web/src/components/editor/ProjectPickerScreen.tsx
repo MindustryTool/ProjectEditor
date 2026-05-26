@@ -72,6 +72,7 @@ export function ProjectPickerScreen() {
 							}}
 						/>
 					</div>
+					{nameError && <p className="text-xs text-destructive">{nameError}</p>}
 					<div className="flex flex-col gap-2">
 						<label className="text-xs font-medium text-muted-foreground">{t("projectPickerScreen.language")}</label>
 						<Select value={newLanguage} onValueChange={(v: ProjectLanguage) => setNewLanguage(v)}>
@@ -87,12 +88,9 @@ export function ProjectPickerScreen() {
 							</SelectContent>
 						</Select>
 					</div>
-					{nameError && <p className="text-xs text-destructive">{nameError}</p>}
 					<Button onClick={handleCreate}>{t("projectPickerScreen.create")}</Button>
 				</div>
-
 				<Separator />
-
 				<div className="space-y-2">
 					<div className="flex items-center gap-2 text-sm font-medium text-foreground">
 						<FolderOpen className="h-4 w-4" />
@@ -107,7 +105,13 @@ export function ProjectPickerScreen() {
 								key={project.id}
 								type="button"
 								className="w-full rounded-md px-3 py-2 text-left text-xs transition-colors border bg-card hover:bg-accent"
-								onClick={() => void openProjectFromRecord(project)}
+								onClick={() => {
+									try {
+										openProjectFromRecord(project);
+									} catch (e) {
+										toast.error(`Failed to open project ${e}`);
+									}
+								}}
 							>
 								<div className="flex items-center gap-2 font-medium text-foreground">
 									{project.name}

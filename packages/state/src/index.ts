@@ -62,7 +62,7 @@ export const useProjectStore = create<ProjectState>()(
 					updatedAt: project.updatedAt,
 				});
 				const events = createEventBus<ProjectEventMap>();
-				const fs = await createProjectFileSystem(project, {
+				const fs = await createProjectFileSystem(project, events, {
 					onTreeSnapshotChange: (snapshot) => {
 						set({ treeSnapshot: snapshot });
 					},
