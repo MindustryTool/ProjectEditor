@@ -202,7 +202,7 @@ export async function createProjectFileSystem(
 	});
 
 	const rootExists = await fs.exists("/");
-	if (rootExists) {
+	if (!rootExists) {
 		await fs.mkdir("/");
 	}
 
@@ -355,12 +355,17 @@ export class OPFSAdapter implements VirtualFileSystem {
 				lastModified: new Date(file.lastModified),
 			};
 		} catch {
-			return {
-				name,
-				kind: "directory",
-				size: 0,
-				lastModified: new Date(0),
-			};
+			try {
+				await dir.getDirectoryHandle(name);
+				return {
+					name,
+					kind: "directory",
+					size: 0,
+					lastModified: new Date(0),
+				};
+			} catch {
+				throw new Error(`Entry not found: ${path}`);
+			}
 		}
 	}
 
