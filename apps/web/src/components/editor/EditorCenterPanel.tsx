@@ -1,9 +1,10 @@
-import { lazy, memo, Suspense } from "react";
-import { useFileContent } from "@project/state";
+import { lazy, memo, Suspense, useEffect } from "react";
+import { useFileContent, useProjectSession } from "@project/state";
 import { useTranslation } from "react-i18next";
 import { Panel } from "./Panel";
 import { ContentList } from "#/components/editor/center/ContentList";
 import { getLanguageFromPath } from "~/lib/monaco/languageMap";
+import { RecentlyOpenedFilesBar } from "./recently-opened/RecentlyOpenedFilesBar";
 
 const MonacoEditor = lazy(() => import("./MonacoEditor").then((m) => ({ default: m.MonacoEditor })));
 
@@ -22,12 +23,8 @@ function EditorWithMonaco({ path }: { path: string }) {
 	);
 }
 
-export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: EditorCenterPanelProps) {
+function EditorContent({ path }: { path: string }) {
 	const { t } = useTranslation();
-
-	if (path === null) {
-		return null;
-	}
 
 	if (path === "mod.hjson" || (path.startsWith("content") && path.endsWith(".json"))) {
 		return <EditorWithMonaco path={path} />;
@@ -44,5 +41,25 @@ export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: Edito
 		<Panel header={t("editor.editor")}>
 			<div className="flex h-full items-center justify-center text-xs text-muted-foreground">{path}</div>
 		</Panel>
+	);
+}
+
+export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: EditorCenterPanelProps) {
+	const projectContext = useProjectSession((s) => s.projectContext);
+	const recordFileAccess = useProjectSession((s) => s.recordFileAccess);
+
+	useEffect(() => {
+		if (path && projectContext) {
+			recordFileAccess(projectContext.project.id, path);
+		}
+	}, [path, projectContext, recordFileAccess]);
+
+	return (
+		<div className="flex min-h-0 flex-1 flex-col">
+			{path && projectContext && <RecentlyOpenedFilesBar />}
+			<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+				{path === null ? null : <EditorContent path={path} />}
+			</div>
+		</div>
 	);
 });

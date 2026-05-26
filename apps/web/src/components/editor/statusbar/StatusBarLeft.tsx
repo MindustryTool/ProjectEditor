@@ -1,9 +1,9 @@
-import { useProjectStore } from "@project/state";
+import { useProjectSession } from "@project/state";
 import { useTranslation } from "react-i18next";
 
 export function StatusBarLeft() {
 	const { t } = useTranslation();
-	const projectName = useProjectStore((state) => state.projectContext?.project.name ?? "");
+	const projectName = useProjectSession((state) => state.projectContext?.project.name ?? "");
 
 	return (
 		<>

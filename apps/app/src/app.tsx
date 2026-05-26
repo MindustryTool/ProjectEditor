@@ -1,9 +1,9 @@
 import { Button } from "./components";
-import { useProjectStore } from "@project/state";
+import { useAppStore, useProjectSession } from "@project/state";
 
 export function App() {
-  const projectContext = useProjectStore((s) => s.projectContext);
-  const createNewProject = useProjectStore((s) => s.createNewProject);
+  const projectContext = useProjectSession((s) => s.projectContext);
+  const createNewProject = useAppStore((s) => s.createNewProject);
 
   return (
     <main>

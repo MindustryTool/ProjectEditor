@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useFileContentStore, isDirty, isError, selectEntry, selectIsSaving, getEntry } from "../stores/file-content";
-import { useProjectStore } from "../index";
+import { useProjectSession } from "../stores/session";
 import { getWriteQueue, disposeWriteQueue } from "../services/write-queue";
 
 export interface UseFileContentResult {
@@ -17,7 +17,7 @@ export interface UseFileContentResult {
 }
 
 export function useFileContent(path: string): UseFileContentResult {
-  const projectContext = useProjectStore((s) => s.projectContext);
+  const projectContext = useProjectSession((s) => s.projectContext);
   const projectId = projectContext?.project.id;
   const entry = useFileContentStore(projectId ? selectEntry(projectId, path) : () => undefined);
   const isSaving = useFileContentStore(projectId ? selectIsSaving(projectId, path) : () => false);

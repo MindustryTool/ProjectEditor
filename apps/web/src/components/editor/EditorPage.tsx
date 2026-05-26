@@ -1,6 +1,6 @@
 import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
-import { useProjectStore } from "@project/state";
+import { useAppStore, useProjectSession } from "@project/state";
 import { getProject } from "@project/storage";
 import { NoProjectScreen } from "./NoProjectScreen";
 import { EditorShell } from "./EditorShell";
@@ -14,9 +14,9 @@ export function EditorPage() {
 	const [loading, setLoading] = useState(0);
 	const { t } = useTranslation();
 
-	const projectContext = useProjectStore((state) => state.projectContext);
-	const lastProjectId = useProjectStore((state) => state.lastProjectId);
-	const hydrated = useProjectStore((state) => state.hydrated);
+	const projectContext = useProjectSession((s) => s.projectContext);
+	const lastProjectId = useAppStore((s) => s.lastProjectId);
+	const hydrated = useAppStore((s) => s.hydrated);
 
 	const { openProjectFromRecord } = useProjectActions();
 

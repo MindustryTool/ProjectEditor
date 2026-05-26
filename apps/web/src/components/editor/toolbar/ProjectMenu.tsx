@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import { cn } from "~/lib/utils";
-import { useProjectStore } from "@project/state";
+import { useProjectSession } from "@project/state";
 import { toast } from "sonner";
 import { ProjectPickerDialog } from "../ProjectPickerDialog";
 import { ProjectSettingsDialog } from "./ProjectSettingsDialog";
@@ -17,7 +17,7 @@ interface ProjectMenuProps {
 
 export function ProjectMenu({ className }: ProjectMenuProps) {
 	const { t } = useTranslation();
-	const hasProject = useProjectStore((state) => state.projectContext !== null);
+	const hasProject = useProjectSession((state) => state.projectContext !== null);
 	const { closeProject, createProject, openProjectFromRecord } = useProjectActions();
 
 	const handleCreateProject = useCallback(

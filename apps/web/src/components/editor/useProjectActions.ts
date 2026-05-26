@@ -1,13 +1,13 @@
 import { useCallback } from "react";
 import { createEventBus, type ProjectInfo, type ProjectLanguage, type ProjectEventMap } from "@project/core";
 import { createProjectFileSystem } from "@project/fs";
-import { useProjectStore } from "@project/state";
+import { useAppStore, useProjectSession } from "@project/state";
 import type { ProjectRecord } from "@project/storage";
 
 export function useProjectActions() {
-	const createNewProject = useProjectStore((state) => state.createNewProject);
-	const setCurrentProject = useProjectStore((state) => state.setCurrentProject);
-	const closeProject = useProjectStore((state) => state.closeProject);
+	const createNewProject = useAppStore((state) => state.createNewProject);
+	const setCurrentProject = useProjectSession((state) => state.setCurrentProject);
+	const closeProject = useProjectSession((state) => state.closeProject);
 
 	const createProject = useCallback(
 		async (name: string, language?: ProjectLanguage) => {
@@ -28,7 +28,7 @@ export function useProjectActions() {
 
 			const events = createEventBus<ProjectEventMap>();
 			const fs = await createProjectFileSystem(project, events, {
-				onTreeSnapshotChange: (snapshot) => useProjectStore.setState({ treeSnapshot: snapshot }),
+				onTreeSnapshotChange: (snapshot) => useProjectSession.setState({ treeSnapshot: snapshot }),
 			});
 
 			setCurrentProject({ project, fs, events });

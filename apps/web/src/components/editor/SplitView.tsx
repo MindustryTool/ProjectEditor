@@ -96,7 +96,7 @@ export function SplitView({
 			)}
 
 			{showCenter && (
-				<div className="flex flex-1 overflow-hidden bg-background w-full items-center justify-center">{center}</div>
+				<div className="flex flex-1 overflow-hidden bg-background w-full">{center}</div>
 			)}
 
 			{showRight && (

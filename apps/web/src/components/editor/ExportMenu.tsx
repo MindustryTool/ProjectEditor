@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { getExporter } from "@project/core";
-import { useProjectStore } from "@project/state";
+import { useProjectSession } from "@project/state";
 import { useValidationStore } from "@project/state";
 import { cn } from "~/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "~/components/ui/dialog";
@@ -22,7 +22,7 @@ interface ExportMenuProps {
 
 export function ExportMenu({ className }: ExportMenuProps) {
 	const { t } = useTranslation();
-	const projectContext = useProjectStore((s) => s.projectContext);
+	const projectContext = useProjectSession((s) => s.projectContext);
 	const validationResults = useValidationStore((s) => s.resultsByPath);
 	const [open, setOpen] = useState(false);
 	const [validationOpen, setValidationOpen] = useState(false);

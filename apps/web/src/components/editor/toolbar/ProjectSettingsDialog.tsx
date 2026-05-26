@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next";
 import { deleteProject, getProject, saveProject } from "@project/storage";
 import { deleteProjectFiles } from "@project/fs";
-import { useProjectStore } from "@project/state";
+import { useProjectSession } from "@project/state";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -33,9 +33,9 @@ interface ProjectSettingsDialogProps {
 
 export function ProjectSettingsDialog({ trigger }: ProjectSettingsDialogProps) {
 	const { t } = useTranslation();
-	const projectContext = useProjectStore((s) => s.projectContext);
-	const updateCurrentProject = useProjectStore((s) => s.updateCurrentProject);
-	const closeProject = useProjectStore((s) => s.closeProject);
+	const projectContext = useProjectSession((s) => s.projectContext);
+	const updateCurrentProject = useProjectSession((s) => s.updateCurrentProject);
+	const closeProject = useProjectSession((s) => s.closeProject);
 	const [name, setName] = useState("");
 	const [nameError, setNameError] = useState<NameError>(null);
 	const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -60,7 +60,7 @@ export function ProjectSettingsDialog({ trigger }: ProjectSettingsDialogProps) {
 
 	const persistName = useCallback(
 		async (projectId: string, nextName: string) => {
-			const ctx = useProjectStore.getState().projectContext;
+			const ctx = useProjectSession.getState().projectContext;
 			if (!ctx || ctx.project.id !== projectId) return;
 			if (ctx.project.name === nextName) return;
 

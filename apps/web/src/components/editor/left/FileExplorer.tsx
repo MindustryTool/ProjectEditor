@@ -3,7 +3,7 @@ import { useQueryState } from "nuqs";
 import { File, Folder, FolderOpen, ChevronRight, ChevronDown, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { isDefaultPath, type FileEntry, type TreeNode } from "@project/fs";
-import { useCurrentProject, useProjectStore, useFileContentStore, isDirty, selectEntry, selectIsSaving } from "@project/state";
+import { useCurrentProject, useProjectSession, useFileContentStore, isDirty, selectEntry, selectIsSaving } from "@project/state";
 import { useValidationStore } from "@project/state";
 import { cn } from "~/lib/utils";
 import {
@@ -24,7 +24,7 @@ interface FileExplorerProps {
 export function FileExplorer({ className }: FileExplorerProps) {
 	const context = useCurrentProject();
 	const [path, setPath] = useQueryState("path");
-	const treeSnapshot = useProjectStore((state) => state.treeSnapshot);
+	const treeSnapshot = useProjectSession((state) => state.treeSnapshot);
 	const projectTree = useMemo(() => buildTreeFromSnapshot(treeSnapshot, context.project.id), [context.project.id, treeSnapshot]);
 
 	const [editingPath, setEditingPath] = useState<string | null>(null);
