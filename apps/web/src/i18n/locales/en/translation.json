@@ -33,6 +33,7 @@
   "projectMenu.openProject": "Open Project",
   "projectMenu.changeProject": "Change Project",
   "projectMenu.projectSettings": "Project Settings",
+  "projectMenu.importProject": "Import Project",
   "projectMenu.closeProject": "Close Project",
   "projectSettings.dialogTitle": "Project Settings",
   "projectSettings.nameLabel": "Project name",

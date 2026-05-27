@@ -33,6 +33,7 @@
   "projectMenu.openProject": "Mở dự án",
   "projectMenu.changeProject": "Đổi dự án",
   "projectMenu.projectSettings": "Cài đặt dự án",
+  "projectMenu.importProject": "Nhập dự án",
   "projectMenu.closeProject": "Đóng dự án",
   "projectSettings.dialogTitle": "Cài đặt dự án",
   "projectSettings.nameLabel": "Tên dự án",

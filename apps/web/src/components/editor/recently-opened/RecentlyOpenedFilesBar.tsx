@@ -4,13 +4,15 @@ import { X } from "lucide-react";
 import { useProjectSession, useCurrentProject } from "@project/state";
 import { cn } from "~/lib/utils";
 
+const EMPTY: never[] = [];
+
 export function RecentlyOpenedFilesBar() {
 	const context = useCurrentProject();
 	const [path, setPath] = useQueryState("path");
 	const projectId = context.project.id;
 
 	const treeSnapshot = useProjectSession((state) => state.treeSnapshot);
-	const recentFiles = useProjectSession((state) => state.recentlyOpenedFiles[projectId] ?? []);
+	const recentFiles = useProjectSession((state) => state.recentlyOpenedFiles[projectId]) ?? EMPTY;
 	const recordFileAccess = useProjectSession((state) => state.recordFileAccess);
 	const removeFromRecentFiles = useProjectSession((state) => state.removeFromRecentFiles);
 
