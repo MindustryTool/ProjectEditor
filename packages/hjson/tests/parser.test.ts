@@ -237,7 +237,7 @@ describe("Parser", () => {
       ) as StructuredObjectNode;
       expect(result.valueOf()).toEqual({ a: 2 });
       const info = result.field("a")!;
-      expect(info.value).toBe(2);
+      expect(info.value.valueOf()).toBe(2);
     });
 
     it("structured parse with legacy root works", () => {

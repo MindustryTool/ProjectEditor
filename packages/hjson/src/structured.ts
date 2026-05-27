@@ -11,6 +11,34 @@ export interface FieldInfo {
 	end: Position;
 	valueStart: Position;
 	valueEnd: Position;
+	/**
+	 * Patches the field's value in the original source string.
+	 */
+	replaceValue(original: string, newValue: string): string;
+}
+
+/**
+ * Creates a FieldInfo object with the required properties and methods.
+ */
+export function createFieldInfo(
+	key: string,
+	value: any,
+	start: Position,
+	end: Position,
+	valueStart: Position,
+	valueEnd: Position,
+): FieldInfo {
+	return {
+		key,
+		value,
+		start,
+		end,
+		valueStart,
+		valueEnd,
+		replaceValue(original: string, newValue: string) {
+			return original.slice(0, valueStart.index) + newValue + original.slice(valueEnd.index);
+		},
+	};
 }
 
 export abstract class StructuredNode {
@@ -94,6 +122,27 @@ export class StructuredObjectNode extends StructuredNode {
 
 	fields(): IterableIterator<FieldInfo> {
 		return this.#fields.values();
+	}
+
+	/**
+	 * Patches a field in the original source string.
+	 * If the field exists, it uses replaceValue.
+	 * If not, it uses insertField.
+	 */
+	patchField(original: string, key: string, newValue: string): string {
+		const info = this.field(key);
+		if (info) {
+			return info.replaceValue(original, newValue);
+		}
+		return this.insertField(original, key, newValue);
+	}
+
+	/**
+	 * Inserts a new field at the end of the original source string.
+	 */
+	insertField(original: string, key: string, newValue: string): string {
+		const suffix = original.length > 0 && !original.endsWith("\n") ? "\n" : "";
+		return original + suffix + `${key}: ${newValue}\n`;
 	}
 }
 

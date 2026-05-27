@@ -14,9 +14,9 @@ import { HJSON, type StructuredObject } from "@project/hjson";
 function serializeValue(key: keyof ModHjsonData, value: unknown): string {
 	if (key === "dependencies") {
 		const deps = (value as string[]).filter((d) => d.trim() !== "");
-		return deps.length > 0 ? `[${deps.join(",")}]` : "[]";
+		return HJSON.stringify(deps);
 	}
-	return String(value ?? "");
+	return HJSON.stringify(value);
 }
 
 const TEXT_FIELDS: {
@@ -93,17 +93,13 @@ export function ModHjsonPanel({ path }: { path: string }) {
 
 		try {
 			const result = HJSON.parseStructured(content) as StructuredObject;
-			const fieldInfo = result.field(key);
 			const newValue = serializeValue(key, value);
-			let newContent: string;
-			if (fieldInfo) {
-				newContent = content.slice(0, fieldInfo.valueStart.index) + newValue + content.slice(fieldInfo.valueEnd.index);
-			} else {
-				newContent = content.trimEnd() + `\n${key}: ${newValue}`;
-			}
+			const newContent = result.patchField(content, key, newValue);
 			contentRef.current = newContent;
 			write(newContent);
-		} catch {
+		} catch (e) {
+			console.error("Failed to patch HJSON:", e);
+			// Fallback to full stringify if surgical update fails completely
 			write(HJSON.stringify({ ...values, [key]: value }, null, 2));
 		}
 	}
