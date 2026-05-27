@@ -11,7 +11,7 @@ import { createProjectFileSystem } from "@project/fs";
 import { toast } from "sonner";
 import { ProjectPickerDialog } from "../ProjectPickerDialog";
 import { ProjectSettingsDialog } from "./ProjectSettingsDialog";
-import { useProjectActions } from "../useProjectActions";
+import { useProjectActions } from "../use-project-actions";
 import type { ProjectRecord } from "@project/state";
 import type { ProjectLanguage } from "@project/core";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "#/components/ui/dialog";
@@ -41,53 +41,56 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 		fileInputRef.current?.click();
 	}, []);
 
-	const handleFileSelected = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (!file) return;
+	const handleFileSelected = useCallback(
+		async (e: React.ChangeEvent<HTMLInputElement>) => {
+			const file = e.target.files?.[0];
+			if (!file) return;
 
-		setImporting(true);
-		setPaths([]);
+			setImporting(true);
+			setPaths([]);
 
-		try {
-			const buffer = await file.arrayBuffer();
-			const result = await importProject(new Uint8Array(buffer));
+			try {
+				const buffer = await file.arrayBuffer();
+				const result = await importProject(new Uint8Array(buffer));
 
-			const project = createProjectInfo(result.name, result.language);
-			await useAppStore.getState().saveProject({
-				id: project.id,
-				name: project.name,
-				language: project.language,
-				createdAt: project.createdAt,
-				updatedAt: project.updatedAt,
-			});
+				const project = createProjectInfo(result.name, result.language);
+				await useAppStore.getState().saveProject({
+					id: project.id,
+					name: project.name,
+					language: project.language,
+					createdAt: project.createdAt,
+					updatedAt: project.updatedAt,
+				});
 
-			const events = createEventBus<ProjectEventMap>();
-			const fs = await createProjectFileSystem(project, events, {
-				onTreeSnapshotChange: (snapshot) => useProjectSession.setState({ treeSnapshot: new TreeSnapshot(snapshot) }),
-			});
+				const events = createEventBus<ProjectEventMap>();
+				const fs = await createProjectFileSystem(project, events, {
+					onTreeSnapshotChange: (snapshot) => useProjectSession.setState({ treeSnapshot: new TreeSnapshot(snapshot) }),
+				});
 
-			const unsubscribe = events.on("file:changed", (path) => {
-				if (path.kind === "write") {
-					setPaths((prev) => [...prev, path.path]);
-				}
-			});
+				const unsubscribe = events.on("file:changed", (path) => {
+					if (path.kind === "write") {
+						setPaths((prev) => [...prev, path.path]);
+					}
+				});
 
-			useProjectSession.getState().setCurrentProject({ project, fs, events });
+				useProjectSession.getState().setCurrentProject({ project, fs, events });
 
-			await fs.writeFiles(result.entries);
+				await fs.writeFiles(result.entries);
 
-			unsubscribe();
+				unsubscribe();
 
-			navigateToProject(project.id);
-			toast.success(`Project imported successfully`);
-		} catch (err) {
-			toast.error(err instanceof Error ? err.message : "Failed to import project");
-		} finally {
-			setImporting(false);
-		}
+				navigateToProject(project.id);
+				toast.success(`Project imported successfully`);
+			} catch (err) {
+				toast.error(err instanceof Error ? err.message : "Failed to import project");
+			} finally {
+				setImporting(false);
+			}
 
-		e.target.value = "";
-	}, [navigateToProject]);
+			e.target.value = "";
+		},
+		[navigateToProject],
+	);
 
 	const handleCreateProject = useCallback(
 		async (name: string, language?: ProjectLanguage) => {

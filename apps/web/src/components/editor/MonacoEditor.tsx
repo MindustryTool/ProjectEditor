@@ -7,7 +7,7 @@ import { useFileContentStore } from "@project/state";
 import { useProjectSession } from "@project/state";
 import { useTranslation } from "react-i18next";
 import { configureMonaco } from "~/lib/monaco/setup";
-import { useMonacoTheme } from "~/lib/monaco/useMonacoTheme";
+import { useMonacoTheme } from "#/lib/monaco/use-monaco-theme";
 
 interface MonacoEditorProps {
 	value: string;

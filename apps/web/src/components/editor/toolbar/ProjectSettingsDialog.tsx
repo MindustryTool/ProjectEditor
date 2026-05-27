@@ -20,7 +20,7 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import { useProjectActions } from "#/components/editor/useProjectActions";
+import { useProjectActions } from "#/components/editor/use-project-actions";
 
 type NameError = "empty" | "invalid" | null;
 
