@@ -8,7 +8,7 @@ import i18n from "../i18n/i18n";
 
 import appCss from "../styles.css?url";
 import { createRootRouteWithContext } from "@tanstack/react-router";
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
 	head: () => ({
@@ -27,6 +27,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 	shellComponent: RootDocument,
 });
 
+const queryClient = new QueryClient();
+
 function RootDocument({ children }: { children: React.ReactNode }) {
 	const lang = i18n.language?.startsWith("vi") ? "vi" : "en";
 	return (
@@ -36,11 +38,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body className="flex min-h-screen flex-col font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)]">
 				<main className="flex flex-1 flex-col">
-					<NuqsAdapter>
-						<ThemeProvider defaultTheme="system" storageKey="theme">
-							{children}
-						</ThemeProvider>
-					</NuqsAdapter>
+					<QueryClientProvider client={queryClient}>
+						<NuqsAdapter>
+							<ThemeProvider defaultTheme="system" storageKey="theme">
+								{children}
+							</ThemeProvider>
+						</NuqsAdapter>
+					</QueryClientProvider>
 				</main>
 				<Toaster />
 				<TanStackDevtools
