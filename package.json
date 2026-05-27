@@ -11,6 +11,7 @@
     "typecheck": "turbo typecheck",
     "lint": "turbo lint",
     "clean": "turbo clean",
+    "test": "turbo run test",
     "format": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "format:fix": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\""
   },

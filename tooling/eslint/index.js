@@ -19,6 +19,12 @@ export default tseslint.config(
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/consistent-type-imports": "error",
+      "no-restricted-imports": ["error", {
+        patterns: [{
+          group: ["{.,}../**"],
+          message: "Relative imports to parent directories are not allowed. Use absolute imports instead.",
+        }],
+      }],
     },
     settings: {
       react: { version: "detect" },
