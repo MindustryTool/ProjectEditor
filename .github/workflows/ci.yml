@@ -20,5 +20,4 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
-      - name: Typecheck, lint & test (changed packages only)
-        run: pnpm turbo run typecheck lint test --filter=...[origin/main]
+      - run: pnpm turbo run typecheck lint test
