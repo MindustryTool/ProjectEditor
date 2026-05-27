@@ -2,8 +2,16 @@ import { useMemo, useState, useRef, useEffect } from "react";
 import { useQueryState } from "nuqs";
 import { File, Folder, FolderOpen, ChevronRight, ChevronDown, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { isDefaultPath, type FileEntry, type TreeNode } from "@project/fs";
-import { useCurrentProject, useProjectSession, useFileContentStore, isDirty, selectEntry, selectIsSaving } from "@project/state";
+import { isDefaultPath, type TreeNode } from "@project/fs";
+import {
+	useCurrentProject,
+	useProjectSession,
+	useFileContentStore,
+	isDirty,
+	selectEntry,
+	selectIsSaving,
+	TreeSnapshot,
+} from "@project/state";
 import { useValidationStore } from "@project/state";
 import { cn } from "~/lib/utils";
 import {
@@ -58,17 +66,25 @@ export function FileExplorer({ className }: FileExplorerProps) {
 					onDeleteRequest={setDeleteTargetPath}
 				/>
 			))}
-			<AlertDialog open={deleteTargetPath !== null} onOpenChange={(open) => { if (!open) setDeleteTargetPath(null); }}>
+			<AlertDialog
+				open={deleteTargetPath !== null}
+				onOpenChange={(open) => {
+					if (!open) setDeleteTargetPath(null);
+				}}
+			>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>Delete {deleteTargetName}?</AlertDialogTitle>
 						<AlertDialogDescription>
-							This action cannot be undone. {deleteTargetPath && deleteTargetPath.split("/").length > 1 ? "All contents will be deleted." : ""}
+							This action cannot be undone.{" "}
+							{deleteTargetPath && deleteTargetPath.split("/").length > 1 ? "All contents will be deleted." : ""}
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel>Cancel</AlertDialogCancel>
-						<AlertDialogAction variant="destructive" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+						<AlertDialogAction variant="destructive" onClick={handleDeleteConfirm}>
+							Delete
+						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
@@ -99,12 +115,12 @@ interface TreeNodeItemProps {
 	onDeleteRequest: (path: string) => void;
 }
 
-function buildTreeFromSnapshot(snapshot: FileEntry[], projectId: string): TreeNode[] {
+function buildTreeFromSnapshot(snapshot: TreeSnapshot, projectId: string): TreeNode[] {
 	const basePrefix = `/projects/${projectId}/`;
 	const roots: TreeNode[] = [];
 	const nodeByPath = new Map<string, TreeNode>();
 
-	for (const entry of snapshot) {
+	for (const entry of snapshot.getEntries()) {
 		const relative = entry.path.startsWith(basePrefix) ? entry.path.slice(basePrefix.length) : entry.path;
 		const parts = relative.split("/").filter(Boolean);
 		if (parts.length === 0) continue;
@@ -156,7 +172,17 @@ function sortTreeNodes(nodes: TreeNode[]) {
 	}
 }
 
-function TreeNodeItem({ node, parentPath, selectedPath, onSelect, projectId, depth = 0, editingPath, onEditingPathChange, onDeleteRequest }: TreeNodeItemProps) {
+function TreeNodeItem({
+	node,
+	parentPath,
+	selectedPath,
+	onSelect,
+	projectId,
+	depth = 0,
+	editingPath,
+	onEditingPathChange,
+	onDeleteRequest,
+}: TreeNodeItemProps) {
 	const context = useCurrentProject();
 	const [expanded, setExpanded] = useState(false);
 	const currentPath = parentPath ? `${parentPath}/${node.name}` : node.name;
@@ -216,7 +242,8 @@ function TreeNodeItem({ node, parentPath, selectedPath, onSelect, projectId, dep
 
 		if (isFolder) {
 			const newPath = `${parentDir}${newNameTrimmed}`;
-			context.fs.rename(currentPath, newPath)
+			context.fs
+				.rename(currentPath, newPath)
 				.then(() => {
 					if (selectedPath === currentPath) onSelect(newPath);
 				})
@@ -227,7 +254,8 @@ function TreeNodeItem({ node, parentPath, selectedPath, onSelect, projectId, dep
 			const dotIndex = node.name.lastIndexOf(".");
 			const ext = dotIndex > 0 ? node.name.substring(dotIndex) : "";
 			const newPath = `${parentDir}${newNameTrimmed}${ext}`;
-			context.fs.rename(currentPath, newPath)
+			context.fs
+				.rename(currentPath, newPath)
 				.then(() => {
 					if (selectedPath === currentPath) onSelect(newPath);
 				})
@@ -267,7 +295,12 @@ function TreeNodeItem({ node, parentPath, selectedPath, onSelect, projectId, dep
 				tabIndex={0}
 				aria-selected={isSelected}
 				onClick={handleClick}
-				onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleClick(); } }}
+				onKeyDown={(e) => {
+					if (e.key === "Enter" || e.key === " ") {
+						e.preventDefault();
+						handleClick();
+					}
+				}}
 				style={{ paddingLeft: `${8 + depth * 16}px` }}
 			>
 				{isFolder && (
@@ -293,13 +326,7 @@ function TreeNodeItem({ node, parentPath, selectedPath, onSelect, projectId, dep
 					<span className={cn("flex-1 truncate", filenameColor)}>{node.name}</span>
 				)}
 				{showActions && !isDefault && (
-					<div
-						className={cn(
-							"flex items-center gap-0.5",
-							!isSelected && "invisible group-hover:visible",
-							isSelected && "visible",
-						)}
-					>
+					<div className={cn("flex items-center gap-0.5", !isSelected && "invisible group-hover:visible", isSelected && "visible")}>
 						<button
 							onClick={handleRenameClick}
 							className="flex size-6 items-center justify-center rounded hover:bg-accent"

@@ -17,7 +17,7 @@ export function RecentlyOpenedFilesBar() {
 	const removeFromRecentFiles = useProjectSession((state) => state.removeFromRecentFiles);
 
 	const filePaths = useMemo(() => {
-		return new Set(treeSnapshot.filter((e) => e.kind === "file").map((e) => e.path));
+		return new Set(treeSnapshot.getEntries().filter((e) => e.kind === "file").map((e) => e.path));
 	}, [treeSnapshot]);
 
 	const handleTabClick = useCallback(

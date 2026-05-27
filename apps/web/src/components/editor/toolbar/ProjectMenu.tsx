@@ -4,7 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import { cn } from "~/lib/utils";
-import { useProjectSession, useAppStore } from "@project/state";
+import { useProjectSession, useAppStore, TreeSnapshot } from "@project/state";
 import { importProject, createProjectInfo, createEventBus } from "@project/core";
 import type { ProjectEventMap } from "@project/core";
 import { createProjectFileSystem } from "@project/fs";
@@ -63,7 +63,7 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 
 			const events = createEventBus<ProjectEventMap>();
 			const fs = await createProjectFileSystem(project, events, {
-				onTreeSnapshotChange: (snapshot) => useProjectSession.setState({ treeSnapshot: snapshot }),
+				onTreeSnapshotChange: (snapshot) => useProjectSession.setState({ treeSnapshot: new TreeSnapshot(snapshot) }),
 			});
 
 			const unsubscribe = events.on("file:changed", (path) => {

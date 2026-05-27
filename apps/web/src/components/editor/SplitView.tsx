@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { cn } from "~/lib/utils";
 
@@ -77,13 +77,16 @@ export function SplitView({
 		};
 	}, [onMouseMove, onMouseUp]);
 
-	const showCenter = center !== undefined
-	const showRight = right !== undefined
+	const showCenter = center !== undefined;
+	const showRight = right !== undefined;
 
 	return (
 		<div ref={containerRef} className={cn("flex min-h-0 flex-1 overflow-hidden w-full", className)}>
-			<div style={{ width: showCenter ? leftWidth : undefined, minWidth: showCenter ? minPanelWidth : undefined }} className={cn("shrink-0 border-r bg-muted", !showCenter && "flex-1")}>
-				{left}
+			<div
+				style={{ width: showCenter ? leftWidth : undefined, minWidth: showCenter ? minPanelWidth : undefined }}
+				className={cn("shrink-0 border-r bg-muted", !showCenter && "flex-1")}
+			>
+				<Suspense>{left}</Suspense>
 			</div>
 
 			{showCenter && (
@@ -96,7 +99,9 @@ export function SplitView({
 			)}
 
 			{showCenter && (
-				<div className="flex flex-1 overflow-hidden bg-background w-full">{center}</div>
+				<div className="flex flex-1 overflow-hidden bg-background w-full">
+					<Suspense>{center}</Suspense>
+				</div>
 			)}
 
 			{showRight && (
@@ -110,7 +115,7 @@ export function SplitView({
 
 			{showRight && (
 				<div style={{ width: rightWidth, minWidth: minPanelWidth }} className="shrink-0 border-l bg-muted">
-					{right}
+					<Suspense>{right}</Suspense>
 				</div>
 			)}
 		</div>

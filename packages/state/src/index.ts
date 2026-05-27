@@ -4,6 +4,7 @@ export { useAppStore } from "./stores/project";
 export {
 	useProjectSession,
 	useCurrentProject,
+    TreeSnapshot
 } from "./stores/session";
 
 export type { FileContentEntry, FileContentStore } from "./stores/file-content";

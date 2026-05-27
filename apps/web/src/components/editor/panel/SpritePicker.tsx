@@ -2,7 +2,7 @@ import { useCallback, useRef } from "react";
 import { useCurrentProject, useProjectSession, useFileContent, useFileContentImageUrl } from "@project/state";
 import { Button } from "#/components/ui/button";
 import { FormControl, FormField, FormLabel } from "#/components/ui/form";
-import { resolveContentSprite, findFileInTree } from "~/lib/utils";
+import { resolveContentSprite } from "~/lib/utils";
 import { File, Trash2, Upload } from "lucide-react";
 
 interface SpritePickerProps {
@@ -12,7 +12,7 @@ interface SpritePickerProps {
 export function SpritePicker({ path }: SpritePickerProps) {
 	const spritePath = resolveContentSprite(path);
 	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
-	const exists = spritePath !== null && findFileInTree(treeSnapshot, spritePath) !== null;
+	const exists = spritePath !== null && treeSnapshot.getEntry(spritePath) !== undefined;
 
 	if (spritePath === null) {
 		return <p className="text-sm text-muted-foreground">Not a content JSON file</p>;
@@ -66,9 +66,7 @@ function SpriteViewer({ path: spritePath }: { path: string }) {
 
 	return (
 		<div className="relative">
-			{objectUrl && (
-				<img className="object-contain w-full rounded border border-border" src={objectUrl} alt={spritePath} />
-			)}
+			{objectUrl && <img className="object-contain w-full rounded border border-border" src={objectUrl} alt={spritePath} />}
 			<div className="backdrop-blur-sm bg-background/20 justify-end flex gap-1 p-1">
 				<Button variant="ghost" size="icon" aria-label="Replace sprite" onClick={handleReplace}>
 					<Upload className="w-4 h-4" />

@@ -23,6 +23,8 @@ function EditorWithMonaco({ path }: { path: string }) {
 }
 
 function EditorContent({ path }: { path: string }) {
+	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
+
 	if (path === "mod.hjson" || (path.startsWith("content") && path.endsWith(".json"))) {
 		return <EditorWithMonaco path={path} />;
 	}
@@ -38,7 +40,17 @@ function EditorContent({ path }: { path: string }) {
 		return <ImageFilePreview path={path} />;
 	}
 
-	return <EditorWithMonaco path={path} />;
+	const entry = treeSnapshot.getEntry(path);
+
+	if (entry === undefined) {
+		return null;
+	}
+
+	if (entry.kind === "file") {
+		return <EditorWithMonaco path={path} />;
+	}
+
+    return <ContentList path={path} />;
 }
 
 export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: EditorCenterPanelProps) {
@@ -47,7 +59,12 @@ export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: Edito
 	const recordFileAccess = useProjectSession((s) => s.recordFileAccess);
 
 	const filePaths = useMemo(() => {
-		return new Set(treeSnapshot.filter((e) => e.kind === "file").map((e) => e.path));
+		return new Set(
+			treeSnapshot
+				.getEntries()
+				.filter((e) => e.kind === "file")
+				.map((e) => e.path),
+		);
 	}, [treeSnapshot]);
 
 	useEffect(() => {

@@ -36,9 +36,24 @@ function removeEntry(entries: RecentFileEntry[], path: string): RecentFileEntry[
 	return entries.filter((e) => e.path !== path);
 }
 
+export class TreeSnapshot {
+	constructor(private readonly entries: FileEntry[]) {}
+
+	getEntries() {
+		return this.entries;
+	}
+
+	contains(path: string) {
+		return this.entries.some((e) => e.path === path);
+	}
+
+	getEntry(path: string) {
+		return this.entries.find((e) => e.path === path);
+	}
+}
 interface ProjectSession {
 	projectContext: ProjectContext | null;
-	treeSnapshot: FileEntry[];
+	treeSnapshot: TreeSnapshot;
 	recentlyOpenedFiles: Record<string, RecentFileEntry[]>;
 
 	setCurrentProject: (context: ProjectContext | null) => void;
@@ -53,13 +68,13 @@ export const useProjectSession = create<ProjectSession>()(
 	persist(
 		(set) => ({
 			projectContext: null,
-			treeSnapshot: [],
+			treeSnapshot: new TreeSnapshot([]),
 			recentlyOpenedFiles: {},
 
 			setCurrentProject: (context) => {
 				set((state) => ({
 					projectContext: context,
-					treeSnapshot: context ? state.treeSnapshot : [],
+					treeSnapshot: context ? state.treeSnapshot : new TreeSnapshot([]),
 				}));
 			},
 
@@ -74,7 +89,7 @@ export const useProjectSession = create<ProjectSession>()(
 			},
 
 			reset: () => {
-				set({ projectContext: null, treeSnapshot: [] });
+				set({ projectContext: null, treeSnapshot: new TreeSnapshot([]) });
 			},
 
 			recordFileAccess: (projectId, path) => {

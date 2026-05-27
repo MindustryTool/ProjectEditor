@@ -7,7 +7,7 @@ import type { ProjectLanguage } from "@project/core";
 import { importProject, createProjectInfo, createEventBus } from "@project/core";
 import type { ProjectEventMap } from "@project/core";
 import { createProjectFileSystem } from "@project/fs";
-import { useAppStore, useProjectSession } from "@project/state";
+import { TreeSnapshot, useAppStore, useProjectSession } from "@project/state";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { FolderOpen, Plus, Settings, Upload } from "lucide-react";
 import { toast } from "sonner";
@@ -112,7 +112,7 @@ function ImportProjectSection({ onImported }: { onImported: (id: string) => void
 
 			const events = createEventBus<ProjectEventMap>();
 			const fs = await createProjectFileSystem(project, events, {
-				onTreeSnapshotChange: (snapshot) => useProjectSession.setState({ treeSnapshot: snapshot }),
+				onTreeSnapshotChange: (snapshot) => useProjectSession.setState({ treeSnapshot: new TreeSnapshot(snapshot) }),
 			});
 
 			const unsubscribe = events.on("file:changed", (path) => {

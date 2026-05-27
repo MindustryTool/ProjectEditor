@@ -45,7 +45,11 @@ export function ContentList({ path }: { path: string }) {
 						{entry.kind === "directory" ? (
 							<Folder className="text-amber-500 w-full h-full" strokeWidth={1} />
 						) : entry.name.endsWith(".json") ? (
-							<SpritePreview path={entry.path} />
+							resolveContentSprite(entry.path) ? (
+								<SpritePreview path={resolveContentSprite(entry.path)!} />
+							) : (
+								<div className="flex h-full w-full" />
+							)
 						) : (
 							<File className="text-muted-foreground w-full h-full" strokeWidth={1} />
 						)}
@@ -58,11 +62,10 @@ export function ContentList({ path }: { path: string }) {
 }
 
 function SpritePreview({ path }: { path: string }) {
-	const spritePath = resolveContentSprite(path);
-	const { data, isLoading, isError } = useFileContent(spritePath ?? "");
+	const { data, isLoading, isError } = useFileContent(path);
 	const objectUrl = useFileContentImageUrl(data);
 
-	if (spritePath === null || isError || isLoading || !data || data.byteLength === 0) {
+	if (isError || isLoading || !data || data.byteLength === 0) {
 		return <File className="text-muted-foreground w-full h-full" strokeWidth={1} />;
 	}
 

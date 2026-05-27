@@ -3,8 +3,8 @@ import { useFileContentStore, isDirty, isError, selectEntry, selectIsSaving, get
 import { useProjectSession } from "../stores/session";
 import { getWriteQueue, disposeWriteQueue } from "../services/write-queue";
 
-export interface UseFileContentResult {
-	data: ArrayBuffer | null;
+export interface UseFileContentResult<T> {
+	data: T | null;
 	currentVersion: number;
 	savedVersion: number;
 	savedAt: number | null;
@@ -13,10 +13,10 @@ export interface UseFileContentResult {
 	isSaving: boolean;
 	isLoading: boolean;
 	isError: boolean;
-	write: (content: ArrayBuffer | string) => void;
+	write: (content: T) => void;
 }
 
-export function useFileContent(path: string): UseFileContentResult {
+export function useFileContent(path: string): UseFileContentResult<ArrayBuffer> {
 	const projectContext = useProjectSession((s) => s.projectContext);
 	const projectId = projectContext?.project.id;
 	const entry = useFileContentStore(projectId ? selectEntry(projectId, path) : () => undefined);

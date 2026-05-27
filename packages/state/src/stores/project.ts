@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import { createProjectInfo, createEventBus, type ProjectLanguage, type ProjectEventMap } from "@project/core";
 import { createProjectFileSystem } from "@project/fs";
 import { DEFAULT_SETTINGS } from "@project/config";
-import { useProjectSession } from "./session";
+import { TreeSnapshot, useProjectSession } from "./session";
 
 export interface AppSettings {
 	theme: "light" | "dark" | "system";
@@ -54,7 +54,7 @@ export const useAppStore = create<AppState>()(
 				const events = createEventBus<ProjectEventMap>();
 				const fs = await createProjectFileSystem(project, events, {
 					onTreeSnapshotChange: (snapshot) => {
-						useProjectSession.setState({ treeSnapshot: snapshot });
+						useProjectSession.setState({ treeSnapshot: new TreeSnapshot(snapshot) });
 					},
 				});
 				useProjectSession.getState().setCurrentProject({ project, fs, events });

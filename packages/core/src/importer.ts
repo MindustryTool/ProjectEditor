@@ -39,7 +39,6 @@ export async function importProject(zipData: Uint8Array): Promise<ImportResult> 
 	const name = nameMatch?.[1]?.trim() ?? "Imported Project";
 
 	const scopedEntries = entries
-		.filter((e) => e.name !== modHjsonEntry.name)
 		.map((e) => ({
 			...e,
 			name: rootFolder ? e.name.slice(rootFolder.length) : e.name,
