@@ -62,7 +62,6 @@ export function useFileContent(path: string): UseFileContentResult<ArrayBuffer> 
 				(err: unknown) => {
 					const updatedEntry = getEntry(projectId, path);
 					if (!updatedEntry || updatedEntry.currentVersion !== version) return;
-					console.error(`Failed to write ${path}:`, err);
 					useFileContentStore.getState().setBufferError(projectId, path, err instanceof Error ? err.message : String(err));
 					useFileContentStore.getState().clearSaving(projectId, path);
 				},

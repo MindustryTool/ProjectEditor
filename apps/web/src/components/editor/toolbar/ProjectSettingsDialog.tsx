@@ -134,7 +134,7 @@ function DeleteProject({ projectId: propId, onDeleted }: { projectId?: string; o
 			try {
 				await deleteProjectFiles(projectId);
 			} catch (err) {
-				console.error("Failed to delete project files:", err);
+                toast.error(`Failed to delete project files: ${err instanceof Error ? err.message : "Unknown error"}`);
 			}
 		},
 		onSuccess: () => {

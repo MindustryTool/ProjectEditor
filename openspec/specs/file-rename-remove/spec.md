@@ -21,7 +21,7 @@ The system SHALL allow users to rename a file or folder by clicking a rename act
 
 #### Scenario: Clicking rename enters inline edit mode
 - **WHEN** the user clicks the rename button on a non-default file or folder row
-- **THEN** the filename text SHALL be replaced by an `<input>` element pre-filled with the current name (without extension for files), and the input SHALL be focused
+- **THEN** the filename text SHALL be replaced by an `<input>` element pre-filled with the current name, and the input SHALL be focused
 
 #### Scenario: Confirm rename with Enter
 - **WHEN** the user presses Enter while in inline rename mode
@@ -35,9 +35,9 @@ The system SHALL allow users to rename a file or folder by clicking a rename act
 - **WHEN** the user presses Escape while in inline rename mode
 - **THEN** the system SHALL cancel the rename and restore the original filename
 
-#### Scenario: Rename preserves extension
-- **WHEN** the user renames a file
-- **THEN** the `<input>` SHALL be pre-filled without the file extension, and the extension SHALL be re-appended before calling rename
+#### Scenario: Rename applies extension changes
+- **WHEN** the user renames a file and the provided new name changes, adds, or removes the file extension
+- **THEN** the system SHALL use the provided name as the target filename when calling `project.fs.rename(oldPath, newPath)` and SHALL NOT force the original extension to be preserved
 
 #### Scenario: Rename folder name
 - **WHEN** the user renames a folder

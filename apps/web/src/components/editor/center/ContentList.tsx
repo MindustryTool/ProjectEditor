@@ -89,7 +89,7 @@ function Item({ className, children, ...props }: React.ComponentProps<"button">)
 
 function ItemPreview({ children }: { children: ReactNode }) {
 	return (
-		<div className="flex flex-col w-full items-center rounded-md bg-background border border-border overflow-hidden aspect-square hover:bg-accent hover:ring transition-colors">
+		<div className="flex flex-col w-full items-center rounded-md bg-background border border-border overflow-hidden aspect-square hover:bg-accent transition-colors">
 			{children}
 		</div>
 	);

@@ -1,7 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { Parser } from "../src/parser.js";
 import { HJSONError, HJSONErrorCode } from "../src/errors.js";
-import { StructuredObject, type FieldInfo } from "../src/structured.js";
+import {
+  StructuredNode,
+  StructuredObjectNode,
+  StructuredArrayNode,
+  StructuredValueNode,
+  type FieldInfo,
+  StructuredObject,
+} from "../src/structured.js";
 
 function parse(input: string, reviver?: (key: string, value: any) => any) {
   return Parser.parse(input, reviver);
@@ -163,78 +170,78 @@ describe("Parser", () => {
 
     it("structured parse has correct field positions", () => {
       const text = '{"a": 42}';
-      const result = parseStructured(text) as StructuredObject<{ a: number }>;
+      const result = parseStructured(text) as StructuredObjectNode;
       const info = result.field("a")!;
       expect(info.key).toBe("a");
-      expect(info.value).toBe(42);
+      expect(info.value.valueOf()).toBe(42);
       expect(info.start).toEqual({ row: 1, col: 2, index: 1 });
       expect(info.valueStart).toEqual({ row: 1, col: 7, index: 6 });
     });
 
     it("field() returns correct FieldInfo", () => {
-      const result = parseStructured('{"x": "hello"}') as StructuredObject<{ x: string }>;
+      const result = parseStructured('{"x": "hello"}') as StructuredObjectNode;
       const info = result.field("x")!;
       expect(info.key).toBe("x");
-      expect(info.value).toBe("hello");
+      expect(info.value.valueOf()).toBe("hello");
     });
 
     it("field() returns undefined for missing key", () => {
-      const result = parseStructured('{"a": 1}') as StructuredObject<{ a: number }>;
+      const result = parseStructured('{"a": 1}') as StructuredObjectNode;
       expect(result.field("bogus")).toBeUndefined();
     });
 
     it("fields() iterates all entries", () => {
-      const result = parseStructured('{"a": 1, "b": 2}') as StructuredObject<{ a: number; b: number }>;
+      const result = parseStructured('{"a": 1, "b": 2}') as StructuredObjectNode;
       const entries = Array.from(result.fields());
       expect(entries).toHaveLength(2);
       expect(entries.map((f) => f.key)).toEqual(["a", "b"]);
     });
 
-    it("nested objects are recursively StructuredObject", () => {
-      const result = parseStructured('{"outer": {"inner": 1}}') as StructuredObject<{ outer: { inner: number } }>;
+    it("nested objects are recursively StructuredNode", () => {
+      const result = parseStructured('{"outer": {"inner": 1}}') as StructuredObjectNode;
       const outerField = result.field("outer")!;
-      expect(outerField.value).toBeInstanceOf(StructuredObject);
-      const inner = outerField.value as StructuredObject<{ inner: number }>;
+      expect(outerField.value).toBeInstanceOf(StructuredNode);
+      const inner = outerField.value as StructuredObjectNode;
       const innerField = inner.field("inner")!;
       expect(innerField.key).toBe("inner");
-      expect(innerField.value).toBe(1);
+      expect(innerField.value.valueOf()).toBe(1);
     });
 
     it("primitives in object fields store correct values", () => {
-      const result = parseStructured('{"n": 42, "b": true, "v": null, "s": "hi"}') as StructuredObject<any>;
-      expect(result.field("n")!.value).toBe(42);
-      expect(result.field("b")!.value).toBe(true);
-      expect(result.field("v")!.value).toBeNull();
-      expect(result.field("s")!.value).toBe("hi");
+      const result = parseStructured('{"n": 42, "b": true, "v": null, "s": "hi"}') as StructuredObjectNode;
+      expect(result.field("n")!.value.valueOf()).toBe(42);
+      expect(result.field("b")!.value.valueOf()).toBe(true);
+      expect(result.field("v")!.value.valueOf()).toBeNull();
+      expect(result.field("s")!.value.valueOf()).toBe("hi");
     });
 
-    it("arrays return plain value in structured mode", () => {
+    it("arrays return StructuredArrayNode in structured mode", () => {
       const result = parseStructured("[1, 2, 3]");
-      expect(Array.isArray(result)).toBe(true);
-      expect(result).toEqual([1, 2, 3]);
+      expect(result.isArray()).toBe(true);
+      expect(result.valueOf()).toEqual([1, 2, 3]);
     });
 
     it("valueOf() returns plain JS object", () => {
-      const result = parseStructured('{"a": 1}') as StructuredObject<{ a: number }>;
+      const result = parseStructured('{"a": 1}') as StructuredObjectNode;
       expect(result.valueOf()).toEqual({ a: 1 });
     });
 
     it("toJSON() returns plain JS object", () => {
-      const result = parseStructured('{"a": 1}') as StructuredObject<{ a: number }>;
+      const result = parseStructured('{"a": 1}') as StructuredObjectNode;
       expect(JSON.stringify(result)).toBe('{"a":1}');
     });
 
     it("structured parse with reviver works correctly", () => {
       const result = parseStructured('{"a": 1}', (key, val) =>
         typeof val === "number" ? val * 2 : val,
-      ) as StructuredObject<{ a: number }>;
+      ) as StructuredObjectNode;
       expect(result.valueOf()).toEqual({ a: 2 });
       const info = result.field("a")!;
       expect(info.value).toBe(2);
     });
 
     it("structured parse with legacy root works", () => {
-      const result = parseStructured("a: 1\nb: 2") as StructuredObject<{ a: number; b: number }>;
+      const result = parseStructured("a: 1\nb: 2") as StructuredObjectNode;
       expect(result).toBeInstanceOf(StructuredObject);
       expect(result.valueOf()).toEqual({ a: 1, b: 2 });
       expect(result.field("a")).toBeDefined();

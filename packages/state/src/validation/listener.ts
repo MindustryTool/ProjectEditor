@@ -2,6 +2,7 @@ import { useFileContentStore } from "../stores/file-content";
 import { createDefaultValidators } from "./validators";
 import { createValidationRunner } from "./runner";
 import { useValidationStore } from "./store";
+import { Severity } from "./types";
 
 const registry = createDefaultValidators();
 const runner = createValidationRunner(registry);
@@ -35,7 +36,15 @@ function scheduleValidation(compositeKey: string, data: ArrayBuffer | null | und
 				const results = runner.validate(path, content);
 				useValidationStore.getState().setResults(path, results);
 			} catch (err) {
-				console.error(`Validation failed for ${path}:`, err);
+				useValidationStore.getState().setResults(path, [
+					{
+						path,
+						severity: Severity.error,
+						messageKey: err instanceof Error ? err.message : "Unknown error",
+						startLine: 1,
+						startColumn: 1,
+					},
+				]);
 			}
 		}, DEBOUNCE_MS),
 	);

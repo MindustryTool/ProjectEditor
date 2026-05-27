@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: ValidationResult uses startLine/startColumn/endLine/endColumn for error ranges
 

@@ -2,8 +2,10 @@ import type { ValidatorFn } from "./types";
 import { Severity } from "./types";
 import { createValidatorRegistry } from "./registry";
 import { HJSON, HJSONError } from "@project/hjson";
+import { ModHjsonSchema } from "@project/validation";
+import * as v from "valibot";
 
-export const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
+const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 	const trimmed = content.trim();
 
 	if (!trimmed) return [];
@@ -60,6 +62,64 @@ export const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 	}
 };
 
+const modMetaValidator: ValidatorFn = ({ path, content }) => {
+	try {
+		const data = HJSON.parse(content);
+
+		if (typeof data !== "object" || data === null)
+			return [
+				{
+					path,
+					severity: Severity.error,
+					messageKey: "validation.content.invalidJson",
+					messageParams: { error: "Mod meta is not a valid JSON object" },
+					startLine: 1,
+					startColumn: 1,
+					endLine: 1,
+					endColumn: 1,
+				},
+			];
+
+		v.parse(ModHjsonSchema, data);
+
+		return [];
+	} catch (err) {
+		if (v.isValiError(err)) {
+			const result = [];
+
+			for (const issue of err.issues) {
+                const field = issue.path?.map((p) => p.key)?.join(".");
+				result.push({
+					path,
+					severity: Severity.error,
+					messageKey: "validation.content.invalidJson",
+                    field,
+					messageParams: { error: field + ": " + issue.message },
+					startLine: 1,
+					startColumn: 1,
+					endLine: 1,
+					endColumn: 1,
+				});
+			}
+
+			return result;
+		}
+
+		return [
+			{
+				path,
+				severity: Severity.error,
+				messageKey: "validation.content.invalidJson",
+				messageParams: { error: "Aaaaa" },
+				startLine: 1,
+				startColumn: 1,
+				endLine: 1,
+				endColumn: 1,
+			},
+		];
+	}
+};
+
 export function createDefaultValidators() {
 	const registry = createValidatorRegistry();
 
@@ -73,6 +133,12 @@ export function createDefaultValidators() {
 		name: "json-syntax",
 		pattern: "*.hjson",
 		validate: jsonSyntaxValidator,
+	});
+
+	registry.register({
+		name: "mod-meta",
+		pattern: "mod.hjson",
+		validate: modMetaValidator,
 	});
 
 	return registry;

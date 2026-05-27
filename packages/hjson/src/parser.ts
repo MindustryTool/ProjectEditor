@@ -1,7 +1,14 @@
 import { Tokenizer, type Token } from "./tokenizer.js";
 import type { HjsonNode, ObjectNode, ArrayNode, StringNode, NumberNode, BooleanNode, NullNode, MemberNode } from "./ast.js";
 import { HJSONError, HJSONErrorCode } from "./errors.js";
-import { StructuredObject, type FieldInfo } from "./structured.js";
+import {
+  StructuredObjectNode,
+  StructuredArrayNode,
+  StructuredValueNode,
+  StructuredNode,
+  type FieldInfo,
+  type ElementInfo,
+} from "./structured.js";
 
 export interface HJSONParseOptions {
   keepQuote?: boolean;
@@ -442,7 +449,7 @@ export class Parser {
     return parser.toJSValue(ast, reviver);
   }
 
-  toStructuredValue(node: HjsonNode, reviver?: (key: string, value: any) => any): any {
+  toStructuredValue(node: HjsonNode, reviver?: (key: string, value: any) => any): StructuredNode {
     return this.convertNodeStructured(node, "", reviver);
   }
 
@@ -450,57 +457,75 @@ export class Parser {
     node: HjsonNode,
     keyHint: string,
     reviver?: (key: string, value: any) => any,
-  ): any {
+  ): StructuredNode {
     switch (node.kind) {
       case "null":
-        return reviver ? reviver(keyHint, null) : null;
       case "boolean":
-        return reviver ? reviver(keyHint, node.value) : node.value;
       case "number":
-        return reviver ? reviver(keyHint, node.value) : node.value;
-      case "string":
-        return reviver ? reviver(keyHint, node.value) : node.value;
+      case "string": {
+        const val = reviver ? reviver(keyHint, node.value) : node.value;
+        return new StructuredValueNode(val, { ...node.loc.start }, { ...node.loc.end });
+      }
       case "array": {
-        const arr = node.elements.map((el, i) => this.convertNodeStructured(el, String(i), reviver));
-        const plainArr = arr.map((v) => (v instanceof StructuredObject ? v.valueOf() : v));
-        const final = reviver ? reviver(keyHint, plainArr) : plainArr;
-        return final;
+        const elements: ElementInfo[] = [];
+        const data: any[] = [];
+        node.elements.forEach((el, i) => {
+          const val = this.convertNodeStructured(el, String(i), reviver);
+          elements.push({
+            index: i,
+            value: val,
+            start: { ...el.loc.start },
+            end: { ...el.loc.end },
+          });
+          data.push(val.valueOf());
+        });
+        const finalData = reviver ? reviver(keyHint, data) : data;
+        return new StructuredArrayNode(finalData, elements);
       }
       case "object": {
         const fieldInfos: FieldInfo[] = [];
-        const rawValues: Map<string, unknown> = new Map();
-        const obj: Record<string, any> = {};
+        const rawValues: Map<string, StructuredNode> = new Map();
+        const data: Record<string, any> = {};
+
         for (const member of node.members) {
           const key = member.key.value;
           const val = this.convertNodeStructured(member.value, key, reviver);
-          if (val !== undefined) {
-            rawValues.set(key, val);
-            obj[key] = val instanceof StructuredObject ? val.valueOf() : val;
-            fieldInfos.push({
-              key,
-              value: val,
-              start: { ...member.loc.start },
-              end: { ...member.loc.end },
-              valueStart: { ...member.value.loc.start },
-              valueEnd: { ...member.value.loc.end },
-            });
+          rawValues.set(key, val);
+          data[key] = val.valueOf();
+          fieldInfos.push({
+            key,
+            value: val,
+            start: { ...member.loc.start },
+            end: { ...member.loc.end },
+            valueStart: { ...member.value.loc.start },
+            valueEnd: { ...member.value.loc.end },
+          });
+        }
+
+        const finalData = reviver ? reviver(keyHint, data) : data;
+        // If the reviver returned something else, we might need to handle it,
+        // but typically it should return an object for object nodes.
+        const resultData = (finalData && typeof finalData === "object") ? finalData : data;
+
+        // Re-sync field values if reviver changed them
+        if (finalData !== data && typeof finalData === "object" && finalData !== null) {
+          for (const fi of fieldInfos) {
+            if (fi.key in finalData) {
+              const newVal = finalData[fi.key];
+              const oldRaw = rawValues.get(fi.key);
+              if (oldRaw && oldRaw.valueOf() !== newVal) {
+                // If it changed, we wrap it in a new ValueNode without precise loc (or keep old loc?)
+                // For now, let's just update the value.
+                fi.value = new StructuredValueNode(newVal, fi.valueStart, fi.valueEnd);
+              }
+            }
           }
         }
-        const plainObj = reviver ? reviver(keyHint, obj) : obj;
-        if (plainObj === undefined || plainObj === null) return plainObj;
-        if (typeof plainObj !== "object") return plainObj;
-        for (const fi of fieldInfos) {
-          if (fi.key in (plainObj as Record<string, any>)) {
-            const rawVal = rawValues.get(fi.key);
-            const newVal = (plainObj as Record<string, any>)[fi.key];
-            const isUnchanged = rawVal instanceof StructuredObject && newVal === obj[fi.key];
-            fi.value = isUnchanged ? rawVal : newVal;
-          }
-        }
-        return new StructuredObject(plainObj as Record<string, unknown>, fieldInfos);
+
+        return new StructuredObjectNode(resultData as Record<string, unknown>, fieldInfos);
       }
       default:
-        return null;
+        throw new Error(`Unknown node kind: ${(node as any).kind}`);
     }
   }
 

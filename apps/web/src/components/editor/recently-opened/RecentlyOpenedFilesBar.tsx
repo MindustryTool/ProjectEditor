@@ -39,7 +39,6 @@ export function RecentlyOpenedFilesBar() {
 		(e: React.MouseEvent, filePath: string) => {
 			e.stopPropagation();
 			removeFromRecentFiles(projectId, filePath);
-			console.log({ filePath, path, r: filePath.trim() === path?.trim() });
 			if (filePath.trim() === path?.trim()) {
 				const first = recentFiles.filter((e) => e.path !== filePath)[0];
 				if (first) {

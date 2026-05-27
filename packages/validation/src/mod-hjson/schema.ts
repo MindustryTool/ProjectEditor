@@ -17,10 +17,10 @@ export const ModHjsonSchema = v.object({
 		v.string(),
 		v.check((val) => {
 			const num = Number(val);
-			return !isNaN(num) && num > 145;
-		}, "Must be a number greater than 145"),
+			return !isNaN(num) && num > 157;
+		}, "Must be a number greater than 157"),
 	),
-	dependencies: v.array(ModNameSchema),
+	dependencies: v.optional(v.array(ModNameSchema)),
 	hidden: v.optional(v.boolean()),
 });
 

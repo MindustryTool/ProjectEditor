@@ -74,8 +74,8 @@ export function ModHjsonPanel({ path }: { path: string }) {
 			return;
 		}
 		try {
-			const result = HJSON.parse(data, undefined, { structured: true }) as unknown as StructuredObject<ModHjsonData>;
-			setValues(result.valueOf());
+			const result = HJSON.parseStructured(data) as StructuredObject;
+			setValues(result.valueOf() as ModHjsonData);
 		} catch {
 			setValues(defaultModHjson);
 		}
@@ -92,7 +92,7 @@ export function ModHjsonPanel({ path }: { path: string }) {
 		}
 
 		try {
-			const result = HJSON.parse(content, undefined, { structured: true }) as unknown as StructuredObject<ModHjsonData>;
+			const result = HJSON.parseStructured(content) as StructuredObject;
 			const fieldInfo = result.field(key);
 			const newValue = serializeValue(key, value);
 			let newContent: string;
@@ -109,21 +109,21 @@ export function ModHjsonPanel({ path }: { path: string }) {
 	}
 
 	function handleDepChange(index: number, val: string) {
-		const newDeps = [...values.dependencies];
+		const newDeps = [...(values.dependencies || [])];
 		newDeps[index] = val;
 		updateValue("dependencies", newDeps);
 	}
 
 	function handleDepAdd() {
-		updateValue("dependencies", [...values.dependencies, ""]);
+		updateValue("dependencies", [...(values.dependencies || []), ""]);
 	}
 
 	function handleDepRemove(index: number) {
-		const newDeps = values.dependencies.filter((_, i) => i !== index);
+		const newDeps = values.dependencies?.filter((_, i) => i !== index);
 		updateValue("dependencies", newDeps);
 	}
 
-	const depsDisplay = values.dependencies?.length > 0 ? values.dependencies : [""];
+	const depsDisplay = (values.dependencies?.length || 0) > 0 ? values.dependencies : [""];
 
 	return (
 		<Panel>
@@ -166,7 +166,7 @@ export function ModHjsonPanel({ path }: { path: string }) {
 					<FormDescription>{t("editor.modHjson.dependenciesDescription")}</FormDescription>
 					<FormControl>
 						<div className="flex flex-col gap-2">
-							{depsDisplay.map((dep, index) => (
+							{depsDisplay?.map((dep, index) => (
 								<div key={index} className="flex items-center gap-2">
 									<Input
 										value={dep}

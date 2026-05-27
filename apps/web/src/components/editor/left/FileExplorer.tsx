@@ -232,37 +232,23 @@ function TreeNodeItem({
 	}
 
 	function handleRenameConfirm(newName: string) {
-		if (!newName.trim() || newName.trim() === node.name) {
+		const newNameTrimmed = newName.trim();
+		if (!newNameTrimmed || newNameTrimmed === node.name) {
 			onEditingPathChange(null);
 			return;
 		}
 
 		const parentDir = currentPath.slice(0, currentPath.length - node.name.length);
-		const newNameTrimmed = newName.trim();
+		const newPath = `${parentDir}${newNameTrimmed}`;
 
-		if (isFolder) {
-			const newPath = `${parentDir}${newNameTrimmed}`;
-			context.fs
-				.rename(currentPath, newPath)
-				.then(() => {
-					if (selectedPath === currentPath) onSelect(newPath);
-				})
-				.catch((err) => {
-					toast.error(`Rename failed: ${err instanceof Error ? err.message : "Unknown error"}`);
-				});
-		} else {
-			const dotIndex = node.name.lastIndexOf(".");
-			const ext = dotIndex > 0 ? node.name.substring(dotIndex) : "";
-			const newPath = `${parentDir}${newNameTrimmed}${ext}`;
-			context.fs
-				.rename(currentPath, newPath)
-				.then(() => {
-					if (selectedPath === currentPath) onSelect(newPath);
-				})
-				.catch((err) => {
-					toast.error(`Rename failed: ${err instanceof Error ? err.message : "Unknown error"}`);
-				});
-		}
+		context.fs
+			.rename(currentPath, newPath)
+			.then(() => {
+				if (selectedPath === currentPath) onSelect(newPath);
+			})
+			.catch((err) => {
+				toast.error(`Rename failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+			});
 		onEditingPathChange(null);
 	}
 
@@ -277,9 +263,7 @@ function TreeNodeItem({
 	}
 
 	function getRenameInitialValue(): string {
-		if (isFolder) return node.name;
-		const dotIndex = node.name.lastIndexOf(".");
-		return dotIndex > 0 ? node.name.substring(0, dotIndex) : node.name;
+		return node.name;
 	}
 
 	const showActions = !isEditing;
