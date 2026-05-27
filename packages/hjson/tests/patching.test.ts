@@ -44,14 +44,14 @@ describe("Surgical Patching", () => {
 
 	it("preserves comments and formatting (Exogenesis example)", () => {
 		const text = `{ 
-   displayName: "[cyan]Exogenesis", 
-   name: exogenesis, 
-   author: "[blue]AureusStratus", 
-   description: "A mod that adds in a butt load of content", 
-   minGameVersion: "151", 
-   # This is a 
-   version: "[blue]1.9.1", 
- }`;
+                        displayName: "[cyan]Exogenesis", 
+                        name: exogenesis, 
+                        author: "[blue]AureusStratus", 
+                        description: "A mod that adds in a butt load of content", 
+                        minGameVersion: "151", 
+                        # This is a 
+                        version: "[blue]1.9.1", 
+                      }`;
 		const node = parseStructured(text);
 
 		// Patch displayName
@@ -73,6 +73,68 @@ describe("Surgical Patching", () => {
 		const node = parseStructured(text);
 		const patched = node.patchField(text, "name", "exo");
 		expect(patched).toBe("name: exo");
+	});
+
+	it("patches inline array values", () => {
+		const text = "dependencies: [core,graphics,]";
+		const node = parseStructured(text);
+		const newValue = HJSON.stringify(["logic", "ui"]);
+		const patched = node.patchField(text, "dependencies", newValue);
+		expect(patched).toBe(`dependencies: ${newValue}`);
+	});
+
+	it("patches empty arrays", () => {
+		const text = "dependencies: []";
+		const node = parseStructured(text);
+		const newValue = HJSON.stringify(["core"]);
+		const patched = node.patchField(text, "dependencies", newValue);
+		expect(patched).toBe(`dependencies: ${newValue}`);
+	});
+
+	it("patches arrays back to empty arrays", () => {
+		const text = "dependencies: [core,graphics,]";
+		const node = parseStructured(text);
+		const patched = node.patchField(text, "dependencies", "[]");
+		expect(patched).toBe("dependencies: []");
+	});
+
+	it("inserts missing array fields", () => {
+		const text = "name: example";
+		const node = parseStructured(text);
+		const newValue = HJSON.stringify(["core", "graphics"]);
+		const patched = node.patchField(text, "dependencies", newValue);
+		expect(patched).toBe(`name: example\ndependencies: ${newValue}\n`);
+	});
+
+	it("preserves surrounding comments and fields when patching multiline arrays", () => {
+		const text = `name: example
+# keep comment
+dependencies: [
+  core,
+  graphics,
+]
+hidden: false`;
+		const node = parseStructured(text);
+		const newValue = HJSON.stringify(["logic", "ui"], null, 2);
+		const patched = node.patchField(text, "dependencies", newValue);
+		expect(patched).toBe(`name: example
+# keep comment
+dependencies: [
+  logic,
+  ui,
+]
+hidden: false`);
+	});
+
+	it("patches arrays with nested objects and arrays", () => {
+		const text = "dependencies: [core,]";
+		const node = parseStructured(text);
+		const newValue = HJSON.stringify([{ name: "core", optional: true }, ["dep-a", "dep-b"]], null, 2);
+		const patched = node.patchField(text, "dependencies", newValue);
+		const reparsed = parseStructured(patched);
+		expect(reparsed.valueOf()).toEqual({
+			dependencies: [{ name: "core", optional: true }, ["dep-a", "dep-b"]],
+		});
 	});
 
 	it("preserves whitespace between fields", () => {

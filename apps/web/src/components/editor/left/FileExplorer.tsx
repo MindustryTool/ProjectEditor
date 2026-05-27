@@ -11,6 +11,7 @@ import {
 	selectEntry,
 	selectIsSaving,
 	TreeSnapshot,
+	Severity,
 } from "@project/state";
 import { useValidationStore } from "@project/state";
 import { cn } from "~/lib/utils";
@@ -37,6 +38,26 @@ export function FileExplorer({ className }: FileExplorerProps) {
 
 	const [editingPath, setEditingPath] = useState<string | null>(null);
 	const [deleteTargetPath, setDeleteTargetPath] = useState<string | null>(null);
+
+	const resultsByPath = useValidationStore((s) => s.resultsByPath);
+	const totalIssueCount = useMemo(() => {
+		const result: Record<string, { error: number; warning: number }> = {};
+		for (const [path, results] of Object.entries(resultsByPath)) {
+			const segments = path.split("/").filter(Boolean);
+			let currentPath = "";
+			for (let i = 0; i < segments.length; i++) {
+				const segment = segments[i];
+				if (i > 0) currentPath += "/";
+				currentPath += segment;
+				if (result[currentPath] == null) result[currentPath] = { error: 0, warning: 0 };
+				result[currentPath]!.error += results.filter((r) => r.severity === Severity.error).length;
+				result[currentPath]!.warning += results.filter((r) => r.severity === Severity.warning).length;
+			}
+		}
+
+		return result;
+	}, [resultsByPath]);
+
 	const deleteTargetName = useMemo(() => {
 		if (!deleteTargetPath) return "";
 		const parts = deleteTargetPath.split("/");
@@ -59,6 +80,7 @@ export function FileExplorer({ className }: FileExplorerProps) {
 					node={node}
 					parentPath=""
 					selectedPath={path ?? null}
+					totalIssueCount={totalIssueCount}
 					onSelect={setPath}
 					projectId={context.project.id}
 					editingPath={editingPath}
@@ -107,6 +129,7 @@ interface TreeNodeItemProps {
 	node: TreeNode;
 	parentPath: string;
 	selectedPath: string | null;
+	totalIssueCount: Record<string, { error: number; warning: number }>;
 	onSelect: (value: string | null) => void;
 	projectId: string;
 	depth?: number;
@@ -176,6 +199,7 @@ function TreeNodeItem({
 	node,
 	parentPath,
 	selectedPath,
+	totalIssueCount,
 	onSelect,
 	projectId,
 	depth = 0,
@@ -188,20 +212,20 @@ function TreeNodeItem({
 	const currentPath = parentPath ? `${parentPath}/${node.name}` : node.name;
 	const isSelected = selectedPath === currentPath;
 	const isFolder = node.type === "folder";
-	const fileResults = useValidationStore((s) => (isFolder ? null : s.resultsByPath[currentPath]));
-	const errorCount = fileResults?.filter((r) => r.severity === 0).length ?? 0;
-	const warningCount = fileResults?.filter((r) => r.severity === 1).length ?? 0;
+
+	const errorCount = totalIssueCount[currentPath]?.error ?? 0;
+	const warningCount = totalIssueCount[currentPath]?.warning ?? 0;
 
 	const bufferEntry = useFileContentStore(isFolder ? () => undefined : selectEntry(projectId, currentPath));
 	const isItemDirty = !isFolder && isDirty(bufferEntry);
 	const isItemSaving = useFileContentStore(isFolder ? () => false : selectIsSaving(projectId, currentPath));
 
-	const isItemError = !isFolder && bufferEntry?.error != null && bufferEntry.currentVersion === bufferEntry.savedVersion;
-	const filenameColor = isItemError
-		? "text-red-500"
-		: !isFolder && warningCount > 0 && errorCount === 0
-			? "text-yellow-400"
-			: "text-foreground";
+	const filenameClass =
+		errorCount > 0
+			? "text-red-400 underline decoration-wavy"
+			: !isFolder && warningCount > 0 && errorCount === 0
+				? "text-yellow-400 underline decoration-wavy"
+				: "text-foreground";
 
 	const isDefault = isDefaultPath(context.fs.defaultProjectTree, currentPath);
 	const isEditing = editingPath === currentPath;
@@ -307,7 +331,7 @@ function TreeNodeItem({
 						onClick={(e) => e.stopPropagation()}
 					/>
 				) : (
-					<span className={cn("flex-1 truncate", filenameColor)}>{node.name}</span>
+					<span className={cn("flex-1 truncate", filenameClass)}>{node.name}</span>
 				)}
 				{showActions && !isDefault && (
 					<div className={cn("flex items-center gap-0.5", !isSelected && "invisible group-hover:visible", isSelected && "visible")}>
@@ -336,6 +360,7 @@ function TreeNodeItem({
 						<TreeNodeItem
 							key={child.name}
 							node={child}
+							totalIssueCount={totalIssueCount}
 							parentPath={currentPath}
 							selectedPath={selectedPath}
 							onSelect={onSelect}

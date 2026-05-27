@@ -1,6 +1,7 @@
 import { Checkbox } from "#/components/ui/checkbox";
 import { FormControl, FormField, FormLabel } from "#/components/ui/form";
 import { Input } from "#/components/ui/input";
+import { useValidationStore } from "@project/state";
 import { Fragment, type ReactNode } from "react";
 
 export const FieldTypes = ["String", "Int", "Float", "Double", "Boolean", "HexColor"] as const;
@@ -14,12 +15,15 @@ export interface Field {
 }
 
 interface FieldRendererProps {
+	path: string;
 	fields: Field[];
 	values: Record<string, string>;
 	updater: (field: string, value: any | undefined) => void;
 }
 
-export function FieldRenderer({ fields, values, updater }: FieldRendererProps) {
+export function FieldRenderer({ path, fields, values, updater }: FieldRendererProps) {
+	const issues = useValidationStore((state) => state.resultsByPath[path]);
+
 	return fields.map((field) => {
 		const { name, type, defaultValue, hiddenIfDefault } = field;
 		const renderer = fieldRenderers[type];
@@ -31,6 +35,8 @@ export function FieldRenderer({ fields, values, updater }: FieldRendererProps) {
 				</span>
 			);
 		}
+
+		const issue = issues?.filter((issue) => issue.field === name);
 
 		return (
 			<Fragment key={name}>
@@ -45,6 +51,11 @@ export function FieldRenderer({ fields, values, updater }: FieldRendererProps) {
 						}
 					},
 				})}
+				{issue?.map((issue) => (
+					<span key={issue.code} className="text-red-400">
+						{issue.code}
+					</span>
+				)) || null}
 			</Fragment>
 		);
 	});

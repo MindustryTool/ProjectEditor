@@ -1,7 +1,7 @@
 import type { ValidatorFn } from "./types";
 import { Severity } from "./types";
 import { createValidatorRegistry } from "./registry";
-import { HJSON, HJSONError } from "@project/hjson";
+import { HJSON, HJSONError, StructuredObjectNode } from "@project/hjson";
 import { ModHjsonSchema } from "@project/validation";
 import * as v from "valibot";
 
@@ -63,9 +63,9 @@ const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 };
 
 const modMetaValidator: ValidatorFn = ({ path, content }) => {
-	try {
-		const data = HJSON.parse(content);
+	const data = HJSON.parseStructured(content) as StructuredObjectNode;
 
+	try {
 		if (typeof data !== "object" || data === null)
 			return [
 				{
@@ -80,7 +80,7 @@ const modMetaValidator: ValidatorFn = ({ path, content }) => {
 				},
 			];
 
-		v.parse(ModHjsonSchema, data);
+		v.parse(ModHjsonSchema, data.valueOf());
 
 		return [];
 	} catch (err) {
@@ -88,17 +88,31 @@ const modMetaValidator: ValidatorFn = ({ path, content }) => {
 			const result = [];
 
 			for (const issue of err.issues) {
-                const field = issue.path?.map((p) => p.key)?.join(".");
+				const field = issue.path?.map((p) => p.key)?.join(".") || "";
+				const fieldInfo = data.field(field);
+
+				let startLine = 1;
+				let startColumn = 1;
+				let endLine = 1;
+				let endColumn = 1;
+
+				if (fieldInfo) {
+					startLine = fieldInfo.start.row;
+					startColumn = fieldInfo.start.col;
+					endLine = fieldInfo.end.row;
+					endColumn = fieldInfo.end.col;
+				}
+
 				result.push({
 					path,
 					severity: Severity.error,
 					messageKey: "validation.content.invalidJson",
-                    field,
+					field,
 					messageParams: { error: field + ": " + issue.message },
-					startLine: 1,
-					startColumn: 1,
-					endLine: 1,
-					endColumn: 1,
+					startLine,
+					startColumn,
+					endLine,
+					endColumn,
 				});
 			}
 
@@ -124,20 +138,14 @@ export function createDefaultValidators() {
 	const registry = createValidatorRegistry();
 
 	registry.register({
-		name: "json-syntax",
-		pattern: "*.json",
-		validate: jsonSyntaxValidator,
-	});
-
-	registry.register({
-		name: "json-syntax",
-		pattern: "*.hjson",
+		name: "hjson-syntax",
+		pattern: (path) => path.endsWith(".json") || path.endsWith(".hjson"),
 		validate: jsonSyntaxValidator,
 	});
 
 	registry.register({
 		name: "mod-meta",
-		pattern: "mod.hjson",
+		pattern: (path) => path.endsWith("mod.hjson") || path.endsWith("mod.json"),
 		validate: modMetaValidator,
 	});
 

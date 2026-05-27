@@ -92,7 +92,7 @@ export class Parser {
 			kind: "object",
 			loc: {
 				start: { row: startRow, col: startCol, index: startIdx },
-				end: { row: endTok.row, col: endTok.col, index: endTok.index },
+				end: { row: endTok.row, col: endTok.col + (endTok.endIndex - endTok.index), index: endTok.endIndex },
 			},
 			members: members as any,
 		};
@@ -164,7 +164,7 @@ export class Parser {
 			kind: "object",
 			loc: {
 				start: { row: openTok.row, col: openTok.col, index: openTok.index },
-				end: { row: closeTok.row, col: closeTok.col, index: closeTok.index },
+				end: { row: closeTok.row, col: closeTok.col + (closeTok.endIndex - closeTok.index), index: closeTok.endIndex },
 			},
 			members: members as any,
 		};
@@ -335,7 +335,7 @@ export class Parser {
 			kind: "array",
 			loc: {
 				start: { row: openTok.row, col: openTok.col, index: openTok.index },
-				end: { row: closeTok.row, col: closeTok.col, index: closeTok.index },
+				end: { row: closeTok.row, col: closeTok.col + (closeTok.endIndex - closeTok.index), index: closeTok.endIndex },
 			},
 			elements,
 		};

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { createEventBus, type ProjectInfo, type ProjectLanguage, type ProjectEventMap } from "@project/core";
 import { createProjectFileSystem } from "@project/fs";
-import { TreeSnapshot, useAppStore, useProjectSession } from "@project/state";
+import { TreeSnapshot, useAppStore, useProjectSession, useValidationStore } from "@project/state";
 import type { ProjectRecord } from "@project/state";
 import { useNavigate, useParams } from "@tanstack/react-router";
 
@@ -33,6 +33,7 @@ export function useProjectActions() {
 			const fs = await createProjectFileSystem(project, events, {
 				onTreeSnapshotChange: (snapshot) => useProjectSession.setState({ treeSnapshot: new TreeSnapshot(snapshot) }),
 			});
+			useValidationStore.setState({ resultsByPath: {}, summary: { total: 0, errors: 0, warnings: 0, infos: 0, deprecated: 0 } });
 
 			setCurrentProject({ project, fs, events });
 		},

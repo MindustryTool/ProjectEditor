@@ -93,7 +93,7 @@ export function ItemPanel({ path }: ItemPanelProps) {
 		<Panel>
 			<div className="space-y-4">
 				<SpritePicker path={path} />
-				<FieldRenderer fields={fields} values={values} updater={handleUpdate} />
+				<FieldRenderer path={path} fields={fields} values={values} updater={handleUpdate} />
 			</div>
 		</Panel>
 	);

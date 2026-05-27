@@ -24,6 +24,7 @@ function decodeContent(data: ArrayBuffer | null | undefined): string {
 function scheduleValidation(compositeKey: string, data: ArrayBuffer | null | undefined) {
 	const path = extractPath(compositeKey);
 	const existing = debounceTimers.get(path);
+
 	if (existing) clearTimeout(existing);
 
 	debounceTimers.set(
@@ -68,7 +69,7 @@ export function registerValidationListener() {
 		for (const key of Object.keys(curr)) {
 			const currEntry = curr[key]!;
 			const prevEntry = prev[key];
-			if (currEntry.currentVersion !== (prevEntry?.currentVersion ?? 0) || currEntry.currentVersion === 0) {
+			if (currEntry.currentVersion !== (prevEntry?.currentVersion ?? 0) || prevEntry === undefined || prevEntry.loading === true) {
 				scheduleValidation(key, currEntry.data);
 			}
 		}

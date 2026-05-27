@@ -189,6 +189,9 @@ importers:
       valibot:
         specifier: ^1.4.0
         version: 1.4.0(typescript@6.0.3)
+      zustand:
+        specifier: ^5.0.0
+        version: 5.0.13(@types/react@19.2.15)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6))
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: ^1.38.0
