@@ -158,7 +158,7 @@ function sortTreeNodes(nodes: TreeNode[]) {
 
 function TreeNodeItem({ node, parentPath, selectedPath, onSelect, projectId, depth = 0, editingPath, onEditingPathChange, onDeleteRequest }: TreeNodeItemProps) {
 	const context = useCurrentProject();
-	const [expanded, setExpanded] = useState(depth === 0 && node.type === "folder");
+	const [expanded, setExpanded] = useState(false);
 	const currentPath = parentPath ? `${parentPath}/${node.name}` : node.name;
 	const isSelected = selectedPath === currentPath;
 	const isFolder = node.type === "folder";

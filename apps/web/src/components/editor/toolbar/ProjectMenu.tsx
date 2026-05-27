@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
@@ -14,6 +14,7 @@ import { ProjectSettingsDialog } from "./ProjectSettingsDialog";
 import { useProjectActions } from "../useProjectActions";
 import type { ProjectRecord } from "@project/storage";
 import type { ProjectLanguage } from "@project/core";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "#/components/ui/dialog";
 
 interface ProjectMenuProps {
 	className?: string;
@@ -24,6 +25,9 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 	const hasProject = useProjectSession((state) => state.projectContext !== null);
 	const { closeProject, createProject, openProjectFromRecord } = useProjectActions();
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const [importing, setImporting] = useState(false);
+	const [paths, setPaths] = useState<string[]>([]);
+	const listRef = useRef<HTMLDivElement>(null);
 
 	const handleImportProject = useCallback(async () => {
 		fileInputRef.current?.click();
@@ -32,6 +36,9 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 	const handleFileSelected = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (!file) return;
+
+		setImporting(true);
+		setPaths([]);
 
 		try {
 			const buffer = await file.arrayBuffer();
@@ -52,6 +59,12 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 				onTreeSnapshotChange: (snapshot) => useProjectSession.setState({ treeSnapshot: snapshot }),
 			});
 
+			const unsubscribe = events.on("file:changed", (path) => {
+				if (path.kind === "write") {
+					setPaths((prev) => [...prev, path.path]);
+				}
+			});
+
 			useAppStore.setState((state) => ({
 				projects: [...state.projects, project],
 				lastProjectId: project.id,
@@ -60,9 +73,13 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 
 			await fs.writeFiles(result.entries);
 
-			toast.success("Project imported successfully");
+			unsubscribe();
+
+			toast.success(`Project imported successfully`);
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Failed to import project");
+		} finally {
+			setImporting(false);
 		}
 
 		e.target.value = "";
@@ -95,6 +112,12 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 		[closeProject, openProjectFromRecord],
 	);
 
+	useEffect(() => {
+		if (listRef.current) {
+			listRef.current.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
+		}
+	}, [paths]);
+
 	return (
 		<>
 			<input ref={fileInputRef} type="file" accept=".zip" className="hidden" onChange={handleFileSelected} />
@@ -111,43 +134,54 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 					</button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="start" className="w-44">
-					<DropdownMenuItem onClick={handleImportProject}>
-						{t("projectMenu.importProject")}
-					</DropdownMenuItem>
+					<DropdownMenuItem onClick={handleImportProject}>{t("projectMenu.importProject")}</DropdownMenuItem>
 					<ProjectPickerDialog
-					mode="create"
-					trigger={<DropdownMenuItem onSelect={(e) => e.preventDefault()}>{t("projectMenu.createProject")}</DropdownMenuItem>}
-					onCreateProject={handleCreateProject}
-					onSelectProject={handleOpenProject}
-				/>
-				<ProjectPickerDialog
-					mode="open"
-					trigger={<DropdownMenuItem onSelect={(e) => e.preventDefault()}>{t("projectMenu.openProject")}</DropdownMenuItem>}
-					onCreateProject={handleCreateProject}
-					onSelectProject={handleOpenProject}
-				/>
-				<ProjectPickerDialog
-					mode="change"
-					trigger={
-						<DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={!hasProject}>
-							{t("projectMenu.changeProject")}
-						</DropdownMenuItem>
-					}
-					onCreateProject={handleCreateProject}
-					onSelectProject={handleChangeProject}
-				/>
-				<ProjectSettingsDialog
-					trigger={
-						<DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={!hasProject}>
-							{t("projectMenu.projectSettings")}
-						</DropdownMenuItem>
-					}
-				/>
-				<DropdownMenuItem onClick={closeProject} disabled={!hasProject}>
-					{t("projectMenu.closeProject")}
-				</DropdownMenuItem>
-			</DropdownMenuContent>
-		</DropdownMenu>
+						mode="create"
+						trigger={<DropdownMenuItem onSelect={(e) => e.preventDefault()}>{t("projectMenu.createProject")}</DropdownMenuItem>}
+						onCreateProject={handleCreateProject}
+						onSelectProject={handleOpenProject}
+					/>
+					<ProjectPickerDialog
+						mode="open"
+						trigger={<DropdownMenuItem onSelect={(e) => e.preventDefault()}>{t("projectMenu.openProject")}</DropdownMenuItem>}
+						onCreateProject={handleCreateProject}
+						onSelectProject={handleOpenProject}
+					/>
+					<ProjectPickerDialog
+						mode="change"
+						trigger={
+							<DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={!hasProject}>
+								{t("projectMenu.changeProject")}
+							</DropdownMenuItem>
+						}
+						onCreateProject={handleCreateProject}
+						onSelectProject={handleChangeProject}
+					/>
+					<ProjectSettingsDialog
+						trigger={
+							<DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={!hasProject}>
+								{t("projectMenu.projectSettings")}
+							</DropdownMenuItem>
+						}
+					/>
+					<DropdownMenuItem onClick={closeProject} disabled={!hasProject}>
+						{t("projectMenu.closeProject")}
+					</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
+			<Dialog open={importing}>
+				<DialogContent>
+					<DialogTitle>{t("projectMenu.importProject")}</DialogTitle>
+					<DialogDescription />
+					<div className="grid gap-1 p-2 rounded-md border max-h-[200px] overflow-y-auto" ref={listRef}>
+						{paths.map((path, index) => (
+							<div key={path} className="text-xs text-muted-foreground">
+								{`${index + 1}. ${path}`}
+							</div>
+						))}
+					</div>
+				</DialogContent>
+			</Dialog>
 		</>
 	);
 }

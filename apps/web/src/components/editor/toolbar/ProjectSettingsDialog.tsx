@@ -166,7 +166,11 @@ function DeleteProject({ projectId: propId, onDeleted }: { projectId?: string; o
 					<AlertDialogCancel>{t("projectSettings.cancel")}</AlertDialogCancel>
 					<AlertDialogAction
 						variant="destructive"
-						onClick={() => effectiveId && deleteMutation.mutate(effectiveId)}
+						onClick={(event) => {
+							event.stopPropagation();
+							event.preventDefault();
+							if (effectiveId) deleteMutation.mutate(effectiveId);
+						}}
 						disabled={deleteMutation.isPending}
 					>
 						{deleteMutation.isPending ? <Spinner /> : t("projectSettings.confirmDelete")}
@@ -182,15 +186,12 @@ export function ProjectSettingsDialog({ trigger, project, onDeleted }: ProjectSe
 	const [open, setOpen] = useState(false);
 	const [resetKey, setResetKey] = useState(0);
 
-	const handleOpenChange = useCallback(
-		(nextOpen: boolean) => {
-			setOpen(nextOpen);
-			if (nextOpen) {
-				setResetKey((k) => k + 1);
-			}
-		},
-		[],
-	);
+	const handleOpenChange = useCallback((nextOpen: boolean) => {
+		setOpen(nextOpen);
+		if (nextOpen) {
+			setResetKey((k) => k + 1);
+		}
+	}, []);
 
 	return (
 		<Dialog open={open} onOpenChange={handleOpenChange}>

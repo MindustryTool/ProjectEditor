@@ -61,6 +61,7 @@ export const useProjectSession = create<ProjectSession>()(
 					projectContext: context,
 					treeSnapshot: context ? state.treeSnapshot : [],
 				}));
+                console.error(new Error("setCurrentProject"));
 			},
 
 			updateCurrentProject: (patch) => {

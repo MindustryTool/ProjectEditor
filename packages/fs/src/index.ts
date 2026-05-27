@@ -85,14 +85,34 @@ export class ProjectFileSystem {
 	}
 
 	async writeFiles(entries: { name: string; data: Uint8Array }[]): Promise<void> {
-		for (const entry of entries) {
-			const parts = entry.name.split("/");
-			if (parts.length > 1) {
-				await this.vfs.mkdir(this.scopePath(parts.slice(0, -1).join("/")));
+		const BATCH_SIZE = 20;
+
+		const dirs = new Set(
+			entries
+				.map((e) => e.name.split("/").slice(0, -1).join("/"))
+				.filter(Boolean),
+		);
+		await Promise.all([...dirs].map((d) => this.vfs.mkdir(this.scopePath(d))));
+
+		for (let i = 0; i < entries.length; i += BATCH_SIZE) {
+			const batch = entries.slice(i, i + BATCH_SIZE);
+			const results = await Promise.allSettled(
+				batch.map((entry) =>
+					this.vfs.writeFile(this.scopePath(entry.name), new Uint8Array(entry.data)),
+				),
+			);
+			for (const entry of batch) {
+				this.events.emit("file:changed", { path: entry.name, kind: "write" });
 			}
-			await this.vfs.writeFile(this.scopePath(entry.name), new Uint8Array(entry.data));
-			this.events.emit("file:changed", { path: entry.name, kind: "write" });
+			const rejected = results.filter((r) => r.status === "rejected") as PromiseRejectedResult[];
+			if (rejected.length > 0) {
+				throw new AggregateError(
+					rejected.map((r) => r.reason),
+					`${rejected.length}/${batch.length} file writes failed in batch ${Math.floor(i / BATCH_SIZE) + 1}`,
+				);
+			}
 		}
+
 		await this.refreshTree(true);
 	}
 
