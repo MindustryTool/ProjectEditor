@@ -1,14 +1,20 @@
-import { useEffect, useRef, useCallback } from "react";
-import type { editor } from "monaco-editor";
+import { useEffect, useRef, useCallback, useState } from "react";
+import type { editor, IDisposable, IPosition } from "monaco-editor";
 import Editor, { type BeforeMount, type OnMount } from "@monaco-editor/react";
 import { HJSON_LANGUAGE_ID, hjsonMonarchGrammar, hjsonLanguageConfig } from "~/lib/monaco/hjsonLanguage";
 import { JSON_MINDUSTRY_LANGUAGE_ID, jsonMindustryMonarchGrammar, jsonMindustryLanguageConfig } from "~/lib/monaco/jsonMindustryLanguage";
 import {
+	COLOR_NAMES,
 	ensureInlineColorClass,
+	findEditableColorTagAtColumn,
+	formatMindustryColorTag,
 	getColorThemeRules,
+	MINDUSTRY_COLORS,
 	MONACO_THEME_DARK,
 	MONACO_THEME_LIGHT,
-	resolveMindustryColor,
+	parseMindustryStringTags,
+	toPickerColorValue,
+	type MindustryColorTagMatch,
 } from "~/lib/monaco/colorTags";
 import { useValidationStore, Severity } from "@project/state";
 import { useFileContentStore } from "@project/state";
@@ -25,13 +31,23 @@ interface MonacoEditorProps {
 	filePath: string;
 }
 
+interface ActiveColorTagState extends MindustryColorTagMatch {
+	lineNumber: number;
+	top: number;
+	left: number;
+	pickerColor: string;
+}
+
 export function MonacoEditor({ value, onChange, language, readOnly, filePath }: MonacoEditorProps) {
 	const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 	const colorDecorationsRef = useRef<editor.IEditorDecorationsCollection | null>(null);
+	const editorDisposablesRef = useRef<IDisposable[]>([]);
+	const containerRef = useRef<HTMLDivElement | null>(null);
 	const theme = useMonacoTheme();
 	const { t } = useTranslation();
 	const monacoConfigured = useRef(false);
+	const [activeColorTag, setActiveColorTag] = useState<ActiveColorTagState | null>(null);
 
 	if (!monacoConfigured.current) {
 		configureMonaco();
@@ -78,6 +94,49 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 		updateMarkers();
 	}, [updateMarkers]);
 
+	const clearActiveColorTag = useCallback(() => {
+		setActiveColorTag(null);
+	}, []);
+
+	const resolveActiveColorTag = useCallback(
+		(position?: IPosition | null): ActiveColorTagState | null => {
+			if (readOnly) return null;
+
+			const editorInstance = editorRef.current;
+			if (!editorInstance) return null;
+
+			const model = editorInstance.getModel();
+			const currentPosition = position ?? editorInstance.getPosition();
+			if (!model || !currentPosition) return null;
+
+			const line = model.getLineContent(currentPosition.lineNumber);
+			const match = findEditableColorTagAtColumn(line, currentPosition.column);
+			if (!match) return null;
+
+			const anchor = editorInstance.getScrolledVisiblePosition({
+				lineNumber: currentPosition.lineNumber,
+				column: match.endColumn,
+			});
+			if (!anchor) return null;
+
+			return {
+				...match,
+				lineNumber: currentPosition.lineNumber,
+				top: anchor.top + anchor.height + 6,
+				left: anchor.left,
+				pickerColor: toPickerColorValue(match.resolvedColor) ?? "#ffffff",
+			};
+		},
+		[readOnly],
+	);
+
+	const refreshActiveColorTag = useCallback(
+		(position?: IPosition | null) => {
+			setActiveColorTag(resolveActiveColorTag(position));
+		},
+		[resolveActiveColorTag],
+	);
+
 	const updateColorDecorations = useCallback(() => {
 		const editorInstance = editorRef.current;
 		const monacoInstance = monacoRef.current;
@@ -90,6 +149,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 
 		for (let lineNumber = 1; lineNumber <= model.getLineCount(); lineNumber += 1) {
 			const line = model.getLineContent(lineNumber);
+			const tagsByStartIndex = new Map(parseMindustryStringTags(line).map((match) => [match.startIndex, match]));
 			let quote: '"' | "'" | null = null;
 			let activeClassName: string | null = null;
 			let segmentStartColumn: number | null = null;
@@ -118,11 +178,8 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 					}
 
 					if (char === "[") {
-						const remaining = line.slice(index);
-						const resetMatch = remaining.match(/^\[\]/);
-						const colorMatch = remaining.match(/^\[(#(?:[0-9a-fA-F]{1,6}|[0-9a-fA-F]{8})|[a-zA-Z]+)\]/);
-
-						if (resetMatch || colorMatch) {
+						const tagMatch = tagsByStartIndex.get(index);
+						if (tagMatch) {
 							if (activeClassName && segmentStartColumn !== null && segmentStartColumn < index + 1) {
 								decorations.push({
 									range: new monacoInstance.Range(lineNumber, segmentStartColumn, lineNumber, index + 1),
@@ -130,20 +187,17 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 								});
 							}
 
-							if (resetMatch) {
+							if (tagMatch.type === "reset") {
 								activeClassName = null;
 								segmentStartColumn = null;
-								index += resetMatch[0].length - 1;
+								index = tagMatch.endIndex - 1;
 								continue;
 							}
 
-							if (colorMatch) {
-								const colorValue = resolveMindustryColor(colorMatch[1] ?? "");
-								activeClassName = colorValue ? ensureInlineColorClass(colorValue) : null;
-								segmentStartColumn = activeClassName ? index + colorMatch[0].length + 1 : null;
-								index += colorMatch[0].length - 1;
-								continue;
-							}
+							activeClassName = ensureInlineColorClass(tagMatch.resolvedColor);
+							segmentStartColumn = index + tagMatch.text.length + 1;
+							index = tagMatch.endIndex - 1;
+							continue;
 						}
 					}
 
@@ -169,6 +223,10 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 	}, [updateColorDecorations, value, language]);
 
 	useEffect(() => {
+		refreshActiveColorTag();
+	}, [refreshActiveColorTag, value, language, filePath, readOnly]);
+
+	useEffect(() => {
 		if (!filePath) return;
 		const projectContext = useProjectSession.getState().projectContext;
 		if (!projectContext) return;
@@ -181,6 +239,62 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 			useFileContentStore.getState().cleanup(projectId, filePath);
 		};
 	}, [filePath]);
+
+	useEffect(() => {
+		const handlePointerDown = (event: MouseEvent) => {
+			const container = containerRef.current;
+			if (!container) return;
+			if (container.contains(event.target as Node)) return;
+			clearActiveColorTag();
+		};
+
+		document.addEventListener("mousedown", handlePointerDown);
+		return () => {
+			document.removeEventListener("mousedown", handlePointerDown);
+		};
+	}, [clearActiveColorTag]);
+
+	const replaceActiveColorTag = useCallback(
+		(replacement: string) => {
+			const editorInstance = editorRef.current;
+			const monacoInstance = monacoRef.current;
+			const activeTag = activeColorTag;
+			if (!editorInstance || !monacoInstance || !activeTag || readOnly) return;
+
+			const range = new monacoInstance.Range(activeTag.lineNumber, activeTag.startColumn, activeTag.lineNumber, activeTag.endColumn);
+
+			editorInstance.pushUndoStop();
+			editorInstance.executeEdits("mindustry-color-picker", [{ range, text: replacement, forceMoveMarkers: true }]);
+			editorInstance.pushUndoStop();
+
+			const nextPosition = {
+				lineNumber: activeTag.lineNumber,
+				column: activeTag.startColumn + Math.min(replacement.length - 1, 1),
+			};
+			editorInstance.setPosition(nextPosition);
+			editorInstance.focus();
+			refreshActiveColorTag(nextPosition);
+		},
+		[activeColorTag, readOnly, refreshActiveColorTag],
+	);
+
+	const handleNamedColorPick = useCallback(
+		(name: keyof typeof MINDUSTRY_COLORS) => {
+			const replacement = formatMindustryColorTag(name);
+			if (!replacement) return;
+			replaceActiveColorTag(replacement);
+		},
+		[replaceActiveColorTag],
+	);
+
+	const handleCustomColorPick = useCallback(
+		(nextColor: string) => {
+			const replacement = formatMindustryColorTag(nextColor);
+			if (!replacement) return;
+			replaceActiveColorTag(replacement);
+		},
+		[replaceActiveColorTag],
+	);
 
 	const handleBeforeMount: BeforeMount = (monaco) => {
 		monacoRef.current = monaco;
@@ -220,35 +334,101 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 		editorRef.current = editor;
 		updateMarkers();
 		updateColorDecorations();
+		editorDisposablesRef.current.forEach((disposable) => disposable.dispose());
+		editorDisposablesRef.current = [
+			editor.onDidChangeCursorSelection((event) => {
+				if (!event.selection.isEmpty()) {
+					clearActiveColorTag();
+					return;
+				}
+				refreshActiveColorTag(event.selection.getPosition());
+			}),
+			editor.onDidScrollChange(() => {
+				refreshActiveColorTag();
+			}),
+			editor.onDidLayoutChange(() => {
+				refreshActiveColorTag();
+			}),
+			editor.onMouseDown((event) => {
+				refreshActiveColorTag(event.target.position);
+			}),
+			editor.onDidChangeModel(() => {
+				clearActiveColorTag();
+			}),
+		];
 	};
 
+	useEffect(() => {
+		return () => {
+			editorDisposablesRef.current.forEach((disposable) => disposable.dispose());
+			editorDisposablesRef.current = [];
+		};
+	}, []);
+
 	return (
-		<Editor
-			theme={theme}
-			language={language}
-			value={value}
-			onChange={(newValue) => {
-				const next = newValue ?? "";
-				onChange(next);
-			}}
-			beforeMount={handleBeforeMount}
-			onMount={handleMount}
-			options={{
-				readOnly,
-				minimap: { enabled: false },
-				fontSize: 15,
-				lineNumbers: "on",
-				renderWhitespace: "selection",
-				bracketPairColorization: { enabled: true },
-				autoClosingBrackets: "always",
-				autoClosingQuotes: "always",
-				scrollBeyondLastLine: false,
-				wordWrap: "on",
-				tabSize: 2,
-				insertSpaces: true,
-				padding: { top: 8 },
-			}}
-			loading={<div className="flex h-full items-center justify-center text-xs text-muted-foreground">Loading editor...</div>}
-		/>
+		<div ref={containerRef} className="relative h-full w-full">
+			<Editor
+				theme={theme}
+				language={language}
+				value={value}
+				onChange={(newValue) => {
+					const next = newValue ?? "";
+					onChange(next);
+				}}
+				beforeMount={handleBeforeMount}
+				onMount={handleMount}
+				options={{
+                    readOnly,
+					minimap: { enabled: false },
+					fontSize: 15,
+					lineNumbers: "on",
+					renderWhitespace: "selection",
+					bracketPairColorization: { enabled: true },
+					autoClosingBrackets: "always",
+					autoClosingQuotes: "always",
+					scrollBeyondLastLine: false,
+					wordWrap: "on",
+					tabSize: 2,
+					insertSpaces: true,
+					padding: { top: 8 },
+				}}
+				loading={<div className="flex h-full items-center justify-center text-xs text-muted-foreground">Loading editor...</div>}
+			/>
+			{activeColorTag ? (
+				<div
+					className="absolute z-20 w-64 rounded-md border border-border bg-background p-3 shadow-lg"
+					style={{
+						top: activeColorTag.top,
+						left: Math.max(8, activeColorTag.left),
+					}}
+				>
+					<div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
+						<span>{activeColorTag.text}</span>
+						<input
+							type="color"
+							value={activeColorTag.pickerColor}
+							className="h-7 w-9 cursor-pointer rounded border border-border bg-transparent p-0"
+							onChange={(event) => {
+								handleCustomColorPick(event.target.value);
+							}}
+						/>
+					</div>
+					<div className="grid grid-cols-6 gap-2">
+						{COLOR_NAMES.map((name) => (
+							<button
+								key={name}
+								type="button"
+								className="h-8 rounded border border-border"
+								style={{ backgroundColor: MINDUSTRY_COLORS[name] }}
+								title={name}
+								onClick={() => {
+									handleNamedColorPick(name);
+								}}
+							/>
+						))}
+					</div>
+				</div>
+			) : null}
+		</div>
 	);
 }

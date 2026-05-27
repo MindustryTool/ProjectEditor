@@ -25,14 +25,3 @@ export const ModHjsonSchema = v.object({
 });
 
 export type ModHjsonData = v.InferOutput<typeof ModHjsonSchema>;
-
-export const defaultModHjson: ModHjsonData = {
-	name: "my-hjson-mod",
-	displayName: "Cool mod",
-	author: "Me",
-	description: "A cool mod",
-	version: "1.0.0",
-	minGameVersion: "158",
-	dependencies: [],
-	hidden: false,
-};

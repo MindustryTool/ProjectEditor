@@ -6,7 +6,7 @@ import { FileExplorer } from "./left/FileExplorer";
 export const EditorLeftPanel = memo(function EditorLeftPanel() {
 	const { t } = useTranslation();
 	return (
-		<Panel className="p-0" header={t("editor.explorer")}>
+		<Panel header={t("editor.explorer")}>
 			<FileExplorer />
 		</Panel>
 	);

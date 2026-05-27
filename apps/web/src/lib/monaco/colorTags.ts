@@ -1,6 +1,6 @@
 import type { editor, languages } from "monaco-editor";
 
-export const MINDUSTRY_COLORS: Record<string, string> = {
+export const MINDUSTRY_COLORS = {
 	accent: "#ffd37f",
 	white: "#ffffff",
 	lightGray: "#bfbfbf",
@@ -37,7 +37,7 @@ export const MINDUSTRY_COLORS: Record<string, string> = {
 	purple: "#a020f0",
 	violet: "#ee82ee",
 	maroon: "#b03060",
-};
+} as const satisfies Record<string, string>;
 
 export const COLOR_NAMES = Object.keys(MINDUSTRY_COLORS) as Array<keyof typeof MINDUSTRY_COLORS>;
 
@@ -46,6 +46,32 @@ export const MONACO_THEME_DARK = "mindustry-vs-dark";
 const INLINE_COLOR_STYLE_ID = "mindustry-monaco-inline-colors";
 const inlineColorClasses = new Set<string>();
 const MINDUSTRY_HEX_COLOR = "#(?:[0-9a-fA-F]{1,6}|[0-9a-fA-F]{8})";
+const COLOR_TAG_PATTERN = new RegExp(`^\\[(${MINDUSTRY_HEX_COLOR}|[a-zA-Z]+)\\]`);
+
+export type MindustryColorTagKind = "named" | "hex";
+
+export interface MindustryColorTagMatch {
+	type: "color";
+	startIndex: number;
+	endIndex: number;
+	startColumn: number;
+	endColumn: number;
+	text: string;
+	tagValue: string;
+	kind: MindustryColorTagKind;
+	resolvedColor: string;
+}
+
+export interface MindustryResetTagMatch {
+	type: "reset";
+	startIndex: number;
+	endIndex: number;
+	startColumn: number;
+	endColumn: number;
+	text: "[]";
+}
+
+export type MindustryStringTagMatch = MindustryColorTagMatch | MindustryResetTagMatch;
 
 export function getColorTagRules(statePrefix: string): languages.IMonarchLanguageRule[] {
 	const namedRules = COLOR_NAMES.map(
@@ -75,9 +101,13 @@ export function getColorThemeRules(): editor.ITokenThemeRule[] {
 	});
 }
 
+export function isMindustryNamedColor(tag: string): tag is keyof typeof MINDUSTRY_COLORS {
+	return tag in MINDUSTRY_COLORS;
+}
+
 export function resolveMindustryColor(tag: string): string | null {
-	if (tag in MINDUSTRY_COLORS) {
-		return MINDUSTRY_COLORS[tag as keyof typeof MINDUSTRY_COLORS] ?? null;
+	if (isMindustryNamedColor(tag)) {
+		return MINDUSTRY_COLORS[tag] ?? null;
 	}
 	if (new RegExp(`^${MINDUSTRY_HEX_COLOR}$`).test(tag)) {
 		const hex = tag.slice(1);
@@ -87,6 +117,103 @@ export function resolveMindustryColor(tag: string): string | null {
 		const rgb = hex.padEnd(6, "0");
 		return `#${rgb}ff`;
 	}
+	return null;
+}
+
+export function toPickerColorValue(color: string): string | null {
+	const normalized = color.trim().match(/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/);
+	if (!normalized) return null;
+	return `#${normalized[1]!.slice(0, 6).toLowerCase()}`;
+}
+
+export function formatMindustryColorTag(value: string): string | null {
+	if (isMindustryNamedColor(value)) {
+		return `[${value}]`;
+	}
+
+	const pickerColor = toPickerColorValue(value);
+	if (!pickerColor) return null;
+	return `[${pickerColor}]`;
+}
+
+export function parseMindustryStringTags(line: string): MindustryStringTagMatch[] {
+	const matches: MindustryStringTagMatch[] = [];
+	let quote: '"' | "'" | null = null;
+
+	for (let index = 0; index < line.length; index += 1) {
+		const char = line[index];
+		if (!char) continue;
+
+		if (!quote) {
+			if (char === '"' || char === "'") {
+				quote = char;
+			}
+			continue;
+		}
+
+		if (char === "\\") {
+			index += 1;
+			continue;
+		}
+
+		if (char === quote) {
+			quote = null;
+			continue;
+		}
+
+		if (char !== "[") {
+			continue;
+		}
+
+		if (line.startsWith("[]", index)) {
+			matches.push({
+				type: "reset",
+				startIndex: index,
+				endIndex: index + 2,
+				startColumn: index + 1,
+				endColumn: index + 3,
+				text: "[]",
+			});
+			index += 1;
+			continue;
+		}
+
+		const colorMatch = line.slice(index).match(COLOR_TAG_PATTERN);
+		if (!colorMatch) continue;
+
+		const text = colorMatch[0];
+		const tagValue = colorMatch[1] ?? "";
+		const resolvedColor = resolveMindustryColor(tagValue);
+		if (!resolvedColor) continue;
+
+		matches.push({
+			type: "color",
+			startIndex: index,
+			endIndex: index + text.length,
+			startColumn: index + 1,
+			endColumn: index + text.length + 1,
+			text,
+			tagValue,
+			kind: tagValue.startsWith("#") ? "hex" : "named",
+			resolvedColor,
+		});
+		index += text.length - 1;
+	}
+
+	return matches;
+}
+
+export function findEditableColorTagAtColumn(line: string, column: number): MindustryColorTagMatch | null {
+	if (column < 1) return null;
+	const cursorIndex = column - 1;
+
+	for (const match of parseMindustryStringTags(line)) {
+		if (match.type !== "color") continue;
+		if (cursorIndex >= match.startIndex && cursorIndex < match.endIndex) {
+			return match;
+		}
+	}
+
 	return null;
 }
 

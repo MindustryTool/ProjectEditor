@@ -5,7 +5,7 @@ import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import { FormField, FormLabel, FormControl, FormDescription } from "~/components/ui/form";
 import { Field, FieldContent, FieldLabel, FieldDescription } from "~/components/ui/field";
-import { defaultModHjson, type ModHjsonData } from "@project/validation";
+import { type ModHjsonData } from "@project/validation";
 import { useState, useEffect, useRef } from "react";
 import { useFileContentString } from "@project/state";
 import { Panel } from "@/components/editor/Panel";
@@ -13,7 +13,7 @@ import { HJSON, type StructuredObject } from "@project/hjson";
 
 function serializeValue(key: keyof ModHjsonData, value: unknown): string {
 	if (key === "dependencies") {
-		const deps = (value as string[]).filter((d) => d.trim() !== "");
+		const deps = (value as string[])?.filter((d) => d.trim() !== "");
 		return HJSON.stringify(deps);
 	}
 	return HJSON.stringify(value);
@@ -63,21 +63,20 @@ const TEXT_FIELDS: {
 export function ModHjsonPanel({ path }: { path: string }) {
 	const { t } = useTranslation();
 	const { data, write, isLoading } = useFileContentString(path);
-	const [values, setValues] = useState<ModHjsonData>(defaultModHjson);
+	const [values, setValues] = useState<Partial<ModHjsonData>>({});
 	const contentRef = useRef<string | null>(null);
 
 	useEffect(() => {
 		if (data === null || isLoading) return;
 		contentRef.current = data;
 		if (data === "") {
-			setValues(defaultModHjson);
+			setValues({});
 			return;
 		}
 		try {
 			const result = HJSON.parseStructured(data) as StructuredObject;
 			setValues(result.valueOf() as ModHjsonData);
 		} catch {
-			setValues(defaultModHjson);
 		}
 	}, [data, isLoading]);
 
@@ -87,7 +86,7 @@ export function ModHjsonPanel({ path }: { path: string }) {
 
 		const content = contentRef.current;
 		if (content === null) {
-			write(HJSON.stringify({ ...defaultModHjson, [key]: value }, null, 2));
+			write(HJSON.stringify({ ...values, [key]: value }, null, 2));
 			return;
 		}
 

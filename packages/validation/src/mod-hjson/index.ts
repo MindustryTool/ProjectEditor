@@ -1,2 +1,2 @@
-export { ModNameSchema, ModHjsonSchema, defaultModHjson } from "./schema"
-export type { ModHjsonData } from "./schema"
+export { ModNameSchema, ModHjsonSchema } from "./schema";
+export type { ModHjsonData } from "./schema";
