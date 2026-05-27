@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: mod.hjson form editor renders with fields
-The system SHALL render a form-based editor in the SplitView center panel when `?path=mod.hjson` is selected, with labeled input fields for each mod metadata property. The form SHALL NOT include save or reset buttons. Changes SHALL be applied line-by-line to the file content rather than rebuilding the entire file.
+The system SHALL render a form-based editor in the SplitView center panel when `?path=mod.hjson` is selected, with labeled input fields for each mod metadata property. The form SHALL NOT include save or reset buttons. Changes SHALL be applied to the file content via position-based replacement rather than rebuilding the entire file.
 
 #### Scenario: Form renders eight fields
 - **WHEN** `?path=mod.hjson` is active
@@ -15,36 +15,17 @@ The system SHALL render a form-based editor in the SplitView center panel when `
 - **WHEN** the form is rendered
 - **THEN** the form SHALL NOT contain save or reset buttons
 
-### Requirement: Form uses TanStack Form with Valibot validation
-The mod.hjson form SHALL use `@tanstack/react-form` for form state management and Valibot for field validation.
+### Requirement: Form uses HJSON structured parser for field values
+The mod.hjson editor SHALL parse the file content using `HJSON.parse()` from `@project/hjson` with structured mode enabled. Field values SHALL be read from the parsed result. Inline field validation SHALL NOT be performed in the editor panel — validation is handled by the file validation system.
 
-#### Scenario: name field validates mod-name format
-- **WHEN** the user enters a value with uppercase letters or spaces in the `name` field
-- **THEN** the field SHALL display a validation error
+#### Scenario: content parsed with HJSON structured parser
+- **WHEN** the mod.hjson file content loads
+- **THEN** the editor SHALL parse it using `HJSON.parse(content, undefined, { structured: true })`
+- **THEN** field values SHALL be extracted from the structured result
 
-#### Scenario: displayName length validated
-- **WHEN** the user enters a `displayName` shorter than 2 or longer than 127 characters
-- **THEN** the field SHALL display a validation error
-
-#### Scenario: description max length validated
-- **WHEN** the user enters a description longer than 9999 characters
-- **THEN** the field SHALL display a validation error
-
-#### Scenario: author length validated
-- **WHEN** the user enters an `author` shorter than 2 or longer than 127 characters
-- **THEN** the field SHALL display a validation error
-
-#### Scenario: version max length validated
-- **WHEN** the user enters a `version` longer than 127 characters
-- **THEN** the field SHALL display a validation error
-
-#### Scenario: minGameVersion must be a number > 145
-- **WHEN** the user enters a `minGameVersion` that is not a valid number or is 145 or less
-- **THEN** the field SHALL display a validation error
-
-#### Scenario: dependencies validated as mod-names
-- **WHEN** the user enters a dependency that does not match the mod-name format
-- **THEN** the field SHALL display a validation error
+#### Scenario: No inline validation on field input
+- **WHEN** the user types in any field
+- **THEN** the editor SHALL NOT display inline validation errors for that field
 
 ### Requirement: Field labels and descriptions are translated
 All mod.hjson form field labels and descriptions SHALL use i18n translation keys.
@@ -94,17 +75,14 @@ The system SHALL render the `hidden` field as a checkbox in the mod.hjson form. 
 - **WHEN** the checkbox is checked
 - **THEN** the field value SHALL be `true`
 
-### Requirement: Changes applied line-by-line
-When the user modifies a field, the system SHALL update only the corresponding line in the file content. The line SHALL be identified by its key prefix (e.g., `name:` for the name field) and replaced with the new value. Other lines SHALL remain unchanged.
+### Requirement: Changes applied via position-based replacement
+When the user modifies a field, the system SHALL replace only the value portion of that field in the original source text, using the `valueStart`/`valueEnd` positions from the structured parse result. Other parts of the file SHALL remain unchanged, preserving comments and formatting.
 
-#### Scenario: Line-by-line update on change
-- **WHEN** the user types in any single-value field (name, displayName, author, description, version, minGameVersion)
-- **THEN** only the line starting with that field's key SHALL be replaced in the content passed to `update()`
+#### Scenario: Position-based replacement on change
+- **WHEN** the user modifies any field value
+- **THEN** the editor SHALL use the field's `valueStart`/`valueEnd` positions to slice the replacement into the original source string
+- **THEN** only the modified field's value range SHALL be replaced, leaving all other text intact
 
-#### Scenario: Full dependencies line replaced on list change
-- **WHEN** the user adds, removes, or edits a dependency
-- **THEN** only the `dependencies:` line SHALL be replaced with the updated list
-
-#### Scenario: Hidden line toggled
-- **WHEN** the user checks or unchecks the hidden checkbox
-- **THEN** only the `hidden:` line SHALL be replaced with the updated boolean value
+#### Scenario: Initial field values from parsed result
+- **WHEN** the mod.hjson file has no `hidden:` line (field is absent)
+- **THEN** the editor SHALL treat `hidden` as `false` (default value)

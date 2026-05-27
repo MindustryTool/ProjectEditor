@@ -1,6 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { createProjectInfo, createEventBus, type ProjectLanguage, type ProjectEventMap } from "@project/core";
+import {
+	createProjectInfo,
+	createEventBus,
+	type ProjectLanguage,
+	type ProjectEventMap,
+	importProject,
+	type ProjectInfo,
+} from "@project/core";
 import { createProjectFileSystem } from "@project/fs";
 import { DEFAULT_SETTINGS } from "@project/config";
 import { TreeSnapshot, useProjectSession } from "./session";
@@ -33,6 +40,7 @@ interface AppState {
 	saveProject: (record: ProjectRecord) => Promise<void>;
 	getAllProjects: () => ProjectRecord[];
 	deleteProject: (id: string) => Promise<void>;
+	importProject: (file: ArrayBuffer, callback: (path: string) => void) => Promise<ProjectInfo>;
 }
 
 export const useAppStore = create<AppState>()(
@@ -82,6 +90,37 @@ export const useAppStore = create<AppState>()(
 					delete state.projects[id];
 					return { projects: { ...state.projects } };
 				});
+			},
+			importProject: async (buffer, callback) => {
+				const result = await importProject(new Uint8Array(buffer));
+				const project = createProjectInfo(result.name, result.language);
+
+				await useAppStore.getState().saveProject({
+					id: project.id,
+					name: project.name,
+					language: project.language,
+					createdAt: project.createdAt,
+					updatedAt: project.updatedAt,
+				});
+
+				const events = createEventBus<ProjectEventMap>();
+				const fs = await createProjectFileSystem(project, events, {
+					onTreeSnapshotChange: (snapshot) => useProjectSession.setState({ treeSnapshot: new TreeSnapshot(snapshot) }),
+				});
+
+				const unsubscribe = events.on("file:changed", (path) => {
+					if (path.kind === "write") {
+						callback(path.path);
+					}
+				});
+
+				await fs.writeFiles(result.entries);
+
+				unsubscribe();
+
+				useProjectSession.getState().setCurrentProject({ project, fs, events });
+
+				return project;
 			},
 		}),
 		{

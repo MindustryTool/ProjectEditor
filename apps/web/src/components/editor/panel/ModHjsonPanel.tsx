@@ -123,7 +123,7 @@ export function ModHjsonPanel({ path }: { path: string }) {
 		updateValue("dependencies", newDeps);
 	}
 
-	const depsDisplay = values.dependencies.length > 0 ? values.dependencies : [""];
+	const depsDisplay = values.dependencies?.length > 0 ? values.dependencies : [""];
 
 	return (
 		<Panel>

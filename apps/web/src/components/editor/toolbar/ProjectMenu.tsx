@@ -4,10 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import { cn } from "~/lib/utils";
-import { useProjectSession, useAppStore, TreeSnapshot } from "@project/state";
-import { importProject, createProjectInfo, createEventBus } from "@project/core";
-import type { ProjectEventMap } from "@project/core";
-import { createProjectFileSystem } from "@project/fs";
+import { useProjectSession, useAppStore } from "@project/state";
 import { toast } from "sonner";
 import { ProjectPickerDialog } from "../ProjectPickerDialog";
 import { ProjectSettingsDialog } from "./ProjectSettingsDialog";
@@ -51,33 +48,9 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 
 			try {
 				const buffer = await file.arrayBuffer();
-				const result = await importProject(new Uint8Array(buffer));
-
-				const project = createProjectInfo(result.name, result.language);
-				await useAppStore.getState().saveProject({
-					id: project.id,
-					name: project.name,
-					language: project.language,
-					createdAt: project.createdAt,
-					updatedAt: project.updatedAt,
+				const project = await useAppStore.getState().importProject(buffer, (path) => {
+					setPaths((prev) => [...prev, path]);
 				});
-
-				const events = createEventBus<ProjectEventMap>();
-				const fs = await createProjectFileSystem(project, events, {
-					onTreeSnapshotChange: (snapshot) => useProjectSession.setState({ treeSnapshot: new TreeSnapshot(snapshot) }),
-				});
-
-				const unsubscribe = events.on("file:changed", (path) => {
-					if (path.kind === "write") {
-						setPaths((prev) => [...prev, path.path]);
-					}
-				});
-
-				useProjectSession.getState().setCurrentProject({ project, fs, events });
-
-				await fs.writeFiles(result.entries);
-
-				unsubscribe();
 
 				navigateToProject(project.id);
 				toast.success(`Project imported successfully`);

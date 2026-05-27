@@ -267,6 +267,12 @@ export async function createProjectFileSystem(
 		await ensureNode(fs, node);
 	}
 
+	const hasModMeta = (await fs.exists("/mod.hjson")) || (await fs.exists("/mod.json"));
+
+	if (!hasModMeta) {
+		await fs.createFile("/mod.hjson");
+	}
+
 	await fs.refreshTree();
 	return fs;
 }
@@ -513,7 +519,6 @@ export function isDefaultPath(tree: DefaultProjectFileTree, path: string): boole
 }
 
 export const jsonProjectTree = new DefaultProjectFileTree([
-	{ name: "mod.hjson", type: "file" },
 	{
 		name: "content",
 		type: "folder",

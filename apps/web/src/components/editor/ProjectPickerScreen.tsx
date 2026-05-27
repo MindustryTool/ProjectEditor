@@ -4,10 +4,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import type { ProjectLanguage } from "@project/core";
-import { importProject, createProjectInfo, createEventBus } from "@project/core";
-import type { ProjectEventMap } from "@project/core";
-import { createProjectFileSystem } from "@project/fs";
-import { TreeSnapshot, useAppStore, useProjectSession } from "@project/state";
+import { useAppStore } from "@project/state";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { FolderOpen, Plus, Settings, Upload } from "lucide-react";
 import { toast } from "sonner";
@@ -99,33 +96,9 @@ function ImportProjectSection({ onImported }: { onImported: (id: string) => void
 
 		try {
 			const buffer = await file.arrayBuffer();
-			const result = await importProject(new Uint8Array(buffer));
-			const project = createProjectInfo(result.name, result.language);
-
-			await useAppStore.getState().saveProject({
-				id: project.id,
-				name: project.name,
-				language: project.language,
-				createdAt: project.createdAt,
-				updatedAt: project.updatedAt,
+			const project = await useAppStore.getState().importProject(buffer, (path) => {
+				setPaths((prev) => [...prev, path]);
 			});
-
-			const events = createEventBus<ProjectEventMap>();
-			const fs = await createProjectFileSystem(project, events, {
-				onTreeSnapshotChange: (snapshot) => useProjectSession.setState({ treeSnapshot: new TreeSnapshot(snapshot) }),
-			});
-
-			const unsubscribe = events.on("file:changed", (path) => {
-				if (path.kind === "write") {
-					setPaths((prev) => [...prev, path.path]);
-				}
-			});
-
-			await fs.writeFiles(result.entries);
-
-			unsubscribe();
-
-			useProjectSession.getState().setCurrentProject({ project, fs, events });
 
 			toast.success(`Project imported successfully`);
 			onImported(project.id);
