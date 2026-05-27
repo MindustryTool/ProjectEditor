@@ -119,7 +119,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 				autoClosingBrackets: "always",
 				autoClosingQuotes: "always",
 				scrollBeyondLastLine: false,
-				wordWrap: "off",
+				wordWrap: "on",
 				tabSize: 2,
 				insertSpaces: true,
 				padding: { top: 8 },

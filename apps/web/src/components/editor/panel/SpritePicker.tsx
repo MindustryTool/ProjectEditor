@@ -67,11 +67,11 @@ function SpriteViewer({ path: spritePath }: { path: string }) {
 	return (
 		<div className="relative">
 			{objectUrl && <img className="object-contain w-full rounded border border-border" src={objectUrl} alt={spritePath} />}
-			<div className="backdrop-blur-sm bg-background/20 justify-end flex gap-1 p-1">
-				<Button variant="ghost" size="icon" aria-label="Replace sprite" onClick={handleReplace}>
+			<div className="backdrop-blur-sm justify-end flex gap-1 py-1">
+				<Button className="bg-transparent" variant="outline" size="icon" aria-label="Replace sprite" onClick={handleReplace}>
 					<Upload className="w-4 h-4" />
 				</Button>
-				<Button variant="ghost" size="icon" aria-label="Remove sprite" onClick={handleRemove}>
+				<Button className="bg-transparent text-destructive" variant="outline" size="icon" aria-label="Remove sprite" onClick={handleRemove}>
 					<Trash2 className="w-4 h-4" />
 				</Button>
 			</div>
