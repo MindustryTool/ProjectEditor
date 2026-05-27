@@ -1,32 +1,37 @@
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
-import { getAllProjects, type ProjectRecord } from "@project/storage";
+import { getAllProjects } from "@project/storage";
 import type { ProjectLanguage } from "@project/core";
-import { FolderOpen, Plus } from "lucide-react";
+import { FolderOpen, Plus, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { useProjectActions } from "./useProjectActions";
 import { Separator } from "#/components/ui/separator";
+import { ProjectSettingsDialog } from "~/components/editor/toolbar/ProjectSettingsDialog";
 import { LANGUAGE_OPTIONS, LanguageBadge } from "./LanguageBadge";
+import { Skeleton } from "~/components/ui/skeleton";
+import { ErrorDisplay } from "~/components/ui/error-display";
 
 export function ProjectPickerScreen() {
 	const { t } = useTranslation();
 	const { createProject, openProjectFromRecord } = useProjectActions();
-	const [projects, setProjects] = useState<ProjectRecord[]>([]);
 	const [newName, setNewName] = useState("");
 	const [newLanguage, setNewLanguage] = useState<ProjectLanguage>("json");
 	const [nameError, setNameError] = useState("");
 
-	const loadProjects = useCallback(async () => {
-		const all = await getAllProjects();
-		setProjects(all);
-	}, []);
-
-	useEffect(() => {
-		loadProjects();
-	}, [loadProjects]);
+	const {
+		data: projects,
+		isLoading,
+		isError,
+		error,
+		refetch,
+	} = useQuery({
+		queryKey: ["projects"],
+		queryFn: getAllProjects,
+	});
 
 	async function handleCreate() {
 		const trimmed = newName.trim();
@@ -97,28 +102,46 @@ export function ProjectPickerScreen() {
 						{t("projectPickerScreen.recentProjects")}
 					</div>
 					<div className="space-y-1">
-						{projects.length === 0 && (
+						{isLoading &&
+							Array.from({ length: 3 }).map((_, i) => (
+								<div key={i} className="rounded-md border bg-card px-3 py-2 space-y-2">
+									<Skeleton className="h-4 w-3/4" />
+									<Skeleton className="h-3 w-1/4" />
+								</div>
+							))}
+						{isError && <ErrorDisplay message={error?.message} onRetry={() => refetch()} />}
+						{projects?.length === 0 && !isLoading && (
 							<p className="py-8 text-center text-xs text-muted-foreground">{t("projectPickerScreen.noProjects")}</p>
 						)}
-						{projects.map((project) => (
-							<button
-								key={project.id}
-								type="button"
-								className="w-full rounded-md px-3 py-2 text-left text-xs transition-colors border bg-card hover:bg-accent"
-								onClick={() => {
-									try {
-										openProjectFromRecord(project);
-									} catch (e) {
-										toast.error(`Failed to open project ${e}`);
+						{projects?.map((project) => (
+							<div key={project.id} className="relative rounded-md border bg-card px-3 py-2 transition-colors hover:bg-accent">
+								<button
+									type="button"
+									className="w-full text-left text-xs"
+									onClick={() => {
+										try {
+											openProjectFromRecord(project);
+										} catch (e) {
+											toast.error(`Failed to open project ${e}`);
+										}
+									}}
+								>
+									<div className="flex items-center gap-2 font-medium text-foreground">
+										{project.name}
+										<LanguageBadge language={project.language} />
+									</div>
+									<div className="text-muted-foreground">{new Date(project.updatedAt).toLocaleDateString()}</div>
+								</button>
+								<ProjectSettingsDialog
+									project={project}
+									onDeleted={() => refetch()}
+									trigger={
+										<Button className="absolute right-2 top-2" variant="ghost" size="icon">
+											<Settings className="size-3.5" />
+										</Button>
 									}
-								}}
-							>
-								<div className="flex items-center gap-2 font-medium text-foreground">
-									{project.name}
-									<LanguageBadge language={project.language} />
-								</div>
-								<div className="text-muted-foreground">{new Date(project.updatedAt).toLocaleDateString()}</div>
-							</button>
+								/>
+							</div>
 						))}
 					</div>
 				</div>

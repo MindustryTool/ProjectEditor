@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { deleteProject, getProject, saveProject } from "@project/storage";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { deleteProject, getProject, saveProject, type ProjectRecord } from "@project/storage";
 import { deleteProjectFiles } from "@project/fs";
 import { useProjectSession } from "@project/state";
+import { Spinner } from "~/components/ui/spinner";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -29,16 +32,16 @@ function validateName(name: string): NameError {
 
 interface ProjectSettingsDialogProps {
 	trigger: ReactNode;
+	project?: ProjectRecord;
+	onDeleted?: () => void;
 }
 
-export function ProjectSettingsDialog({ trigger }: ProjectSettingsDialogProps) {
+function EditProjectName({ defaultProject }: { defaultProject?: ProjectRecord }) {
 	const { t } = useTranslation();
 	const projectContext = useProjectSession((s) => s.projectContext);
 	const updateCurrentProject = useProjectSession((s) => s.updateCurrentProject);
-	const closeProject = useProjectSession((s) => s.closeProject);
-	const [name, setName] = useState("");
+	const [name, setName] = useState(defaultProject?.name ?? projectContext?.project.name ?? "");
 	const [nameError, setNameError] = useState<NameError>(null);
-	const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	useEffect(() => {
@@ -49,17 +52,21 @@ export function ProjectSettingsDialog({ trigger }: ProjectSettingsDialogProps) {
 		};
 	}, []);
 
-	const handleOpenChange = useCallback(
-		(nextOpen: boolean) => {
-			if (!nextOpen) return;
-			setName(projectContext?.project.name ?? "");
-			setNameError(null);
-		},
-		[projectContext?.project.name],
-	);
-
 	const persistName = useCallback(
 		async (projectId: string, nextName: string) => {
+			if (defaultProject) {
+				const now = new Date();
+				const existing = await getProject(projectId);
+				await saveProject({
+					id: projectId,
+					name: nextName,
+					language: existing?.language ?? defaultProject.language,
+					data: existing?.data ?? "",
+					createdAt: existing?.createdAt ?? defaultProject.createdAt,
+					updatedAt: now,
+				});
+				return;
+			}
 			const ctx = useProjectSession.getState().projectContext;
 			if (!ctx || ctx.project.id !== projectId) return;
 			if (ctx.project.name === nextName) return;
@@ -76,7 +83,7 @@ export function ProjectSettingsDialog({ trigger }: ProjectSettingsDialogProps) {
 			});
 			updateCurrentProject({ name: nextName, updatedAt: now });
 		},
-		[updateCurrentProject],
+		[defaultProject, updateCurrentProject],
 	);
 
 	const handleNameChange = useCallback(
@@ -86,74 +93,115 @@ export function ProjectSettingsDialog({ trigger }: ProjectSettingsDialogProps) {
 			const err = validateName(next);
 			setNameError(err);
 			if (err) return;
-			if (!projectContext) return;
+
+			const projectId = defaultProject?.id ?? projectContext?.project.id;
+			if (!projectId) return;
 
 			if (debounceRef.current !== null) {
 				clearTimeout(debounceRef.current);
 			}
-			const projectId = projectContext.project.id;
 			debounceRef.current = setTimeout(() => {
 				void persistName(projectId, next);
 			}, 400);
 		},
-		[projectContext, persistName],
+		[defaultProject?.id, projectContext?.project.id, persistName],
 	);
 
-	const handleDelete = useCallback(async () => {
-		if (!projectContext) return;
-		const projectId = projectContext.project.id;
-		try {
+	return (
+		<div className="flex flex-col gap-2">
+			<label className="text-xs font-medium text-muted-foreground">{t("projectSettings.nameLabel")}</label>
+			<Input
+				value={name}
+				onChange={handleNameChange}
+				placeholder={t("projectSettings.namePlaceholder")}
+				aria-invalid={nameError !== null}
+			/>
+			{nameError === "invalid" && <p className="text-xs text-destructive">{t("projectSettings.nameInvalid")}</p>}
+			{nameError === "empty" && <p className="text-xs text-destructive">{t("projectSettings.nameEmpty")}</p>}
+		</div>
+	);
+}
+
+function DeleteProject({ projectId: propId, onDeleted }: { projectId?: string; onDeleted?: () => void }) {
+	const { t } = useTranslation();
+	const projectContext = useProjectSession((s) => s.projectContext);
+	const closeProject = useProjectSession((s) => s.closeProject);
+	const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+	const effectiveId = propId ?? projectContext?.project.id;
+
+	const deleteMutation = useMutation({
+		mutationFn: async (projectId: string) => {
 			await deleteProject(projectId);
-		} catch (err) {
-			console.error("Failed to delete project:", err);
+			try {
+				await deleteProjectFiles(projectId);
+			} catch (err) {
+				console.error("Failed to delete project files:", err);
+			}
+		},
+		onSuccess: () => {
 			setDeleteConfirmOpen(false);
-			return;
-		}
-		try {
-			await deleteProjectFiles(projectId);
-		} catch (err) {
-			console.error("Failed to delete project files:", err);
-		}
-		setDeleteConfirmOpen(false);
-		closeProject();
-	}, [projectContext, closeProject]);
+			if (propId) {
+				onDeleted?.();
+			} else {
+				closeProject();
+			}
+		},
+		onError: (err) => {
+			toast.error(`Failed to delete project: ${err instanceof Error ? err.message : "Unknown error"}`);
+			setDeleteConfirmOpen(false);
+		},
+	});
 
 	return (
-		<Dialog onOpenChange={handleOpenChange}>
+		<AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+			<AlertDialogTrigger asChild>
+				<Button variant="destructive">{t("projectSettings.deleteProject")}</Button>
+			</AlertDialogTrigger>
+			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>{t("projectSettings.deleteTitle")}</AlertDialogTitle>
+					<AlertDialogDescription>{t("projectSettings.deleteDescription")}</AlertDialogDescription>
+				</AlertDialogHeader>
+				<AlertDialogFooter>
+					<AlertDialogCancel>{t("projectSettings.cancel")}</AlertDialogCancel>
+					<AlertDialogAction
+						variant="destructive"
+						onClick={() => effectiveId && deleteMutation.mutate(effectiveId)}
+						disabled={deleteMutation.isPending}
+					>
+						{deleteMutation.isPending ? <Spinner /> : t("projectSettings.confirmDelete")}
+					</AlertDialogAction>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
+	);
+}
+
+export function ProjectSettingsDialog({ trigger, project, onDeleted }: ProjectSettingsDialogProps) {
+	const { t } = useTranslation();
+	const [open, setOpen] = useState(false);
+	const [resetKey, setResetKey] = useState(0);
+
+	const handleOpenChange = useCallback(
+		(nextOpen: boolean) => {
+			setOpen(nextOpen);
+			if (nextOpen) {
+				setResetKey((k) => k + 1);
+			}
+		},
+		[],
+	);
+
+	return (
+		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogTrigger asChild>{trigger}</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>{t("projectSettings.dialogTitle")}</DialogTitle>
 				</DialogHeader>
-				<div className="flex flex-col gap-2">
-					<label className="text-xs font-medium text-muted-foreground">{t("projectSettings.nameLabel")}</label>
-					<Input
-						value={name}
-						onChange={handleNameChange}
-						placeholder={t("projectSettings.namePlaceholder")}
-						aria-invalid={nameError !== null}
-					/>
-					{nameError === "invalid" && <p className="text-xs text-destructive">{t("projectSettings.nameInvalid")}</p>}
-					{nameError === "empty" && <p className="text-xs text-destructive">{t("projectSettings.nameEmpty")}</p>}
-				</div>
+				<EditProjectName key={resetKey} defaultProject={project} />
 				<DialogFooter>
-					<AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
-						<AlertDialogTrigger asChild>
-							<Button variant="destructive">{t("projectSettings.deleteProject")}</Button>
-						</AlertDialogTrigger>
-						<AlertDialogContent>
-							<AlertDialogHeader>
-								<AlertDialogTitle>{t("projectSettings.deleteTitle")}</AlertDialogTitle>
-								<AlertDialogDescription>{t("projectSettings.deleteDescription")}</AlertDialogDescription>
-							</AlertDialogHeader>
-							<AlertDialogFooter>
-								<AlertDialogCancel>{t("projectSettings.cancel")}</AlertDialogCancel>
-								<AlertDialogAction variant="destructive" onClick={handleDelete}>
-									{t("projectSettings.confirmDelete")}
-								</AlertDialogAction>
-							</AlertDialogFooter>
-						</AlertDialogContent>
-					</AlertDialog>
+					<DeleteProject projectId={project?.id} onDeleted={onDeleted} />
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
