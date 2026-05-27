@@ -102,8 +102,8 @@ export class Parser {
     if (this.depth > MAX_DEPTH) {
       const tok = this.tokenizer.peek();
       throw new HJSONError(HJSONErrorCode.MaximumDepthExceeded, {
-        row: tok.row,
-        col: tok.col,
+        startLine: tok.row,
+        startColumn: tok.col,
         index: tok.index,
         inputFragment: "",
       });
@@ -129,8 +129,8 @@ export class Parser {
 
       if (tok.type === "EOF") {
         throw new HJSONError(HJSONErrorCode.UnexpectedEndOfInput, {
-          row: openTok.row,
-          col: openTok.col,
+          startLine: openTok.row,
+          startColumn: openTok.col,
           index: openTok.index,
           inputFragment: "",
         });
@@ -166,8 +166,10 @@ export class Parser {
     const existing = seenKeys.get(keyStr);
     if (existing) {
       throw new HJSONError(HJSONErrorCode.DuplicateKey, {
-        row: keyToken.row,
-        col: keyToken.col,
+        startLine: keyToken.row,
+        startColumn: keyToken.col,
+        endLine: keyToken.row,
+        endColumn: keyToken.col + keyToken.value.length,
         index: keyToken.index,
         inputFragment: keyStr,
         message: `Duplicate key "${keyStr}" (first occurrence at ${existing.row}:${existing.col})`,
@@ -251,15 +253,17 @@ export class Parser {
         return this.parseNullNode();
       case "EOF":
         throw new HJSONError(HJSONErrorCode.ExpectedValue, {
-          row: tok.row,
-          col: tok.col,
+          startLine: tok.row,
+          startColumn: tok.col,
           index: tok.index,
           inputFragment: "",
         });
       default:
         throw new HJSONError(HJSONErrorCode.UnexpectedToken, {
-          row: tok.row,
-          col: tok.col,
+          startLine: tok.row,
+          startColumn: tok.col,
+          endLine: tok.row,
+          endColumn: tok.col + tok.value.length,
           index: tok.index,
           inputFragment: tok.value,
         });
@@ -270,8 +274,8 @@ export class Parser {
     if (this.depth > MAX_DEPTH) {
       const tok = this.tokenizer.peek();
       throw new HJSONError(HJSONErrorCode.MaximumDepthExceeded, {
-        row: tok.row,
-        col: tok.col,
+        startLine: tok.row,
+        startColumn: tok.col,
         index: tok.index,
         inputFragment: "",
       });
@@ -296,8 +300,8 @@ export class Parser {
 
       if (tok.type === "EOF") {
         throw new HJSONError(HJSONErrorCode.UnexpectedEndOfInput, {
-          row: openTok.row,
-          col: openTok.col,
+          startLine: openTok.row,
+          startColumn: openTok.col,
           index: openTok.index,
           inputFragment: "",
         });
@@ -351,8 +355,10 @@ export class Parser {
 
     if (!Number.isFinite(value)) {
       throw new HJSONError(HJSONErrorCode.InvalidNumber, {
-        row: tok.row,
-        col: tok.col,
+        startLine: tok.row,
+        startColumn: tok.col,
+        endLine: tok.row,
+        endColumn: tok.col + raw.length,
         index: tok.index,
         inputFragment: raw,
       });

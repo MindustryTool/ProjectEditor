@@ -29,8 +29,10 @@ export interface ValidationResult {
   severity: SeverityLevel;
   messageKey: string;
   messageParams?: Record<string, string | number>;
-  line?: number;
-  column?: number;
+  startLine: number;
+  startColumn: number;
+  endLine?: number;
+  endColumn?: number;
   field?: string;
   code?: string;
 }

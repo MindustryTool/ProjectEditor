@@ -80,8 +80,10 @@ export class Tokenizer {
 
   private error(code: HJSONErrorCode, message?: string): never {
     throw new HJSONError(code, {
-      row: this.row,
-      col: this.col,
+      startLine: this.row,
+      startColumn: this.col,
+      endLine: this.row,
+      endColumn: this.col + 1,
       index: this.pos,
       inputFragment: this.input.slice(Math.max(0, this.pos), this.pos + 20),
       message,

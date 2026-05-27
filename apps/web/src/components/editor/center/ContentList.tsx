@@ -10,6 +10,7 @@ import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from "#/
 import { Plus } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ImageFilePreview } from "#/components/editor/center/ImageFilePreview";
 
 export function ContentList({ path }: { path: string }) {
 	const context = useCurrentProject();
@@ -50,6 +51,8 @@ export function ContentList({ path }: { path: string }) {
 							) : (
 								<div className="flex h-full w-full" />
 							)
+						) : entry.name.endsWith(".png") ? (
+							<ImageFilePreview path={entry.path} />
 						) : (
 							<File className="text-muted-foreground w-full h-full" strokeWidth={1} />
 						)}

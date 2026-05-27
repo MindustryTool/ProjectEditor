@@ -1,144 +1,79 @@
 import type { ValidatorFn } from "./types";
 import { Severity } from "./types";
 import { createValidatorRegistry } from "./registry";
+import { HJSON, HJSONError } from "@project/hjson";
 
 export const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
-  const trimmed = content.trim();
-  if (!trimmed) return [];
+	const trimmed = content.trim();
 
-  try {
-    JSON.parse(trimmed);
-    return [];
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    const lineMatch = message.match(/position\s+(\d+)/i);
-    const lineColMatch = message.match(/line\s+(\d+)\s+column\s+(\d+)/i);
+	if (!trimmed) return [];
 
-    let line: number | undefined;
-    let column: number | undefined;
+	try {
+		HJSON.parse(trimmed);
+		return [];
+	} catch (err) {
+		if (err instanceof HJSONError) {
+			const { startLine, startColumn, endLine, endColumn, code, message } = err;
+			return [
+				{
+					path,
+					severity: Severity.error,
+					messageKey: "validation.content.invalidJson",
+					messageParams: { error: `${code}: ${message}` },
+					startLine,
+					startColumn,
+					endLine: endLine ?? startLine,
+					endColumn: endColumn ?? startColumn,
+				},
+			];
+		}
 
-    if (lineColMatch) {
-      line = parseInt(lineColMatch[1]!, 10);
-      column = parseInt(lineColMatch[2]!, 10);
-    } else if (lineMatch) {
-      const pos = parseInt(lineMatch[1]!, 10);
-      const lines = content.slice(0, pos).split("\n");
-      line = lines.length;
-      column = lines[lines.length - 1]!.length + 1;
-    }
+		const message = err instanceof Error ? err.message : String(err);
+		const lineMatch = message.match(/position\s+(\d+)/i);
+		const lineColMatch = message.match(/line\s+(\d+)\s+column\s+(\d+)/i);
 
-    return [{
-      path,
-      severity: Severity.error,
-      messageKey: "validation.content.invalidJson",
-      messageParams: { error: message },
-      line,
-      column,
-    }];
-  }
-};
+		let startLine = 1;
+		let startColumn = 1;
 
-interface ContentEntry {
-  name?: string;
-  type?: string;
-}
+		if (lineColMatch) {
+			startLine = parseInt(lineColMatch[1]!, 10);
+			startColumn = parseInt(lineColMatch[2]!, 10);
+		} else if (lineMatch) {
+			const pos = parseInt(lineMatch[1]!, 10);
+			const lines = content.slice(0, pos).split("\n");
+			startLine = lines.length;
+			startColumn = lines[lines.length - 1]!.length + 1;
+		}
 
-const KNOWN_CONTENT_TYPES = [
-  "item",
-  "block",
-  "liquid",
-  "unit",
-  "mech",
-  "turret",
-  "drill",
-  "conveyor",
-  "router",
-  "junction",
-  "factory",
-  "power",
-  "defense",
-  "distribution",
-  "crafting",
-  "schematic",
-];
-
-export const contentJsonValidator: ValidatorFn = ({ path, content }) => {
-  const trimmed = content.trim();
-  if (!trimmed) return [];
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(trimmed);
-  } catch {
-    return [{
-      path,
-      severity: Severity.error,
-      messageKey: "validation.content.invalidJson",
-    }];
-  }
-
-  const issues: ReturnType<typeof contentJsonValidator> = [];
-  const entries: ContentEntry[] = Array.isArray(parsed) ? parsed : [parsed as ContentEntry];
-  const seenNames = new Map<string, number>();
-
-  for (let i = 0; i < entries.length; i++) {
-    const entry = entries[i]!;
-
-    if (!entry.type) {
-      issues.push({
-        path,
-        severity: Severity.error,
-        messageKey: "validation.content.missingField",
-        messageParams: { index: i + 1 },
-        field: "type",
-      });
-      continue;
-    }
-
-    if (!KNOWN_CONTENT_TYPES.includes(entry.type)) {
-      issues.push({
-        path,
-        severity: Severity.warning,
-        messageKey: "validation.content.unknownType",
-        messageParams: { type: entry.type },
-      });
-    }
-
-    if (entry.name) {
-      if (seenNames.has(entry.name)) {
-        issues.push({
-          path,
-          severity: Severity.error,
-          messageKey: "validation.content.duplicateName",
-          messageParams: { name: entry.name, firstIndex: seenNames.get(entry.name)! + 1, secondIndex: i + 1 },
-        });
-      } else {
-        seenNames.set(entry.name, i);
-      }
-    }
-  }
-
-  return issues;
+		return [
+			{
+				path,
+				severity: Severity.error,
+				messageKey: "validation.content.invalidJson",
+				messageParams: { error: message },
+				startLine,
+				startColumn,
+				endLine: startLine,
+				endColumn: startColumn,
+			},
+		];
+	}
 };
 
 export function createDefaultValidators() {
-  const registry = createValidatorRegistry();
+	const registry = createValidatorRegistry();
 
-  registry.register({
-    name: "content-json",
-    pattern: "content/**/*.json",
-    validate: (params) => {
-      const syntaxResults = jsonSyntaxValidator(params);
-      if (syntaxResults.length > 0) return syntaxResults;
-      return contentJsonValidator(params);
-    },
-  });
+	registry.register({
+		name: "json-syntax",
+		pattern: "*.json",
+		validate: jsonSyntaxValidator,
+	});
 
-  registry.register({
-    name: "json-syntax",
-    pattern: "*.json",
-    validate: jsonSyntaxValidator,
-  });
+	registry.register({
+		name: "json-syntax",
+		pattern: "*.hjson",
+		validate: jsonSyntaxValidator,
+	});
 
-  return registry;
+	return registry;
 }

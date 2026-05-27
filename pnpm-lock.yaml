@@ -294,6 +294,9 @@ importers:
       '@project/fs':
         specifier: workspace:*
         version: link:../fs
+      '@project/hjson':
+        specifier: workspace:*
+        version: link:../hjson
       '@project/validation':
         specifier: workspace:*
         version: link:../validation

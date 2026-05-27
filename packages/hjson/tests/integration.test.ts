@@ -105,13 +105,13 @@ describe("Integration: real-world scenarios", () => {
     expect(result.key).toBe("val");
   });
 
-  it("provides typed error with code, row, col, index", () => {
+  it("provides typed error with code, startLine, startColumn, index", () => {
     try {
       HJSON.parse("{invalid: @bad}");
     } catch (e: any) {
       expect(e.code).toBeDefined();
-      expect(typeof e.row).toBe("number");
-      expect(typeof e.col).toBe("number");
+      expect(typeof e.startLine).toBe("number");
+      expect(typeof e.startColumn).toBe("number");
       expect(typeof e.index).toBe("number");
       expect(e.inputFragment).toBeDefined();
     }

@@ -14,7 +14,7 @@ interface MonacoEditorProps {
 	onChange: (value: string) => void;
 	language?: string;
 	readOnly?: boolean;
-	filePath?: string;
+	filePath: string;
 }
 
 export function MonacoEditor({ value, onChange, language, readOnly, filePath }: MonacoEditorProps) {
@@ -29,7 +29,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 		monacoConfigured.current = true;
 	}
 
-	const resultsByPath = useValidationStore((s) => s.resultsByPath);
+	const results = useValidationStore((s) => s.resultsByPath[filePath]);
 
 	const updateMarkers = useCallback(() => {
 		const editorInstance = editorRef.current;
@@ -39,7 +39,6 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 		const model = editorInstance.getModel();
 		if (!model) return;
 
-		const results = filePath ? resultsByPath[filePath] : undefined;
 		if (!results || results.length === 0) {
 			monacoInstance.editor.setModelMarkers(model, "file-validation", []);
 			return;
@@ -48,22 +47,23 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 		const markers: editor.IMarkerData[] = [];
 
 		for (const r of results) {
-			if (r.line === undefined) continue;
-
 			const monacoSeverity = r.severity === Severity.error ? 8 : r.severity === Severity.warning ? 4 : 2;
+			const endLineNumber = r.endLine ?? r.startLine;
+			const rawEndColumn = r.endColumn ?? r.startColumn;
+			const endColumn = endLineNumber === r.startLine && rawEndColumn === r.startColumn ? r.startColumn + 1 : rawEndColumn;
 
 			markers.push({
 				severity: monacoSeverity as editor.IMarkerData["severity"],
 				message: t(r.messageKey as any, r.messageParams),
-				startLineNumber: r.line,
-				startColumn: r.column ?? 1,
-				endLineNumber: r.line,
-				endColumn: (r.column ?? 1) + 1,
+				startLineNumber: r.startLine,
+				startColumn: r.startColumn,
+				endLineNumber,
+				endColumn,
 			});
 		}
 
 		monacoInstance.editor.setModelMarkers(model, "file-validation", markers);
-	}, [resultsByPath, filePath, t]);
+	}, [results, filePath, t]);
 
 	useEffect(() => {
 		updateMarkers();

@@ -25,14 +25,14 @@ describe("HJSONErrorCode", () => {
 describe("HJSONError", () => {
   it("creates error with UnexpectedToken code at correct position", () => {
     const err = new HJSONError(HJSONErrorCode.UnexpectedToken, {
-      row: 1,
-      col: 6,
+      startLine: 1,
+      startColumn: 6,
       index: 5,
       inputFragment: "@invalid",
     });
     expect(err.code).toBe(HJSONErrorCode.UnexpectedToken);
-    expect(err.row).toBe(1);
-    expect(err.col).toBe(6);
+    expect(err.startLine).toBe(1);
+    expect(err.startColumn).toBe(6);
     expect(err.index).toBe(5);
     expect(err.inputFragment).toBe("@invalid");
     expect(err.name).toBe("HJSONError");
@@ -40,8 +40,8 @@ describe("HJSONError", () => {
 
   it("extends SyntaxError", () => {
     const err = new HJSONError(HJSONErrorCode.UnexpectedToken, {
-      row: 0,
-      col: 0,
+      startLine: 0,
+      startColumn: 0,
       index: 0,
       inputFragment: "",
     });
@@ -51,8 +51,8 @@ describe("HJSONError", () => {
 
   it("includes human-readable message with position and snippet", () => {
     const err = new HJSONError(HJSONErrorCode.UnterminatedString, {
-      row: 2,
-      col: 10,
+      startLine: 2,
+      startColumn: 10,
       index: 25,
       inputFragment: '"unclosed',
     });
@@ -63,8 +63,8 @@ describe("HJSONError", () => {
 
   it("throws with UnterminatedString code", () => {
     const err = new HJSONError(HJSONErrorCode.UnterminatedString, {
-      row: 1,
-      col: 5,
+      startLine: 1,
+      startColumn: 5,
       index: 5,
       inputFragment: '"unclosed',
     });
@@ -73,8 +73,8 @@ describe("HJSONError", () => {
 
   it("throws with UnterminatedMultilineString code", () => {
     const err = new HJSONError(HJSONErrorCode.UnterminatedMultilineString, {
-      row: 1,
-      col: 5,
+      startLine: 1,
+      startColumn: 5,
       index: 5,
       inputFragment: "'''\nhello",
     });
@@ -83,8 +83,8 @@ describe("HJSONError", () => {
 
   it("throws with ExpectedValue code", () => {
     const err = new HJSONError(HJSONErrorCode.ExpectedValue, {
-      row: 0,
-      col: 0,
+      startLine: 0,
+      startColumn: 0,
       index: 0,
       inputFragment: "",
     });
@@ -93,8 +93,8 @@ describe("HJSONError", () => {
 
   it("throws with ExpectedCommaOrClosingBrace code", () => {
     const err = new HJSONError(HJSONErrorCode.ExpectedCommaOrClosingBrace, {
-      row: 1,
-      col: 8,
+      startLine: 1,
+      startColumn: 8,
       index: 8,
       inputFragment: "a: 1 b: 2",
     });
@@ -103,8 +103,8 @@ describe("HJSONError", () => {
 
   it("throws with DuplicateKey code", () => {
     const err = new HJSONError(HJSONErrorCode.DuplicateKey, {
-      row: 1,
-      col: 5,
+      startLine: 1,
+      startColumn: 5,
       index: 5,
       inputFragment: "a: 1, a: 2",
     });
@@ -113,8 +113,8 @@ describe("HJSONError", () => {
 
   it("throws with InvalidNumber code", () => {
     const err = new HJSONError(HJSONErrorCode.InvalidNumber, {
-      row: 1,
-      col: 4,
+      startLine: 1,
+      startColumn: 4,
       index: 4,
       inputFragment: "12.34.56",
     });
@@ -123,8 +123,8 @@ describe("HJSONError", () => {
 
   it("throws with UnexpectedEndOfInput code", () => {
     const err = new HJSONError(HJSONErrorCode.UnexpectedEndOfInput, {
-      row: 1,
-      col: 4,
+      startLine: 1,
+      startColumn: 4,
       index: 4,
       inputFragment: "{a: ",
     });
@@ -133,8 +133,8 @@ describe("HJSONError", () => {
 
   it("includes inputFragment with surrounding characters", () => {
     const err = new HJSONError(HJSONErrorCode.UnexpectedToken, {
-      row: 1,
-      col: 6,
+      startLine: 1,
+      startColumn: 6,
       index: 5,
       inputFragment: "@invalid",
     });
@@ -143,14 +143,38 @@ describe("HJSONError", () => {
 
   it("has readonly properties on the error instance", () => {
     const err = new HJSONError(HJSONErrorCode.InvalidNumber, {
-      row: 1,
-      col: 4,
+      startLine: 1,
+      startColumn: 4,
       index: 4,
       inputFragment: "12.34.56",
     });
     expect(err.code).toBe(HJSONErrorCode.InvalidNumber);
-    expect(err.row).toBe(1);
-    expect(err.col).toBe(4);
+    expect(err.startLine).toBe(1);
+    expect(err.startColumn).toBe(4);
     expect(err.index).toBe(4);
+  });
+
+  it("endLine and endColumn default to start values when not provided", () => {
+    const err = new HJSONError(HJSONErrorCode.UnexpectedToken, {
+      startLine: 2,
+      startColumn: 3,
+      index: 10,
+      inputFragment: "@bad",
+    });
+    expect(err.endLine).toBe(2);
+    expect(err.endColumn).toBe(3);
+  });
+
+  it("endLine and endColumn are set when explicitly provided", () => {
+    const err = new HJSONError(HJSONErrorCode.InvalidNumber, {
+      startLine: 1,
+      startColumn: 4,
+      endLine: 1,
+      endColumn: 12,
+      index: 4,
+      inputFragment: "12.34.56",
+    });
+    expect(err.endLine).toBe(1);
+    expect(err.endColumn).toBe(12);
   });
 });

@@ -30,16 +30,20 @@ const errorMessages: Record<HJSONErrorCode, string> = {
 
 export class HJSONError extends SyntaxError {
   readonly code: HJSONErrorCode;
-  readonly row: number;
-  readonly col: number;
+  readonly startLine: number;
+  readonly startColumn: number;
+  readonly endLine: number;
+  readonly endColumn: number;
   readonly index: number;
   readonly inputFragment: string;
 
   constructor(
     code: HJSONErrorCode,
     options: {
-      row: number;
-      col: number;
+      startLine: number;
+      startColumn: number;
+      endLine?: number;
+      endColumn?: number;
       index: number;
       inputFragment: string;
       message?: string;
@@ -47,12 +51,14 @@ export class HJSONError extends SyntaxError {
   ) {
     const baseMessage = errorMessages[code];
     const detail = options.message ?? formatErrorSnippet(options.inputFragment);
-    super(`${baseMessage} at ${options.row}:${options.col} — ${detail}`);
+    super(`${baseMessage} at ${options.startLine}:${options.startColumn} — ${detail}`);
 
     this.name = "HJSONError";
     this.code = code;
-    this.row = options.row;
-    this.col = options.col;
+    this.startLine = options.startLine;
+    this.startColumn = options.startColumn;
+    this.endLine = options.endLine ?? options.startLine;
+    this.endColumn = options.endColumn ?? options.startColumn;
     this.index = options.index;
     this.inputFragment = options.inputFragment;
   }
