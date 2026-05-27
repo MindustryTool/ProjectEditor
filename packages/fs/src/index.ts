@@ -47,6 +47,7 @@ export interface ProjectFileSystemOptions {
 export class ProjectFileSystem {
 	private projectRoot: string;
 	private onTreeSnapshotChange: TreeSnapshotChangeCallback;
+	private refreshTreeTimer: ReturnType<typeof setTimeout> | null = null;
 	readonly defaultProjectTree: DefaultProjectFileTree;
 
 	constructor(
@@ -83,6 +84,18 @@ export class ProjectFileSystem {
 		await this.refreshTree();
 	}
 
+	async writeFiles(entries: { name: string; data: Uint8Array }[]): Promise<void> {
+		for (const entry of entries) {
+			const parts = entry.name.split("/");
+			if (parts.length > 1) {
+				await this.vfs.mkdir(this.scopePath(parts.slice(0, -1).join("/")));
+			}
+			await this.vfs.writeFile(this.scopePath(entry.name), new Uint8Array(entry.data));
+			this.events.emit("file:changed", { path: entry.name, kind: "write" });
+		}
+		await this.refreshTree(true);
+	}
+
 	async delete(path: string): Promise<void> {
 		await this.vfs.delete(this.scopePath(path));
 		this.events.emit("file:changed", { path, kind: "delete" });
@@ -99,7 +112,25 @@ export class ProjectFileSystem {
 		return (await this.vfs.readdir(this.scopePath(path))).map((f) => ({ ...f, path: this.unscopePath(f.path) }));
 	}
 
-	async refreshTree(): Promise<FileEntry[]> {
+	async refreshTree(force?: boolean): Promise<FileEntry[]> {
+		if (this.refreshTreeTimer !== null) {
+			clearTimeout(this.refreshTreeTimer);
+			this.refreshTreeTimer = null;
+		}
+
+		if (force) {
+			return this.refreshTreeNow();
+		}
+
+		return new Promise((resolve) => {
+			this.refreshTreeTimer = setTimeout(async () => {
+				this.refreshTreeTimer = null;
+				resolve(await this.refreshTreeNow());
+			}, 50);
+		});
+	}
+
+	private async refreshTreeNow(): Promise<FileEntry[]> {
 		const snapshot = await this.listFiles("/", { recursive: true });
 		this.onTreeSnapshotChange(snapshot);
 		return snapshot;

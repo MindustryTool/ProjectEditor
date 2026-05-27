@@ -9,7 +9,7 @@ interface PanelProps {
 
 export function Panel({ header, children, className }: PanelProps) {
 	return (
-		<div className={cn("flex flex-col", className)}>
+		<div className={cn("flex flex-col h-full", className)}>
 			{header && (
 				<div className="flex items-center px-2 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">{header}</div>
 			)}

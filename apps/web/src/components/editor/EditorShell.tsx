@@ -6,7 +6,7 @@ import { LocalizationMenu } from "./toolbar/LocalizationMenu";
 import { Toolbar } from "./Toolbar";
 import { StatusBar } from "./StatusBar";
 import { SplitView } from "./SplitView";
-import { EditorToolPanel } from "./toolbar/EditorToolPanel";
+import { EditorLeftPanel } from "./EditorLeftPanel";
 import { EditorCenterPanel } from "./EditorCenterPanel";
 import { EditorRightPanel } from "./EditorRightPanel";
 import { StatusBarLeft } from "./statusbar/StatusBarLeft";
@@ -19,7 +19,7 @@ interface EditorShellProps {
 
 export const EditorShell = memo(function EditorShell({ path }: EditorShellProps) {
 	return (
-		<div className="flex min-h-0 flex-1 flex-col bg-background text-foreground">
+		<div className="flex min-h-0 flex-1 flex-col bg-background text-foreground overflow-hidden h-dvh max-h-dvh">
 			<Toolbar>
 				<ProjectMenu />
 				<ViewMenu />
@@ -31,16 +31,12 @@ export const EditorShell = memo(function EditorShell({ path }: EditorShellProps)
 				defaultLeftWidth={260}
 				defaultRightWidth={360}
 				minPanelWidth={300}
-				left={<EditorToolPanel />}
+				left={<EditorLeftPanel />}
 				center={<EditorCenterPanel path={path} />}
 				right={<EditorRightPanel path={path} />}
 			/>
 
-			<StatusBar
-				left={<StatusBarLeft />}
-				center={<StatusBarCenter />}
-				right={<StatusBarRight />}
-			/>
+			<StatusBar left={<StatusBarLeft />} center={<StatusBarCenter />} right={<StatusBarRight />} />
 		</div>
 	);
 });

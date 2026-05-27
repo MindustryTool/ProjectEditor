@@ -11,8 +11,9 @@ export function ImageFilePreview({ path }: { path: string }) {
 	}
 
 	return (
-		<div className="flex justify-center items-center h-full w-full">
+		<div className="flex justify-center items-center h-full w-full flex-col">
 			<img
+                className="mt-auto"
 				src={objectUrl}
 				alt={path}
 				onLoad={(e) => {

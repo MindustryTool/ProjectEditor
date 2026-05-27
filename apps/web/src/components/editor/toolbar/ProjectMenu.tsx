@@ -58,16 +58,7 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 			}));
 			useProjectSession.getState().setCurrentProject({ project, fs, events });
 
-			for (const entry of result.entries) {
-				const parts = entry.name.split("/");
-				if (parts.length > 1) {
-					const dir = parts.slice(0, -1).join("/");
-					if (!(await fs.exists(dir))) {
-						await fs.mkdir(dir);
-					}
-				}
-				await fs.writeFile(entry.name, new Uint8Array(entry.data));
-			}
+			await fs.writeFiles(result.entries);
 
 			toast.success("Project imported successfully");
 		} catch (err) {
