@@ -42,6 +42,7 @@ export function RecentlyOpenedFilesBar() {
 		<div className="flex items-center gap-px overflow-x-auto bg-muted/30 py-0.5">
 			{recentFiles.map((entry) => {
 				const isActive = entry.path === path;
+				const isMissing = !filePaths.has(entry.path);
 				const name = entry.path.split("/").pop() ?? entry.path;
 				return (
 					<button
@@ -52,6 +53,7 @@ export function RecentlyOpenedFilesBar() {
 							isActive
 								? "bg-background text-foreground"
 								: "text-muted-foreground hover:bg-accent hover:text-foreground",
+							isMissing && "line-through text-destructive",
 						)}
 					>
 						<span className="max-w-32 truncate">{name}</span>

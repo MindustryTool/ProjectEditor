@@ -3,6 +3,7 @@ import { useFileContentString, useProjectSession } from "@project/state";
 import { ContentList } from "#/components/editor/center/ContentList";
 import { getLanguageFromPath } from "~/lib/monaco/languageMap";
 import { RecentlyOpenedFilesBar } from "./recently-opened/RecentlyOpenedFilesBar";
+import { ImageFilePreview } from "#/components/editor/center/ImageFilePreview";
 
 const MonacoEditor = lazy(() => import("./MonacoEditor").then((m) => ({ default: m.MonacoEditor })));
 
@@ -31,6 +32,10 @@ function EditorContent({ path }: { path: string }) {
 		(path.endsWith("blocks") || path.endsWith("items") || path.endsWith("liquids") || path.endsWith("units"))
 	) {
 		return <ContentList path={path} />;
+	}
+
+	if (path.endsWith(".png")) {
+		return <ImageFilePreview path={path} />;
 	}
 
 	return <div className="flex h-full items-center justify-center text-xs text-muted-foreground">{path}</div>;

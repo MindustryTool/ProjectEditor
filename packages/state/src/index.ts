@@ -14,6 +14,7 @@ export type { UseFileContentResult } from "./hooks/use-file-content";
 export { useFileContent } from "./hooks/use-file-content";
 export type { UseFileContentStringResult } from "./hooks/use-file-content-string";
 export { useFileContentString } from "./hooks/use-file-content-string";
+export { useFileContentImageUrl } from "./hooks/use-file-content-image-url";
 export { registerValidationListener } from "./validation/listener";
 
 export { Severity, severityLabel, isErrorOrWarning } from "./validation/types";

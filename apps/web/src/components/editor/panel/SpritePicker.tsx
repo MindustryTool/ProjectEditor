@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
-import { useCurrentProject, useProjectSession, useFileContent } from "@project/state";
+import { useCallback, useRef } from "react";
+import { useCurrentProject, useProjectSession, useFileContent, useFileContentImageUrl } from "@project/state";
 import { Button } from "#/components/ui/button";
 import { FormControl, FormField, FormLabel } from "#/components/ui/form";
 import { resolveContentSprite, findFileInTree } from "~/lib/utils";
@@ -30,18 +30,7 @@ function SpriteViewer({ path: spritePath }: { path: string }) {
 	const { fs } = useCurrentProject();
 	const { data, isLoading, isError, error, write } = useFileContent(spritePath);
 	const inputRef = useRef<HTMLInputElement>(null);
-
-	const objectUrl = useMemo(() => {
-		if (!data) return null;
-		const blob = new Blob([data], { type: "image/png" });
-		return URL.createObjectURL(blob);
-	}, [data]);
-
-	useEffect(() => {
-		return () => {
-			if (objectUrl) URL.revokeObjectURL(objectUrl);
-		};
-	}, [objectUrl]);
+	const objectUrl = useFileContentImageUrl(data);
 
 	const handleReplace = useCallback(() => {
 		inputRef.current?.click();

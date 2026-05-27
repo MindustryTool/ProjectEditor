@@ -1,5 +1,5 @@
-import { useCurrentProject, useFileContent } from "@project/state";
-import React, { useEffect, useMemo, type ReactNode } from "react";
+import { useCurrentProject, useFileContent, useFileContentImageUrl } from "@project/state";
+import React, { useEffect, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useQueryState } from "nuqs";
 import { File, Folder } from "lucide-react";
@@ -60,18 +60,7 @@ export function ContentList({ path }: { path: string }) {
 function SpritePreview({ path }: { path: string }) {
 	const spritePath = resolveContentSprite(path);
 	const { data, isLoading, isError } = useFileContent(spritePath ?? "");
-
-	const objectUrl = useMemo(() => {
-		if (!data) return null;
-		const blob = new Blob([data], { type: "image/png" });
-		return URL.createObjectURL(blob);
-	}, [data]);
-
-	useEffect(() => {
-		return () => {
-			if (objectUrl) URL.revokeObjectURL(objectUrl);
-		};
-	}, [objectUrl]);
+	const objectUrl = useFileContentImageUrl(data);
 
 	if (spritePath === null || isError || isLoading || !data || data.byteLength === 0) {
 		return <File className="text-muted-foreground w-full h-full" strokeWidth={1} />;
