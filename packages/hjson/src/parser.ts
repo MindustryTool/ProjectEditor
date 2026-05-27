@@ -1,10 +1,12 @@
 import { Tokenizer, type Token } from "./tokenizer.js";
 import type { HjsonNode, ObjectNode, ArrayNode, StringNode, NumberNode, BooleanNode, NullNode, MemberNode } from "./ast.js";
 import { HJSONError, HJSONErrorCode } from "./errors.js";
+import { StructuredObject, type FieldInfo } from "./structured.js";
 
 export interface HJSONParseOptions {
   keepQuote?: boolean;
   legacyRoot?: boolean;
+  structured?: boolean;
 }
 
 const MAX_DEPTH = 512;
@@ -428,7 +430,72 @@ export class Parser {
   static parse(input: string, reviver?: (key: string, value: any) => any, options?: HJSONParseOptions): any {
     const parser = new Parser(input, options);
     const ast = parser.parse();
+    if (options?.structured) {
+      return parser.toStructuredValue(ast, reviver);
+    }
     return parser.toJSValue(ast, reviver);
+  }
+
+  toStructuredValue(node: HjsonNode, reviver?: (key: string, value: any) => any): any {
+    return this.convertNodeStructured(node, "", reviver);
+  }
+
+  private convertNodeStructured(
+    node: HjsonNode,
+    keyHint: string,
+    reviver?: (key: string, value: any) => any,
+  ): any {
+    switch (node.kind) {
+      case "null":
+        return reviver ? reviver(keyHint, null) : null;
+      case "boolean":
+        return reviver ? reviver(keyHint, node.value) : node.value;
+      case "number":
+        return reviver ? reviver(keyHint, node.value) : node.value;
+      case "string":
+        return reviver ? reviver(keyHint, node.value) : node.value;
+      case "array": {
+        const arr = node.elements.map((el, i) => this.convertNodeStructured(el, String(i), reviver));
+        const plainArr = arr.map((v) => (v instanceof StructuredObject ? v.valueOf() : v));
+        const final = reviver ? reviver(keyHint, plainArr) : plainArr;
+        return final;
+      }
+      case "object": {
+        const fieldInfos: FieldInfo[] = [];
+        const rawValues: Map<string, unknown> = new Map();
+        const obj: Record<string, any> = {};
+        for (const member of node.members) {
+          const key = member.key.value;
+          const val = this.convertNodeStructured(member.value, key, reviver);
+          if (val !== undefined) {
+            rawValues.set(key, val);
+            obj[key] = val instanceof StructuredObject ? val.valueOf() : val;
+            fieldInfos.push({
+              key,
+              value: val,
+              start: { ...member.loc.start },
+              end: { ...member.loc.end },
+              valueStart: { ...member.value.loc.start },
+              valueEnd: { ...member.value.loc.end },
+            });
+          }
+        }
+        const plainObj = reviver ? reviver(keyHint, obj) : obj;
+        if (plainObj === undefined || plainObj === null) return plainObj;
+        if (typeof plainObj !== "object") return plainObj;
+        for (const fi of fieldInfos) {
+          if (fi.key in (plainObj as Record<string, any>)) {
+            const rawVal = rawValues.get(fi.key);
+            const newVal = (plainObj as Record<string, any>)[fi.key];
+            const isUnchanged = rawVal instanceof StructuredObject && newVal === obj[fi.key];
+            fi.value = isUnchanged ? rawVal : newVal;
+          }
+        }
+        return new StructuredObject(plainObj as Record<string, unknown>, fieldInfos);
+      }
+      default:
+        return null;
+    }
   }
 
   static async parseAsync(input: string, reviver?: (key: string, value: any) => any, options?: HJSONParseOptions): Promise<any> {

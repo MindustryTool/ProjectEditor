@@ -21,6 +21,7 @@
     "@project/config": "workspace:*",
     "@project/core": "workspace:*",
     "@project/fs": "workspace:*",
+    "@project/hjson": "workspace:*",
     "@project/state": "workspace:*",
     "@project/utils": "workspace:*",
     "@project/validation": "workspace:*",

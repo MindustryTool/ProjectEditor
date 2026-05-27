@@ -90,6 +90,9 @@ importers:
       '@project/fs':
         specifier: workspace:*
         version: link:../../packages/fs
+      '@project/hjson':
+        specifier: workspace:*
+        version: link:../../packages/hjson
       '@project/state':
         specifier: workspace:*
         version: link:../../packages/state

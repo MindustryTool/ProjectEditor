@@ -1,57 +1,22 @@
 import { useTranslation } from "react-i18next";
-import * as v from "valibot";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
-import { FormField, FormLabel, FormControl, FormDescription, FormMessage } from "~/components/ui/form";
+import { FormField, FormLabel, FormControl, FormDescription } from "~/components/ui/form";
 import { Field, FieldContent, FieldLabel, FieldDescription } from "~/components/ui/field";
-import { ModHjsonSchema, ModNameSchema, defaultModHjson, type ModHjsonData } from "@project/validation";
+import { defaultModHjson, type ModHjsonData } from "@project/validation";
 import { useState, useEffect, useRef } from "react";
 import { useFileContentString } from "@project/state";
 import { Panel } from "@/components/editor/Panel";
+import { HJSON, type StructuredObject } from "@project/hjson";
 
-function replaceLine(lines: string[], key: string, value: string): string[] {
-	const prefix = `${key}:`;
-	const index = lines.findIndex((line) => line.startsWith(prefix));
-	const newLine = `${key}: ${value}`;
-	if (index !== -1) {
-		const result = [...lines];
-		result[index] = newLine;
-		return result;
+function serializeValue(key: keyof ModHjsonData, value: unknown): string {
+	if (key === "dependencies") {
+		const deps = (value as string[]).filter((d) => d.trim() !== "");
+		return deps.length > 0 ? `[${deps.join(",")}]` : "[]";
 	}
-
-	if (lines.at(-1)?.trim() === "") {
-		lines.pop();
-	}
-
-	return [...lines, newLine];
-}
-
-function parseModHjsonContent(content: string): { lines: string[]; values: ModHjsonData } {
-	const lines = content.split("\n");
-	const values = { ...defaultModHjson };
-	for (const line of lines) {
-		const match = line.match(/^(\w+):\s*(.*)$/);
-		if (!match) continue;
-		const key = match[1] as keyof ModHjsonData;
-		const raw = match[2];
-		if (raw === undefined) continue;
-		if (key === "hidden") {
-			values[key] = raw === "true";
-		} else if (key === "dependencies") {
-			const inner = raw.startsWith("[") && raw.endsWith("]") ? raw.slice(1, -1) : raw;
-			values[key] = inner
-				? inner
-						.split(",")
-						.map((s) => s.trim())
-						.filter(Boolean)
-				: [];
-		} else {
-			(values as Record<string, unknown>)[key] = raw;
-		}
-	}
-	return { lines, values };
+	return String(value ?? "");
 }
 
 const TEXT_FIELDS: {
@@ -99,63 +64,48 @@ export function ModHjsonPanel({ path }: { path: string }) {
 	const { t } = useTranslation();
 	const { data, write, isLoading } = useFileContentString(path);
 	const [values, setValues] = useState<ModHjsonData>(defaultModHjson);
-	const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof ModHjsonData, string>>>({});
-	const linesRef = useRef<string[]>([]);
+	const contentRef = useRef<string | null>(null);
 
 	useEffect(() => {
 		if (data === null || isLoading) return;
-
+		contentRef.current = data;
 		if (data === "") {
-			linesRef.current = [];
 			setValues(defaultModHjson);
-			setFieldErrors({});
 			return;
 		}
-
-		const { lines, values: parsed } = parseModHjsonContent(data);
-		linesRef.current = lines;
-		setValues(parsed);
-		setFieldErrors({});
-	}, [data, isLoading]);
-
-	function validateField(key: keyof ModHjsonData, value: unknown): string | undefined {
-		if (key === "dependencies") {
-			const result = v.safeParse(v.array(ModNameSchema), value);
-			if (!result.success) return result.issues[0]?.message ?? "Invalid";
-			return undefined;
+		try {
+			const result = HJSON.parse(data, undefined, { structured: true }) as unknown as StructuredObject<ModHjsonData>;
+			setValues(result.valueOf());
+		} catch {
+			setValues(defaultModHjson);
 		}
-		const result = v.safeParse(v.pick(ModHjsonSchema, [key]), { [key]: value } as ModHjsonData);
-		if (!result.success) return result.issues[0]?.message ?? "Invalid";
-		return undefined;
-	}
+	}, [data, isLoading]);
 
 	function updateValue(key: keyof ModHjsonData, rawValue: unknown) {
 		const value = key === "hidden" ? Boolean(rawValue) : rawValue;
-
-		const error = validateField(key, value);
-		setFieldErrors((prev) => {
-			if (error) return { ...prev, [key]: error };
-			const next = { ...prev };
-			delete next[key];
-			return next;
-		});
-
 		setValues((prev) => ({ ...prev, [key]: value }));
 
-		if (error) return;
-
-		let lineValue: string;
-		if (key === "dependencies") {
-			const deps = (value as string[]).filter((d) => d.trim() !== "");
-			lineValue = deps.length > 0 ? `[${deps.join(",")}]` : "[]";
-		} else if (key === "hidden") {
-			lineValue = String(value);
-		} else {
-			lineValue = String(value ?? "");
+		const content = contentRef.current;
+		if (content === null) {
+			write(HJSON.stringify({ ...defaultModHjson, [key]: value }, null, 2));
+			return;
 		}
 
-		linesRef.current = replaceLine(linesRef.current, key, lineValue);
-		write(linesRef.current.join("\n"));
+		try {
+			const result = HJSON.parse(content, undefined, { structured: true }) as unknown as StructuredObject<ModHjsonData>;
+			const fieldInfo = result.field(key);
+			const newValue = serializeValue(key, value);
+			let newContent: string;
+			if (fieldInfo) {
+				newContent = content.slice(0, fieldInfo.valueStart.index) + newValue + content.slice(fieldInfo.valueEnd.index);
+			} else {
+				newContent = content.trimEnd() + `\n${key}: ${newValue}`;
+			}
+			contentRef.current = newContent;
+			write(newContent);
+		} catch {
+			write(HJSON.stringify({ ...values, [key]: value }, null, 2));
+		}
 	}
 
 	function handleDepChange(index: number, val: string) {
@@ -174,13 +124,11 @@ export function ModHjsonPanel({ path }: { path: string }) {
 	}
 
 	const depsDisplay = values.dependencies.length > 0 ? values.dependencies : [""];
-	const depError = fieldErrors.dependencies;
 
 	return (
 		<Panel>
 			<div className="flex flex-col gap-4">
 				{TEXT_FIELDS.map((field) => {
-					const error = fieldErrors[field.name];
 					const value = values[field.name] ?? "";
 					return (
 						<FormField key={field.name}>
@@ -191,19 +139,16 @@ export function ModHjsonPanel({ path }: { path: string }) {
 										value={value as string}
 										onChange={(e) => updateValue(field.name, e.target.value)}
 										placeholder={field.placeholder}
-										aria-invalid={!!error}
 									/>
 								) : (
 									<Input
 										value={value as string}
 										onChange={(e) => updateValue(field.name, e.target.value)}
 										placeholder={field.placeholder}
-										aria-invalid={!!error}
 									/>
 								)}
 							</FormControl>
 							<FormDescription>{t(field.description)}</FormDescription>
-							{error && <FormMessage>{error}</FormMessage>}
 						</FormField>
 					);
 				})}
@@ -227,7 +172,6 @@ export function ModHjsonPanel({ path }: { path: string }) {
 										value={dep}
 										onChange={(e) => handleDepChange(index, e.target.value)}
 										placeholder="mod-name"
-										aria-invalid={!!depError}
 										className="flex-1"
 									/>
 									<Button className="size-9" type="button" variant="outline" onClick={() => handleDepRemove(index)}>
@@ -240,7 +184,6 @@ export function ModHjsonPanel({ path }: { path: string }) {
 							</Button>
 						</div>
 					</FormControl>
-					{depError && <FormMessage>{depError}</FormMessage>}
 				</FormField>
 			</div>
 		</Panel>
