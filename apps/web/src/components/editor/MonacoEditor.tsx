@@ -2,6 +2,14 @@ import { useEffect, useRef, useCallback } from "react";
 import type { editor } from "monaco-editor";
 import Editor, { type BeforeMount, type OnMount } from "@monaco-editor/react";
 import { HJSON_LANGUAGE_ID, hjsonMonarchGrammar, hjsonLanguageConfig } from "~/lib/monaco/hjsonLanguage";
+import { JSON_MINDUSTRY_LANGUAGE_ID, jsonMindustryMonarchGrammar, jsonMindustryLanguageConfig } from "~/lib/monaco/jsonMindustryLanguage";
+import {
+	ensureInlineColorClass,
+	getColorThemeRules,
+	MONACO_THEME_DARK,
+	MONACO_THEME_LIGHT,
+	resolveMindustryColor,
+} from "~/lib/monaco/colorTags";
 import { useValidationStore, Severity } from "@project/state";
 import { useFileContentStore } from "@project/state";
 import { useProjectSession } from "@project/state";
@@ -18,8 +26,9 @@ interface MonacoEditorProps {
 }
 
 export function MonacoEditor({ value, onChange, language, readOnly, filePath }: MonacoEditorProps) {
-	const monacoRef = useRef<{ editor: typeof editor } | null>(null);
+	const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+	const colorDecorationsRef = useRef<editor.IEditorDecorationsCollection | null>(null);
 	const theme = useMonacoTheme();
 	const { t } = useTranslation();
 	const monacoConfigured = useRef(false);
@@ -69,6 +78,96 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 		updateMarkers();
 	}, [updateMarkers]);
 
+	const updateColorDecorations = useCallback(() => {
+		const editorInstance = editorRef.current;
+		const monacoInstance = monacoRef.current;
+		if (!editorInstance || !monacoInstance) return;
+
+		const model = editorInstance.getModel();
+		if (!model) return;
+
+		const decorations: editor.IModelDeltaDecoration[] = [];
+
+		for (let lineNumber = 1; lineNumber <= model.getLineCount(); lineNumber += 1) {
+			const line = model.getLineContent(lineNumber);
+			let quote: '"' | "'" | null = null;
+			let activeClassName: string | null = null;
+			let segmentStartColumn: number | null = null;
+
+			for (let index = 0; index < line.length; index += 1) {
+				const char = line[index];
+				if (!char) continue;
+
+				if (quote) {
+					if (char === "\\") {
+						index += 1;
+						continue;
+					}
+
+					if (char === quote) {
+						if (activeClassName && segmentStartColumn !== null && segmentStartColumn < index + 1) {
+							decorations.push({
+								range: new monacoInstance.Range(lineNumber, segmentStartColumn, lineNumber, index + 1),
+								options: { inlineClassName: activeClassName },
+							});
+						}
+						quote = null;
+						activeClassName = null;
+						segmentStartColumn = null;
+						continue;
+					}
+
+					if (char === "[") {
+						const remaining = line.slice(index);
+						const resetMatch = remaining.match(/^\[\]/);
+						const colorMatch = remaining.match(/^\[(#(?:[0-9a-fA-F]{1,6}|[0-9a-fA-F]{8})|[a-zA-Z]+)\]/);
+
+						if (resetMatch || colorMatch) {
+							if (activeClassName && segmentStartColumn !== null && segmentStartColumn < index + 1) {
+								decorations.push({
+									range: new monacoInstance.Range(lineNumber, segmentStartColumn, lineNumber, index + 1),
+									options: { inlineClassName: activeClassName },
+								});
+							}
+
+							if (resetMatch) {
+								activeClassName = null;
+								segmentStartColumn = null;
+								index += resetMatch[0].length - 1;
+								continue;
+							}
+
+							if (colorMatch) {
+								const colorValue = resolveMindustryColor(colorMatch[1] ?? "");
+								activeClassName = colorValue ? ensureInlineColorClass(colorValue) : null;
+								segmentStartColumn = activeClassName ? index + colorMatch[0].length + 1 : null;
+								index += colorMatch[0].length - 1;
+								continue;
+							}
+						}
+					}
+
+					continue;
+				}
+
+				if (char === '"' || char === "'") {
+					quote = char;
+				}
+			}
+		}
+
+		if (!colorDecorationsRef.current) {
+			colorDecorationsRef.current = editorInstance.createDecorationsCollection(decorations);
+			return;
+		}
+
+		colorDecorationsRef.current.set(decorations);
+	}, []);
+
+	useEffect(() => {
+		updateColorDecorations();
+	}, [updateColorDecorations, value, language]);
+
 	useEffect(() => {
 		if (!filePath) return;
 		const projectContext = useProjectSession.getState().projectContext;
@@ -85,17 +184,42 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 
 	const handleBeforeMount: BeforeMount = (monaco) => {
 		monacoRef.current = monaco;
-		const existingLang = monaco.languages.getLanguages().find((l) => l.id === HJSON_LANGUAGE_ID);
-		if (!existingLang) {
+
+		const colorThemeRules = getColorThemeRules();
+		monaco.editor.defineTheme(MONACO_THEME_LIGHT, {
+			base: "vs",
+			inherit: true,
+			rules: colorThemeRules,
+			colors: {},
+		});
+		monaco.editor.defineTheme(MONACO_THEME_DARK, {
+			base: "vs-dark",
+			inherit: true,
+			rules: colorThemeRules,
+			colors: {},
+		});
+
+		// Register HJSON
+		const existingHjson = monaco.languages.getLanguages().find((l) => l.id === HJSON_LANGUAGE_ID);
+		if (!existingHjson) {
 			monaco.languages.register({ id: HJSON_LANGUAGE_ID });
 			monaco.languages.setMonarchTokensProvider(HJSON_LANGUAGE_ID, hjsonMonarchGrammar);
 			monaco.languages.setLanguageConfiguration(HJSON_LANGUAGE_ID, hjsonLanguageConfig);
+		}
+
+		// Register JSON with Mindustry color tags
+		const existingJsonMindustry = monaco.languages.getLanguages().find((l) => l.id === JSON_MINDUSTRY_LANGUAGE_ID);
+		if (!existingJsonMindustry) {
+			monaco.languages.register({ id: JSON_MINDUSTRY_LANGUAGE_ID });
+			monaco.languages.setMonarchTokensProvider(JSON_MINDUSTRY_LANGUAGE_ID, jsonMindustryMonarchGrammar);
+			monaco.languages.setLanguageConfiguration(JSON_MINDUSTRY_LANGUAGE_ID, jsonMindustryLanguageConfig);
 		}
 	};
 
 	const handleMount: OnMount = (editor) => {
 		editorRef.current = editor;
 		updateMarkers();
+		updateColorDecorations();
 	};
 
 	return (

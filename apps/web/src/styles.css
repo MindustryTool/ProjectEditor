@@ -172,6 +172,24 @@ body {
 	-moz-osx-font-smoothing: grayscale;
 }
 
+/* Monaco Color Tags */
+.color-tag { font-weight: bold; opacity: 0.8; }
+.color-tag.accent, .color-text.accent { color: #ffd37f !important; }
+.color-tag.scarlet, .color-text.scarlet { color: #ff4c4c !important; }
+.color-tag.cyan, .color-text.cyan { color: #00ffff !important; }
+.color-tag.white, .color-text.white { color: #ffffff !important; }
+.color-tag.gray, .color-text.gray { color: #7f7f7f !important; }
+.color-tag.black, .color-text.black { color: #000000 !important; }
+.color-tag.red, .color-text.red { color: #ff0000 !important; }
+.color-tag.orange, .color-text.orange { color: #ff7f00 !important; }
+.color-tag.yellow, .color-text.yellow { color: #ffff00 !important; }
+.color-tag.green, .color-text.green { color: #00ff00 !important; }
+.color-tag.blue, .color-text.blue { color: #0000ff !important; }
+.color-tag.purple, .color-text.purple { color: #7f00ff !important; }
+.color-tag.magenta, .color-text.magenta { color: #ff00ff !important; }
+.color-tag.pink, .color-text.pink { color: #ff7f7f !important; }
+.color-tag.hex, .color-text.hex { color: #aaaaaa !important; }
+
 @theme inline {
 	--font-heading: var(--font-sans);
 	--font-sans: 'Inter Variable', sans-serif;

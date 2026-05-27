@@ -1,6 +1,8 @@
+import { JSON_MINDUSTRY_LANGUAGE_ID } from "./jsonMindustryLanguage";
+
 const extensionToLanguage: Record<string, string> = {
-  ".json": "json",
-  ".hjson": "hjson",
+	".json": JSON_MINDUSTRY_LANGUAGE_ID,
+	".hjson": "hjson",
   ".java": "java",
   ".js": "javascript",
   ".ts": "typescript",

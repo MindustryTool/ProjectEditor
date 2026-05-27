@@ -56,11 +56,12 @@ The system SHALL map file extensions to Monaco language identifiers when renderi
 
 #### Scenario: JSON files
 - **WHEN** a file with `.json` extension is opened
-- **THEN** the editor SHALL use the `json` language for syntax highlighting
+- **THEN** the editor SHALL use a language that supports both standard JSON and Mindustry color tags in strings
+- **AND** the standard JSON features (syntax validation, bracket matching) SHALL be preserved
 
 #### Scenario: HJSON files
 - **WHEN** a file with `.hjson` extension is opened
-- **THEN** the editor SHALL use the custom `hjson` language for syntax highlighting
+- **THEN** the editor SHALL use the custom `hjson` language for syntax highlighting, including Mindustry color tags in strings
 
 #### Scenario: Unknown extension
 - **WHEN** a file with an unrecognized extension is opened
@@ -145,4 +146,3 @@ MonacoEditor SHALL manage `monacoRef` and `editorRef` internally as local refs, 
 #### Scenario: Refs cleaned up on unmount
 - **WHEN** MonacoEditor unmounts
 - **THEN** the editor instance SHALL be disposed
-

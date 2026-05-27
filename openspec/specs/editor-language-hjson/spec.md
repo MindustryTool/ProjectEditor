@@ -22,6 +22,7 @@ The HJSON Monarch grammar SHALL provide syntax highlighting for the following HJ
 #### Scenario: String values
 - **WHEN** HJSON content contains string values in double or single quotes
 - **THEN** the string values SHALL be rendered in the string color (typically orange)
+- **AND** any color tags within the string SHALL be highlighted according to the `editor-color-tags` capability
 
 #### Scenario: Numeric values
 - **WHEN** HJSON content contains numeric values (integers, floats)
