@@ -38,7 +38,7 @@ function EditorContent({ path }: { path: string }) {
 		return <ImageFilePreview path={path} />;
 	}
 
-	return <div className="flex h-full items-center justify-center text-xs text-muted-foreground">{path}</div>;
+	return <EditorWithMonaco path={path} />;
 }
 
 export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: EditorCenterPanelProps) {
