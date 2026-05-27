@@ -62,77 +62,80 @@ const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 	}
 };
 
-const modMetaValidator: ValidatorFn = ({ path, content }) => {
-	const data = HJSON.parseStructured(content) as StructuredObjectNode;
+const createValibotValidator: (schema: Parameters<typeof v.parse>[0]) => ValidatorFn = (schema) => {
+	return ({ path, content }) => {
+		const data = HJSON.parseStructured(content) as StructuredObjectNode;
+		try {
+			if (typeof data !== "object" || data === null)
+				return [
+					{
+						path,
+						severity: Severity.error,
+						messageKey: "validation.content.invalidJson",
+						messageParams: { error: "Mod meta is not a valid JSON object" },
+						startLine: 1,
+						startColumn: 1,
+						endLine: 1,
+						endColumn: 1,
+					},
+				];
 
-	try {
-		if (typeof data !== "object" || data === null)
+			v.parse(schema, data.valueOf());
+
+			return [];
+		} catch (err) {
+			if (v.isValiError(err)) {
+				const result = [];
+
+				for (const issue of err.issues) {
+					const field = issue.path?.map((p) => p.key)?.join(".") || "";
+					const fieldInfo = data.field(field);
+
+					let startLine = 1;
+					let startColumn = 1;
+					let endLine = 1;
+					let endColumn = 1;
+
+					if (fieldInfo) {
+						startLine = fieldInfo.start.row;
+						startColumn = fieldInfo.start.col;
+						endLine = fieldInfo.end.row;
+						endColumn = fieldInfo.end.col;
+					}
+
+					result.push({
+						path,
+						severity: Severity.error,
+						messageKey: "validation.content.invalidJson",
+						field,
+						messageParams: { error: field + ": " + issue.message },
+						startLine,
+						startColumn,
+						endLine,
+						endColumn,
+					});
+				}
+
+				return result;
+			}
+
 			return [
 				{
 					path,
 					severity: Severity.error,
 					messageKey: "validation.content.invalidJson",
-					messageParams: { error: "Mod meta is not a valid JSON object" },
+					messageParams: { error: "Aaaaa" },
 					startLine: 1,
 					startColumn: 1,
 					endLine: 1,
 					endColumn: 1,
 				},
 			];
-
-		v.parse(ModHjsonSchema, data.valueOf());
-
-		return [];
-	} catch (err) {
-		if (v.isValiError(err)) {
-			const result = [];
-
-			for (const issue of err.issues) {
-				const field = issue.path?.map((p) => p.key)?.join(".") || "";
-				const fieldInfo = data.field(field);
-
-				let startLine = 1;
-				let startColumn = 1;
-				let endLine = 1;
-				let endColumn = 1;
-
-				if (fieldInfo) {
-					startLine = fieldInfo.start.row;
-					startColumn = fieldInfo.start.col;
-					endLine = fieldInfo.end.row;
-					endColumn = fieldInfo.end.col;
-				}
-
-				result.push({
-					path,
-					severity: Severity.error,
-					messageKey: "validation.content.invalidJson",
-					field,
-					messageParams: { error: field + ": " + issue.message },
-					startLine,
-					startColumn,
-					endLine,
-					endColumn,
-				});
-			}
-
-			return result;
 		}
-
-		return [
-			{
-				path,
-				severity: Severity.error,
-				messageKey: "validation.content.invalidJson",
-				messageParams: { error: "Aaaaa" },
-				startLine: 1,
-				startColumn: 1,
-				endLine: 1,
-				endColumn: 1,
-			},
-		];
-	}
+	};
 };
+
+const modMetaValidator: ValidatorFn = createValibotValidator(ModHjsonSchema);
 
 export function createDefaultValidators() {
 	const registry = createValidatorRegistry();
