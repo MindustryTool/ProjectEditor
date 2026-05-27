@@ -102,10 +102,6 @@ export function ModHjsonPanel({ path }: { path: string }) {
 	const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof ModHjsonData, string>>>({});
 	const linesRef = useRef<string[]>([]);
 
-	if (isLoading) {
-		throw new Promise((resolve) => setTimeout(resolve, 100));
-	}
-
 	useEffect(() => {
 		if (data === null || isLoading) return;
 
