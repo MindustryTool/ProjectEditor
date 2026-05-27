@@ -17,7 +17,11 @@ import { ProjectSettingsDialog } from "~/components/editor/toolbar/ProjectSettin
 import { LANGUAGE_OPTIONS, LanguageBadge } from "./LanguageBadge";
 import { Spinner } from "#/components/ui/spinner";
 
-function CreateProjectSection({ onCreated }: { onCreated: () => void }) {
+interface ProjectPickerScreenProps {
+	onProjectSelected?: (id: string) => void;
+}
+
+function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: string) => void }) {
 	const { t } = useTranslation();
 	const { createProject } = useProjectActions();
 	const [name, setName] = useState("");
@@ -31,12 +35,12 @@ function CreateProjectSection({ onCreated }: { onCreated: () => void }) {
 			return;
 		}
 		try {
-			await createProject(trimmed, language);
+			const id = await createProject(trimmed, language);
 			toast.success("Project created successfully");
 			setName("");
 			setLanguage("json");
 			setNameError("");
-			onCreated();
+			if (id) onProjectSelected(id);
 		} catch (e) {
 			toast.error(`Failed to create project ${e}`);
 		}
@@ -79,7 +83,7 @@ function CreateProjectSection({ onCreated }: { onCreated: () => void }) {
 	);
 }
 
-function ImportProjectSection({ onImported }: { onImported: () => void }) {
+function ImportProjectSection({ onImported }: { onImported: (id: string) => void }) {
 	const { t } = useTranslation();
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [importing, setImporting] = useState(false);
@@ -121,10 +125,10 @@ function ImportProjectSection({ onImported }: { onImported: () => void }) {
 
 			unsubscribe();
 
-			useAppStore.setState({ lastProjectId: project.id });
+			useProjectSession.getState().setCurrentProject({ project, fs, events });
 
 			toast.success(`Project imported successfully`);
-			onImported();
+			onImported(project.id);
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Failed to import project");
 		}
@@ -158,7 +162,7 @@ function ImportProjectSection({ onImported }: { onImported: () => void }) {
 	);
 }
 
-function ProjectActionsSection({ onCreated }: { onCreated: () => void }) {
+function ProjectActionsSection({ onProjectSelected }: { onProjectSelected: (id: string) => void }) {
 	const { t } = useTranslation();
 
 	return (
@@ -174,18 +178,17 @@ function ProjectActionsSection({ onCreated }: { onCreated: () => void }) {
 				</TabsTrigger>
 			</TabsList>
 			<TabsContent value="create" className="m-0 p-4">
-				<CreateProjectSection onCreated={onCreated} />
+				<CreateProjectSection onProjectSelected={onProjectSelected} />
 			</TabsContent>
 			<TabsContent value="import" className="m-0 p-4">
-				<ImportProjectSection onImported={onCreated} />
+				<ImportProjectSection onImported={onProjectSelected} />
 			</TabsContent>
 		</Tabs>
 	);
 }
 
-function ProjectListSection() {
+function ProjectListSection({ onProjectSelected }: { onProjectSelected: (id: string) => void }) {
 	const { t } = useTranslation();
-	const { openProjectFromRecord } = useProjectActions();
 	const projects = useAppStore((s) => s.projects);
 
 	return (
@@ -201,11 +204,7 @@ function ProjectListSection() {
 							type="button"
 							className="w-full text-left text-xs"
 							onClick={() => {
-								try {
-									openProjectFromRecord(project);
-								} catch (err) {
-									toast.error(err instanceof Error ? err.message : "Failed to open project");
-								}
+								onProjectSelected(project.id);
 							}}
 						>
 							<div className="flex items-center gap-2 font-medium text-foreground">
@@ -229,8 +228,9 @@ function ProjectListSection() {
 	);
 }
 
-export function ProjectPickerScreen() {
+export function ProjectPickerScreen({ onProjectSelected }: ProjectPickerScreenProps) {
 	const { t } = useTranslation();
+	const handleCreated = onProjectSelected ?? (() => {});
 
 	return (
 		<div className="flex flex-1 items-center justify-center bg-background">
@@ -239,9 +239,9 @@ export function ProjectPickerScreen() {
 					<h1 className="text-xl font-medium text-foreground">{t("app.title")}</h1>
 					<p className="text-xs text-muted-foreground">{t("projectPickerScreen.description")}</p>
 				</div>
-				<ProjectActionsSection onCreated={() => {}} />
+				<ProjectActionsSection onProjectSelected={handleCreated} />
 				<Separator />
-				<ProjectListSection />
+				<ProjectListSection onProjectSelected={handleCreated} />
 			</div>
 		</div>
 	);

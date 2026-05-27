@@ -20,6 +20,7 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
+import { useProjectActions } from "#/components/editor/useProjectActions";
 
 type NameError = "empty" | "invalid" | null;
 
@@ -123,7 +124,7 @@ function EditProjectName({ defaultProject }: { defaultProject?: ProjectRecord })
 function DeleteProject({ projectId: propId, onDeleted }: { projectId?: string; onDeleted?: () => void }) {
 	const { t } = useTranslation();
 	const projectContext = useProjectSession((s) => s.projectContext);
-	const closeProject = useProjectSession((s) => s.closeProject);
+	const { closeProject } = useProjectActions();
 	const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 	const effectiveId = propId ?? projectContext?.project.id;
 

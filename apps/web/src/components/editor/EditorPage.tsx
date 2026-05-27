@@ -1,7 +1,7 @@
 import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "@tanstack/react-router";
 import { useAppStore, useProjectSession } from "@project/state";
-import { NoProjectScreen } from "./NoProjectScreen";
 import { EditorShell } from "./EditorShell";
 import { useProjectActions } from "./useProjectActions";
 import { useTranslation } from "react-i18next";
@@ -12,9 +12,10 @@ export function EditorPage() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [loading, setLoading] = useState(0);
 	const { t } = useTranslation();
+	const navigate = useNavigate();
+	const { id, lang } = useParams({ from: "/$lang/projects/$id" });
 
 	const projectContext = useProjectSession((s) => s.projectContext);
-	const lastProjectId = useAppStore((s) => s.lastProjectId);
 	const hydrated = useAppStore((s) => s.hydrated);
 
 	const { openProjectFromRecord } = useProjectActions();
@@ -26,13 +27,15 @@ export function EditorPage() {
 			return;
 		}
 
-		if (!lastProjectId) {
-			if (hydrated) {
-				setLoading(100);
-				setTimeout(() => setIsLoading(false), 1000);
-			} else {
-				setLoading(20);
-			}
+		if (!hydrated) {
+			setLoading(20);
+			return;
+		}
+
+		if (!id) {
+			navigate({ to: `/${lang}/projects`, replace: true });
+			setLoading(100);
+			setTimeout(() => setIsLoading(false), 1000);
 			return;
 		}
 
@@ -40,10 +43,12 @@ export function EditorPage() {
 
 		(async () => {
 			try {
-				const record = useAppStore.getState().projects[lastProjectId];
+				const record = useAppStore.getState().projects[id];
 				if (record && !cancelled) {
 					await openProjectFromRecord(record);
 					setLoading(50);
+				} else if (!cancelled) {
+					navigate({ to: `/${lang}/projects`, replace: true });
 				}
 			} finally {
 				setLoading(100);
@@ -54,7 +59,7 @@ export function EditorPage() {
 		return () => {
 			cancelled = true;
 		};
-	}, [lastProjectId, projectContext, hydrated, setLoading, setIsLoading, openProjectFromRecord]);
+	}, [projectContext, hydrated, id, openProjectFromRecord, navigate, lang]);
 
 	if (isLoading) {
 		return (
@@ -69,7 +74,7 @@ export function EditorPage() {
 	}
 
 	if (projectContext === null) {
-		return <NoProjectScreen />;
+		return null;
 	}
 
 	return <EditorShell path={path} />;

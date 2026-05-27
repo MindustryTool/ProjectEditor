@@ -3,15 +3,18 @@ import { createEventBus, type ProjectInfo, type ProjectLanguage, type ProjectEve
 import { createProjectFileSystem } from "@project/fs";
 import { useAppStore, useProjectSession } from "@project/state";
 import type { ProjectRecord } from "@project/state";
+import { useNavigate, useParams } from "@tanstack/react-router";
 
 export function useProjectActions() {
 	const createNewProject = useAppStore((state) => state.createNewProject);
 	const setCurrentProject = useProjectSession((state) => state.setCurrentProject);
-	const closeProject = useProjectSession((state) => state.closeProject);
+	const reset = useProjectSession((state) => state.reset);
+	const navigate = useNavigate();
+	const { lang } = useParams({ strict: false });
 
 	const createProject = useCallback(
 		async (name: string, language?: ProjectLanguage) => {
-			await createNewProject(name, language);
+			return await createNewProject(name, language);
 		},
 		[createNewProject],
 	);
@@ -35,6 +38,14 @@ export function useProjectActions() {
 		},
 		[setCurrentProject],
 	);
+
+	const closeProject = useCallback(() => {
+		if (!lang) {
+			throw new Error("lang is not set");
+		}
+		reset();
+		navigate({ to: `/$lang/projects`, params: { lang } });
+	}, [reset, navigate, lang]);
 
 	return { closeProject, createProject, openProjectFromRecord };
 }

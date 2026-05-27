@@ -44,7 +44,7 @@ export function FileExplorer({ className }: FileExplorerProps) {
 	}
 
 	return (
-		<div className={cn("space-y-0.5 px-1 py-1 h-full overflow-y-auto", className)}>
+		<div className={cn("space-y-0.5 h-full overflow-y-auto", className)}>
 			{projectTree.map((node) => (
 				<TreeNodeItem
 					key={node.name}

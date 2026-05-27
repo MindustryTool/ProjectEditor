@@ -88,7 +88,7 @@ export class ProjectFileSystem {
 	}
 
 	async writeFiles(entries: { name: string; data: Uint8Array }[]): Promise<void> {
-		const BATCH_SIZE = 20;
+		const BATCH_SIZE = 50;
 
 		const dirs = new Set(entries.map((e) => e.name.split("/").slice(0, -1).join("/")).filter(Boolean));
 		await Promise.all([...dirs].map((d) => this.vfs.mkdir(this.scopePath(d))));

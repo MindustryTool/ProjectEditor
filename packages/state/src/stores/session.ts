@@ -43,7 +43,7 @@ interface ProjectSession {
 
 	setCurrentProject: (context: ProjectContext | null) => void;
 	updateCurrentProject: (patch: Partial<ProjectInfo>) => void;
-	closeProject: () => void;
+	reset: () => void;
 	recordFileAccess: (projectId: string, path: string) => void;
 	removeFromRecentFiles: (projectId: string, path: string) => void;
 	clearRecentFiles: (projectId: string) => void;
@@ -61,7 +61,6 @@ export const useProjectSession = create<ProjectSession>()(
 					projectContext: context,
 					treeSnapshot: context ? state.treeSnapshot : [],
 				}));
-                console.error(new Error("setCurrentProject"));
 			},
 
 			updateCurrentProject: (patch) => {
@@ -74,7 +73,7 @@ export const useProjectSession = create<ProjectSession>()(
 				});
 			},
 
-			closeProject: () => {
+			reset: () => {
 				set({ projectContext: null, treeSnapshot: [] });
 			},
 

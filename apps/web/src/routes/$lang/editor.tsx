@@ -1,17 +1,12 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import { EditorPage } from "../../components/editor"
-import { isSupportedLocale, setLocale } from "../../lib/locales"
+import { isSupportedLocale } from "../../lib/locales"
 
 export const Route = createFileRoute("/$lang/editor")({
   beforeLoad: ({ params }) => {
     if (!isSupportedLocale(params.lang)) {
-      throw redirect({ href: "/en/editor", replace: true })
+      throw redirect({ href: "/en/projects", replace: true })
     }
-    setLocale(params.lang)
+    throw redirect({ href: `/${params.lang}/projects`, replace: true })
   },
-  component: RouteComponent,
+  component: () => null,
 })
-
-function RouteComponent() {
-  return <EditorPage />
-}

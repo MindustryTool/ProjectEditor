@@ -1,7 +1,5 @@
-## Purpose
+## MODIFIED Requirements
 
-Define the visual transition behavior when the editor loads, ensuring smooth, accessible, and non-blocking transitions between loading, project picker, and editor views.
-## Requirements
 ### Requirement: Loading state transitions are smooth
 
 The editor entry screen SHALL transition between the loading view and the next screen using a smooth visual effect that includes opacity fade and blur.
@@ -30,6 +28,8 @@ The transition behavior SHALL NOT delay the point at which the editor content ca
 - **WHEN** the editor content is ready to render
 - **THEN** the editor content becomes available for interaction at the start of the transition (or immediately after it appears), without waiting for the full animation to complete
 
+## ADDED Requirements
+
 ### Requirement: Editor loads project from URL param
 
 The editor entry screen SHALL read the project ID from the URL route parameter instead of from persisted store state. It SHALL attempt to open the corresponding project record on mount.
@@ -53,4 +53,3 @@ The editor entry screen SHALL NOT read, write, or depend on `lastProjectId` from
 #### Scenario: Store has stale lastProjectId
 - **WHEN** the user opens the editor and the persisted store still contains a `lastProjectId` value
 - **THEN** that value is ignored and no project is auto-loaded from it
-

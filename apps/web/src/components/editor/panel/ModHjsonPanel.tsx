@@ -8,25 +8,9 @@ import { Checkbox } from "~/components/ui/checkbox";
 import { FormField, FormLabel, FormControl, FormDescription, FormMessage } from "~/components/ui/form";
 import { Field, FieldContent, FieldLabel, FieldDescription } from "~/components/ui/field";
 import { ModHjsonSchema, ModNameSchema, defaultModHjson, type ModHjsonData } from "@project/validation";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { useFileContentString } from "@project/state";
 import { Panel } from "@/components/editor/Panel";
-
-function toHjson(data: ModHjsonData): string {
-	let result = `name: ${data.name.trimStart()}\n`;
-	result += `displayName: ${data.displayName.trimStart()}\n`;
-	result += `author: ${data.author.trimStart()}\n`;
-	result += `description: ${data.description.trimStart()}\n`;
-	result += `version: ${data.version.trimStart()}\n`;
-	result += `minGameVersion: ${data.minGameVersion.trimStart()}\n`;
-
-	if (data.dependencies.filter((dep) => dep.trim() !== "").length > 0) {
-		result += `dependencies: [${data.dependencies.join(",").trimStart()}]\n`;
-	}
-
-	result += `hidden: ${data.hidden}\n`;
-	return result;
-}
 
 function replaceLine(lines: string[], key: string, value: string): string[] {
 	const prefix = `${key}:`;
@@ -51,31 +35,13 @@ interface ModHjsonEditorProps {
 
 export function ModHjsonPanel({ path }: ModHjsonEditorProps) {
 	const { t } = useTranslation();
-	const { data, isLoading, write } = useFileContentString(path);
+	const { write } = useFileContentString(path);
 	const linesRef = useRef<string[]>([]);
 	const prevValuesRef = useRef<ModHjsonData>({ ...defaultModHjson });
 
 	const form = useForm({
 		defaultValues: { ...defaultModHjson },
 	});
-
-	useEffect(() => {
-		if (data === null) {
-			return;
-		}
-
-		if (isLoading) {
-			return;
-		}
-
-		if (data === "") {
-			const content = toHjson(defaultModHjson);
-			linesRef.current = content.split("\n");
-			prevValuesRef.current = { ...defaultModHjson };
-			form.reset(defaultModHjson);
-			write(content);
-		}
-	}, [data, isLoading, write]);
 
 	const fields: {
 		name: keyof ModHjsonData;

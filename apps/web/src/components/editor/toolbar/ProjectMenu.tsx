@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "@tanstack/react-router";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import { cn } from "~/lib/utils";
@@ -21,12 +22,20 @@ interface ProjectMenuProps {
 
 export function ProjectMenu({ className }: ProjectMenuProps) {
 	const { t } = useTranslation();
+	const navigate = useNavigate();
 	const hasProject = useProjectSession((state) => state.projectContext !== null);
 	const { closeProject, createProject, openProjectFromRecord } = useProjectActions();
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [importing, setImporting] = useState(false);
 	const [paths, setPaths] = useState<string[]>([]);
 	const listRef = useRef<HTMLDivElement>(null);
+
+	const navigateToProject = useCallback(
+		(id: string) => {
+			navigate({ to: `/en/projects/${id}`, replace: true });
+		},
+		[navigate],
+	);
 
 	const handleImportProject = useCallback(async () => {
 		fileInputRef.current?.click();
@@ -63,13 +72,13 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 				}
 			});
 
-			useAppStore.setState({ lastProjectId: project.id });
 			useProjectSession.getState().setCurrentProject({ project, fs, events });
 
 			await fs.writeFiles(result.entries);
 
 			unsubscribe();
 
+			navigateToProject(project.id);
 			toast.success(`Project imported successfully`);
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Failed to import project");
@@ -78,33 +87,36 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 		}
 
 		e.target.value = "";
-	}, []);
+	}, [navigateToProject]);
 
 	const handleCreateProject = useCallback(
 		async (name: string, language?: ProjectLanguage) => {
 			try {
-				await createProject(name, language);
+				const id = await createProject(name, language);
+				if (id) navigateToProject(id);
 				toast.success("Project created successfully");
 			} catch (e) {
 				toast.error(`Failed to create project ${e}`);
 			}
 		},
-		[createProject],
+		[createProject, navigateToProject],
 	);
 
 	const handleOpenProject = useCallback(
 		async (record: ProjectRecord) => {
 			await openProjectFromRecord(record);
+			navigateToProject(record.id);
 		},
-		[openProjectFromRecord],
+		[openProjectFromRecord, navigateToProject],
 	);
 
 	const handleChangeProject = useCallback(
 		async (record: ProjectRecord) => {
 			closeProject();
 			await openProjectFromRecord(record);
+			navigateToProject(record.id);
 		},
-		[closeProject, openProjectFromRecord],
+		[closeProject, openProjectFromRecord, navigateToProject],
 	);
 
 	useEffect(() => {

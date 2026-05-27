@@ -27,11 +27,11 @@ interface AppState {
 	hydrated: boolean;
 	projects: Record<string, ProjectRecord>;
 	settings: AppSettings;
-	lastProjectId: string | null;
 
-	createNewProject: (name: string, language?: ProjectLanguage) => Promise<void>;
+	createNewProject: (name: string, language?: ProjectLanguage) => Promise<string>;
 	updateSettings: (settings: Partial<AppSettings>) => void;
 	saveProject: (record: ProjectRecord) => Promise<void>;
+	getAllProjects: () => ProjectRecord[];
 	deleteProject: (id: string) => Promise<void>;
 }
 
@@ -41,7 +41,6 @@ export const useAppStore = create<AppState>()(
 			hydrated: false,
 			projects: {},
 			settings: DEFAULT_SETTINGS as AppSettings,
-			lastProjectId: null,
 
 			createNewProject: async (name: string, language?: ProjectLanguage) => {
 				const project = createProjectInfo(name, language);
@@ -58,8 +57,8 @@ export const useAppStore = create<AppState>()(
 						useProjectSession.setState({ treeSnapshot: snapshot });
 					},
 				});
-				set({ lastProjectId: project.id });
 				useProjectSession.getState().setCurrentProject({ project, fs, events });
+				return project.id;
 			},
 
 			updateSettings: (settings) => {
@@ -90,7 +89,6 @@ export const useAppStore = create<AppState>()(
 			partialize: (state) => ({
 				settings: state.settings,
 				projects: state.projects,
-				lastProjectId: state.lastProjectId,
 			}),
 			onRehydrateStorage(state) {
 				if (state) state.hydrated = true;
