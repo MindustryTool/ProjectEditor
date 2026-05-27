@@ -4,7 +4,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
-import { getAllProjects, type ProjectRecord } from "@project/storage";
+import { useAppStore } from "@project/state";
+import type { ProjectRecord } from "@project/state";
 import type { ProjectLanguage } from "@project/core";
 import { FolderOpen } from "lucide-react";
 import { Separator } from "#/components/ui/separator";
@@ -28,7 +29,7 @@ export function ProjectPickerDialog({ mode, trigger, onSelectProject, onCreatePr
 	const [nameError, setNameError] = useState("");
 
 	const loadProjects = useCallback(async () => {
-		const all = await getAllProjects();
+		const all = await useAppStore.getState().getAllProjects();
 		setProjects(all);
 	}, []);
 

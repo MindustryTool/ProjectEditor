@@ -1,5 +1,8 @@
 import type { EventBus, ProjectEventMap, ProjectInfo } from "@project/core";
-import { getOPFSRoot } from "@project/storage";
+
+async function getOPFSRoot(): Promise<FileSystemDirectoryHandle> {
+	return navigator.storage.getDirectory();
+}
 
 // Types
 
@@ -87,19 +90,13 @@ export class ProjectFileSystem {
 	async writeFiles(entries: { name: string; data: Uint8Array }[]): Promise<void> {
 		const BATCH_SIZE = 20;
 
-		const dirs = new Set(
-			entries
-				.map((e) => e.name.split("/").slice(0, -1).join("/"))
-				.filter(Boolean),
-		);
+		const dirs = new Set(entries.map((e) => e.name.split("/").slice(0, -1).join("/")).filter(Boolean));
 		await Promise.all([...dirs].map((d) => this.vfs.mkdir(this.scopePath(d))));
 
 		for (let i = 0; i < entries.length; i += BATCH_SIZE) {
 			const batch = entries.slice(i, i + BATCH_SIZE);
 			const results = await Promise.allSettled(
-				batch.map((entry) =>
-					this.vfs.writeFile(this.scopePath(entry.name), new Uint8Array(entry.data)),
-				),
+				batch.map((entry) => this.vfs.writeFile(this.scopePath(entry.name), new Uint8Array(entry.data))),
 			);
 			for (const entry of batch) {
 				this.events.emit("file:changed", { path: entry.name, kind: "write" });
@@ -343,7 +340,7 @@ export class OPFSAdapter implements VirtualFileSystem {
 			const file = await fileHandle.getFile();
 			return file.arrayBuffer();
 		} catch (err) {
-			console.error("Error reading file:", path, err);
+			console.error("Error reading file:" + path, new Error(String(err)));
 			throw err;
 		}
 	}

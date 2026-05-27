@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
-import { getAllProjects, saveProject } from "@project/storage";
 import type { ProjectLanguage } from "@project/core";
 import { importProject, createProjectInfo, createEventBus } from "@project/core";
 import type { ProjectEventMap } from "@project/core";
@@ -17,9 +15,6 @@ import { useProjectActions } from "./useProjectActions";
 import { Separator } from "#/components/ui/separator";
 import { ProjectSettingsDialog } from "~/components/editor/toolbar/ProjectSettingsDialog";
 import { LANGUAGE_OPTIONS, LanguageBadge } from "./LanguageBadge";
-import { Skeleton } from "~/components/ui/skeleton";
-import { ErrorDisplay } from "~/components/ui/error-display";
-import type { ProjectRecord } from "@project/storage";
 import { Spinner } from "#/components/ui/spinner";
 
 function CreateProjectSection({ onCreated }: { onCreated: () => void }) {
@@ -103,11 +98,10 @@ function ImportProjectSection({ onImported }: { onImported: () => void }) {
 			const result = await importProject(new Uint8Array(buffer));
 			const project = createProjectInfo(result.name, result.language);
 
-			await saveProject({
+			await useAppStore.getState().saveProject({
 				id: project.id,
 				name: project.name,
 				language: project.language,
-				data: "",
 				createdAt: project.createdAt,
 				updatedAt: project.updatedAt,
 			});
@@ -119,7 +113,7 @@ function ImportProjectSection({ onImported }: { onImported: () => void }) {
 
 			const unsubscribe = events.on("file:changed", (path) => {
 				if (path.kind === "write") {
-					setPaths(prev => [...prev, path.path]);
+					setPaths((prev) => [...prev, path.path]);
 				}
 			});
 
@@ -127,10 +121,7 @@ function ImportProjectSection({ onImported }: { onImported: () => void }) {
 
 			unsubscribe();
 
-			useAppStore.setState((state) => ({
-				projects: [...state.projects, project],
-				lastProjectId: project.id,
-			}));
+			useAppStore.setState({ lastProjectId: project.id });
 
 			toast.success(`Project imported successfully`);
 			onImported();
@@ -154,7 +145,7 @@ function ImportProjectSection({ onImported }: { onImported: () => void }) {
 			<Button onClick={() => fileInputRef.current?.click()} disabled={importing}>
 				{importing ? <Spinner /> : t("projectPickerScreen.selectZip")}
 			</Button>
-			{importing && (
+			{importing && paths.length > 0 && (
 				<div className="grid gap-1 p-2 rounded-md border max-h-[200px] overflow-y-auto" ref={listRef}>
 					{paths.map((path, index) => (
 						<div key={path} className="text-xs text-muted-foreground">
@@ -192,18 +183,10 @@ function ProjectActionsSection({ onCreated }: { onCreated: () => void }) {
 	);
 }
 
-interface ProjectListSectionProps {
-	projects: ProjectRecord[] | undefined;
-	isLoading: boolean;
-	isError: boolean;
-	error: Error | null;
-	onRetry: () => void;
-	onOpen: (project: ProjectRecord) => void;
-	onDeleted: () => void;
-}
-
-function ProjectListSection({ projects, isLoading, isError, error, onRetry, onOpen, onDeleted }: ProjectListSectionProps) {
+function ProjectListSection() {
 	const { t } = useTranslation();
+	const { openProjectFromRecord } = useProjectActions();
+	const projects = useAppStore((s) => s.projects);
 
 	return (
 		<div className="space-y-2">
@@ -212,20 +195,19 @@ function ProjectListSection({ projects, isLoading, isError, error, onRetry, onOp
 				{t("projectPickerScreen.recentProjects")}
 			</div>
 			<div className="space-y-1">
-				{isLoading &&
-					Array.from({ length: 3 }).map((_, i) => (
-						<div key={i} className="rounded-md border bg-card px-3 py-2 space-y-2">
-							<Skeleton className="h-4 w-3/4" />
-							<Skeleton className="h-3 w-1/4" />
-						</div>
-					))}
-				{isError && <ErrorDisplay message={error?.message} onRetry={onRetry} />}
-				{projects?.length === 0 && !isLoading && (
-					<p className="py-8 text-center text-xs text-muted-foreground">{t("projectPickerScreen.noProjects")}</p>
-				)}
-				{projects?.map((project) => (
+				{Object.values(projects).map((project) => (
 					<div key={project.id} className="relative rounded-md border bg-card px-3 py-2 transition-colors hover:bg-accent">
-						<button type="button" className="w-full text-left text-xs" onClick={() => onOpen(project)}>
+						<button
+							type="button"
+							className="w-full text-left text-xs"
+							onClick={() => {
+								try {
+									openProjectFromRecord(project);
+								} catch (err) {
+									toast.error(err instanceof Error ? err.message : "Failed to open project");
+								}
+							}}
+						>
 							<div className="flex items-center gap-2 font-medium text-foreground">
 								{project.name}
 								<LanguageBadge language={project.language} />
@@ -234,7 +216,6 @@ function ProjectListSection({ projects, isLoading, isError, error, onRetry, onOp
 						</button>
 						<ProjectSettingsDialog
 							project={project}
-							onDeleted={onDeleted}
 							trigger={
 								<Button className="absolute right-2 top-2" variant="ghost" size="icon">
 									<Settings className="size-3.5" />
@@ -250,17 +231,6 @@ function ProjectListSection({ projects, isLoading, isError, error, onRetry, onOp
 
 export function ProjectPickerScreen() {
 	const { t } = useTranslation();
-	const { openProjectFromRecord } = useProjectActions();
-	const {
-		data: projects,
-		isLoading,
-		isError,
-		error,
-		refetch,
-	} = useQuery({
-		queryKey: ["projects"],
-		queryFn: getAllProjects,
-	});
 
 	return (
 		<div className="flex flex-1 items-center justify-center bg-background">
@@ -269,23 +239,9 @@ export function ProjectPickerScreen() {
 					<h1 className="text-xl font-medium text-foreground">{t("app.title")}</h1>
 					<p className="text-xs text-muted-foreground">{t("projectPickerScreen.description")}</p>
 				</div>
-				<ProjectActionsSection onCreated={() => refetch()} />
+				<ProjectActionsSection onCreated={() => {}} />
 				<Separator />
-				<ProjectListSection
-					projects={projects}
-					isLoading={isLoading}
-					isError={isError}
-					error={error}
-					onRetry={() => refetch()}
-					onOpen={(project) => {
-						try {
-							openProjectFromRecord(project);
-						} catch (e) {
-							toast.error(`Failed to open project ${e}`);
-						}
-					}}
-					onDeleted={() => refetch()}
-				/>
+				<ProjectListSection />
 			</div>
 		</div>
 	);

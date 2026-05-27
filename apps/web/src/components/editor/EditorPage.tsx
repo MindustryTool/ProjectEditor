@@ -1,7 +1,6 @@
 import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 import { useAppStore, useProjectSession } from "@project/state";
-import { getProject } from "@project/storage";
 import { NoProjectScreen } from "./NoProjectScreen";
 import { EditorShell } from "./EditorShell";
 import { useProjectActions } from "./useProjectActions";
@@ -41,7 +40,7 @@ export function EditorPage() {
 
 		(async () => {
 			try {
-				const record = await getProject(lastProjectId);
+				const record = useAppStore.getState().projects[lastProjectId];
 				if (record && !cancelled) {
 					await openProjectFromRecord(record);
 					setLoading(50);

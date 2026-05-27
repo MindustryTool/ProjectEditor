@@ -32,9 +32,6 @@ importers:
       '@project/state':
         specifier: workspace:*
         version: link:../../packages/state
-      '@project/storage':
-        specifier: workspace:*
-        version: link:../../packages/storage
       '@project/utils':
         specifier: workspace:*
         version: link:../../packages/utils
@@ -93,9 +90,6 @@ importers:
       '@project/state':
         specifier: workspace:*
         version: link:../../packages/state
-      '@project/storage':
-        specifier: workspace:*
-        version: link:../../packages/storage
       '@project/utils':
         specifier: workspace:*
         version: link:../../packages/utils
@@ -266,9 +260,6 @@ importers:
       '@project/core':
         specifier: workspace:*
         version: link:../core
-      '@project/storage':
-        specifier: workspace:*
-        version: link:../storage
       '@project/zip':
         specifier: workspace:*
         version: link:../zip
@@ -288,9 +279,6 @@ importers:
       '@project/fs':
         specifier: workspace:*
         version: link:../fs
-      '@project/storage':
-        specifier: workspace:*
-        version: link:../storage
       '@project/validation':
         specifier: workspace:*
         version: link:../validation
@@ -313,16 +301,6 @@ importers:
       '@types/react-dom':
         specifier: ^19.0.0
         version: 19.2.3(@types/react@19.2.15)
-      typescript:
-        specifier: ^5.7.0
-        version: 5.9.3
-
-  packages/storage:
-    dependencies:
-      idb:
-        specifier: ^8.0.0
-        version: 8.0.3
-    devDependencies:
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
@@ -4087,9 +4065,6 @@ packages:
   iconv-lite@0.7.2:
     resolution: {integrity: sha512-im9DjEDQ55s9fL4EYzOAv0yMqmMBSZp6G0VvFyTMPKWxiSBHUj9NW/qqLmXUwXrrM7AvqSlTCfvqRb0cM8yYqw==}
     engines: {node: '>=0.10.0'}
-
-  idb@8.0.3:
-    resolution: {integrity: sha512-LtwtVyVYO5BqRvcsKuB2iUMnHwPVByPCXFXOpuU96IZPPoPN6xjOGxZQ74pgSVVLQWtUOYgyeL4GE98BY5D3wg==}
 
   ignore@5.3.2:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
@@ -9547,8 +9522,6 @@ snapshots:
   iconv-lite@0.7.2:
     dependencies:
       safer-buffer: 2.1.2
-
-  idb@8.0.3: {}
 
   ignore@5.3.2: {}
 

@@ -7,12 +7,11 @@ import { useProjectSession, useAppStore } from "@project/state";
 import { importProject, createProjectInfo, createEventBus } from "@project/core";
 import type { ProjectEventMap } from "@project/core";
 import { createProjectFileSystem } from "@project/fs";
-import { saveProject } from "@project/storage";
 import { toast } from "sonner";
 import { ProjectPickerDialog } from "../ProjectPickerDialog";
 import { ProjectSettingsDialog } from "./ProjectSettingsDialog";
 import { useProjectActions } from "../useProjectActions";
-import type { ProjectRecord } from "@project/storage";
+import type { ProjectRecord } from "@project/state";
 import type { ProjectLanguage } from "@project/core";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "#/components/ui/dialog";
 
@@ -45,11 +44,10 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 			const result = await importProject(new Uint8Array(buffer));
 
 			const project = createProjectInfo(result.name, result.language);
-			await saveProject({
+			await useAppStore.getState().saveProject({
 				id: project.id,
 				name: project.name,
 				language: project.language,
-				data: "",
 				createdAt: project.createdAt,
 				updatedAt: project.updatedAt,
 			});
@@ -65,10 +63,7 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 				}
 			});
 
-			useAppStore.setState((state) => ({
-				projects: [...state.projects, project],
-				lastProjectId: project.id,
-			}));
+			useAppStore.setState({ lastProjectId: project.id });
 			useProjectSession.getState().setCurrentProject({ project, fs, events });
 
 			await fs.writeFiles(result.entries);
@@ -174,11 +169,12 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 					<DialogTitle>{t("projectMenu.importProject")}</DialogTitle>
 					<DialogDescription />
 					<div className="grid gap-1 p-2 rounded-md border max-h-[200px] overflow-y-auto" ref={listRef}>
-						{paths.map((path, index) => (
-							<div key={path} className="text-xs text-muted-foreground">
-								{`${index + 1}. ${path}`}
-							</div>
-						))}
+						{paths.length > 0 &&
+							paths.map((path, index) => (
+								<div key={path} className="text-xs text-muted-foreground">
+									{`${index + 1}. ${path}`}
+								</div>
+							))}
 					</div>
 				</DialogContent>
 			</Dialog>

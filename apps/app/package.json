@@ -18,7 +18,6 @@
     "@project/core": "workspace:*",
     "@project/state": "workspace:*",
     "@project/fs": "workspace:*",
-    "@project/storage": "workspace:*",
     "@project/zip": "workspace:*",
     "@project/validation": "workspace:*",
     "@project/utils": "workspace:*",

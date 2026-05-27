@@ -1,4 +1,4 @@
-export type { AppSettings } from "./stores/project";
+export type { AppSettings, ProjectRecord } from "./stores/project";
 export type { ProjectContext, RecentFileEntry } from "./stores/session";
 export { useAppStore } from "./stores/project";
 export {

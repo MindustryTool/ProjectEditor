@@ -1,15 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import {
-	createProjectInfo,
-	createEventBus,
-	type ProjectInfo,
-	type ProjectLanguage,
-	type ProjectEventMap,
-} from "@project/core";
+import { createProjectInfo, createEventBus, type ProjectLanguage, type ProjectEventMap } from "@project/core";
 import { createProjectFileSystem } from "@project/fs";
 import { DEFAULT_SETTINGS } from "@project/config";
-import { saveProject } from "@project/storage";
 import { useProjectSession } from "./session";
 
 export interface AppSettings {
@@ -20,33 +13,42 @@ export interface AppSettings {
 	autoSaveDelay: number;
 }
 
+export interface ProjectRecord {
+	id: string;
+	name: string;
+	language?: string;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
 export type { ProjectContext, RecentFileEntry } from "./session";
 
 interface AppState {
 	hydrated: boolean;
-	projects: ProjectInfo[];
+	projects: Record<string, ProjectRecord>;
 	settings: AppSettings;
 	lastProjectId: string | null;
 
 	createNewProject: (name: string, language?: ProjectLanguage) => Promise<void>;
 	updateSettings: (settings: Partial<AppSettings>) => void;
+	saveProject: (record: ProjectRecord) => Promise<void>;
+	deleteProject: (id: string) => Promise<void>;
 }
 
 export const useAppStore = create<AppState>()(
 	persist(
-		(set) => ({
+		(set, get) => ({
 			hydrated: false,
-			projects: [],
+			projects: {},
 			settings: DEFAULT_SETTINGS as AppSettings,
 			lastProjectId: null,
 
 			createNewProject: async (name: string, language?: ProjectLanguage) => {
 				const project = createProjectInfo(name, language);
-				await saveProject({
+				get().saveProject({
 					id: project.id,
 					name: project.name,
 					language: project.language,
-					data: "",
 					createdAt: project.createdAt,
 					updatedAt: project.updatedAt,
 				});
@@ -56,10 +58,7 @@ export const useAppStore = create<AppState>()(
 						useProjectSession.setState({ treeSnapshot: snapshot });
 					},
 				});
-				set((state) => ({
-					projects: [...state.projects, project],
-					lastProjectId: project.id,
-				}));
+				set({ lastProjectId: project.id });
 				useProjectSession.getState().setCurrentProject({ project, fs, events });
 			},
 
@@ -67,6 +66,23 @@ export const useAppStore = create<AppState>()(
 				set((state) => ({
 					settings: { ...state.settings, ...settings },
 				}));
+			},
+
+			saveProject: async (record) => {
+				set((state) => ({
+					projects: { ...state.projects, [record.id]: record },
+				}));
+			},
+
+			getAllProjects: () => {
+				return Object.values(get().projects);
+			},
+
+			deleteProject: async (id) => {
+				set((state) => {
+					delete state.projects[id];
+					return { projects: { ...state.projects } };
+				});
 			},
 		}),
 		{

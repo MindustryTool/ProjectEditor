@@ -2,9 +2,9 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { deleteProject, getProject, saveProject, type ProjectRecord } from "@project/storage";
 import { deleteProjectFiles } from "@project/fs";
-import { useProjectSession } from "@project/state";
+import { useAppStore, useProjectSession } from "@project/state";
+import type { ProjectRecord } from "@project/state";
 import { Spinner } from "~/components/ui/spinner";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
@@ -56,12 +56,11 @@ function EditProjectName({ defaultProject }: { defaultProject?: ProjectRecord })
 		async (projectId: string, nextName: string) => {
 			if (defaultProject) {
 				const now = new Date();
-				const existing = await getProject(projectId);
-				await saveProject({
+				const existing = useAppStore.getState().projects[projectId];
+				await useAppStore.getState().saveProject({
 					id: projectId,
 					name: nextName,
 					language: existing?.language ?? defaultProject.language,
-					data: existing?.data ?? "",
 					createdAt: existing?.createdAt ?? defaultProject.createdAt,
 					updatedAt: now,
 				});
@@ -72,12 +71,11 @@ function EditProjectName({ defaultProject }: { defaultProject?: ProjectRecord })
 			if (ctx.project.name === nextName) return;
 
 			const now = new Date();
-			const existing = await getProject(projectId);
-			await saveProject({
+			const existing = useAppStore.getState().projects[projectId];
+			await useAppStore.getState().saveProject({
 				id: projectId,
 				name: nextName,
 				language: existing?.language ?? ctx.project.language,
-				data: existing?.data ?? "",
 				createdAt: existing?.createdAt ?? ctx.project.createdAt,
 				updatedAt: now,
 			});
@@ -131,7 +129,7 @@ function DeleteProject({ projectId: propId, onDeleted }: { projectId?: string; o
 
 	const deleteMutation = useMutation({
 		mutationFn: async (projectId: string) => {
-			await deleteProject(projectId);
+			await useAppStore.getState().deleteProject(projectId);
 			try {
 				await deleteProjectFiles(projectId);
 			} catch (err) {

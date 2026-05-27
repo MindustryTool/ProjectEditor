@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { createEventBus, type ProjectInfo, type ProjectLanguage, type ProjectEventMap } from "@project/core";
 import { createProjectFileSystem } from "@project/fs";
 import { useAppStore, useProjectSession } from "@project/state";
-import type { ProjectRecord } from "@project/storage";
+import type { ProjectRecord } from "@project/state";
 
 export function useProjectActions() {
 	const createNewProject = useAppStore((state) => state.createNewProject);
