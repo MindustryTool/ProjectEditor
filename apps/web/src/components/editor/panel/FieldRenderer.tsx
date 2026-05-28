@@ -133,12 +133,11 @@ const fieldRenderers: FieldRendererMap = {
 			<FormControl>
 				<div className="flex items-center gap-2">
 					<Popover>
-						<PopoverTrigger className="flex gap-1 items-end">
-							<div
-								className="h-8 w-12 cursor-pointer rounded border border-border bg-transparent p-0"
-								style={{ backgroundColor: value || "#000000" }}
-							/>
-							<span className="text-sm">{value}</span>
+						<PopoverTrigger
+							className="h-16 w-full relative cursor-pointer rounded border border-border bg-transparent p-0"
+							style={{ backgroundColor: value || "#000000" }}
+						>
+							<span className="text-sm absolute left-1 bottom-1">{value}</span>
 						</PopoverTrigger>
 						<PopoverContent className="w-64 p-3" side="bottom" align="start">
 							<ColorPicker value={value || "#000000"} onChange={(val) => onChange(val)}>
