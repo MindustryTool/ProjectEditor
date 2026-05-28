@@ -1,7 +1,7 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from "axios";
 import { API_BASE_URL } from "@project/config";
 import { ApiError } from "./errors";
-import type { Item } from "./types";
+import type { Block, EnvBlock, Item, Liquid, Sector, Status, Unit } from "./types";
 
 type RequestOptions = {
   signal?: AbortSignal;
@@ -52,6 +52,30 @@ export class MindustryApiClient {
 
   getItems(options?: RequestOptions): Promise<Item[]> {
     return this.get<Item[]>("/items", options);
+  }
+
+  getBlocks(options?: RequestOptions): Promise<Block[]> {
+    return this.get<Block[]>("/blocks", options);
+  }
+
+  getEnvBlocks(options?: RequestOptions): Promise<EnvBlock[]> {
+    return this.get<EnvBlock[]>("/env-blocks", options);
+  }
+
+  getLiquids(options?: RequestOptions): Promise<Liquid[]> {
+    return this.get<Liquid[]>("/liquids", options);
+  }
+
+  getUnits(options?: RequestOptions): Promise<Unit[]> {
+    return this.get<Unit[]>("/units", options);
+  }
+
+  getSectors(options?: RequestOptions): Promise<Sector[]> {
+    return this.get<Sector[]>("/sectors", options);
+  }
+
+  getStatuses(options?: RequestOptions): Promise<Status[]> {
+    return this.get<Status[]>("/statuses", options);
   }
 
   async get<TResponse>(path: string, options?: RequestOptions): Promise<TResponse> {

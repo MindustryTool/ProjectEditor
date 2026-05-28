@@ -115,8 +115,7 @@ tooling/
 
 ## Website
 
-**Production:** `https://project-editor.mindustry-tool.com` (placeholder)  
-**Staging:** `https://staging.project-editor.mindustry-tool.com` (placeholder)
+**Production:** [`https://project-editor.smme.workers.dev`](https://project-editor.smme.workers.dev)
 
 ---
 
