@@ -1,4 +1,4 @@
-import type { ValidationResult, ValidatorFn } from "./types";
+import type { ValidationContext, ValidationResult, ValidatorFn } from "./types";
 import { Severity } from "./types";
 import { createValidatorRegistry } from "./registry";
 import { HJSON, HJSONError, StructuredObjectNode } from "@project/hjson";
@@ -62,12 +62,19 @@ const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 	}
 };
 
-const createValibotValidator: (
-	schema: Parameters<typeof v.parse>[0],
-	validator?: (result: v.InferOutput<typeof schema>) => ValidationResult[],
-) => ValidatorFn = (schema, validator) => {
-	return ({ path, content }) => {
+function createValibotValidator<T extends Parameters<typeof v.parse>[0]>(
+	schema: T,
+	validator?: (c: {
+		path: string;
+		content: string;
+		context: ValidationContext;
+		result: v.InferOutput<T>;
+		node: StructuredObjectNode;
+	}) => ValidationResult[],
+): ValidatorFn {
+	return ({ path, content, context }) => {
 		const data = HJSON.parseStructured(content) as StructuredObjectNode;
+
 		try {
 			if (typeof data !== "object" || data === null)
 				return [
@@ -86,7 +93,7 @@ const createValibotValidator: (
 			const result = v.parse(schema, data.valueOf());
 
 			if (validator) {
-				return validator(result);
+				return validator({ path, content, context, result, node: data });
 			}
 
 			return [];
@@ -151,10 +158,82 @@ const createValibotValidator: (
 			];
 		}
 	};
-};
+}
 
 const modMetaValidator: ValidatorFn = createValibotValidator(ModHjsonSchema);
-const itemHjsonValidator: ValidatorFn = createValibotValidator(ItemHjsonSchema);
+const itemHjsonValidator: ValidatorFn = createValibotValidator(ItemHjsonSchema, ({ path, context, result, node }) => {
+	const items = context.getItems();
+	const research = result.research;
+	const issues: ValidationResult[] = [];
+
+	if (!research) {
+		return [];
+	}
+
+	const researchField = node.get("research")!;
+
+	if (typeof research === "string") {
+		const item = items.find((i) => i.name === research);
+
+		if (!item) {
+			issues.push({
+				path,
+				severity: Severity.error,
+				messageKey: "validation.content.invalidJson",
+				messageParams: { error: `Item ${result.research} not found` },
+				startLine: researchField.info()!.start.row,
+				startColumn: researchField.info()!.start.col,
+				endLine: researchField.info()!.end.row,
+				endColumn: researchField.info()!.end.col,
+			});
+		}
+	} else if (typeof research === "object") {
+		const parent = research.parent;
+		const parentField = researchField.get("parent")!;
+
+		if (parent) {
+			const item = items.find((i) => i.name === parent);
+
+			if (!item) {
+				issues.push({
+					path,
+					severity: Severity.error,
+					messageKey: "validation.content.invalidJson",
+					messageParams: { error: `Item ${parent} not found` },
+					startLine: parentField.info()!.start.row,
+					startColumn: parentField.info()!.start.col,
+					endLine: parentField.info()!.end.row,
+					endColumn: parentField.info()!.end.col,
+				});
+			}
+		}
+		const requirement = research.requirements;
+		const requirementsField = researchField.get("requirements")!;
+
+		if (requirement) {
+			for (let i = 0; i < requirement.length; i++) {
+				const req = requirement[i]!;
+				const reqField = requirementsField.get(i)!;
+				const item = items.find((i) => i.name === req.itemName);
+
+				if (!item) {
+					issues.push({
+						path,
+						severity: Severity.error,
+						messageKey: "validation.content.invalidJson",
+						messageParams: { error: `Item ${req.itemName} not found` },
+						startLine: reqField.info()!.start.row,
+						startColumn: reqField.info()!.start.col,
+						endLine: reqField.info()!.end.row,
+						endColumn: reqField.info()!.end.col,
+					});
+				}
+			}
+		}
+	}
+
+	return issues;
+});
 
 export function createDefaultValidators() {
 	const registry = createValidatorRegistry();

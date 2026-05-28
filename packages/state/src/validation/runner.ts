@@ -1,12 +1,12 @@
 import type { ValidationContext, ValidationResult, ValidatorRegistry } from "./types";
 
 export interface ValidationRunner {
-	validate(path: string, content: string): ValidationResult[];
-	validateAll(files: { path: string; content: string }[]): Record<string, ValidationResult[]>;
+	validate(path: string, content: string, context: ValidationContext): ValidationResult[];
+	validateAll(files: { path: string; content: string }[], context: ValidationContext): Record<string, ValidationResult[]>;
 }
 
-export function createValidationRunner(registry: ValidatorRegistry, context: ValidationContext): ValidationRunner {
-	function validate(path: string, content: string): ValidationResult[] {
+export function createValidationRunner(registry: ValidatorRegistry): ValidationRunner {
+	function validate(path: string, content: string, context: ValidationContext): ValidationResult[] {
 		const validators = registry.getMatches(path);
 		const results: ValidationResult[] = [];
 
@@ -31,10 +31,10 @@ export function createValidationRunner(registry: ValidatorRegistry, context: Val
 		return results;
 	}
 
-	function validateAll(files: { path: string; content: string }[]): Record<string, ValidationResult[]> {
+	function validateAll(files: { path: string; content: string }[], context: ValidationContext): Record<string, ValidationResult[]> {
 		const allResults: Record<string, ValidationResult[]> = {};
 		for (const file of files) {
-			allResults[file.path] = validate(file.path, file.content);
+			allResults[file.path] = validate(file.path, file.content, context);
 		}
 		return allResults;
 	}

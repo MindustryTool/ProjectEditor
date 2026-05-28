@@ -1,16 +1,19 @@
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-	useCurrentProject,
 	useFileContentStore,
 	useValidationStore,
 	Severity,
 	createDefaultValidators,
 	createValidationRunner,
+	useProjectSession,
 } from "@project/state";
 import type { ValidationContext } from "@project/state";
+import { useShallow } from "zustand/react/shallow";
+import { useBaseItems } from "~/hooks/use-base-items";
 
 const registry = createDefaultValidators();
+const runner = createValidationRunner(registry);
+
 const DEBOUNCE_MS = 500;
 
 function extractPath(compositeKey: string): string {
@@ -25,27 +28,32 @@ function decodeContent(data: ArrayBuffer | null | undefined): string {
 }
 
 export function ValidationProvider({ children }: { children: ReactNode }) {
-	const projectContext = useCurrentProject();
-	const queryClient = useQueryClient();
 	const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-	useQuery({
-		queryKey: ["items", projectContext.project.id],
-		queryFn: async () => {
-			const entries = await projectContext.fs.listFiles("content/item/");
-			return entries.filter((e) => e.kind === "file" && e.name.endsWith(".json")).map((e) => ({ name: e.name.replace(/\.json$/, "") }));
-		},
-	});
+	const modItems = useProjectSession(
+		useShallow((s) =>
+			s.treeSnapshot
+				.getEntries()
+				.filter((e) => e.kind === "file" && e.path.includes("content/items") && e.name.endsWith(".json"))
+				.map((e) => e.name.replace(".json", "")),
+		),
+	);
 
-	const runner = useMemo(() => {
+	const { data: baseItems } = useBaseItems();
+
+	const context = useMemo(() => {
 		const context: ValidationContext = {
 			getItems: () => {
-				const items = queryClient.getQueryData<{ name: string }[]>(["items", projectContext.project.id]);
-				return items ?? [];
+				const result = [];
+				if (baseItems) {
+					result.push(...baseItems);
+				}
+				result.push(...modItems.map((i) => ({ name: i })));
+				return result;
 			},
 		};
-		return createValidationRunner(registry, context);
-	}, [queryClient, projectContext.project.id]);
+		return context;
+	}, [baseItems]);
 
 	useEffect(() => {
 		const timers = timersRef.current;
@@ -60,7 +68,7 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 					timers.delete(path);
 					try {
 						const content = decodeContent(data);
-						const results = runner.validate(path, content);
+						const results = runner.validate(path, content, context);
 						useValidationStore.getState().setResults(path, results);
 					} catch (err) {
 						useValidationStore.getState().setResults(path, [
@@ -106,7 +114,7 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 			}
 			timers.clear();
 		};
-	}, [runner]);
+	}, [context]);
 
 	return children;
 }

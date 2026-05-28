@@ -54,7 +54,10 @@ export type ColorPickerProps = Omit<HTMLAttributes<HTMLDivElement>, "onChange" |
 export const ColorPicker = ({ value, defaultValue = "#000000", onChange, className, ...props }: ColorPickerProps) => {
 	const safeColor = (val?: string) => {
 		try {
-			return Color(val || "#ffffff");
+			val = val || "#ffffff";
+			val = val.startsWith("#") ? val : "#" + val;
+
+			return Color(val);
 		} catch (e) {
 			return Color("#ffffff");
 		}
@@ -72,14 +75,7 @@ export const ColorPicker = ({ value, defaultValue = "#000000", onChange, classNa
 	// Update color when controlled value changes
 	useEffect(() => {
 		if (value) {
-			const safeColor = () => {
-				try {
-					return Color(value.startsWith("#") ? value : `#${value}`);
-				} catch (e) {
-					return Color("#ffffff");
-				}
-			};
-			const color = safeColor();
+			const color = safeColor(value);
 
 			setHue((prev) => (Math.abs(prev - color.hue()) > 1 ? color.hue() : prev));
 			setSaturation((prev) => (Math.abs(prev - color.saturationl()) > 1 ? color.saturationl() : prev));

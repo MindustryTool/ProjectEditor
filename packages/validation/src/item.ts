@@ -34,6 +34,13 @@ export const ItemRequirementSchema = v.pipe(
 
 		return true;
 	}, "Invalid item requirement, must be in the format 'item/number'"),
+	v.transform((value) => {
+		const [itemName, number] = value.split("/");
+		return {
+			itemName,
+			number: Number(number),
+		};
+	}),
 );
 
 export const ItemHjsonSchema = v.object({
