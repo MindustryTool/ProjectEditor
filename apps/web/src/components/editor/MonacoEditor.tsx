@@ -368,7 +368,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 	}, []);
 
 	return (
-		<div ref={containerRef} className="relative h-full w-full">
+		<div ref={containerRef} className="relative h-full w-full flex flex-col flex-1">
 			<Editor
 				theme={theme}
 				language={language}

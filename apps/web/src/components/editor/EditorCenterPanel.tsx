@@ -50,7 +50,7 @@ function EditorContent({ path }: { path: string }) {
 		return <EditorWithMonaco path={path} />;
 	}
 
-    return <ContentList path={path} />;
+	return <ContentList path={path} />;
 }
 
 export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: EditorCenterPanelProps) {
@@ -76,7 +76,7 @@ export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: Edito
 	return (
 		<div className="flex min-h-0 flex-1 flex-col">
 			{path && projectContext && <RecentlyOpenedFilesBar />}
-			<div className="flex min-h-0 flex-1 flex-col overflow-hidden">{path === null ? null : <EditorContent path={path} />}</div>
+			<div className="flex min-h-0 flex-1 flex-col overflow-hidden">{path && <EditorContent path={path} />}</div>
 		</div>
 	);
 });

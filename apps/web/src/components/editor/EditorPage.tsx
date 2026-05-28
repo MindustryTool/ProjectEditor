@@ -63,7 +63,7 @@ export function EditorPage() {
 
 	if (isLoading) {
 		return (
-			<div className="m-auto flex flex-col gap-1 text-sm w-sm">
+			<div className="m-auto flex flex-col gap-1 text-sm w-sm max-w-[80vw]">
 				<div className="flex items-center">
 					{t("editor.loading")}
 					<LoadingDot />
