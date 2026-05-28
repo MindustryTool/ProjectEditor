@@ -143,4 +143,49 @@ hidden: false`);
 		const patched = node.patchField(text, "a", "10");
 		expect(patched).toBe("a: 10\n\n  b: 2");
 	});
+
+	it("inserts missing fields into braced object", () => {
+		const text = "{\n  hardness: 82\n}";
+		const node = parseStructured(text);
+		const patched = node.patchField(text, "buildable", "true");
+		expect(patched).toBe("{\n  hardness: 82,\n  buildable: true\n}");
+	});
+
+	it("inserts multiple missing fields into braced object", () => {
+		const text = `{hardness: 82, cost: 7, charge: 2, color: "#8D012B", research: oltuxium}`;
+		const node = parseStructured(text);
+		let patched = node.patchField(text, "buildable", "true");
+		const node2 = parseStructured(patched);
+		patched = node2.patchField(patched, "hidden", "true");
+		expect(patched).not.toContain("buildable: true\nbuildable: true");
+		expect(patched).not.toContain("hidden: true\nhidden: true");
+		const reparsed = parseStructured(patched);
+		expect(reparsed.valueOf()).toEqual({
+			hardness: 82, cost: 7, charge: 2, color: "#8D012B", research: "oltuxium",
+			buildable: true, hidden: true,
+		});
+	});
+
+	it("inserts field after existing trailing comma", () => {
+		const text = "{\n  hardness: 82,\n}";
+		const node = parseStructured(text);
+		const patched = node.patchField(text, "cost", "7");
+		expect(patched).toBe("{\n  hardness: 82,\n  cost: 7\n}");
+	});
+
+	it("inserted field survives round-trip parse", () => {
+		const text = "{\n  hardness: 82\n}";
+		const node = parseStructured(text);
+		const patched = node.patchField(text, "cost", "7");
+		const reparsed = parseStructured(patched);
+		expect(reparsed.valueOf()).toEqual({ hardness: 82, cost: 7 });
+	});
+
+	it("inserts field into object with no fields", () => {
+		const text = "{}";
+		const node = parseStructured(text);
+		const patched = node.patchField(text, "active", "true");
+		const reparsed = parseStructured(patched);
+		expect(reparsed.valueOf()).toEqual({ active: true });
+	});
 });

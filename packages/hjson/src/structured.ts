@@ -158,12 +158,42 @@ export class StructuredObjectNode extends StructuredNode {
 		return this.insertField(original, key, newValue);
 	}
 
+	#detectIndent(): string {
+		for (const fi of this.#fields.values()) {
+			if (fi.start.col > 1) {
+				return " ".repeat(fi.start.col - 1);
+			}
+		}
+		return "  ";
+	}
+
 	/**
-	 * Inserts a new field at the end of the original source string.
+	 * Inserts a new field into the original source string.
+	 * If the object uses braces ({}), inserts before the closing brace.
+	 * Otherwise (flat root object), appends at end.
 	 */
 	insertField(original: string, key: string, newValue: string): string {
-		const suffix = original.length > 0 && !original.endsWith("\n") ? "\n" : "";
-		return original + suffix + `${key}: ${newValue}\n`;
+		if (this.#end) {
+			const closeIdx = this.#end.index - 1;
+			if (closeIdx >= 0 && original[closeIdx] === "}") {
+				let i = closeIdx - 1;
+				while (i >= 0 && (original[i] === " " || original[i] === "\t" || original[i] === "\n" || original[i] === "\r")) {
+					i--;
+				}
+				if (i >= 0 && original[i] === ",") {
+					i--;
+				}
+				const before = original.slice(0, i + 1);
+				const after = original.slice(closeIdx);
+				const indent = this.#detectIndent();
+				const hasFields = this.#fields.size > 0;
+				return before + (hasFields ? "," : "") + "\n" + indent + key + ": " + newValue + "\n" + after;
+			}
+		}
+		// Flat root object (no braces) or no position info: append at end
+		const trimmed = original.trimEnd();
+		const suffix = trimmed.length > 0 && !trimmed.endsWith("\n") ? "\n" : "";
+		return trimmed + suffix + `${key}: ${newValue}\n`;
 	}
 }
 
