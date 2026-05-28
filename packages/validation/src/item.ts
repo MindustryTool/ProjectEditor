@@ -5,30 +5,25 @@ export const ItemRequirementSchema = v.pipe(
 	v.string(),
 	v.check((value) => {
 		if (!value.includes("/")) {
-			console.log("Value must contain a '/' character");
 			return false;
 		}
 
 		const parts = value.split("/");
 		if (parts.length !== 2) {
-			console.log("Value must contain exactly two '/' characters");
 			return false;
 		}
 
 		const [itemName, number] = parts;
 
 		if (!itemName || !number) {
-			console.log("Value must contain both an item name and a number");
 			return false;
 		}
 
 		if (!v.safeParse(ContentNameSchema, itemName).success) {
-			console.log("Item name must be a valid content name");
 			return false;
 		}
 
 		if (!v.safeParse(v.pipe(v.string(), v.toNumber(), v.minValue(0), v.integer()), number).success) {
-			console.log("Number must be a non-negative integer");
 			return false;
 		}
 

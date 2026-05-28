@@ -64,7 +64,7 @@ export function createEventBus<T extends EventMap = EventMap>(): EventBus<T> {
 
 	function emit<K extends keyof T>(event: K, ...args: T[K]): void {
 		const key = String(event);
-        console.log(`emit ${key} ${JSON.stringify(args)}`);
+		console.log(`emit ${key} ${JSON.stringify(args)}`);
 		handlers.get(key)?.forEach((h) => h(...args));
 	}
 

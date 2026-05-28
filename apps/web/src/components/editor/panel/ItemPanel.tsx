@@ -1,10 +1,10 @@
 import { Panel } from "@/components/editor/Panel";
 import { FieldRenderer, type Field } from "#/components/editor/panel/FieldRenderer";
 import { useFileContentString } from "@project/state";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { SpritePicker } from "#/components/editor/panel/SpritePicker";
 import { useFileName } from "#/hooks/use-path";
-import { HJSON } from "@project/hjson";
+import { HJSON, type StructuredObject } from "@project/hjson";
 
 interface ItemPanelProps {
 	path: string;
@@ -13,26 +13,21 @@ interface ItemPanelProps {
 export function ItemPanel({ path }: ItemPanelProps) {
 	const { data, isLoading, write } = useFileContentString(path);
 	const fileName = useFileName();
-	const [values, setValues] = useState<Record<string, string>>({});
+	const [values, setValues] = useState<Record<string, any>>({});
+	const contentRef = useRef<string | null>(null);
 
 	useEffect(() => {
-		if (data === null) {
-			return;
-		}
-
-		if (isLoading) {
-			return;
-		}
-
+		if (data === null || isLoading) return;
+		contentRef.current = data;
 		if (data === "") {
 			setValues({});
 			return;
 		}
-
 		try {
-			setValues(HJSON.parse(data));
+			const result = HJSON.parseStructured(data) as StructuredObject;
+			setValues(result.valueOf());
 		} catch {}
-	}, [data]);
+	}, [data, isLoading]);
 
 	const fields = [
 		{
@@ -82,14 +77,35 @@ export function ItemPanel({ path }: ItemPanelProps) {
 	] satisfies Field[];
 
 	function handleUpdate(field: string, value: any | undefined) {
-		const newValue = { ...values };
+		const newValues = { ...values };
+		if (value === undefined || value === null || (typeof value === "number" && isNaN(value))) {
+			delete newValues[field];
+		} else {
+			newValues[field] = value;
+		}
+		setValues(newValues);
+
+		const content = contentRef.current;
+
+		if (content === null) {
+			write(HJSON.stringify(newValues, null, 4));
+			return;
+		}
 
 		if (value === undefined || value === null || (typeof value === "number" && isNaN(value))) {
-			delete newValue[field];
-		} else {
-			newValue[field] = value;
+			write(HJSON.stringify(newValues, null, 4));
+			return;
 		}
-		write(HJSON.stringify(newValue, null, 4));
+
+		try {
+			const result = HJSON.parseStructured(content) as StructuredObject;
+			const newContent = result.patchField(content, field, HJSON.stringify(value));
+			contentRef.current = newContent;
+			write(newContent);
+		} catch (e) {
+			console.error("Failed to patch HJSON:", e);
+			write(HJSON.stringify(newValues, null, 4));
+		}
 	}
 
 	return (

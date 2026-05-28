@@ -96,6 +96,7 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 			for (const key of Object.keys(curr)) {
 				const currEntry = curr[key]!;
 				const prevEntry = prev[key];
+
 				if (currEntry.currentVersion !== (prevEntry?.currentVersion ?? 0) || prevEntry === undefined || prevEntry.loading === true) {
 					scheduleValidation(key, currEntry.data);
 				}

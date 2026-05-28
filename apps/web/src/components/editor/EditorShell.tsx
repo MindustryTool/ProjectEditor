@@ -1,5 +1,5 @@
 import { lazy, memo, Suspense } from "react";
-import { useMediaQuery } from "~/hooks/use-media-query";
+import { useIsDesktop } from "~/hooks/use-is-desktop";
 import { ProjectMenu } from "./toolbar/ProjectMenu";
 import { ViewMenu } from "./toolbar/ViewMenu";
 import { ExportMenu } from "./ExportMenu";
@@ -22,7 +22,7 @@ interface EditorShellProps {
 }
 
 export const EditorShell = memo(function EditorShell({ path }: EditorShellProps) {
-	const isDesktop = useMediaQuery("(min-width: 1024px)");
+	const isDesktop = useIsDesktop();
 
 	return (
 		<ValidationProvider>

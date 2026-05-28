@@ -16,6 +16,7 @@ const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 	} catch (err) {
 		if (err instanceof HJSONError) {
 			const { startLine, startColumn, endLine, endColumn, code, message } = err;
+
 			return [
 				{
 					path,
@@ -90,29 +91,28 @@ function createValibotValidator<T extends Parameters<typeof v.parse>[0]>(
 					},
 				];
 
-			const result = v.parse(schema, data.valueOf());
+			const { success, output: result, issues } = v.safeParse(schema, data.valueOf());
 
-			if (validator) {
-				return validator({ path, content, context, result, node: data });
-			}
-
-			return [];
-		} catch (err) {
-			if (v.isValiError(err)) {
+			if (!success) {
 				const result = [];
 
-				for (const issue of err.issues) {
-					const field = issue.path?.map((p) => p.key)?.join(".") || "";
-					let fieldData: ReturnType<typeof data.get> = data;
-
-					for (const field of issue.path || []) {
-						const nested = fieldData.get(field.key as string | number);
+				const resolveFieldData = (fieldData: ReturnType<typeof data.get>, path: (string | number)[]) => {
+					for (const key of path.filter((p) => p !== undefined || p !== null || p !== "")) {
+						const nested = fieldData.get(key);
 						if (nested) {
 							fieldData = nested;
 						} else {
 							break;
 						}
 					}
+					return fieldData;
+				};
+
+				for (const issue of issues) {
+					const field = issue.path?.map((p) => p.key)?.join(".") || "";
+
+					const fieldPath = issue.path?.map((p) => p.key as string) || [];
+					const fieldData = resolveFieldData(data, fieldPath);
 
 					const fieldInfo = fieldData.info();
 
@@ -139,11 +139,49 @@ function createValibotValidator<T extends Parameters<typeof v.parse>[0]>(
 						endLine,
 						endColumn,
 					});
+
+					if (issue.issues) {
+						for (const subIssue of issue.issues) {
+							const subIssueFieldPath = [...fieldPath, ...(subIssue.path?.map((p) => p.key as string) || [])];
+							const subFieldData = resolveFieldData(data, subIssueFieldPath);
+                            const subFieldInfo = subFieldData.info();
+                            
+                            let subStartLine = 1;
+                            let subStartColumn = 1;
+                            let subEndLine = 1;
+                            let subEndColumn = 1;
+
+                            if (subFieldInfo) {
+                                subStartLine = subFieldInfo.start.row;
+                                subStartColumn = subFieldInfo.start.col;
+                                subEndLine = subFieldInfo.end.row;
+                                subEndColumn = subFieldInfo.end.col;
+                            }
+
+							result.push({
+								path,
+								severity: Severity.error,
+								messageKey: "validation.content.invalidJson",
+								field: subIssue.path?.map((p) => p.key)?.join(".") || "",
+								messageParams: { error: subIssue.message },
+								startLine,
+								startColumn,
+								endLine,
+								endColumn,
+							});
+						}
+					}
 				}
 
 				return result;
 			}
 
+			if (validator) {
+				return validator({ path, content, context, result, node: data });
+			}
+
+			return [];
+		} catch (err) {
 			return [
 				{
 					path,

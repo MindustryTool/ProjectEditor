@@ -47,10 +47,10 @@ export const EditorMobileLayout = memo(function EditorMobileLayout({ path }: Edi
 				<LocalizationMenu />
 			</Toolbar>
 			<Tabs defaultValue="center" className="flex min-h-0 flex-1 flex-col overflow-hidden">
-				<TabsContent value="center" className="flex flex-col h-full w-full overflow-hidden">
+				<TabsContent value="center" className="flex min-h-0 flex-1 flex-col overflow-hidden">
 					<EditorCenterPanel path={path} />
 				</TabsContent>
-				<TabsContent value="right" className="flex flex-col h-full w-full overflow-hidden">
+				<TabsContent value="right" className="flex min-h-0 flex-1 flex-col overflow-hidden">
 					{path ? (
 						<EditorRightPanel path={path} />
 					) : (
