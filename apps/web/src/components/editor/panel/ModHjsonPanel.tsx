@@ -9,7 +9,7 @@ import { type ModHjsonData } from "@project/validation";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useFileContentString, useValidationStore } from "@project/state";
 import { Panel } from "@/components/editor/Panel";
-import { HJSON, type HjsonObjectNode } from "@project/hjson";
+import { HJSON, HjsonObjectNode } from "@project/hjson";
 import { cn, EMPTY_ARRAY } from "#/lib/utils";
 
 function serializeValue(key: keyof ModHjsonData, value: unknown): string {
@@ -120,7 +120,7 @@ export function ModHjsonPanel({ path }: { path: string }) {
 			return;
 		}
 		try {
-			const result = HJSON.parseStructured(data) as HjsonObjectNode;
+			const result = HJSON.parseStructured(data);
 			setValues(result.valueOf() as ModHjsonData);
 		} catch {}
 	}, [data, isLoading]);
@@ -137,11 +137,15 @@ export function ModHjsonPanel({ path }: { path: string }) {
 		}
 
 		try {
-			const result = HJSON.parseStructured(content) as HjsonObjectNode;
+			const result = HJSON.parseStructured(content);
 			const newValue = serializeValue(key, value);
-			const newContent = result.patchField(content, key, newValue);
-			contentRef.current = newContent;
-			write(newContent);
+			if (result instanceof HjsonObjectNode) {
+				const newContent = result.patchField(content, key, newValue);
+				contentRef.current = newContent;
+				write(newContent);
+			} else {
+                write(HJSON.stringify({ ...values, [key]: value }, null, 2));
+            }
 		} catch (e) {
 			console.error("Failed to patch HJSON:", e);
 			write(HJSON.stringify({ ...values, [key]: value }, null, 2));

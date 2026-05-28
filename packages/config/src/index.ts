@@ -8,6 +8,5 @@ export const DEFAULT_SETTINGS = {
   theme: "system" as const,
   fontSize: 14,
   tabSize: 2,
-  autoSave: true,
-  autoSaveDelay: 1000,
+  validationDelayMs: 1000,
 };

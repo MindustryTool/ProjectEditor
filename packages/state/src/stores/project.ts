@@ -16,8 +16,7 @@ export interface AppSettings {
 	theme: "light" | "dark" | "system";
 	fontSize: number;
 	tabSize: number;
-	autoSave: boolean;
-	autoSaveDelay: number;
+    validationDelayMs: number;
 }
 
 export interface ProjectRecord {

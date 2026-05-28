@@ -6,6 +6,7 @@ import {
 	createDefaultValidators,
 	createValidationRunner,
 	useProjectSession,
+    useAppStore,
 } from "@project/state";
 import type { ValidationContext } from "@project/state";
 import { useShallow } from "zustand/react/shallow";
@@ -13,8 +14,6 @@ import { useBaseItems } from "#/hooks/use-base-items";
 
 const registry = createDefaultValidators();
 const runner = createValidationRunner(registry);
-
-const DEBOUNCE_MS = 500;
 
 function extractPath(compositeKey: string): string {
 	const idx = compositeKey.indexOf("::");
@@ -29,6 +28,7 @@ function decodeContent(data: ArrayBuffer | null | undefined): string {
 
 export function ValidationProvider({ children }: { children: ReactNode }) {
 	const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+    const validationDelayMs = useAppStore(useShallow((s) => s.settings.validationDelayMs));
 
 	const modItems = useProjectSession(
 		useShallow((s) =>
@@ -81,7 +81,7 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 							},
 						]);
 					}
-				}, DEBOUNCE_MS),
+				}, validationDelayMs),
 			);
 		}
 

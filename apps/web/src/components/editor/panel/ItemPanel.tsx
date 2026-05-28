@@ -4,7 +4,7 @@ import { useFileContentString } from "@project/state";
 import { useEffect, useState, useRef } from "react";
 import { SpritePicker } from "#/components/editor/panel/SpritePicker";
 import { useFileName } from "#/hooks/use-path";
-import { HJSON, type HjsonObjectNode } from "@project/hjson";
+import { HJSON, HjsonObjectNode } from "@project/hjson";
 
 interface ItemPanelProps {
 	path: string;
@@ -24,7 +24,7 @@ export function ItemPanel({ path }: ItemPanelProps) {
 			return;
 		}
 		try {
-			const result = HJSON.parseStructured(data) as HjsonObjectNode;
+			const result = HJSON.parseStructured(data);
 			setValues(result.valueOf());
 		} catch {}
 	}, [data, isLoading]);
@@ -102,10 +102,14 @@ export function ItemPanel({ path }: ItemPanelProps) {
 		}
 
 		try {
-			const result = HJSON.parseStructured(content) as HjsonObjectNode;
-			const newContent = result.patchField(content, field, HJSON.stringify(value));
-			contentRef.current = newContent;
-			write(newContent);
+			const result = HJSON.parseStructured(content);
+			if (result instanceof HjsonObjectNode) {
+				const newContent = result.patchField(content, field, HJSON.stringify(value));
+				contentRef.current = newContent;
+				write(newContent);
+			} else {
+                write(HJSON.stringify(newValues, null, 4));
+            }
 		} catch (e) {
 			console.error("Failed to patch HJSON:", e);
 			write(HJSON.stringify(newValues, null, 4));
