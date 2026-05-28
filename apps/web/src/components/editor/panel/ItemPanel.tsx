@@ -3,6 +3,8 @@ import { FieldRenderer, type Field } from "#/components/editor/panel/FieldRender
 import { useFileContentString } from "@project/state";
 import { useEffect, useState } from "react";
 import { SpritePicker } from "#/components/editor/panel/SpritePicker";
+import { useFileName } from "#/hooks/use-path";
+import { HJSON } from "@project/hjson";
 
 interface ItemPanelProps {
 	path: string;
@@ -10,6 +12,7 @@ interface ItemPanelProps {
 
 export function ItemPanel({ path }: ItemPanelProps) {
 	const { data, isLoading, write } = useFileContentString(path);
+	const fileName = useFileName();
 	const [values, setValues] = useState<Record<string, string>>({});
 
 	useEffect(() => {
@@ -27,7 +30,7 @@ export function ItemPanel({ path }: ItemPanelProps) {
 		}
 
 		try {
-			setValues(JSON.parse(data));
+			setValues(HJSON.parse(data));
 		} catch {}
 	}, [data]);
 
@@ -86,12 +89,13 @@ export function ItemPanel({ path }: ItemPanelProps) {
 		} else {
 			newValue[field] = value;
 		}
-		write(JSON.stringify(newValue, null, 4));
+		write(HJSON.stringify(newValue, null, 4));
 	}
 
 	return (
 		<Panel>
 			<div className="space-y-4">
+				{fileName !== null && <div className="text-lg font-bold">{fileName}</div>}
 				<SpritePicker path={path} />
 				<FieldRenderer path={path} fields={fields} values={values} updater={handleUpdate} />
 			</div>

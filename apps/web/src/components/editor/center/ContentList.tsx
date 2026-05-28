@@ -1,7 +1,6 @@
 import { useCurrentProject, useFileContent, useFileContentImageUrl } from "@project/state";
 import React, { useEffect, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useQueryState } from "nuqs";
 import { File, Folder } from "lucide-react";
 import { cn, resolveContentSprite } from "~/lib/utils";
 import { Button } from "#/components/ui/button";
@@ -11,11 +10,12 @@ import { Plus } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ImageFilePreview } from "#/components/editor/center/ImageFilePreview";
+import { usePath } from "#/hooks/use-path";
 
 export function ContentList({ path }: { path: string }) {
 	const context = useCurrentProject();
 	const queryClient = useQueryClient();
-	const [, setPath] = useQueryState("path");
+	const [, setPath] = usePath();
 
 	const { data, isLoading, isError, error } = useQuery({
 		queryKey: ["files", path],
@@ -38,7 +38,7 @@ export function ContentList({ path }: { path: string }) {
 	}
 
 	return (
-		<div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-2 w-full mb-auto p-2">
+		<div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-2 w-full mb-auto p-2 overflow-y-auto">
 			<CreateNewContentDialog />
 			{data?.map((entry) => (
 				<Item key={entry.path} onClick={() => setPath(entry.path)}>
@@ -103,7 +103,7 @@ export function CreateNewContentDialog() {
 	const { t } = useTranslation();
 	const [name, setName] = useState("");
 	const context = useCurrentProject();
-	const [path, setPath] = useQueryState("path");
+	const [path, setPath] = usePath();
 
 	const handleCreate = useCallback(() => {
 		if (name.length === 0) {

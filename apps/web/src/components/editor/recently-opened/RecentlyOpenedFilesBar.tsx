@@ -1,14 +1,14 @@
 import { useCallback, useMemo } from "react";
-import { useQueryState } from "nuqs";
 import { X } from "lucide-react";
 import { useProjectSession, useCurrentProject } from "@project/state";
 import { cn } from "~/lib/utils";
+import { usePath } from "#/hooks/use-path";
 
 const EMPTY: never[] = [];
 
 export function RecentlyOpenedFilesBar() {
+	const [path, setPath] = usePath();
 	const context = useCurrentProject();
-	const [path, setPath] = useQueryState("path");
 	const projectId = context.project.id;
 
 	const treeSnapshot = useProjectSession((state) => state.treeSnapshot);

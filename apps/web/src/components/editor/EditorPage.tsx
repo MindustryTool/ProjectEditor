@@ -1,4 +1,3 @@
-import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "@tanstack/react-router";
 import { useAppStore, useProjectSession } from "@project/state";
@@ -6,9 +5,10 @@ import { EditorShell } from "./EditorShell";
 import { useProjectActions } from "./use-project-actions";
 import { useTranslation } from "react-i18next";
 import { Progress } from "#/components/ui/progress";
+import { usePath } from "#/hooks/use-path";
 
 export function EditorPage() {
-	const [path] = useQueryState("path");
+	const [path] = usePath();
 	const [isLoading, setIsLoading] = useState(true);
 	const [loading, setLoading] = useState(0);
 	const { t } = useTranslation();

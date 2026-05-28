@@ -1,5 +1,4 @@
 import { useMemo, useState, useRef, useEffect } from "react";
-import { useQueryState } from "nuqs";
 import { File, Folder, FolderOpen, ChevronRight, ChevronDown, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { isDefaultPath, type TreeNode } from "@project/fs";
@@ -25,6 +24,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
+import { usePath } from "#/hooks/use-path";
 
 interface FileExplorerProps {
 	className?: string;
@@ -32,7 +32,7 @@ interface FileExplorerProps {
 
 export function FileExplorer({ className }: FileExplorerProps) {
 	const context = useCurrentProject();
-	const [path, setPath] = useQueryState("path");
+	const [path, setPath] = usePath();
 	const treeSnapshot = useProjectSession((state) => state.treeSnapshot);
 	const projectTree = useMemo(() => buildTreeFromSnapshot(treeSnapshot, context.project.id), [context.project.id, treeSnapshot]);
 

@@ -96,11 +96,13 @@ export class ProjectFileSystem {
 		for (let i = 0; i < entries.length; i += BATCH_SIZE) {
 			const batch = entries.slice(i, i + BATCH_SIZE);
 			const results = await Promise.allSettled(
-				batch.map((entry) => this.vfs.writeFile(this.scopePath(entry.name), new Uint8Array(entry.data))),
+				batch.map((entry) =>
+					this.vfs
+						.writeFile(this.scopePath(entry.name), new Uint8Array(entry.data))
+						.then(() => this.events.emit("file:changed", { path: entry.name, kind: "write" })),
+				),
 			);
-			for (const entry of batch) {
-				this.events.emit("file:changed", { path: entry.name, kind: "write" });
-			}
+
 			const rejected = results.filter((r) => r.status === "rejected") as PromiseRejectedResult[];
 			if (rejected.length > 0) {
 				throw new AggregateError(
