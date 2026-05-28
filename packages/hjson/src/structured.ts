@@ -4,11 +4,14 @@ export interface Position {
 	index: number;
 }
 
-export interface FieldInfo {
-	key: string;
-	value: any;
+export interface InfoBase {
 	start: Position;
 	end: Position;
+}
+
+export interface FieldInfo extends InfoBase {
+	key: string;
+	value: any;
 	valueStart: Position;
 	valueEnd: Position;
 	/**
@@ -47,8 +50,10 @@ export abstract class StructuredNode {
 	abstract isValue(): this is StructuredValueNode;
 	abstract isMissing(): this is MissingNode;
 
-	abstract get(key: string): StructuredNode;
-	abstract at(index: number): StructuredNode;
+	abstract get(key: string | number): StructuredNode;
+	abstract at(value: string | number): FieldInfo | ElementInfo | undefined;
+
+	abstract info(): InfoBase | undefined;
 
 	abstract asString(): string | undefined;
 	abstract asNumber(): number | undefined;
@@ -64,14 +69,18 @@ export abstract class StructuredNode {
 export class StructuredObjectNode extends StructuredNode {
 	readonly #data: Record<string, unknown>;
 	readonly #fields: Map<string, FieldInfo>;
+	readonly #start?: Position;
+	readonly #end?: Position;
 
-	constructor(data: Record<string, unknown>, fields: Iterable<FieldInfo>) {
+	constructor(data: Record<string, unknown>, fields: Iterable<FieldInfo>, start?: Position, end?: Position) {
 		super();
 		this.#data = data;
 		this.#fields = new Map();
 		for (const f of fields) {
 			this.#fields.set(f.key, f);
 		}
+		this.#start = start;
+		this.#end = end;
 	}
 
 	isObject(): this is StructuredObjectNode {
@@ -87,16 +96,28 @@ export class StructuredObjectNode extends StructuredNode {
 		return false;
 	}
 
-	get(key: string): StructuredNode {
-		const info = this.#fields.get(key);
-		if (info && info.value instanceof StructuredNode) {
-			return info.value;
+	get(key: string | number): StructuredNode {
+		if (typeof key === "string") {
+			const info = this.#fields.get(key);
+			if (info && info.value instanceof StructuredNode) {
+				return info.value;
+			}
 		}
 		return MissingNode.instance;
 	}
 
-	at(_index: number): StructuredNode {
-		return MissingNode.instance;
+	at(value: string | number): FieldInfo | undefined {
+		if (typeof value === "string") {
+			return this.#fields.get(value);
+		}
+		return undefined;
+	}
+
+	info(): InfoBase | undefined {
+		if (this.#start && this.#end) {
+			return { start: this.#start, end: this.#end };
+		}
+		return undefined;
 	}
 
 	asString(): string | undefined {
@@ -146,21 +167,23 @@ export class StructuredObjectNode extends StructuredNode {
 	}
 }
 
-export interface ElementInfo {
+export interface ElementInfo extends InfoBase {
 	index: number;
 	value: any;
-	start: Position;
-	end: Position;
 }
 
 export class StructuredArrayNode extends StructuredNode {
 	readonly #data: unknown[];
 	readonly #elements: ElementInfo[];
+	readonly #start?: Position;
+	readonly #end?: Position;
 
-	constructor(data: unknown[], elements: ElementInfo[]) {
+	constructor(data: unknown[], elements: ElementInfo[], start?: Position, end?: Position) {
 		super();
 		this.#data = data;
 		this.#elements = elements;
+		this.#start = start;
+		this.#end = end;
 	}
 
 	isObject(): this is StructuredObjectNode {
@@ -176,16 +199,28 @@ export class StructuredArrayNode extends StructuredNode {
 		return false;
 	}
 
-	get(_key: string): StructuredNode {
+	get(key: string | number): StructuredNode {
+		if (typeof key === "number") {
+			const el = this.#elements[key];
+			if (el && el.value instanceof StructuredNode) {
+				return el.value;
+			}
+		}
 		return MissingNode.instance;
 	}
 
-	at(index: number): StructuredNode {
-		const info = this.#elements[index];
-		if (info && info.value instanceof StructuredNode) {
-			return info.value;
+	at(value: string | number): ElementInfo | undefined {
+		if (typeof value === "number") {
+			return this.#elements[value];
 		}
-		return MissingNode.instance;
+		return undefined;
+	}
+
+	info(): InfoBase | undefined {
+		if (this.#start && this.#end) {
+			return { start: this.#start, end: this.#end };
+		}
+		return undefined;
 	}
 
 	asString(): string | undefined {
@@ -235,11 +270,15 @@ export class StructuredValueNode extends StructuredNode {
 		return false;
 	}
 
-	get(_key: string): StructuredNode {
+	get(_key: string | number): StructuredNode {
 		return MissingNode.instance;
 	}
-	at(_index: number): StructuredNode {
-		return MissingNode.instance;
+	at(_value: string | number): undefined {
+		return undefined;
+	}
+
+	info(): InfoBase {
+		return { start: this.#start, end: this.#end };
 	}
 
 	asString(): string | undefined {
@@ -290,11 +329,15 @@ export class MissingNode extends StructuredNode {
 		return true;
 	}
 
-	get(_key: string): StructuredNode {
+	get(_key: string | number): StructuredNode {
 		return this;
 	}
-	at(_index: number): StructuredNode {
-		return this;
+	at(_value: string | number): undefined {
+		return undefined;
+	}
+
+	info(): undefined {
+		return undefined;
 	}
 
 	asString(): string | undefined {

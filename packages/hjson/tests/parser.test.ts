@@ -6,7 +6,10 @@ import {
   StructuredObjectNode,
   StructuredArrayNode,
   StructuredValueNode,
+  MissingNode,
   type FieldInfo,
+  type ElementInfo,
+  type InfoBase,
   StructuredObject,
 } from "../src/structured.js";
 
@@ -246,6 +249,170 @@ describe("Parser", () => {
       expect(result.valueOf()).toEqual({ a: 1, b: 2 });
       expect(result.field("a")).toBeDefined();
       expect(result.field("b")).toBeDefined();
+    });
+
+    it("at(string) on object returns FieldInfo with key and value", () => {
+      const result = parseStructured('{"a": 42, "b": "hi"}') as StructuredObjectNode;
+      const infoA = result.at("a")!;
+      expect(infoA.key).toBe("a");
+      expect(infoA.value.valueOf()).toBe(42);
+      expect(infoA.start).toBeDefined();
+      expect(infoA.end).toBeDefined();
+      expect(infoA.valueStart).toBeDefined();
+      expect(infoA.valueEnd).toBeDefined();
+      expect(typeof infoA.replaceValue).toBe("function");
+
+      const infoB = result.at("b")!;
+      expect(infoB.key).toBe("b");
+      expect(infoB.value.valueOf()).toBe("hi");
+    });
+
+    it("at(string) on object returns undefined for non-existent field", () => {
+      const result = parseStructured('{"a": 1}') as StructuredObjectNode;
+      expect(result.at("bogus")).toBeUndefined();
+    });
+
+    it("at(number) on object returns undefined", () => {
+      const result = parseStructured('{"a": 1}') as StructuredObjectNode;
+      expect(result.at(0)).toBeUndefined();
+    });
+
+    it("at(number) on array returns ElementInfo with index and value", () => {
+      const result = parseStructured("[10, 20, 30]") as StructuredArrayNode;
+      const el0 = result.at(0)!;
+      expect(el0.index).toBe(0);
+      expect(el0.value.valueOf()).toBe(10);
+      expect(el0.start).toBeDefined();
+      expect(el0.end).toBeDefined();
+
+      const el1 = result.at(1)!;
+      expect(el1.index).toBe(1);
+      expect(el1.value.valueOf()).toBe(20);
+
+      const el2 = result.at(2)!;
+      expect(el2.index).toBe(2);
+      expect(el2.value.valueOf()).toBe(30);
+    });
+
+    it("at(number) on array returns undefined for out-of-bounds index", () => {
+      const result = parseStructured("[1, 2, 3]") as StructuredArrayNode;
+      expect(result.at(5)).toBeUndefined();
+      expect(result.at(-1)).toBeUndefined();
+    });
+
+    it("at(string) on array returns undefined", () => {
+      const result = parseStructured("[1, 2, 3]") as StructuredArrayNode;
+      expect(result.at("a")).toBeUndefined();
+    });
+
+    it("at() on value node returns undefined", () => {
+      const result = parseStructured('{"x": 42}') as StructuredObjectNode;
+      const fieldInfo = result.at("x")!;
+      const valNode = fieldInfo.value as StructuredValueNode;
+      expect(valNode.at("anything")).toBeUndefined();
+      expect(valNode.at(0)).toBeUndefined();
+    });
+
+    it("FieldInfo satisfies InfoBase contract", () => {
+      const result = parseStructured('{"x": 1}') as StructuredObjectNode;
+      const info: InfoBase = result.at("x")!;
+      expect(info.start).toBeDefined();
+      expect(info.end).toBeDefined();
+      expect(typeof info.start.row).toBe("number");
+      expect(typeof info.start.col).toBe("number");
+    });
+
+    it("ElementInfo satisfies InfoBase contract", () => {
+      const result = parseStructured("[10, 20]") as StructuredArrayNode;
+      for (const el of result.elements()) {
+        const info: InfoBase = el;
+        expect(info.start).toBeDefined();
+        expect(info.end).toBeDefined();
+      }
+    });
+
+    it("at(string) on object returns FieldInfo with patchable replaceValue", () => {
+      const text = '{"x": "hello"}';
+      const result = parseStructured(text) as StructuredObjectNode;
+      const info = result.at("x")!;
+      const patched = info.replaceValue(text, '"world"');
+      expect(patched).toBe('{"x": "world"}');
+    });
+
+    it("at(number) on array can access nested FieldInfo via ElementInfo.value", () => {
+      const result = parseStructured('[{"nested": 99}]') as StructuredArrayNode;
+      const el = result.at(0)!;
+      expect(el.index).toBe(0);
+      const objNode = el.value as StructuredObjectNode;
+      expect(objNode.at("nested")!.value.valueOf()).toBe(99);
+    });
+
+    it("get(number) on array returns value node", () => {
+      const result = parseStructured("[10, 20, 30]") as StructuredArrayNode;
+      const node = result.get(0) as StructuredValueNode;
+      expect(node.isValue()).toBe(true);
+      expect(node.valueOf()).toBe(10);
+    });
+
+    it("get(number) on array returns MissingNode for out-of-bounds", () => {
+      const result = parseStructured("[1, 2, 3]") as StructuredArrayNode;
+      expect(result.get(5).isMissing()).toBe(true);
+      expect(result.get(-1).isMissing()).toBe(true);
+    });
+
+    it("get(number) on object returns MissingNode", () => {
+      const result = parseStructured('{"a": 1}') as StructuredObjectNode;
+      expect(result.get(0).isMissing()).toBe(true);
+    });
+
+    it("get(number) on value node returns MissingNode", () => {
+      const result = parseStructured('{"x": 42}') as StructuredObjectNode;
+      const valNode = result.get("x") as StructuredValueNode;
+      expect(valNode.get(0).isMissing()).toBe(true);
+    });
+
+    it("get(number) on missing node returns MissingNode", () => {
+      const result = parseStructured('{"x": 42}') as StructuredObjectNode;
+      const missing = result.get("nonexistent");
+      expect(missing.isMissing()).toBe(true);
+      expect(missing.get(0).isMissing()).toBe(true);
+    });
+
+    it("info() on value node returns correct positions", () => {
+      const text = '{"a": 42}';
+      const result = parseStructured(text) as StructuredObjectNode;
+      const valNode = result.get("a") as StructuredValueNode;
+      const info = valNode.info();
+      expect(info).toBeDefined();
+      expect(info.start.row).toBe(1);
+      expect(info.start.col).toBe(7);
+      expect(info.start.index).toBe(6);
+      expect(info.end.col).toBe(9);
+      expect(info.end.index).toBe(8);
+    });
+
+    it("info() on object node returns correct block positions", () => {
+      const text = '{"a": 1, "b": 2}';
+      const result = parseStructured(text) as StructuredObjectNode;
+      const info = result.info();
+      expect(info).toBeDefined();
+      expect(info!.start.col).toBe(1);
+      expect(info!.start.index).toBe(0);
+    });
+
+    it("info() on array node returns correct block positions", () => {
+      const text = "[10, 20, 30]";
+      const result = parseStructured(text) as StructuredArrayNode;
+      const info = result.info();
+      expect(info).toBeDefined();
+      expect(info!.start.col).toBe(1);
+      expect(info!.start.index).toBe(0);
+    });
+
+    it("info() on missing node returns undefined", () => {
+      const result = parseStructured('{"a": 1}') as StructuredObjectNode;
+      const missing = result.get("nonexistent");
+      expect(missing.info()).toBeUndefined();
     });
   });
 });

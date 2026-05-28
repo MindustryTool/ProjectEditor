@@ -32,7 +32,7 @@ export function FieldRenderer({ path, fields, values, updater }: FieldRendererPr
 
 		if (renderer === undefined) {
 			return (
-				<span key={name} className="text-yellow-400">
+				<span key={name + type + path} className="text-yellow-400">
 					Unknown field type {type}
 				</span>
 			);
@@ -41,7 +41,7 @@ export function FieldRenderer({ path, fields, values, updater }: FieldRendererPr
 		const issue = issues?.filter((issue) => issue.field === name);
 
 		return (
-			<Fragment key={name}>
+			<Fragment key={name + type + path}>
 				{renderer({
 					name,
 					value: values[name] || defaultValue || "",

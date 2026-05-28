@@ -480,7 +480,7 @@ export class Parser {
 					data.push(val.valueOf());
 				});
 				const finalData = reviver ? reviver(keyHint, data) : data;
-				return new StructuredArrayNode(finalData, elements);
+				return new StructuredArrayNode(finalData, elements, { ...node.loc.start }, { ...node.loc.end });
 			}
 			case "object": {
 				const fieldInfos: FieldInfo[] = [];
@@ -524,7 +524,7 @@ export class Parser {
 					}
 				}
 
-				return new StructuredObjectNode(resultData as Record<string, unknown>, fieldInfos);
+				return new StructuredObjectNode(resultData as Record<string, unknown>, fieldInfos, { ...node.loc.start }, { ...node.loc.end });
 			}
 			default:
 				throw new Error(`Unknown node kind: ${(node as any).kind}`);

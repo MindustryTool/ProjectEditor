@@ -1,14 +1,8 @@
 import * as v from "valibot";
-
-export const ModNameSchema = v.pipe(
-	v.string(),
-	v.regex(/^[a-z][a-z0-9-]*$/, "Must be lowercase letters, digits, hyphens"),
-	v.minLength(2),
-	v.maxLength(127),
-);
+import { ContentNameSchema } from "./base";
 
 export const ModHjsonSchema = v.object({
-	name: ModNameSchema,
+	name: ContentNameSchema,
 	displayName: v.pipe(v.string(), v.minLength(2), v.maxLength(127)),
 	author: v.pipe(v.string(), v.minLength(2), v.maxLength(127)),
 	description: v.pipe(v.string(), v.maxLength(9999)),
@@ -20,7 +14,7 @@ export const ModHjsonSchema = v.object({
 			return !isNaN(num) && num > 157;
 		}, "Must be a number greater than 157"),
 	),
-	dependencies: v.optional(v.array(ModNameSchema)),
+	dependencies: v.optional(v.array(ContentNameSchema)),
 	hidden: v.optional(v.boolean()),
 });
 

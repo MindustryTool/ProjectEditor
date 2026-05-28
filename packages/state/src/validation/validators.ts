@@ -1,8 +1,8 @@
-import type { ValidatorFn } from "./types";
+import type { ValidationResult, ValidatorFn } from "./types";
 import { Severity } from "./types";
 import { createValidatorRegistry } from "./registry";
 import { HJSON, HJSONError, StructuredObjectNode } from "@project/hjson";
-import { ModHjsonSchema } from "@project/validation";
+import { ItemHjsonSchema, ModHjsonSchema } from "@project/validation";
 import * as v from "valibot";
 
 const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
@@ -62,7 +62,10 @@ const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 	}
 };
 
-const createValibotValidator: (schema: Parameters<typeof v.parse>[0]) => ValidatorFn = (schema) => {
+const createValibotValidator: (
+	schema: Parameters<typeof v.parse>[0],
+	validator?: (result: v.InferOutput<typeof schema>) => ValidationResult[],
+) => ValidatorFn = (schema, validator) => {
 	return ({ path, content }) => {
 		const data = HJSON.parseStructured(content) as StructuredObjectNode;
 		try {
@@ -80,7 +83,11 @@ const createValibotValidator: (schema: Parameters<typeof v.parse>[0]) => Validat
 					},
 				];
 
-			v.parse(schema, data.valueOf());
+			const result = v.parse(schema, data.valueOf());
+
+			if (validator) {
+				return validator(result);
+			}
 
 			return [];
 		} catch (err) {
@@ -89,7 +96,18 @@ const createValibotValidator: (schema: Parameters<typeof v.parse>[0]) => Validat
 
 				for (const issue of err.issues) {
 					const field = issue.path?.map((p) => p.key)?.join(".") || "";
-					const fieldInfo = data.field(field);
+					let fieldData: ReturnType<typeof data.get> = data;
+
+					for (const field of issue.path || []) {
+						const nested = fieldData.get(field.key as string | number);
+						if (nested) {
+							fieldData = nested;
+						} else {
+							break;
+						}
+					}
+
+					const fieldInfo = fieldData.info();
 
 					let startLine = 1;
 					let startColumn = 1;
@@ -136,6 +154,7 @@ const createValibotValidator: (schema: Parameters<typeof v.parse>[0]) => Validat
 };
 
 const modMetaValidator: ValidatorFn = createValibotValidator(ModHjsonSchema);
+const itemHjsonValidator: ValidatorFn = createValibotValidator(ItemHjsonSchema);
 
 export function createDefaultValidators() {
 	const registry = createValidatorRegistry();
@@ -150,6 +169,12 @@ export function createDefaultValidators() {
 		name: "mod-meta",
 		pattern: (path) => path.endsWith("mod.hjson") || path.endsWith("mod.json"),
 		validate: modMetaValidator,
+	});
+
+	registry.register({
+		name: "items-hjson",
+		pattern: (path) => path.startsWith("content/item") || (path.endsWith(".json") && path.endsWith(".hjson")),
+		validate: itemHjsonValidator,
 	});
 
 	return registry;
