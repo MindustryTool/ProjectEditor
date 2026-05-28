@@ -1,6 +1,8 @@
 import { Checkbox } from "#/components/ui/checkbox";
+import { ColorPicker, ColorPickerAlpha, ColorPickerFormat, ColorPickerHue, ColorPickerSelection } from "#/components/ui/color-picker";
 import { FormControl, FormField, FormLabel } from "#/components/ui/form";
 import { Input } from "#/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover";
 import { useValidationStore } from "@project/state";
 import { Fragment, type ReactNode } from "react";
 
@@ -106,8 +108,25 @@ const fieldRenderers: Record<FieldType, (value: { name: string; value: any; onCh
 		<FormField>
 			<FormLabel>{name}</FormLabel>
 			<FormControl>
-				{value}
-				<Input value={value} onChange={(v) => onChange(v.currentTarget.value)} type="color" />
+				<div className="flex items-center gap-2">
+					<Popover>
+						<PopoverTrigger className="flex gap-1 items-end">
+							<div
+								className="h-8 w-12 cursor-pointer rounded border border-border bg-transparent p-0"
+								style={{ backgroundColor: value || "#000000" }}
+							/>
+							<span className="text-sm">{value}</span>
+						</PopoverTrigger>
+						<PopoverContent className="w-64 p-3" side="bottom" align="start">
+							<ColorPicker value={value || "#000000"} onChange={(val) => onChange(val)}>
+								<ColorPickerSelection className="h-40 rounded-lg" />
+								<ColorPickerHue />
+								<ColorPickerAlpha />
+								<ColorPickerFormat />
+							</ColorPicker>
+						</PopoverContent>
+					</Popover>
+				</div>
 			</FormControl>
 		</FormField>
 	),

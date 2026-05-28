@@ -62,12 +62,17 @@ export function RecentlyOpenedFilesBar() {
 				return (
 					<button
 						key={entry.path}
-						onClick={() => handleTabClick(entry.path)}
 						className={cn(
 							"group flex flex-1 shrink-0 items-center gap-1 px-2 py-1 text-xs transition-colors max-w-40",
 							isActive ? "bg-background text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground",
 							isMissing && "line-through text-destructive",
 						)}
+						onClick={() => handleTabClick(entry.path)}
+						onContextMenu={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+							handleClose(e, entry.path);
+						}}
 					>
 						<span className="w-full truncate">{name}</span>
 						<span

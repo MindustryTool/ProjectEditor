@@ -22,6 +22,8 @@ import { useProjectSession } from "@project/state";
 import { useTranslation } from "react-i18next";
 import { configureMonaco } from "~/lib/monaco/setup";
 import { useMonacoTheme } from "#/lib/monaco/use-monaco-theme";
+import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
+import { ColorPicker, ColorPickerAlpha, ColorPickerFormat, ColorPickerHue, ColorPickerSelection } from "~/components/ui/color-picker";
 
 interface MonacoEditorProps {
 	value: string;
@@ -378,7 +380,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 				beforeMount={handleBeforeMount}
 				onMount={handleMount}
 				options={{
-                    readOnly,
+					readOnly,
 					minimap: { enabled: false },
 					fontSize: 15,
 					lineNumbers: "on",
@@ -404,14 +406,23 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 				>
 					<div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
 						<span>{activeColorTag.text}</span>
-						<input
-							type="color"
-							value={activeColorTag.pickerColor}
-							className="h-7 w-9 cursor-pointer rounded border border-border bg-transparent p-0"
-							onChange={(event) => {
-								handleCustomColorPick(event.target.value);
-							}}
-						/>
+						<Popover>
+							<PopoverTrigger asChild>
+								<button
+									type="button"
+									className="h-7 w-9 cursor-pointer rounded border border-border bg-transparent p-0"
+									style={{ backgroundColor: activeColorTag.pickerColor }}
+								/>
+							</PopoverTrigger>
+							<PopoverContent className="w-64 p-3" side="bottom" align="start">
+								<ColorPicker value={activeColorTag.pickerColor} onChange={(val) => handleCustomColorPick(val)}>
+									<ColorPickerSelection className="h-40 rounded-lg" />
+									<ColorPickerHue />
+									<ColorPickerAlpha />
+									<ColorPickerFormat />
+								</ColorPicker>
+							</PopoverContent>
+						</Popover>
 					</div>
 					<div className="grid grid-cols-6 gap-2">
 						{COLOR_NAMES.map((name) => (
