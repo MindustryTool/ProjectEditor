@@ -1,9 +1,10 @@
 import type { ValidationContext, ValidationResult, ValidatorFn } from "./types";
 import { Severity } from "./types";
 import { createValidatorRegistry } from "./registry";
-import { HJSON, HJSONError, StructuredObjectNode } from "@project/hjson";
+import { HJSON, HJSONError, HjsonNode, HjsonObjectNode } from "@project/hjson";
 import { ItemHjsonSchema, ModHjsonSchema } from "@project/validation";
 import * as v from "valibot";
+import { findUnknownProperties } from "./utils";
 
 const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 	const trimmed = content.trim();
@@ -17,6 +18,8 @@ const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 		if (err instanceof HJSONError) {
 			const { startLine, startColumn, endLine, endColumn, code, message } = err;
 
+            console.log({ startLine, startColumn, endLine, endColumn, code, message });
+
 			return [
 				{
 					path,
@@ -25,8 +28,8 @@ const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 					messageParams: { error: `${code}: ${message}` },
 					startLine,
 					startColumn,
-					endLine: endLine ?? startLine,
-					endColumn: endColumn ?? startColumn,
+					endLine,
+					endColumn,
 				},
 			];
 		}
@@ -63,138 +66,129 @@ const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 	}
 };
 
-function createValibotValidator<T extends Parameters<typeof v.parse>[0]>(
+function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>>(
 	schema: T,
 	validator?: (c: {
 		path: string;
 		content: string;
 		context: ValidationContext;
 		result: v.InferOutput<T>;
-		node: StructuredObjectNode;
+		node: HjsonNode;
 	}) => ValidationResult[],
 ): ValidatorFn {
 	return ({ path, content, context }) => {
-		const data = HJSON.parseStructured(content) as StructuredObjectNode;
+		const data = HJSON.parseStructured(content);
+		const { success, output: result, issues } = v.safeParse(schema, data.valueOf());
 
-		try {
-			if (typeof data !== "object" || data === null)
-				return [
-					{
-						path,
-						severity: Severity.error,
-						messageKey: "validation.content.invalidJson",
-						messageParams: { error: "Mod meta is not a valid JSON object" },
-						startLine: 1,
-						startColumn: 1,
-						endLine: 1,
-						endColumn: 1,
-					},
-				];
+		if (!success) {
+			const result = [];
 
-			const { success, output: result, issues } = v.safeParse(schema, data.valueOf());
-
-			if (!success) {
-				const result = [];
-
-				const resolveFieldData = (fieldData: ReturnType<typeof data.get>, path: (string | number)[]) => {
-					for (const key of path.filter((p) => p !== undefined || p !== null || p !== "")) {
-						const nested = fieldData.get(key);
-						if (nested) {
-							fieldData = nested;
-						} else {
-							break;
-						}
-					}
-					return fieldData;
-				};
-
-				for (const issue of issues) {
-					const field = issue.path?.map((p) => p.key)?.join(".") || "";
-
-					const fieldPath = issue.path?.map((p) => p.key as string) || [];
-					const fieldData = resolveFieldData(data, fieldPath);
-
-					const fieldInfo = fieldData.info();
-
-					let startLine = 1;
-					let startColumn = 1;
-					let endLine = 1;
-					let endColumn = 1;
-
-					if (fieldInfo) {
-						startLine = fieldInfo.start.row;
-						startColumn = fieldInfo.start.col;
-						endLine = fieldInfo.end.row;
-						endColumn = fieldInfo.end.col;
-					}
-
-					result.push({
-						path,
-						severity: Severity.error,
-						messageKey: "validation.content.invalidJson",
-						field,
-						messageParams: { error: field + ": " + issue.message },
-						startLine,
-						startColumn,
-						endLine,
-						endColumn,
-					});
-
-					if (issue.issues) {
-						for (const subIssue of issue.issues) {
-							const subIssueFieldPath = [...fieldPath, ...(subIssue.path?.map((p) => p.key as string) || [])];
-							const subFieldData = resolveFieldData(data, subIssueFieldPath);
-							const subFieldInfo = subFieldData.info();
-
-							let subStartLine = 1;
-							let subStartColumn = 1;
-							let subEndLine = 1;
-							let subEndColumn = 1;
-
-							if (subFieldInfo) {
-								subStartLine = subFieldInfo.start.row;
-								subStartColumn = subFieldInfo.start.col;
-								subEndLine = subFieldInfo.end.row;
-								subEndColumn = subFieldInfo.end.col;
-							}
-
-							result.push({
-								path,
-								severity: Severity.error,
-								messageKey: "validation.content.invalidJson",
-								field: subIssue.path?.map((p) => p.key)?.join(".") || "",
-								messageParams: { error: subIssue.message },
-								startLine: subStartLine,
-								startColumn: subStartColumn,
-								endLine: subEndLine,
-								endColumn: subEndColumn,
-							});
-						}
+			const resolveFieldData = (fieldData: ReturnType<typeof data.get>, path: (string | number)[]) => {
+				for (const key of path.filter((p) => p !== undefined || p !== null || p !== "")) {
+					const nested = fieldData.get(key);
+					if (nested) {
+						fieldData = nested;
+					} else {
+						break;
 					}
 				}
+				return fieldData;
+			};
 
-				return result;
-			}
+			for (const issue of issues) {
+				const field = issue.path?.map((p) => p.key)?.join(".") || "";
 
-			if (validator) {
-				return validator({ path, content, context, result, node: data });
-			}
+				const fieldPath = issue.path?.map((p) => p.key as string) || [];
+				const fieldData = resolveFieldData(data, fieldPath);
 
-			return [];
-		} catch (err) {
-			return [
-				{
+				const fieldInfo = fieldData.info();
+
+				let startLine = 1;
+				let startColumn = 1;
+				let endLine = 1;
+				let endColumn = 1;
+
+				if (fieldInfo) {
+					startLine = fieldInfo.start.row;
+					startColumn = fieldInfo.start.col;
+					endLine = fieldInfo.end.row;
+					endColumn = fieldInfo.end.col;
+				}
+
+				result.push({
 					path,
 					severity: Severity.error,
 					messageKey: "validation.content.invalidJson",
-					messageParams: { error: "Aaaaa" },
-					startLine: 1,
-					startColumn: 1,
-					endLine: 1,
-					endColumn: 1,
-				},
-			];
+					field,
+					messageParams: { error: field + ": " + issue.message },
+					startLine,
+					startColumn,
+					endLine,
+					endColumn,
+				});
+
+				if (issue.issues) {
+					for (const subIssue of issue.issues) {
+						const subIssueFieldPath = [...fieldPath, ...(subIssue.path?.map((p) => p.key as string) || [])];
+						const subFieldData = resolveFieldData(data, subIssueFieldPath);
+						const subFieldInfo = subFieldData.info();
+
+						let subStartLine = 1;
+						let subStartColumn = 1;
+						let subEndLine = 1;
+						let subEndColumn = 1;
+
+						if (subFieldInfo) {
+							subStartLine = subFieldInfo.start.row;
+							subStartColumn = subFieldInfo.start.col;
+							subEndLine = subFieldInfo.end.row;
+							subEndColumn = subFieldInfo.end.col;
+						}
+
+						result.push({
+							path,
+							severity: Severity.error,
+							messageKey: "validation.content.invalidJson",
+							field: subIssue.path?.map((p) => p.key)?.join(".") || "",
+							messageParams: { error: subIssue.message },
+							startLine: subStartLine,
+							startColumn: subStartColumn,
+							endLine: subEndLine,
+							endColumn: subEndColumn,
+						});
+					}
+				}
+			}
+
+			return result;
 		}
+
+		const problems = [];
+
+		if (validator) {
+			problems.push(...validator({ path, content, context, result, node: data }));
+		}
+
+		if (data instanceof HjsonObjectNode) {
+			const unknownPaths = findUnknownProperties(schema, data.valueOf());
+
+			for (const path of unknownPaths) {
+				const field = data.path(path);
+
+				problems.push({
+					path,
+					severity: Severity.warning,
+					messageKey: "validation.content.invalidJson",
+					messageParams: { error: `Unknown field ${path}` },
+					startLine: field?.start.row ?? 1,
+					startColumn: field?.start.col ?? 1,
+					endLine: field?.end?.row ?? 1,
+					endColumn: field?.end?.col ?? 1,
+				});
+			}
+		}
+
+		return problems;
 	};
 }
 

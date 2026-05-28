@@ -2,15 +2,14 @@ import { describe, it, expect } from "vitest";
 import { Parser } from "../src/parser.js";
 import { HJSONError, HJSONErrorCode } from "../src/errors.js";
 import {
-  StructuredNode,
-  StructuredObjectNode,
-  StructuredArrayNode,
-  StructuredValueNode,
-  MissingNode,
+  HjsonNode,
+  HjsonObjectNode,
+  HjsonArrayNode,
+  HjsonValueNode,
+  HjsonMissingNode,
   type FieldInfo,
   type ElementInfo,
   type InfoBase,
-  StructuredObject,
 } from "../src/structured.js";
 
 function parse(input: string, reviver?: (key: string, value: any) => any) {
@@ -163,17 +162,17 @@ describe("Parser", () => {
     it("default parse still returns plain JS value", () => {
       const result = parse('{"a": 1}');
       expect(result).toEqual({ a: 1 });
-      expect(result).not.toBeInstanceOf(StructuredObject);
+      expect(result).not.toBeInstanceOf(HjsonObjectNode);
     });
 
-    it("structured parse returns StructuredObject instance", () => {
+    it("structured parse returns HjsonObjectNode instance", () => {
       const result = parseStructured('{"a": 1}');
-      expect(result).toBeInstanceOf(StructuredObject);
+      expect(result).toBeInstanceOf(HjsonObjectNode);
     });
 
     it("structured parse has correct field positions", () => {
       const text = '{"a": 42}';
-      const result = parseStructured(text) as StructuredObjectNode;
+      const result = parseStructured(text) as HjsonObjectNode;
       const info = result.field("a")!;
       expect(info.key).toBe("a");
       expect(info.value.valueOf()).toBe(42);
@@ -182,77 +181,77 @@ describe("Parser", () => {
     });
 
     it("field() returns correct FieldInfo", () => {
-      const result = parseStructured('{"x": "hello"}') as StructuredObjectNode;
+      const result = parseStructured('{"x": "hello"}') as HjsonObjectNode;
       const info = result.field("x")!;
       expect(info.key).toBe("x");
       expect(info.value.valueOf()).toBe("hello");
     });
 
     it("field() returns undefined for missing key", () => {
-      const result = parseStructured('{"a": 1}') as StructuredObjectNode;
+      const result = parseStructured('{"a": 1}') as HjsonObjectNode;
       expect(result.field("bogus")).toBeUndefined();
     });
 
     it("fields() iterates all entries", () => {
-      const result = parseStructured('{"a": 1, "b": 2}') as StructuredObjectNode;
+      const result = parseStructured('{"a": 1, "b": 2}') as HjsonObjectNode;
       const entries = Array.from(result.fields());
       expect(entries).toHaveLength(2);
       expect(entries.map((f) => f.key)).toEqual(["a", "b"]);
     });
 
-    it("nested objects are recursively StructuredNode", () => {
-      const result = parseStructured('{"outer": {"inner": 1}}') as StructuredObjectNode;
+    it("nested objects are recursively HjsonNode", () => {
+      const result = parseStructured('{"outer": {"inner": 1}}') as HjsonObjectNode;
       const outerField = result.field("outer")!;
-      expect(outerField.value).toBeInstanceOf(StructuredNode);
-      const inner = outerField.value as StructuredObjectNode;
+      expect(outerField.value).toBeInstanceOf(HjsonNode);
+      const inner = outerField.value as HjsonObjectNode;
       const innerField = inner.field("inner")!;
       expect(innerField.key).toBe("inner");
       expect(innerField.value.valueOf()).toBe(1);
     });
 
     it("primitives in object fields store correct values", () => {
-      const result = parseStructured('{"n": 42, "b": true, "v": null, "s": "hi"}') as StructuredObjectNode;
+      const result = parseStructured('{"n": 42, "b": true, "v": null, "s": "hi"}') as HjsonObjectNode;
       expect(result.field("n")!.value.valueOf()).toBe(42);
       expect(result.field("b")!.value.valueOf()).toBe(true);
       expect(result.field("v")!.value.valueOf()).toBeNull();
       expect(result.field("s")!.value.valueOf()).toBe("hi");
     });
 
-    it("arrays return StructuredArrayNode in structured mode", () => {
+    it("arrays return HjsonArrayNode in structured mode", () => {
       const result = parseStructured("[1, 2, 3]");
       expect(result.isArray()).toBe(true);
       expect(result.valueOf()).toEqual([1, 2, 3]);
     });
 
     it("valueOf() returns plain JS object", () => {
-      const result = parseStructured('{"a": 1}') as StructuredObjectNode;
+      const result = parseStructured('{"a": 1}') as HjsonObjectNode;
       expect(result.valueOf()).toEqual({ a: 1 });
     });
 
     it("toJSON() returns plain JS object", () => {
-      const result = parseStructured('{"a": 1}') as StructuredObjectNode;
+      const result = parseStructured('{"a": 1}') as HjsonObjectNode;
       expect(JSON.stringify(result)).toBe('{"a":1}');
     });
 
     it("structured parse with reviver works correctly", () => {
       const result = parseStructured('{"a": 1}', (key, val) =>
         typeof val === "number" ? val * 2 : val,
-      ) as StructuredObjectNode;
+      ) as HjsonObjectNode;
       expect(result.valueOf()).toEqual({ a: 2 });
       const info = result.field("a")!;
       expect(info.value.valueOf()).toBe(2);
     });
 
     it("structured parse with legacy root works", () => {
-      const result = parseStructured("a: 1\nb: 2") as StructuredObjectNode;
-      expect(result).toBeInstanceOf(StructuredObject);
+      const result = parseStructured("a: 1\nb: 2") as HjsonObjectNode;
+      expect(result).toBeInstanceOf(HjsonObjectNode);
       expect(result.valueOf()).toEqual({ a: 1, b: 2 });
       expect(result.field("a")).toBeDefined();
       expect(result.field("b")).toBeDefined();
     });
 
     it("at(string) on object returns FieldInfo with key and value", () => {
-      const result = parseStructured('{"a": 42, "b": "hi"}') as StructuredObjectNode;
+      const result = parseStructured('{"a": 42, "b": "hi"}') as HjsonObjectNode;
       const infoA = result.at("a")!;
       expect(infoA.key).toBe("a");
       expect(infoA.value.valueOf()).toBe(42);
@@ -268,17 +267,17 @@ describe("Parser", () => {
     });
 
     it("at(string) on object returns undefined for non-existent field", () => {
-      const result = parseStructured('{"a": 1}') as StructuredObjectNode;
+      const result = parseStructured('{"a": 1}') as HjsonObjectNode;
       expect(result.at("bogus")).toBeUndefined();
     });
 
     it("at(number) on object returns undefined", () => {
-      const result = parseStructured('{"a": 1}') as StructuredObjectNode;
+      const result = parseStructured('{"a": 1}') as HjsonObjectNode;
       expect(result.at(0)).toBeUndefined();
     });
 
     it("at(number) on array returns ElementInfo with index and value", () => {
-      const result = parseStructured("[10, 20, 30]") as StructuredArrayNode;
+      const result = parseStructured("[10, 20, 30]") as HjsonArrayNode;
       const el0 = result.at(0)!;
       expect(el0.index).toBe(0);
       expect(el0.value.valueOf()).toBe(10);
@@ -295,26 +294,26 @@ describe("Parser", () => {
     });
 
     it("at(number) on array returns undefined for out-of-bounds index", () => {
-      const result = parseStructured("[1, 2, 3]") as StructuredArrayNode;
+      const result = parseStructured("[1, 2, 3]") as HjsonArrayNode;
       expect(result.at(5)).toBeUndefined();
       expect(result.at(-1)).toBeUndefined();
     });
 
     it("at(string) on array returns undefined", () => {
-      const result = parseStructured("[1, 2, 3]") as StructuredArrayNode;
+      const result = parseStructured("[1, 2, 3]") as HjsonArrayNode;
       expect(result.at("a")).toBeUndefined();
     });
 
     it("at() on value node returns undefined", () => {
-      const result = parseStructured('{"x": 42}') as StructuredObjectNode;
+      const result = parseStructured('{"x": 42}') as HjsonObjectNode;
       const fieldInfo = result.at("x")!;
-      const valNode = fieldInfo.value as StructuredValueNode;
+      const valNode = fieldInfo.value as HjsonValueNode;
       expect(valNode.at("anything")).toBeUndefined();
       expect(valNode.at(0)).toBeUndefined();
     });
 
     it("FieldInfo satisfies InfoBase contract", () => {
-      const result = parseStructured('{"x": 1}') as StructuredObjectNode;
+      const result = parseStructured('{"x": 1}') as HjsonObjectNode;
       const info: InfoBase = result.at("x")!;
       expect(info.start).toBeDefined();
       expect(info.end).toBeDefined();
@@ -323,7 +322,7 @@ describe("Parser", () => {
     });
 
     it("ElementInfo satisfies InfoBase contract", () => {
-      const result = parseStructured("[10, 20]") as StructuredArrayNode;
+      const result = parseStructured("[10, 20]") as HjsonArrayNode;
       for (const el of result.elements()) {
         const info: InfoBase = el;
         expect(info.start).toBeDefined();
@@ -333,46 +332,46 @@ describe("Parser", () => {
 
     it("at(string) on object returns FieldInfo with patchable replaceValue", () => {
       const text = '{"x": "hello"}';
-      const result = parseStructured(text) as StructuredObjectNode;
+      const result = parseStructured(text) as HjsonObjectNode;
       const info = result.at("x")!;
       const patched = info.replaceValue(text, '"world"');
       expect(patched).toBe('{"x": "world"}');
     });
 
     it("at(number) on array can access nested FieldInfo via ElementInfo.value", () => {
-      const result = parseStructured('[{"nested": 99}]') as StructuredArrayNode;
+      const result = parseStructured('[{"nested": 99}]') as HjsonArrayNode;
       const el = result.at(0)!;
       expect(el.index).toBe(0);
-      const objNode = el.value as StructuredObjectNode;
+      const objNode = el.value as HjsonObjectNode;
       expect(objNode.at("nested")!.value.valueOf()).toBe(99);
     });
 
     it("get(number) on array returns value node", () => {
-      const result = parseStructured("[10, 20, 30]") as StructuredArrayNode;
-      const node = result.get(0) as StructuredValueNode;
+      const result = parseStructured("[10, 20, 30]") as HjsonArrayNode;
+      const node = result.get(0) as HjsonValueNode;
       expect(node.isValue()).toBe(true);
       expect(node.valueOf()).toBe(10);
     });
 
-    it("get(number) on array returns MissingNode for out-of-bounds", () => {
-      const result = parseStructured("[1, 2, 3]") as StructuredArrayNode;
+    it("get(number) on array returns HjsonMissingNode for out-of-bounds", () => {
+      const result = parseStructured("[1, 2, 3]") as HjsonArrayNode;
       expect(result.get(5).isMissing()).toBe(true);
       expect(result.get(-1).isMissing()).toBe(true);
     });
 
-    it("get(number) on object returns MissingNode", () => {
-      const result = parseStructured('{"a": 1}') as StructuredObjectNode;
+    it("get(number) on object returns HjsonMissingNode", () => {
+      const result = parseStructured('{"a": 1}') as HjsonObjectNode;
       expect(result.get(0).isMissing()).toBe(true);
     });
 
-    it("get(number) on value node returns MissingNode", () => {
-      const result = parseStructured('{"x": 42}') as StructuredObjectNode;
-      const valNode = result.get("x") as StructuredValueNode;
+    it("get(number) on value node returns HjsonMissingNode", () => {
+      const result = parseStructured('{"x": 42}') as HjsonObjectNode;
+      const valNode = result.get("x") as HjsonValueNode;
       expect(valNode.get(0).isMissing()).toBe(true);
     });
 
-    it("get(number) on missing node returns MissingNode", () => {
-      const result = parseStructured('{"x": 42}') as StructuredObjectNode;
+    it("get(number) on missing node returns HjsonMissingNode", () => {
+      const result = parseStructured('{"x": 42}') as HjsonObjectNode;
       const missing = result.get("nonexistent");
       expect(missing.isMissing()).toBe(true);
       expect(missing.get(0).isMissing()).toBe(true);
@@ -380,8 +379,8 @@ describe("Parser", () => {
 
     it("info() on value node returns correct positions", () => {
       const text = '{"a": 42}';
-      const result = parseStructured(text) as StructuredObjectNode;
-      const valNode = result.get("a") as StructuredValueNode;
+      const result = parseStructured(text) as HjsonObjectNode;
+      const valNode = result.get("a") as HjsonValueNode;
       const info = valNode.info();
       expect(info).toBeDefined();
       expect(info.start.row).toBe(1);
@@ -393,7 +392,7 @@ describe("Parser", () => {
 
     it("info() on object node returns correct block positions", () => {
       const text = '{"a": 1, "b": 2}';
-      const result = parseStructured(text) as StructuredObjectNode;
+      const result = parseStructured(text) as HjsonObjectNode;
       const info = result.info();
       expect(info).toBeDefined();
       expect(info!.start.col).toBe(1);
@@ -402,7 +401,7 @@ describe("Parser", () => {
 
     it("info() on array node returns correct block positions", () => {
       const text = "[10, 20, 30]";
-      const result = parseStructured(text) as StructuredArrayNode;
+      const result = parseStructured(text) as HjsonArrayNode;
       const info = result.info();
       expect(info).toBeDefined();
       expect(info!.start.col).toBe(1);
@@ -410,9 +409,59 @@ describe("Parser", () => {
     });
 
     it("info() on missing node returns undefined", () => {
-      const result = parseStructured('{"a": 1}') as StructuredObjectNode;
+      const result = parseStructured('{"a": 1}') as HjsonObjectNode;
       const missing = result.get("nonexistent");
       expect(missing.info()).toBeUndefined();
+    });
+
+    describe("path()", () => {
+      it("single key returns FieldInfo for the field", () => {
+        const result = parseStructured('{"a": 42}') as HjsonObjectNode;
+        const info = result.path("a");
+        expect(info).toBeDefined();
+        expect(info!.value.valueOf()).toBe(42);
+        expect((info! as FieldInfo).key).toBe("a");
+      });
+
+      it("deep object path returns FieldInfo for the deepest field", () => {
+        const result = parseStructured('{"a": {"b": {"c": "deep"}}}') as HjsonObjectNode;
+        const info = result.path("a.b.c");
+        expect(info).toBeDefined();
+        expect(info!.value.valueOf()).toBe("deep");
+        expect((info! as FieldInfo).key).toBe("c");
+      });
+
+      it("array index bracket notation returns ElementInfo", () => {
+        const result = parseStructured('{"items": [10, 20, 30]}') as HjsonObjectNode;
+        const info = result.path("items[1]");
+        expect(info).toBeDefined();
+        expect(info!.value.valueOf()).toBe(20);
+        expect((info! as ElementInfo).index).toBe(1);
+      });
+
+      it("mixed dot and bracket paths", () => {
+        const result = parseStructured('{"a": {"d": [0, 0, {"c": "x"}]}}') as HjsonObjectNode;
+        const info = result.path("a.d[2].c");
+        expect(info).toBeDefined();
+        expect(info!.value.valueOf()).toBe("x");
+        expect((info! as FieldInfo).key).toBe("c");
+      });
+
+      it("missing segment returns undefined", () => {
+        const result = parseStructured('{"a": {"b": 1}}') as HjsonObjectNode;
+        expect(result.path("a.nonexistent.b")).toBeUndefined();
+      });
+
+      it("path on value node returns undefined", () => {
+        const result = parseStructured('{"x": 42}') as HjsonObjectNode;
+        const valNode = result.get("x");
+        expect(valNode.path("anything")).toBeUndefined();
+      });
+
+      it("empty path returns undefined", () => {
+        const result = parseStructured('{"a": 1}') as HjsonObjectNode;
+        expect(result.path("")).toBeUndefined();
+      });
     });
   });
 });

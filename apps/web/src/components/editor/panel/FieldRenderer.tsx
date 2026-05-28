@@ -4,6 +4,7 @@ import { Button } from "#/components/ui/button";
 import { Checkbox } from "#/components/ui/checkbox";
 import { ColorPicker, ColorPickerAlpha, ColorPickerFormat, ColorPickerHue, ColorPickerSelection } from "#/components/ui/color-picker";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
+import { ErrorBoundary } from "#/components/ui/error-boundary";
 import { FormControl, FormField, FormLabel } from "#/components/ui/form";
 import { Input } from "#/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover";
@@ -13,7 +14,7 @@ import { useValidationStore } from "@project/state";
 import { type Research } from "@project/validation";
 import { Plus, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
-import { Fragment, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
 export type FieldTypes = {
 	String: string;
@@ -45,9 +46,9 @@ export function FieldsRenderer({ path, fields, values, updater }: FieldsRenderer
 
 	return fields.map((field) => {
 		const { name, type, defaultValue, hiddenIfDefault } = field;
-		const renderer = fieldRenderers[type] as FieldRenderer<any> | undefined;
+		const Renderer = fieldRenderers[type] as FieldRenderer<any> | undefined;
 
-		if (renderer === undefined) {
+		if (Renderer === undefined) {
 			return (
 				<span key={name + type + path} className="text-yellow-400">
 					Unknown field type {type}
@@ -58,24 +59,24 @@ export function FieldsRenderer({ path, fields, values, updater }: FieldsRenderer
 		const issue = issues?.filter((issue) => issue.field === name);
 
 		return (
-			<Fragment key={name + type + path}>
-				{renderer({
-					name,
-					value: values[name] || defaultValue || "",
-					onChange: (v) => {
+			<ErrorBoundary key={name + type + path}>
+				<Renderer
+					name={name}
+					value={values[name] || defaultValue || ""}
+					onChange={(v) => {
 						if (hiddenIfDefault === true && v === defaultValue) {
 							updater(name, Number.NaN);
 						} else {
 							updater(name, v);
 						}
-					},
-				})}
+					}}
+				/>
 				{issue?.map((issue) => (
 					<span key={issue.code} className="text-red-400">
 						{issue.code}
 					</span>
 				)) || null}
-			</Fragment>
+			</ErrorBoundary>
 		);
 	});
 }
@@ -220,7 +221,7 @@ const fieldRenderers: FieldRendererMap = {
 										<Button variant="outline" size="icon">
 											{selectedItem ? (
 												selectedItem.type === "project" ? (
-													<ImageFilePreview path={selectedItem.name} />
+													<ImageFilePreview path={selectedItem.path} showSize={false} />
 												) : (
 													<AssetImage type="items" name={selectedItem.name} />
 												)
@@ -245,7 +246,7 @@ const fieldRenderers: FieldRendererMap = {
 												.map((item) => (
 													<ToggleGroupItem key={item.name} value={item.name}>
 														{item.type === "project" ? (
-															<ImageFilePreview path={item.name} />
+															<ImageFilePreview path={item.path} showSize={false} />
 														) : (
 															<AssetImage type="items" name={item.name} />
 														)}

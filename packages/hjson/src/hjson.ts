@@ -1,6 +1,6 @@
 import { Parser, type HJSONParseOptions } from "./parser.js";
 import { stringify } from "./serializer.js";
-import type { StructuredNode } from "./structured.js";
+import type { HjsonNode } from "./structured.js";
 
 export type Reviver = (this: any, key: string, value: any) => any;
 export type ReplacerFunction = (this: any, key: string, value: any) => any;
@@ -17,12 +17,12 @@ export const HJSON = {
 		return Parser.parseAsync(text, reviver, options) as Promise<T>;
 	},
 
-	parseStructured(text: string, reviver?: Reviver, options?: HJSONParseOptions): StructuredNode {
-		return Parser.parse(text, reviver, { ...options, structured: true }) as StructuredNode;
+	parseStructured(text: string, reviver?: Reviver, options?: HJSONParseOptions): HjsonNode {
+		return Parser.parse(text, reviver, { ...options, structured: true }) as HjsonNode;
 	},
 
-	parseStructuredAsync(text: string, reviver?: Reviver, options?: HJSONParseOptions): Promise<StructuredNode> {
-		return Parser.parseAsync(text, reviver, { ...options, structured: true }) as Promise<StructuredNode>;
+	parseStructuredAsync(text: string, reviver?: Reviver, options?: HJSONParseOptions): Promise<HjsonNode> {
+		return Parser.parseAsync(text, reviver, { ...options, structured: true }) as Promise<HjsonNode>;
 	},
 
 	stringify(value: any, replacer?: Replacer | null, space?: Space): string {

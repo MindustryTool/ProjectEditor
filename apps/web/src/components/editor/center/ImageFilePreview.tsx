@@ -1,8 +1,27 @@
 import { useFileContent, useFileContentImageUrl } from "@project/state";
+import { resolveContentSprite } from "@project/utils";
 import { useState } from "react";
 
-export function ImageFilePreview({ path }: { path: string }) {
-	const { data } = useFileContent(path);
+export interface ImageFilePreviewProps {
+	path: string;
+	showSize?: boolean;
+}
+
+export function ImageFilePreview({ path, showSize = true }: ImageFilePreviewProps) {
+	let resolvedPath: string | null = path;
+
+	if (path.endsWith(".json")) {
+		resolvedPath = resolveContentSprite(path);
+		if (!resolvedPath) {
+			throw new Error(`Invalid content path: ${path}`);
+		}
+	}
+
+	if (!resolvedPath?.endsWith(".png")) {
+		throw new Error(`ImageFilePreview only supports png file: ${resolvedPath}`);
+	}
+
+	const { data } = useFileContent(resolvedPath);
 	const objectUrl = useFileContentImageUrl(data);
 	const [size, setSize] = useState({ width: 0, height: 0 });
 
@@ -14,9 +33,13 @@ export function ImageFilePreview({ path }: { path: string }) {
 		<div className="relative flex justify-center items-center h-full w-full flex-col">
 			<img
 				src={objectUrl}
-				alt={path}
+				alt={resolvedPath}
 				onLoad={(e) => {
 					const img = e.currentTarget;
+
+					if (!showSize) {
+						return;
+					}
 
 					setSize({
 						width: img.naturalWidth,
@@ -24,7 +47,11 @@ export function ImageFilePreview({ path }: { path: string }) {
 					});
 				}}
 			/>
-			<div className="absolute bottom-0.5 backdrop-blur-xs backdrop-brightness-75 p-0.5 right-0.5 text-xs text-muted-foreground">{size.width}x{size.height}</div>
+			{showSize && (
+				<div className="absolute bottom-0.5 backdrop-blur-xs backdrop-brightness-75 p-0.5 right-0.5 text-xs text-muted-foreground">
+					{size.width}x{size.height}
+				</div>
+			)}
 		</div>
 	);
 }

@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { HJSON } from "../src/hjson.js";
-import { StructuredObjectNode } from "../src/structured.js";
+import { HjsonObjectNode } from "../src/structured.js";
 
 function parseStructured(input: string) {
-	return HJSON.parseStructured(input) as StructuredObjectNode;
+	return HJSON.parseStructured(input) as HjsonObjectNode;
 }
 
 describe("Surgical Patching", () => {

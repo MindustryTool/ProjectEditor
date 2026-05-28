@@ -2,10 +2,10 @@ import { Tokenizer, type Token } from "./tokenizer.js";
 import type { HjsonNode, ObjectNode, ArrayNode, StringNode, NumberNode, BooleanNode, NullNode, MemberNode } from "./ast.js";
 import { HJSONError, HJSONErrorCode } from "./errors.js";
 import {
-	StructuredObjectNode,
-	StructuredArrayNode,
-	StructuredValueNode,
-	StructuredNode,
+	HjsonObjectNode,
+	HjsonArrayNode,
+	HjsonValueNode,
+	HjsonNode as HjsonStructuredNode,
 	createFieldInfo,
 	type FieldInfo,
 	type ElementInfo,
@@ -453,18 +453,18 @@ export class Parser {
 		return parser.toJSValue(ast, reviver);
 	}
 
-	toStructuredValue(node: HjsonNode, reviver?: (key: string, value: any) => any): StructuredNode {
+	toStructuredValue(node: HjsonNode, reviver?: (key: string, value: any) => any): HjsonStructuredNode {
 		return this.convertNodeStructured(node, "", reviver);
 	}
 
-	private convertNodeStructured(node: HjsonNode, keyHint: string, reviver?: (key: string, value: any) => any): StructuredNode {
+	private convertNodeStructured(node: HjsonNode, keyHint: string, reviver?: (key: string, value: any) => any): HjsonStructuredNode {
 		switch (node.kind) {
 			case "null":
 			case "boolean":
 			case "number":
 			case "string": {
 				const val = reviver ? reviver(keyHint, node.value) : node.value;
-				return new StructuredValueNode(val, { ...node.loc.start }, { ...node.loc.end });
+				return new HjsonValueNode(val, { ...node.loc.start }, { ...node.loc.end });
 			}
 			case "array": {
 				const elements: ElementInfo[] = [];
@@ -480,11 +480,11 @@ export class Parser {
 					data.push(val.valueOf());
 				});
 				const finalData = reviver ? reviver(keyHint, data) : data;
-				return new StructuredArrayNode(finalData, elements, { ...node.loc.start }, { ...node.loc.end });
+				return new HjsonArrayNode(finalData, elements, { ...node.loc.start }, { ...node.loc.end });
 			}
 			case "object": {
 				const fieldInfos: FieldInfo[] = [];
-				const rawValues: Map<string, StructuredNode> = new Map();
+				const rawValues: Map<string, HjsonStructuredNode> = new Map();
 				const data: Record<string, any> = {};
 
 				for (const member of node.members) {
@@ -518,13 +518,13 @@ export class Parser {
 							if (oldRaw && oldRaw.valueOf() !== newVal) {
 								// If it changed, we wrap it in a new ValueNode without precise loc (or keep old loc?)
 								// For now, let's just update the value.
-								fi.value = new StructuredValueNode(newVal, fi.valueStart, fi.valueEnd);
+								fi.value = new HjsonValueNode(newVal, fi.valueStart, fi.valueEnd);
 							}
 						}
 					}
 				}
 
-				return new StructuredObjectNode(resultData as Record<string, unknown>, fieldInfos, { ...node.loc.start }, { ...node.loc.end });
+				return new HjsonObjectNode(resultData as Record<string, unknown>, fieldInfos, { ...node.loc.start }, { ...node.loc.end });
 			}
 			default:
 				throw new Error(`Unknown node kind: ${(node as any).kind}`);

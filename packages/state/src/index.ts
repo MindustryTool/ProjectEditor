@@ -1,11 +1,7 @@
 export type { AppSettings, ProjectRecord } from "./stores/project";
 export type { ProjectContext, RecentFileEntry } from "./stores/session";
 export { useAppStore } from "./stores/project";
-export {
-	useProjectSession,
-	useCurrentProject,
-    TreeSnapshot
-} from "./stores/session";
+export { useProjectSession, useCurrentProject, TreeSnapshot } from "./stores/session";
 
 export type { FileContentEntry, FileContentStore } from "./stores/file-content";
 export { useFileContentStore, isDirty, selectEntry, selectIsSaving } from "./stores/file-content";
@@ -19,15 +15,15 @@ export { useFileContentImageUrl } from "./hooks/use-file-content-image-url";
 
 export { Severity, severityLabel, isErrorOrWarning } from "./validation/types";
 export type {
-  SeverityLevel,
-  ValidationResult,
-  ValidatorFn,
-  ValidatorRegistration,
-  ValidatorRegistry,
-  ValidationSummary,
-  ValidationStore,
-  ValidationContext,
-  ItemDto,
+	SeverityLevel,
+	ValidationResult,
+	ValidatorFn,
+	ValidatorRegistration,
+	ValidatorRegistry,
+	ValidationSummary,
+	ValidationStore,
+	ValidationContext,
+	ItemDto,
 } from "./validation/types";
 export { createValidatorRegistry } from "./validation/registry";
 export { createValidationRunner } from "./validation/runner";

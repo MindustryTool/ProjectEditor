@@ -2,14 +2,13 @@ export { HJSONErrorCode, HJSONError } from "./errors.js";
 export { HJSON } from "./hjson.js";
 export type { HJSONParseOptions, Reviver, Replacer } from "./hjson.js";
 export {
-  StructuredNode,
-  StructuredObjectNode,
-  StructuredArrayNode,
-  StructuredValueNode,
-  MissingNode,
-  StructuredObject,
+  HjsonNode,
+  HjsonObjectNode,
+  HjsonArrayNode,
+  HjsonValueNode,
+  HjsonMissingNode,
   type FieldInfo,
   type ElementInfo,
-  type StructuredResult,
+  type HjsonResult,
   type Position,
 } from "./structured.js";

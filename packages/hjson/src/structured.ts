@@ -44,13 +44,33 @@ export function createFieldInfo(
 	};
 }
 
-export abstract class StructuredNode {
-	abstract isObject(): this is StructuredObjectNode;
-	abstract isArray(): this is StructuredArrayNode;
-	abstract isValue(): this is StructuredValueNode;
-	abstract isMissing(): this is MissingNode;
+export abstract class HjsonNode {
+	abstract isObject(): this is HjsonObjectNode;
+	abstract isArray(): this is HjsonArrayNode;
+	abstract isValue(): this is HjsonValueNode;
+	abstract isMissing(): this is HjsonMissingNode;
 
-	abstract get(key: string | number): StructuredNode;
+	abstract get(key: string | number): HjsonNode;
+
+	path(pathStr: string): FieldInfo | ElementInfo | undefined {
+		if (!pathStr) return undefined;
+		const segments = pathStr.match(/(\w+)|\[(\d+)\]/g);
+		if (!segments || segments.length === 0) return undefined;
+		let node: HjsonNode = this;
+		for (let i = 0; i < segments.length - 1; i++) {
+			const seg = segments[i]!;
+			const info = seg.startsWith("[")
+				? node.at(Number.parseInt(seg.slice(1, -1), 10))
+				: node.at(seg);
+			if (!info) return undefined;
+			node = info.value;
+		}
+		const last = segments[segments.length - 1]!;
+		return last.startsWith("[")
+			? node.at(Number.parseInt(last.slice(1, -1), 10))
+			: node.at(last);
+	}
+
 	abstract at(value: string | number): FieldInfo | ElementInfo | undefined;
 
 	abstract info(): InfoBase | undefined;
@@ -66,7 +86,7 @@ export abstract class StructuredNode {
 	}
 }
 
-export class StructuredObjectNode extends StructuredNode {
+export class HjsonObjectNode extends HjsonNode {
 	readonly #data: Record<string, unknown>;
 	readonly #fields: Map<string, FieldInfo>;
 	readonly #start?: Position;
@@ -83,27 +103,27 @@ export class StructuredObjectNode extends StructuredNode {
 		this.#end = end;
 	}
 
-	isObject(): this is StructuredObjectNode {
+	isObject(): this is HjsonObjectNode {
 		return true;
 	}
-	isArray(): this is StructuredArrayNode {
+	isArray(): this is HjsonArrayNode {
 		return false;
 	}
-	isValue(): this is StructuredValueNode {
+	isValue(): this is HjsonValueNode {
 		return false;
 	}
-	isMissing(): this is MissingNode {
+	isMissing(): this is HjsonMissingNode {
 		return false;
 	}
 
-	get(key: string | number): StructuredNode {
+	get(key: string | number): HjsonNode {
 		if (typeof key === "string") {
 			const info = this.#fields.get(key);
-			if (info && info.value instanceof StructuredNode) {
+			if (info && info.value instanceof HjsonNode) {
 				return info.value;
 			}
 		}
-		return MissingNode.instance;
+		return HjsonMissingNode.instance;
 	}
 
 	at(value: string | number): FieldInfo | undefined {
@@ -202,7 +222,7 @@ export interface ElementInfo extends InfoBase {
 	value: any;
 }
 
-export class StructuredArrayNode extends StructuredNode {
+export class HjsonArrayNode extends HjsonNode {
 	readonly #data: unknown[];
 	readonly #elements: ElementInfo[];
 	readonly #start?: Position;
@@ -216,27 +236,27 @@ export class StructuredArrayNode extends StructuredNode {
 		this.#end = end;
 	}
 
-	isObject(): this is StructuredObjectNode {
+	isObject(): this is HjsonObjectNode {
 		return false;
 	}
-	isArray(): this is StructuredArrayNode {
+	isArray(): this is HjsonArrayNode {
 		return true;
 	}
-	isValue(): this is StructuredValueNode {
+	isValue(): this is HjsonValueNode {
 		return false;
 	}
-	isMissing(): this is MissingNode {
+	isMissing(): this is HjsonMissingNode {
 		return false;
 	}
 
-	get(key: string | number): StructuredNode {
+	get(key: string | number): HjsonNode {
 		if (typeof key === "number") {
 			const el = this.#elements[key];
-			if (el && el.value instanceof StructuredNode) {
+			if (el && el.value instanceof HjsonNode) {
 				return el.value;
 			}
 		}
-		return MissingNode.instance;
+		return HjsonMissingNode.instance;
 	}
 
 	at(value: string | number): ElementInfo | undefined {
@@ -275,7 +295,7 @@ export class StructuredArrayNode extends StructuredNode {
 	}
 }
 
-export class StructuredValueNode extends StructuredNode {
+export class HjsonValueNode extends HjsonNode {
 	readonly #value: any;
 	readonly #start: Position;
 	readonly #end: Position;
@@ -287,21 +307,21 @@ export class StructuredValueNode extends StructuredNode {
 		this.#end = end;
 	}
 
-	isObject(): this is StructuredObjectNode {
+	isObject(): this is HjsonObjectNode {
 		return false;
 	}
-	isArray(): this is StructuredArrayNode {
+	isArray(): this is HjsonArrayNode {
 		return false;
 	}
-	isValue(): this is StructuredValueNode {
+	isValue(): this is HjsonValueNode {
 		return true;
 	}
-	isMissing(): this is MissingNode {
+	isMissing(): this is HjsonMissingNode {
 		return false;
 	}
 
-	get(_key: string | number): StructuredNode {
-		return MissingNode.instance;
+	get(_key: string | number): HjsonNode {
+		return HjsonMissingNode.instance;
 	}
 	at(_value: string | number): undefined {
 		return undefined;
@@ -339,27 +359,27 @@ export class StructuredValueNode extends StructuredNode {
 	}
 }
 
-export class MissingNode extends StructuredNode {
-	static readonly instance = new MissingNode();
+export class HjsonMissingNode extends HjsonNode {
+	static readonly instance = new HjsonMissingNode();
 
 	private constructor() {
 		super();
 	}
 
-	isObject(): this is StructuredObjectNode {
+	isObject(): this is HjsonObjectNode {
 		return false;
 	}
-	isArray(): this is StructuredArrayNode {
+	isArray(): this is HjsonArrayNode {
 		return false;
 	}
-	isValue(): this is StructuredValueNode {
+	isValue(): this is HjsonValueNode {
 		return false;
 	}
-	isMissing(): this is MissingNode {
+	isMissing(): this is HjsonMissingNode {
 		return true;
 	}
 
-	get(_key: string | number): StructuredNode {
+	get(_key: string | number): HjsonNode {
 		return this;
 	}
 	at(_value: string | number): undefined {
@@ -388,11 +408,5 @@ export class MissingNode extends StructuredNode {
 	}
 }
 
-/**
- * @deprecated Use StructuredObjectNode instead
- */
-export const StructuredObject = StructuredObjectNode;
-export type StructuredObject = StructuredObjectNode;
-
-export type StructuredResult<T> =
-	T extends Record<string, unknown> ? StructuredObjectNode : T extends unknown[] ? StructuredArrayNode : StructuredValueNode;
+export type HjsonResult<T> =
+	T extends Record<string, unknown> ? HjsonObjectNode : T extends unknown[] ? HjsonArrayNode : HjsonValueNode;
