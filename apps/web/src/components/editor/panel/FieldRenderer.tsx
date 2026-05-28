@@ -1,12 +1,18 @@
+import { AssetImage } from "#/components/editor/AssetImage";
+import { ImageFilePreview } from "#/components/editor/center/ImageFilePreview";
 import { Button } from "#/components/ui/button";
 import { Checkbox } from "#/components/ui/checkbox";
 import { ColorPicker, ColorPickerAlpha, ColorPickerFormat, ColorPickerHue, ColorPickerSelection } from "#/components/ui/color-picker";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
 import { FormControl, FormField, FormLabel } from "#/components/ui/form";
 import { Input } from "#/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover";
+import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
+import { useItems } from "#/hooks/use-items";
 import { useValidationStore } from "@project/state";
 import { type Research } from "@project/validation";
 import { Plus, X } from "lucide-react";
+import { VisuallyHidden } from "radix-ui";
 import { Fragment, type ReactNode } from "react";
 
 export type FieldTypes = {
@@ -148,8 +154,12 @@ const fieldRenderers: FieldRendererMap = {
 		</FormField>
 	),
 	Research: ({ name, value, onChange }) => {
+		const items = useItems({ project: true, base: true });
+
 		const parent = (!value ? "" : typeof value === "string" ? value : value.parent) || "";
 		const requirements = (!value ? [] : typeof value === "string" ? [] : value.requirements) || [];
+
+		const addedReq = requirements.map((requirement) => requirement.split("/")[0]!);
 
 		function handleChange(parent: string, requirements: string[]) {
 			if (!parent && requirements.length === 0) {
@@ -161,6 +171,33 @@ const fieldRenderers: FieldRendererMap = {
 			}
 		}
 
+		function handleAddNewReq() {
+			const notAdded = items.find((item) => {
+				for (const requirement of requirements) {
+					if (requirement.startsWith(item.name + "/")) {
+						return false;
+					}
+				}
+				return true;
+			});
+
+			handleChange(parent, [...requirements, notAdded?.name + "/" + 10]);
+		}
+
+		function handleRemoveReq(index: number) {
+			handleChange(
+				parent,
+				requirements.filter((_, i) => i !== index),
+			);
+		}
+
+		function handleUpdateReq(index: number, item: string, number: number) {
+			handleChange(
+				parent,
+				requirements.map((r, i) => (i === index ? item + "/" + number : r)),
+			);
+		}
+
 		return (
 			<>
 				<FormField>
@@ -169,34 +206,68 @@ const fieldRenderers: FieldRendererMap = {
 						<Input value={parent} onChange={(v) => handleChange(v.currentTarget.value, requirements)} />
 					</FormControl>
 				</FormField>
-				{requirements.map((requirement, index) => (
-					<FormField key={requirement}>
-						<FormControl className="flex gap-1">
-							<Input
-								value={requirement}
-								onChange={(v) =>
-									handleChange(
-										parent,
-										requirements.map((r, i) => (i === index ? v.currentTarget.value : r)),
-									)
-								}
-							/>
-							<Button
-								variant="outline"
-								size="icon"
-								onClick={() =>
-									handleChange(
-										parent,
-										requirements.filter((_, i) => i !== index),
-									)
-								}
-							>
-								<X />
-							</Button>
-						</FormControl>
-					</FormField>
-				))}
-				<Button className="w-full" variant="outline" onClick={() => handleChange(parent, [...requirements, ""])}>
+				{requirements.map((requirement, index) => {
+					const parts = requirement.split("/");
+					const item = parts[0]!;
+					let number = Number(parts[1]);
+
+					const selectedItem = items.find((i) => i.name === item);
+
+					return (
+						<FormField key={index}>
+							<FormControl className="flex gap-1">
+								<Dialog>
+									<DialogTrigger asChild>
+										<Button variant="outline" size="icon">
+											{selectedItem ? (
+												selectedItem.type === "project" ? (
+													<ImageFilePreview path={selectedItem.name} />
+												) : (
+													<AssetImage type="items" name={selectedItem.name} />
+												)
+											) : (
+												item
+											)}
+										</Button>
+									</DialogTrigger>
+									<DialogContent className="w-sm" showCloseButton={false}>
+										<VisuallyHidden.Root>
+											<DialogTitle />
+											<DialogDescription />
+										</VisuallyHidden.Root>
+										<ToggleGroup
+											className="grid w-full grid-cols-[repeat(auto-fill,minmax(32px,1fr))] gap-1"
+											type="single"
+											value={item}
+											onValueChange={(v) => (v ? handleUpdateReq(index, v, number) : handleRemoveReq(index))}
+										>
+											{items
+												.filter((i) => !addedReq.includes(i.name))
+												.map((item) => (
+													<ToggleGroupItem key={item.name} value={item.name}>
+														{item.type === "project" ? (
+															<ImageFilePreview path={item.name} />
+														) : (
+															<AssetImage type="items" name={item.name} />
+														)}
+													</ToggleGroupItem>
+												))}
+										</ToggleGroup>
+									</DialogContent>
+								</Dialog>
+								<Input
+									type="number"
+									value={number}
+									onChange={(v) => handleUpdateReq(index, item, Number(v.currentTarget.valueAsNumber))}
+								/>
+								<Button className="text-destructive" variant="outline" size="icon" onClick={() => handleRemoveReq(index)}>
+									<X />
+								</Button>
+							</FormControl>
+						</FormField>
+					);
+				})}
+				<Button className="w-full" variant="outline" onClick={handleAddNewReq}>
 					<Plus />
 				</Button>
 			</>

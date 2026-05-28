@@ -2,7 +2,7 @@ import { useCallback, useRef } from "react";
 import { useCurrentProject, useProjectSession, useFileContent, useFileContentImageUrl } from "@project/state";
 import { Button } from "#/components/ui/button";
 import { FormControl, FormField, FormLabel } from "#/components/ui/form";
-import { resolveContentSprite } from "~/lib/utils";
+import { resolveContentSprite } from "@project/utils";
 import { File, Trash2, Upload } from "lucide-react";
 
 interface SpritePickerProps {

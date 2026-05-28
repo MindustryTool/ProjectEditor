@@ -9,7 +9,7 @@ import {
 } from "@project/state";
 import type { ValidationContext } from "@project/state";
 import { useShallow } from "zustand/react/shallow";
-import { useBaseItems } from "~/hooks/use-base-items";
+import { useBaseItems } from "#/hooks/use-base-items";
 
 const registry = createDefaultValidators();
 const runner = createValidationRunner(registry);

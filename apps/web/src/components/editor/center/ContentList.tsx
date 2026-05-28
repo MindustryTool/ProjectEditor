@@ -2,7 +2,7 @@ import { useCurrentProject, useFileContent, useFileContentImageUrl } from "@proj
 import React, { useEffect, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { File, Folder } from "lucide-react";
-import { cn, resolveContentSprite } from "~/lib/utils";
+import { resolveContentSprite } from "@project/utils";
 import { Button } from "#/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
 import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from "#/components/ui/input-group";
@@ -11,6 +11,7 @@ import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ImageFilePreview } from "#/components/editor/center/ImageFilePreview";
 import { usePath } from "#/hooks/use-path";
+import { cn } from "#/lib/utils";
 
 export function ContentList({ path }: { path: string }) {
 	const context = useCurrentProject();
