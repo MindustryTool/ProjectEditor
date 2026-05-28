@@ -74,7 +74,7 @@ export const ColorPicker = ({ value, defaultValue = "#000000", onChange, classNa
 		if (value) {
 			const safeColor = () => {
 				try {
-					return Color(value);
+					return Color(value.startsWith("#") ? value : `#${value}`);
 				} catch (e) {
 					return Color("#ffffff");
 				}

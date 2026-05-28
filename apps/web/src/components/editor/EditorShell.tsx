@@ -12,6 +12,7 @@ import { EditorRightPanel } from "./EditorRightPanel";
 import { StatusBarLeft } from "./statusbar/StatusBarLeft";
 import { StatusBarCenter } from "./statusbar/StatusBarCenter";
 import { StatusBarRight } from "./statusbar/StatusBarRight";
+import { ValidationProvider } from "#/components/validation/validation-provider";
 
 interface EditorShellProps {
 	path: string | null;
@@ -19,6 +20,7 @@ interface EditorShellProps {
 
 export const EditorShell = memo(function EditorShell({ path }: EditorShellProps) {
 	return (
+		<ValidationProvider>
 		<div className="flex min-h-0 flex-1 flex-col bg-background text-foreground overflow-hidden h-dvh max-h-dvh">
 			<Toolbar>
 				<ProjectMenu />
@@ -38,5 +40,6 @@ export const EditorShell = memo(function EditorShell({ path }: EditorShellProps)
 
 			<StatusBar left={<StatusBarLeft />} center={<StatusBarCenter />} right={<StatusBarRight />} />
 		</div>
+		</ValidationProvider>
 	);
 });

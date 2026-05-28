@@ -5,7 +5,7 @@ import { useValidationStore } from "./store";
 import { Severity } from "./types";
 
 const registry = createDefaultValidators();
-const runner = createValidationRunner(registry);
+const runner = createValidationRunner(registry, { getItems: () => [] });
 
 const debounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
 const DEBOUNCE_MS = 500;
@@ -81,5 +81,3 @@ export function registerValidationListener() {
 		}
 	});
 }
-
-registerValidationListener();

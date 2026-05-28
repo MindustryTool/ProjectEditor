@@ -1,18 +1,18 @@
-import type { ValidationResult, ValidatorRegistry } from "./types";
+import type { ValidationContext, ValidationResult, ValidatorRegistry } from "./types";
 
 export interface ValidationRunner {
 	validate(path: string, content: string): ValidationResult[];
 	validateAll(files: { path: string; content: string }[]): Record<string, ValidationResult[]>;
 }
 
-export function createValidationRunner(registry: ValidatorRegistry): ValidationRunner {
+export function createValidationRunner(registry: ValidatorRegistry, context: ValidationContext): ValidationRunner {
 	function validate(path: string, content: string): ValidationResult[] {
 		const validators = registry.getMatches(path);
 		const results: ValidationResult[] = [];
 
 		for (const v of validators) {
 			try {
-				const validatorResults = v.validate({ path, content });
+				const validatorResults = v.validate({ path, content, context });
 				results.push(...validatorResults);
 			} catch (err) {
 				results.push({

@@ -37,7 +37,15 @@ export interface ValidationResult {
 	code?: string;
 }
 
-export type ValidatorFn = (params: { path: string; content: string }) => ValidationResult[];
+export type ItemDto = {
+	name: string;
+};
+
+export type ValidationContext = {
+	getItems(): ItemDto[];
+};
+
+export type ValidatorFn = (params: { path: string; content: string; context: ValidationContext }) => ValidationResult[];
 
 export interface ValidatorRegistration {
 	name: string;
