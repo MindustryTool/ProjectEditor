@@ -21,5 +21,5 @@ export const SettingsSchema = v.object({
 export { ModHjsonSchema } from "./mod-hjson";
 export type { ModHjsonData } from "./mod-hjson";
 
-export { ItemHjsonSchema } from "./item";
-export type { ItemHjsonData } from "./item";
+export { ItemHjsonSchema, ResearchSchema } from "./item";
+export type { ItemHjsonData, Research } from "./item";

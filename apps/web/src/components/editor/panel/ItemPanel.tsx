@@ -1,5 +1,5 @@
 import { Panel } from "@/components/editor/Panel";
-import { FieldRenderer, type Field } from "#/components/editor/panel/FieldRenderer";
+import { FieldsRenderer, type Field } from "#/components/editor/panel/FieldRenderer";
 import { useFileContentString } from "@project/state";
 import { useEffect, useState, useRef } from "react";
 import { SpritePicker } from "#/components/editor/panel/SpritePicker";
@@ -59,6 +59,10 @@ export function ItemPanel({ path }: ItemPanelProps) {
 			type: "Float",
 		},
 		{
+			name: "research",
+			type: "Research",
+		},
+		{
 			name: "healthScaling",
 			type: "Float",
 		},
@@ -113,7 +117,7 @@ export function ItemPanel({ path }: ItemPanelProps) {
 			<div className="space-y-4">
 				{fileName !== null && <div className="text-lg font-bold">{fileName}</div>}
 				<SpritePicker path={path} />
-				<FieldRenderer path={path} fields={fields} values={values} updater={handleUpdate} />
+				<FieldsRenderer path={path} fields={fields} values={values} updater={handleUpdate} />
 			</div>
 		</Panel>
 	);

@@ -144,19 +144,19 @@ function createValibotValidator<T extends Parameters<typeof v.parse>[0]>(
 						for (const subIssue of issue.issues) {
 							const subIssueFieldPath = [...fieldPath, ...(subIssue.path?.map((p) => p.key as string) || [])];
 							const subFieldData = resolveFieldData(data, subIssueFieldPath);
-                            const subFieldInfo = subFieldData.info();
-                            
-                            let subStartLine = 1;
-                            let subStartColumn = 1;
-                            let subEndLine = 1;
-                            let subEndColumn = 1;
+							const subFieldInfo = subFieldData.info();
 
-                            if (subFieldInfo) {
-                                subStartLine = subFieldInfo.start.row;
-                                subStartColumn = subFieldInfo.start.col;
-                                subEndLine = subFieldInfo.end.row;
-                                subEndColumn = subFieldInfo.end.col;
-                            }
+							let subStartLine = 1;
+							let subStartColumn = 1;
+							let subEndLine = 1;
+							let subEndColumn = 1;
+
+							if (subFieldInfo) {
+								subStartLine = subFieldInfo.start.row;
+								subStartColumn = subFieldInfo.start.col;
+								subEndLine = subFieldInfo.end.row;
+								subEndColumn = subFieldInfo.end.col;
+							}
 
 							result.push({
 								path,
@@ -164,10 +164,10 @@ function createValibotValidator<T extends Parameters<typeof v.parse>[0]>(
 								messageKey: "validation.content.invalidJson",
 								field: subIssue.path?.map((p) => p.key)?.join(".") || "",
 								messageParams: { error: subIssue.message },
-								startLine,
-								startColumn,
-								endLine,
-								endColumn,
+								startLine: subStartLine,
+								startColumn: subStartColumn,
+								endLine: subEndLine,
+								endColumn: subEndColumn,
 							});
 						}
 					}
@@ -252,14 +252,16 @@ const itemHjsonValidator: ValidatorFn = createValibotValidator(ItemHjsonSchema, 
 			for (let i = 0; i < requirement.length; i++) {
 				const req = requirement[i]!;
 				const reqField = requirementsField.get(i)!;
-				const item = items.find((i) => i.name === req.itemName);
+				const parts = req.split("/");
+				const itemName = parts[0];
+				const item = items.find((i) => i.name === itemName);
 
 				if (!item) {
 					issues.push({
 						path,
 						severity: Severity.error,
 						messageKey: "validation.content.invalidJson",
-						messageParams: { error: `Item ${req.itemName} not found` },
+						messageParams: { error: `Item ${itemName} not found` },
 						startLine: reqField.info()!.start.row,
 						startColumn: reqField.info()!.start.col,
 						endLine: reqField.info()!.end.row,

@@ -29,14 +29,19 @@ export const ItemRequirementSchema = v.pipe(
 
 		return true;
 	}, "Invalid item requirement, must be in the format 'item/number'"),
-	v.transform((value) => {
-		const [itemName, number] = value.split("/");
-		return {
-			itemName,
-			number: Number(number),
-		};
-	}),
 );
+
+export const ResearchSchema = v.nullish(
+	v.union([
+		ContentNameSchema,
+		v.object({
+			parent: v.nullish(ContentNameSchema),
+			requirements: v.nullish(v.array(ItemRequirementSchema)),
+		}),
+	]),
+);
+
+export type Research = v.InferOutput<typeof ResearchSchema>;
 
 export const ItemHjsonSchema = v.object({
 	hardness: v.nullish(v.pipe(v.number(), v.minValue(0), v.integer())),
@@ -47,15 +52,7 @@ export const ItemHjsonSchema = v.object({
 	explosiveness: v.nullish(v.pipe(v.number(), v.minValue(0))),
 	healthScaling: v.nullish(v.pipe(v.number(), v.minValue(0))),
 	color: v.nullish(MindustryHexColorSchema),
-	research: v.nullish(
-		v.union([
-			ContentNameSchema,
-			v.object({
-				parent: v.nullish(ContentNameSchema),
-				requirements: v.nullish(v.array(ItemRequirementSchema)),
-			}),
-		]),
-	),
+	research: ResearchSchema,
 });
 
 export type ItemHjsonData = v.InferOutput<typeof ItemHjsonSchema>;
