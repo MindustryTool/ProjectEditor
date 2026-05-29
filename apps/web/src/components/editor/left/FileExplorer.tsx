@@ -25,19 +25,14 @@ import {
 import { usePath } from "#/hooks/use-path";
 import { resolveContentSprite } from "@project/utils";
 import { useIssues } from "#/hooks/use-issue";
-import { ImageFilePreview } from "#/components/editor/center/ImageFilePreview";
+import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "~/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
-import {
-	DropdownMenu,
-	DropdownMenuTrigger,
-	DropdownMenuContent,
-	DropdownMenuItem,
-} from "~/components/ui/dropdown-menu";
-import { getItemTemplate, getBlockTemplate, getUnitTemplate, getEffectTemplate } from "./templates";
-import { Input } from "#/components/ui/input";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "~/components/ui/dropdown-menu";
+import { InputGroup, InputGroupInput, InputGroupAddon } from "#/components/ui/input-group";
+import { TemplateSelector, EffectSelector } from "./TemplateSelector";
 
 interface FileExplorerContextValue {
 	selectedPath: string | null;
@@ -116,11 +111,7 @@ export function FileExplorer({ className }: FileExplorerProps) {
 				}}
 			>
 				{projectTree.map((node) => (
-					<TreeNodeItem
-						key={node.name}
-						node={node}
-						depth={0}
-					/>
+					<TreeNodeItem key={node.name} node={node} depth={0} />
 				))}
 			</FileExplorerCtx.Provider>
 			<AlertDialog
@@ -171,6 +162,8 @@ export function FileExplorer({ className }: FileExplorerProps) {
 	);
 }
 
+const contentTypes = new Set(["item", "block", "unit", "liquid", "status", "sector", "env-block", "effect"]);
+
 function CreateFileForm({
 	targetPath,
 	context,
@@ -182,22 +175,25 @@ function CreateFileForm({
 	onSuccess: (path: string) => void;
 	onCancel: () => void;
 }) {
-	const [name, setName] = useState("");
-	const [type, setType] = useState("file");
-	const [templateChoice, setTemplateChoice] = useState("none");
-	const [error, setError] = useState("");
-
-	const NONE = "none";
-
-	const templateOptions: Record<string, { label: string; getTemplate: (name: string) => string } | undefined> = {
-		item: { label: "Item Template", getTemplate: getItemTemplate },
-		block: { label: "Block Template", getTemplate: getBlockTemplate },
-		unit: { label: "Unit Template", getTemplate: getUnitTemplate },
-		effect: { label: "Effect Template", getTemplate: getEffectTemplate },
+	const EXTENSION_MAP: Record<string, string> = {
+		file: "",
+		folder: "",
+		item: ".hjson",
+		block: ".hjson",
+		unit: ".hjson",
+		liquid: ".hjson",
+		status: ".hjson",
+		sector: ".hjson",
+		"env-block": ".hjson",
+		effect: ".hjson",
 	};
 
-	const isContentType = type === "item" || type === "block" || type === "unit" || type === "effect";
-	const templateDef = isContentType ? templateOptions[type] : undefined;
+	const [name, setName] = useState("");
+	const [type, setType] = useState("file");
+	const [error, setError] = useState("");
+
+	const isContentType = contentTypes.has(type);
+	const [getTemplateContent, setGetTemplateContent] = useState<() => Promise<string>>(async () => "");
 
 	async function handleCreate() {
 		const trimmed = name.trim();
@@ -207,15 +203,15 @@ function CreateFileForm({
 		}
 		setError("");
 
-		const folderPath = targetPath || "";
-		const fullPath = isContentType ? `${folderPath}/${trimmed}.json` : `${folderPath}/${trimmed}`;
+		const ext = EXTENSION_MAP[type] ?? "";
+		const fullPath = `${targetPath || ""}/${trimmed}${ext}`;
 
 		try {
 			if (type === "folder") {
 				await context.fs.mkdir(fullPath);
 				onSuccess(fullPath);
 			} else {
-				const content = templateDef && templateChoice !== NONE ? templateDef.getTemplate(trimmed) : "";
+				const content = await getTemplateContent();
 				await context.fs.writeTextFile(fullPath, content);
 				onSuccess(fullPath);
 			}
@@ -228,16 +224,14 @@ function CreateFileForm({
 		<div className="space-y-4">
 			<div className="space-y-2">
 				<Label htmlFor="name">Name</Label>
-				<Input
-					id="name"
-					value={name}
-					onChange={(e) => setName(e.target.value)}
-					placeholder="Enter name"
-				/>
+				<InputGroup>
+					<InputGroupInput id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter name" />
+					{isContentType && <InputGroupAddon align="inline-end">{EXTENSION_MAP[type]}</InputGroupAddon>}
+				</InputGroup>
 			</div>
 			<div className="space-y-2">
 				<Label htmlFor="type">Type</Label>
-				<Select value={type} onValueChange={(v) => { setType(v); setTemplateChoice(NONE); }}>
+				<Select value={type} onValueChange={setType}>
 					<SelectTrigger className="w-full">
 						<SelectValue />
 					</SelectTrigger>
@@ -247,24 +241,20 @@ function CreateFileForm({
 						<SelectItem value="item">Item</SelectItem>
 						<SelectItem value="block">Block</SelectItem>
 						<SelectItem value="unit">Unit</SelectItem>
+						<SelectItem value="liquid">Liquid</SelectItem>
+						<SelectItem value="status">Status</SelectItem>
+						<SelectItem value="sector">Sector</SelectItem>
+						<SelectItem value="env-block">Env Block</SelectItem>
 						<SelectItem value="effect">Effect</SelectItem>
 					</SelectContent>
 				</Select>
 			</div>
-			{isContentType && templateDef && (
-				<div className="space-y-2">
-					<Label htmlFor="template">Template</Label>
-					<Select value={templateChoice} onValueChange={setTemplateChoice}>
-						<SelectTrigger className="w-full">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value={NONE}>None (empty file)</SelectItem>
-							<SelectItem value={templateDef.label}>{templateDef.label}</SelectItem>
-						</SelectContent>
-					</Select>
-				</div>
-			)}
+			{isContentType &&
+				(type === "effect" ? (
+					<EffectSelector name={name} onContentReady={setGetTemplateContent} />
+				) : (
+					<TemplateSelector type={type} onContentReady={setGetTemplateContent} />
+				))}
 			{error && <p className="text-sm text-red-400">{error}</p>}
 			<DialogFooter>
 				<Button variant="outline" onClick={onCancel}>
@@ -316,16 +306,8 @@ interface TreeNodeItemProps {
 
 function TreeNodeItem({ node, depth = 0 }: TreeNodeItemProps) {
 	const context = useCurrentProject();
-	const {
-		selectedPath,
-		editingPath,
-		onSelect,
-		onEditingPathChange,
-		onDeleteRequest,
-		onCreateRequest,
-		totalIssueCount,
-		projectId,
-	} = useFileExplorer();
+	const { selectedPath, editingPath, onSelect, onEditingPathChange, onDeleteRequest, onCreateRequest, totalIssueCount, projectId } =
+		useFileExplorer();
 	const [expanded, setExpanded] = useState(node.path === "/");
 	const currentPath = node.path === "/" ? "" : node.path;
 	const isSelected = selectedPath === currentPath;
@@ -472,10 +454,7 @@ function TreeNodeItem({ node, depth = 0 }: TreeNodeItemProps) {
 						{!isRoot && !isDefault && (
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
-									<button
-										className="flex size-6 items-center justify-center rounded hover:bg-accent"
-										title="More actions"
-									>
+									<button className="flex size-6 items-center justify-center rounded hover:bg-accent" title="More actions">
 										<MoreHorizontal className="size-3 text-muted-foreground" />
 									</button>
 								</DropdownMenuTrigger>
@@ -499,11 +478,7 @@ function TreeNodeItem({ node, depth = 0 }: TreeNodeItemProps) {
 			{isFolder && expanded && node.children && (
 				<div>
 					{node.children.map((child) => (
-						<TreeNodeItem
-							key={child.name}
-							node={child}
-							depth={depth + 1}
-						/>
+						<TreeNodeItem key={child.name} node={child} depth={depth + 1} />
 					))}
 				</div>
 			)}

@@ -7,21 +7,23 @@ export interface ImageFilePreviewProps {
 	path: string;
 	showSize?: boolean;
 	className?: string;
-    fallback?: ReactNode;
+	fallback?: ReactNode;
 }
 
 export function ImageFilePreview({ path, className, showSize = true, fallback }: ImageFilePreviewProps) {
 	let resolvedPath: string | null = path;
 
-	if (path.endsWith(".json")) {
-		resolvedPath = resolveContentSprite(path);
-		if (!resolvedPath) {
-			throw new Error(`Invalid content path: ${path}`);
+	if (!path.endsWith(".png")) {
+		if (path.endsWith(".json")) {
+			resolvedPath = resolveContentSprite(path);
+			if (!resolvedPath) {
+				throw new Error(`Invalid content path: ${path}`);
+			}
 		}
-	}
 
-	if (!resolvedPath?.endsWith(".png")) {
-		throw new Error(`ImageFilePreview only supports png file: ${resolvedPath}`);
+		if (!resolvedPath?.endsWith(".png")) {
+			throw new Error(`ImageFilePreview only supports png file: ${resolvedPath}`);
+		}
 	}
 
 	const { data } = useFileContent(resolvedPath);
@@ -37,6 +39,7 @@ export function ImageFilePreview({ path, className, showSize = true, fallback }:
 			<img
 				src={objectUrl}
 				alt={resolvedPath}
+				loading="lazy"
 				onLoad={(e) => {
 					const img = e.currentTarget;
 

@@ -3,7 +3,7 @@ import { useFileContentString, useProjectSession } from "@project/state";
 import { ContentList } from "#/components/editor/center/ContentList";
 import { getLanguageFromPath } from "~/lib/monaco/languageMap";
 import { RecentlyOpenedFilesBar } from "./recently-opened/RecentlyOpenedFilesBar";
-import { ImageFilePreview } from "#/components/editor/center/ImageFilePreview";
+import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
 
 const MonacoEditor = lazy(() => import("./MonacoEditor").then((m) => ({ default: m.MonacoEditor })));
 

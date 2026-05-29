@@ -9,7 +9,7 @@ import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from "#/
 import { Plus } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ImageFilePreview } from "#/components/editor/center/ImageFilePreview";
+import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
 import { usePath } from "#/hooks/use-path";
 import { cn } from "#/lib/utils";
 

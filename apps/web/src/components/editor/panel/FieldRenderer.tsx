@@ -1,5 +1,5 @@
-import { AssetImage } from "#/components/editor/AssetImage";
-import { ImageFilePreview } from "#/components/editor/center/ImageFilePreview";
+import { ContentApiImage } from "#/components/editor/ContentApiImage";
+import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
 import { Button } from "#/components/ui/button";
 import { Checkbox } from "#/components/ui/checkbox";
 import { ColorPicker, ColorPickerAlpha, ColorPickerFormat, ColorPickerHue, ColorPickerSelection } from "#/components/ui/color-picker";
@@ -224,7 +224,7 @@ const fieldRenderers: FieldRendererMap = {
 												selectedItem.type === "project" ? (
 													<ImageFilePreview path={selectedItem.path} showSize={false} />
 												) : (
-													<AssetImage type="items" name={selectedItem.name} />
+													<ContentApiImage type="items" name={selectedItem.name} />
 												)
 											) : (
 												item
@@ -249,7 +249,7 @@ const fieldRenderers: FieldRendererMap = {
 														{item.type === "project" ? (
 															<ImageFilePreview path={item.path} showSize={false} />
 														) : (
-															<AssetImage type="items" name={item.name} />
+															<ContentApiImage type="items" name={item.name} />
 														)}
 													</ToggleGroupItem>
 												))}
