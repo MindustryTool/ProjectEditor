@@ -5,12 +5,11 @@ import {
 	Severity,
 	createDefaultValidators,
 	createValidationRunner,
-	useProjectSession,
-    useAppStore,
+	useAppStore,
 } from "@project/state";
 import type { ValidationContext } from "@project/state";
 import { useShallow } from "zustand/react/shallow";
-import { useBaseItems } from "#/hooks/use-base-items";
+import { useItems } from "#/hooks/use-items";
 
 const registry = createDefaultValidators();
 const runner = createValidationRunner(registry);
@@ -28,32 +27,17 @@ function decodeContent(data: ArrayBuffer | null | undefined): string {
 
 export function ValidationProvider({ children }: { children: ReactNode }) {
 	const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
-    const validationDelayMs = useAppStore(useShallow((s) => s.settings.validationDelayMs));
+	const validationDelayMs = useAppStore(useShallow((s) => s.settings.validationDelayMs));
 
-	const modItems = useProjectSession(
-		useShallow((s) =>
-			s.treeSnapshot
-				.getEntries()
-				.filter((e) => e.kind === "file" && e.path.includes("content/items") && e.name.endsWith(".json"))
-				.map((e) => e.name.replace(".json", "")),
-		),
-	);
-
-	const { data: baseItems } = useBaseItems();
+	const items = useItems({ base: true, project: true });
 
 	const context = useMemo(() => {
 		const context: ValidationContext = {
-			getItems: () => {
-				const result = [];
-				if (baseItems) {
-					result.push(...baseItems);
-				}
-				result.push(...modItems.map((i) => ({ name: i })));
-				return result;
-			},
+			getItems: () => items,
 		};
+
 		return context;
-	}, [baseItems]);
+	}, [items]);
 
 	useEffect(() => {
 		const timers = timersRef.current;

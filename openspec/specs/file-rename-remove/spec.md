@@ -1,3 +1,16 @@
+## ADDED Requirements
+
+### Requirement: Create button co-located with action buttons
+The create button SHALL be positioned alongside the existing rename and remove action buttons on folder rows, following the same visibility pattern.
+
+#### Scenario: Create button is part of action button group
+- **WHEN** action buttons are visible on a folder row (hover or selected)
+- **THEN** the "+" create button SHALL be displayed as the first button in the action button group, before the rename (Pencil) and remove (Trash2) buttons
+
+#### Scenario: Create button not shown on file rows
+- **WHEN** the user hovers over or selects a file row
+- **THEN** the "+" create button SHALL NOT be shown
+
 ## MODIFIED Requirements
 
 ### Requirement: File rename via inline edit

@@ -1,5 +1,5 @@
-import { useMemo, useState, useRef, useEffect } from "react";
-import { File, Folder, FolderOpen, ChevronRight, ChevronDown, Pencil, Trash2 } from "lucide-react";
+import { useMemo, useState, useRef, useEffect, createContext, useContext } from "react";
+import { File, Folder, FolderOpen, ChevronRight, ChevronDown, Pencil, Trash2, Plus, MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { isDefaultPath, type TreeNode } from "@project/fs";
 import {
@@ -26,6 +26,37 @@ import { usePath } from "#/hooks/use-path";
 import { resolveContentSprite } from "@project/utils";
 import { useIssues } from "#/hooks/use-issue";
 import { ImageFilePreview } from "#/components/editor/center/ImageFilePreview";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "~/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import { Button } from "~/components/ui/button";
+import { Label } from "~/components/ui/label";
+import {
+	DropdownMenu,
+	DropdownMenuTrigger,
+	DropdownMenuContent,
+	DropdownMenuItem,
+} from "~/components/ui/dropdown-menu";
+import { getItemTemplate, getBlockTemplate, getUnitTemplate, getEffectTemplate } from "./templates";
+import { Input } from "#/components/ui/input";
+
+interface FileExplorerContextValue {
+	selectedPath: string | null;
+	editingPath: string | null;
+	onSelect: (value: string | null) => void;
+	onEditingPathChange: (path: string | null) => void;
+	onDeleteRequest: (path: string) => void;
+	onCreateRequest: (path: string) => void;
+	totalIssueCount: Record<string, { error: number; warning: number }>;
+	projectId: string;
+}
+
+const FileExplorerCtx = createContext<FileExplorerContextValue | null>(null);
+
+function useFileExplorer() {
+	const ctx = useContext(FileExplorerCtx);
+	if (!ctx) throw new Error("useFileExplorer must be used within FileExplorer");
+	return ctx;
+}
 
 interface FileExplorerProps {
 	className?: string;
@@ -35,10 +66,20 @@ export function FileExplorer({ className }: FileExplorerProps) {
 	const context = useCurrentProject();
 	const [path, setPath] = usePath();
 	const treeSnapshot = useProjectSession((state) => state.treeSnapshot);
-	const projectTree = useMemo(() => buildFileTree(treeSnapshot, context.project.id), [context.project.id, treeSnapshot]);
+	const rawTree = useMemo(() => buildFileTree(treeSnapshot, context.project.id), [context.project.id, treeSnapshot]);
+	const projectTree = useMemo(() => {
+		const rootNode: TreeNode = {
+			name: context.project.name,
+			type: "folder",
+			children: rawTree,
+			path: "/",
+		};
+		return [rootNode];
+	}, [rawTree, context.project.name]);
 
 	const [editingPath, setEditingPath] = useState<string | null>(null);
 	const [deleteTargetPath, setDeleteTargetPath] = useState<string | null>(null);
+	const [createTargetPath, setCreateTargetPath] = useState<string | null>(null);
 
 	const totalIssueCount = useIssues();
 
@@ -62,20 +103,26 @@ export function FileExplorer({ className }: FileExplorerProps) {
 
 	return (
 		<div className={cn("space-y-0.5 h-full overflow-y-auto", className)}>
-			{projectTree.map((node) => (
-				<TreeNodeItem
-					key={node.name}
-					node={node}
-					parentPath=""
-					selectedPath={path ?? null}
-					totalIssueCount={totalIssueCount}
-					onSelect={setPath}
-					projectId={context.project.id}
-					editingPath={editingPath}
-					onEditingPathChange={setEditingPath}
-					onDeleteRequest={setDeleteTargetPath}
-				/>
-			))}
+			<FileExplorerCtx.Provider
+				value={{
+					selectedPath: path ?? null,
+					editingPath,
+					onSelect: setPath,
+					onEditingPathChange: setEditingPath,
+					onDeleteRequest: setDeleteTargetPath,
+					onCreateRequest: setCreateTargetPath,
+					totalIssueCount,
+					projectId: context.project.id,
+				}}
+			>
+				{projectTree.map((node) => (
+					<TreeNodeItem
+						key={node.name}
+						node={node}
+						depth={0}
+					/>
+				))}
+			</FileExplorerCtx.Provider>
 			<AlertDialog
 				open={deleteTargetPath !== null}
 				onOpenChange={(open) => {
@@ -98,11 +145,142 @@ export function FileExplorer({ className }: FileExplorerProps) {
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
+			<Dialog
+				open={createTargetPath !== null}
+				onOpenChange={(open) => {
+					if (!open) setCreateTargetPath(null);
+				}}
+			>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Create New</DialogTitle>
+						<DialogDescription>Create a new file or folder in {createTargetPath || "project root"}.</DialogDescription>
+					</DialogHeader>
+					<CreateFileForm
+						targetPath={createTargetPath ?? ""}
+						context={context}
+						onSuccess={(newPath) => {
+							setPath(newPath);
+							setCreateTargetPath(null);
+						}}
+						onCancel={() => setCreateTargetPath(null)}
+					/>
+				</DialogContent>
+			</Dialog>
+		</div>
+	);
+}
+
+function CreateFileForm({
+	targetPath,
+	context,
+	onSuccess,
+	onCancel,
+}: {
+	targetPath: string;
+	context: ReturnType<typeof useCurrentProject>;
+	onSuccess: (path: string) => void;
+	onCancel: () => void;
+}) {
+	const [name, setName] = useState("");
+	const [type, setType] = useState("file");
+	const [templateChoice, setTemplateChoice] = useState("none");
+	const [error, setError] = useState("");
+
+	const NONE = "none";
+
+	const templateOptions: Record<string, { label: string; getTemplate: (name: string) => string } | undefined> = {
+		item: { label: "Item Template", getTemplate: getItemTemplate },
+		block: { label: "Block Template", getTemplate: getBlockTemplate },
+		unit: { label: "Unit Template", getTemplate: getUnitTemplate },
+		effect: { label: "Effect Template", getTemplate: getEffectTemplate },
+	};
+
+	const isContentType = type === "item" || type === "block" || type === "unit" || type === "effect";
+	const templateDef = isContentType ? templateOptions[type] : undefined;
+
+	async function handleCreate() {
+		const trimmed = name.trim();
+		if (!trimmed) {
+			setError("Name cannot be empty");
+			return;
+		}
+		setError("");
+
+		const folderPath = targetPath || "";
+		const fullPath = isContentType ? `${folderPath}/${trimmed}.json` : `${folderPath}/${trimmed}`;
+
+		try {
+			if (type === "folder") {
+				await context.fs.mkdir(fullPath);
+				onSuccess(fullPath);
+			} else {
+				const content = templateDef && templateChoice !== NONE ? templateDef.getTemplate(trimmed) : "";
+				await context.fs.writeTextFile(fullPath, content);
+				onSuccess(fullPath);
+			}
+		} catch (err) {
+			setError(err instanceof Error ? err.message : "Failed to create");
+		}
+	}
+
+	return (
+		<div className="space-y-4">
+			<div className="space-y-2">
+				<Label htmlFor="name">Name</Label>
+				<Input
+					id="name"
+					value={name}
+					onChange={(e) => setName(e.target.value)}
+					placeholder="Enter name"
+				/>
+			</div>
+			<div className="space-y-2">
+				<Label htmlFor="type">Type</Label>
+				<Select value={type} onValueChange={(v) => { setType(v); setTemplateChoice(NONE); }}>
+					<SelectTrigger className="w-full">
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="file">File</SelectItem>
+						<SelectItem value="folder">Folder</SelectItem>
+						<SelectItem value="item">Item</SelectItem>
+						<SelectItem value="block">Block</SelectItem>
+						<SelectItem value="unit">Unit</SelectItem>
+						<SelectItem value="effect">Effect</SelectItem>
+					</SelectContent>
+				</Select>
+			</div>
+			{isContentType && templateDef && (
+				<div className="space-y-2">
+					<Label htmlFor="template">Template</Label>
+					<Select value={templateChoice} onValueChange={setTemplateChoice}>
+						<SelectTrigger className="w-full">
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value={NONE}>None (empty file)</SelectItem>
+							<SelectItem value={templateDef.label}>{templateDef.label}</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
+			)}
+			{error && <p className="text-sm text-red-400">{error}</p>}
+			<DialogFooter>
+				<Button variant="outline" onClick={onCancel}>
+					Cancel
+				</Button>
+				<Button onClick={handleCreate}>Create</Button>
+			</DialogFooter>
 		</div>
 	);
 }
 
 function getIcon(node: TreeNode, expanded: boolean) {
+	if (node.path === "/") {
+		return null;
+	}
+
 	if (node.type === "folder") {
 		return expanded ? (
 			<FolderOpen className="h-3.5 w-3.5 shrink-0 text-amber-500" />
@@ -110,6 +288,11 @@ function getIcon(node: TreeNode, expanded: boolean) {
 			<Folder className="h-3.5 w-3.5 shrink-0 text-amber-500" />
 		);
 	}
+
+	if (node.name.endsWith(".png")) {
+		return <ImageFilePreview path={node.path} showSize={false} className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4" />;
+	}
+
 	const assetPath = resolveContentSprite(node.path);
 
 	if (assetPath) {
@@ -128,32 +311,23 @@ function getIcon(node: TreeNode, expanded: boolean) {
 
 interface TreeNodeItemProps {
 	node: TreeNode;
-	parentPath: string;
-	selectedPath: string | null;
-	totalIssueCount: Record<string, { error: number; warning: number }>;
-	onSelect: (value: string | null) => void;
-	projectId: string;
 	depth?: number;
-	editingPath: string | null;
-	onEditingPathChange: (path: string | null) => void;
-	onDeleteRequest: (path: string) => void;
 }
 
-function TreeNodeItem({
-	node,
-	parentPath,
-	selectedPath,
-	totalIssueCount,
-	onSelect,
-	projectId,
-	depth = 0,
-	editingPath,
-	onEditingPathChange,
-	onDeleteRequest,
-}: TreeNodeItemProps) {
+function TreeNodeItem({ node, depth = 0 }: TreeNodeItemProps) {
 	const context = useCurrentProject();
-	const [expanded, setExpanded] = useState(false);
-	const currentPath = parentPath ? `${parentPath}/${node.name}` : node.name;
+	const {
+		selectedPath,
+		editingPath,
+		onSelect,
+		onEditingPathChange,
+		onDeleteRequest,
+		onCreateRequest,
+		totalIssueCount,
+		projectId,
+	} = useFileExplorer();
+	const [expanded, setExpanded] = useState(node.path === "/");
+	const currentPath = node.path === "/" ? "" : node.path;
 	const isSelected = selectedPath === currentPath;
 	const isFolder = node.type === "folder";
 
@@ -172,6 +346,7 @@ function TreeNodeItem({
 				: "text-foreground";
 
 	const isDefault = isDefaultPath(context.fs.defaultProjectTree, currentPath);
+	const isRoot = depth === 0 && currentPath === "";
 	const isEditing = editingPath === currentPath;
 	const inputRef = useRef<HTMLInputElement>(null);
 
@@ -188,6 +363,11 @@ function TreeNodeItem({
 		} else {
 			onSelect(currentPath);
 		}
+	}
+
+	function handleCreateClick(e: React.MouseEvent) {
+		e.stopPropagation();
+		onCreateRequest(currentPath);
 	}
 
 	function handleRenameClick(e: React.MouseEvent) {
@@ -254,7 +434,7 @@ function TreeNodeItem({
 						handleClick();
 					}
 				}}
-				style={{ paddingLeft: `${depth * 16}px` }}
+				style={{ paddingLeft: `${depth * 12}px` }}
 			>
 				{isFolder && (
 					<span className="shrink-0">
@@ -278,22 +458,39 @@ function TreeNodeItem({
 				) : (
 					<span className={cn("flex-1 truncate", filenameClass)}>{node.name}</span>
 				)}
-				{showActions && !isDefault && (
+				{showActions && (isFolder || !isDefault) && (
 					<div className={cn("flex items-center gap-0.5", !isSelected && "invisible group-hover:visible", isSelected && "visible")}>
-						<button
-							onClick={handleRenameClick}
-							className="flex size-6 items-center justify-center rounded hover:bg-accent"
-							title="Rename"
-						>
-							<Pencil className="size-3 text-muted-foreground" />
-						</button>
-						<button
-							onClick={handleDeleteClick}
-							className="flex size-6 items-center justify-center rounded hover:bg-accent"
-							title="Delete"
-						>
-							<Trash2 className="size-3 text-muted-foreground" />
-						</button>
+						{isFolder && (
+							<button
+								onClick={handleCreateClick}
+								className="flex size-6 items-center justify-center rounded hover:bg-accent"
+								title="Create"
+							>
+								<Plus className="size-3 text-muted-foreground" />
+							</button>
+						)}
+						{!isRoot && !isDefault && (
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<button
+										className="flex size-6 items-center justify-center rounded hover:bg-accent"
+										title="More actions"
+									>
+										<MoreHorizontal className="size-3 text-muted-foreground" />
+									</button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align="end">
+									<DropdownMenuItem onClick={handleRenameClick}>
+										<Pencil className="size-3" />
+										Rename
+									</DropdownMenuItem>
+									<DropdownMenuItem onClick={handleDeleteClick}>
+										<Trash2 className="size-3" />
+										Delete
+									</DropdownMenuItem>
+								</DropdownMenuContent>
+							</DropdownMenu>
+						)}
 					</div>
 				)}
 				{!isFolder && isItemSaving && <span className="h-2 w-2 shrink-0 rounded-full bg-amber-400" />}
@@ -305,15 +502,7 @@ function TreeNodeItem({
 						<TreeNodeItem
 							key={child.name}
 							node={child}
-							totalIssueCount={totalIssueCount}
-							parentPath={currentPath}
-							selectedPath={selectedPath}
-							onSelect={onSelect}
-							projectId={projectId}
 							depth={depth + 1}
-							editingPath={editingPath}
-							onEditingPathChange={onEditingPathChange}
-							onDeleteRequest={onDeleteRequest}
 						/>
 					))}
 				</div>

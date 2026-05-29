@@ -46,11 +46,12 @@ export function FieldsRenderer({ path, fields, values, updater }: FieldsRenderer
 
 	return fields.map((field) => {
 		const { name, type, defaultValue, hiddenIfDefault } = field;
+		const key = name + type + path;
 		const Renderer = fieldRenderers[type] as FieldRenderer<any> | undefined;
 
 		if (Renderer === undefined) {
 			return (
-				<span key={name + type + path} className="text-yellow-400">
+				<span key={key} className="text-yellow-400">
 					Unknown field type {type}
 				</span>
 			);
@@ -59,7 +60,7 @@ export function FieldsRenderer({ path, fields, values, updater }: FieldsRenderer
 		const issue = issues?.filter((issue) => issue.field === name);
 
 		return (
-			<ErrorBoundary key={name + type + path}>
+			<ErrorBoundary key={key}>
 				<Renderer
 					name={name}
 					value={values[name] || defaultValue || ""}
@@ -71,8 +72,8 @@ export function FieldsRenderer({ path, fields, values, updater }: FieldsRenderer
 						}
 					}}
 				/>
-				{issue?.map((issue) => (
-					<span key={issue.code} className="text-red-400">
+				{issue?.map((issue, index) => (
+					<span key={(issue.code || "") + index} className="text-red-400">
 						{issue.code}
 					</span>
 				)) || null}

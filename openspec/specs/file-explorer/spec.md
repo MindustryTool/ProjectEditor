@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: File explorer renders directory tree
-The system SHALL render a file explorer in the editor left panel showing the active Mindustry mod project directory structure as a collapsible tree, with validation status badges, buffer state indicators, and inline rename/remove action buttons on each row.
+The system SHALL render a file explorer in the editor left panel showing the active Mindustry mod project directory structure as a collapsible tree, with validation status badges, buffer state indicators, and action buttons on each row. The Plus (+) create button SHALL remain directly visible on folder rows. The Rename and Delete actions SHALL be accessible via an ellipsis (`MoreHorizontal`) dropdown menu.
 
 #### Scenario: Tree displays top-level items from the project snapshot
 - **WHEN** the editor page renders with a project file-tree snapshot containing entries at the project root
@@ -55,23 +55,52 @@ The system SHALL render a file explorer in the editor left panel showing the act
 - **WHEN** a file has `isDirty === false` and `isSaving === false`
 - **THEN** its row SHALL NOT show any status dot
 
-#### Scenario: Action buttons visible on hover (desktop)
-- **WHEN** the user hovers over a file or folder row on a desktop device
-- **THEN** the row SHALL display a Pencil (rename) and Trash2 (remove) button on the right side
+#### Scenario: Ellipsis button visible on hover (desktop)
+- **WHEN** the user hovers over a non-default file or folder row on a desktop device
+- **THEN** the row SHALL show a `MoreHorizontal` ellipsis icon button on the right side
 
-#### Scenario: Action buttons visible on selected row (touch)
-- **WHEN** the user selects a file or folder row on a touch device
-- **THEN** the row SHALL display Pencil and Trash2 buttons on the right side
+#### Scenario: Ellipsis button visible on selected row (touch)
+- **WHEN** the user selects a non-default file or folder row on a touch device
+- **THEN** the row SHALL show a `MoreHorizontal` ellipsis icon button on the right side
 
-#### Scenario: Action buttons are interactive
-- **WHEN** the user clicks the rename button
+#### Scenario: Ellipsis opens dropdown with Rename and Delete
+- **WHEN** the user clicks the ellipsis button
+- **THEN** a dropdown menu SHALL open containing "Rename" and "Delete" items
+
+#### Scenario: Rename in dropdown enters inline edit
+- **WHEN** the user clicks "Rename" in the ellipsis dropdown
 - **THEN** the row SHALL enter inline rename mode (not select the file)
-- **WHEN** the user clicks the remove button
+
+#### Scenario: Delete in dropdown shows confirmation
+- **WHEN** the user clicks "Delete" in the ellipsis dropdown
 - **THEN** the system SHALL show a delete confirmation dialog
 
 #### Scenario: Action buttons do not trigger file select
-- **WHEN** the user clicks an action button (rename or remove)
+- **WHEN** the user clicks the Plus, ellipsis, or a dropdown item
 - **THEN** the click SHALL NOT change the selected path or expand/collapse the folder
+
+### Requirement: Folder rows show create button
+Each folder row in the file explorer SHALL display a "+" create button that opens the create file dialog scoped to that folder's path.
+
+#### Scenario: Create button visible on hover (desktop)
+- **WHEN** the user hovers over a folder row in the file explorer on a desktop device
+- **THEN** the row SHALL show a "+" (Plus) icon button on the right side of the row
+
+#### Scenario: Create button visible on selected row (touch)
+- **WHEN** the user selects a folder row on a touch device
+- **THEN** the row SHALL show a "+" (Plus) icon button on the right side of the row
+
+#### Scenario: Create button visible on root node
+- **WHEN** the user hovers over or selects the root folder node
+- **THEN** the row SHALL show the "+" create button
+
+#### Scenario: Create button opens dialog scoped to folder
+- **WHEN** the user clicks the "+" button on a folder row
+- **THEN** the create file dialog SHALL open with that folder's path as the target directory
+
+#### Scenario: Create button does not trigger expand/collapse
+- **WHEN** the user clicks the "+" button on a folder
+- **THEN** the click SHALL NOT expand or collapse the folder
 
 ### Requirement: Selected item is highlighted
 The system SHALL visually highlight the currently selected item in the explorer tree based on the `?path=` URL query parameter.
