@@ -37,6 +37,9 @@ export const ResearchSchema = v.nullish(
 		v.object({
 			parent: v.nullish(ContentNameSchema),
 			requirements: v.nullish(v.array(ItemRequirementSchema)),
+            objectives: v.nullish(v.any()),
+            planet: v.nullish(v.string()),
+            robot: v.nullish(v.boolean()),
 		}),
 	]),
 );

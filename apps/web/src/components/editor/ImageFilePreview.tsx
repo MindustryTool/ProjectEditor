@@ -35,7 +35,7 @@ export function ImageFilePreview({ path, className, showSize = true, fallback }:
 	}
 
 	return (
-		<div className={cn("relative flex justify-center items-center h-full w-full", className)}>
+		<div className={cn("relative flex justify-center items-center h-full w-full overflow-hidden", className)}>
 			<img
 				src={objectUrl}
 				alt={resolvedPath}
