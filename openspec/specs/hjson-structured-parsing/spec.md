@@ -93,3 +93,33 @@ A base interface (`InfoBase`) SHALL be provided with `start: Position` and `end:
 - **THEN** it SHALL return the `FieldInfo` or `ElementInfo` for the final segment
 - **AND** it SHALL return `undefined` if any part of the path does not exist
 - **AND** the returned info SHALL have a `.value` property containing the target node
+
+### Requirement: ElementInfo extends InfoBase with replaceValue
+`ElementInfo` SHALL include a `replaceValue(original: string, newValue: string): string` method that replaces the element's value in the original source string using positional slicing.
+
+#### Scenario: Replace array element value
+- **WHEN** `elementInfo.replaceValue(original, '"new-value"')` is called
+- **THEN** it SHALL return `original` with the element's value range replaced by `"new-value"`
+- **AND** the replacement SHALL be based on `valueStart.index` and `valueEnd.index`
+
+### Requirement: HjsonArrayNode provides element mutation methods
+`HjsonArrayNode` SHALL provide `patchElement`, `insertElement`, and `removeElement` methods for surgically modifying array elements in the original source string.
+
+#### Scenario: patchElement replaces element value by index
+- **WHEN** `arrayNode.patchElement(original, 0, '"replaced"')` is called
+- **THEN** it SHALL return the source string with the element at index 0 replaced
+
+#### Scenario: removeElement removes element by index with comma cleanup
+- **WHEN** `arrayNode.removeElement(original, 0)` is called
+- **THEN** it SHALL return the source string with the element and its surrounding comma removed
+
+### Requirement: HjsonObjectNode and HjsonArrayNode provide comment patching
+`HjsonObjectNode` and `HjsonArrayNode` SHALL provide methods to patch, insert, and remove comments associated with fields or elements.
+
+#### Scenario: Patch comment before a field
+- **WHEN** `objectNode.patchComment(original, "name", "# new comment")` is called
+- **THEN** the comment before the `name` field SHALL be replaced
+
+#### Scenario: Add comment before a field that has no comment
+- **WHEN** `objectNode.patchComment(original, "name", "# added comment")` is called on a field without a preceding comment
+- **THEN** the comment SHALL be inserted before the field

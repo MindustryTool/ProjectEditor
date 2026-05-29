@@ -7,6 +7,7 @@ import {
 	HjsonValueNode,
 	HjsonNode as HjsonStructuredNode,
 	createFieldInfo,
+	createElementInfo,
 	type FieldInfo,
 	type ElementInfo,
 } from "./structured.js";
@@ -471,12 +472,16 @@ export class Parser {
 				const data: any[] = [];
 				node.elements.forEach((el, i) => {
 					const val = this.convertNodeStructured(el, String(i), reviver);
-					elements.push({
-						index: i,
-						value: val,
-						start: { ...el.loc.start },
-						end: { ...el.loc.end },
-					});
+					elements.push(
+						createElementInfo(
+							i,
+							val,
+							{ ...el.loc.start },
+							{ ...el.loc.end },
+							{ ...el.loc.start },
+							{ ...el.loc.end },
+						),
+					);
 					data.push(val.valueOf());
 				});
 				const finalData = reviver ? reviver(keyHint, data) : data;

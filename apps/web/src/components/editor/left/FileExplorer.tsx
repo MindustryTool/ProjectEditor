@@ -10,9 +10,7 @@ import {
 	selectEntry,
 	selectIsSaving,
 	TreeSnapshot,
-	Severity,
 } from "@project/state";
-import { useValidationStore } from "@project/state";
 import { cn } from "~/lib/utils";
 import {
 	AlertDialog,
@@ -25,6 +23,9 @@ import {
 	AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import { usePath } from "#/hooks/use-path";
+import { resolveContentSprite } from "@project/utils";
+import { useIssues } from "#/hooks/use-issue";
+import { ImageFilePreview } from "#/components/editor/center/ImageFilePreview";
 
 interface FileExplorerProps {
 	className?: string;
@@ -34,29 +35,12 @@ export function FileExplorer({ className }: FileExplorerProps) {
 	const context = useCurrentProject();
 	const [path, setPath] = usePath();
 	const treeSnapshot = useProjectSession((state) => state.treeSnapshot);
-	const projectTree = useMemo(() => buildTreeFromSnapshot(treeSnapshot, context.project.id), [context.project.id, treeSnapshot]);
+	const projectTree = useMemo(() => buildFileTree(treeSnapshot, context.project.id), [context.project.id, treeSnapshot]);
 
 	const [editingPath, setEditingPath] = useState<string | null>(null);
 	const [deleteTargetPath, setDeleteTargetPath] = useState<string | null>(null);
 
-	const resultsByPath = useValidationStore((s) => s.resultsByPath);
-	const totalIssueCount = useMemo(() => {
-		const result: Record<string, { error: number; warning: number }> = {};
-		for (const [path, results] of Object.entries(resultsByPath)) {
-			const segments = path.split("/").filter(Boolean);
-			let currentPath = "";
-			for (let i = 0; i < segments.length; i++) {
-				const segment = segments[i];
-				if (i > 0) currentPath += "/";
-				currentPath += segment;
-				if (result[currentPath] == null) result[currentPath] = { error: 0, warning: 0 };
-				result[currentPath]!.error += results.filter((r) => r.severity === Severity.error).length;
-				result[currentPath]!.warning += results.filter((r) => r.severity === Severity.warning).length;
-			}
-		}
-
-		return result;
-	}, [resultsByPath]);
+	const totalIssueCount = useIssues();
 
 	const deleteTargetName = useMemo(() => {
 		if (!deleteTargetPath) return "";
@@ -64,11 +48,15 @@ export function FileExplorer({ className }: FileExplorerProps) {
 		return parts[parts.length - 1] ?? "";
 	}, [deleteTargetPath]);
 
-	function handleDeleteConfirm() {
-		if (!deleteTargetPath) return;
-		context.fs.delete(deleteTargetPath).catch((err) => {
+	async function handleDeleteConfirm() {
+		if (!deleteTargetPath) {
+			return;
+		}
+
+		await context.fs.delete(deleteTargetPath).catch((err) => {
 			toast.error(`Failed to delete: ${err instanceof Error ? err.message : "Unknown error"}`);
 		});
+
 		setDeleteTargetPath(null);
 	}
 
@@ -122,6 +110,19 @@ function getIcon(node: TreeNode, expanded: boolean) {
 			<Folder className="h-3.5 w-3.5 shrink-0 text-amber-500" />
 		);
 	}
+	const assetPath = resolveContentSprite(node.path);
+
+	if (assetPath) {
+		return (
+			<ImageFilePreview
+				path={assetPath}
+				showSize={false}
+				className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4"
+				fallback={<File />}
+			/>
+		);
+	}
+
 	return <File className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4" />;
 }
 
@@ -136,63 +137,6 @@ interface TreeNodeItemProps {
 	editingPath: string | null;
 	onEditingPathChange: (path: string | null) => void;
 	onDeleteRequest: (path: string) => void;
-}
-
-function buildTreeFromSnapshot(snapshot: TreeSnapshot, projectId: string): TreeNode[] {
-	const basePrefix = `/projects/${projectId}/`;
-	const roots: TreeNode[] = [];
-	const nodeByPath = new Map<string, TreeNode>();
-
-	for (const entry of snapshot.getEntries()) {
-		const relative = entry.path.startsWith(basePrefix) ? entry.path.slice(basePrefix.length) : entry.path;
-		const parts = relative.split("/").filter(Boolean);
-		if (parts.length === 0) continue;
-
-		let parentPath = "";
-		let siblings = roots;
-
-		for (let i = 0; i < parts.length; i++) {
-			const name = parts[i]!;
-			const currentPath = parentPath ? `${parentPath}/${name}` : name;
-			const isLast = i === parts.length - 1;
-			const expectedType: TreeNode["type"] = isLast ? (entry.kind === "directory" ? "folder" : "file") : "folder";
-
-			const existing = nodeByPath.get(currentPath);
-			let node: TreeNode;
-
-			if (existing) {
-				node = existing;
-				if (node.type !== expectedType) {
-					node.type = expectedType;
-					if (expectedType === "folder") node.children = node.children ?? [];
-					else delete node.children;
-				}
-			} else {
-				node = expectedType === "folder" ? { name, type: "folder", children: [] } : { name, type: "file" };
-				nodeByPath.set(currentPath, node);
-				siblings.push(node);
-			}
-
-			if (node.type !== "folder") break;
-
-			parentPath = currentPath;
-			node.children = node.children ?? [];
-			siblings = node.children;
-		}
-	}
-
-	sortTreeNodes(roots);
-	return roots;
-}
-
-function sortTreeNodes(nodes: TreeNode[]) {
-	nodes.sort((a, b) => {
-		if (a.type !== b.type) return a.type === "folder" ? -1 : 1;
-		return a.name.localeCompare(b.name);
-	});
-	for (const node of nodes) {
-		if (node.type === "folder" && node.children) sortTreeNodes(node.children);
-	}
 }
 
 function TreeNodeItem({
@@ -241,8 +185,9 @@ function TreeNodeItem({
 	function handleClick() {
 		if (isFolder) {
 			setExpanded(!expanded);
+		} else {
+			onSelect(currentPath);
 		}
-		onSelect(currentPath);
 	}
 
 	function handleRenameClick(e: React.MouseEvent) {
@@ -296,7 +241,7 @@ function TreeNodeItem({
 		<div>
 			<div
 				className={cn(
-					"group flex cursor-pointer items-center gap-1 rounded px-2 py-1 text-sm hover:bg-accent",
+					"group flex cursor-pointer items-center gap-1 rounded py-1 text-sm hover:bg-accent",
 					isSelected && "bg-accent font-medium",
 				)}
 				role="button"
@@ -309,7 +254,7 @@ function TreeNodeItem({
 						handleClick();
 					}
 				}}
-				style={{ paddingLeft: `${8 + depth * 16}px` }}
+				style={{ paddingLeft: `${depth * 16}px` }}
 			>
 				{isFolder && (
 					<span className="shrink-0">
@@ -375,4 +320,67 @@ function TreeNodeItem({
 			)}
 		</div>
 	);
+}
+
+function buildFileTree(snapshot: TreeSnapshot, projectId: string): TreeNode[] {
+	const basePrefix = `/projects/${projectId}/`;
+	const roots: TreeNode[] = [];
+	const nodeByPath = new Map<string, TreeNode>();
+
+	for (const entry of snapshot.getEntries()) {
+		const relative = entry.path.startsWith(basePrefix) ? entry.path.slice(basePrefix.length) : entry.path;
+
+		const parts = relative.split("/").filter(Boolean);
+
+		if (parts.length === 0) continue;
+
+		let parentPath = "";
+		let siblings = roots;
+
+		for (let i = 0; i < parts.length; i++) {
+			const name = parts[i]!;
+			const currentPath = parentPath ? `${parentPath}/${name}` : name;
+			const isLast = i === parts.length - 1;
+			const expectedType: TreeNode["type"] = isLast ? (entry.kind === "directory" ? "folder" : "file") : "folder";
+
+			const existing = nodeByPath.get(currentPath);
+			let node: TreeNode;
+
+			if (existing) {
+				node = existing;
+				if (node.type !== expectedType) {
+					node.type = expectedType;
+					if (expectedType === "folder") node.children = node.children ?? [];
+					else delete node.children;
+				}
+			} else {
+				node =
+					expectedType === "folder"
+						? { name, type: "folder", children: [], path: currentPath }
+						: { name, type: "file", path: currentPath };
+				nodeByPath.set(currentPath, node);
+				siblings.push(node);
+			}
+
+			if (node.type !== "folder") break;
+
+			parentPath = currentPath;
+			node.children = node.children ?? [];
+			siblings = node.children;
+		}
+	}
+
+	sortTreeNodes(roots);
+
+	return roots;
+}
+
+function sortTreeNodes(nodes: TreeNode[]) {
+	nodes.sort((a, b) => {
+		if (a.type !== b.type) return a.type === "folder" ? -1 : 1;
+		return a.name.localeCompare(b.name);
+	});
+	for (const node of nodes) {
+		if (node.type === "folder" && node.children) sortTreeNodes(node.children);
+	}
 }

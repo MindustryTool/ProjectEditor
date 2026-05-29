@@ -1,13 +1,16 @@
+import { cn } from "#/lib/utils";
 import { useFileContent, useFileContentImageUrl } from "@project/state";
 import { resolveContentSprite } from "@project/utils";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 export interface ImageFilePreviewProps {
 	path: string;
 	showSize?: boolean;
+	className?: string;
+    fallback?: ReactNode;
 }
 
-export function ImageFilePreview({ path, showSize = true }: ImageFilePreviewProps) {
+export function ImageFilePreview({ path, className, showSize = true, fallback }: ImageFilePreviewProps) {
 	let resolvedPath: string | null = path;
 
 	if (path.endsWith(".json")) {
@@ -26,11 +29,11 @@ export function ImageFilePreview({ path, showSize = true }: ImageFilePreviewProp
 	const [size, setSize] = useState({ width: 0, height: 0 });
 
 	if (objectUrl === null) {
-		return <div className="flex h-full w-full" />;
+		return <div className={cn("relative flex justify-center items-center h-full w-full", className)}>{fallback}</div>;
 	}
 
 	return (
-		<div className="relative flex justify-center items-center h-full w-full flex-col">
+		<div className={cn("relative flex justify-center items-center h-full w-full", className)}>
 			<img
 				src={objectUrl}
 				alt={resolvedPath}

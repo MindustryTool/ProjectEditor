@@ -482,6 +482,7 @@ export class OPFSAdapter implements VirtualFileSystem {
 export interface TreeNode {
 	name: string;
 	type: "file" | "folder";
+    path: string;
 	children?: TreeNode[];
 }
 

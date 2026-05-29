@@ -178,6 +178,42 @@ export class HjsonObjectNode extends HjsonNode {
 		return this.insertField(original, key, newValue);
 	}
 
+	#findPrecedingComment(original: string, fromIndex: number): { text: string; start: number; end: number } | undefined {
+		let i = fromIndex - 1;
+		while (i >= 0 && (original[i] === " " || original[i] === "\t")) {
+			i--;
+		}
+		if (i >= 0 && original[i] === "\n") {
+			i--;
+			while (i >= 0 && original[i] !== "\n") {
+				if (original[i] === "#") {
+					const start = i;
+					let end = start;
+					while (end < original.length && original[end] !== "\n") {
+						end++;
+					}
+					return { text: original.slice(start, end), start, end };
+				}
+				i--;
+			}
+		}
+		return undefined;
+	}
+
+	patchComment(original: string, key: string, newComment: string): string {
+		const info = this.field(key);
+		if (!info) return original;
+
+		const existing = this.#findPrecedingComment(original, info.start.index);
+		if (existing) {
+			return original.slice(0, existing.start) + newComment + original.slice(existing.end);
+		}
+
+		const indent = info.start.col > 1 ? " ".repeat(info.start.col - 1) : "";
+		const prefix = indent ? newComment + "\n" + indent : newComment + "\n";
+		return original.slice(0, info.start.index) + prefix + original.slice(info.start.index);
+	}
+
 	#detectIndent(): string {
 		for (const fi of this.#fields.values()) {
 			if (fi.start.col > 1) {
@@ -220,6 +256,30 @@ export class HjsonObjectNode extends HjsonNode {
 export interface ElementInfo extends InfoBase {
 	index: number;
 	value: any;
+	valueStart: Position;
+	valueEnd: Position;
+	replaceValue(original: string, newValue: string): string;
+}
+
+export function createElementInfo(
+	index: number,
+	value: any,
+	start: Position,
+	end: Position,
+	valueStart: Position,
+	valueEnd: Position,
+): ElementInfo {
+	return {
+		index,
+		value,
+		start,
+		end,
+		valueStart,
+		valueEnd,
+		replaceValue(original: string, newValue: string) {
+			return original.slice(0, valueStart.index) + newValue + original.slice(valueEnd.index);
+		},
+	};
 }
 
 export class HjsonArrayNode extends HjsonNode {
@@ -292,6 +352,129 @@ export class HjsonArrayNode extends HjsonNode {
 
 	elements(): ElementInfo[] {
 		return this.#elements;
+	}
+
+	#detectIndent(): string {
+		const firstEl = this.#elements[0];
+		if (firstEl && firstEl.start.col > 1) {
+			return " ".repeat(firstEl.start.col - 1);
+		}
+		return "  ";
+	}
+
+	#isInline(original: string): boolean {
+		if (!this.#start || this.#elements.length === 0) return true;
+		return this.#elements[0].start.row === this.#start.row;
+	}
+
+	patchElement(original: string, index: number, newValue: string): string {
+		const el = this.#elements[index];
+		if (!el) return original;
+		return el.replaceValue(original, newValue);
+	}
+
+	insertElement(original: string, index: number, newValue: string): string {
+		const len = this.#elements.length;
+		if (index < 0 || index > len) return original;
+
+		if (len === 0) {
+			const openIdx = this.#start!.index + 1;
+			const closeIdx = this.#end!.index;
+			return original.slice(0, openIdx) + newValue + original.slice(closeIdx - 1);
+		}
+
+		const isMultiline = !this.#isInline(original);
+		const indent = this.#detectIndent();
+		const sep = isMultiline ? ",\n" + indent : ", ";
+
+		if (index === 0) {
+			const insIdx = this.#elements[0].start.index;
+			return original.slice(0, insIdx) + newValue + sep + original.slice(insIdx);
+		}
+
+		if (index === len) {
+			const closeIdx = this.#end!.index - 1;
+			let insIdx = closeIdx;
+			while (insIdx > this.#start!.index + 1) {
+				const c = original[insIdx - 1];
+				if (c === " " || c === "\t" || c === "\n" || c === "\r") {
+					insIdx--;
+					continue;
+				}
+				if (c === ",") {
+					insIdx--;
+				}
+				break;
+			}
+			return original.slice(0, insIdx) + sep + newValue + original.slice(insIdx);
+		}
+
+		const insIdx = this.#elements[index].start.index;
+		return original.slice(0, insIdx) + newValue + sep + original.slice(insIdx);
+	}
+
+	removeElement(original: string, index: number): string {
+		const len = this.#elements.length;
+		if (index < 0 || index >= len) return original;
+
+		if (len === 1) {
+			const openIdx = this.#start!.index + 1;
+			const closeIdx = this.#end!.index;
+			return original.slice(0, openIdx) + original.slice(closeIdx - 1);
+		}
+
+		const el = this.#elements[index];
+
+		if (index === 0) {
+			const nextStart = this.#elements[1].start.index;
+			return original.slice(0, el.start.index) + original.slice(nextStart);
+		}
+
+		let start = el.start.index - 1;
+		while (start >= 0 && (original[start] === " " || original[start] === "\t" || original[start] === "\n" || original[start] === "\r")) {
+			start--;
+		}
+		if (start >= 0 && original[start] === ",") {
+			start--;
+		}
+		const commaEnd = start + 1;
+		return original.slice(0, commaEnd) + original.slice(el.end.index);
+	}
+
+	#findPrecedingComment(original: string, fromIndex: number): { text: string; start: number; end: number } | undefined {
+		let i = fromIndex - 1;
+		while (i >= 0 && (original[i] === " " || original[i] === "\t")) {
+			i--;
+		}
+		if (i >= 0 && original[i] === "\n") {
+			i--;
+			while (i >= 0 && original[i] !== "\n") {
+				if (original[i] === "#") {
+					const start = i;
+					let end = start;
+					while (end < original.length && original[end] !== "\n") {
+						end++;
+					}
+					return { text: original.slice(start, end), start, end };
+				}
+				i--;
+			}
+		}
+		return undefined;
+	}
+
+	patchComment(original: string, index: number, newComment: string): string {
+		const el = this.#elements[index];
+		if (!el) return original;
+
+		const existing = this.#findPrecedingComment(original, el.start.index);
+		if (existing) {
+			return original.slice(0, existing.start) + newComment + original.slice(existing.end);
+		}
+
+		// Insert new comment before the element
+		const indent = this.#detectIndent();
+		return original.slice(0, el.start.index) + newComment + "\n" + indent + original.slice(el.start.index);
 	}
 }
 

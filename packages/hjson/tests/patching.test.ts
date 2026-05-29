@@ -1,9 +1,15 @@
 import { describe, it, expect } from "vitest";
 import { HJSON } from "../src/hjson.js";
-import { HjsonObjectNode } from "../src/structured.js";
+import { HjsonObjectNode, HjsonArrayNode, createElementInfo } from "../src/structured.js";
 
 function parseStructured(input: string) {
 	return HJSON.parseStructured(input) as HjsonObjectNode;
+}
+
+function wrapArray(text: string): { node: HjsonArrayNode; original: string } {
+	const original = `arr: ${text}`;
+	const obj = HJSON.parseStructured(original) as HjsonObjectNode;
+	return { node: obj.get("arr") as HjsonArrayNode, original };
 }
 
 describe("Surgical Patching", () => {
@@ -187,5 +193,223 @@ hidden: false`);
 		const patched = node.patchField(text, "active", "true");
 		const reparsed = parseStructured(patched);
 		expect(reparsed.valueOf()).toEqual({ active: true });
+	});
+});
+
+describe("ElementInfo.replaceValue", () => {
+	it("replaces string element", () => {
+		const { node: arr, original } = wrapArray('[a, b, c]');
+		const el = arr.at(0)!;
+		const result = el.replaceValue(original, '"x"');
+		expect(result).toBe('arr: ["x", b, c]');
+		const arrayPart = result.slice(5);
+		expect(arrayPart).toBe('["x", b, c]');
+	});
+
+	it("replaces numeric element", () => {
+		const { node: arr, original } = wrapArray('[1, 2, 3]');
+		const el = arr.at(1)!;
+		const result = el.replaceValue(original, '42');
+		expect(result).toBe('arr: [1, 42, 3]');
+	});
+
+	it("replaces boolean element", () => {
+		const { node: arr, original } = wrapArray('[true, false]');
+		const el = arr.at(0)!;
+		const result = el.replaceValue(original, 'false');
+		expect(result).toBe('arr: [false, false]');
+	});
+
+	it("replaces object element", () => {
+		const { node: arr, original } = wrapArray('[{a: 1}, {b: 2}]');
+		const el = arr.at(0)!;
+		const result = el.replaceValue(original, '{c: 3}');
+		expect(result).toBe('arr: [{c: 3}, {b: 2}]');
+	});
+
+	it("replaces array element", () => {
+		const { node: arr, original } = wrapArray('[[1, 2], [3, 4]]');
+		const el = arr.at(1)!;
+		const result = el.replaceValue(original, '[5]');
+		expect(result).toBe('arr: [[1, 2], [5]]');
+	});
+});
+
+describe("HjsonArrayNode.patchElement", () => {
+	it("replaces first element", () => {
+		const { node: arr, original } = wrapArray('[a, b, c]');
+		const result = arr.patchElement(original, 0, '"x"');
+		expect(result).toBe('arr: ["x", b, c]');
+	});
+
+	it("replaces middle element", () => {
+		const { node: arr, original } = wrapArray('[a, b, c]');
+		const result = arr.patchElement(original, 1, '"y"');
+		expect(result).toBe('arr: [a, "y", c]');
+	});
+
+	it("replaces last element", () => {
+		const { node: arr, original } = wrapArray('[a, b, c]');
+		const result = arr.patchElement(original, 2, '"z"');
+		expect(result).toBe('arr: [a, b, "z"]');
+	});
+
+	it("returns original for out-of-bounds index", () => {
+		const { node: arr, original } = wrapArray('[a, b]');
+		const result = arr.patchElement(original, 99, '"x"');
+		expect(result).toBe(original);
+	});
+
+	it("preserves surrounding content", () => {
+		const { node: arr, original } = wrapArray('[a, b, c]');
+		const result = arr.patchElement(original, 1, '"y"');
+		expect(result).toBe('arr: [a, "y", c]');
+	});
+});
+
+describe("HjsonArrayNode.insertElement", () => {
+	it("inserts at beginning of inline array", () => {
+		const { node: arr, original } = wrapArray('[b, c]');
+		const result = arr.insertElement(original, 0, '"a"');
+		expect(result).toBe('arr: ["a", b, c]');
+	});
+
+	it("inserts in middle of inline array", () => {
+		const { node: arr, original } = wrapArray('[a, c]');
+		const result = arr.insertElement(original, 1, '"b"');
+		expect(result).toBe('arr: [a, "b", c]');
+	});
+
+	it("appends at end of inline array", () => {
+		const { node: arr, original } = wrapArray('[a, b]');
+		const result = arr.insertElement(original, 2, '"c"');
+		expect(result).toBe('arr: [a, b, "c"]');
+	});
+
+	it("preserves trailing comma on append", () => {
+		const { node: arr, original } = wrapArray('[a, b,]');
+		const result = arr.insertElement(original, 2, '"c"');
+		expect(result).toBe('arr: [a, b, "c",]');
+	});
+
+	it("inserts into empty array", () => {
+		const { node: arr, original } = wrapArray('[]');
+		const result = arr.insertElement(original, 0, '"a"');
+		expect(result).toBe('arr: ["a"]');
+	});
+});
+
+describe("HjsonArrayNode.removeElement", () => {
+	it("removes first element", () => {
+		const { node: arr, original } = wrapArray('[a, b, c]');
+		const result = arr.removeElement(original, 0);
+		expect(result).toBe('arr: [b, c]');
+	});
+
+	it("removes middle element", () => {
+		const { node: arr, original } = wrapArray('[a, b, c]');
+		const result = arr.removeElement(original, 1);
+		expect(result).toBe('arr: [a, c]');
+	});
+
+	it("removes last element", () => {
+		const { node: arr, original } = wrapArray('[a, b, c]');
+		const result = arr.removeElement(original, 2);
+		expect(result).toBe('arr: [a, b]');
+	});
+
+	it("removes single element leaving empty array", () => {
+		const { node: arr, original } = wrapArray('[a]');
+		const result = arr.removeElement(original, 0);
+		expect(result).toBe('arr: []');
+	});
+
+	it("removes middle element with trailing comma", () => {
+		const { node: arr, original } = wrapArray('[a, b, c,]');
+		const result = arr.removeElement(original, 1);
+		expect(result).toBe('arr: [a, c,]');
+	});
+
+	it("returns original for out-of-bounds index", () => {
+		const { node: arr, original } = wrapArray('[a]');
+		const result = arr.removeElement(original, 99);
+		expect(result).toBe(original);
+	});
+});
+
+describe("Comment patching on object fields", () => {
+	it("replaces preceding comment", () => {
+		const text = `# old comment
+name: exogenesis`;
+		const node = parseStructured(text);
+		const result = node.patchComment(text, "name", "# new comment");
+		expect(result).toBe(`# new comment
+name: exogenesis`);
+	});
+
+	it("inserts comment when none exists", () => {
+		const text = "name: exogenesis";
+		const node = parseStructured(text);
+		const result = node.patchComment(text, "name", "# added comment");
+		expect(result).toBe("# added comment\nname: exogenesis");
+	});
+});
+
+describe("Comment patching on array elements", () => {
+	it("replaces preceding comment on element", () => {
+		const text = `items: [
+  # element comment
+  a,
+  b,
+]`;
+		const node = parseStructured(text);
+		const arr = node.get("items") as HjsonArrayNode;
+		const result = arr.patchComment(text, 0, "# new");
+		expect(result).toContain("# new");
+		expect(result).not.toContain("# element comment");
+	});
+
+	it("inserts comment before element when none exists", () => {
+		const text = `items: [
+  a,
+  b,
+]`;
+		const node = parseStructured(text);
+		const arr = node.get("items") as HjsonArrayNode;
+		const result = arr.patchComment(text, 0, "# added");
+		expect(result).toContain("# added");
+		expect(result).toContain("a");
+	});
+});
+
+describe("Round-trip array patching", () => {
+	it("patchElement round-trips correctly", () => {
+		const { node: arr, original } = wrapArray('[1, 2, 3]');
+		const patched = arr.patchElement(original, 1, '42');
+		const reparsed = wrapArray(patched.slice(5)).node;
+		expect(reparsed.valueOf()).toEqual([1, 42, 3]);
+	});
+
+	it("insertElement at end round-trips correctly", () => {
+		const { node: arr, original } = wrapArray('[1, 2]');
+		const patched = arr.insertElement(original, 2, '3');
+		const reparsed = wrapArray(patched.slice(5)).node;
+		expect(reparsed.valueOf()).toEqual([1, 2, 3]);
+	});
+
+	it("removeElement round-trips correctly", () => {
+		const { node: arr, original } = wrapArray('[1, 2, 3]');
+		const patched = arr.removeElement(original, 1);
+		const reparsed = wrapArray(patched.slice(5)).node;
+		expect(reparsed.valueOf()).toEqual([1, 3]);
+	});
+
+	it("comment patch round-trips correctly", () => {
+		const text = `# old
+name: exo`;
+		const node = parseStructured(text);
+		const patched = node.patchComment(text, "name", "# new");
+		const reparsed = parseStructured(patched);
+		expect((reparsed.field("name")?.value as any).valueOf()).toBe("exo");
 	});
 });
