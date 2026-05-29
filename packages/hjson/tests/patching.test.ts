@@ -382,6 +382,117 @@ describe("Comment patching on array elements", () => {
 	});
 });
 
+describe("HjsonObjectNode.removeField", () => {
+	it("removes only field from braced object leaving empty braces", () => {
+		const text = "{name: exogenesis}";
+		const node = parseStructured(text);
+		const result = node.removeField(text, "name");
+		expect(result).toBe("{}");
+	});
+
+	it("removes first field from flat multi-field object", () => {
+		const text = "name: exo\n  version: 1\n  hidden: true";
+		const node = parseStructured(text);
+		const result = node.removeField(text, "name");
+		expect(result).toBe("version: 1\n  hidden: true");
+	});
+
+	it("removes middle field from flat multi-field object", () => {
+		const text = "name: exo\n  version: 1\n  hidden: true";
+		const node = parseStructured(text);
+		const result = node.removeField(text, "version");
+		expect(result).toBe("name: exo\n  hidden: true");
+	});
+
+	it("removes last field from flat multi-field object", () => {
+		const text = "name: exo\n  version: 1\n  hidden: true";
+		const node = parseStructured(text);
+		const result = node.removeField(text, "hidden");
+		expect(result).toBe("name: exo\n  version: 1");
+	});
+
+	it("removes first field from braced multi-field object", () => {
+		const text = "{a: 1, b: 2, c: 3}";
+		const node = parseStructured(text);
+		const result = node.removeField(text, "a");
+		expect(result).toBe("{b: 2, c: 3}");
+	});
+
+	it("removes middle field from braced multi-field object", () => {
+		const text = "{a: 1, b: 2, c: 3}";
+		const node = parseStructured(text);
+		const result = node.removeField(text, "b");
+		expect(result).toBe("{a: 1, c: 3}");
+	});
+
+	it("removes last field from braced multi-field object", () => {
+		const text = "{a: 1, b: 2, c: 3}";
+		const node = parseStructured(text);
+		const result = node.removeField(text, "c");
+		expect(result).toBe("{a: 1, b: 2}");
+	});
+
+	it("removes field with trailing comma preceding it", () => {
+		const text = "{a: 1, b: 2,}";
+		const node = parseStructured(text);
+		const result = node.removeField(text, "b");
+		expect(result).toBe("{a: 1,}");
+	});
+
+	it("returns original for non-existent key", () => {
+		const text = "name: exo";
+		const node = parseStructured(text);
+		const result = node.removeField(text, "nonexistent");
+		expect(result).toBe(text);
+	});
+
+	it("round-trips correctly after removing field", () => {
+		const text = "{a: 1, b: 2, c: 3}";
+		const node = parseStructured(text);
+		const patched = node.removeField(text, "b");
+		const reparsed = HJSON.parse(patched);
+		expect(reparsed).toEqual({ a: 1, c: 3 });
+	});
+
+	it("removes multiline field from braced object", () => {
+		const text = `{
+  name: exo,
+  nested: {
+    a: 1,
+    b: 2
+  },
+  version: 1
+}`;
+		const node = parseStructured(text);
+		const result = node.removeField(text, "nested");
+		expect(result).toBe(`{
+  name: exo,
+  version: 1
+}`);
+		const reparsed = HJSON.parse(result);
+		expect(reparsed).toEqual({ name: "exo", version: 1 });
+	});
+
+	it("removes last multiline field from braced object", () => {
+		const text = `{
+  name: exo,
+  version: 1,
+  nested: {
+    a: 1,
+    b: 2
+  }
+}`;
+		const node = parseStructured(text);
+		const result = node.removeField(text, "nested");
+		expect(result).toBe(`{
+  name: exo,
+  version: 1
+}`);
+		const reparsed = HJSON.parse(result);
+		expect(reparsed).toEqual({ name: "exo", version: 1 });
+	});
+});
+
 describe("Sequential patching (stale node positions)", () => {
 	it("sequential patchField preserves nested object structure", () => {
 		const text = `{

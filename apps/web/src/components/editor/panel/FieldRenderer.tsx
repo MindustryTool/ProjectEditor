@@ -34,7 +34,6 @@ export interface Field {
 	name: string;
 	type: FieldType;
 	defaultValue?: unknown;
-	hiddenIfDefault?: boolean;
 	nullable?: boolean;
 	itemType?: FieldType;
 	fields?: Field[];
@@ -52,7 +51,7 @@ export function FieldsRenderer({ path, fields, node, original, onPatch }: Fields
 	const issues = useValidationStore((state) => state.resultsByPath[path]);
 
 	return fields.map((field) => {
-		const { name, type, defaultValue, hiddenIfDefault, nullable, itemType, fields: subFields } = field;
+		const { name, type, defaultValue, nullable, itemType, fields: subFields } = field;
 		const key = name + type + path;
 		const Renderer = fieldRenderers[type] as FieldRenderer | undefined;
 
@@ -78,7 +77,7 @@ export function FieldsRenderer({ path, fields, node, original, onPatch }: Fields
 				onPatch(newContent);
 				return;
 			}
-			if (hiddenIfDefault === true && newRawValue === defaultValue) {
+			if (newRawValue === defaultValue) {
 				const newContent = node.removeField(original, name);
 				onPatch(newContent);
 				return;
@@ -114,13 +113,15 @@ interface FieldRendererAdditionalProps {
 	subFields?: Field[];
 }
 
-type FieldRenderer = (props: {
-	name: string;
-	node: HjsonNode;
-	original: string;
-	onPatch: (newContent: string) => void;
-	patchValue: (newRawValue: unknown) => void;
-} & FieldRendererAdditionalProps) => ReactNode;
+type FieldRenderer = (
+	props: {
+		name: string;
+		node: HjsonNode;
+		original: string;
+		onPatch: (newContent: string) => void;
+		patchValue: (newRawValue: unknown) => void;
+	} & FieldRendererAdditionalProps,
+) => ReactNode;
 
 type FieldRendererMap = {
 	[K in keyof FieldTypes]: FieldRenderer;
@@ -139,7 +140,7 @@ const fieldRenderers: FieldRendererMap = {
 		);
 	},
 	Int: ({ name, node, patchValue }) => {
-		const value = node.isNumber() ? node.valueOf() : 0;
+		const value = node.isNumber() ? node.valueOf() : "";
 		return (
 			<FormField>
 				<FormLabel>{name}</FormLabel>
@@ -150,7 +151,7 @@ const fieldRenderers: FieldRendererMap = {
 		);
 	},
 	Float: ({ name, node, patchValue }) => {
-		const value = node.isNumber() ? node.valueOf() : 0;
+		const value = node.isNumber() ? node.valueOf() : "";
 		return (
 			<FormField>
 				<FormLabel>{name}</FormLabel>
@@ -161,7 +162,7 @@ const fieldRenderers: FieldRendererMap = {
 		);
 	},
 	Double: ({ name, node, patchValue }) => {
-		const value = node.isNumber() ? node.valueOf() : 0;
+		const value = node.isNumber() ? node.valueOf() : "";
 		return (
 			<FormField>
 				<FormLabel>{name}</FormLabel>
@@ -216,7 +217,7 @@ const fieldRenderers: FieldRendererMap = {
 		function getCurrentValue(): Research | string | null {
 			if (node.isValue()) {
 				const val = (node as HjsonValueNode<unknown>).valueOf();
-				return (typeof val === "string" || (val && typeof val === "object")) ? val as Research | string : null;
+				return typeof val === "string" || (val && typeof val === "object") ? (val as Research | string) : null;
 			}
 			if (node.isObject()) {
 				return (node as HjsonObjectNode).valueOf() as unknown as Research;
@@ -226,8 +227,19 @@ const fieldRenderers: FieldRendererMap = {
 
 		const currentValue = getCurrentValue();
 
-		const parent = (!currentValue ? "" : typeof currentValue === "string" ? currentValue : (currentValue as Record<string, unknown>)?.parent as string ?? "") || "";
-		const requirements = (!currentValue ? [] : typeof currentValue === "string" ? [] : (currentValue as Record<string, unknown>)?.requirements as string[] ?? []) as string[];
+		const parent =
+			(!currentValue
+				? ""
+				: typeof currentValue === "string"
+					? currentValue
+					: (((currentValue as Record<string, unknown>)?.parent as string) ?? "")) || "";
+		const requirements = (
+			!currentValue
+				? []
+				: typeof currentValue === "string"
+					? []
+					: (((currentValue as Record<string, unknown>)?.requirements as string[]) ?? [])
+		) as string[];
 
 		const addedReq = requirements.map((requirement: string) => requirement.split("/")[0]!);
 
@@ -405,11 +417,7 @@ const fieldRenderers: FieldRendererMap = {
 						{items.map((el, index) => (
 							<div key={index} className="flex items-center gap-2">
 								<div className="flex-1">
-									<ArrayItemEditor
-										value={el.value}
-										itemType={itemType}
-										onChange={(v) => handleItemChange(index, v)}
-									/>
+									<ArrayItemEditor value={el.value} itemType={itemType} onChange={(v) => handleItemChange(index, v)} />
 								</div>
 								<Button className="size-9 shrink-0" type="button" variant="outline" onClick={() => handleRemove(index)}>
 									<X />
@@ -440,13 +448,7 @@ const fieldRenderers: FieldRendererMap = {
 				<FormLabel>{name}</FormLabel>
 				<FormControl>
 					<div className="pl-4 border-l-2 border-border space-y-2">
-						<FieldsRenderer
-							path={name}
-							fields={subFields}
-							node={objNode}
-							original={original}
-							onPatch={onPatch}
-						/>
+						<FieldsRenderer path={name} fields={subFields} node={objNode} original={original} onPatch={onPatch} />
 					</div>
 				</FormControl>
 			</FormField>
@@ -456,7 +458,8 @@ const fieldRenderers: FieldRendererMap = {
 
 function ArrayItemEditor({ value, itemType, onChange }: { value: unknown; itemType?: FieldType; onChange: (v: unknown) => void }) {
 	const renderer = itemType ? fieldRenderers[itemType] : fieldRenderers.String;
-	const node = value instanceof HjsonNode ? value : new HjsonValueNode<unknown>(value, { row: 0, col: 0, index: 0 }, { row: 0, col: 0, index: 0 });
+	const node =
+		value instanceof HjsonNode ? value : new HjsonValueNode<unknown>(value, { row: 0, col: 0, index: 0 }, { row: 0, col: 0, index: 0 });
 	const typeName = itemType || "String";
 	const name = typeName.toLowerCase();
 
