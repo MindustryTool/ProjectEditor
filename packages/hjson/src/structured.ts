@@ -362,9 +362,9 @@ export class HjsonArrayNode extends HjsonNode {
 		return "  ";
 	}
 
-	#isInline(original: string): boolean {
+	#isInline(_original: string): boolean {
 		if (!this.#start || this.#elements.length === 0) return true;
-		return this.#elements[0].start.row === this.#start.row;
+		return this.#elements[0]!.start.row === this.#start.row;
 	}
 
 	patchElement(original: string, index: number, newValue: string): string {
@@ -388,7 +388,7 @@ export class HjsonArrayNode extends HjsonNode {
 		const sep = isMultiline ? ",\n" + indent : ", ";
 
 		if (index === 0) {
-			const insIdx = this.#elements[0].start.index;
+			const insIdx = this.#elements[0]!.start.index;
 			return original.slice(0, insIdx) + newValue + sep + original.slice(insIdx);
 		}
 
@@ -409,7 +409,7 @@ export class HjsonArrayNode extends HjsonNode {
 			return original.slice(0, insIdx) + sep + newValue + original.slice(insIdx);
 		}
 
-		const insIdx = this.#elements[index].start.index;
+		const insIdx = this.#elements[index]!.start.index;
 		return original.slice(0, insIdx) + newValue + sep + original.slice(insIdx);
 	}
 
@@ -426,11 +426,11 @@ export class HjsonArrayNode extends HjsonNode {
 		const el = this.#elements[index];
 
 		if (index === 0) {
-			const nextStart = this.#elements[1].start.index;
-			return original.slice(0, el.start.index) + original.slice(nextStart);
+			const nextStart = this.#elements[1]!.start.index;
+			return original.slice(0, el!.start.index) + original.slice(nextStart);
 		}
 
-		let start = el.start.index - 1;
+		let start = el!.start.index - 1;
 		while (start >= 0 && (original[start] === " " || original[start] === "\t" || original[start] === "\n" || original[start] === "\r")) {
 			start--;
 		}
@@ -438,7 +438,7 @@ export class HjsonArrayNode extends HjsonNode {
 			start--;
 		}
 		const commaEnd = start + 1;
-		return original.slice(0, commaEnd) + original.slice(el.end.index);
+		return original.slice(0, commaEnd) + original.slice(el!.end.index);
 	}
 
 	#findPrecedingComment(original: string, fromIndex: number): { text: string; start: number; end: number } | undefined {
