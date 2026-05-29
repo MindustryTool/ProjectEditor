@@ -35,6 +35,7 @@ export interface Field {
 	type: FieldType;
 	defaultValue?: unknown;
 	hiddenIfDefault?: boolean;
+	nullable?: boolean;
 	itemType?: FieldType;
 	fields?: Field[];
 }
@@ -51,7 +52,7 @@ export function FieldsRenderer({ path, fields, node, original, onPatch }: Fields
 	const issues = useValidationStore((state) => state.resultsByPath[path]);
 
 	return fields.map((field) => {
-		const { name, type, defaultValue, hiddenIfDefault, itemType, fields: subFields } = field;
+		const { name, type, defaultValue, hiddenIfDefault, nullable, itemType, fields: subFields } = field;
 		const key = name + type + path;
 		const Renderer = fieldRenderers[type] as FieldRenderer | undefined;
 
@@ -68,12 +69,17 @@ export function FieldsRenderer({ path, fields, node, original, onPatch }: Fields
 
 		const patchValue = (newRawValue: unknown) => {
 			if (newRawValue === undefined || newRawValue === null || (typeof newRawValue === "number" && isNaN(newRawValue))) {
+				if (nullable === true) {
+					const newContent = node.removeField(original, name);
+					onPatch(newContent);
+					return;
+				}
 				const newContent = node.patchField(original, name, "null");
 				onPatch(newContent);
 				return;
 			}
 			if (hiddenIfDefault === true && newRawValue === defaultValue) {
-				const newContent = node.patchField(original, name, "NaN");
+				const newContent = node.removeField(original, name);
 				onPatch(newContent);
 				return;
 			}

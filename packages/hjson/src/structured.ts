@@ -184,6 +184,40 @@ export class HjsonObjectNode extends HjsonNode {
 		return this.insertField(original, key, newValue);
 	}
 
+	removeField(original: string, key: string): string {
+		const info = this.field(key);
+		if (!info) return original;
+
+		const fields = [...this.#fields.keys()];
+		const idx = fields.indexOf(key);
+		const totalFields = fields.length;
+
+		if (totalFields === 1) {
+			if (this.#start && this.#end) {
+				const openIdx = this.#start.index + 1;
+				const closeIdx = this.#end.index;
+				return original.slice(0, openIdx) + original.slice(closeIdx - 1);
+			}
+			return original.slice(0, info.start.index) + original.slice(info.end.index);
+		}
+
+		if (idx === 0) {
+			const nextKey = fields[1]!;
+			const nextInfo = this.#fields.get(nextKey)!;
+			return original.slice(0, info.start.index) + original.slice(nextInfo.start.index);
+		}
+
+		let start = info.start.index - 1;
+		while (start >= 0 && (original[start] === " " || original[start] === "\t" || original[start] === "\n" || original[start] === "\r")) {
+			start--;
+		}
+		if (start >= 0 && original[start] === ",") {
+			start--;
+		}
+		const commaEnd = start + 1;
+		return original.slice(0, commaEnd) + original.slice(info.end.index);
+	}
+
 	#findPrecedingComment(original: string, fromIndex: number): { text: string; start: number; end: number } | undefined {
 		let i = fromIndex - 1;
 		while (i >= 0 && (original[i] === " " || original[i] === "\t")) {
