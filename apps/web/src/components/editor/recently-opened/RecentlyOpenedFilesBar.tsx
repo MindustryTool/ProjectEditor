@@ -1,8 +1,10 @@
-import { useCallback, useMemo } from "react";
-import { X } from "lucide-react";
+import { useCallback } from "react";
+import { File, X } from "lucide-react";
 import { useProjectSession, useCurrentProject } from "@project/state";
 import { cn } from "~/lib/utils";
 import { usePath } from "#/hooks/use-path";
+import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
+import { resolveContentSprite } from "@project/utils";
 
 const EMPTY: never[] = [];
 
@@ -16,23 +18,14 @@ export function RecentlyOpenedFilesBar() {
 	const recordFileAccess = useProjectSession((state) => state.recordFileAccess);
 	const removeFromRecentFiles = useProjectSession((state) => state.removeFromRecentFiles);
 
-	const filePaths = useMemo(() => {
-		return new Set(
-			treeSnapshot
-				.getEntries()
-				.filter((e) => e.kind === "file")
-				.map((e) => e.path),
-		);
-	}, [treeSnapshot]);
-
 	const handleTabClick = useCallback(
 		(filePath: string) => {
-			if (filePaths.has(filePath)) {
+			if (treeSnapshot.contains(filePath)) {
 				recordFileAccess(projectId, filePath);
 			}
 			setPath(filePath);
 		},
-		[projectId, recordFileAccess, setPath, filePaths],
+		[projectId, recordFileAccess, setPath, treeSnapshot],
 	);
 
 	const handleClose = useCallback(
@@ -54,17 +47,18 @@ export function RecentlyOpenedFilesBar() {
 	if (recentFiles.length === 0) return null;
 
 	return (
-		<div className="flex items-center gap-px overflow-x-hidden flex-wrap bg-muted/30 py-0.5">
+		<div className="flex items-center gap-px overflow-x-hidden flex-wrap bg-muted/30 py-0.5 divide-x">
 			{recentFiles.map((entry) => {
 				const isActive = entry.path === path;
-				const isMissing = !filePaths.has(entry.path);
+				const isMissing = !treeSnapshot.contains(entry.path);
 				const name = entry.path.split("/").pop() ?? entry.path;
+
 				return (
 					<button
 						key={entry.path}
 						className={cn(
 							"group flex flex-1 shrink-0 items-center gap-1 px-2 py-1 text-xs transition-colors max-w-40",
-							isActive ? "bg-background text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground",
+							isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground",
 							isMissing && "line-through text-destructive",
 						)}
 						onClick={() => handleTabClick(entry.path)}
@@ -74,7 +68,8 @@ export function RecentlyOpenedFilesBar() {
 							handleClose(e, entry.path);
 						}}
 					>
-						<span className="w-full truncate">{name}</span>
+						{getIcon(entry.path)}
+						<span className="truncate">{name}</span>
 						<span
 							role="button"
 							tabIndex={-1}
@@ -91,4 +86,25 @@ export function RecentlyOpenedFilesBar() {
 			})}
 		</div>
 	);
+}
+
+function getIcon(path: string) {
+	if (path.endsWith(".png")) {
+		return <ImageFilePreview path={path} showSize={false} className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4" />;
+	}
+
+	const assetPath = resolveContentSprite(path);
+
+	if (assetPath) {
+		return (
+			<ImageFilePreview
+				path={assetPath}
+				showSize={false}
+				className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4"
+				fallback={<File />}
+			/>
+		);
+	}
+
+	return <File className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4" />;
 }

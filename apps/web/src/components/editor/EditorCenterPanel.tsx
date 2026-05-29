@@ -1,4 +1,4 @@
-import { lazy, memo, Suspense, useEffect, useMemo } from "react";
+import { lazy, memo, Suspense, useEffect } from "react";
 import { useFileContentString, useProjectSession } from "@project/state";
 import { getLanguageFromPath } from "~/lib/monaco/languageMap";
 import { RecentlyOpenedFilesBar } from "./recently-opened/RecentlyOpenedFilesBar";
@@ -50,20 +50,11 @@ export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: Edito
 	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
 	const recordFileAccess = useProjectSession((s) => s.recordFileAccess);
 
-	const filePaths = useMemo(() => {
-		return new Set(
-			treeSnapshot
-				.getEntries()
-				.filter((e) => e.kind === "file")
-				.map((e) => e.path),
-		);
-	}, [treeSnapshot]);
-
 	useEffect(() => {
-		if (path && projectContext && filePaths.has(path)) {
+		if (path && projectContext && treeSnapshot.contains(path)) {
 			recordFileAccess(projectContext.project.id, path);
 		}
-	}, [path, projectContext, filePaths, recordFileAccess]);
+	}, [path, projectContext, treeSnapshot, recordFileAccess]);
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col">

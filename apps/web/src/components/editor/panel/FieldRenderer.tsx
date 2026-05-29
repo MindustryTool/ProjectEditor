@@ -16,44 +16,24 @@ import { HjsonNode, HjsonValueNode, HjsonArrayNode, HjsonObjectNode } from "@pro
 import { Plus, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
 import { type ReactNode } from "react";
-
-export type FieldTypes = {
-	String: HjsonValueNode<string>;
-	Int: HjsonValueNode<number>;
-	Float: HjsonValueNode<number>;
-	Double: HjsonValueNode<number>;
-	Boolean: HjsonValueNode<boolean>;
-	HexColor: HjsonValueNode<string>;
-	Research: HjsonValueNode<Research> | HjsonObjectNode;
-	Array: HjsonArrayNode;
-	Object: HjsonObjectNode;
-};
-export type FieldType = keyof FieldTypes;
-
-export interface Field {
-	name: string;
-	type: FieldType;
-	defaultValue?: unknown;
-	nullable?: boolean;
-	itemType?: FieldType;
-	fields?: Field[];
-}
+import { detectSchemaType, getSchemaEntries, getArrayItemSchema, hasNullishWrapper, type AnySchema } from "@project/validation";
 
 interface FieldsRendererProps {
 	path: string;
-	fields: Field[];
+	schema: AnySchema;
 	node: HjsonObjectNode;
 	original: string;
 	onPatch: (newContent: string) => void;
 }
 
-export function FieldsRenderer({ path, fields, node, original, onPatch }: FieldsRendererProps) {
+export function FieldsRenderer({ path, schema, node, original, onPatch }: FieldsRendererProps) {
 	const issues = useValidationStore((state) => state.resultsByPath[path]);
+	const entries = getSchemaEntries(schema);
 
-	return fields.map((field) => {
-		const { name, type, defaultValue, nullable, itemType, fields: subFields } = field;
-		const key = name + type + path;
-		const Renderer = fieldRenderers[type] as FieldRenderer | undefined;
+	return entries.map(([name, entrySchema]) => {
+		const key = name + path;
+		const type = detectSchemaType(entrySchema);
+		const Renderer = schemaRenderers[type] as SchemaRenderer | undefined;
 
 		if (Renderer === undefined) {
 			return (
@@ -65,20 +45,16 @@ export function FieldsRenderer({ path, fields, node, original, onPatch }: Fields
 
 		const issue = issues?.filter((issue) => issue.field === name);
 		const childNode = node.get(name);
+		const isNullable = hasNullishWrapper(entrySchema);
 
 		const patchValue = (newRawValue: unknown) => {
 			if (newRawValue === undefined || newRawValue === null || (typeof newRawValue === "number" && isNaN(newRawValue))) {
-				if (nullable === true) {
+				if (isNullable) {
 					const newContent = node.removeField(original, name);
 					onPatch(newContent);
 					return;
 				}
 				const newContent = node.patchField(original, name, "null");
-				onPatch(newContent);
-				return;
-			}
-			if (newRawValue === defaultValue) {
-				const newContent = node.removeField(original, name);
 				onPatch(newContent);
 				return;
 			}
@@ -95,8 +71,7 @@ export function FieldsRenderer({ path, fields, node, original, onPatch }: Fields
 					original={original}
 					onPatch={onPatch}
 					patchValue={patchValue}
-					itemType={itemType}
-					subFields={subFields}
+					entrySchema={entrySchema as AnySchema}
 				/>
 				{issue?.map((issue, index) => (
 					<span key={(issue.code || "") + index} className="text-red-400">
@@ -107,28 +82,19 @@ export function FieldsRenderer({ path, fields, node, original, onPatch }: Fields
 		);
 	});
 }
-
-interface FieldRendererAdditionalProps {
-	itemType?: FieldType;
-	subFields?: Field[];
-}
-
-type FieldRenderer = (
+type SchemaRenderer = (
 	props: {
 		name: string;
 		node: HjsonNode;
 		original: string;
 		onPatch: (newContent: string) => void;
 		patchValue: (newRawValue: unknown) => void;
-	} & FieldRendererAdditionalProps,
+		entrySchema: AnySchema;
+	},
 ) => ReactNode;
 
-type FieldRendererMap = {
-	[K in keyof FieldTypes]: FieldRenderer;
-};
-
-const fieldRenderers: FieldRendererMap = {
-	String: ({ name, node, patchValue }) => {
+const schemaRenderers: Record<string, SchemaRenderer> = {
+	string: ({ name, node, patchValue }) => {
 		const value = node.isString() ? node.valueOf() : "";
 		return (
 			<FormField>
@@ -139,7 +105,7 @@ const fieldRenderers: FieldRendererMap = {
 			</FormField>
 		);
 	},
-	Int: ({ name, node, patchValue }) => {
+	number: ({ name, node, patchValue }) => {
 		const value = node.isNumber() ? node.valueOf() : "";
 		return (
 			<FormField>
@@ -150,29 +116,7 @@ const fieldRenderers: FieldRendererMap = {
 			</FormField>
 		);
 	},
-	Float: ({ name, node, patchValue }) => {
-		const value = node.isNumber() ? node.valueOf() : "";
-		return (
-			<FormField>
-				<FormLabel>{name}</FormLabel>
-				<FormControl>
-					<Input value={value} onChange={(v) => patchValue(v.currentTarget.valueAsNumber)} type="number" />
-				</FormControl>
-			</FormField>
-		);
-	},
-	Double: ({ name, node, patchValue }) => {
-		const value = node.isNumber() ? node.valueOf() : "";
-		return (
-			<FormField>
-				<FormLabel>{name}</FormLabel>
-				<FormControl>
-					<Input value={value} onChange={(v) => patchValue(v.currentTarget.valueAsNumber)} type="number" />
-				</FormControl>
-			</FormField>
-		);
-	},
-	Boolean: ({ name, node, patchValue }) => {
+	boolean: ({ name, node, patchValue }) => {
 		const checked = node.isBoolean() ? node.valueOf() : false;
 		return (
 			<FormField>
@@ -183,7 +127,7 @@ const fieldRenderers: FieldRendererMap = {
 			</FormField>
 		);
 	},
-	HexColor: ({ name, node, patchValue }) => {
+	"hex-color": ({ name, node, patchValue }) => {
 		const value = node.isString() ? node.valueOf() : "";
 		return (
 			<FormField>
@@ -211,7 +155,7 @@ const fieldRenderers: FieldRendererMap = {
 			</FormField>
 		);
 	},
-	Research: ({ name, node, original, onPatch, patchValue }) => {
+	research: ({ name, node, original, onPatch, patchValue }) => {
 		const items = useItems({ project: true, base: true });
 
 		function getCurrentValue(): Research | string | null {
@@ -386,10 +330,12 @@ const fieldRenderers: FieldRendererMap = {
 			</>
 		);
 	},
-	Array: ({ name, node, original, onPatch, itemType }) => {
+	array: ({ name, node, original, onPatch, entrySchema }) => {
 		if (!node.isArray()) return null;
 		const arrNode = node as HjsonArrayNode;
 		const items = arrNode.elements();
+		const itemSchema = getArrayItemSchema(entrySchema);
+		const itemType = itemSchema ? detectSchemaType(itemSchema) : null;
 
 		function handleRemove(index: number) {
 			const newContent = arrNode.removeElement(original, index);
@@ -403,7 +349,7 @@ const fieldRenderers: FieldRendererMap = {
 		}
 
 		function handleAdd() {
-			const serialized = itemType ? HJSON.stringify(defaultForType(itemType)) : '""';
+			const serialized = itemSchema ? HJSON.stringify(defaultForDetectedType(itemSchema)) : '""';
 			const newContent = arrNode.insertElement(original, items.length, serialized);
 			onPatch(newContent);
 		}
@@ -417,7 +363,7 @@ const fieldRenderers: FieldRendererMap = {
 						{items.map((el, index) => (
 							<div key={index} className="flex items-center gap-2">
 								<div className="flex-1">
-									<ArrayItemEditor value={el.value} itemType={itemType} onChange={(v) => handleItemChange(index, v)} />
+									<SchemaArrayItemEditor value={el.value} itemType={itemType} itemSchema={itemSchema} onChange={(v) => handleItemChange(index, v)} />
 								</div>
 								<Button className="size-9 shrink-0" type="button" variant="outline" onClick={() => handleRemove(index)}>
 									<X />
@@ -432,23 +378,16 @@ const fieldRenderers: FieldRendererMap = {
 			</FormField>
 		);
 	},
-	Object: ({ name, node, original, onPatch }) => {
+	object: ({ name, node, original, onPatch, entrySchema }) => {
 		if (!node.isObject()) return null;
 		const objNode = node as HjsonObjectNode;
-
-		const subFields: Field[] = [];
-		for (const fi of objNode.fields()) {
-			const fieldNode = fi.value as HjsonNode;
-			const fieldType = inferFieldType(fieldNode);
-			subFields.push({ name: fi.key, type: fieldType });
-		}
 
 		return (
 			<FormField>
 				<FormLabel>{name}</FormLabel>
 				<FormControl>
 					<div className="pl-4 border-l-2 border-border space-y-2">
-						<FieldsRenderer path={name} fields={subFields} node={objNode} original={original} onPatch={onPatch} />
+						<FieldsRenderer path={name} schema={entrySchema} node={objNode} original={original} onPatch={onPatch} />
 					</div>
 				</FormControl>
 			</FormField>
@@ -456,12 +395,19 @@ const fieldRenderers: FieldRendererMap = {
 	},
 };
 
-function ArrayItemEditor({ value, itemType, onChange }: { value: unknown; itemType?: FieldType; onChange: (v: unknown) => void }) {
-	const renderer = itemType ? fieldRenderers[itemType] : fieldRenderers.String;
+function getSchemaRenderer(type: string | null): SchemaRenderer {
+	if (type) {
+		const r = schemaRenderers[type];
+		if (r) return r;
+	}
+	return schemaRenderers.string!;
+}
+
+function SchemaArrayItemEditor({ value, itemType, itemSchema, onChange }: { value: unknown; itemType: string | null; itemSchema: AnySchema | null; onChange: (v: unknown) => void }) {
+	const renderer = getSchemaRenderer(itemType);
 	const node =
 		value instanceof HjsonNode ? value : new HjsonValueNode<unknown>(value, { row: 0, col: 0, index: 0 }, { row: 0, col: 0, index: 0 });
-	const typeName = itemType || "String";
-	const name = typeName.toLowerCase();
+	const name = itemType || "string";
 
 	return (
 		<ErrorBoundary key={name}>
@@ -471,34 +417,27 @@ function ArrayItemEditor({ value, itemType, onChange }: { value: unknown; itemTy
 				original: "",
 				onPatch: () => {},
 				patchValue: (v) => onChange(v),
+				entrySchema: itemSchema ?? (null as unknown as AnySchema),
 			})}
 		</ErrorBoundary>
 	);
 }
 
-function defaultForType(type: FieldType): unknown {
+function defaultForDetectedType(schema: AnySchema): unknown {
+	const type = detectSchemaType(schema);
 	switch (type) {
-		case "String":
-		case "HexColor":
+		case "string":
+		case "hex-color":
 			return "";
-		case "Int":
-		case "Float":
-		case "Double":
+		case "number":
 			return 0;
-		case "Boolean":
+		case "boolean":
 			return false;
-		case "Research":
+		case "research":
 			return "";
 		default:
 			return "";
 	}
 }
 
-function inferFieldType(node: HjsonNode): FieldType {
-	if (node.isString()) return "String";
-	if (node.isNumber()) return "Float";
-	if (node.isBoolean()) return "Boolean";
-	if (node.isObject()) return "Object";
-	if (node.isArray()) return "Array";
-	return "String";
-}
+

@@ -23,3 +23,8 @@ export type { ModHjsonData } from "./mod-hjson";
 
 export { ItemHjsonSchema, ResearchSchema } from "./item";
 export type { ItemHjsonData, Research } from "./item";
+
+export { ContentNameSchema, MindustryHexColorSchema } from "./base";
+
+export { unwrapSchema, hasNullishWrapper, detectSchemaType, getSchemaEntries, getArrayItemSchema } from "./schema-utils";
+export type { AnySchema } from "./schema-utils";
