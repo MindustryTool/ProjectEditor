@@ -97,7 +97,7 @@ export function FileExplorer({ className }: FileExplorerProps) {
 	}
 
 	return (
-		<div className={cn("space-y-0.5 h-full", className)}>
+		<div className={cn("space-y-0.5 h-full w-full", className)}>
 			<FileExplorerCtx.Provider
 				value={{
 					selectedPath: path ?? null,
@@ -436,7 +436,7 @@ function TreeNodeItem({ node, depth = 0 }: TreeNodeItemProps) {
 					<span className={cn("flex-1 truncate", filenameClass)}>{node.name}</span>
 				)}
 				{showActions && (isFolder || !isDefault) && (
-					<div className={cn("flex items-center gap-0.5", !isSelected && "invisible group-hover:visible", isSelected && "visible")}>
+					<div className={cn("flex items-center gap-0.5 ml-auto", !isSelected && "invisible group-hover:visible", isSelected && "visible")}>
 						{isFolder && (
 							<button
 								onClick={handleCreateClick}
