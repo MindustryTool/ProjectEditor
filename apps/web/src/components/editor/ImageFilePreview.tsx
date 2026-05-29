@@ -1,5 +1,5 @@
-import { cn } from "#/lib/utils";
-import { useFileContent, useFileContentImageUrl } from "@project/state";
+import { cn, getImageUrl } from "#/lib/utils";
+import { useFileContent } from "@project/state";
 import { resolveContentSprite } from "@project/utils";
 import { useState, type ReactNode } from "react";
 
@@ -27,12 +27,13 @@ export function ImageFilePreview({ path, className, showSize = true, fallback }:
 	}
 
 	const { data } = useFileContent(resolvedPath);
-	const objectUrl = useFileContentImageUrl(data);
 	const [size, setSize] = useState({ width: 0, height: 0 });
 
-	if (objectUrl === null) {
+	if (data === null) {
 		return <div className={cn("relative flex justify-center items-center h-full w-full", className)}>{fallback}</div>;
 	}
+
+	const objectUrl = getImageUrl(data);
 
 	return (
 		<div className={cn("relative flex justify-center items-center h-full w-full overflow-hidden", className)}>

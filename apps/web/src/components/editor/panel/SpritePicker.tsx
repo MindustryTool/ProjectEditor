@@ -1,9 +1,10 @@
 import { useCallback, useRef } from "react";
-import { useCurrentProject, useProjectSession, useFileContent, useFileContentImageUrl } from "@project/state";
+import { useCurrentProject, useProjectSession, useFileContent } from "@project/state";
 import { Button } from "#/components/ui/button";
 import { FormControl, FormField, FormLabel } from "#/components/ui/form";
 import { resolveContentSprite } from "@project/utils";
 import { File, Trash2, Upload } from "lucide-react";
+import { getImageUrl } from "#/lib/utils";
 
 interface SpritePickerProps {
 	path: string;
@@ -30,7 +31,6 @@ function SpriteViewer({ path: spritePath }: { path: string }) {
 	const { fs } = useCurrentProject();
 	const { data, isLoading, isError, error, write } = useFileContent(spritePath);
 	const inputRef = useRef<HTMLInputElement>(null);
-	const objectUrl = useFileContentImageUrl(data);
 
 	const handleReplace = useCallback(() => {
 		inputRef.current?.click();
@@ -63,6 +63,12 @@ function SpriteViewer({ path: spritePath }: { path: string }) {
 			</div>
 		);
 	}
+
+	if (!data || data.byteLength === 0) {
+		return <p className="text-sm text-muted-foreground">No sprite set</p>;
+	}
+
+	const objectUrl = getImageUrl(data);
 
 	return (
 		<div className="relative">

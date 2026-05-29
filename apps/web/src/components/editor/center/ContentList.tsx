@@ -1,4 +1,4 @@
-import { useCurrentProject, useFileContent, useFileContentImageUrl } from "@project/state";
+import { useCurrentProject, useFileContent } from "@project/state";
 import React, { useEffect, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { File, Folder } from "lucide-react";
@@ -11,7 +11,7 @@ import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
 import { usePath } from "#/hooks/use-path";
-import { cn } from "#/lib/utils";
+import { cn, getImageUrl } from "#/lib/utils";
 
 export function ContentList({ path }: { path: string }) {
 	const context = useCurrentProject();
@@ -67,11 +67,12 @@ export function ContentList({ path }: { path: string }) {
 
 function SpritePreview({ path }: { path: string }) {
 	const { data, isLoading, isError } = useFileContent(path);
-	const objectUrl = useFileContentImageUrl(data);
 
 	if (isError || isLoading || !data || data.byteLength === 0) {
 		return <File className="text-muted-foreground w-full h-full" strokeWidth={1} />;
 	}
+
+	const objectUrl = getImageUrl(data);
 
 	if (objectUrl === null) {
 		return <div className="flex h-full w-full" />;
