@@ -14,7 +14,7 @@ export function Panel({ header, children, className }: PanelProps) {
 				<div className="flex items-center py-1 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">{header}</div>
 			)}
 			<div className="overflow-y-auto h-full flex px-4 flex-col">
-				<div className="flex w-full mb-20">{children}</div>
+				<div className="flex w-full mb-10">{children}</div>
 			</div>
 		</div>
 	);

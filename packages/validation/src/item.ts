@@ -56,6 +56,7 @@ export const ItemHjsonSchema = v.object({
 	healthScaling: v.nullish(v.pipe(v.number(), v.minValue(0))),
 	color: v.nullish(MindustryHexColorSchema),
 	research: ResearchSchema,
+	lowPriority: v.nullish(v.boolean()),
 });
 
 export type ItemHjsonData = v.InferOutput<typeof ItemHjsonSchema>;

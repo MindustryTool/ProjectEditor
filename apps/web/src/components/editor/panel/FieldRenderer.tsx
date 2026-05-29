@@ -1,4 +1,5 @@
 import { ContentApiImage } from "#/components/editor/ContentApiImage";
+import { ContentImage } from "#/components/editor/ContentImage";
 import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
 import { Button } from "#/components/ui/button";
 import { Checkbox } from "#/components/ui/checkbox";
@@ -220,15 +221,7 @@ const fieldRenderers: FieldRendererMap = {
 								<Dialog>
 									<DialogTrigger asChild>
 										<Button variant="outline" size="icon">
-											{selectedItem ? (
-												selectedItem.type === "project" ? (
-													<ImageFilePreview path={selectedItem.path} showSize={false} />
-												) : (
-													<ContentApiImage type="items" name={selectedItem.name} />
-												)
-											) : (
-												item
-											)}
+											{selectedItem ? <ContentImage className="p-1" entry={selectedItem} /> : item}
 										</Button>
 									</DialogTrigger>
 									<DialogContent className="w-sm" showCloseButton={false}>
@@ -246,11 +239,7 @@ const fieldRenderers: FieldRendererMap = {
 												.filter((i) => !addedReq.includes(i.name))
 												.map((item) => (
 													<ToggleGroupItem key={item.name} value={item.name}>
-														{item.type === "project" ? (
-															<ImageFilePreview path={item.path} showSize={false} />
-														) : (
-															<ContentApiImage type="items" name={item.name} />
-														)}
+														<ContentImage entry={item} />
 													</ToggleGroupItem>
 												))}
 										</ToggleGroup>

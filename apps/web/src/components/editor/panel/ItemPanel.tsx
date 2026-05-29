@@ -78,6 +78,12 @@ export function ItemPanel({ path }: ItemPanelProps) {
 			defaultValue: false,
 			hiddenIfDefault: true,
 		},
+		{
+			name: "lowPriority",
+			type: "Boolean",
+			defaultValue: false,
+			hiddenIfDefault: true,
+		},
 	] satisfies Field[];
 
 	function handleUpdate(field: string, value: any | undefined) {
