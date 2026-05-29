@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, useEffect, createContext, useContext } from "react";
+import { useMemo, useState, useRef, useEffect, useCallback, createContext, useContext } from "react";
 import { File, Folder, FolderOpen, ChevronRight, ChevronDown, Pencil, Trash2, Plus, MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { isDefaultPath, type TreeNode } from "@project/fs";
@@ -193,7 +193,9 @@ function CreateFileForm({
 	const [error, setError] = useState("");
 
 	const isContentType = contentTypes.has(type);
-	const [getTemplateContent, setGetTemplateContent] = useState<() => Promise<string>>(async () => "");
+	const getTemplateContentRef = useRef<() => Promise<string>>(async () => "");
+	const handleGetTemplateContent = useCallback(async () => getTemplateContentRef.current(), []);
+	const handleSetTemplateContent = useCallback((fn: () => Promise<string>) => { getTemplateContentRef.current = fn; }, []);
 
 	async function handleCreate() {
 		const trimmed = name.trim();
@@ -211,7 +213,7 @@ function CreateFileForm({
 				await context.fs.mkdir(fullPath);
 				onSuccess(fullPath);
 			} else {
-				const content = await getTemplateContent();
+				const content = await handleGetTemplateContent();
 				await context.fs.writeTextFile(fullPath, content);
 				onSuccess(fullPath);
 			}
@@ -249,7 +251,7 @@ function CreateFileForm({
 					</SelectContent>
 				</Select>
 			</div>
-			{isContentType && <TemplateSelector type={type} name={name} onContentReady={setGetTemplateContent} />}
+			{isContentType && <TemplateSelector type={type} name={name} onContentReady={handleSetTemplateContent} />}
 			{error && <p className="text-sm text-red-400">{error}</p>}
 			<DialogFooter>
 				<Button variant="outline" onClick={onCancel}>

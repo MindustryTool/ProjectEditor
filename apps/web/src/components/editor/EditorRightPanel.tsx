@@ -11,7 +11,7 @@ export const EditorRightPanel = memo(function EditorRightPanel({ path }: EditorR
 		return null;
 	}
 
-	if (path === "mod.hjson") {
+	if (path === "mod.hjson" || path === "mod.json") {
 		return <ModHjsonPanel path={path} />;
 	}
 
