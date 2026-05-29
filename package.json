@@ -1,7 +1,7 @@
 {
   "name": "project-editor",
   "private": true,
-  "packageManager": "pnpm@10.4.0",
+  "packageManager": "pnpm@11.5.0",
   "engines": {
     "node": ">=22"
   },
@@ -16,8 +16,8 @@
     "format:fix": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\""
   },
   "devDependencies": {
-    "turbo": "catalog:",
     "prettier": "catalog:",
+    "turbo": "catalog:",
     "typescript": "^5.7.0"
   }
 }

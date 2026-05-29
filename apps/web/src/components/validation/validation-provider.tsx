@@ -1,5 +1,13 @@
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
-import { useFileStore, useValidationStore, Severity, createDefaultValidators, createValidationRunner, useAppStore } from "@project/state";
+import {
+	useFileStore,
+	useValidationStore,
+	Severity,
+	createDefaultValidators,
+	createValidationRunner,
+	useAppStore,
+	useProjectSession,
+} from "@project/state";
 import type { ValidationContext } from "@project/state";
 import { useShallow } from "zustand/react/shallow";
 import { useItems } from "#/hooks/use-items";
@@ -39,6 +47,7 @@ function runValidation(
 ) {
 	const path = extractPath(compositeKey);
 	const existing = timers.get(path);
+
 	if (existing) clearTimeout(existing);
 
 	timers.set(
@@ -64,11 +73,9 @@ function shouldValidate(
 	currEntry: { currentVersion: number; loading?: boolean },
 	prevEntry: { currentVersion?: number; loading?: boolean } | undefined,
 ) {
-	return (
-		currEntry.currentVersion !== (prevEntry?.currentVersion ?? 0) ||
-		prevEntry === undefined ||
-		prevEntry.loading === true
-	);
+	if (currEntry.loading) return false;
+
+	return currEntry.currentVersion !== (prevEntry?.currentVersion ?? 0) || prevEntry === undefined || prevEntry.loading === true;
 }
 
 function handleFileChanges(
@@ -96,8 +103,23 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 	const timersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
 	const validationDelayMs = useAppStore(useShallow((s) => s.settings.validationDelayMs));
 	const items = useItems({ base: true, project: true });
+	const projectContext = useProjectSession((s) => s.projectContext);
 
 	const context = useMemo(() => ({ getItems: () => items }), [items]);
+
+	useEffect(() => {
+		if (!projectContext) {
+			return;
+		}
+
+		const unsub = useValidationStore.persist.onFinishHydration((state) => {
+			for (const path of Object.keys(state.results.resultsByPath)) {
+				useFileStore.getState().readFile(projectContext.project.id, path, projectContext.fs);
+			}
+		});
+
+		return unsub;
+	}, [projectContext]);
 
 	useEffect(() => {
 		const timers = timersRef.current;

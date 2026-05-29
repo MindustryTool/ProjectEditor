@@ -82,8 +82,13 @@ export function createEventBus<T extends { [K in keyof T]: unknown[] }>(): Event
 		const set = handlers.get(key);
 		if (!set) return;
 		for (const h of [...set]) {
-			try { h(...args); } catch (e) { console.error(e); }
+			try {
+				h(...args);
+			} catch (e) {
+				console.error(e);
+			}
 		}
+		console.log(`Emitted ${key} with ${JSON.stringify(args)}`);
 	}
 
 	return { on, off, once, emit };
