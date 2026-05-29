@@ -47,6 +47,8 @@ export type EventMap = Record<string, unknown[]>;
 
 export interface EventBus<T extends EventMap = EventMap> {
 	on<K extends keyof T>(event: K, handler: (...args: T[K]) => void): Unsubscribe;
+	off<K extends keyof T>(event: K, handler: (...args: T[K]) => void): void;
+	once<K extends keyof T>(event: K, handler: (...args: T[K]) => void): Unsubscribe;
 	emit<K extends keyof T>(event: K, ...args: T[K]): void;
 }
 
@@ -62,13 +64,29 @@ export function createEventBus<T extends EventMap = EventMap>(): EventBus<T> {
 		};
 	}
 
-	function emit<K extends keyof T>(event: K, ...args: T[K]): void {
+	function off<K extends keyof T>(event: K, handler: (...args: T[K]) => void): void {
 		const key = String(event);
-		console.log(`emit ${key} ${JSON.stringify(args)}`);
-		handlers.get(key)?.forEach((h) => h(...args));
+		handlers.get(key)?.delete(handler as (...args: unknown[]) => void);
 	}
 
-	return { on, emit };
+	function once<K extends keyof T>(event: K, handler: (...args: T[K]) => void): Unsubscribe {
+		const wrapped = (...args: T[K]) => {
+			off(event, wrapped as (...args: T[K]) => void);
+			handler(...args);
+		};
+		return on(event, wrapped as (...args: T[K]) => void);
+	}
+
+	function emit<K extends keyof T>(event: K, ...args: T[K]): void {
+		const key = String(event);
+		const set = handlers.get(key);
+		if (!set) return;
+		for (const h of [...set]) {
+			try { h(...args); } catch (e) { console.error(e); }
+		}
+	}
+
+	return { on, off, once, emit };
 }
 
 export { getExporter } from "./exporter.js";
@@ -79,6 +97,4 @@ export type { ImportResult } from "./importer.js";
 
 export interface ProjectEventMap extends EventMap {
 	"file:changed": [{ path: string; kind: "write" | "delete" | "rename" | "create" | "mkdir" }];
-	"project:saved": [];
-	"project:opened": [{ projectId: string }];
 }

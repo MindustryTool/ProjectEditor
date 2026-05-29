@@ -1,6 +1,5 @@
 import { lazy, memo, Suspense, useEffect, useMemo } from "react";
 import { useFileContentString, useProjectSession } from "@project/state";
-import { ContentList } from "#/components/editor/center/ContentList";
 import { getLanguageFromPath } from "~/lib/monaco/languageMap";
 import { RecentlyOpenedFilesBar } from "./recently-opened/RecentlyOpenedFilesBar";
 import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
@@ -29,13 +28,6 @@ function EditorContent({ path }: { path: string }) {
 		return <EditorWithMonaco path={path} />;
 	}
 
-	if (
-		path.startsWith("content") &&
-		(path.endsWith("blocks") || path.endsWith("items") || path.endsWith("liquids") || path.endsWith("units"))
-	) {
-		return <ContentList path={path} />;
-	}
-
 	if (path.endsWith(".png")) {
 		return <ImageFilePreview path={path} />;
 	}
@@ -50,7 +42,7 @@ function EditorContent({ path }: { path: string }) {
 		return <EditorWithMonaco path={path} />;
 	}
 
-	return <ContentList path={path} />;
+	return null;
 }
 
 export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: EditorCenterPanelProps) {

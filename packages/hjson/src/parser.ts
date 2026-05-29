@@ -13,7 +13,6 @@ import {
 } from "./structured.js";
 
 export interface HJSONParseOptions {
-	keepQuote?: boolean;
 	legacyRoot?: boolean;
 	structured?: boolean;
 }

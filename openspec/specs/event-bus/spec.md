@@ -19,20 +19,24 @@ The system SHALL provide an `EventBus` type with typed event maps for publish/su
 - **WHEN** an event is emitted
 - **THEN** the payload type matches the declared event map type
 
+#### Scenario: Off method
+- **WHEN** `events.off("file:changed", handler)` is called
+- **THEN** the handler is no longer invoked for that event
+
+#### Scenario: Once handler fires once
+- **WHEN** `events.once("file:changed", handler)` is called and the event is emitted twice
+- **THEN** the handler SHALL be invoked only on the first emission
+
+#### Scenario: Error-safe emit
+- **WHEN** `emit()` is called with multiple subscribed handlers and one handler throws
+- **THEN** the exception SHALL NOT prevent subsequent handlers from executing
+
 ### Requirement: Project event types
 The system SHALL define an `ProjectEventMap` with standard project lifecycle events.
 
 #### Scenario: file:changed event
 - **WHEN** a file is written, deleted, or renamed
 - **THEN** a `file:changed` event is emitted with `{ path: string, kind: "write" | "delete" | "rename" }`
-
-#### Scenario: project:saved event
-- **WHEN** the project is saved to storage
-- **THEN** a `project:saved` event is emitted
-
-#### Scenario: project:opened event
-- **WHEN** a project is loaded and the context is initialized
-- **THEN** a `project:opened` event is emitted with `{ projectId: string }`
 
 ### Requirement: EventBus factory function
 The system SHALL provide a `createEventBus()` factory that returns a new `EventBus` instance.
