@@ -4,7 +4,7 @@
 The system SHALL provide composite hooks for each Mindustry content type that merge project entries and base API data, returning items with async content loading capability.
 
 #### Scenario: Hook returns project + base entries
-- **WHEN** `useBlocks()`, `useUnits()`, `useLiquids()`, `useStatuses()`, `useSectors()`, or `useEnvBlocks()` is called
+- **WHEN** `useBlocks()`, `useUnits()`, `useLiquids()`, `useStatuses()`, `useSectors()` is called
 - **THEN** it SHALL return an array of `{ name: string; type: "project" | "base"; path: string; getContent: (fs: ProjectFileSystem) => Promise<unknown> }`
 - **WHEN** project entries exist in `content/<type>/`
 - **THEN** they SHALL be included with `type: "project"` and `getContent` reading the file via `fs.readTextFile(path)` and parsing as JSON

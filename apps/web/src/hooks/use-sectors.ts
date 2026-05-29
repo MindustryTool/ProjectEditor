@@ -1,15 +1,10 @@
 import { useBaseSectors } from "#/hooks/use-base-sectors";
 import { useProjectSession, useCurrentProject } from "@project/state";
 import { useMemo } from "react";
-import { useShallow } from "zustand/react/shallow";
 import type { ContentEntry } from "./use-blocks";
 
 export function useSectors(): ContentEntry[] {
-	const projectItems = useProjectSession(
-		useShallow((s) =>
-			s.treeSnapshot.getEntries().filter((e) => e.kind === "file" && e.path.includes("content/sectors") && e.name.endsWith(".json")),
-		),
-	);
+	const projectItems = useProjectSession(s => s.treeSnapshot.sectors);
 
 	const { data } = useBaseSectors();
 	const { fs } = useCurrentProject();

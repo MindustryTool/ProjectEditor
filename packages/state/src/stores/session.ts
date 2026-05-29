@@ -37,7 +37,46 @@ function removeEntry(entries: RecentFileEntry[], path: string): RecentFileEntry[
 }
 
 export class TreeSnapshot {
-	constructor(private readonly entries: FileEntry[]) {}
+	readonly items: FileEntry[];
+	readonly blocks: FileEntry[];
+	readonly liquids: FileEntry[];
+	readonly sectors: FileEntry[];
+	readonly statuses: FileEntry[];
+	readonly units: FileEntry[];
+
+	constructor(private readonly entries: FileEntry[]) {
+		const items: FileEntry[] = [];
+		const blocks: FileEntry[] = [];
+		const liquids: FileEntry[] = [];
+		const sectors: FileEntry[] = [];
+		const statuses: FileEntry[] = [];
+		const units: FileEntry[] = [];
+
+		for (const entry of this.entries) {
+			if (entry.kind === "file") {
+				if (entry.path.includes("content/items") && entry.name.endsWith(".json")) {
+					items.push(entry);
+				} else if (entry.path.includes("content/blocks") && entry.name.endsWith(".json")) {
+					blocks.push(entry);
+				} else if (entry.path.includes("content/liquids") && entry.name.endsWith(".json")) {
+					liquids.push(entry);
+				} else if (entry.path.includes("content/sectors") && entry.name.endsWith(".json")) {
+					sectors.push(entry);
+				} else if (entry.path.includes("content/status") && entry.name.endsWith(".json")) {
+					statuses.push(entry);
+				} else if (entry.path.includes("content/units") && entry.name.endsWith(".json")) {
+					units.push(entry);
+				}
+			}
+		}
+
+		this.items = items;
+		this.blocks = blocks;
+		this.liquids = liquids;
+		this.sectors = sectors;
+		this.statuses = statuses;
+		this.units = units;
+	}
 
 	getEntries() {
 		return this.entries;

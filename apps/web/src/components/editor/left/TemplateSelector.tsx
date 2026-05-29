@@ -17,7 +17,6 @@ import { useUnits } from "#/hooks/use-units";
 import { useLiquids } from "#/hooks/use-liquids";
 import { useStatuses } from "#/hooks/use-statuses";
 import { useSectors } from "#/hooks/use-sectors";
-import { useEnvBlocks } from "#/hooks/use-env-blocks";
 import { getEffectTemplate } from "./templates";
 import type { ContentEntry } from "#/hooks/use-blocks";
 
@@ -120,7 +119,6 @@ const UnitsSelector = createHookSelector(useUnits);
 const LiquidsSelector = createHookSelector(useLiquids);
 const StatusesSelector = createHookSelector(useStatuses);
 const SectorsSelector = createHookSelector(useSectors);
-const EnvBlocksSelector = createHookSelector(useEnvBlocks);
 
 function EffectEntries({ onContentReady, name }: { onContentReady: (fn: () => Promise<string>) => void; name: string }) {
 	const [choice, setChoice] = useState(NONE);
@@ -184,8 +182,6 @@ export function TemplateSelector({
 			return <StatusesSelector onContentReady={onContentReady} />;
 		case "sector":
 			return <SectorsSelector onContentReady={onContentReady} />;
-		case "env-block":
-			return <EnvBlocksSelector onContentReady={onContentReady} />;
 		case "effect":
 			return <EffectEntries onContentReady={onContentReady} name={name ?? ""} />;
 		default:
