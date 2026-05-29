@@ -51,3 +51,16 @@ The system SHALL provide a reusable Valibot schema `ModNameSchema` that validate
 #### Scenario: Empty string rejected
 - **WHEN** an empty string `""` is validated
 - **THEN** the schema SHALL reject with a validation error
+
+### Requirement: Schema package renamed from @project/validation to @project/schema
+The package containing the schema definitions SHALL be named `@project/schema`, residing at `packages/schema/`.
+
+**Package name change:** FROM `@project/validation` TO `@project/schema`
+
+#### Scenario: Package installed under new name
+- **WHEN** `@project/schema` is listed as a dependency in a consumer's `package.json`
+- **THEN** `pnpm install` SHALL resolve to `packages/schema/` without errors
+
+#### Scenario: Old package name unresolved
+- **WHEN** a consumer tries to import from `@project/validation`
+- **THEN** the import SHALL fail with a module-not-found error

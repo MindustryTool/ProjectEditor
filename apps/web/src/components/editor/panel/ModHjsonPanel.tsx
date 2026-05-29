@@ -5,9 +5,9 @@ import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import { FormField, FormLabel, FormControl, FormDescription, FormMessage } from "~/components/ui/form";
 import { Field, FieldContent, FieldLabel, FieldDescription } from "~/components/ui/field";
-import { type ModHjsonData } from "@project/validation";
+import { type ModHjsonData } from "@project/schema";
 import { useState, useEffect, useRef, useMemo } from "react";
-import { useFileContentString, useValidationStore } from "@project/state";
+import { useFileString, useValidationStore } from "@project/state";
 import { Panel } from "@/components/editor/Panel";
 import { HJSON, HjsonObjectNode } from "@project/hjson";
 import { cn, EMPTY_ARRAY } from "#/lib/utils";
@@ -107,11 +107,10 @@ function DependenciesFieldRow({ label, description, dependencies, onChange, onAd
 
 export function ModHjsonPanel({ path }: { path: string }) {
 	const { t } = useTranslation();
-	const { data, write, isLoading } = useFileContentString(path);
+	const { data, write, isLoading } = useFileString(path);
 	const [values, setValues] = useState<Partial<ModHjsonData>>({});
 	const contentRef = useRef<string | null>(null);
-const issues = useValidationStore((s) => 
-s.results.resultsByPath[path] ?? EMPTY_ARRAY);
+	const issues = useValidationStore((s) => s.results.resultsByPath[path] ?? EMPTY_ARRAY);
 
 	useEffect(() => {
 		if (data === null || isLoading) return;
@@ -145,8 +144,8 @@ s.results.resultsByPath[path] ?? EMPTY_ARRAY);
 				contentRef.current = newContent;
 				write(newContent);
 			} else {
-                write(HJSON.stringify({ ...values, [key]: value }, null, 2));
-            }
+				write(HJSON.stringify({ ...values, [key]: value }, null, 2));
+			}
 		} catch (e) {
 			console.error("Failed to patch HJSON:", e);
 			write(HJSON.stringify({ ...values, [key]: value }, null, 2));

@@ -1,17 +1,17 @@
 import { Panel } from "@/components/editor/Panel";
 import { FieldsRenderer } from "#/components/editor/panel/FieldRenderer";
-import { useFileContentString } from "@project/state";
+import { useFileString } from "@project/state";
 import { SpritePicker } from "#/components/editor/panel/SpritePicker";
 import { useFileName } from "#/hooks/use-path";
 import { HJSON, HjsonObjectNode } from "@project/hjson";
-import { ItemHjsonSchema } from "@project/validation";
+import { ItemHjsonSchema } from "@project/schema";
 
 interface ItemPanelProps {
 	path: string;
 }
 
 export function ItemPanel({ path }: ItemPanelProps) {
-	const { data, isLoading, write } = useFileContentString(path);
+	const { data, isLoading, write } = useFileString(path);
 	const fileName = useFileName();
 
 	if (isLoading || data === null) {

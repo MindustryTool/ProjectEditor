@@ -1,9 +1,9 @@
 import { useEffect, useRef, useCallback } from "react";
-import { useFileContentStore, isDirty, isError, selectEntry, selectIsSaving, getEntry } from "../stores/file-content";
+import { useFileStore, isDirty, isError, selectEntry, selectIsSaving, getEntry } from "../stores/file";
 import { useProjectSession } from "../stores/session";
 import { getWriteQueue, disposeWriteQueue } from "../services/write-queue";
 
-export interface UseFileContentResult<T> {
+export interface UseFileResult<T> {
 	data: T | null;
 	currentVersion: number;
 	savedVersion: number;
@@ -16,17 +16,17 @@ export interface UseFileContentResult<T> {
 	write: (content: T) => void;
 }
 
-export function useFileContent(path: string): UseFileContentResult<ArrayBuffer> {
+export function useFile(path: string): UseFileResult<ArrayBuffer> {
 	const projectContext = useProjectSession((s) => s.projectContext);
 	const projectId = projectContext?.project.id;
-	const entry = useFileContentStore(projectId ? selectEntry(projectId, path) : () => undefined);
-	const isSaving = useFileContentStore(projectId ? selectIsSaving(projectId, path) : () => false);
+	const entry = useFileStore(projectId ? selectEntry(projectId, path) : () => undefined);
+	const isSaving = useFileStore(projectId ? selectIsSaving(projectId, path) : () => false);
 
 	useEffect(() => {
 		if (!projectId || !path) return;
 		if (entry !== undefined) return;
 
-		useFileContentStore.getState().readFile(projectId, path, projectContext!.fs);
+		useFileStore.getState().readFile(projectId, path, projectContext!.fs);
 	}, [path, projectId, projectContext, entry]);
 
 	const previousProjectId = useRef(projectId ?? null);
@@ -44,7 +44,7 @@ export function useFileContent(path: string): UseFileContentResult<ArrayBuffer> 
 		(content: ArrayBuffer | string) => {
 			if (!projectId || !projectContext) return;
 
-			const store = useFileContentStore.getState();
+			const store = useFileStore.getState();
 			store.writeBuffer(projectId, path, content);
 
 			const currentEntry = getEntry(projectId, path);
@@ -56,14 +56,14 @@ export function useFileContent(path: string): UseFileContentResult<ArrayBuffer> 
 				() => {
 					const updatedEntry = getEntry(projectId, path);
 					if (!updatedEntry || updatedEntry.currentVersion !== version) return;
-					useFileContentStore.getState().markPersisted(projectId, path);
-					useFileContentStore.getState().clearSaving(projectId, path);
+					useFileStore.getState().markPersisted(projectId, path);
+					useFileStore.getState().clearSaving(projectId, path);
 				},
 				(err: unknown) => {
 					const updatedEntry = getEntry(projectId, path);
 					if (!updatedEntry || updatedEntry.currentVersion !== version) return;
-					useFileContentStore.getState().setBufferError(projectId, path, err instanceof Error ? err.message : String(err));
-					useFileContentStore.getState().clearSaving(projectId, path);
+					useFileStore.getState().setBufferError(projectId, path, err instanceof Error ? err.message : String(err));
+					useFileStore.getState().clearSaving(projectId, path);
 				},
 			);
 		},

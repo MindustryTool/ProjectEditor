@@ -1,5 +1,5 @@
 import { cn, getImageUrl } from "#/lib/utils";
-import { useFileContent } from "@project/state";
+import { useFile } from "@project/state";
 import { resolveContentSprite } from "@project/utils";
 import { useState, type ReactNode } from "react";
 
@@ -26,7 +26,7 @@ export function ImageFilePreview({ path, className, showSize = true, fallback }:
 		}
 	}
 
-	const { data } = useFileContent(resolvedPath);
+	const { data } = useFile(resolvedPath);
 	const [size, setSize] = useState({ width: 0, height: 0 });
 
 	if (data === null) {

@@ -21,7 +21,7 @@
     "@project/core": "workspace:*",
     "@project/fs": "workspace:*",
     "@project/config": "workspace:*",
-    "@project/validation": "workspace:*",
+    "@project/schema": "workspace:*",
     "@project/hjson": "workspace:*",
     "valibot": "^1.4.0"
   },

@@ -1,5 +1,5 @@
 import { useCallback, useRef } from "react";
-import { useCurrentProject, useProjectSession, useFileContent } from "@project/state";
+import { useCurrentProject, useProjectSession, useFile } from "@project/state";
 import { Button } from "#/components/ui/button";
 import { FormControl, FormField, FormLabel } from "#/components/ui/form";
 import { resolveContentSprite } from "@project/utils";
@@ -29,7 +29,7 @@ export function SpritePicker({ path }: SpritePickerProps) {
 
 function SpriteViewer({ path: spritePath }: { path: string }) {
 	const { fs } = useCurrentProject();
-	const { data, isLoading, isError, error, write } = useFileContent(spritePath);
+	const { data, isLoading, isError, error, write } = useFile(spritePath);
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	const handleReplace = useCallback(() => {

@@ -17,7 +17,7 @@ import {
 	type MindustryColorTagMatch,
 } from "~/lib/monaco/colorTags";
 import { useValidationStore, Severity } from "@project/state";
-import { useFileContentStore } from "@project/state";
+import { useFileStore } from "@project/state";
 import { useProjectSession } from "@project/state";
 import { useTranslation } from "react-i18next";
 import { configureMonaco } from "~/lib/monaco/setup";
@@ -234,11 +234,11 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 		if (!projectContext) return;
 
 		const projectId = projectContext.project.id;
-		const unsub = useFileContentStore.getState().subscribeToEvents(projectId, path, projectContext.events, projectContext.fs);
+		const unsub = useFileStore.getState().subscribeToEvents(projectId, path, projectContext.events, projectContext.fs);
 
 		return () => {
 			unsub();
-			useFileContentStore.getState().cleanup(projectId, path);
+			useFileStore.getState().cleanup(projectId, path);
 		};
 	}, [path]);
 
@@ -370,7 +370,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 	return (
 		<div ref={containerRef} className="relative h-full w-full flex flex-col flex-1">
 			<Editor
-                key={path}
+				key={path}
 				theme={theme}
 				language={language}
 				value={value}

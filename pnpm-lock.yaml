@@ -32,15 +32,15 @@ importers:
       '@project/fs':
         specifier: workspace:*
         version: link:../../packages/fs
+      '@project/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
       '@project/state':
         specifier: workspace:*
         version: link:../../packages/state
       '@project/utils':
         specifier: workspace:*
         version: link:../../packages/utils
-      '@project/validation':
-        specifier: workspace:*
-        version: link:../../packages/validation
       '@project/zip':
         specifier: workspace:*
         version: link:../../packages/zip
@@ -99,15 +99,15 @@ importers:
       '@project/hjson':
         specifier: workspace:*
         version: link:../../packages/hjson
+      '@project/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
       '@project/state':
         specifier: workspace:*
         version: link:../../packages/state
       '@project/utils':
         specifier: workspace:*
         version: link:../../packages/utils
-      '@project/validation':
-        specifier: workspace:*
-        version: link:../../packages/validation
       '@project/zip':
         specifier: workspace:*
         version: link:../../packages/zip
@@ -269,12 +269,12 @@ importers:
       '@project/config':
         specifier: workspace:*
         version: link:../config
+      '@project/schema':
+        specifier: workspace:*
+        version: link:../schema
       '@project/utils':
         specifier: workspace:*
         version: link:../utils
-      '@project/validation':
-        specifier: workspace:*
-        version: link:../validation
       '@project/zip':
         specifier: workspace:*
         version: link:../zip
@@ -308,6 +308,19 @@ importers:
         specifier: ^4.1.5
         version: 4.1.7(@types/node@22.19.19)(jsdom@28.1.0(@noble/hashes@1.8.0))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.14(@types/node@22.19.19)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.3))
 
+  packages/schema:
+    dependencies:
+      valibot:
+        specifier: ^1.4.0
+        version: 1.4.0(typescript@5.9.3)
+    devDependencies:
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.5
+        version: 4.1.7(@types/node@22.19.19)(jsdom@28.1.0(@noble/hashes@1.8.0))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.14(@types/node@22.19.19)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.3))
+
   packages/state:
     dependencies:
       '@project/config':
@@ -322,9 +335,9 @@ importers:
       '@project/hjson':
         specifier: workspace:*
         version: link:../hjson
-      '@project/validation':
+      '@project/schema':
         specifier: workspace:*
-        version: link:../validation
+        version: link:../schema
       react:
         specifier: ^19.0.0
         version: 19.2.6
@@ -356,19 +369,6 @@ importers:
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
-
-  packages/validation:
-    dependencies:
-      valibot:
-        specifier: ^1.4.0
-        version: 1.4.0(typescript@5.9.3)
-    devDependencies:
-      typescript:
-        specifier: ^5.7.0
-        version: 5.9.3
-      vitest:
-        specifier: ^4.1.5
-        version: 4.1.7(@types/node@22.19.19)(jsdom@28.1.0(@noble/hashes@1.8.0))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.14(@types/node@22.19.19)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.3))
 
   packages/zip:
     dependencies:

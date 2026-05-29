@@ -10,13 +10,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { useItems } from "#/hooks/use-items";
 import { useValidationStore } from "@project/state";
-import { type Research } from "@project/validation";
+import { type Research } from "@project/schema";
 import { HJSON } from "@project/hjson";
 import { HjsonNode, HjsonValueNode, HjsonArrayNode, HjsonObjectNode } from "@project/hjson";
 import { Plus, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
 import { type ReactNode } from "react";
-import { detectSchemaType, getSchemaEntries, getArrayItemSchema, hasNullishWrapper, type AnySchema } from "@project/validation";
+import { detectSchemaType, getSchemaEntries, getArrayItemSchema, hasNullishWrapper, type AnySchema } from "@project/schema";
 
 interface FieldsRendererProps {
 	path: string;

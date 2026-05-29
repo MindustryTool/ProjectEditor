@@ -1,12 +1,5 @@
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
-import {
-	useFileContentStore,
-	useValidationStore,
-	Severity,
-	createDefaultValidators,
-	createValidationRunner,
-	useAppStore,
-} from "@project/state";
+import { useFileStore, useValidationStore, Severity, createDefaultValidators, createValidationRunner, useAppStore } from "@project/state";
 import type { ValidationContext } from "@project/state";
 import { useShallow } from "zustand/react/shallow";
 import { useItems } from "#/hooks/use-items";
@@ -74,7 +67,7 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 			useValidationStore.getState().clearResults(path);
 		}
 
-		const unsub = useFileContentStore.subscribe((state, prevState) => {
+		const unsub = useFileStore.subscribe((state, prevState) => {
 			const curr = state.fileContents;
 			const prev = prevState.fileContents;
 			for (const key of Object.keys(curr)) {

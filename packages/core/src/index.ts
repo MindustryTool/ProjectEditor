@@ -1,4 +1,4 @@
-import { ProjectInfoSchema } from "@project/validation";
+import { ProjectInfoSchema } from "@project/schema";
 import { sanitizeFilename } from "@project/utils";
 import * as v from "valibot";
 

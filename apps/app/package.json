@@ -20,7 +20,7 @@
     "@project/state": "workspace:*",
     "@project/fs": "workspace:*",
     "@project/zip": "workspace:*",
-    "@project/validation": "workspace:*",
+    "@project/schema": "workspace:*",
     "@project/utils": "workspace:*",
     "@project/config": "workspace:*"
   },

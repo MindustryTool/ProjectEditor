@@ -2,15 +2,7 @@ import { useMemo, useState, useRef, useEffect, useCallback, createContext, useCo
 import { File, Folder, FolderOpen, ChevronRight, ChevronDown, Pencil, Trash2, Plus, MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { isDefaultPath, type TreeNode } from "@project/fs";
-import {
-	useCurrentProject,
-	useProjectSession,
-	useFileContentStore,
-	isDirty,
-	selectEntry,
-	selectIsSaving,
-	TreeSnapshot,
-} from "@project/state";
+import { useCurrentProject, useProjectSession, useFileStore, isDirty, selectEntry, selectIsSaving, TreeSnapshot } from "@project/state";
 import { cn } from "~/lib/utils";
 import {
 	AlertDialog,
@@ -318,9 +310,9 @@ function TreeNodeItem({ node, depth = 0 }: TreeNodeItemProps) {
 	const errorCount = totalIssueCount[currentPath]?.error ?? 0;
 	const warningCount = totalIssueCount[currentPath]?.warning ?? 0;
 
-	const bufferEntry = useFileContentStore(isFolder ? () => undefined : selectEntry(projectId, currentPath));
+	const bufferEntry = useFileStore(isFolder ? () => undefined : selectEntry(projectId, currentPath));
 	const isItemDirty = !isFolder && isDirty(bufferEntry);
-	const isItemSaving = useFileContentStore(isFolder ? () => false : selectIsSaving(projectId, currentPath));
+	const isItemSaving = useFileStore(isFolder ? () => false : selectIsSaving(projectId, currentPath));
 
 	const filenameClass =
 		errorCount > 0

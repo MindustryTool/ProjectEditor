@@ -1,10 +1,10 @@
 import { useMemo, useCallback } from "react";
-import { useFileContent, type UseFileContentResult } from "./use-file-content";
+import { useFile, type UseFileResult } from "./use-file-content";
 
-export interface UseFileContentStringResult extends UseFileContentResult<string> {}
+export interface UseFileStringResult extends UseFileResult<string> {}
 
-export function useFileContentString(path: string): UseFileContentStringResult {
-	const result = useFileContent(path);
+export function useFileString(path: string): UseFileStringResult {
+	const result = useFile(path);
 
 	const data = useMemo<string | null>(() => {
 		if (result.data === null) return null;

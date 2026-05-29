@@ -1,5 +1,5 @@
 {
-  "name": "@project/validation",
+  "name": "@project/schema",
   "type": "module",
   "version": "0.1.0",
   "private": true,
