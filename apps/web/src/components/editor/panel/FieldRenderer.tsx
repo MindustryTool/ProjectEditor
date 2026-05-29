@@ -1,6 +1,4 @@
-import { ContentApiImage } from "#/components/editor/ContentApiImage";
 import { ContentImage } from "#/components/editor/ContentImage";
-import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
 import { Button } from "#/components/ui/button";
 import { Checkbox } from "#/components/ui/checkbox";
 import { ColorPicker, ColorPickerAlpha, ColorPickerFormat, ColorPickerHue, ColorPickerSelection } from "#/components/ui/color-picker";
