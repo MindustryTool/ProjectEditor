@@ -30,7 +30,7 @@ interface MonacoEditorProps {
 	onChange: (value: string) => void;
 	language?: string;
 	readOnly?: boolean;
-	filePath: string;
+	path: string;
 }
 
 interface ActiveColorTagState extends MindustryColorTagMatch {
@@ -40,7 +40,7 @@ interface ActiveColorTagState extends MindustryColorTagMatch {
 	pickerColor: string;
 }
 
-export function MonacoEditor({ value, onChange, language, readOnly, filePath }: MonacoEditorProps) {
+export function MonacoEditor({ value, onChange, language, readOnly, path }: MonacoEditorProps) {
 	const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 	const colorDecorationsRef = useRef<editor.IEditorDecorationsCollection | null>(null);
@@ -56,7 +56,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 		monacoConfigured.current = true;
 	}
 
-	const results = useValidationStore((s) => s.resultsByPath[filePath]);
+	const results = useValidationStore((s) => s.resultsByPath[path]);
 
 	const updateMarkers = useCallback(() => {
 		const editorInstance = editorRef.current;
@@ -90,7 +90,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 		}
 
 		monacoInstance.editor.setModelMarkers(model, "file-validation", markers);
-	}, [results, filePath, t]);
+	}, [results, path, t]);
 
 	useEffect(() => {
 		updateMarkers();
@@ -226,21 +226,21 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 
 	useEffect(() => {
 		refreshActiveColorTag();
-	}, [refreshActiveColorTag, value, language, filePath, readOnly]);
+	}, [refreshActiveColorTag, value, language, path, readOnly]);
 
 	useEffect(() => {
-		if (!filePath) return;
+		if (!path) return;
 		const projectContext = useProjectSession.getState().projectContext;
 		if (!projectContext) return;
 
 		const projectId = projectContext.project.id;
-		const unsub = useFileContentStore.getState().subscribeToEvents(projectId, filePath, projectContext.events, projectContext.fs);
+		const unsub = useFileContentStore.getState().subscribeToEvents(projectId, path, projectContext.events, projectContext.fs);
 
 		return () => {
 			unsub();
-			useFileContentStore.getState().cleanup(projectId, filePath);
+			useFileContentStore.getState().cleanup(projectId, path);
 		};
-	}, [filePath]);
+	}, [path]);
 
 	useEffect(() => {
 		const handlePointerDown = (event: MouseEvent) => {
@@ -370,6 +370,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, filePath }: 
 	return (
 		<div ref={containerRef} className="relative h-full w-full flex flex-col flex-1">
 			<Editor
+                key={path}
 				theme={theme}
 				language={language}
 				value={value}

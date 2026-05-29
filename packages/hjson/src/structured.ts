@@ -9,28 +9,22 @@ export interface InfoBase {
 	end: Position;
 }
 
-export interface FieldInfo extends InfoBase {
+export interface FieldInfo<T = unknown> extends InfoBase {
 	key: string;
-	value: any;
+	value: T;
 	valueStart: Position;
 	valueEnd: Position;
-	/**
-	 * Patches the field's value in the original source string.
-	 */
 	replaceValue(original: string, newValue: string): string;
 }
 
-/**
- * Creates a FieldInfo object with the required properties and methods.
- */
-export function createFieldInfo(
+export function createFieldInfo<T>(
 	key: string,
-	value: any,
+	value: T,
 	start: Position,
 	end: Position,
 	valueStart: Position,
 	valueEnd: Position,
-): FieldInfo {
+): FieldInfo<T> {
 	return {
 		key,
 		value,
@@ -49,6 +43,9 @@ export abstract class HjsonNode {
 	abstract isArray(): this is HjsonArrayNode;
 	abstract isValue(): this is HjsonValueNode;
 	abstract isMissing(): this is HjsonMissingNode;
+	abstract isString(): this is HjsonValueNode<string>;
+	abstract isNumber(): this is HjsonValueNode<number>;
+	abstract isBoolean(): this is HjsonValueNode<boolean>;
 
 	abstract get(key: string | number): HjsonNode;
 
@@ -63,7 +60,7 @@ export abstract class HjsonNode {
 				? node.at(Number.parseInt(seg.slice(1, -1), 10))
 				: node.at(seg);
 			if (!info) return undefined;
-			node = info.value;
+			node = info.value as HjsonNode;
 		}
 		const last = segments[segments.length - 1]!;
 		return last.startsWith("[")
@@ -80,8 +77,8 @@ export abstract class HjsonNode {
 	abstract asBoolean(): boolean | undefined;
 	abstract asValue<T>(): T | undefined;
 
-	abstract valueOf(): any;
-	toJSON(): any {
+	abstract valueOf(): unknown;
+	toJSON(): unknown {
 		return this.valueOf();
 	}
 }
@@ -113,6 +110,15 @@ export class HjsonObjectNode extends HjsonNode {
 		return false;
 	}
 	isMissing(): this is HjsonMissingNode {
+		return false;
+	}
+	isString(): this is HjsonValueNode<string> {
+		return false;
+	}
+	isNumber(): this is HjsonValueNode<number> {
+		return false;
+	}
+	isBoolean(): this is HjsonValueNode<boolean> {
 		return false;
 	}
 
@@ -253,22 +259,22 @@ export class HjsonObjectNode extends HjsonNode {
 	}
 }
 
-export interface ElementInfo extends InfoBase {
+export interface ElementInfo<T = unknown> extends InfoBase {
 	index: number;
-	value: any;
+	value: T;
 	valueStart: Position;
 	valueEnd: Position;
 	replaceValue(original: string, newValue: string): string;
 }
 
-export function createElementInfo(
+export function createElementInfo<T>(
 	index: number,
-	value: any,
+	value: T,
 	start: Position,
 	end: Position,
 	valueStart: Position,
 	valueEnd: Position,
-): ElementInfo {
+): ElementInfo<T> {
 	return {
 		index,
 		value,
@@ -306,6 +312,15 @@ export class HjsonArrayNode extends HjsonNode {
 		return false;
 	}
 	isMissing(): this is HjsonMissingNode {
+		return false;
+	}
+	isString(): this is HjsonValueNode<string> {
+		return false;
+	}
+	isNumber(): this is HjsonValueNode<number> {
+		return false;
+	}
+	isBoolean(): this is HjsonValueNode<boolean> {
 		return false;
 	}
 
@@ -478,12 +493,12 @@ export class HjsonArrayNode extends HjsonNode {
 	}
 }
 
-export class HjsonValueNode extends HjsonNode {
-	readonly #value: any;
+export class HjsonValueNode<T = unknown> extends HjsonNode {
+	readonly #value: T;
 	readonly #start: Position;
 	readonly #end: Position;
 
-	constructor(value: any, start: Position, end: Position) {
+	constructor(value: T, start: Position, end: Position) {
 		super();
 		this.#value = value;
 		this.#start = start;
@@ -501,6 +516,15 @@ export class HjsonValueNode extends HjsonNode {
 	}
 	isMissing(): this is HjsonMissingNode {
 		return false;
+	}
+	isString(): this is HjsonValueNode<string> {
+		return typeof this.#value === "string";
+	}
+	isNumber(): this is HjsonValueNode<number> {
+		return typeof this.#value === "number";
+	}
+	isBoolean(): this is HjsonValueNode<boolean> {
+		return typeof this.#value === "boolean";
 	}
 
 	get(_key: string | number): HjsonNode {
@@ -526,11 +550,11 @@ export class HjsonValueNode extends HjsonNode {
 		return typeof this.#value === "boolean" ? this.#value : undefined;
 	}
 
-	asValue<T>(): T | undefined {
-		return this.#value as T;
+	asValue<V = T>(): V | undefined {
+		return this.#value as unknown as V;
 	}
 
-	valueOf(): any {
+	valueOf(): T {
 		return this.#value;
 	}
 
@@ -561,6 +585,15 @@ export class HjsonMissingNode extends HjsonNode {
 	isMissing(): this is HjsonMissingNode {
 		return true;
 	}
+	isString(): this is HjsonValueNode<string> {
+		return false;
+	}
+	isNumber(): this is HjsonValueNode<number> {
+		return false;
+	}
+	isBoolean(): this is HjsonValueNode<boolean> {
+		return false;
+	}
 
 	get(_key: string | number): HjsonNode {
 		return this;
@@ -586,10 +619,10 @@ export class HjsonMissingNode extends HjsonNode {
 		return undefined;
 	}
 
-	valueOf(): any {
+	valueOf(): undefined {
 		return undefined;
 	}
 }
 
 export type HjsonResult<T> =
-	T extends Record<string, unknown> ? HjsonObjectNode : T extends unknown[] ? HjsonArrayNode : HjsonValueNode;
+	T extends Record<string, unknown> ? HjsonObjectNode : T extends unknown[] ? HjsonArrayNode : HjsonValueNode<T>;

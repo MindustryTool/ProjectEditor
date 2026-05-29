@@ -17,7 +17,7 @@ function EditorWithMonaco({ path }: { path: string }) {
 
 	return (
 		<Suspense fallback={<div className="flex h-full items-center justify-center text-xs text-muted-foreground">Loading editor...</div>}>
-			<MonacoEditor value={data ?? ""} onChange={write} language={language} filePath={path} />
+			<MonacoEditor path={path} value={data ?? ""} onChange={write} language={language} />
 		</Suspense>
 	);
 }

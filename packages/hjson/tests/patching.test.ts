@@ -382,6 +382,148 @@ describe("Comment patching on array elements", () => {
 	});
 });
 
+describe("Sequential patching (stale node positions)", () => {
+	it("sequential patchField preserves nested object structure", () => {
+		const text = `{
+  "cost": 1,
+  "radioactivity": 0.3,
+  "color": "#7AC27C",
+  "research": {parent:team-quantra,requirements:["lead/200555555",],}
+}`;
+		let content = text;
+		const serialized1 = HJSON.stringify({ parent: "team-quantra", requirements: ["lead/20055555"] });
+		let node = HJSON.parseStructured(content) as HjsonObjectNode;
+		content = node.patchField(content, "research", serialized1);
+
+		const serialized2 = HJSON.stringify({ parent: "team-quantra", requirements: ["lead/200555"] });
+		node = HJSON.parseStructured(content) as HjsonObjectNode;
+		content = node.patchField(content, "research", serialized2);
+
+		const serialized3 = HJSON.stringify({ parent: "team-quantra", requirements: ["lead/2005"] });
+		node = HJSON.parseStructured(content) as HjsonObjectNode;
+		content = node.patchField(content, "research", serialized3);
+
+		expect(content).toContain('"research"');
+		expect(content).toContain("team-quantra");
+		expect(content).toContain("lead/2005");
+		expect(content).toContain("}");
+		const result = HJSON.parse(content);
+		expect(result).toEqual({
+			cost: 1,
+			radioactivity: 0.3,
+			color: "#7AC27C",
+			research: { parent: "team-quantra", requirements: ["lead/2005"] },
+		});
+	});
+
+	it("sequential patchField requires re-parse to avoid stale position drift", () => {
+		// Simulates the real UI pattern: edit a nested object value character by character,
+		// re-parsing the node after each edit to keep positions in sync
+		const text = `{
+  "cost": 1,
+  "radioactivity": 0.3,
+  "research": {parent:team-quantra,requirements:["lead/200555555",],}
+}`;
+		let content = text;
+		const numbers = ["20055555", "2005555", "200555"];
+		for (const num of numbers) {
+			const serialized = HJSON.stringify({ parent: "team-quantra", requirements: ["lead/" + num] });
+			const node = HJSON.parseStructured(content) as HjsonObjectNode; // re-parse each time
+			content = node.patchField(content, "research", serialized);
+		}
+		const result = HJSON.parse(content);
+		expect(result).toEqual({
+			cost: 1,
+			radioactivity: 0.3,
+			research: { parent: "team-quantra", requirements: ["lead/200555"] },
+		});
+	});
+});
+
+describe("Nested object field patching (research)", () => {
+	it("patchElement on nested array preserves multiline structure", () => {
+		const text = `{
+  "cost": 7,
+  "hardness": 18,
+  "color": "A9D8FFFF",
+  "research": {
+    "parent": "siradamite",
+    "requirements": [
+      "siradamite/200"
+    ]
+  }
+}`;
+		const root = HJSON.parseStructured(text) as HjsonObjectNode;
+		const researchNode = root.get("research") as HjsonObjectNode;
+		const reqField = researchNode.field("requirements")!;
+		const arrNode = reqField.value as HjsonArrayNode;
+		const content = arrNode.patchElement(text, 0, HJSON.stringify("siradamite/2000"));
+
+		// Multiline array structure preserved: newlines and indentation unchanged
+		expect(content).toBe(`{
+  "cost": 7,
+  "hardness": 18,
+  "color": "A9D8FFFF",
+  "research": {
+    "parent": "siradamite",
+    "requirements": [
+      "siradamite/2000"
+    ]
+  }
+}`);
+
+		const result = HJSON.parse(content);
+		expect(result).toEqual({
+			cost: 7,
+			hardness: 18,
+			color: "A9D8FFFF",
+			research: { parent: "siradamite", requirements: ["siradamite/2000"] },
+		});
+	});
+
+	it("sequential patchElement on nested array with re-parse preserves multiline structure", () => {
+		const text = `{
+  "cost": 7,
+  "hardness": 18,
+  "color": "A9D8FFFF",
+  "research": {
+    "parent": "siradamite",
+    "requirements": [
+      "siradamite/200"
+    ]
+  }
+}`;
+		let content = text;
+		for (const val of ["2000", "20000"]) {
+			const root = HJSON.parseStructured(content) as HjsonObjectNode;
+			const researchNode = root.get("research") as HjsonObjectNode;
+			const reqField = researchNode.field("requirements")!;
+			const arrNode = reqField.value as HjsonArrayNode;
+			content = arrNode.patchElement(content, 0, HJSON.stringify("siradamite/" + val));
+		}
+
+		expect(content).toBe(`{
+  "cost": 7,
+  "hardness": 18,
+  "color": "A9D8FFFF",
+  "research": {
+    "parent": "siradamite",
+    "requirements": [
+      "siradamite/20000"
+    ]
+  }
+}`);
+
+		const result = HJSON.parse(content);
+		expect(result).toEqual({
+			cost: 7,
+			hardness: 18,
+			color: "A9D8FFFF",
+			research: { parent: "siradamite", requirements: ["siradamite/20000"] },
+		});
+	});
+});
+
 describe("Round-trip array patching", () => {
 	it("patchElement round-trips correctly", () => {
 		const { node: arr, original } = wrapArray('[1, 2, 3]');
