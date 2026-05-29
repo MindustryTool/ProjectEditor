@@ -1,5 +1,14 @@
 import { useState, useCallback, useMemo, useEffect, useRef, memo } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel, SelectSeparator } from "~/components/ui/select";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+	SelectGroup,
+	SelectLabel,
+	SelectSeparator,
+} from "~/components/ui/select";
 import { Label } from "~/components/ui/label";
 import { ContentImage } from "#/components/editor/ContentImage";
 import { useItems } from "#/hooks/use-items";
@@ -31,26 +40,10 @@ function EntriesDropdown({
 			<SelectTrigger className="w-full">
 				<SelectValue placeholder="None (empty file)" />
 			</SelectTrigger>
-			<SelectContent className="max-h-60">
+			<SelectContent position="popper">
 				<SelectGroup>
 					<SelectItem value={NONE}>None (empty file)</SelectItem>
 				</SelectGroup>
-				{projectEntries.length > 0 && (
-					<>
-						<SelectSeparator />
-						<SelectGroup>
-							<SelectLabel>Project</SelectLabel>
-							{projectEntries.map((i) => (
-								<SelectItem key={i.path} value={i.path}>
-									<div className="flex items-center gap-2">
-										<ContentImage entry={i} className="h-5 w-5 shrink-0" />
-										<span>{i.name}</span>
-									</div>
-								</SelectItem>
-							))}
-						</SelectGroup>
-					</>
-				)}
 				{baseEntries.length > 0 && (
 					<>
 						<SelectSeparator />
@@ -67,17 +60,29 @@ function EntriesDropdown({
 						</SelectGroup>
 					</>
 				)}
+				{projectEntries.length > 0 && (
+					<>
+						<SelectSeparator />
+						<SelectGroup>
+							<SelectLabel>Project</SelectLabel>
+							{projectEntries.map((i) => (
+								<SelectItem key={i.path} value={i.path}>
+									<div className="flex items-center gap-2">
+										<ContentImage entry={i} className="h-5 w-5 shrink-0" />
+										<span>{i.name}</span>
+									</div>
+								</SelectItem>
+							))}
+						</SelectGroup>
+					</>
+				)}
 			</SelectContent>
 		</Select>
 	);
 }
 
 function createHookSelector(useHook: () => ContentEntry[]) {
-	return memo(function HookSelector({
-		onContentReady,
-	}: {
-		onContentReady: (fn: () => Promise<string>) => void;
-	}) {
+	return memo(function HookSelector({ onContentReady }: { onContentReady: (fn: () => Promise<string>) => void }) {
 		const entries = useHook();
 		const [choice, setChoice] = useState(NONE);
 		const entriesRef = useRef(entries);
@@ -117,13 +122,7 @@ const StatusesSelector = createHookSelector(useStatuses);
 const SectorsSelector = createHookSelector(useSectors);
 const EnvBlocksSelector = createHookSelector(useEnvBlocks);
 
-function EffectEntries({
-	onContentReady,
-	name,
-}: {
-	onContentReady: (fn: () => Promise<string>) => void;
-	name: string;
-}) {
+function EffectEntries({ onContentReady, name }: { onContentReady: (fn: () => Promise<string>) => void; name: string }) {
 	const [choice, setChoice] = useState(NONE);
 	const nameRef = useRef(name);
 	nameRef.current = name;
@@ -142,13 +141,18 @@ function EffectEntries({
 		setChoice(value);
 	}, []);
 
-	const entries: ContentEntry[] = useMemo(() => [{
-		name: "Effect Template",
-		type: "base" as const,
-		path: "effect-template",
-		contentType: "effect",
-		getContent: async () => getEffectTemplate(name.trim()),
-	}], [name]);
+	const entries: ContentEntry[] = useMemo(
+		() => [
+			{
+				name: "Effect Template",
+				type: "base" as const,
+				path: "effect-template",
+				contentType: "effect",
+				getContent: async () => getEffectTemplate(name.trim()),
+			},
+		],
+		[name],
+	);
 
 	return (
 		<div className="space-y-2">
