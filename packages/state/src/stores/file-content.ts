@@ -277,20 +277,33 @@ export const useFileContentStore = create<FileContentStore>()((set, get) => ({
     const prev = eventUnsubs.get(key);
     if (prev) prev();
 
-    const unsub = events.on("file:changed", (event) => {
+    const unsubWrite = events.on("file:write", (event) => {
       if (event.path !== path) return;
-      if (event.kind === "delete") {
+      const current = lruMap.get(key);
+      if (current && current.currentVersion !== current.savedVersion) return;
+      get().readFile(projectId, path, fs);
+    });
+
+    const unsubDelete = events.on("file:delete", (event) => {
+      if (event.path !== path) return;
+      get().clearFileContent(projectId, path);
+      get().cleanup(projectId, path);
+    });
+
+    const unsubRename = events.on("file:rename", (event) => {
+      if (event.oldPath === path) {
         get().clearFileContent(projectId, path);
         get().cleanup(projectId, path);
         return;
       }
-
-      const current = lruMap.get(key);
-      if (current && current.currentVersion !== current.savedVersion) return;
-
-      get().readFile(projectId, path, fs);
+      if (event.newPath === path) {
+        const current = lruMap.get(key);
+        if (current && current.currentVersion !== current.savedVersion) return;
+        get().readFile(projectId, path, fs);
+      }
     });
 
+    const unsub = () => { unsubWrite(); unsubDelete(); unsubRename(); };
     eventUnsubs.set(key, unsub);
     return unsub;
   },

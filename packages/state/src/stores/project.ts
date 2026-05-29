@@ -107,10 +107,8 @@ export const useAppStore = create<AppState>()(
 					onTreeSnapshotChange: (snapshot) => useProjectSession.setState({ treeSnapshot: new TreeSnapshot(snapshot) }),
 				});
 
-				const unsubscribe = events.on("file:changed", (path) => {
-					if (path.kind === "write") {
-						callback(path.path);
-					}
+				const unsubscribe = events.on('file:write', (event) => {
+					callback(event.path);
 				});
 
 				await fs.writeFiles(result.entries);

@@ -45,14 +45,14 @@ export type Unsubscribe = () => void;
 
 export type EventMap = Record<string, unknown[]>;
 
-export interface EventBus<T extends EventMap = EventMap> {
+export interface EventBus<T extends { [K in keyof T]: unknown[] }> {
 	on<K extends keyof T>(event: K, handler: (...args: T[K]) => void): Unsubscribe;
 	off<K extends keyof T>(event: K, handler: (...args: T[K]) => void): void;
 	once<K extends keyof T>(event: K, handler: (...args: T[K]) => void): Unsubscribe;
 	emit<K extends keyof T>(event: K, ...args: T[K]): void;
 }
 
-export function createEventBus<T extends EventMap = EventMap>(): EventBus<T> {
+export function createEventBus<T extends { [K in keyof T]: unknown[] }>(): EventBus<T> {
 	const handlers = new Map<string, Set<(...args: unknown[]) => void>>();
 
 	function on<K extends keyof T>(event: K, handler: (...args: T[K]) => void): Unsubscribe {
@@ -95,6 +95,10 @@ export { JsonExporter } from "./json-exporter.js";
 export { importProject } from "./importer.js";
 export type { ImportResult } from "./importer.js";
 
-export interface ProjectEventMap extends EventMap {
-	"file:changed": [{ path: string; kind: "write" | "delete" | "rename" | "create" | "mkdir" }];
+export interface ProjectEventMap {
+	"file:write": [{ path: string }];
+	"file:delete": [{ path: string }];
+	"file:rename": [{ oldPath: string; newPath: string }];
+	"file:create": [{ path: string }];
+	"file:mkdir": [{ path: string }];
 }

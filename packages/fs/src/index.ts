@@ -83,7 +83,7 @@ export class ProjectFileSystem {
 
 	async writeFile(path: string, data: BufferSource): Promise<void> {
 		await this.vfs.writeFile(this.scopePath(path), data);
-		this.events.emit("file:changed", { path, kind: "write" });
+		this.events.emit("file:write", { path });
 		await this.refreshTree();
 	}
 
@@ -99,7 +99,7 @@ export class ProjectFileSystem {
 				batch.map((entry) =>
 					this.vfs
 						.writeFile(this.scopePath(entry.name), new Uint8Array(entry.data))
-						.then(() => this.events.emit("file:changed", { path: entry.name, kind: "write" })),
+						.then(() => this.events.emit("file:write", { path: entry.name })),
 				),
 			);
 
@@ -117,14 +117,14 @@ export class ProjectFileSystem {
 
 	async delete(path: string): Promise<void> {
 		await this.vfs.delete(this.scopePath(path));
-		this.events.emit("file:changed", { path, kind: "delete" });
+		this.events.emit("file:delete", { path });
 		await this.refreshTree();
 	}
 
 	async mkdir(path: string): Promise<void> {
 		await this.vfs.mkdir(this.scopePath(path));
 		await this.refreshTree();
-		this.events.emit("file:changed", { path, kind: "mkdir" });
+		this.events.emit("file:mkdir", { path });
 	}
 
 	async readdir(path: string): Promise<FileEntry[]> {
@@ -189,21 +189,19 @@ export class ProjectFileSystem {
 
 	async rename(oldPath: string, newPath: string): Promise<void> {
 		await this.vfs.rename(this.scopePath(oldPath), this.scopePath(newPath));
-		this.events.emit("file:changed", { path: newPath, kind: "rename" });
+		this.events.emit("file:rename", { oldPath, newPath });
 		await this.refreshTree();
 	}
 
 	async move(src: string, dst: string): Promise<void> {
 		await this.vfs.move(this.scopePath(src), this.scopePath(dst));
-		this.events.emit("file:changed", { path: dst, kind: "create" });
-		this.events.emit("file:changed", { path: dst, kind: "write" });
+		this.events.emit("file:rename", { oldPath: src, newPath: dst });
 		await this.refreshTree();
 	}
 
 	async copy(src: string, dst: string): Promise<void> {
 		await this.vfs.copy(this.scopePath(src), this.scopePath(dst));
-		this.events.emit("file:changed", { path: dst, kind: "create" });
-		this.events.emit("file:changed", { path: dst, kind: "write" });
+		this.events.emit("file:create", { path: dst });
 		await this.refreshTree();
 	}
 
@@ -225,8 +223,8 @@ export class ProjectFileSystem {
 	}
 
 	async createFile(path: string): Promise<void> {
-		await this.writeFile(this.scopePath(path), new ArrayBuffer(0));
-		this.events.emit("file:changed", { path, kind: "create" });
+		await this.vfs.writeFile(this.scopePath(path), new ArrayBuffer(0));
+		this.events.emit("file:create", { path });
 		await this.refreshTree();
 	}
 

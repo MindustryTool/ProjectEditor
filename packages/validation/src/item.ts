@@ -37,9 +37,9 @@ export const ResearchSchema = v.nullish(
 		v.object({
 			parent: v.nullish(ContentNameSchema),
 			requirements: v.nullish(v.array(ItemRequirementSchema)),
-            objectives: v.nullish(v.any()),
-            planet: v.nullish(v.string()),
-            robot: v.nullish(v.boolean()),
+			objectives: v.nullish(v.any()),
+			planet: v.nullish(v.string()),
+			robot: v.nullish(v.boolean()),
 		}),
 	]),
 );
@@ -57,6 +57,8 @@ export const ItemHjsonSchema = v.object({
 	color: v.nullish(MindustryHexColorSchema),
 	research: ResearchSchema,
 	lowPriority: v.nullish(v.boolean()),
+	buildable: v.nullish(v.boolean()),
+	hidden: v.nullish(v.boolean()),
 });
 
 export type ItemHjsonData = v.InferOutput<typeof ItemHjsonSchema>;
