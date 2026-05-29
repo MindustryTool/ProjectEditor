@@ -97,7 +97,7 @@ export function FileExplorer({ className }: FileExplorerProps) {
 	}
 
 	return (
-		<div className={cn("space-y-0.5 h-full overflow-y-auto", className)}>
+		<div className={cn("space-y-0.5 h-full", className)}>
 			<FileExplorerCtx.Provider
 				value={{
 					selectedPath: path ?? null,
@@ -221,7 +221,7 @@ function CreateFileForm({
 	}
 
 	return (
-		<div className="space-y-4">
+		<div className="space-y-4 h-full w-full">
 			<div className="space-y-2">
 				<Label htmlFor="name">Name</Label>
 				<InputGroup>

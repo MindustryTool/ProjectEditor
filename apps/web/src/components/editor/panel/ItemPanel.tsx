@@ -118,7 +118,7 @@ export function ItemPanel({ path }: ItemPanelProps) {
 
 	return (
 		<Panel>
-			<div className="space-y-4">
+			<div className="space-y-4 h-full w-full">
 				{fileName !== null && <div className="text-lg font-bold">{fileName}</div>}
 				<SpritePicker path={path} />
 				<FieldsRenderer path={path} fields={fields} values={values} updater={handleUpdate} />
