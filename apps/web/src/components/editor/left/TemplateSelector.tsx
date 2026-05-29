@@ -117,12 +117,55 @@ const StatusesSelector = createHookSelector(useStatuses);
 const SectorsSelector = createHookSelector(useSectors);
 const EnvBlocksSelector = createHookSelector(useEnvBlocks);
 
+function EffectEntries({
+	onContentReady,
+	name,
+}: {
+	onContentReady: (fn: () => Promise<string>) => void;
+	name: string;
+}) {
+	const [choice, setChoice] = useState(NONE);
+	const nameRef = useRef(name);
+	nameRef.current = name;
+
+	const getContent = useCallback(async () => {
+		if (choice === NONE) return "";
+		if (choice === "effect-template") return getEffectTemplate(nameRef.current.trim());
+		return "";
+	}, [choice]);
+
+	useEffect(() => {
+		onContentReady(getContent);
+	});
+
+	const handleChange = useCallback((value: string) => {
+		setChoice(value);
+	}, []);
+
+	const entries: ContentEntry[] = useMemo(() => [{
+		name: "Effect Template",
+		type: "base" as const,
+		path: "effect-template",
+		contentType: "effect",
+		getContent: async () => getEffectTemplate(name.trim()),
+	}], [name]);
+
+	return (
+		<div className="space-y-2">
+			<Label htmlFor="template">Template</Label>
+			<EntriesDropdown entries={entries} value={choice} onValueChange={handleChange} />
+		</div>
+	);
+}
+
 export function TemplateSelector({
 	type,
 	onContentReady,
+	name,
 }: {
 	type: string;
 	onContentReady: (fn: () => Promise<string>) => void;
+	name?: string;
 }) {
 	switch (type) {
 		case "item":
@@ -139,47 +182,9 @@ export function TemplateSelector({
 			return <SectorsSelector onContentReady={onContentReady} />;
 		case "env-block":
 			return <EnvBlocksSelector onContentReady={onContentReady} />;
+		case "effect":
+			return <EffectEntries onContentReady={onContentReady} name={name ?? ""} />;
 		default:
 			return null;
 	}
-}
-
-export function EffectSelector({
-	name,
-	onContentReady,
-}: {
-	name: string;
-	onContentReady: (fn: () => Promise<string>) => void;
-}) {
-	const [choice, setChoice] = useState(NONE);
-	const nameRef = useRef(name);
-	nameRef.current = name;
-
-	const getContent = useCallback(async () => {
-		if (choice === NONE) return "";
-		return getEffectTemplate(nameRef.current.trim());
-	}, [choice]);
-
-	useEffect(() => {
-		onContentReady(getContent);
-	});
-
-	const handleChange = useCallback((value: string) => {
-		setChoice(value);
-	}, []);
-
-	return (
-		<div className="space-y-2">
-			<Label htmlFor="template">Template</Label>
-			<Select value={choice} onValueChange={handleChange}>
-				<SelectTrigger className="w-full">
-					<SelectValue placeholder="None (empty file)" />
-				</SelectTrigger>
-				<SelectContent>
-					<SelectItem value={NONE}>None (empty file)</SelectItem>
-					<SelectItem value="template">Effect Template</SelectItem>
-				</SelectContent>
-			</Select>
-		</div>
-	);
 }

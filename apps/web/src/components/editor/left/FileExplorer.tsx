@@ -32,7 +32,7 @@ import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "~/components/ui/dropdown-menu";
 import { InputGroup, InputGroupInput, InputGroupAddon } from "#/components/ui/input-group";
-import { TemplateSelector, EffectSelector } from "./TemplateSelector";
+import { TemplateSelector } from "./TemplateSelector";
 
 interface FileExplorerContextValue {
 	selectedPath: string | null;
@@ -249,12 +249,7 @@ function CreateFileForm({
 					</SelectContent>
 				</Select>
 			</div>
-			{isContentType &&
-				(type === "effect" ? (
-					<EffectSelector name={name} onContentReady={setGetTemplateContent} />
-				) : (
-					<TemplateSelector type={type} onContentReady={setGetTemplateContent} />
-				))}
+			{isContentType && <TemplateSelector type={type} name={name} onContentReady={setGetTemplateContent} />}
 			{error && <p className="text-sm text-red-400">{error}</p>}
 			<DialogFooter>
 				<Button variant="outline" onClick={onCancel}>
