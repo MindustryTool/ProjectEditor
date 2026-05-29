@@ -16,8 +16,8 @@
     "format:fix": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\""
   },
   "devDependencies": {
-    "turbo": "^2.4.0",
-    "prettier": "^3.5.0",
+    "turbo": "catalog:",
+    "prettier": "catalog:",
     "typescript": "^5.7.0"
   }
 }

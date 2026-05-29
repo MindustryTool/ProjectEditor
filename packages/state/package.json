@@ -17,13 +17,13 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "zustand": "^5.0.0",
+    "zustand": "catalog:",
     "@project/core": "workspace:*",
     "@project/fs": "workspace:*",
     "@project/config": "workspace:*",
     "@project/schema": "workspace:*",
     "@project/hjson": "workspace:*",
-    "valibot": "^1.4.0"
+    "valibot": "catalog:"
   },
   "peerDependencies": {
     "react": "^19.0.0",
@@ -33,6 +33,6 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "typescript": "^5.7.0",
-    "vitest": "^4.1.5"
+    "vitest": "catalog:"
   }
 }

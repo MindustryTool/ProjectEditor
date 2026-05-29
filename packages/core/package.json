@@ -19,7 +19,7 @@
     "@project/schema": "workspace:*",
     "@project/utils": "workspace:*",
     "@project/config": "workspace:*",
-    "valibot": "^1.4.0"
+    "valibot": "catalog:"
   },
   "devDependencies": {
     "typescript": "^5.7.0"

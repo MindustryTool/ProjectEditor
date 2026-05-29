@@ -15,7 +15,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "fflate": "^0.8.0"
+    "fflate": "catalog:"
   },
   "devDependencies": {
     "typescript": "^5.7.0"

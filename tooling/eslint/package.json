@@ -6,13 +6,13 @@
     ".": "./index.js"
   },
   "dependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
-    "eslint-plugin-react": "^7.37.0",
-    "eslint-plugin-react-hooks": "^5.1.0",
-    "typescript-eslint": "^8.0.0"
+    "@typescript-eslint/eslint-plugin": "catalog:",
+    "@typescript-eslint/parser": "catalog:",
+    "eslint-plugin-react": "catalog:",
+    "eslint-plugin-react-hooks": "catalog:",
+    "typescript-eslint": "catalog:"
   },
   "devDependencies": {
-    "eslint": "^9.0.0"
+    "eslint": "catalog:"
   }
 }

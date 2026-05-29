@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@project/config": "workspace:*",
-    "axios": "^1.7.0"
+    "axios": "catalog:"
   },
   "devDependencies": {
     "typescript": "^5.7.0"

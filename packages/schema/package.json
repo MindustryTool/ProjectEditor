@@ -17,10 +17,10 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "valibot": "^1.4.0"
+    "valibot": "catalog:"
   },
   "devDependencies": {
     "typescript": "^5.7.0",
-    "vitest": "^4.1.5"
+    "vitest": "catalog:"
   }
 }
