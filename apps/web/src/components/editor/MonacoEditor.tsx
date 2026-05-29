@@ -368,7 +368,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 	}, []);
 
 	return (
-		<div ref={containerRef} className="relative h-full w-full flex flex-col flex-1">
+		<div ref={containerRef} className="relative h-full w-full flex">
 			<Editor
 				key={path}
 				theme={theme}
@@ -394,6 +394,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 					tabSize: 2,
 					insertSpaces: true,
 					padding: { top: 8 },
+					automaticLayout: true,
 				}}
 				loading={<div className="flex h-full items-center justify-center text-xs text-muted-foreground">Loading editor...</div>}
 			/>

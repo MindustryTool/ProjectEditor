@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { Fragment, useState } from "react";
 import { FolderOpen } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Toolbar } from "./Toolbar";
@@ -16,17 +16,18 @@ import { FileExplorer } from "./left/FileExplorer";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Button } from "~/components/ui/button";
+import { Panel } from "#/components/editor/Panel";
 
 interface EditorMobileLayoutProps {
 	path: string | null;
 }
 
-export const EditorMobileLayout = memo(function EditorMobileLayout({ path }: EditorMobileLayoutProps) {
+export function EditorMobileLayout({ path }: EditorMobileLayoutProps) {
 	const { t } = useTranslation();
 	const [sheetOpen, setSheetOpen] = useState(false);
 
 	return (
-		<div className="flex min-h-0 flex-1 flex-col bg-background text-foreground overflow-hidden h-dvh max-h-dvh">
+		<Fragment>
 			<Toolbar>
 				<Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
 					<SheetTrigger asChild>
@@ -34,11 +35,10 @@ export const EditorMobileLayout = memo(function EditorMobileLayout({ path }: Edi
 							<FolderOpen className="size-4" />
 						</Button>
 					</SheetTrigger>
-					<SheetContent side="left" showCloseButton={false} className="w-4/5 sm:max-w-sm">
-						<SheetHeader>
-							<SheetTitle>{t("editor.explorer")}</SheetTitle>
-						</SheetHeader>
-						<FileExplorer />
+					<SheetContent side="left" showCloseButton={false} className="w-4/5 sm:max-w-sm max-h-dvh">
+						<Panel>
+							<FileExplorer />
+						</Panel>
 					</SheetContent>
 				</Sheet>
 				<ProjectMenu />
@@ -46,18 +46,20 @@ export const EditorMobileLayout = memo(function EditorMobileLayout({ path }: Edi
 				<ExportMenu />
 				<LocalizationMenu />
 			</Toolbar>
-			<Tabs defaultValue="center" className="flex min-h-0 flex-1 flex-col overflow-hidden">
-				<TabsContent value="center" className="flex min-h-0 flex-1 flex-col overflow-hidden">
-					<EditorCenterPanel path={path} />
-				</TabsContent>
-				<TabsContent value="right" className="flex min-h-0 flex-1 flex-col overflow-hidden">
-					{path ? (
-						<EditorRightPanel path={path} />
-					) : (
-						<div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-							{t("editor.propertiesPlaceholder")}
+			<Tabs defaultValue="center" className="flex min-h-0 flex-1 overflow-hidden w-full">
+				<TabsContent value="center" className="flex flex-1 overflow-hidden bg-background w-full">
+					{/* Those 2 divs are required for monaco to work, idk why but it work */}
+					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
+						<div className="flex flex-1 overflow-hidden bg-background w-full">
+							<EditorCenterPanel path={path} />
 						</div>
-					)}
+					</div>
+				</TabsContent>
+				<TabsContent value="right" className="flex flex-1 overflow-hidden bg-background w-full h-full">
+                    {/* Same to above */}
+					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
+						<div className="flex flex-1 overflow-hidden bg-background w-full">{path && <EditorRightPanel path={path} />}</div>
+					</div>
 				</TabsContent>
 				<TabsList className="w-full justify-around rounded-none border-t bg-muted shrink-0">
 					<TabsTrigger value="center" className="flex-1">
@@ -69,6 +71,6 @@ export const EditorMobileLayout = memo(function EditorMobileLayout({ path }: Edi
 				</TabsList>
 			</Tabs>
 			<StatusBar left={<StatusBarLeft />} center={<StatusBarCenter />} right={<StatusBarRight />} />
-		</div>
+		</Fragment>
 	);
-});
+}

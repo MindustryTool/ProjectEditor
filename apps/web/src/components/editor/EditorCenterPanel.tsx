@@ -16,7 +16,7 @@ function EditorWithMonaco({ path }: { path: string }) {
 
 	return (
 		<Suspense fallback={<div className="flex h-full items-center justify-center text-xs text-muted-foreground">Loading editor...</div>}>
-			<MonacoEditor path={path} value={data ?? ""} onChange={write} language={language} />
+            <MonacoEditor path={path} value={data ?? ""} onChange={write} language={language} />
 		</Suspense>
 	);
 }
@@ -57,7 +57,7 @@ export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: Edito
 	}, [path, projectContext, treeSnapshot, recordFileAccess]);
 
 	return (
-		<div className="flex min-h-0 flex-1 flex-col">
+		<div className="flex min-h-0 flex-1 flex-col overflow-hidden h-full w-full">
 			{path && projectContext && <RecentlyOpenedFilesBar />}
 			<div className="flex min-h-0 flex-1 flex-col overflow-hidden">{path && <EditorContent path={path} />}</div>
 		</div>
