@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: SpritePicker resolves sprite path from content JSON path
 The `SpritePicker` SHALL derive the sprite file path by calling `resolveContentSprite(contentPath)` where `contentPath` is the prop passed to the component.
@@ -53,3 +53,43 @@ When a sprite already exists, `SpritePicker` SHALL provide an icon-only Remove b
 - **WHEN** user clicks the Remove icon button overlaid on the sprite preview
 - **THEN** `SpritePicker` calls `ProjectFileSystem.delete()` on the sprite path
 - **AND** the upload prompt is shown again since the sprite no longer exists
+
+### Requirement: Action overlay uses backdrop blur
+The icon-only action buttons overlaid on the sprite preview SHALL use `backdrop-blur-sm` with a semi-transparent background (`bg-background/60`) to ensure readability against any sprite image.
+
+#### Scenario: Backdrop blur applied to overlay
+- **WHEN** the action overlay is rendered on top of the sprite preview
+- **THEN** it applies `backdrop-blur-sm` and `bg-background/60` CSS classes
+
+### Requirement: Action buttons are icon-only
+The Replace and Remove action buttons SHALL display only icons (no text labels) and use `aria-label` for accessibility.
+
+#### Scenario: Replace uses Upload icon
+- **WHEN** the Replace action button is rendered
+- **THEN** it displays the Upload icon from lucide-react and has `aria-label="Replace sprite"`
+
+#### Scenario: Remove uses Trash2 icon
+- **WHEN** the Remove action button is rendered
+- **THEN** it displays the Trash2 icon from lucide-react and has `aria-label="Remove sprite"`
+
+### Requirement: resolveContentSprite resolves sprite path from JSON content path
+The helper function `resolveContentSprite(path: string): string | null` SHALL derive a sprite image path from a content JSON file path.
+
+#### Scenario: Valid content JSON path
+- **WHEN** given a path like `content/items/copper.json`
+- **THEN** it returns `sprites/copper.png`
+
+#### Scenario: Non-content path returns null
+- **WHEN** given a path like `mod.hjson` or `content/foo.txt`
+- **THEN** it returns `null`
+
+#### Scenario: No subpath after content/ returns null
+- **WHEN** given a path like `content/` or `content`
+- **THEN** it returns `null`
+
+### Requirement: Helper is exported from ~/lib/utils
+The function SHALL be exported from `~/lib/utils` for reuse across the codebase.
+
+#### Scenario: Importable from utils
+- **WHEN** another module imports `resolveContentSprite` from `~/lib/utils`
+- **THEN** the function is available and callable

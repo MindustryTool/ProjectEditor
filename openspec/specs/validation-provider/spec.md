@@ -44,3 +44,10 @@ The `ValidationProvider` SHALL create a `ValidationRunner` with a `ValidationCon
 #### Scenario: getItems reads from query cache
 - **WHEN** validation runs
 - **THEN** `getItems()` SHALL return items from `queryClient.getQueryData(["items", projectId])`
+
+### Requirement: Validation clears on file removal
+The listener SHALL clear validation results when a file entry is removed from the store.
+
+#### Scenario: Clear on file delete
+- **WHEN** `clearFileContent(path)` is called or a file is deleted externally
+- **THEN** the listener SHALL call `useValidationStore.getState().clearResults(path)`

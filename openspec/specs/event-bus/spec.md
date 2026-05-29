@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: EventBus type and implementation
 The system SHALL provide an `EventBus` type with typed event maps for publish/subscribe communication.
@@ -53,6 +53,13 @@ The system SHALL define an `ProjectEventMap` with standard project lifecycle eve
 #### Scenario: file:mkdir event
 - **WHEN** a directory is created
 - **THEN** a `"file:mkdir"` event is emitted with `{ path: string }`
+
+### Requirement: No duplicate events
+Each file operation SHALL emit exactly one event, not multiple redundant events.
+
+#### Scenario: createFile emits once
+- **WHEN** `createFile(path)` is called
+- **THEN** exactly one event (`"file:create"`) is emitted (not also `"file:write"`)
 
 ### Requirement: EventBus factory function
 The system SHALL provide a `createEventBus()` factory that returns a new `EventBus` instance.

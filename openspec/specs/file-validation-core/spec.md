@@ -44,3 +44,6 @@ Each validation result SHALL include a message key (for i18n), optional message 
 #### Scenario: Field-level validation result
 - **WHEN** a validator detects an issue on a specific field
 - **THEN** the result SHALL include the `field` property set to the field name
+
+### Requirement: Mod hjson validation
+The system SHALL provide a validator for `mod.hjson` files that validates mod metadata fields.

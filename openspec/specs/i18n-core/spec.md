@@ -1,4 +1,4 @@
-## MODIFIED Requirements
+## Requirements
 
 ### Requirement: Translation framework initialized
 The system SHALL initialize i18next with `react-i18next` on app startup, loading locale JSON files and setting the active language.
@@ -40,11 +40,40 @@ The system SHALL detect the user's preferred language from the browser and apply
 - **WHEN** a user visits the app for the first time and their browser language is a supported locale
 - **THEN** the app SHALL display UI in that locale
 
-## ADDED Requirements
-
 ### Requirement: Locale from URL on SSR
 The system SHALL initialize the active language from the URL path prefix during server-side rendering.
 
 #### Scenario: SSR uses URL locale
 - **WHEN** the server receives a request for `/vi/about`
 - **THEN** i18n SHALL be initialized with `vi` as the active language before rendering
+
+### Requirement: Locale-prefixed routes
+The system SHALL serve all application routes under a locale path prefix that identifies the display language.
+
+#### Scenario: Routes are prefixed
+- **WHEN** the user visits `/en/about`
+- **THEN** the about page SHALL render with English locale
+- **WHEN** the user visits `/vi/about`
+- **THEN** the about page SHALL render with Vietnamese locale
+
+#### Scenario: Validate locale param
+- **WHEN** the user visits `/fr/editor` (unsupported locale)
+- **THEN** the system SHALL redirect to `/en/editor`
+
+### Requirement: Bare path redirect
+The system SHALL redirect requests to bare paths (without locale prefix) to the user's preferred locale.
+
+#### Scenario: Redirect bare path
+- **WHEN** a user with English browser settings visits `/editor`
+- **THEN** the system SHALL redirect to `/en/editor`
+- **WHEN** a user with Vietnamese browser settings visits `/editor`
+- **THEN** the system SHALL redirect to `/vi/editor`
+
+### Requirement: Dynamic HTML lang attribute
+The system SHALL set the `<html lang>` attribute to match the current locale from the URL.
+
+#### Scenario: lang attribute matches URL locale
+- **WHEN** the user visits `/vi/about`
+- **THEN** the `<html>` element SHALL have `lang="vi"`
+- **WHEN** the user visits `/en/about`
+- **THEN** the `<html>` element SHALL have `lang="en"`

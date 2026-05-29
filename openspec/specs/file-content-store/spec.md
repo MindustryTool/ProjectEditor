@@ -1,4 +1,5 @@
 ## Requirements
+
 ### Requirement: File content Zustand store slice
 The system SHALL provide a Zustand store slice within `@project/state` that caches file contents in memory keyed by `(projectId, path)` tuple. Each entry SHALL have `data`, `currentVersion`, `savedVersion`, `savedAt`, `error`, and `loading` fields. Derived state (`isDirty`, `isSaving`, `isLoading`, `isError`) SHALL be computed from these fields. The store SHALL be the single source of truth; filesystem is an async persistence layer only.
 
@@ -212,3 +213,54 @@ The system SHALL represent uncached (not-yet-loaded) entries as `undefined` in t
 #### Scenario: Uncached entry returns undefined
 - **WHEN** `selectEntry(projectId, path)` is called for a path that has never been loaded
 - **THEN** the selector SHALL return `undefined`
+
+### Requirement: useFileContentString hook wraps useFileContent with string decoding
+The system SHALL provide a `useFileContentString(path)` React hook that wraps `useFileContent(path)` and decodes the `ArrayBuffer` data to a string using `TextDecoder`.
+
+#### Scenario: Returns decoded string from ArrayBuffer data
+- **WHEN** `useFileContentString("mod.hjson")` is called and the underlying `useFileContent` returns `data` as an `ArrayBuffer` containing UTF-8 encoded text
+- **THEN** the returned `data` field SHALL be the decoded string (via `TextDecoder().decode(data)`)
+
+#### Scenario: Returns null when data is null
+- **WHEN** `useFileContentString("mod.hjson")` is called and the underlying `useFileContent` returns `data` as `null`
+- **THEN** the returned `data` field SHALL be `null`
+
+#### Scenario: Returns empty string when data is zero-length ArrayBuffer
+- **WHEN** `useFileContentString("mod.hjson")` is called and `data` is an `ArrayBuffer` with `byteLength` of 0
+- **THEN** the returned `data` SHALL be `""`
+
+#### Scenario: write accepts string and encodes to ArrayBuffer
+- **WHEN** `write("new content")` is called on the result of `useFileContentString`
+- **THEN** it SHALL encode the string to `ArrayBuffer` via `TextEncoder.encode()` and pass it to the underlying `useFileContent().write()`
+
+#### Scenario: All other fields pass through unchanged
+- **WHEN** `useFileContentString(path)` is called
+- **THEN** `currentVersion`, `savedVersion`, `savedAt`, `error`, `isDirty`, `isSaving`, `isLoading`, `isError` SHALL be the same values as returned by `useFileContent(path)`
+
+### Requirement: useFileContentImageUrl hook manages blob URL lifecycle for images
+The system SHALL provide a `useFileContentImageUrl(data)` React hook that creates a `Blob` with `image/png` type from the given `ArrayBuffer` and returns a memoized `blob:` URL, automatically revoking the previous URL on data change and on unmount.
+
+#### Scenario: Returns null when data is null
+- **WHEN** `useFileContentImageUrl(null)` is called
+- **THEN** the returned value SHALL be `null`
+
+#### Scenario: Returns blob URL when data is provided
+- **WHEN** `useFileContentImageUrl(buffer)` is called with a non-null `ArrayBuffer`
+- **THEN** the returned value SHALL be a string starting with `"blob:"`
+
+#### Scenario: Revokes previous URL when data changes
+- **WHEN** the `data` argument changes from one non-null `ArrayBuffer` to another
+- **THEN** the previous object URL SHALL be revoked (via `URL.revokeObjectURL`)
+- **AND** a new object URL SHALL be created for the new data
+
+#### Scenario: Revokes URL on unmount
+- **WHEN** the component using `useFileContentImageUrl` unmounts
+- **THEN** the current object URL SHALL be revoked (via `URL.revokeObjectURL`)
+
+#### Scenario: Blob is always created with image/png type
+- **WHEN** `useFileContentImageUrl(buffer)` is called
+- **THEN** the `Blob` SHALL be created with `{ type: "image/png" }`
+
+#### Scenario: Returns null when data is zero-length
+- **WHEN** `useFileContentImageUrl(buffer)` is called with an `ArrayBuffer` of `byteLength` 0
+- **THEN** the returned value SHALL be `null` (no URL created for empty data)
