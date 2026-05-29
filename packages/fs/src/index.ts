@@ -88,7 +88,7 @@ export class ProjectFileSystem {
 	}
 
 	async writeFiles(entries: { name: string; data: Uint8Array }[]): Promise<void> {
-		const BATCH_SIZE = 200;
+		const BATCH_SIZE = 1000;
 
 		const dirs = new Set(entries.map((e) => e.name.split("/").slice(0, -1).join("/")).filter(Boolean));
 		await Promise.all([...dirs].map((d) => this.vfs.mkdir(this.scopePath(d))));
@@ -269,9 +269,10 @@ export async function createProjectFileSystem(
 		await ensureNode(fs, node);
 	}
 
-	const hasModMeta = (await fs.exists("/mod.hjson")) || (await fs.exists("/mod.json"));
+	const hasModJson = await fs.exists("/mod.json");
+	const hasModHjson = await fs.exists("/mod.hjson");
 
-	if (!hasModMeta) {
+	if (!hasModJson && !hasModHjson) {
 		await fs.createFile("/mod.hjson");
 	}
 
@@ -482,7 +483,7 @@ export class OPFSAdapter implements VirtualFileSystem {
 export interface TreeNode {
 	name: string;
 	type: "file" | "folder";
-    path: string;
+	path: string;
 	children?: TreeNode[];
 }
 
@@ -525,20 +526,22 @@ export const jsonProjectTree = new DefaultProjectFileTree([
 	{
 		name: "content",
 		type: "folder",
+        path: "content",
 		children: [
-			{ name: "items", type: "folder" },
-			{ name: "blocks", type: "folder" },
-			{ name: "liquids", type: "folder" },
-			{ name: "units", type: "folder" },
+			{ name: "items", type: "folder", path: "content/items" },
+			{ name: "blocks", type: "folder", path: "content/blocks" },
+			{ name: "blocks", type: "folder", path: "content/liquids" },
+			{ name: "liquids", type: "folder", path: "content/liquids" },
+			{ name: "units", type: "folder", path: "content/units" },
 		],
 	},
-	{ name: "maps", type: "folder" },
-	{ name: "bundles", type: "folder" },
-	{ name: "sounds", type: "folder" },
-	{ name: "schematics", type: "folder" },
-	{ name: "scripts", type: "folder" },
-	{ name: "sprites-override", type: "folder" },
-	{ name: "sprites", type: "folder" },
+	{ name: "maps", type: "folder", path: "maps" },
+	{ name: "bundles", type: "folder", path: "bundles" },
+	{ name: "sounds", type: "folder", path: "sounds" },
+	{ name: "schematics", type: "folder", path: "schematics" },
+	{ name: "scripts", type: "folder", path: "scripts" },
+	{ name: "sprites-override", type: "folder", path: "sprites-override" },
+	{ name: "sprites", type: "folder", path: "sprites" },
 ]);
 
 export async function createOPFSAdapter(): Promise<OPFSAdapter> {
