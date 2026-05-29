@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: FieldTypes includes Array type mapped to HjsonArrayNode
 `FieldTypes` in `FieldRenderer.tsx` SHALL include an `Array` type mapping to `HjsonArrayNode`.

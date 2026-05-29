@@ -58,19 +58,19 @@ interface FileExplorerProps {
 }
 
 export function FileExplorer({ className }: FileExplorerProps) {
-	const context = useCurrentProject();
 	const [path, setPath] = usePath();
+
+	const context = useCurrentProject();
 	const treeSnapshot = useProjectSession((state) => state.treeSnapshot);
-	const rawTree = useMemo(() => buildFileTree(treeSnapshot, context.project.id), [context.project.id, treeSnapshot]);
 	const projectTree = useMemo(() => {
 		const rootNode: TreeNode = {
 			name: context.project.name,
 			type: "folder",
-			children: rawTree,
+			children: buildFileTree(treeSnapshot, context.project.id),
 			path: "/",
 		};
 		return [rootNode];
-	}, [rawTree, context.project.name]);
+	}, [context.project.id, treeSnapshot]);
 
 	const [editingPath, setEditingPath] = useState<string | null>(null);
 	const [deleteTargetPath, setDeleteTargetPath] = useState<string | null>(null);
@@ -79,7 +79,10 @@ export function FileExplorer({ className }: FileExplorerProps) {
 	const totalIssueCount = useIssues();
 
 	const deleteTargetName = useMemo(() => {
-		if (!deleteTargetPath) return "";
+		if (!deleteTargetPath) {
+			return "";
+		}
+
 		const parts = deleteTargetPath.split("/");
 		return parts[parts.length - 1] ?? "";
 	}, [deleteTargetPath]);
@@ -195,7 +198,9 @@ function CreateFileForm({
 	const isContentType = contentTypes.has(type);
 	const getTemplateContentRef = useRef<() => Promise<string>>(async () => "");
 	const handleGetTemplateContent = useCallback(async () => getTemplateContentRef.current(), []);
-	const handleSetTemplateContent = useCallback((fn: () => Promise<string>) => { getTemplateContentRef.current = fn; }, []);
+	const handleSetTemplateContent = useCallback((fn: () => Promise<string>) => {
+		getTemplateContentRef.current = fn;
+	}, []);
 
 	async function handleCreate() {
 		const trimmed = name.trim();
@@ -438,7 +443,13 @@ function TreeNodeItem({ node, depth = 0 }: TreeNodeItemProps) {
 					<span className={cn("flex-1 truncate", filenameClass)}>{node.name}</span>
 				)}
 				{showActions && (isFolder || !isDefault) && (
-					<div className={cn("flex items-center gap-0.5 ml-auto", !isSelected && "invisible group-hover:visible", isSelected && "visible")}>
+					<div
+						className={cn(
+							"flex items-center gap-0.5 ml-auto",
+							!isSelected && "invisible group-hover:visible",
+							isSelected && "visible",
+						)}
+					>
 						{isFolder && (
 							<button
 								onClick={handleCreateClick}

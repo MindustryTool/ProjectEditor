@@ -4,7 +4,7 @@ import { FileJson, Image } from "lucide-react";
 
 export function StatusBarRight() {
 	const { t } = useTranslation();
-	const validationSummary = useValidationStore((s) => s.summary);
+	const validationSummary = useValidationStore((s) => s.results.summary);
 
 	return (
 		<div className="flex items-center gap-2">

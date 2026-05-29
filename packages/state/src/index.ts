@@ -29,3 +29,4 @@ export { createValidationRunner } from "./validation/runner";
 export type { ValidationRunner } from "./validation/runner";
 export { useValidationStore } from "./validation/store";
 export { createDefaultValidators } from "./validation/validators";
+export { ValidationResults } from "./validation/types";

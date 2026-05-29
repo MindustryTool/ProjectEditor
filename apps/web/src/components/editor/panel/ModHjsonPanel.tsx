@@ -110,7 +110,8 @@ export function ModHjsonPanel({ path }: { path: string }) {
 	const { data, write, isLoading } = useFileContentString(path);
 	const [values, setValues] = useState<Partial<ModHjsonData>>({});
 	const contentRef = useRef<string | null>(null);
-	const issues = useValidationStore((s) => s.resultsByPath[path] ?? EMPTY_ARRAY);
+const issues = useValidationStore((s) => 
+s.results.resultsByPath[path] ?? EMPTY_ARRAY);
 
 	useEffect(() => {
 		if (data === null || isLoading) return;

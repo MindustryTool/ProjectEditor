@@ -1,60 +1,38 @@
 import { create } from "zustand";
-import type { ValidationResult, ValidationStore, ValidationSummary } from "./types";
 import { persist } from "zustand/middleware";
-
-function computeSummary(resultsByPath: Record<string, ValidationResult[]>): ValidationSummary {
-	let errors = 0;
-	let warnings = 0;
-	let infos = 0;
-	let deprecated = 0;
-
-	for (const results of Object.values(resultsByPath)) {
-		for (const r of results) {
-			if (r.severity === 0) errors++;
-			else if (r.severity === 1) warnings++;
-			else if (r.severity === 2) infos++;
-			else if (r.severity === 3) deprecated++;
-		}
-	}
-
-	return {
-		total: errors + warnings + infos + deprecated,
-		errors,
-		warnings,
-		infos,
-		deprecated,
-	};
-}
+import type { ValidationResult, ValidationStore } from "./types";
+import { ValidationResults } from "./types";
 
 export const useValidationStore = create<ValidationStore>()(
-	persist(
-		(set) => ({
-			resultsByPath: {},
-			summary: { total: 0, errors: 0, warnings: 0, infos: 0, deprecated: 0 },
+  persist(
+    (set) => ({
+      results: new ValidationResults(),
 
-			setResults(path: string, results: ValidationResult[]): void {
-				set((state) => {
-					const next = { ...state.resultsByPath, [path]: results };
-					return { resultsByPath: next, summary: computeSummary(next) };
-				});
-			},
+      setResults(path: string, results: ValidationResult[]): void {
+        set((state) => ({
+          results: state.results.setResults(path, results),
+        }));
+      },
 
-			clearResults(path: string): void {
-				set((state) => {
-					const { [path]: _, ...rest } = state.resultsByPath;
-					return { resultsByPath: rest, summary: computeSummary(rest) };
-				});
-			},
+      clearResults(path: string): void {
+        set((state) => ({
+          results: state.results.clearResults(path),
+        }));
+      },
 
-			clearAll(): void {
-				set({ resultsByPath: {}, summary: { total: 0, errors: 0, warnings: 0, infos: 0, deprecated: 0 } });
-			},
-		}),
-		{
-			name: "issue-store",
-			partialize: (state) => ({
-				resultsByPath: state.resultsByPath,
-			}),
-		},
-	),
+      clearAll(): void {
+        set({ results: new ValidationResults() });
+      },
+    }),
+    {
+      name: "issue-store",
+      partialize: (state) => ({
+        resultsByPath: state.results.resultsByPath,
+      }),
+      merge: (persisted, current) => ({
+        ...current,
+        results: new ValidationResults((persisted as any)?.resultsByPath),
+      }),
+    },
+  ),
 );

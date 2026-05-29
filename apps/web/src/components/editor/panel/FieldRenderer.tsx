@@ -27,7 +27,8 @@ interface FieldsRendererProps {
 }
 
 export function FieldsRenderer({ path, schema, node, original, onPatch }: FieldsRendererProps) {
-	const issues = useValidationStore((state) => state.resultsByPath[path]);
+const issues = useValidationStore((state) => 
+state.results.resultsByPath[path]);
 	const entries = getSchemaEntries(schema);
 
 	return entries.map(([name, entrySchema]) => {

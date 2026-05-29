@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: FieldInfo is generic over value type
 `FieldInfo` SHALL accept a type parameter `T` that types the `value` property, defaulting to `unknown` for backward compatibility.

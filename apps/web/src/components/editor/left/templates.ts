@@ -41,13 +41,3 @@ export function getUnitTemplate(name: string): string {
 		2,
 	);
 }
-
-export function getEffectTemplate(name: string): string {
-	return JSON.stringify(
-		{
-			name,
-		},
-		null,
-		2,
-	);
-}

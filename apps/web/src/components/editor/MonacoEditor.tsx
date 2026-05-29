@@ -56,7 +56,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 		monacoConfigured.current = true;
 	}
 
-	const results = useValidationStore((s) => s.resultsByPath[path]);
+	const results = useValidationStore((s) => s.results.resultsByPath[path]);
 
 	const updateMarkers = useCallback(() => {
 		const editorInstance = editorRef.current;

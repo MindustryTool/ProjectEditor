@@ -23,7 +23,7 @@ interface ExportMenuProps {
 export function ExportMenu({ className }: ExportMenuProps) {
 	const { t } = useTranslation();
 	const projectContext = useProjectSession((s) => s.projectContext);
-	const validationResults = useValidationStore((s) => s.resultsByPath);
+	const validationResults = useValidationStore((s) => s.results.resultsByPath);
 	const [open, setOpen] = useState(false);
 	const [validationOpen, setValidationOpen] = useState(false);
 	const [filename, setFilename] = useState("");

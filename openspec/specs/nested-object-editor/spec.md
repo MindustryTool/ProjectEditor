@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: FieldTypes includes Object type mapped to HjsonObjectNode
 `FieldTypes` in `FieldRenderer.tsx` SHALL include an `Object` type mapping to `HjsonObjectNode`.
