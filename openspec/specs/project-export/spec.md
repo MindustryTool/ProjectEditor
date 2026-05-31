@@ -134,16 +134,25 @@ The system SHALL download the ZIP using the user-typed filename (before automati
 - **THEN** the downloaded file SHALL use the filename exactly as displayed in the input (after `.zip` append)
 
 ### Requirement: Pre-export loads and validates all files
-Before showing the export dialog, the ExportMenu SHALL read all project files from the filesystem directly and validate them.
+Before exporting, the ExportMenu SHALL read all project files from the filesystem directly and validate them. Validation SHALL run when the user clicks the Download button, not when the export dialog opens.
 
-#### Scenario: Export reads and validates all files
-- **WHEN** the user clicks the Export button
+#### Scenario: Export reads and validates on download click
+- **WHEN** the user clicks the Download button in the export dialog
 - **THEN** the system SHALL iterate over all project files, read each from the filesystem via `fs.readFile()`, and call `validateFile()` directly
-- **THEN** validation results SHALL be available when the export dialog opens
+- **THEN** validation results SHALL be available after the files are processed
+- **WHEN** errors are found
+- **THEN** the validation error dialog SHALL open
+- **WHEN** no errors are found
+- **THEN** the export SHALL proceed and the ZIP SHALL be downloaded
 
-#### Scenario: Export shows loading indicator
-- **WHEN** files are being read and validated
-- **THEN** a loading indicator SHALL be shown during validation
+#### Scenario: Export opens dialog without pre-validation
+- **WHEN** the user clicks the Export button
+- **THEN** the dialog SHALL open immediately without reading or validating any files
+- **THEN** the filename input SHALL be pre-filled with a sanitized version of the project name
+
+#### Scenario: Export shows loading indicator during download validation
+- **WHEN** files are being read and validated after the user clicks Download
+- **THEN** a loading indicator SHALL be shown on the Download button during validation
 
 ### Requirement: Export validation errors are clickable
 The export validation dialog SHALL display errors with clickable file paths that navigate to the errored file.

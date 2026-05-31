@@ -26,9 +26,10 @@ The system SHALL provide a `ValidationProvider` React component that registers v
 - **WHEN** a file finishes loading into the file store (`loading` transitions from `true` to `false`)
 - **THEN** the listener SHALL read the file content from the file store and schedule validation after debounce
 
-#### Scenario: Validation uses in-memory buffer data
-- **WHEN** validation runs for a file
-- **THEN** it SHALL decode the `data` field from the store entry as text
+#### Scenario: Validation uses lazy content from store
+- **WHEN** a `file:write` event triggers validation for a path
+- **THEN** `scheduleValidation` SHALL create a `() => Promise<string>` getter that reads and decodes the data from the file store when called
+- **THEN** the getter SHALL only be called if `registry.getMatches(path)` returns validators
 
 #### Scenario: Validation results stored via store
 - **WHEN** validation completes
@@ -69,10 +70,15 @@ The `ValidationProvider` SHALL expose a `ValidationContextValue` with a `validat
 
 #### Scenario: useValidationContext returns validateFile
 - **WHEN** a component calls `useValidationContext()` inside a `ValidationProvider`
-- **THEN** it SHALL receive `{ validateFile: (path, content) => void }`
+- **THEN** it SHALL receive `{ validateFile: (path: string, content: () => Promise<string>) => Promise<void> }`
 
-#### Scenario: validateFile runs validators
-- **WHEN** `validateFile(path, content)` is called
-- **THEN** the runner SHALL validate the content against all registered validators for that path
-- **THEN** results SHALL be stored via `useValidationStore.getState().setResults(path, results)`
+#### Scenario: validateFile runs validators with lazy content
+- **WHEN** `validateFile(path, getContent)` is called
+- **THEN** the runner SHALL call `registry.getMatches(path)` to check for matching validators
+- **WHEN** there are matching validators
+- **THEN** the runner SHALL invoke `getContent()` to resolve the content
+- **THEN** the runner SHALL run the resolved content against all matched validators
+- **WHEN** there are no matching validators
+- **THEN** the runner SHALL NOT invoke `getContent()`
+- **THEN** no results SHALL be stored
 

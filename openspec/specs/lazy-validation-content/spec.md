@@ -1,5 +1,9 @@
-## ADDED Requirements
+# lazy-validation-content Specification
 
+## Purpose
+The system SHALL provide lazy content resolution in the validation runner so file content is only decoded when there are registered validators matching a given file path.
+
+## Requirements
 ### Requirement: Content is resolved lazily from a getter
 The `ValidationRunner` SHALL accept content as a `() => Promise<string>` getter instead of a pre-resolved `string`, and SHALL only resolve the getter when there are matched validators for the given path.
 
