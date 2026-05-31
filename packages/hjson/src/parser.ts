@@ -1,11 +1,12 @@
 import { Tokenizer, type Token } from "./tokenizer.js";
 import type { HjsonNode, ObjectNode, ArrayNode, StringNode, NumberNode, BooleanNode, NullNode, MemberNode } from "./ast.js";
 import { HJSONError, HJSONErrorCode } from "./errors.js";
+import type {
+	HjsonNode as HjsonStructuredNode} from "./structured.js";
 import {
 	HjsonObjectNode,
 	HjsonArrayNode,
 	HjsonValueNode,
-	HjsonNode as HjsonStructuredNode,
 	createFieldInfo,
 	createElementInfo,
 	type FieldInfo,
@@ -57,7 +58,7 @@ export class Parser {
 	}
 
 	private parseRootObject(): ObjectNode | null {
-		const members: any[] = [];
+		const members: MemberNode[] = [];
 		const startRow = this.tokenizer.peek().row;
 		const startCol = this.tokenizer.peek().col;
 		const startIdx = this.tokenizer.peek().index;
@@ -94,7 +95,7 @@ export class Parser {
 				start: { row: startRow, col: startCol, index: startIdx },
 				end: { row: endTok.row, col: endTok.col + (endTok.endIndex - endTok.index), index: endTok.endIndex },
 			},
-			members: members as any,
+			members,
 		};
 	}
 
@@ -122,7 +123,7 @@ export class Parser {
 
 		this.depth++;
 		const openTok = this.tokenizer.next();
-		const members: any[] = [];
+		const members: MemberNode[] = [];
 		const seenKeys = new Map<string, Token>();
 
 		while (true) {
@@ -166,7 +167,7 @@ export class Parser {
 				start: { row: openTok.row, col: openTok.col, index: openTok.index },
 				end: { row: closeTok.row, col: closeTok.col + (closeTok.endIndex - closeTok.index), index: closeTok.endIndex },
 			},
-			members: members as any,
+			members,
 		};
 	}
 
@@ -410,11 +411,11 @@ export class Parser {
 		};
 	}
 
-	toJSValue(node: HjsonNode, reviver?: (key: string, value: any) => any): any {
+	toJSValue(node: HjsonNode, reviver?: (key: string, value: unknown) => unknown): unknown {
 		return this.convertNode(node, "", reviver);
 	}
 
-	private convertNode(node: HjsonNode, keyHint: string, reviver?: (key: string, value: any) => any): any {
+	private convertNode(node: HjsonNode, keyHint: string, reviver?: (key: string, value: unknown) => unknown): unknown {
 		switch (node.kind) {
 			case "null":
 				return reviver ? reviver(keyHint, null) : null;
@@ -429,7 +430,7 @@ export class Parser {
 				return reviver ? reviver(keyHint, arr) : arr;
 			}
 			case "object": {
-				const obj: Record<string, any> = {};
+				const obj: Record<string, unknown> = {};
 				for (const member of node.members) {
 					const key = member.key.value;
 					const val = this.convertNode(member.value, key, reviver);
@@ -444,7 +445,7 @@ export class Parser {
 		}
 	}
 
-	static parse(input: string, reviver?: (key: string, value: any) => any, options?: HJSONParseOptions): any {
+	static parse(input: string, reviver?: (key: string, value: unknown) => unknown, options?: HJSONParseOptions): unknown {
 		const parser = new Parser(input, options);
 		const ast = parser.parse();
 		if (options?.structured) {
@@ -453,11 +454,11 @@ export class Parser {
 		return parser.toJSValue(ast, reviver);
 	}
 
-	toStructuredValue(node: HjsonNode, reviver?: (key: string, value: any) => any): HjsonStructuredNode {
+	toStructuredValue(node: HjsonNode, reviver?: (key: string, value: unknown) => unknown): HjsonStructuredNode {
 		return this.convertNodeStructured(node, "", reviver);
 	}
 
-	private convertNodeStructured(node: HjsonNode, keyHint: string, reviver?: (key: string, value: any) => any): HjsonStructuredNode {
+	private convertNodeStructured(node: HjsonNode, keyHint: string, reviver?: (key: string, value: unknown) => unknown): HjsonStructuredNode {
 		switch (node.kind) {
 			case "null":
 			case "boolean":
@@ -468,7 +469,7 @@ export class Parser {
 			}
 			case "array": {
 				const elements: ElementInfo[] = [];
-				const data: any[] = [];
+				const data: unknown[] = [];
 				node.elements.forEach((el, i) => {
 					const val = this.convertNodeStructured(el, String(i), reviver);
 					elements.push(
@@ -484,12 +485,12 @@ export class Parser {
 					data.push(val.valueOf());
 				});
 				const finalData = reviver ? reviver(keyHint, data) : data;
-				return new HjsonArrayNode(finalData, elements, { ...node.loc.start }, { ...node.loc.end });
+				return new HjsonArrayNode(finalData as unknown[], elements, { ...node.loc.start }, { ...node.loc.end });
 			}
 			case "object": {
 				const fieldInfos: FieldInfo[] = [];
 				const rawValues: Map<string, HjsonStructuredNode> = new Map();
-				const data: Record<string, any> = {};
+				const data: Record<string, unknown> = {};
 
 				for (const member of node.members) {
 					const key = member.key.value;
@@ -517,7 +518,7 @@ export class Parser {
 				if (finalData !== data && typeof finalData === "object" && finalData !== null) {
 					for (const fi of fieldInfos) {
 						if (fi.key in finalData) {
-							const newVal = finalData[fi.key];
+							const newVal = (finalData as Record<string, unknown>)[fi.key];
 							const oldRaw = rawValues.get(fi.key);
 							if (oldRaw && oldRaw.valueOf() !== newVal) {
 								// If it changed, we wrap it in a new ValueNode without precise loc (or keep old loc?)
@@ -531,11 +532,11 @@ export class Parser {
 				return new HjsonObjectNode(resultData as Record<string, unknown>, fieldInfos, { ...node.loc.start }, { ...node.loc.end });
 			}
 			default:
-				throw new Error(`Unknown node kind: ${(node as any).kind}`);
+				throw new Error(`Unknown node kind: ${(node as { kind: string }).kind}`);
 		}
 	}
 
-	static async parseAsync(input: string, reviver?: (key: string, value: any) => any, options?: HJSONParseOptions): Promise<any> {
+	static async parseAsync(input: string, reviver?: (key: string, value: unknown) => unknown, options?: HJSONParseOptions): Promise<unknown> {
 		return new Promise((resolve, reject) => {
 			queueMicrotask(() => {
 				try {

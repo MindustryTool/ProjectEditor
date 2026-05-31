@@ -41,7 +41,7 @@ export function RecentlyOpenedFilesBar() {
 				}
 			}
 		},
-		[projectId, path, recentFiles, removeFromRecentFiles],
+		[projectId, path, recentFiles, removeFromRecentFiles, setPath],
 	);
 
 	if (recentFiles.length === 0) return null;

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { HJSON } from "../src/hjson.js";
-import { HjsonObjectNode, HjsonArrayNode, createElementInfo } from "../src/structured.js";
+import type { HjsonObjectNode, HjsonArrayNode, HjsonNode } from "../src/structured.js";
 
 function parseStructured(input: string) {
 	return HJSON.parseStructured(input) as HjsonObjectNode;
@@ -663,6 +663,6 @@ name: exo`;
 		const node = parseStructured(text);
 		const patched = node.patchComment(text, "name", "# new");
 		const reparsed = parseStructured(patched);
-		expect((reparsed.field("name")?.value as any).valueOf()).toBe("exo");
+		expect((reparsed.field("name")?.value as HjsonNode).valueOf()).toBe("exo");
 	});
 });

@@ -138,8 +138,9 @@ export class ValidationResults {
 
 	clearResults(path: string): ValidationResults {
 		if (!(path in this.resultsByPath)) return this;
-		const { [path]: _, ...rest } = this.resultsByPath;
-		return new ValidationResults(rest);
+		const rest = { ...this.resultsByPath };
+			delete rest[path];
+			return new ValidationResults(rest);
 	}
 
 	clearAll(): ValidationResults {

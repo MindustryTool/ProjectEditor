@@ -237,10 +237,10 @@ describe("Tokenizer", () => {
     it("collects inputFragment on error", () => {
       const t = new Tokenizer("{@}");
       t.next();
-      let caught: any;
+      let caught: unknown;
       try {
         t.next();
-      } catch (e: any) {
+      } catch (e: unknown) {
         caught = e;
       }
       expect(caught).toBeDefined();

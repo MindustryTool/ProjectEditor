@@ -1,7 +1,8 @@
 import type { ValidationContext, ValidationResult, ValidatorFn } from "./types";
 import { Severity } from "./types";
 import { createValidatorRegistry } from "./registry";
-import { HJSON, HJSONError, HjsonNode, HjsonObjectNode } from "@project/hjson";
+import type { HjsonNode} from "@project/hjson";
+import { HJSON, HJSONError, HjsonObjectNode } from "@project/hjson";
 import { ItemHjsonSchema, ModHjsonSchema } from "@project/schema";
 import * as v from "valibot";
 import { findUnknownProperties } from "./utils";

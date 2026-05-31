@@ -2,7 +2,8 @@ import { useMemo, useState, useRef, useEffect, useCallback, createContext, useCo
 import { File, Folder, FolderOpen, ChevronRight, ChevronDown, Pencil, Trash2, Plus, MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { isDefaultPath, type TreeNode } from "@project/fs";
-import { useCurrentProject, useProjectSession, useFileStore, isDirty, selectEntry, selectIsSaving, TreeSnapshot } from "@project/state";
+import type { TreeSnapshot } from "@project/state";
+import { useCurrentProject, useProjectSession, useFileStore, isDirty, selectEntry, selectIsSaving } from "@project/state";
 import { cn } from "~/lib/utils";
 import {
 	AlertDialog,
@@ -62,7 +63,7 @@ export function FileExplorer({ className }: FileExplorerProps) {
 			path: "/",
 		};
 		return [rootNode];
-	}, [context.project.id, treeSnapshot]);
+	}, [context.project.id, context.project.name, treeSnapshot]);
 
 	const [editingPath, setEditingPath] = useState<string | null>(null);
 	const [deleteTargetPath, setDeleteTargetPath] = useState<string | null>(null);

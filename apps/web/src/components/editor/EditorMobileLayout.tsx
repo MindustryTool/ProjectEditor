@@ -13,7 +13,7 @@ import { StatusBarRight } from "./statusbar/StatusBarRight";
 import { EditorCenterPanel } from "./EditorCenterPanel";
 import { EditorRightPanel } from "./EditorRightPanel";
 import { FileExplorer } from "./left/FileExplorer";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Button } from "~/components/ui/button";
 import { Panel } from "#/components/editor/Panel";
@@ -56,7 +56,7 @@ export function EditorMobileLayout({ path }: EditorMobileLayoutProps) {
 					</div>
 				</TabsContent>
 				<TabsContent value="right" className="flex flex-1 overflow-hidden bg-background w-full h-full">
-                    {/* Same to above */}
+					{/* Same to above */}
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
 						<div className="flex flex-1 overflow-hidden bg-background w-full">{path && <EditorRightPanel path={path} />}</div>
 					</div>

@@ -31,7 +31,7 @@ export const useValidationStore = create<ValidationStore>()(
       }),
       merge: (persisted, current) => ({
         ...current,
-        results: new ValidationResults((persisted as any)?.resultsByPath),
+        results: new ValidationResults((persisted as { resultsByPath?: Record<string, ValidationResult[]> } | undefined)?.resultsByPath),
       }),
     },
   ),

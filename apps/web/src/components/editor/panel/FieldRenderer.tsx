@@ -12,7 +12,8 @@ import { useItems } from "#/hooks/use-items";
 import { useValidationStore } from "@project/state";
 import { type Research } from "@project/schema";
 import { HJSON } from "@project/hjson";
-import { HjsonNode, HjsonValueNode, HjsonArrayNode, HjsonObjectNode } from "@project/hjson";
+import type { HjsonObjectNode } from "@project/hjson";
+import { HjsonNode, HjsonValueNode, HjsonArrayNode } from "@project/hjson";
 import { Plus, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
 import { type ReactNode } from "react";
@@ -156,181 +157,7 @@ const schemaRenderers: Record<string, SchemaRenderer> = {
 			</FormField>
 		);
 	},
-	research: ({ name, node, original, onPatch, patchValue }) => {
-		const items = useItems({ project: true, base: true });
-
-		function getCurrentValue(): Research | string | null {
-			if (node.isValue()) {
-				const val = (node as HjsonValueNode<unknown>).valueOf();
-				return typeof val === "string" || (val && typeof val === "object") ? (val as Research | string) : null;
-			}
-			if (node.isObject()) {
-				return (node as HjsonObjectNode).valueOf() as unknown as Research;
-			}
-			return null;
-		}
-
-		const currentValue = getCurrentValue();
-
-		const parent =
-			(!currentValue
-				? ""
-				: typeof currentValue === "string"
-					? currentValue
-					: (((currentValue as Record<string, unknown>)?.parent as string) ?? "")) || "";
-		const requirements = (
-			!currentValue
-				? []
-				: typeof currentValue === "string"
-					? []
-					: (((currentValue as Record<string, unknown>)?.requirements as string[]) ?? [])
-		) as string[];
-
-		const addedReq = requirements.map((requirement: string) => requirement.split("/")[0]!);
-
-		function handleChange(newParent: string, newRequirements: string[]) {
-			if (node.isObject()) {
-				const researchNode = node as HjsonObjectNode;
-				const parentChanged = newParent !== parent;
-				const reqsChanged = newRequirements.length !== requirements.length || newRequirements.some((r, i) => r !== requirements[i]);
-
-				if (parentChanged && !reqsChanged) {
-					const newContent = researchNode.patchField(original, "parent", HJSON.stringify(newParent));
-					onPatch(newContent);
-					return;
-				}
-				if (reqsChanged && !parentChanged && newRequirements.length > 0) {
-					const reqField = researchNode.field("requirements");
-					const arrNode = reqField?.value instanceof HjsonArrayNode ? reqField.value : null;
-					if (arrNode) {
-						let content = original;
-						if (newRequirements.length === requirements.length) {
-							for (let i = 0; i < newRequirements.length; i++) {
-								if (newRequirements[i] !== requirements[i]) {
-									content = arrNode.patchElement(content, i, HJSON.stringify(newRequirements[i]));
-									break;
-								}
-							}
-						} else if (newRequirements.length === requirements.length + 1) {
-							for (let i = 0; i < newRequirements.length; i++) {
-								if (i >= requirements.length || newRequirements[i] !== requirements[i]) {
-									content = arrNode.insertElement(content, i, HJSON.stringify(newRequirements[i]));
-									break;
-								}
-							}
-						} else if (newRequirements.length === requirements.length - 1) {
-							for (let i = 0; i < requirements.length; i++) {
-								if (i >= newRequirements.length || requirements[i] !== newRequirements[i]) {
-									content = arrNode.removeElement(content, i);
-									break;
-								}
-							}
-						}
-						if (content !== original) {
-							onPatch(content);
-							return;
-						}
-					}
-				}
-			}
-			if (!newParent && newRequirements.length === 0) {
-				patchValue(undefined);
-			} else if (newRequirements.length > 0) {
-				patchValue({ parent: newParent, requirements: newRequirements });
-			} else {
-				patchValue(newParent);
-			}
-		}
-
-		function handleAddNewReq() {
-			const notAdded = items.find((item) => {
-				for (const requirement of requirements) {
-					if (requirement.startsWith(item.name + "/")) {
-						return false;
-					}
-				}
-				return true;
-			});
-			handleChange(parent, [...requirements, notAdded?.name + "/" + 10]);
-		}
-
-		function handleRemoveReq(index: number) {
-			handleChange(
-				parent,
-				requirements.filter((_: unknown, i: number) => i !== index),
-			);
-		}
-
-		function handleUpdateReq(index: number, item: string, number: number) {
-			handleChange(
-				parent,
-				requirements.map((r: string, i: number) => (i === index ? item + "/" + number : r)),
-			);
-		}
-
-		return (
-			<>
-				<FormField>
-					<FormLabel>{name}</FormLabel>
-					<FormControl>
-						<Input value={parent} onChange={(v) => handleChange(v.currentTarget.value, requirements)} />
-					</FormControl>
-				</FormField>
-				{requirements.map((requirement: string, index: number) => {
-					const parts = requirement.split("/");
-					const itemName = parts[0]!;
-					const reqNumber = Number(parts[1]);
-
-					const selectedItem = items.find((i) => i.name === itemName);
-
-					return (
-						<FormField key={index}>
-							<FormControl className="flex gap-1">
-								<Dialog>
-									<DialogTrigger asChild>
-										<Button variant="outline" size="icon">
-											{selectedItem ? <ContentImage className="p-1" entry={selectedItem} /> : itemName}
-										</Button>
-									</DialogTrigger>
-									<DialogContent className="w-sm" showCloseButton={false}>
-										<VisuallyHidden.Root>
-											<DialogTitle />
-											<DialogDescription />
-										</VisuallyHidden.Root>
-										<ToggleGroup
-											className="grid w-full grid-cols-[repeat(auto-fill,minmax(32px,1fr))] gap-1"
-											type="single"
-											value={itemName}
-											onValueChange={(v) => (v ? handleUpdateReq(index, v, reqNumber) : handleRemoveReq(index))}
-										>
-											{items
-												.filter((i) => i.name !== itemName && !addedReq.includes(i.name))
-												.map((item) => (
-													<ToggleGroupItem key={item.name} value={item.name}>
-														<ContentImage entry={item} />
-													</ToggleGroupItem>
-												))}
-										</ToggleGroup>
-									</DialogContent>
-								</Dialog>
-								<Input
-									type="number"
-									value={reqNumber}
-									onChange={(v) => handleUpdateReq(index, itemName, Number(v.currentTarget.valueAsNumber))}
-								/>
-								<Button className="text-destructive" variant="outline" size="icon" onClick={() => handleRemoveReq(index)}>
-									<X />
-								</Button>
-							</FormControl>
-						</FormField>
-					);
-				})}
-				<Button className="w-full" variant="outline" onClick={handleAddNewReq}>
-					<Plus />
-				</Button>
-			</>
-		);
-	},
+	research: ResearchField,
 	array: ({ name, node, original, onPatch, entrySchema }) => {
 		if (!node.isArray()) return null;
 		const arrNode = node as HjsonArrayNode;
@@ -395,6 +222,182 @@ const schemaRenderers: Record<string, SchemaRenderer> = {
 		);
 	},
 };
+
+function ResearchField({ name, node, original, onPatch, patchValue }: Parameters<SchemaRenderer>[0]) {
+	const items = useItems({ project: true, base: true });
+
+	function getCurrentValue(): Research | string | null {
+		if (node.isValue()) {
+			const val = (node as HjsonValueNode<unknown>).valueOf();
+			return typeof val === "string" || (val && typeof val === "object") ? (val as Research | string) : null;
+		}
+		if (node.isObject()) {
+			return (node as HjsonObjectNode).valueOf() as unknown as Research;
+		}
+		return null;
+	}
+
+	const currentValue = getCurrentValue();
+
+	const parent =
+		(!currentValue
+			? ""
+			: typeof currentValue === "string"
+				? currentValue
+				: (((currentValue as Record<string, unknown>)?.parent as string) ?? "")) || "";
+	const requirements = (
+		!currentValue
+			? []
+			: typeof currentValue === "string"
+				? []
+				: (((currentValue as Record<string, unknown>)?.requirements as string[]) ?? [])
+	) as string[];
+
+	const addedReq = requirements.map((requirement: string) => requirement.split("/")[0]!);
+
+	function handleChange(newParent: string, newRequirements: string[]) {
+		if (node.isObject()) {
+			const researchNode = node as HjsonObjectNode;
+			const parentChanged = newParent !== parent;
+			const reqsChanged = newRequirements.length !== requirements.length || newRequirements.some((r, i) => r !== requirements[i]);
+
+			if (parentChanged && !reqsChanged) {
+				const newContent = researchNode.patchField(original, "parent", HJSON.stringify(newParent));
+				onPatch(newContent);
+				return;
+			}
+			if (reqsChanged && !parentChanged && newRequirements.length > 0) {
+				const reqField = researchNode.field("requirements");
+				const arrNode = reqField?.value instanceof HjsonArrayNode ? reqField.value : null;
+				if (arrNode) {
+					let content = original;
+					if (newRequirements.length === requirements.length) {
+						for (let i = 0; i < newRequirements.length; i++) {
+							if (newRequirements[i] !== requirements[i]) {
+								content = arrNode.patchElement(content, i, HJSON.stringify(newRequirements[i]));
+								break;
+							}
+						}
+					} else if (newRequirements.length === requirements.length + 1) {
+						for (let i = 0; i < newRequirements.length; i++) {
+							if (i >= requirements.length || newRequirements[i] !== requirements[i]) {
+								content = arrNode.insertElement(content, i, HJSON.stringify(newRequirements[i]));
+								break;
+							}
+						}
+					} else if (newRequirements.length === requirements.length - 1) {
+						for (let i = 0; i < requirements.length; i++) {
+							if (i >= newRequirements.length || requirements[i] !== newRequirements[i]) {
+								content = arrNode.removeElement(content, i);
+								break;
+							}
+						}
+					}
+					if (content !== original) {
+						onPatch(content);
+						return;
+					}
+				}
+			}
+		}
+		if (!newParent && newRequirements.length === 0) {
+			patchValue(undefined);
+		} else if (newRequirements.length > 0) {
+			patchValue({ parent: newParent, requirements: newRequirements });
+		} else {
+			patchValue(newParent);
+		}
+	}
+
+	function handleAddNewReq() {
+		const notAdded = items.find((item) => {
+			for (const requirement of requirements) {
+				if (requirement.startsWith(item.name + "/")) {
+					return false;
+				}
+			}
+			return true;
+		});
+		handleChange(parent, [...requirements, notAdded?.name + "/" + 10]);
+	}
+
+	function handleRemoveReq(index: number) {
+		handleChange(
+			parent,
+			requirements.filter((_: unknown, i: number) => i !== index),
+		);
+	}
+
+	function handleUpdateReq(index: number, item: string, number: number) {
+		handleChange(
+			parent,
+			requirements.map((r: string, i: number) => (i === index ? item + "/" + number : r)),
+		);
+	}
+
+	return (
+		<>
+			<FormField>
+				<FormLabel>{name}</FormLabel>
+				<FormControl>
+					<Input value={parent} onChange={(v) => handleChange(v.currentTarget.value, requirements)} />
+				</FormControl>
+			</FormField>
+			{requirements.map((requirement: string, index: number) => {
+				const parts = requirement.split("/");
+				const itemName = parts[0]!;
+				const reqNumber = Number(parts[1]);
+
+				const selectedItem = items.find((i) => i.name === itemName);
+
+				return (
+					<FormField key={index}>
+						<FormControl className="flex gap-1">
+							<Dialog>
+								<DialogTrigger asChild>
+									<Button variant="outline" size="icon">
+										{selectedItem ? <ContentImage className="p-1" entry={selectedItem} /> : itemName}
+									</Button>
+								</DialogTrigger>
+								<DialogContent className="w-sm" showCloseButton={false}>
+									<VisuallyHidden.Root>
+										<DialogTitle />
+										<DialogDescription />
+									</VisuallyHidden.Root>
+									<ToggleGroup
+										className="grid w-full grid-cols-[repeat(auto-fill,minmax(32px,1fr))] gap-1"
+										type="single"
+										value={itemName}
+										onValueChange={(v) => (v ? handleUpdateReq(index, v, reqNumber) : handleRemoveReq(index))}
+									>
+										{items
+											.filter((i) => i.name !== itemName && !addedReq.includes(i.name))
+											.map((item) => (
+												<ToggleGroupItem key={item.name} value={item.name}>
+													<ContentImage entry={item} />
+												</ToggleGroupItem>
+											))}
+									</ToggleGroup>
+								</DialogContent>
+							</Dialog>
+							<Input
+								type="number"
+								value={reqNumber}
+								onChange={(v) => handleUpdateReq(index, itemName, Number(v.currentTarget.valueAsNumber))}
+							/>
+							<Button className="text-destructive" variant="outline" size="icon" onClick={() => handleRemoveReq(index)}>
+								<X />
+							</Button>
+						</FormControl>
+					</FormField>
+				);
+			})}
+			<Button className="w-full" variant="outline" onClick={handleAddNewReq}>
+				<Plus />
+			</Button>
+		</>
+	);
+}
 
 function getSchemaRenderer(type: string | null): SchemaRenderer {
 	if (type) {

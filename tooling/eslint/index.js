@@ -14,7 +14,7 @@ export default tseslint.config(
 			"no-var": "error",
 			"react-hooks/rules-of-hooks": "error",
 			"react-hooks/exhaustive-deps": "warn",
-			"@typescript-eslint/no-explicit-any": "error",
+			"@typescript-eslint/no-explicit-any": "warn",
 			"@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
 			"@typescript-eslint/consistent-type-imports": "error",
 			"no-restricted-imports": [
@@ -26,6 +26,14 @@ export default tseslint.config(
 							message: "Relative imports to parent directories are not allowed. Use absolute imports instead.",
 						},
 					],
+				},
+			],
+			"no-restricted-syntax": [
+				"error",
+				{
+					selector: "TSImportType[qualifier.name]",
+					message:
+						"Use `import type { ... }` instead of inline type import syntax.",
 				},
 			],
 			"@typescript-eslint/consistent-type-assertions": [

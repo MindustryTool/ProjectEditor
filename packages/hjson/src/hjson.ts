@@ -2,8 +2,8 @@ import { Parser, type HJSONParseOptions } from "./parser.js";
 import { stringify } from "./serializer.js";
 import type { HjsonNode } from "./structured.js";
 
-export type Reviver = (this: any, key: string, value: any) => any;
-export type ReplacerFunction = (this: any, key: string, value: any) => any;
+export type Reviver = (this: unknown, key: string, value: unknown) => unknown;
+export type ReplacerFunction = (this: unknown, key: string, value: unknown) => unknown;
 export type Replacer = ReplacerFunction | (string | number)[];
 export type Space = string | number;
 export type { HJSONParseOptions };
@@ -25,7 +25,7 @@ export const HJSON = {
 		return Parser.parseAsync(text, reviver, { ...options, structured: true }) as Promise<HjsonNode>;
 	},
 
-	stringify(value: any, replacer?: Replacer | null, space?: Space): string {
+	stringify(value: unknown, replacer?: Replacer | null, space?: Space): string {
 		return stringify(value, replacer, space);
 	},
 };

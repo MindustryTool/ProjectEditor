@@ -44,7 +44,7 @@ export const jsonMindustryMonarchGrammar: languages.IMonarchLanguage = {
 
 		// Color tag states
 		...COLOR_NAMES.reduce(
-			(acc, name) => {
+			(acc: Record<string, languages.IMonarchLanguageRule[]>, name) => {
 				acc[`string_double_${name}`] = [
 					...getColorTagRules("string_double"),
 					[/[^\\"[\]]+/, `color-text.${name}`],
@@ -54,7 +54,7 @@ export const jsonMindustryMonarchGrammar: languages.IMonarchLanguage = {
 				];
 				return acc;
 			},
-			{} as Record<string, languages.IMonarchLanguageRule[]>,
+			{},
 		),
 
 		string_double_hex: [

@@ -1,9 +1,9 @@
-import * as v from "valibot";
+import type * as v from "valibot";
 
 type AnySchema =
 	| v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>
-	| v.ObjectSchema<v.ObjectEntries, any>
-	| v.TupleSchema<v.TupleItems, any>;
+	| v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>
+	| v.TupleSchema<v.TupleItems, v.ErrorMessage<v.TupleIssue> | undefined>;
 
 export function findUnknownProperties(schema: AnySchema, value: unknown, path = ""): string[] {
 	const unknown: string[] = [];

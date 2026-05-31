@@ -157,7 +157,8 @@ export const useProjectSession = create<ProjectSession>()(
 
 			clearRecentFiles: (projectId) => {
 				set((state) => {
-					const { [projectId]: _, ...rest } = state.recentlyOpenedFiles;
+			const rest = { ...state.recentlyOpenedFiles };
+					delete rest[projectId];
 					return { recentlyOpenedFiles: rest };
 				});
 			},

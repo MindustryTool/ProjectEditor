@@ -78,7 +78,7 @@ export function getColorTagRules(statePrefix: string): languages.IMonarchLanguag
 		(name) =>
 			[
 				new RegExp(`\\[${name}\\]`),
-				{ token: `color-tag.${name}`, next: `@${statePrefix}_${name}` } as languages.IMonarchLanguageAction,
+				{ token: `color-tag.${name}`, next: `@${statePrefix}_${name}` } satisfies languages.IMonarchLanguageAction,
 			] as unknown as languages.IMonarchLanguageRule,
 	);
 

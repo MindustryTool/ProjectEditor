@@ -53,6 +53,7 @@
   "exportMenu.filenameWarning": "Một số ký tự đã được thay thế. Chỉ cho phép chữ cái, số, dấu gạch ngang, gạch dưới và dấu chấm.",
   "exportMenu.filenameEmpty": "Tên tệp không được để trống.",
   "exportMenu.download": "Tải xuống",
+  "exportMenu.validating": "Đang xác thực...",
   "exportMenu.cancel": "Hủy",
   "viewMenu.label": "Xem",
   "viewMenu.changeTheme": "Đổi giao diện",

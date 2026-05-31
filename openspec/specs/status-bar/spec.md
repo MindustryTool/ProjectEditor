@@ -1,5 +1,6 @@
+## Purpose
+The system SHALL display live project information and validation status in a status bar at the bottom of the editor.
 ## Requirements
-
 ### Requirement: Status bar displays live project info
 The `StatusBar` component SHALL compose three sub-components (`StatusBarLeft`, `StatusBarCenter`, `StatusBarRight`) as slot children. Each sub-component subscribes to its own store slices independently.
 
@@ -44,26 +45,36 @@ The StatusBarCenter component SHALL display the current editor status message us
 - **THEN** the center status bar section SHALL display the ready message
 
 ### Requirement: Display validation errors (StatusBarRight)
-The StatusBarRight component SHALL display the count of validation errors using the `statusBar.validationErrors` i18n key, styled with red text, only when the count is greater than zero.
+The StatusBarRight component SHALL display the count of validation errors using the `statusBar.validationErrors` i18n key, styled with red text, only when the count is greater than zero. The error count SHALL be clickable.
 
 #### Scenario: Validation errors exist
 - **WHEN** `validationSummary.errors` is greater than 0
 - **THEN** the error count SHALL be displayed in red text
+- **THEN** the error count element SHALL be clickable
 
 #### Scenario: No validation errors
 - **WHEN** `validationSummary.errors` is 0
 - **THEN** the error count SHALL NOT be displayed
 
+#### Scenario: Clicking error count opens dialog
+- **WHEN** the user clicks on the error count
+- **THEN** a dialog SHALL open listing all errors with clickable file paths
+
 ### Requirement: Display validation warnings (StatusBarRight)
-The StatusBarRight component SHALL display the count of validation warnings using the `statusBar.validationWarnings` i18n key, styled with yellow text, only when the count is greater than zero.
+The StatusBarRight component SHALL display the count of validation warnings using the `statusBar.validationWarnings` i18n key, styled with yellow text, only when the count is greater than zero. The warning count SHALL be clickable.
 
 #### Scenario: Validation warnings exist
 - **WHEN** `validationSummary.warnings` is greater than 0
 - **THEN** the warning count SHALL be displayed in yellow text
+- **THEN** the warning count element SHALL be clickable
 
 #### Scenario: No validation warnings
 - **WHEN** `validationSummary.warnings` is 0
 - **THEN** the warning count SHALL NOT be displayed
+
+#### Scenario: Clicking warning count opens dialog
+- **WHEN** the user clicks on the warning count
+- **THEN** a dialog SHALL open listing all warnings with clickable file paths
 
 ### Requirement: Display document type icons (StatusBarRight)
 The StatusBarRight component SHALL display `FileJson` and `Image` icons from lucide-react.
@@ -78,3 +89,15 @@ The StatusBarRight component SHALL read validation data from `useValidationStore
 #### Scenario: Store subscription
 - **WHEN** the validation summary changes in the store
 - **THEN** the component SHALL re-render with updated error/warning counts
+
+### Requirement: StatusBar validation dialog uses shared component
+The StatusBar SHALL use the shared `ValidationErrorList` component for its validation dialog.
+
+#### Scenario: StatusBar dialog renders shared component
+- **WHEN** the status bar validation dialog is open
+- **THEN** it SHALL render the shared `ValidationErrorList` component with all errors or warnings
+
+#### Scenario: Click file path in dialog navigates
+- **WHEN** the user clicks a file path in the status bar validation dialog
+- **THEN** the dialog closes and the editor navigates to the file
+

@@ -53,6 +53,7 @@
   "exportMenu.filenameWarning": "Some characters were replaced. Only letters, numbers, hyphens, underscores, and periods are allowed.",
   "exportMenu.filenameEmpty": "Filename cannot be empty.",
   "exportMenu.download": "Download",
+  "exportMenu.validating": "Validating...",
   "exportMenu.cancel": "Cancel",
   "viewMenu.label": "View",
   "viewMenu.changeTheme": "Change Theme",

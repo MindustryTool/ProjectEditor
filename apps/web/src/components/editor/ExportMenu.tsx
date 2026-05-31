@@ -1,12 +1,16 @@
 import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { getExporter } from "@project/core";
-import { useProjectSession } from "@project/state";
-import { useValidationStore } from "@project/state";
+import { useProjectSession, useValidationStore, Severity } from "@project/state";
+import type { ProjectFileSystem } from "@project/fs";
+import type { TreeSnapshot } from "@project/state";
 import { cn } from "~/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
 import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from "~/components/ui/input-group";
+import { ValidationErrorList, type ValidationFileError } from "#/components/editor/ValidationErrorList";
+import { useValidationContext } from "#/components/editor/validation-provider";
+import { usePath } from "#/hooks/use-path";
 
 export function sanitizeFilename(name: string): string {
 	let result = name.replace(/[^a-zA-Z0-9._-]/g, "-");
@@ -20,12 +24,50 @@ interface ExportMenuProps {
 	className?: string;
 }
 
+function decodeContent(data: ArrayBuffer): string {
+	if (data.byteLength === 0) return "";
+	return new TextDecoder().decode(data);
+}
+
+async function loadAndValidateAll(
+	fs: ProjectFileSystem,
+	treeSnapshot: TreeSnapshot,
+	validateFile: (path: string, content: () => Promise<string>) => Promise<void>,
+) {
+	const entries = treeSnapshot.getEntries().filter((e) => e.kind === "file");
+
+	await Promise.all(
+		entries.map(async (entry) => {
+			try {
+				await validateFile(entry.path, async () => {
+					const data = await fs.readFile(entry.path);
+					return decodeContent(data);
+				});
+			} catch (err) {
+				useValidationStore.getState().setResults(entry.path, [
+					{
+						path: entry.path,
+						severity: Severity.error,
+						messageKey: err instanceof Error ? err.message : "Unknown error",
+						startLine: 1,
+						startColumn: 1,
+					},
+				]);
+			}
+		}),
+	);
+}
+
 export function ExportMenu({ className }: ExportMenuProps) {
 	const { t } = useTranslation();
 	const projectContext = useProjectSession((s) => s.projectContext);
+	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
 	const validationResults = useValidationStore((s) => s.results.resultsByPath);
+	const { validateFile } = useValidationContext();
+	const [, setPath] = usePath();
 	const [open, setOpen] = useState(false);
 	const [validationOpen, setValidationOpen] = useState(false);
+	const [downloadLoading, setDownloadLoading] = useState(false);
 	const [filename, setFilename] = useState("");
 	const [warning, setWarning] = useState<string | null>(null);
 
@@ -48,7 +90,7 @@ export function ExportMenu({ className }: ExportMenuProps) {
 				a.click();
 				document.body.removeChild(a);
 				URL.revokeObjectURL(url);
-			} catch (err) {
+			} catch {
 				alert(t("exportMenu.exportFailed"));
 			}
 		},
@@ -57,6 +99,7 @@ export function ExportMenu({ className }: ExportMenuProps) {
 
 	const handleOpen = useCallback(() => {
 		if (!projectContext) return;
+
 		const sanitized = sanitizeFilename(projectContext.project.name);
 		setFilename(sanitized);
 		setWarning(null);
@@ -74,16 +117,28 @@ export function ExportMenu({ className }: ExportMenuProps) {
 		}
 	}, []);
 
-	const hasErrors = Object.values(validationResults).some((results) => results.some((r) => r.severity === 0));
+	const handleDownload = useCallback(async () => {
+		if (!projectContext || !treeSnapshot) return;
 
-	const handleDownload = useCallback(() => {
+		setDownloadLoading(true);
+		try {
+			await loadAndValidateAll(projectContext.fs, treeSnapshot, validateFile);
+		} finally {
+			setDownloadLoading(false);
+		}
+
+		const freshResults = useValidationStore.getState().results.resultsByPath;
+		const hasErrors = Object.values(freshResults).some((results) =>
+			results.some((r) => r.severity === Severity.error),
+		);
+
 		if (hasErrors) {
 			setValidationOpen(true);
 		} else {
 			handleExport(filename);
 			setOpen(false);
 		}
-	}, [filename, handleExport, hasErrors]);
+	}, [projectContext, treeSnapshot, validateFile, filename, handleExport]);
 
 	const handleExportAnyway = useCallback(() => {
 		setValidationOpen(false);
@@ -99,8 +154,17 @@ export function ExportMenu({ className }: ExportMenuProps) {
 		setOpen(false);
 	}, []);
 
-	const allErrors = Object.entries(validationResults).flatMap(([filePath, results]) =>
-		results.filter((r) => r.severity === 0).map((r) => ({ filePath, ...r })),
+	const handleNavigate = useCallback(
+		(filePath: string) => {
+			setValidationOpen(false);
+			setOpen(false);
+			setPath(filePath);
+		},
+		[setPath],
+	);
+
+	const allErrors: ValidationFileError[] = Object.entries(validationResults).flatMap(([filePath, results]) =>
+		results.filter((r) => r.severity === Severity.error).map((r) => ({ filePath, ...r })),
 	);
 
 	return (
@@ -139,7 +203,9 @@ export function ExportMenu({ className }: ExportMenuProps) {
 						<Button variant="outline" onClick={handleCancel}>
 							{t("exportMenu.cancel")}
 						</Button>
-						<Button onClick={handleDownload}>{t("exportMenu.download")}</Button>
+						<Button onClick={handleDownload} disabled={downloadLoading}>
+							{downloadLoading ? t("exportMenu.validating") : t("exportMenu.download")}
+						</Button>
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
@@ -150,14 +216,7 @@ export function ExportMenu({ className }: ExportMenuProps) {
 					</DialogHeader>
 					<div className="flex flex-col gap-2">
 						<p className="text-xs text-muted-foreground">{t("exportMenu.validationMessage")}</p>
-						<div className="max-h-48 overflow-y-auto">
-							{allErrors.map((err, i) => (
-								<div key={i} className="flex gap-2 rounded bg-destructive/10 p-1.5 text-xs">
-									<span className="shrink-0 font-medium text-destructive">{err.filePath}</span>
-									<span className="text-muted-foreground">{t(err.messageKey as any, err.messageParams)}</span>
-								</div>
-							))}
-						</div>
+						<ValidationErrorList items={allErrors} onNavigate={handleNavigate} />
 					</div>
 					<DialogFooter>
 						<Button variant="outline" onClick={handleValidationCancel}>

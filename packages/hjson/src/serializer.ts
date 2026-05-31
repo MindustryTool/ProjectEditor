@@ -1,4 +1,4 @@
-export type ReplacerFunction = (this: any, key: string, value: any) => any;
+export type ReplacerFunction = (this: unknown, key: string, value: unknown) => unknown;
 export type Replacer = ReplacerFunction | (string | number)[];
 export type Space = string | number;
 
@@ -24,12 +24,12 @@ function getIndent(space: Space, depth: number): string {
 }
 
 function serializeValue(
-  value: any,
+  value: unknown,
   replacer: Replacer | null | undefined,
   space: Space | undefined,
   depth: number,
   key: string,
-  ancestors: any[],
+  ancestors: unknown[],
 ): string {
   if (value === null) return "null";
   if (typeof value === "boolean") return value ? "true" : "false";
@@ -52,14 +52,15 @@ function serializeValue(
       return serializeArray(value, replacer, space, depth, ancestors);
     }
 
-    if (typeof value.toJSON === "function") {
-      const jsonVal = value.toJSON(key);
+    const valueAsObj = value as { toJSON?(key: string): unknown };
+    if (typeof valueAsObj.toJSON === "function") {
+      const jsonVal = valueAsObj.toJSON(key);
       if (jsonVal !== value) {
         return serializeValue(jsonVal, replacer, space, depth, key, ancestors);
       }
     }
 
-    return serializeObject(value, replacer, space, depth, ancestors);
+		return serializeObject(value as Record<string, unknown>, replacer, space, depth, ancestors);
   }
 
   return "";
@@ -83,11 +84,11 @@ function serializeMultilineString(value: string, _space: Space | undefined): str
 }
 
 function serializeObject(
-  obj: Record<string, any>,
+  obj: Record<string, unknown>,
   replacer: Replacer | null | undefined,
   space: Space | undefined,
   depth: number,
-  ancestors: any[],
+  ancestors: unknown[],
 ): string {
   const keys = getKeys(obj, replacer);
   if (keys.length === 0) return "{}";
@@ -124,11 +125,11 @@ function serializeObject(
 }
 
 function serializeArray(
-  arr: any[],
+  arr: unknown[],
   replacer: Replacer | null | undefined,
   space: Space | undefined,
   depth: number,
-  ancestors: any[],
+  ancestors: unknown[],
 ): string {
   if (arr.length === 0) return "[]";
 
@@ -160,7 +161,7 @@ function serializeArray(
   return "[" + parts.join(",") + "," + "]";
 }
 
-function getKeys(obj: Record<string, any>, replacer: Replacer | null | undefined): string[] {
+function getKeys(obj: Record<string, unknown>, replacer: Replacer | null | undefined): string[] {
   if (Array.isArray(replacer)) {
     return replacer.map(String).filter((k) => k in obj);
   }
@@ -168,7 +169,7 @@ function getKeys(obj: Record<string, any>, replacer: Replacer | null | undefined
 }
 
 export function stringify(
-  value: any,
+  value: unknown,
   replacer?: Replacer | null,
   space?: Space,
 ): string {
@@ -176,6 +177,6 @@ export function stringify(
   if (typeof replacer === "function") {
     processedValue = replacer.call({ "": value }, "", value);
   }
-  if (processedValue === undefined) return undefined as any;
+  if (processedValue === undefined) return undefined as unknown as string;
   return serializeValue(processedValue, replacer, space, 0, "", []);
 }

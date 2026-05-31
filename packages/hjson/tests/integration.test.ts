@@ -108,7 +108,7 @@ describe("Integration: real-world scenarios", () => {
   it("provides typed error with code, startLine, startColumn, index", () => {
     try {
       HJSON.parse("{invalid: @bad}");
-    } catch (e: any) {
+    } catch (e: unknown) {
       expect(e.code).toBeDefined();
       expect(typeof e.startLine).toBe("number");
       expect(typeof e.startColumn).toBe("number");

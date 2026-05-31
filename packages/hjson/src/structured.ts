@@ -53,19 +53,20 @@ export abstract class HjsonNode {
 		if (!pathStr) return undefined;
 		const segments = pathStr.match(/(\w+)|\[(\d+)\]/g);
 		if (!segments || segments.length === 0) return undefined;
-		let node: HjsonNode = this;
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
+		let current: HjsonNode = this;
 		for (let i = 0; i < segments.length - 1; i++) {
 			const seg = segments[i]!;
 			const info = seg.startsWith("[")
-				? node.at(Number.parseInt(seg.slice(1, -1), 10))
-				: node.at(seg);
+				? current.at(Number.parseInt(seg.slice(1, -1), 10))
+				: current.at(seg);
 			if (!info) return undefined;
-			node = info.value as HjsonNode;
+			current = info.value as HjsonNode;
 		}
 		const last = segments[segments.length - 1]!;
 		return last.startsWith("[")
-			? node.at(Number.parseInt(last.slice(1, -1), 10))
-			: node.at(last);
+			? current.at(Number.parseInt(last.slice(1, -1), 10))
+			: current.at(last);
 	}
 
 	abstract at(value: string | number): FieldInfo | ElementInfo | undefined;

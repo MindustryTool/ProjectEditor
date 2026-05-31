@@ -40,5 +40,5 @@ export function useItems({ project, base }: UseItemsOptions): ContentEntry[] {
 			);
 		}
 		return items;
-	}, [projectItems, data, fs]);
+	}, [projectItems, data, fs, project, base]);
 }

@@ -1,8 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { HJSON } from "../src/hjson.js";
-import { stringify } from "../src/serializer.js";
 
-function stringifyAndParse(value: any, space?: string | number) {
+function stringifyAndParse(value: unknown, space?: string | number) {
   const str = HJSON.stringify(value, null, space);
   const parsed = HJSON.parse(str);
   return { str, parsed };

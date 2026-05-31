@@ -1,26 +1,26 @@
 import { describe, it, expect } from "vitest";
 import { Parser } from "../src/parser.js";
 import { HJSONError, HJSONErrorCode } from "../src/errors.js";
+import type {
+  HjsonArrayNode,
+  HjsonValueNode} from "../src/structured.js";
 import {
   HjsonNode,
   HjsonObjectNode,
-  HjsonArrayNode,
-  HjsonValueNode,
-  HjsonMissingNode,
   type FieldInfo,
   type ElementInfo,
   type InfoBase,
 } from "../src/structured.js";
 
-function parse(input: string, reviver?: (key: string, value: any) => any) {
+function parse(input: string, reviver?: (key: string, value: unknown) => unknown) {
   return Parser.parse(input, reviver);
 }
 
-function parseStructured(input: string, reviver?: (key: string, value: any) => any) {
+function parseStructured(input: string, reviver?: (key: string, value: unknown) => unknown) {
   return Parser.parse(input, reviver, { structured: true });
 }
 
-function parseAsync(input: string, reviver?: (key: string, value: any) => any) {
+function parseAsync(input: string, reviver?: (key: string, value: unknown) => unknown) {
   return Parser.parseAsync(input, reviver);
 }
 

@@ -12,7 +12,7 @@ import { EditorRightPanel } from "./EditorRightPanel";
 import { StatusBarLeft } from "./statusbar/StatusBarLeft";
 import { StatusBarCenter } from "./statusbar/StatusBarCenter";
 import { StatusBarRight } from "./statusbar/StatusBarRight";
-import { ValidationProvider } from "#/components/validation/validation-provider";
+import { ValidationProvider } from "#/components/editor/validation-provider";
 import { EditorMobileLayout } from "#/components/editor/EditorMobileLayout";
 import { Fragment } from "react/jsx-runtime";
 

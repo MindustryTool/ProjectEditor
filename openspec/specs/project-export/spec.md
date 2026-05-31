@@ -1,5 +1,6 @@
+## Purpose
+The system SHALL provide export functionality that collects project files into a downloadable ZIP archive with file validation before export.
 ## Requirements
-
 ### Requirement: Exporter interface
 The `@project/core` package SHALL define an `Exporter` interface with a method that accepts `ProjectContext` and returns a ZIP `Uint8Array`.
 
@@ -131,3 +132,24 @@ The system SHALL download the ZIP using the user-typed filename (before automati
 #### Scenario: Export uses filename from input
 - **WHEN** the user clicks Download
 - **THEN** the downloaded file SHALL use the filename exactly as displayed in the input (after `.zip` append)
+
+### Requirement: Pre-export loads and validates all files
+Before showing the export dialog, the ExportMenu SHALL read all project files from the filesystem directly and validate them.
+
+#### Scenario: Export reads and validates all files
+- **WHEN** the user clicks the Export button
+- **THEN** the system SHALL iterate over all project files, read each from the filesystem via `fs.readFile()`, and call `validateFile()` directly
+- **THEN** validation results SHALL be available when the export dialog opens
+
+#### Scenario: Export shows loading indicator
+- **WHEN** files are being read and validated
+- **THEN** a loading indicator SHALL be shown during validation
+
+### Requirement: Export validation errors are clickable
+The export validation dialog SHALL display errors with clickable file paths that navigate to the errored file.
+
+#### Scenario: Error file path is clickable
+- **WHEN** the export validation dialog lists errors
+- **THEN** each error's file path SHALL be rendered as a clickable element
+- **THEN** clicking the path SHALL close the dialog and navigate to the file in the editor
+

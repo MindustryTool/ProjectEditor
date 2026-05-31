@@ -1,6 +1,6 @@
 const store = new Map<string, string>();
 
-globalThis.localStorage = {
+const mockStorage: Storage = {
 	getItem: (key: string) => store.get(key) ?? null,
 	setItem: (key: string, value: string) => {
 		store.set(key, String(value));
@@ -15,5 +15,7 @@ globalThis.localStorage = {
 	get length() {
 		return store.size;
 	},
-} as any;
+};
+
+globalThis.localStorage = mockStorage;
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import type { editor, IDisposable, IPosition } from "monaco-editor";
-import Editor, { type BeforeMount, type OnMount } from "@monaco-editor/react";
+import Editor, { type BeforeMount, type OnMount, type Monaco } from "@monaco-editor/react";
 import { HJSON_LANGUAGE_ID, hjsonMonarchGrammar, hjsonLanguageConfig } from "~/lib/monaco/hjsonLanguage";
 import { JSON_MINDUSTRY_LANGUAGE_ID, jsonMindustryMonarchGrammar, jsonMindustryLanguageConfig } from "~/lib/monaco/jsonMindustryLanguage";
 import {
@@ -41,7 +41,7 @@ interface ActiveColorTagState extends MindustryColorTagMatch {
 }
 
 export function MonacoEditor({ value, onChange, language, readOnly, path }: MonacoEditorProps) {
-	const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
+	const monacoRef = useRef<Monaco | null>(null);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 	const colorDecorationsRef = useRef<editor.IEditorDecorationsCollection | null>(null);
 	const editorDisposablesRef = useRef<IDisposable[]>([]);
@@ -81,7 +81,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 
 			markers.push({
 				severity: monacoSeverity as editor.IMarkerData["severity"],
-				message: t(r.messageKey as any, r.messageParams),
+				message: (t as (key: string, params?: Record<string, string | number>) => string)(r.messageKey, r.messageParams),
 				startLineNumber: r.startLine,
 				startColumn: r.startColumn,
 				endLineNumber,
@@ -90,7 +90,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 		}
 
 		monacoInstance.editor.setModelMarkers(model, "file-validation", markers);
-	}, [results, path, t]);
+	}, [results, t]);
 
 	useEffect(() => {
 		updateMarkers();

@@ -1,5 +1,12 @@
 import type { EventBus, ProjectEventMap, ProjectInfo } from "@project/core";
 
+// FileSystemDirectoryHandle has async iterable methods (entries, keys, values)
+// that aren't in TypeScript's DOM types for TS < 6.0
+interface AsyncIterableFileSystemDirectoryHandle extends FileSystemDirectoryHandle {
+	entries(): AsyncIterableIterator<[string, FileSystemDirectoryHandle | FileSystemFileHandle]>;
+	values(): AsyncIterableIterator<FileSystemDirectoryHandle | FileSystemFileHandle>;
+}
+
 async function getOPFSRoot(): Promise<FileSystemDirectoryHandle> {
 	return navigator.storage.getDirectory();
 }
@@ -392,12 +399,11 @@ export class OPFSAdapter implements VirtualFileSystem {
 			const entries: FileEntry[] = [];
 			const base = `/${path.replace(/^\/+/, "").replace(/\/+$/, "")}`;
 			const basePrefix = base === "/" ? "" : base;
-			for await (const entry of (dir as any).values()) {
-				const name = entry.name as string;
+			for await (const [name, handle] of (dir as AsyncIterableFileSystemDirectoryHandle).entries()) {
 				entries.push({
 					name,
 					path: `${basePrefix}/${name}`,
-					kind: entry.kind as "file" | "directory",
+					kind: handle.kind as "file" | "directory",
 				});
 			}
 			return entries;

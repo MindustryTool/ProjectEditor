@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from "react";
 import { useFile, type UseFileResult } from "./use-file-content";
 
-export interface UseFileStringResult extends UseFileResult<string> {}
+export type UseFileStringResult = UseFileResult<string>
 
 export function useFileString(path: string): UseFileStringResult {
 	const result = useFile(path);
@@ -12,12 +12,13 @@ export function useFileString(path: string): UseFileStringResult {
 		return new TextDecoder().decode(result.data);
 	}, [result.data]);
 
+	const { write: resultWrite } = result;
 	const write = useCallback(
 		(content: string) => {
 			const encoded = new TextEncoder().encode(content).buffer as ArrayBuffer;
-			result.write(encoded);
+			resultWrite(encoded);
 		},
-		[result.write],
+		[resultWrite],
 	);
 
 	return {
