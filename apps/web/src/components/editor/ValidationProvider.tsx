@@ -58,13 +58,13 @@ function cacheKey(projectId: string, path: string): string {
 
 function scheduleValidation(projectId: string, path: string, timers: Map<string, NodeJS.Timeout>, delay: number, context: ProjectContents) {
 	const key = cacheKey(projectId, path);
-	const existing = timers.get(path);
+	const existing = timers.get(key);
 	if (existing) clearTimeout(existing);
 
 	timers.set(
-		path,
+		key,
 		setTimeout(async () => {
-			timers.delete(path);
+			timers.delete(key);
 			try {
 				const getContent = async () => {
 					const entry = useFileStore.getState().fileContents[key];

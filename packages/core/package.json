@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "@project/zip": "workspace:*",
-    "@project/schema": "workspace:*",
     "@project/utils": "workspace:*",
     "@project/config": "workspace:*",
     "valibot": "catalog:"

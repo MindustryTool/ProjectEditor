@@ -38,8 +38,13 @@ export function createValidationRunner(registry: ValidatorRegistry): ValidationR
 
 		for (const v of validators) {
 			try {
+				const start = Date.now();
 				const validatorResults = v.validate({ path, content: resolvedContent, context });
 				results.push(...validatorResults);
+				const duration = Date.now() - start;
+				if (duration > 100) {
+					console.log({ task: "Validate", name: v.name, path, finish: true, duration });
+				}
 			} catch (err) {
 				results.push({
 					path,

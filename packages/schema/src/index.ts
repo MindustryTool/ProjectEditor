@@ -1,15 +1,5 @@
 import * as v from "valibot";
 
-const LANGUAGE_VALUES = ["json", "java", "javascript"] as const;
-
-export const ProjectInfoSchema = v.object({
-	id: v.pipe(v.string(), v.uuid()),
-	name: v.pipe(v.string(), v.minLength(1), v.maxLength(100), v.regex(/^[a-zA-Z0-9._-]+$/)),
-	language: v.optional(v.picklist(LANGUAGE_VALUES), "json"),
-	createdAt: v.pipe(v.unknown(), v.toDate()),
-	updatedAt: v.pipe(v.unknown(), v.toDate()),
-});
-
 export const SettingsSchema = v.object({
 	theme: v.picklist(["light", "dark", "system"]),
 	fontSize: v.pipe(v.number(), v.minValue(8), v.maxValue(32)),

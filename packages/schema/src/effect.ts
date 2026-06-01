@@ -121,6 +121,10 @@ const classSchemaMap: Record<EffectClass, SchemaFn<v.ObjectSchema<v.ObjectEntrie
 };
 
 export const EffectSchema: SchemaFn = (value, context) => {
+	if (value.isMissing()) {
+		return v.null();
+	}
+
 	if (value.isObject()) {
 		const baseSchema = v.object({
 			type: v.picklist(effectClasses),
