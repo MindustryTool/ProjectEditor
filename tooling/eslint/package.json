@@ -13,6 +13,7 @@
     "typescript-eslint": "catalog:"
   },
   "devDependencies": {
-    "eslint": "catalog:"
+    "eslint": "catalog:",
+    "eslint-plugin-import": "^2.32.0"
   }
 }

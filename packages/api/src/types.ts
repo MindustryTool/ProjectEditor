@@ -53,3 +53,8 @@ export interface Status {
   image: boolean;
   className: string;
 }
+
+export interface Effect {
+  id: number;
+  name: string;
+}

@@ -22,7 +22,7 @@ export function LiquidPanel({ path }: LiquidPanelProps) {
 
 	return (
 		<Panel>
-			<div className="space-y-4 h-full w-full">
+			<div className="space-y-6 h-full w-full">
 				{fileName !== null && <div className="text-lg font-bold">{fileName}</div>}
 				<SpritePicker path={path} />
 				{result && result instanceof HjsonObjectNode && (

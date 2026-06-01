@@ -55,4 +55,6 @@ export const ResearchSchema = v.nullish(
 	]),
 );
 
+export const EffectSchema = v.pipe(v.string(), v.minLength(1), v.maxLength(127));
+
 export type Research = v.InferOutput<typeof ResearchSchema>;

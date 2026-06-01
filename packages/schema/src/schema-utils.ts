@@ -1,5 +1,5 @@
 import type * as v from "valibot";
-import { MindustryHexColorSchema } from "./base";
+import { EffectSchema, MindustryHexColorSchema } from "./base";
 import { ResearchSchema } from "./base";
 
 export type AnySchema =
@@ -22,8 +22,9 @@ export function hasNullishWrapper(schema: AnySchema): boolean {
 }
 
 const specialSchemaRegistry = new Map<AnySchema, string>();
-specialSchemaRegistry.set(MindustryHexColorSchema as unknown as AnySchema, "hex-color");
+specialSchemaRegistry.set(MindustryHexColorSchema as unknown as AnySchema, "color");
 specialSchemaRegistry.set(ResearchSchema as unknown as AnySchema, "research");
+specialSchemaRegistry.set(EffectSchema as unknown as AnySchema, "effect");
 
 function getSchemaType(schema: AnySchema): string {
 	const s = schema as unknown as { type: string; pipe?: AnySchema[] };

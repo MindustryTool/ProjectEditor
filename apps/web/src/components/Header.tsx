@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import ThemeToggle from "./ThemeToggle";
 import { LocalePicker } from "./LocalePicker";
 import { Package } from "lucide-react";
-import i18n from "../i18n/i18n";
+import i18n from "#/i18n/i18n";
 
 const lang = () => (i18n.language?.startsWith("vi") ? "vi" : "en");
 

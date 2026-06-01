@@ -1,6 +1,14 @@
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
-import { unwrapSchema, hasNullishWrapper, detectSchemaType, getSchemaEntries, getArrayItemSchema, getSchemaMetadata, type AnySchema } from "../src/schema-utils";
+import {
+	unwrapSchema,
+	hasNullishWrapper,
+	detectSchemaType,
+	getSchemaEntries,
+	getArrayItemSchema,
+	getSchemaMetadata,
+	type AnySchema,
+} from "../src/schema-utils";
 import { MindustryHexColorSchema, ResearchSchema, ContentNameSchema } from "../src/index";
 
 describe("unwrapSchema", () => {
@@ -95,21 +103,21 @@ describe("detectSchemaType", () => {
 		expect(detectSchemaType(v.array(v.string()) as AnySchema)).toBe("array");
 	});
 
-	it("detects hex-color by identity", () => {
-		expect(detectSchemaType(MindustryHexColorSchema as AnySchema)).toBe("hex-color");
+	it("detects color by identity", () => {
+		expect(detectSchemaType(MindustryHexColorSchema as AnySchema)).toBe("color");
 	});
 
-	it("detects hex-color through v.nullish wrapper", () => {
+	it("detects color through v.nullish wrapper", () => {
 		const wrapped = v.nullish(MindustryHexColorSchema);
-		expect(detectSchemaType(wrapped as AnySchema)).toBe("hex-color");
+		expect(detectSchemaType(wrapped as AnySchema)).toBe("color");
 	});
 
 	it("detects research by identity", () => {
 		expect(detectSchemaType(ResearchSchema as AnySchema)).toBe("research");
 	});
 
-	it("does not detect ContentNameSchema as hex-color", () => {
-		expect(detectSchemaType(ContentNameSchema as AnySchema)).not.toBe("hex-color");
+	it("does not detect ContentNameSchema as color", () => {
+		expect(detectSchemaType(ContentNameSchema as AnySchema)).not.toBe("color");
 	});
 
 	it("returns 'unknown' for a custom schema", () => {
@@ -202,18 +210,22 @@ describe("getSchemaMetadata", () => {
 	});
 
 	it("returns last metadata when multiple metadata actions exist", () => {
-		const schema = v.pipe(v.string(), v.metadata({ visibleWhen: { field: "first", value: 1 } }), v.metadata({ visibleWhen: { field: "last", value: 2 } }));
+		const schema = v.pipe(
+			v.string(),
+			v.metadata({ visibleWhen: { field: "first", value: 1 } }),
+			v.metadata({ visibleWhen: { field: "last", value: 2 } }),
+		);
 		expect(getSchemaMetadata(schema as AnySchema)).toEqual({ visibleWhen: { field: "last", value: 2 } });
 	});
 
-	it("returns metadata from pipe with hex-color base schema", () => {
+	it("returns metadata from pipe with color base schema", () => {
 		const schema = v.pipe(MindustryHexColorSchema, v.metadata({ visibleWhen: { field: "gas", value: true } }));
 		expect(getSchemaMetadata(schema as AnySchema)).toEqual({ visibleWhen: { field: "gas", value: true } });
 	});
 
-	it("detects type as hex-color for pipe with MindustryHexColorSchema and metadata", () => {
+	it("detects type as color for pipe with MindustryHexColorSchema and metadata", () => {
 		const schema = v.pipe(MindustryHexColorSchema, v.metadata({ visibleWhen: { field: "gas", value: true } }));
-		expect(detectSchemaType(schema as AnySchema)).toBe("hex-color");
+		expect(detectSchemaType(schema as AnySchema)).toBe("color");
 	});
 
 	it("detects type as string for pipe with v.string() and metadata", () => {

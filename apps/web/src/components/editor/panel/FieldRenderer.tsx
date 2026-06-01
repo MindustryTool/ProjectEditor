@@ -14,9 +14,9 @@ import { type Research } from "@project/schema";
 import { HJSON } from "@project/hjson";
 import type { HjsonObjectNode } from "@project/hjson";
 import { HjsonNode, HjsonValueNode, HjsonArrayNode } from "@project/hjson";
-import { Plus, X } from "lucide-react";
+import { Plus, Search, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
-import React, { useCallback, type ReactNode } from "react";
+import React, { useCallback, useState, type ReactNode } from "react";
 import {
 	detectSchemaType,
 	getSchemaEntries,
@@ -32,6 +32,10 @@ import { useLiquids } from "#/hooks/use-liquids";
 import { useSectors } from "#/hooks/use-sectors";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import { cn } from "#/lib/utils";
+import { useEffects } from "#/hooks/use-effects";
+import { Spinner } from "#/components/ui/spinner";
+import { ErrorDisplay } from "#/components/ui/error-display";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
 
 interface FieldsRendererProps {
 	path: string;
@@ -52,9 +56,12 @@ export function FieldsRenderer({ path, schema, node, original, onPatch }: Fields
 
 		if (Renderer === undefined) {
 			return (
-				<span key={key} className="text-yellow-400">
-					Unknown field type {type}
-				</span>
+				<FormControl>
+					<FormLabel>{name}</FormLabel>
+					<span key={key} className="text-yellow-400 text-sm">
+						Unknown field type {type}
+					</span>
+				</FormControl>
 			);
 		}
 
@@ -121,139 +128,152 @@ type SchemaRenderer = (props: {
 }) => ReactNode;
 
 const schemaRenderers: Record<string, SchemaRenderer> = {
-	string: ({ name, node, patchValue, entrySchema }) => {
-		const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema);
-		return (
-			<FormField>
-				<FormLabel>{name}</FormLabel>
-				<FormControl>
-					<Input value={value} onChange={(v) => patchValue(v.currentTarget.value)} />
-				</FormControl>
-			</FormField>
-		);
-	},
-	number: ({ name, node, patchValue, entrySchema }) => {
-		const value = node.isNumber() ? node.valueOf() : v.getDefault(entrySchema);
-		return (
-			<FormField>
-				<FormLabel>{name}</FormLabel>
-				<FormControl>
-					<Input value={value} onChange={(v) => patchValue(v.currentTarget.valueAsNumber)} type="number" />
-				</FormControl>
-			</FormField>
-		);
-	},
-	boolean: ({ name, node, patchValue, entrySchema }) => {
-		const checked = node.isBoolean() ? node.valueOf() : v.getDefault(entrySchema);
-		return (
-			<FormField>
-				<FormControl className="flex-row flex gap-1">
-					<Checkbox checked={checked} onCheckedChange={(value) => patchValue(value === true)} />
-					<FormLabel>{name}</FormLabel>
-				</FormControl>
-			</FormField>
-		);
-	},
-	"hex-color": ({ name, node, patchValue, entrySchema }) => {
-		let value = node.isString() ? node.valueOf() : v.getDefault(entrySchema);
-		value = value?.startsWith("#") ? value : "#" + value;
-
-		return (
-			<FormField>
-				<FormLabel>{name}</FormLabel>
-				<FormControl>
-					<div className="flex items-center gap-2">
-						<Popover>
-							<PopoverTrigger
-								className="h-16 w-full relative cursor-pointer rounded border border-border bg-transparent p-0"
-								style={{ backgroundColor: value }}
-							>
-								<span className="text-sm absolute left-1 bottom-1">{value}</span>
-							</PopoverTrigger>
-							<PopoverContent className="w-64 p-3" side="bottom" align="start">
-								<ColorPicker value={value} onChange={(val) => patchValue(val)}>
-									<ColorPickerSelection className="h-40 rounded-lg" />
-									<ColorPickerHue />
-									<ColorPickerAlpha />
-									<ColorPickerFormat />
-								</ColorPicker>
-							</PopoverContent>
-						</Popover>
-					</div>
-				</FormControl>
-			</FormField>
-		);
-	},
+	string: StringField,
+	number: NumberField,
+	boolean: BooleanField,
+	color: ColorField,
 	research: ResearchField,
-	array: ({ name, node, original, onPatch, entrySchema }) => {
-		if (!node.isArray()) return null;
-		const arrNode = node as HjsonArrayNode;
-		const items = arrNode.elements();
-		const itemSchema = getArrayItemSchema(entrySchema);
-		const itemType = itemSchema ? detectSchemaType(itemSchema) : null;
-
-		function handleRemove(index: number) {
-			const newContent = arrNode.removeElement(original, index);
-			onPatch(newContent);
-		}
-
-		function handleItemChange(index: number, rawValue: unknown) {
-			const serialized = HJSON.stringify(rawValue);
-			const newContent = arrNode.patchElement(original, index, serialized);
-			onPatch(newContent);
-		}
-
-		function handleAdd() {
-			const serialized = itemSchema ? HJSON.stringify(defaultForDetectedType(itemSchema)) : '""';
-			const newContent = arrNode.insertElement(original, items.length, serialized);
-			onPatch(newContent);
-		}
-
-		return (
-			<FormField>
-				<FormLabel>{name}</FormLabel>
-				<FormControl>
-					<div className="flex flex-col gap-2">
-						{items.length === 0 && <span className="text-muted-foreground text-sm italic">(empty)</span>}
-						{items.map((el, index) => (
-							<div key={index} className="flex items-center gap-2">
-								<div className="flex-1">
-									<SchemaArrayItemEditor
-										value={el.value}
-										itemType={itemType}
-										itemSchema={itemSchema}
-										onChange={(v) => handleItemChange(index, v)}
-									/>
-								</div>
-								<Button className="size-9 shrink-0" type="button" variant="outline" onClick={() => handleRemove(index)}>
-									<X />
-								</Button>
-							</div>
-						))}
-						<Button type="button" variant="outline" size="sm" onClick={handleAdd}>
-							<Plus /> Add
-						</Button>
-					</div>
-				</FormControl>
-			</FormField>
-		);
-	},
-	object: ({ name, node, original, onPatch, entrySchema }) => {
-		if (!node.isObject()) return null;
-		const objNode = node as HjsonObjectNode;
-
-		return (
-			<FormField>
-				<FormLabel>{name}</FormLabel>
-				<FormControl>
-					<div className="pl-4 border-l-2 border-border space-y-2">
-						<FieldsRenderer path={name} schema={entrySchema} node={objNode} original={original} onPatch={onPatch} />
-					</div>
-				</FormControl>
-			</FormField>
-		);
-	},
+	effect: EffectField,
+	array: ArrayField,
+	object: ObjectField,
 };
+
+function StringField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
+	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema);
+	return (
+		<FormField>
+			<FormLabel>{name}</FormLabel>
+			<FormControl>
+				<Input value={value} onChange={(v) => patchValue(v.currentTarget.value)} />
+			</FormControl>
+		</FormField>
+	);
+}
+
+function NumberField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
+	const value = node.isNumber() ? node.valueOf() : v.getDefault(entrySchema);
+	return (
+		<FormField>
+			<FormLabel>{name}</FormLabel>
+			<FormControl>
+				<Input value={value} onChange={(v) => patchValue(v.currentTarget.valueAsNumber)} type="number" />
+			</FormControl>
+		</FormField>
+	);
+}
+
+function BooleanField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
+	const checked = node.isBoolean() ? node.valueOf() : v.getDefault(entrySchema);
+	return (
+		<FormField>
+			<FormControl className="flex-row flex gap-1">
+				<Checkbox checked={checked} onCheckedChange={(value) => patchValue(value === true)} />
+				<FormLabel>{name}</FormLabel>
+			</FormControl>
+		</FormField>
+	);
+}
+
+function ColorField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
+	let value = node.isString() ? node.valueOf() : v.getDefault(entrySchema);
+	value = value?.startsWith("#") ? value : "#" + value;
+
+	return (
+		<FormField>
+			<FormLabel>{name}</FormLabel>
+			<FormControl>
+				<div className="flex items-center gap-2">
+					<Popover>
+						<PopoverTrigger
+							className="h-16 w-full relative cursor-pointer rounded border border-border bg-transparent p-0"
+							style={{ backgroundColor: value }}
+						>
+							<span className="text-sm absolute left-1 bottom-1">{value}</span>
+						</PopoverTrigger>
+						<PopoverContent className="w-64 p-3" side="bottom" align="start">
+							<ColorPicker value={value} onChange={(val) => patchValue(val)}>
+								<ColorPickerSelection className="h-40 rounded-lg" />
+								<ColorPickerHue />
+								<ColorPickerAlpha />
+								<ColorPickerFormat />
+							</ColorPicker>
+						</PopoverContent>
+					</Popover>
+				</div>
+			</FormControl>
+		</FormField>
+	);
+}
+
+function ArrayField({ name, node, original, onPatch, entrySchema }: Parameters<SchemaRenderer>[0]) {
+	if (!node.isArray()) return null;
+	const arrNode = node as HjsonArrayNode;
+	const items = arrNode.elements();
+	const itemSchema = getArrayItemSchema(entrySchema);
+	const itemType = itemSchema ? detectSchemaType(itemSchema) : null;
+
+	function handleRemove(index: number) {
+		const newContent = arrNode.removeElement(original, index);
+		onPatch(newContent);
+	}
+
+	function handleItemChange(index: number, rawValue: unknown) {
+		const serialized = HJSON.stringify(rawValue);
+		const newContent = arrNode.patchElement(original, index, serialized);
+		onPatch(newContent);
+	}
+
+	function handleAdd() {
+		const serialized = itemSchema ? HJSON.stringify(v.getDefault(itemSchema)) : '""';
+		const newContent = arrNode.insertElement(original, items.length, serialized);
+		onPatch(newContent);
+	}
+
+	return (
+		<FormField>
+			<FormLabel>{name}</FormLabel>
+			<FormControl>
+				<div className="flex flex-col gap-2">
+					{items.length === 0 && <span className="text-muted-foreground text-sm italic">(empty)</span>}
+					{items.map((el, index) => (
+						<div key={index} className="flex items-center gap-2">
+							<div className="flex-1">
+								<SchemaArrayItemEditor
+									value={el.value}
+									itemType={itemType}
+									itemSchema={itemSchema}
+									onChange={(v) => handleItemChange(index, v)}
+								/>
+							</div>
+							<Button className="size-9 shrink-0" type="button" variant="outline" onClick={() => handleRemove(index)}>
+								<X />
+							</Button>
+						</div>
+					))}
+					<Button type="button" variant="outline" size="sm" onClick={handleAdd}>
+						<Plus /> Add
+					</Button>
+				</div>
+			</FormControl>
+		</FormField>
+	);
+}
+
+function ObjectField({ name, node, original, onPatch, entrySchema }: Parameters<SchemaRenderer>[0]) {
+	if (!node.isObject()) return null;
+	const objNode = node as HjsonObjectNode;
+
+	return (
+		<FormField>
+			<FormLabel>{name}</FormLabel>
+			<FormControl>
+				<div className="pl-4 border-l-2 border-border space-y-2">
+					<FieldsRenderer path={name} schema={entrySchema} node={objNode} original={original} onPatch={onPatch} />
+				</div>
+			</FormControl>
+		</FormField>
+	);
+}
 
 function ResearchField({ name, node, original, onPatch, patchValue }: Parameters<SchemaRenderer>[0]) {
 	const items = useItems({ project: true, base: true });
@@ -540,6 +560,50 @@ function ResearchField({ name, node, original, onPatch, patchValue }: Parameters
 	);
 }
 
+function EffectField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
+	const { data = [], isLoading, isError, error } = useEffects();
+	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema);
+	const [filter, setFilter] = useState("");
+
+	return (
+		<FormField>
+			<FormLabel>{name}</FormLabel>
+			<Dialog>
+				<DialogTrigger asChild>
+					<Button variant="outline">{value || "None"}</Button>
+				</DialogTrigger>
+				<DialogContent className="w-sm" showCloseButton={false}>
+					<VisuallyHidden.Root>
+						<DialogTitle />
+						<DialogDescription />
+					</VisuallyHidden.Root>
+					<ToggleGroup type="single" value={value} onValueChange={(v) => patchValue(v)} asChild>
+						<div>
+							<InputGroup>
+								<InputGroupAddon>
+									<Search />
+								</InputGroupAddon>
+								<InputGroupInput value={filter} onChange={(event) => setFilter(event.currentTarget.value)} />
+							</InputGroup>
+							<div className="max-h-[90dvh] md:max-h-[50dvh] overflow-y-auto">
+								{isLoading && <Spinner />}
+								{isError && <ErrorDisplay message={error.message} />}
+								{data
+									.filter((i) => i.name !== value && i.name.includes(filter))
+									.map((item) => (
+										<ToggleGroupItem key={item.name} value={item.name}>
+											{item.name}
+										</ToggleGroupItem>
+									))}
+							</div>
+						</div>
+					</ToggleGroup>
+				</DialogContent>
+			</Dialog>
+		</FormField>
+	);
+}
+
 function ItemGrid({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
@@ -588,21 +652,4 @@ function SchemaArrayItemEditor({
 			})}
 		</ErrorBoundary>
 	);
-}
-
-function defaultForDetectedType(schema: AnySchema): unknown {
-	const type = detectSchemaType(schema);
-	switch (type) {
-		case "string":
-		case "hex-color":
-			return "";
-		case "number":
-			return 0;
-		case "boolean":
-			return false;
-		case "research":
-			return "";
-		default:
-			return "";
-	}
 }

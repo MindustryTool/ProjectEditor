@@ -1,5 +1,5 @@
 import * as v from "valibot";
-import { MindustryHexColorSchema, ResearchSchema } from "./base";
+import { EffectSchema, MindustryHexColorSchema, ResearchSchema } from "./base";
 
 export const LiquidHjsonSchema = v.object({
 	color: v.nullish(MindustryHexColorSchema),
@@ -26,12 +26,12 @@ export const LiquidHjsonSchema = v.object({
 	coolant: v.nullish(v.boolean(), true),
 	moveThroughBlocks: v.nullish(v.boolean(), false),
 	incinerable: v.nullish(v.boolean(), true),
-	effect: v.nullish(v.string()),
-	particleEffect: v.nullish(v.string()),
+	effect: v.nullish(EffectSchema),
+	particleEffect: v.nullish(EffectSchema),
 	particleSpacing: v.nullish(v.pipe(v.number())),
 	boilPoint: v.nullish(v.pipe(v.number())),
 	capPuddles: v.nullish(v.boolean(), true),
-	vaporEffect: v.nullish(v.string()),
+	vaporEffect: v.nullish(EffectSchema),
 	hidden: v.nullish(v.boolean(), false),
 	canStayOn: v.nullish(v.array(v.string())),
     research: ResearchSchema,
