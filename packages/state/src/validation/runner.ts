@@ -2,7 +2,10 @@ import type { ValidationContext, ValidationResult, ValidatorRegistry } from "./t
 
 export interface ValidationRunner {
 	validate(path: string, content: () => Promise<string>, context: ValidationContext): Promise<ValidationResult[]>;
-	validateAll(files: { path: string; content: () => Promise<string> }[], context: ValidationContext): Promise<Record<string, ValidationResult[]>>;
+	validateAll(
+		files: { path: string; content: () => Promise<string> }[],
+		context: ValidationContext,
+	): Promise<Record<string, ValidationResult[]>>;
 }
 
 export function createValidationRunner(registry: ValidatorRegistry): ValidationRunner {
@@ -10,17 +13,21 @@ export function createValidationRunner(registry: ValidatorRegistry): ValidationR
 		const validators = registry.getMatches(path);
 		if (validators.length === 0) return [];
 
+		console.log(`Validate: ${path}`);
+
 		let resolvedContent: string;
 		try {
 			resolvedContent = await content();
 		} catch (err) {
-			return [{
-				path,
-				severity: 0,
-				messageKey: err instanceof Error ? err.message : "Unknown error",
-				startLine: 1,
-				startColumn: 1,
-			}];
+			return [
+				{
+					path,
+					severity: 0,
+					messageKey: err instanceof Error ? err.message : "Unknown error",
+					startLine: 1,
+					startColumn: 1,
+				},
+			];
 		}
 
 		const results: ValidationResult[] = [];
@@ -46,7 +53,10 @@ export function createValidationRunner(registry: ValidatorRegistry): ValidationR
 		return results;
 	}
 
-	async function validateAll(files: { path: string; content: () => Promise<string> }[], context: ValidationContext): Promise<Record<string, ValidationResult[]>> {
+	async function validateAll(
+		files: { path: string; content: () => Promise<string> }[],
+		context: ValidationContext,
+	): Promise<Record<string, ValidationResult[]>> {
 		const allResults: Record<string, ValidationResult[]> = {};
 		for (const file of files) {
 			allResults[file.path] = await validate(file.path, file.content, context);

@@ -11,6 +11,11 @@ import {
 import type { ValidationContext } from "@project/state";
 import { useShallow } from "zustand/react/shallow";
 import { useItems } from "#/hooks/use-items";
+import { useBlocks } from "#/hooks/use-blocks";
+import { useLiquids } from "#/hooks/use-liquids";
+import { useSectors } from "#/hooks/use-sectors";
+import { useStatuses } from "#/hooks/use-statuses";
+import { useUnits } from "#/hooks/use-units";
 
 const registry = createDefaultValidators();
 const runner = createValidationRunner(registry);
@@ -87,38 +92,65 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 	const timersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
 	const validationDelayMs = useAppStore(useShallow((s) => s.settings.validationDelayMs));
 	const items = useItems({ base: true, project: true });
+	const blocks = useBlocks();
+	const liquids = useLiquids();
+	const sectors = useSectors();
+	const statuses = useStatuses();
+	const units = useUnits();
 	const projectContext = useProjectSession((s) => s.projectContext);
 
-	const context = useMemo(() => ({ getItems: () => items }), [items]);
+	const validationContext = useMemo(
+		() => ({
+			getItems: () => items,
+			getBlocks: () => blocks,
+			getLiquids: () => liquids,
+			getSectors: () => sectors,
+			getStatuses: () => statuses,
+			getUnits: () => units,
+		}),
+		[items, blocks, liquids, sectors, statuses, units],
+	);
 
 	const ctxValue = useMemo<ValidationContextValue>(
 		() => ({
 			validateFile: async (path: string, getContent: () => Promise<string>) => {
 				try {
-					const results = await runner.validate(path, getContent, context);
+					const results = await runner.validate(path, getContent, validationContext);
 					useValidationStore.getState().setResults(path, results);
 				} catch (err) {
 					useValidationStore.getState().setResults(path, toErrorResult(path, err));
 				}
 			},
 		}),
-		[context],
+		[validationContext],
 	);
 
 	useEffect(() => {
 		if (!projectContext) {
 			return;
 		}
+		const projectId = projectContext.project.id;
+
+		for (const path of Object.keys(useValidationStore.getState().results.resultsByPath)) {
+			scheduleValidation(projectId, path, timersRef.current, validationDelayMs, validationContext);
+		}
+	}, [projectContext, validationContext, validationDelayMs]);
+
+	useEffect(() => {
+		if (!projectContext) {
+			return;
+		}
+
 		const events = projectContext.events;
 		const projectId = projectContext.project.id;
 		const timers = timersRef.current;
 
 		const unsubWrite = events.on("file:write", (event) => {
-			scheduleValidation(projectId, event.path, timers, validationDelayMs, context);
+			scheduleValidation(projectId, event.path, timers, validationDelayMs, validationContext);
 		});
 
 		const unsubCreate = events.on("file:create", (event) => {
-			scheduleValidation(projectId, event.path, timers, validationDelayMs, context);
+			scheduleValidation(projectId, event.path, timers, validationDelayMs, validationContext);
 		});
 
 		const unsubDelete = events.on("file:delete", (event) => {
@@ -139,7 +171,7 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 				const prev = prevState.fileContents[key];
 				if (curr && !curr.loading && prev?.loading && curr.data !== prev.data) {
 					const path = extractPath(key);
-					scheduleValidation(projectId, path, timers, validationDelayMs, context);
+					scheduleValidation(projectId, path, timers, validationDelayMs, validationContext);
 				}
 			}
 		});
@@ -155,7 +187,7 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 			}
 			timers.clear();
 		};
-	}, [projectContext, validationDelayMs, context]);
+	}, [projectContext, validationDelayMs, validationContext]);
 
 	return <ValidationFileContext.Provider value={ctxValue}>{children}</ValidationFileContext.Provider>;
 }

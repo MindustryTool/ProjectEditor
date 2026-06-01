@@ -41,8 +41,33 @@ export type ItemDto = {
 	name: string;
 };
 
+export type BlockDto = {
+	name: string;
+};
+
+export type LiquidDto = {
+	name: string;
+};
+
+export type SectorDto = {
+	name: string;
+};
+
+export type StatusDto = {
+	name: string;
+};
+
+export type UnitDto = {
+	name: string;
+};
+
 export type ValidationContext = {
 	getItems(): ItemDto[];
+	getBlocks(): BlockDto[];
+	getLiquids(): LiquidDto[];
+	getSectors(): SectorDto[];
+	getStatuses(): StatusDto[];
+	getUnits(): UnitDto[];
 };
 
 export type ValidatorFn = (params: { path: string; content: string; context: ValidationContext }) => ValidationResult[];
@@ -139,8 +164,8 @@ export class ValidationResults {
 	clearResults(path: string): ValidationResults {
 		if (!(path in this.resultsByPath)) return this;
 		const rest = { ...this.resultsByPath };
-			delete rest[path];
-			return new ValidationResults(rest);
+		delete rest[path];
+		return new ValidationResults(rest);
 	}
 
 	clearAll(): ValidationResults {

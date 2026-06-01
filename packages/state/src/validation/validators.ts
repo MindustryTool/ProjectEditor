@@ -1,7 +1,7 @@
 import type { ValidationContext, ValidationResult, ValidatorFn } from "./types";
 import { Severity } from "./types";
 import { createValidatorRegistry } from "./registry";
-import type { HjsonNode} from "@project/hjson";
+import type { HjsonNode } from "@project/hjson";
 import { HJSON, HJSONError, HjsonObjectNode } from "@project/hjson";
 import { ItemHjsonSchema, ModHjsonSchema } from "@project/schema";
 import * as v from "valibot";
@@ -19,7 +19,7 @@ const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 		if (err instanceof HJSONError) {
 			const { startLine, startColumn, endLine, endColumn, code, message } = err;
 
-            console.log({ startLine, startColumn, endLine, endColumn, code, message });
+			console.log({ startLine, startColumn, endLine, endColumn, code, message });
 
 			return [
 				{
@@ -193,6 +193,48 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 	};
 }
 
+function findContent(name: string, context: ValidationContext) {
+	const items = context.getItems();
+
+	const item = items.find((i) => i.name === name);
+
+	if (item) {
+		return item;
+	}
+
+	const blocks = context.getBlocks();
+	const block = blocks.find((b) => b.name === name);
+	if (block) {
+		return block;
+	}
+
+	const liquids = context.getLiquids();
+	const liquid = liquids.find((l) => l.name === name);
+	if (liquid) {
+		return liquid;
+	}
+
+	const sectors = context.getSectors();
+	const sector = sectors.find((s) => s.name === name);
+	if (sector) {
+		return sector;
+	}
+
+	const statuses = context.getStatuses();
+	const status = statuses.find((s) => s.name === name);
+	if (status) {
+		return status;
+	}
+
+	const units = context.getUnits();
+	const unit = units.find((u) => u.name === name);
+	if (unit) {
+		return unit;
+	}
+
+	return null;
+}
+
 const modMetaValidator: ValidatorFn = createValibotValidator(ModHjsonSchema);
 const itemHjsonValidator: ValidatorFn = createValibotValidator(ItemHjsonSchema, ({ path, context, result, node }) => {
 	const items = context.getItems();
@@ -206,14 +248,14 @@ const itemHjsonValidator: ValidatorFn = createValibotValidator(ItemHjsonSchema, 
 	const researchField = node.get("research")!;
 
 	if (typeof research === "string") {
-		const item = items.find((i) => i.name === research);
+		const content = findContent(research, context);
 
-		if (!item) {
+		if (!content) {
 			issues.push({
 				path,
 				severity: Severity.error,
 				messageKey: "validation.content.invalidJson",
-				messageParams: { error: `Item ${result.research} not found` },
+				messageParams: { error: `Content ${research} not found` },
 				startLine: researchField.info()!.start.row,
 				startColumn: researchField.info()!.start.col,
 				endLine: researchField.info()!.end.row,
@@ -225,14 +267,14 @@ const itemHjsonValidator: ValidatorFn = createValibotValidator(ItemHjsonSchema, 
 		const parentField = researchField.get("parent")!;
 
 		if (parent) {
-			const item = items.find((i) => i.name === parent);
+			const content = findContent(parent, context);
 
-			if (!item) {
+			if (!content) {
 				issues.push({
 					path,
 					severity: Severity.error,
 					messageKey: "validation.content.invalidJson",
-					messageParams: { error: `Item ${parent} not found` },
+					messageParams: { error: `Content ${parent} not found` },
 					startLine: parentField.info()!.start.row,
 					startColumn: parentField.info()!.start.col,
 					endLine: parentField.info()!.end.row,

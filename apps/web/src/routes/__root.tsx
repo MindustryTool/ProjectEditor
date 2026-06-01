@@ -38,13 +38,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body className="flex min-h-screen flex-col font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)]">
 				<main className="flex flex-1 flex-col">
-					<QueryClientProvider client={queryClient}>
-						<NuqsAdapter>
+					<NuqsAdapter>
+						<QueryClientProvider client={queryClient}>
 							<ThemeProvider defaultTheme="system" storageKey="theme">
 								{children}
 							</ThemeProvider>
-						</NuqsAdapter>
-					</QueryClientProvider>
+						</QueryClientProvider>
+					</NuqsAdapter>
 				</main>
 				<Toaster />
 				<TanStackDevtools
