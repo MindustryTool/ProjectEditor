@@ -106,12 +106,14 @@ export function getSchemaEntries(schema: AnySchema): [string, AnySchema][] {
 	return [];
 }
 
-export function getArrayItemSchema(schema: AnySchema): AnySchema | null {
-	const s = schema as unknown as { type: string; item?: AnySchema };
+export function getArrayItemSchema(schema: AnySchema) {
+	const s = unwrapSchema(schema) as unknown as { type: string; item?: AnySchema };
+
 	if (s.type === "array" && s.item) {
 		return s.item as AnySchema;
 	}
-	return null;
+
+	throw new Error("Array schema must have item schema");
 }
 
 export interface SchemaMetadata {

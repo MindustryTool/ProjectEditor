@@ -3,6 +3,7 @@ import { useFileString, useProjectSession } from "@project/state";
 import { getLanguageFromPath } from "~/lib/monaco/languageMap";
 import { RecentlyOpenedFilesBar } from "./recently-opened/RecentlyOpenedFilesBar";
 import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
+import { Spinner } from "#/components/ui/spinner";
 
 const MonacoEditor = lazy(() => import("./MonacoEditor").then((m) => ({ default: m.MonacoEditor })));
 
@@ -11,11 +12,19 @@ interface EditorCenterPanelProps {
 }
 
 function EditorWithMonaco({ path }: { path: string }) {
-	const { data, write } = useFileString(path);
+	const { data, isLoading, write } = useFileString(path);
 	const language = getLanguageFromPath(path);
 
+	if (isLoading) {
+		return (
+			<div className="flex w-full h-full items-center justify-center">
+				<Spinner />
+			</div>
+		);
+	}
+
 	if (data === null) {
-		return <div>File not found</div>;
+		return <div className="flex w-full h-full items-center justify-center">File not found</div>;
 	}
 
 	return (

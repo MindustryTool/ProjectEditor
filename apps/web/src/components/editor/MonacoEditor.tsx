@@ -24,6 +24,7 @@ import { configureMonaco } from "~/lib/monaco/setup";
 import { useMonacoTheme } from "#/lib/monaco/use-monaco-theme";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { ColorPicker, ColorPickerAlpha, ColorPickerFormat, ColorPickerHue, ColorPickerSelection } from "~/components/ui/color-picker";
+import { Spinner } from "#/components/ui/spinner";
 
 interface MonacoEditorProps {
 	value: string;
@@ -396,7 +397,11 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 					padding: { top: 8 },
 					automaticLayout: true,
 				}}
-				loading={<div className="flex h-full items-center justify-center text-xs text-muted-foreground">Loading editor...</div>}
+				loading={
+					<div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+						<Spinner />
+					</div>
+				}
 			/>
 			{activeColorTag ? (
 				<div

@@ -76,7 +76,7 @@ export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 		const key = name + path;
 		const type = detectSchemaType(entrySchema);
 
-		const Renderer = schemaRenderers[type] as SchemaRenderer | undefined;
+		const Renderer = schemaRenderers[type];
 
 		if (Renderer === undefined) {
 			return (
@@ -256,7 +256,7 @@ function ColorField({ name, node, patchValue, entrySchema }: Parameters<SchemaRe
 							className="h-16 w-full relative cursor-pointer rounded border border-border bg-transparent p-0"
 							style={{ backgroundColor: value }}
 						>
-							<span className="text-sm absolute left-1 bottom-1">{value}</span>
+							<span className="text-sm absolute left-1.5 bottom-1.5">{value}</span>
 						</PopoverTrigger>
 						<PopoverContent className="w-64 p-3" side="bottom" align="start">
 							<ColorPicker value={value} onChange={(val) => patchValue(val)}>
@@ -305,7 +305,6 @@ function ArrayField({ path, name, node, original, onPatch, patchValue, entrySche
 			<FormLabel>{name}</FormLabel>
 			<FormControl>
 				<div className="flex flex-col gap-2">
-					{items.length === 0 && <span className="text-muted-foreground text-sm italic">(empty)</span>}
 					{items.map((el, index) => (
 						<div key={index} className="flex gap-2">
 							<div className="flex-1 p-2 border rounded-md relative">
@@ -351,20 +350,6 @@ function ObjectField({ name: parentName, path, node, original, onPatch, entrySch
 	return entries.map(([name, entrySchema]) => {
 		const key = name;
 		const type = detectSchemaType(entrySchema);
-
-		const Renderer = schemaRenderers[type] as SchemaRenderer | undefined;
-
-		if (Renderer === undefined) {
-			return (
-				<FormControl>
-					<FormLabel>{name}</FormLabel>
-					<span key={key} className="text-yellow-400 text-sm">
-						Unknown field type {type}
-					</span>
-				</FormControl>
-			);
-		}
-
 		const childNode = node.get(name);
 		const metadata = getSchemaMetadata(entrySchema);
 		const isNullable = hasNullishWrapper(entrySchema);
@@ -403,6 +388,9 @@ function ObjectField({ name: parentName, path, node, original, onPatch, entrySch
 			if (refNode.isMissing()) return null;
 			if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) return null;
 		}
+		
+        const Renderer = schemaRenderers[type];
+
 		return (
 			<ErrorBoundary key={key}>
 				<Renderer
@@ -463,6 +451,7 @@ function ResearchField({ name, node, original, onPatch, patchValue }: Parameters
 			: typeof currentValue === "string"
 				? currentValue
 				: (((currentValue as Record<string, unknown>)?.parent as string) ?? "")) || "";
+                
 	const requirements = (
 		!currentValue
 			? []
@@ -823,14 +812,6 @@ function ItemGrid({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function getSchemaRenderer(type: Type | null): SchemaRenderer {
-	if (type) {
-		const r = schemaRenderers[type];
-		if (r) return r;
-	}
-	return schemaRenderers.string!;
-}
-
 function SchemaArrayItemEditor({
 	path,
 	value,
@@ -843,12 +824,14 @@ function SchemaArrayItemEditor({
 	path: string;
 	value: unknown;
 	itemType: Type | null;
-	itemSchema: AnySchema | null;
+	itemSchema: AnySchema;
 	onChange: (v: unknown) => void;
 	original?: string;
 	jsonPath?: string;
 }) {
-	const renderer = getSchemaRenderer(itemType);
+	const type = detectSchemaType(itemSchema);
+	const Renderer = schemaRenderers[type];
+
 	const node = useMemo(
 		() =>
 			value instanceof HjsonNode
@@ -883,16 +866,16 @@ function SchemaArrayItemEditor({
 
 	return (
 		<ErrorBoundary key={name}>
-			{renderer({
-				path,
-				name,
-				node,
-				original,
-				onPatch: handleOnPatch,
-				patchValue: (v) => onChange(v),
-				entrySchema: itemSchema ?? (null as unknown as AnySchema),
-				jsonPath,
-			})}
+			<Renderer
+				path={path}
+				name={name}
+				node={node}
+				original={original}
+				onPatch={handleOnPatch}
+				patchValue={(v) => onChange(v)}
+				entrySchema={itemSchema}
+				jsonPath={jsonPath}
+			/>
 		</ErrorBoundary>
 	);
 }
