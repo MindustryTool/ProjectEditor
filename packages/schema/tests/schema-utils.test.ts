@@ -1,6 +1,6 @@
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
-import { unwrapSchema, hasNullishWrapper, detectSchemaType, getSchemaEntries, getArrayItemSchema, type AnySchema } from "../src/schema-utils";
+import { unwrapSchema, hasNullishWrapper, detectSchemaType, getSchemaEntries, getArrayItemSchema, getSchemaMetadata, type AnySchema } from "../src/schema-utils";
 import { MindustryHexColorSchema, ResearchSchema, ContentNameSchema } from "../src/index";
 
 describe("unwrapSchema", () => {
@@ -165,5 +165,64 @@ describe("getArrayItemSchema", () => {
 
 	it("returns null for object schema", () => {
 		expect(getArrayItemSchema(v.object({}) as AnySchema)).toBeNull();
+	});
+});
+
+describe("getSchemaMetadata", () => {
+	it("returns metadata from pipe with v.metadata()", () => {
+		const schema = v.pipe(v.string(), v.metadata({ visibleWhen: { field: "x", value: true } }));
+		expect(getSchemaMetadata(schema as AnySchema)).toEqual({ visibleWhen: { field: "x", value: true } });
+	});
+
+	it("returns null for pipe without metadata", () => {
+		const schema = v.pipe(v.string(), v.minLength(1));
+		expect(getSchemaMetadata(schema as AnySchema)).toBeNull();
+	});
+
+	it("returns null for non-pipe schema", () => {
+		expect(getSchemaMetadata(v.string() as AnySchema)).toBeNull();
+		expect(getSchemaMetadata(v.number() as AnySchema)).toBeNull();
+		expect(getSchemaMetadata(v.boolean() as AnySchema)).toBeNull();
+	});
+
+	it("returns null for object schema", () => {
+		expect(getSchemaMetadata(v.object({}) as AnySchema)).toBeNull();
+	});
+
+	it("unwraps nullish wrapper before extracting metadata", () => {
+		const inner = v.pipe(v.string(), v.metadata({ visibleWhen: { field: "toggle", value: true } }));
+		const wrapped = v.nullish(inner);
+		expect(getSchemaMetadata(wrapped as AnySchema)).toEqual({ visibleWhen: { field: "toggle", value: true } });
+	});
+
+	it("unwraps optional wrapper before extracting metadata", () => {
+		const inner = v.pipe(v.number(), v.metadata({ visibleWhen: { field: "flag", value: 1 } }));
+		const wrapped = v.optional(inner);
+		expect(getSchemaMetadata(wrapped as AnySchema)).toEqual({ visibleWhen: { field: "flag", value: 1 } });
+	});
+
+	it("returns last metadata when multiple metadata actions exist", () => {
+		const schema = v.pipe(v.string(), v.metadata({ visibleWhen: { field: "first", value: 1 } }), v.metadata({ visibleWhen: { field: "last", value: 2 } }));
+		expect(getSchemaMetadata(schema as AnySchema)).toEqual({ visibleWhen: { field: "last", value: 2 } });
+	});
+
+	it("returns metadata from pipe with hex-color base schema", () => {
+		const schema = v.pipe(MindustryHexColorSchema, v.metadata({ visibleWhen: { field: "gas", value: true } }));
+		expect(getSchemaMetadata(schema as AnySchema)).toEqual({ visibleWhen: { field: "gas", value: true } });
+	});
+
+	it("detects type as hex-color for pipe with MindustryHexColorSchema and metadata", () => {
+		const schema = v.pipe(MindustryHexColorSchema, v.metadata({ visibleWhen: { field: "gas", value: true } }));
+		expect(detectSchemaType(schema as AnySchema)).toBe("hex-color");
+	});
+
+	it("detects type as string for pipe with v.string() and metadata", () => {
+		const schema = v.pipe(v.string(), v.metadata({ visibleWhen: { field: "x", value: "y" } }));
+		expect(detectSchemaType(schema as AnySchema)).toBe("string");
+	});
+
+	it("detects type as number for pipe with v.number() and metadata", () => {
+		const schema = v.pipe(v.number(), v.minValue(0), v.metadata({ visibleWhen: { field: "x", value: true } }));
+		expect(detectSchemaType(schema as AnySchema)).toBe("number");
 	});
 });

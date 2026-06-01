@@ -30,5 +30,5 @@ export type { Research } from "./base";
 export { LiquidHjsonSchema } from "./liquid";
 export type { LiquidHjsonData } from "./liquid";
 
-export { unwrapSchema, hasNullishWrapper, detectSchemaType, getSchemaEntries, getArrayItemSchema } from "./schema-utils";
-export type { AnySchema } from "./schema-utils";
+export { unwrapSchema, hasNullishWrapper, detectSchemaType, getSchemaEntries, getArrayItemSchema, getSchemaMetadata } from "./schema-utils";
+export type { AnySchema, SchemaMetadata } from "./schema-utils";

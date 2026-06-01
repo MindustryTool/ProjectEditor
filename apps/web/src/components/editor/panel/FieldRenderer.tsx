@@ -17,7 +17,14 @@ import { HjsonNode, HjsonValueNode, HjsonArrayNode } from "@project/hjson";
 import { Plus, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
 import { type ReactNode } from "react";
-import { detectSchemaType, getSchemaEntries, getArrayItemSchema, hasNullishWrapper, type AnySchema } from "@project/schema";
+import {
+	detectSchemaType,
+	getSchemaEntries,
+	getArrayItemSchema,
+	hasNullishWrapper,
+	getSchemaMetadata,
+	type AnySchema,
+} from "@project/schema";
 import * as v from "valibot";
 
 interface FieldsRendererProps {
@@ -48,6 +55,14 @@ export function FieldsRenderer({ path, schema, node, original, onPatch }: Fields
 		const issue = issues?.filter((issue) => issue.field === name);
 		const childNode = node.get(name);
 		const isNullable = hasNullishWrapper(entrySchema);
+
+		const metadata = getSchemaMetadata(entrySchema);
+
+		if (metadata?.visibleWhen) {
+			const refNode = node.get(metadata.visibleWhen.field);
+			if (refNode.isMissing()) return null;
+			if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) return null;
+		}
 
 		const patchValue = (newRawValue: unknown) => {
 			if (v.getDefault(entrySchema) === newRawValue) {

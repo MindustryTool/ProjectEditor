@@ -28,19 +28,16 @@ specialSchemaRegistry.set(ResearchSchema as unknown as AnySchema, "research");
 function getSchemaType(schema: AnySchema): string {
 	const s = schema as unknown as { type: string; pipe?: AnySchema[] };
 
+	if (s.pipe && s.pipe.length > 0) {
+		const first: AnySchema = s.pipe[0]!;
+		return detectSchemaType(first);
+	}
+
 	if (s.type === "string") return "string";
 	if (s.type === "number") return "number";
 	if (s.type === "boolean") return "boolean";
 	if (s.type === "object") return "object";
 	if (s.type === "array") return "array";
-	if (s.type === "pipe" && s.pipe) {
-		if (s.pipe.length > 0) {
-			const first = s.pipe[0];
-			if ((first as unknown as { type: string }).type === "string") return "string";
-			if ((first as unknown as { type: string }).type === "number") return "number";
-		}
-		return "unknown";
-	}
 	return "unknown";
 }
 
@@ -70,4 +67,27 @@ export function getArrayItemSchema(schema: AnySchema): AnySchema | null {
 		return s.item as AnySchema;
 	}
 	return null;
+}
+
+export interface SchemaMetadata {
+	visibleWhen?: {
+		field: string;
+		value: unknown;
+	};
+}
+
+export function getSchemaMetadata(schema: AnySchema): SchemaMetadata | null {
+	const unwrapped = unwrapSchema(schema);
+	const s = unwrapped as unknown as { type: string; pipe?: Array<{ type: string; metadata: SchemaMetadata }> };
+
+	if (!s.pipe) return null;
+
+	let result: SchemaMetadata | null = null;
+	for (const action of s.pipe) {
+		if (action.type === "metadata" && action.metadata) {
+			result = action.metadata;
+		}
+	}
+
+	return result;
 }

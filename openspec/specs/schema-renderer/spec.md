@@ -149,3 +149,22 @@ The system SHALL render an unrecognized schema type as a warning message.
 #### Scenario: Unknown type shown
 - **WHEN** a field's schema type cannot be determined
 - **THEN** a yellow warning text SHALL display "Unknown field type"
+
+### Requirement: Conditional field visibility from visibleWhen metadata
+The system SHALL conditionally render fields based on `visibleWhen` metadata attached to the field schema.
+
+#### Scenario: Field hidden when condition not met
+- **WHEN** a field has `visibleWhen: { field: "toggle", value: true }` metadata and the referenced field `toggle` has value `false`
+- **THEN** the field SHALL NOT be rendered
+
+#### Scenario: Field shown when condition is met
+- **WHEN** a field has `visibleWhen: { field: "toggle", value: true }` metadata and the referenced field `toggle` has value `true`
+- **THEN** the field SHALL be rendered
+
+#### Scenario: Field shown when referenced field is missing
+- **WHEN** a field has `visibleWhen: { field: "missingField", value: true }` metadata and the referenced field does not exist in the HJSON node
+- **THEN** the field SHALL NOT be rendered (fail closed)
+
+#### Scenario: Field rendered normally when no metadata
+- **WHEN** a field has no `visibleWhen` metadata
+- **THEN** the field SHALL always be rendered
