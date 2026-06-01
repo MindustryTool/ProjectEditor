@@ -1,15 +1,6 @@
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
-import {
-	unwrapSchema,
-	hasNullishWrapper,
-	detectSchemaType,
-	getSchemaEntries,
-	getArrayItemSchema,
-	getSchemaMetadata,
-	type AnySchema,
-} from "../src/schema-utils";
-import { MindustryHexColorSchema, ResearchSchema, ContentNameSchema } from "../src/index";
+import { unwrapSchema, hasNullishWrapper, detectSchemaType, getSchemaEntries, getArrayItemSchema, getSchemaMetadata, type AnySchema, MindustryHexColorSchema, ResearchSchema, ContentNameSchema } from "@project/schema";
 
 describe("unwrapSchema", () => {
 	it("returns the same schema for non-wrapped types", () => {

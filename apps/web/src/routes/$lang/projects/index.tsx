@@ -1,6 +1,6 @@
 import { createFileRoute, redirect, useNavigate, useParams } from "@tanstack/react-router"
-import { ProjectsPage } from "../../../components/editor/ProjectsPage"
-import { isSupportedLocale, setLocale } from "../../../lib/locales"
+import { ProjectsPage } from "#/components/editor/ProjectsPage"
+import { isSupportedLocale, setLocale } from "#/lib/locales"
 
 export const Route = createFileRoute("/$lang/projects/")({
   beforeLoad: ({ params }) => {

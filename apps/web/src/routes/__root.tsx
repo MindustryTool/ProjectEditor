@@ -4,9 +4,9 @@ import { TanStackDevtools } from "@tanstack/react-devtools";
 import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 import { ThemeProvider } from "~/components/theme-provider";
 import { Toaster } from "~/components/ui/sonner";
-import i18n from "../i18n/i18n";
+import i18n from "#/i18n/i18n";
 
-import appCss from "../styles.css?url";
+import appCss from "#/styles.css?url";
 import { createRootRouteWithContext } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 

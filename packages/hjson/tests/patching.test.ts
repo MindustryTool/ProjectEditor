@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { HJSON } from "../src/hjson.js";
-import type { HjsonObjectNode, HjsonArrayNode, HjsonNode } from "../src/structured.js";
+import { HJSON } from "@project/hjson";
+import type { HjsonObjectNode, HjsonArrayNode, HjsonNode } from "@project/hjson";
 
 function parseStructured(input: string) {
 	return HJSON.parseStructured(input) as HjsonObjectNode;

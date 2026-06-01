@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { HJSONError, HJSONErrorCode } from "../src/errors.js";
+import { HJSONError, HJSONErrorCode } from "@project/hjson";
 
 describe("HJSONErrorCode", () => {
   it("has all expected error codes as const values", () => {

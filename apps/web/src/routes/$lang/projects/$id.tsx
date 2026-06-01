@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import { EditorPage } from "../../../components/editor"
-import { isSupportedLocale, setLocale } from "../../../lib/locales"
+import { EditorPage } from "#/components/editor"
+import { isSupportedLocale, setLocale } from "#/lib/locales"
 
 export const Route = createFileRoute("/$lang/projects/$id")({
   beforeLoad: ({ params }) => {

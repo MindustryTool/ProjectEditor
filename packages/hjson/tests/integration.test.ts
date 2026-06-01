@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { HJSON } from "../src/hjson.js";
+import { HJSON } from "@project/hjson";
 
 describe("Integration: real-world scenarios", () => {
   it("parses a config file with comments, unquoted keys, trailing commas", () => {

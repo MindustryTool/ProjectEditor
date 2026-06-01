@@ -1,6 +1,6 @@
 import { apiClient } from "@project/api";
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
-import type { Effect } from "../../../../packages/api/src/types";
+import type { Effect } from "@project/api";
 
 export function useEffects(): UseQueryResult<NoInfer<Effect[]>, Error> {
 	const data = useQuery({

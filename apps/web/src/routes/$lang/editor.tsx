@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import { isSupportedLocale } from "../../lib/locales"
+import { isSupportedLocale } from "#/lib/locales"
 
 export const Route = createFileRoute("/$lang/editor")({
   beforeLoad: ({ params }) => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Tokenizer, type Token } from "../src/tokenizer.js";
+import { Tokenizer, type Token } from "@project/hjson";
 
 function tokens(input: string): Token[] {
   const t = new Tokenizer(input);

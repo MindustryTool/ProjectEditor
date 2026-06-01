@@ -1,16 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { Parser } from "../src/parser.js";
-import { HJSONError, HJSONErrorCode } from "../src/errors.js";
-import type {
-  HjsonArrayNode,
-  HjsonValueNode} from "../src/structured.js";
-import {
-  HjsonNode,
-  HjsonObjectNode,
-  type FieldInfo,
-  type ElementInfo,
-  type InfoBase,
-} from "../src/structured.js";
+import { Parser, HJSONError, HJSONErrorCode, HjsonNode, HjsonObjectNode, type FieldInfo, type ElementInfo, type InfoBase } from "@project/hjson";
+import type { HjsonArrayNode, HjsonValueNode } from "@project/hjson";
 
 function parse(input: string, reviver?: (key: string, value: unknown) => unknown) {
   return Parser.parse(input, reviver);

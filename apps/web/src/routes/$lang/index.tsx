@@ -1,7 +1,7 @@
 import { createFileRoute, redirect, Link } from "@tanstack/react-router";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
-import i18n from "../../i18n/i18n";
+import Header from "#/components/Header";
+import Footer from "#/components/Footer";
+import i18n from "#/i18n/i18n";
 import {
 	Package,
 	FileCode2,
@@ -22,7 +22,7 @@ import {
 	FileType,
 	Palette,
 } from "lucide-react";
-import { isSupportedLocale, setLocale } from "../../lib/locales";
+import { isSupportedLocale, setLocale } from "#/lib/locales";
 
 export const Route = createFileRoute("/$lang/")({
 	beforeLoad: ({ params }) => {

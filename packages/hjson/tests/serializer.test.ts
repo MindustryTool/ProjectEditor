@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { HJSON } from "../src/hjson.js";
+import { HJSON } from "@project/hjson";
 
 function stringifyAndParse(value: unknown, space?: string | number) {
   const str = HJSON.stringify(value, null, space);
