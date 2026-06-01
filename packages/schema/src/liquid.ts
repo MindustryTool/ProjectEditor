@@ -4,7 +4,17 @@ import { MindustryHexColorSchema } from "./base";
 export const LiquidHjsonSchema = v.object({
 	color: v.nullish(MindustryHexColorSchema),
 	gas: v.nullish(v.boolean(), false),
-	gasColor: v.nullish(MindustryHexColorSchema),
+	gasColor: v.nullish(
+		v.pipe(
+			MindustryHexColorSchema,
+			v.metadata({
+				visibleWhen: {
+					field: "gas",
+					value: true,
+				},
+			}),
+		),
+	),
 	barColor: v.nullish(MindustryHexColorSchema),
 	lightColor: v.nullish(MindustryHexColorSchema),
 	flammability: v.nullish(v.pipe(v.number(), v.minValue(0), v.maxValue(1))),
