@@ -2,6 +2,7 @@ import { memo } from "react";
 import { ModHjsonPanel } from "./panel/ModHjsonPanel";
 import { ItemPanel } from "#/components/editor/panel/ItemPanel";
 import { LiquidPanel } from "#/components/editor/panel/LiquidPanel";
+import { SectorPanel } from "#/components/editor/panel/SectorPanel";
 
 interface EditorRightPanelProps {
 	path: string | null;
@@ -20,8 +21,12 @@ export const EditorRightPanel = memo(function EditorRightPanel({ path }: EditorR
 		return <ItemPanel path={path} />;
 	}
 
-    if (path.startsWith("content/liquids") && path.endsWith(".json")) {
+	if (path.startsWith("content/liquids") && path.endsWith(".json")) {
 		return <LiquidPanel path={path} />;
+	}
+
+	if (path.startsWith("content/sectors") && path.endsWith(".json")) {
+		return <SectorPanel path={path} />;
 	}
 
 	if (path.startsWith("content")) {

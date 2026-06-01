@@ -3,7 +3,7 @@ import { Severity } from "./types";
 import { createValidatorRegistry } from "./registry";
 import type { HjsonNode } from "@project/hjson";
 import { HJSON, HJSONError, HjsonObjectNode } from "@project/hjson";
-import { ItemHjsonSchema, LiquidHjsonSchema, ModHjsonSchema, type ResearchSchema } from "@project/schema";
+import { ItemHjsonSchema, LiquidHjsonSchema, ModHjsonSchema, SectorHjsonSchema, type ResearchSchema } from "@project/schema";
 import * as v from "valibot";
 import { findUnknownProperties } from "./utils";
 
@@ -320,6 +320,9 @@ const itemHjsonValidator: ValidatorFn = createValibotValidator(ItemHjsonSchema, 
 const liquidHjsonValidator: ValidatorFn = createValibotValidator(LiquidHjsonSchema, (result) =>
 	researchValidator({ ...result, result: result.result.research }),
 );
+const sectorHjsonValidator: ValidatorFn = createValibotValidator(SectorHjsonSchema, (result) =>
+	researchValidator({ ...result, result: result.result.research }),
+);
 
 export function createDefaultValidators() {
 	const registry = createValidatorRegistry();
@@ -346,6 +349,12 @@ export function createDefaultValidators() {
 		name: "liquids-hjson",
 		pattern: (path) => path.startsWith("content/liquid") || (path.endsWith(".json") && path.endsWith(".hjson")),
 		validate: liquidHjsonValidator,
+	});
+
+	registry.register({
+		name: "sectors-hjson",
+		pattern: (path) => path.startsWith("content/sector") || (path.endsWith(".json") && path.endsWith(".hjson")),
+		validate: sectorHjsonValidator,
 	});
 
 	return registry;

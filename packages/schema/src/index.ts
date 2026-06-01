@@ -27,6 +27,9 @@ export type { ItemHjsonData } from "./item";
 export { ContentNameSchema, MindustryHexColorSchema, ResearchSchema } from "./base";
 export type { Research } from "./base";
 
+export { SectorHjsonSchema } from "./sector";
+export type { SectorHjsonData } from "./sector";
+
 export { LiquidHjsonSchema } from "./liquid";
 export type { LiquidHjsonData } from "./liquid";
 
