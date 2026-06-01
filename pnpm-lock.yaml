@@ -466,6 +466,9 @@ importers:
 
   packages/schema:
     dependencies:
+      '@project/core':
+        specifier: workspace:*
+        version: link:../core
       '@project/hjson':
         specifier: workspace:*
         version: link:../hjson

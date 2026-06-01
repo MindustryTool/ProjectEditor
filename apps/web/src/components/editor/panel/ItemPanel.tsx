@@ -5,6 +5,7 @@ import { SpritePicker } from "#/components/editor/panel/SpritePicker";
 import { useFileName } from "#/hooks/use-path";
 import { HJSON, HjsonObjectNode } from "@project/hjson";
 import { ItemHjsonSchema } from "@project/schema";
+import { useProjectContext } from "#/components/editor/ProjectProvider";
 
 interface ItemPanelProps {
 	path: string;
@@ -13,6 +14,7 @@ interface ItemPanelProps {
 export function ItemPanel({ path }: ItemPanelProps) {
 	const { data, isLoading, write } = useFileString(path);
 	const fileName = useFileName();
+	const { contents } = useProjectContext();
 
 	if (isLoading || data === null) {
 		return null;
@@ -26,7 +28,7 @@ export function ItemPanel({ path }: ItemPanelProps) {
 				{fileName !== null && <div className="text-lg font-bold">{fileName}</div>}
 				<SpritePicker path={path} />
 				{result && result instanceof HjsonObjectNode && (
-					<FieldsRenderer path={path} schema={ItemHjsonSchema} node={result} original={data} onPatch={write} />
+					<FieldsRenderer path={path} schema={ItemHjsonSchema(result, contents)} node={result} original={data} onPatch={write} />
 				)}
 			</div>
 		</Panel>

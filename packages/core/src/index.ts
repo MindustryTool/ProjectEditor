@@ -107,3 +107,6 @@ export interface ProjectEventMap {
 	"file:create": [{ path: string }];
 	"file:mkdir": [{ path: string }];
 }
+
+export { findContent } from "./content.js";
+export type * from "./content.js";

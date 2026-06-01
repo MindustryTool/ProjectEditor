@@ -1,18 +1,11 @@
-import type { ValidationContext, ValidationResult, ValidatorFn } from "./types";
+import type { ValidatorFn } from "./types";
 import { Severity } from "./types";
 import { createValidatorRegistry } from "./registry";
-import type { HjsonNode } from "@project/hjson";
 import { HJSON, HJSONError, HjsonObjectNode } from "@project/hjson";
-import {
-	ItemHjsonSchema,
-	LiquidHjsonSchema,
-	ModHjsonSchema,
-	SectorHjsonSchema,
-	StatusHjsonSchema,
-	type ResearchSchema,
-} from "@project/schema";
+import { ItemHjsonSchema, LiquidHjsonSchema, ModHjsonSchema, SectorHjsonSchema, StatusHjsonSchema } from "@project/schema";
 import * as v from "valibot";
 import { findUnknownProperties } from "./utils";
+import type { SchemaFn } from "../../../schema/src/base";
 
 const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 	const trimmed = content.trim();
@@ -25,8 +18,6 @@ const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 	} catch (err) {
 		if (err instanceof HJSONError) {
 			const { startLine, startColumn, endLine, endColumn, code, message } = err;
-
-			console.log({ startLine, startColumn, endLine, endColumn, code, message });
 
 			return [
 				{
@@ -74,22 +65,13 @@ const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 	}
 };
 
-type PostValidatorFn<T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>> = (c: {
-	path: string;
-	content: string;
-	context: ValidationContext;
-	result: v.InferOutput<T>;
-	node: HjsonNode;
-}) => ValidationResult[];
-
 function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>>(
-	schema: T | ((value: HjsonNode) => T),
-	validator?: PostValidatorFn<T>,
+	schema: T | SchemaFn<T>,
 ): ValidatorFn {
 	return ({ path, content, context }) => {
 		const data = HJSON.parseStructured(content);
-		const resolved = typeof schema === "function" ? schema(data) : schema;
-		const { success, output: result, issues } = v.safeParse(resolved, data.valueOf());
+		const resolved = typeof schema === "function" ? schema(data, context) : schema;
+		const { success, issues } = v.safeParse(resolved, data.valueOf());
 
 		if (!success) {
 			const result = [];
@@ -176,10 +158,6 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 
 		const problems = [];
 
-		if (validator) {
-			problems.push(...validator({ path, content, context, result, node: data }));
-		}
-
 		if (data instanceof HjsonObjectNode) {
 			const unknownPaths = findUnknownProperties(resolved, data.valueOf());
 
@@ -203,137 +181,6 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 	};
 }
 
-function findContent(name: string, context: ValidationContext) {
-	const items = context.getItems();
-
-	const item = items.find((i) => i.name === name);
-
-	if (item) {
-		return item;
-	}
-
-	const blocks = context.getBlocks();
-	const block = blocks.find((b) => b.name === name);
-	if (block) {
-		return block;
-	}
-
-	const liquids = context.getLiquids();
-	const liquid = liquids.find((l) => l.name === name);
-	if (liquid) {
-		return liquid;
-	}
-
-	const sectors = context.getSectors();
-	const sector = sectors.find((s) => s.name === name);
-	if (sector) {
-		return sector;
-	}
-
-	const statuses = context.getStatuses();
-	const status = statuses.find((s) => s.name === name);
-	if (status) {
-		return status;
-	}
-
-	const units = context.getUnits();
-	const unit = units.find((u) => u.name === name);
-	if (unit) {
-		return unit;
-	}
-
-	return null;
-}
-
-const researchValidator: PostValidatorFn<typeof ResearchSchema> = ({ path, context, result, node }) => {
-	const research = result;
-	const issues: ValidationResult[] = [];
-
-	if (!research) {
-		return [];
-	}
-
-	const researchField = node.get("research")!;
-
-	if (typeof research === "string") {
-		const content = findContent(research, context);
-
-		if (!content) {
-			issues.push({
-				path,
-				severity: Severity.error,
-				messageKey: "validation.content.invalidJson",
-				messageParams: { error: `Content ${research} not found` },
-				startLine: researchField.info()!.start.row,
-				startColumn: researchField.info()!.start.col,
-				endLine: researchField.info()!.end.row,
-				endColumn: researchField.info()!.end.col,
-			});
-		}
-	} else if (typeof research === "object") {
-		const parent = research.parent;
-		const parentField = researchField.get("parent")!;
-
-		if (parent) {
-			const content = findContent(parent, context);
-
-			if (!content) {
-				issues.push({
-					path,
-					severity: Severity.error,
-					messageKey: "validation.content.invalidJson",
-					messageParams: { error: `Content ${parent} not found` },
-					startLine: parentField.info()!.start.row,
-					startColumn: parentField.info()!.start.col,
-					endLine: parentField.info()!.end.row,
-					endColumn: parentField.info()!.end.col,
-				});
-			}
-		}
-		const requirement = research.requirements;
-		const requirementsField = researchField.get("requirements")!;
-
-		if (requirement) {
-			const items = context.getItems();
-			for (let i = 0; i < requirement.length; i++) {
-				const req = requirement[i]!;
-				const reqField = requirementsField.get(i)!;
-				const parts = req.split("/");
-				const itemName = parts[0];
-				const item = items.find((i) => i.name === itemName);
-
-				if (!item) {
-					issues.push({
-						path,
-						severity: Severity.error,
-						messageKey: "validation.content.invalidJson",
-						messageParams: { error: `Item ${itemName} not found` },
-						startLine: reqField.info()!.start.row,
-						startColumn: reqField.info()!.start.col,
-						endLine: reqField.info()!.end.row,
-						endColumn: reqField.info()!.end.col,
-					});
-				}
-			}
-		}
-	}
-
-	return issues;
-};
-
-const modMetaValidator: ValidatorFn = createValibotValidator(ModHjsonSchema);
-const itemHjsonValidator: ValidatorFn = createValibotValidator(ItemHjsonSchema, (result) =>
-	researchValidator({ ...result, result: result.result.research }),
-);
-const liquidHjsonValidator: ValidatorFn = createValibotValidator(LiquidHjsonSchema, (result) =>
-	researchValidator({ ...result, result: result.result.research }),
-);
-const sectorHjsonValidator: ValidatorFn = createValibotValidator(SectorHjsonSchema, (result) =>
-	researchValidator({ ...result, result: result.result.research }),
-);
-
-const statusHjsonValidator: ValidatorFn = createValibotValidator(StatusHjsonSchema);
-
 export function createDefaultValidators() {
 	const registry = createValidatorRegistry();
 
@@ -346,31 +193,31 @@ export function createDefaultValidators() {
 	registry.register({
 		name: "mod-meta",
 		pattern: (path) => path.endsWith("mod.hjson") || path.endsWith("mod.json"),
-		validate: modMetaValidator,
+		validate: createValibotValidator(ModHjsonSchema),
 	});
 
 	registry.register({
 		name: "items-hjson",
 		pattern: (path) => path.startsWith("content/item") || (path.endsWith(".json") && path.endsWith(".hjson")),
-		validate: itemHjsonValidator,
+		validate: createValibotValidator(ItemHjsonSchema),
 	});
 
 	registry.register({
 		name: "liquids-hjson",
 		pattern: (path) => path.startsWith("content/liquid") || (path.endsWith(".json") && path.endsWith(".hjson")),
-		validate: liquidHjsonValidator,
+		validate: createValibotValidator(LiquidHjsonSchema),
 	});
 
 	registry.register({
 		name: "sectors-hjson",
 		pattern: (path) => path.startsWith("content/sector") || (path.endsWith(".json") && path.endsWith(".hjson")),
-		validate: sectorHjsonValidator,
+		validate: createValibotValidator(SectorHjsonSchema),
 	});
 
 	registry.register({
 		name: "statuses-hjson",
 		pattern: (path) => path.startsWith("content/status") || (path.endsWith(".json") && path.endsWith(".hjson")),
-		validate: statusHjsonValidator,
+		validate: createValibotValidator(StatusHjsonSchema),
 	});
 
 	return registry;

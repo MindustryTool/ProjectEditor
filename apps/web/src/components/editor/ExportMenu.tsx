@@ -9,7 +9,7 @@ import { Button } from "~/components/ui/button";
 import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from "~/components/ui/input-group";
 import { Progress } from "~/components/ui/progress";
 import { ValidationErrorList, type ValidationFileError } from "#/components/editor/ValidationErrorList";
-import { useValidationContext } from "#/components/editor/validation-provider";
+import { useValidationContext } from "#/components/editor/ValidationProvider";
 import { usePath } from "#/hooks/use-path";
 
 export function sanitizeFilename(name: string): string {

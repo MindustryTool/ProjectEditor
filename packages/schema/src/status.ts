@@ -1,9 +1,8 @@
 import * as v from "valibot";
-import { MindustryHexColorSchema } from "./base";
+import { MindustryHexColorSchema, type SchemaFn } from "./base";
 import { EffectSchema } from "./effect";
-import type { HjsonNode } from "@project/hjson";
 
-export const StatusHjsonSchema = (value: HjsonNode) => v.object({
+export const StatusHjsonSchema: SchemaFn = (value, context) => v.object({
 	damageMultiplier: v.nullish(v.number(), 1),
 	healthMultiplier: v.nullish(v.number(), 1),
 	speedMultiplier: v.nullish(v.number(), 1),
@@ -22,8 +21,8 @@ export const StatusHjsonSchema = (value: HjsonNode) => v.object({
 	reactive: v.nullish(v.boolean(), false),
 	show: v.nullish(v.boolean(), true),
 	color: v.nullish(MindustryHexColorSchema),
-	effect: v.nullish(EffectSchema(value.get("effect"))),
-	applyEffect: v.nullish(EffectSchema(value.get("applyEffect"))),
+	effect: v.nullish(EffectSchema(value.get("effect"), context)),
+	applyEffect: v.nullish(EffectSchema(value.get("applyEffect"), context)),
 	applyExtend: v.nullish(v.boolean(), false),
 	applyColor: v.nullish(MindustryHexColorSchema),
 	parentizeApplyEffect: v.nullish(v.boolean(), false),

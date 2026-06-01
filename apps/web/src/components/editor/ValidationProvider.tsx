@@ -9,15 +9,11 @@ import {
 	useProjectSession,
 	useCurrentProject,
 } from "@project/state";
-import type { ValidationContext, ValidationRunner, ValidatorRegistry } from "@project/state";
+import type { ValidationRunner, ValidatorRegistry } from "@project/state";
 import { useShallow } from "zustand/react/shallow";
-import { useItems } from "#/hooks/use-items";
-import { useBlocks } from "#/hooks/use-blocks";
-import { useLiquids } from "#/hooks/use-liquids";
-import { useSectors } from "#/hooks/use-sectors";
-import { useStatuses } from "#/hooks/use-statuses";
-import { useUnits } from "#/hooks/use-units";
 import { usePath } from "#/hooks/use-path";
+import type { ProjectContents } from "@project/core";
+import { useProjectContext } from "#/components/editor/ProjectProvider";
 
 const registry = createDefaultValidators();
 const runner = createValidationRunner(registry);
@@ -25,7 +21,6 @@ const runner = createValidationRunner(registry);
 export interface ValidationContextValue {
 	registry: ValidatorRegistry;
 	runner: ValidationRunner;
-	context: ValidationContext;
 	validateFile: (path: string) => Promise<void>;
 }
 
@@ -61,13 +56,7 @@ function cacheKey(projectId: string, path: string): string {
 	return `${projectId}::${path}`;
 }
 
-function scheduleValidation(
-	projectId: string,
-	path: string,
-	timers: Map<string, NodeJS.Timeout>,
-	delay: number,
-	context: ValidationContext,
-) {
+function scheduleValidation(projectId: string, path: string, timers: Map<string, NodeJS.Timeout>, delay: number, context: ProjectContents) {
 	const key = cacheKey(projectId, path);
 	const existing = timers.get(path);
 	if (existing) clearTimeout(existing);
@@ -101,65 +90,47 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 	const [path] = usePath();
 	const timersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
 	const validationDelayMs = useAppStore(useShallow((s) => s.settings.validationDelayMs));
-	const items = useItems({ base: true, project: true });
-	const blocks = useBlocks();
-	const liquids = useLiquids();
-	const sectors = useSectors();
-	const statuses = useStatuses();
-	const units = useUnits();
 	const projectContext = useCurrentProject();
 	const projectId = projectContext.project.id;
-
-	const validationContext = useMemo(
-		() => ({
-			getItems: () => items,
-			getBlocks: () => blocks,
-			getLiquids: () => liquids,
-			getSectors: () => sectors,
-			getStatuses: () => statuses,
-			getUnits: () => units,
-		}),
-		[items, blocks, liquids, sectors, statuses, units],
-	);
+	const { contents } = useProjectContext();
 
 	const ctxValue = useMemo<ValidationContextValue>(
 		() => ({
 			registry,
 			runner,
-			context: validationContext,
 			validateFile: async (path: string) => {
 				try {
 					const getContent = async () => {
 						const key = cacheKey(projectId, path);
 						const entry = useFileStore.getState().fileContents[key];
-						
-                        if (entry && entry.data) {
+
+						if (entry && entry.data) {
 							return decodeContent(entry.data);
 						}
 
 						const data = await useProjectSession.getState().projectContext!.fs.readTextFile(path);
-						
-                        if (data === null) {
+
+						if (data === null) {
 							return "";
 						}
 
 						return data;
 					};
-					const results = await runner.validate(path, getContent, validationContext);
+					const results = await runner.validate(path, getContent, contents);
 					useValidationStore.getState().setResults(path, results);
 				} catch (err) {
 					useValidationStore.getState().setResults(path, toErrorResult(path, err));
 				}
 			},
 		}),
-		[validationContext],
+		[contents],
 	);
 
 	useEffect(() => {
 		if (path && projectId) {
-			scheduleValidation(projectId, path, timersRef.current, validationDelayMs, validationContext);
+			scheduleValidation(projectId, path, timersRef.current, validationDelayMs, contents);
 		}
-	}, [path, projectId, validationContext, validationDelayMs]);
+	}, [path, projectId, contents, validationDelayMs]);
 
 	useEffect(() => {
 		if (!projectId) {
@@ -167,9 +138,9 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 		}
 
 		for (const path of Object.keys(useValidationStore.getState().results.resultsByPath)) {
-			scheduleValidation(projectId, path, timersRef.current, validationDelayMs, validationContext);
+			scheduleValidation(projectId, path, timersRef.current, validationDelayMs, contents);
 		}
-	}, [projectId, validationContext, validationDelayMs]);
+	}, [projectId, contents, validationDelayMs]);
 
 	useEffect(() => {
 		if (!projectContext) {
@@ -181,11 +152,11 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 		const timers = timersRef.current;
 
 		const unsubWrite = events.on("file:write", (event) => {
-			scheduleValidation(projectId, event.path, timers, validationDelayMs, validationContext);
+			scheduleValidation(projectId, event.path, timers, validationDelayMs, contents);
 		});
 
 		const unsubCreate = events.on("file:create", (event) => {
-			scheduleValidation(projectId, event.path, timers, validationDelayMs, validationContext);
+			scheduleValidation(projectId, event.path, timers, validationDelayMs, contents);
 		});
 
 		const unsubDelete = events.on("file:delete", (event) => {
@@ -201,7 +172,7 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 			}
 			timers.clear();
 		};
-	}, [projectContext, validationDelayMs, validationContext]);
+	}, [projectContext, validationDelayMs, contents]);
 
 	return <ValidationFileContext.Provider value={ctxValue}>{children}</ValidationFileContext.Provider>;
 }

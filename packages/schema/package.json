@@ -18,7 +18,8 @@
   },
   "dependencies": {
     "valibot": "catalog:",
-    "@project/hjson": "workspace:*"
+    "@project/hjson": "workspace:*",
+    "@project/core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.7.0",

@@ -1,15 +1,16 @@
-import type { ValidationContext, ValidationResult, ValidatorRegistry } from "./types";
+import type { ProjectContents } from "@project/core";
+import type { ValidationResult, ValidatorRegistry } from "./types";
 
 export interface ValidationRunner {
-	validate(path: string, content: () => Promise<string>, context: ValidationContext): Promise<ValidationResult[]>;
+	validate(path: string, content: () => Promise<string>, context: ProjectContents): Promise<ValidationResult[]>;
 	validateAll(
 		files: { path: string; content: () => Promise<string> }[],
-		context: ValidationContext,
+		context: ProjectContents,
 	): Promise<Record<string, ValidationResult[]>>;
 }
 
 export function createValidationRunner(registry: ValidatorRegistry): ValidationRunner {
-	async function validate(path: string, content: () => Promise<string>, context: ValidationContext): Promise<ValidationResult[]> {
+	async function validate(path: string, content: () => Promise<string>, context: ProjectContents): Promise<ValidationResult[]> {
 		const validators = registry.getMatches(path);
 
 		if (validators.length === 0) return [];
@@ -58,7 +59,7 @@ export function createValidationRunner(registry: ValidatorRegistry): ValidationR
 
 	async function validateAll(
 		files: { path: string; content: () => Promise<string> }[],
-		context: ValidationContext,
+		context: ProjectContents,
 	): Promise<Record<string, ValidationResult[]>> {
 		const allResults: Record<string, ValidationResult[]> = {};
 		for (const file of files) {

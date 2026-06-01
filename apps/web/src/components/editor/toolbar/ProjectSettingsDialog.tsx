@@ -20,7 +20,7 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import { useProjectActions } from "#/components/editor/use-project-actions";
+import { useProjectActions } from "#/hooks/use-project-actions";
 
 type NameError = "empty" | "invalid" | null;
 
@@ -134,7 +134,7 @@ function DeleteProject({ projectId: propId, onDeleted }: { projectId?: string; o
 			try {
 				await deleteProjectFiles(projectId);
 			} catch (err) {
-                toast.error(`Failed to delete project files: ${err instanceof Error ? err.message : "Unknown error"}`);
+				toast.error(`Failed to delete project files: ${err instanceof Error ? err.message : "Unknown error"}`);
 			}
 		},
 		onSuccess: () => {

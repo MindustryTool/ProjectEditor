@@ -2,7 +2,7 @@ import { HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
-import { ThemeProvider } from "~/components/theme-provider";
+import { ThemeProvider } from "#/components/ThemeProvider";
 import { Toaster } from "~/components/ui/sonner";
 import i18n from "#/i18n/i18n";
 

@@ -1,7 +1,7 @@
 import * as v from "valibot";
-import { MindustryHexColorSchema, ResearchSchema } from "./base";
+import { MindustryHexColorSchema, ResearchSchema, type SchemaFn } from "./base";
 
-export const ItemHjsonSchema = v.object({
+export const ItemHjsonSchema: SchemaFn = (value, context) => v.object({
 	hardness: v.nullish(v.pipe(v.number(), v.minValue(0), v.integer())),
 	cost: v.nullish(v.pipe(v.number(), v.minValue(0))),
 	charge: v.nullish(v.pipe(v.number(), v.minValue(0))),
@@ -10,7 +10,7 @@ export const ItemHjsonSchema = v.object({
 	explosiveness: v.nullish(v.pipe(v.number(), v.minValue(0))),
 	healthScaling: v.nullish(v.pipe(v.number(), v.minValue(0))),
 	color: v.nullish(MindustryHexColorSchema),
-	research: ResearchSchema,
+	research: ResearchSchema(value.get("research"), context),
 	lowPriority: v.nullish(v.boolean()),
 	buildable: v.nullish(v.boolean()),
 	hidden: v.nullish(v.boolean(), false),

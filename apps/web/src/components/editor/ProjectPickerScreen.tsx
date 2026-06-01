@@ -8,7 +8,7 @@ import { useAppStore } from "@project/state";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { FolderOpen, Plus, Settings, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { useProjectActions } from "./use-project-actions";
+import { useProjectActions } from "../../hooks/use-project-actions";
 import { Separator } from "#/components/ui/separator";
 import { ProjectSettingsDialog } from "~/components/editor/toolbar/ProjectSettingsDialog";
 import { LANGUAGE_OPTIONS, LanguageBadge } from "./LanguageBadge";

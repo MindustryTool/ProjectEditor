@@ -1,7 +1,7 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from "axios";
 import { API_BASE_URL } from "@project/config";
 import { ApiError } from "./errors";
-import type { Block, Effect, EnvBlock, Item, Liquid, Sector, Status, Unit } from "./types";
+import type { Block, Effect, EnvBlock, Item, Liquid, Sector, Sound, Status, Unit } from "./types";
 
 type RequestOptions = {
 	signal?: AbortSignal;
@@ -77,6 +77,10 @@ export class MindustryApiClient {
 
 	getStatuses(options?: RequestOptions): Promise<Status[]> {
 		return this.get<Status[]>("/statuses", options);
+	}
+
+	getSounds(options?: RequestOptions): Promise<Sound[]> {
+		return this.get<Sound[]>("/sounds", options);
 	}
 
 	async get<TResponse>(path: string, options?: RequestOptions): Promise<TResponse> {

@@ -43,6 +43,7 @@ export class TreeSnapshot {
 	readonly sectors: FileEntry[];
 	readonly statuses: FileEntry[];
 	readonly units: FileEntry[];
+	readonly sounds: FileEntry[];
 
 	constructor(private readonly entries: FileEntry[]) {
 		const items: FileEntry[] = [];
@@ -51,6 +52,7 @@ export class TreeSnapshot {
 		const sectors: FileEntry[] = [];
 		const statuses: FileEntry[] = [];
 		const units: FileEntry[] = [];
+		const sounds: FileEntry[] = [];
 
 		for (const entry of this.entries) {
 			if (entry.kind === "file") {
@@ -66,6 +68,11 @@ export class TreeSnapshot {
 					statuses.push(entry);
 				} else if (entry.path.includes("content/units") && entry.name.endsWith(".json")) {
 					units.push(entry);
+				} else if (
+					entry.path.includes("sounds/") &&
+					(entry.name.endsWith(".mp3") || entry.name.endsWith(".ogg") || entry.name.endsWith(".wav"))
+				) {
+					sounds.push(entry);
 				}
 			}
 		}
@@ -76,6 +83,7 @@ export class TreeSnapshot {
 		this.sectors = sectors;
 		this.statuses = statuses;
 		this.units = units;
+		this.sounds = sounds;
 	}
 
 	getEntries() {
@@ -157,7 +165,7 @@ export const useProjectSession = create<ProjectSession>()(
 
 			clearRecentFiles: (projectId) => {
 				set((state) => {
-			const rest = { ...state.recentlyOpenedFiles };
+					const rest = { ...state.recentlyOpenedFiles };
 					delete rest[projectId];
 					return { recentlyOpenedFiles: rest };
 				});

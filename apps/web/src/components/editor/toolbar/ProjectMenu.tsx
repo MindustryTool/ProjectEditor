@@ -8,7 +8,7 @@ import { useProjectSession, useAppStore } from "@project/state";
 import { toast } from "sonner";
 import { ProjectPickerDialog } from "#/components/editor/ProjectPickerDialog";
 import { ProjectSettingsDialog } from "./ProjectSettingsDialog";
-import { useProjectActions } from "#/components/editor/use-project-actions";
+import { useProjectActions } from "#/hooks/use-project-actions";
 import type { ProjectRecord } from "@project/state";
 import type { ProjectLanguage } from "@project/core";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "#/components/ui/dialog";

@@ -8,5 +8,5 @@ export const DEFAULT_SETTINGS = {
   theme: "system" as const,
   fontSize: 14,
   tabSize: 2,
-  validationDelayMs: 1000,
+  validationDelayMs: 3000,
 };

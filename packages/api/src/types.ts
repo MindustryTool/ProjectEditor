@@ -58,3 +58,7 @@ export interface Effect {
   id: number;
   name: string;
 }
+
+export interface Sound {
+  name: string;
+ }

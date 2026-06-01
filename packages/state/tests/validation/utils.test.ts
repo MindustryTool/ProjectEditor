@@ -10,21 +10,6 @@ describe("findUnknownProperties", () => {
       expect(findUnknownProperties(v.boolean(), true)).toEqual([]);
     });
 
-    it("returns [] for v.optional wrapping an object", () => {
-      const schema = v.optional(v.object({ a: v.string() }));
-      expect(findUnknownProperties(schema, { a: "x", extra: true })).toEqual([]);
-    });
-
-    it("returns [] for v.nullable wrapping an object", () => {
-      const schema = v.nullable(v.object({ a: v.string() }));
-      expect(findUnknownProperties(schema, { a: "x", extra: true })).toEqual([]);
-    });
-
-    it("returns [] for v.nullish wrapping an object", () => {
-      const schema = v.nullish(v.object({ a: v.string() }));
-      expect(findUnknownProperties(schema, { a: "x", extra: true })).toEqual([]);
-    });
-
     it("returns [] for v.union", () => {
       const schema = v.union([v.string(), v.object({ a: v.number() })]);
       expect(findUnknownProperties(schema, { a: 1, extra: true })).toEqual([]);
@@ -126,28 +111,28 @@ describe("findUnknownProperties", () => {
   });
 
   describe("object schema — wrapped fields (optional / nullable / nullish / union)", () => {
-    it("does NOT recurse into v.optional fields", () => {
+    it("recurses into v.optional fields", () => {
       const schema = v.object({
         a: v.optional(v.object({ n: v.number() })),
       });
       const value = { a: { n: 1, extra: true } };
-      expect(findUnknownProperties(schema, value)).toEqual([]);
+      expect(findUnknownProperties(schema, value)).toEqual(["a.extra"]);
     });
 
-    it("does NOT recurse into v.nullable fields", () => {
+    it("recurses into v.nullable fields", () => {
       const schema = v.object({
         a: v.nullable(v.object({ n: v.number() })),
       });
       const value = { a: { n: 1, extra: true } };
-      expect(findUnknownProperties(schema, value)).toEqual([]);
+      expect(findUnknownProperties(schema, value)).toEqual(["a.extra"]);
     });
 
-    it("does NOT recurse into v.nullish fields", () => {
+    it("recurses into v.nullish fields", () => {
       const schema = v.object({
         a: v.nullish(v.object({ n: v.number() })),
       });
       const value = { a: { n: 1, extra: true } };
-      expect(findUnknownProperties(schema, value)).toEqual([]);
+      expect(findUnknownProperties(schema, value)).toEqual(["a.extra"]);
     });
 
     it("does NOT recurse into v.union fields", () => {
@@ -158,14 +143,14 @@ describe("findUnknownProperties", () => {
       expect(findUnknownProperties(schema, value)).toEqual([]);
     });
 
-    it("does NOT recurse into nested optional → object fields within deeper objects", () => {
+    it("recurses into nested optional → object fields within deeper objects", () => {
       const schema = v.object({
         inner: v.object({
           opt: v.optional(v.object({ x: v.string() })),
         }),
       });
       const value = { inner: { opt: { x: "ok", extra: "y" } } };
-      expect(findUnknownProperties(schema, value)).toEqual([]);
+      expect(findUnknownProperties(schema, value)).toEqual(["inner.opt.extra"]);
     });
 
     it("still detects unknown keys at the parent level when fields are wrapped", () => {
@@ -295,6 +280,96 @@ describe("findUnknownProperties", () => {
         [{ x: 2 }, "b"],
       ];
       expect(findUnknownProperties(schema, value)).toEqual(["[0][0].extra"]);
+    });
+  });
+
+  describe("wrapper unwrapping", () => {
+    it("unwraps nullish → intersect effect-like schema and detects unknown properties inside", () => {
+      const schema = v.object({
+        effect: v.nullish(
+          v.intersect([
+            v.object({ type: v.picklist(["ParticleEffect"]) }),
+            v.object({ type: v.literal("ParticleEffect") }),
+          ]),
+        ),
+      });
+      const value = {
+        effect: {
+          type: "ParticleEffect",
+          line: true,
+          particles: 5,
+          lifetime: 10,
+          length: 35,
+          cone: -360,
+          lenFrom: 5,
+          lenTo: 0,
+          colorFrom: "A9D8FFFF",
+          colorTo: "66B1FFFF",
+        },
+      };
+      const result = findUnknownProperties(schema, value);
+      expect(result).toContain("effect.line");
+      expect(result).toContain("effect.particles");
+      expect(result).toContain("effect.lifetime");
+      expect(result).toContain("effect.length");
+      expect(result).toContain("effect.cone");
+      expect(result).toContain("effect.lenFrom");
+      expect(result).toContain("effect.lenTo");
+      expect(result).toContain("effect.colorFrom");
+      expect(result).toContain("effect.colorTo");
+      expect(result).not.toContain("effect.type");
+      expect(result).toHaveLength(9);
+    });
+
+    it("does not report unknown properties when nullish-wrapped effect has only known keys", () => {
+      const schema = v.object({
+        effect: v.nullish(
+          v.intersect([
+            v.object({ type: v.picklist(["ParticleEffect"]) }),
+            v.object({ type: v.literal("ParticleEffect") }),
+          ]),
+        ),
+      });
+      const value = { effect: { type: "ParticleEffect" } };
+      expect(findUnknownProperties(schema, value)).toEqual([]);
+    });
+
+    it("does not report unknown properties when nullish-wrapped value is null", () => {
+      const schema = v.object({
+        effect: v.nullish(v.object({ type: v.string() })),
+      });
+      const value = { effect: null };
+      expect(findUnknownProperties(schema, value)).toEqual([]);
+    });
+
+    it("unwraps multiple wrapper layers (nullish → optional → object)", () => {
+      const schema = v.object({
+        a: v.nullish(v.optional(v.object({ n: v.number() }))),
+      });
+      const value = { a: { n: 1, extra: true } };
+      expect(findUnknownProperties(schema, value)).toEqual(["a.extra"]);
+    });
+
+    it("handles intersect where options have different entries (merged)", () => {
+      const schema = v.object({
+        cfg: v.intersect([
+          v.object({ a: v.string() }),
+          v.object({ b: v.number() }),
+        ]),
+      });
+      const value = { cfg: { a: "x", b: 42, extra: true } };
+      expect(findUnknownProperties(schema, value)).toEqual(["cfg.extra"]);
+    });
+
+    it("does not report properties that exist in any intersected option", () => {
+      const schema = v.object({
+        cfg: v.intersect([
+          v.object({ a: v.string(), common: v.number() }),
+          v.object({ b: v.number(), common: v.number() }),
+        ]),
+      });
+      const value = { cfg: { a: "x", b: 42, common: 1 } };
+      expect(findUnknownProperties(schema, value)).toEqual([]);
     });
   });
 

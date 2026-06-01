@@ -1,3 +1,5 @@
+import { findContent, type ProjectContents } from "@project/core";
+import type { HjsonNode } from "@project/hjson";
 import * as v from "valibot";
 
 export const ContentNameSchema = v.pipe(
@@ -42,17 +44,95 @@ export const ItemRequirementSchema = v.pipe(
 	}, "Invalid item requirement, must be in the format 'item/number'"),
 );
 
-export const ResearchSchema = v.nullish(
-	v.union([
-		ContentNameSchema,
-		v.object({
-			parent: v.nullish(ContentNameSchema),
-			requirements: v.nullish(v.array(ItemRequirementSchema)),
-			objectives: v.nullish(v.any()),
-			planet: v.nullish(v.string()),
-			robot: v.nullish(v.boolean()),
-		}),
-	]),
-);
+export const ResearchSchema: SchemaFn = (_value, context) =>
+	v.nullish(
+		v.pipe(
+			v.union([
+				ContentNameSchema,
+				v.object({
+					parent: v.nullish(ContentNameSchema),
+					requirements: v.nullish(v.array(ItemRequirementSchema)),
+					objectives: v.nullish(v.any()),
+					planet: v.nullish(v.string()),
+					robot: v.nullish(v.boolean()),
+				}),
+			]),
+			v.rawCheck(({ dataset, addIssue }) => {
+				if (dataset.typed) {
+					const value = dataset.value;
 
-export type Research = v.InferOutput<typeof ResearchSchema>;
+					if (typeof value === "string") {
+						const content = findContent(value, context);
+
+						if (!content) {
+							addIssue({
+								message: `Content ${value} not found`,
+							});
+						}
+					} else if (typeof value === "object") {
+						const parent = value.parent;
+
+						if (parent) {
+							const content = findContent(parent, context);
+
+							if (!content) {
+								addIssue({
+									message: `Content ${parent} not found`,
+									path: [
+										{
+											type: "object",
+											key: "parent",
+											origin: "value",
+											input: value,
+											value: parent,
+										},
+									],
+								});
+							}
+						}
+						const requirement = value.requirements;
+
+						if (requirement) {
+							const items = context.getItems();
+							for (let i = 0; i < requirement.length; i++) {
+								const req = requirement[i]!;
+								const parts = req.split("/");
+								const itemName = parts[0];
+								const item = items.find((i) => i.name === itemName);
+
+								if (!item) {
+									addIssue({
+										message: `Item ${itemName} not found`,
+										path: [
+											{
+												type: "object",
+												key: "requirements",
+												input: value,
+												origin: "value",
+												value: req,
+											},
+											{
+												type: "array",
+												key: i,
+												input: requirement,
+												origin: "value",
+												value: req,
+											},
+										],
+									});
+								}
+							}
+						}
+					}
+				}
+			}),
+		),
+	);
+
+export type Research = v.InferOutput<ReturnType<typeof ResearchSchema>>;
+
+export const SoundSchema = v.pipe(v.string(), v.minLength(1), v.maxLength(127));
+
+export type SchemaFn<
+	T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>> = v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>,
+> = (value: HjsonNode, context: ProjectContents) => T;

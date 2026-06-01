@@ -5,8 +5,50 @@ type AnySchema =
 	| v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>
 	| v.TupleSchema<v.TupleItems, v.ErrorMessage<v.TupleIssue> | undefined>;
 
+type SchemaWithMeta = {
+	type: string;
+	wrapped?: AnySchema;
+	options?: AnySchema[];
+	entries?: Record<string, AnySchema>;
+	item?: AnySchema;
+	items?: AnySchema[];
+};
+
+const WRAPPER_TYPES = new Set(["optional", "nullable", "nullish", "undefinedable", "exact_optional"]);
+
 export function findUnknownProperties(schema: AnySchema, value: unknown, path = ""): string[] {
 	const unknown: string[] = [];
+
+	const s = schema as unknown as SchemaWithMeta;
+
+	// Unwrap wrapper types (optional, nullable, nullish, etc.)
+	if (WRAPPER_TYPES.has(s.type) && s.wrapped) {
+		return findUnknownProperties(s.wrapped, value, path);
+	}
+
+	// Intersect: merge entries from all object options
+	if (s.type === "intersect" && s.options) {
+		const merged: Record<string, AnySchema> = {};
+		for (const opt of s.options) {
+			if ("entries" in opt) {
+				const entries = (opt as unknown as { entries: Record<string, AnySchema> }).entries;
+				for (const key of Object.keys(entries)) {
+					if (!(key in merged)) {
+						merged[key] = entries[key]!;
+					}
+				}
+			}
+		}
+		if (Object.keys(merged).length > 0) {
+			return findUnknownProperties({ entries: merged } as unknown as AnySchema, value, path);
+		}
+		return unknown;
+	}
+
+	// Union: can't determine which variant, skip
+	if (s.type === "union" && s.options) {
+		return unknown;
+	}
 
 	// Object schema
 	if ("entries" in schema) {

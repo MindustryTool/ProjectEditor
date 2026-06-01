@@ -1,3 +1,5 @@
+import type { ProjectContents } from "@project/core";
+
 export const Severity = {
 	error: 0,
 	warning: 1,
@@ -37,40 +39,7 @@ export interface ValidationResult {
 	code?: string;
 }
 
-export type ItemDto = {
-	name: string;
-};
-
-export type BlockDto = {
-	name: string;
-};
-
-export type LiquidDto = {
-	name: string;
-};
-
-export type SectorDto = {
-	name: string;
-};
-
-export type StatusDto = {
-	name: string;
-};
-
-export type UnitDto = {
-	name: string;
-};
-
-export type ValidationContext = {
-	getItems(): ItemDto[];
-	getBlocks(): BlockDto[];
-	getLiquids(): LiquidDto[];
-	getSectors(): SectorDto[];
-	getStatuses(): StatusDto[];
-	getUnits(): UnitDto[];
-};
-
-export type ValidatorFn = (params: { path: string; content: string; context: ValidationContext }) => ValidationResult[];
+export type ValidatorFn = (params: { path: string; content: string; context: ProjectContents }) => ValidationResult[];
 
 export interface ValidatorRegistration {
 	name: string;

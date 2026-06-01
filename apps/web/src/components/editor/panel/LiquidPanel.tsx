@@ -5,6 +5,7 @@ import { SpritePicker } from "#/components/editor/panel/SpritePicker";
 import { useFileName } from "#/hooks/use-path";
 import { HJSON, HjsonObjectNode } from "@project/hjson";
 import { LiquidHjsonSchema } from "@project/schema";
+import { useProjectContext } from "#/components/editor/ProjectProvider";
 
 interface LiquidPanelProps {
 	path: string;
@@ -13,6 +14,7 @@ interface LiquidPanelProps {
 export function LiquidPanel({ path }: LiquidPanelProps) {
 	const { data, isLoading, write } = useFileString(path);
 	const fileName = useFileName();
+	const { contents } = useProjectContext();
 
 	if (isLoading || data === null) {
 		return null;
@@ -26,7 +28,7 @@ export function LiquidPanel({ path }: LiquidPanelProps) {
 				{fileName !== null && <div className="text-lg font-bold">{fileName}</div>}
 				<SpritePicker path={path} />
 				{result && result instanceof HjsonObjectNode && (
-					<FieldsRenderer path={path} schema={LiquidHjsonSchema(result)} node={result} original={data} onPatch={write} />
+					<FieldsRenderer path={path} schema={LiquidHjsonSchema(result, contents)} node={result} original={data} onPatch={write} />
 				)}
 			</div>
 		</Panel>

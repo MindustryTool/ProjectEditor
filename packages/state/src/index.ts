@@ -22,8 +22,6 @@ export type {
 	ValidatorRegistry,
 	ValidationSummary,
 	ValidationStore,
-	ValidationContext,
-	ItemDto,
 } from "./validation/types";
 export { createValidatorRegistry } from "./validation/registry";
 export { createValidationRunner } from "./validation/runner";
