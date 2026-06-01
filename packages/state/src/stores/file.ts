@@ -55,7 +55,7 @@ export interface FileStore {
 	clearSaving: (projectId: string, path: string) => void;
 	clearFile: (projectId: string, path: string) => void;
 	clearAllFiles: (projectId?: string) => void;
-	readFile: (projectId: string, path: string, fs: ProjectFileSystem) => void;
+	loadFile: (projectId: string, path: string, fs: ProjectFileSystem) => void;
 	subscribeToEvents: (projectId: string, path: string, events: EventBus<ProjectEventMap>, fs: ProjectFileSystem) => () => void;
 	cleanup: (projectId: string, path: string) => void;
 }
@@ -203,7 +203,7 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 		set({ fileContents: buildFiles() });
 	},
 
-	readFile: (projectId, path, fs) => {
+	loadFile: (projectId, path, fs) => {
 		const key = cacheKey(projectId, path);
 		const prev = abortMap.get(key);
 		if (prev) prev.abort();
@@ -281,7 +281,7 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 			if (event.path !== path) return;
 			const current = lruMap.get(key);
 			if (current && current.currentVersion !== current.savedVersion) return;
-			get().readFile(projectId, path, fs);
+			get().loadFile(projectId, path, fs);
 		});
 
 		const unsubDelete = events.on("file:delete", (event) => {
@@ -299,7 +299,7 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 			if (event.newPath === path) {
 				const current = lruMap.get(key);
 				if (current && current.currentVersion !== current.savedVersion) return;
-				get().readFile(projectId, path, fs);
+				get().loadFile(projectId, path, fs);
 			}
 		});
 

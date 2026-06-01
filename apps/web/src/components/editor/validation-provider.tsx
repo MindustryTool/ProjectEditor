@@ -74,9 +74,12 @@ function scheduleValidation(
 		setTimeout(async () => {
 			timers.delete(path);
 			try {
-				const getContent = () => {
+				const getContent = async () => {
 					const entry = useFileStore.getState().fileContents[key];
-					return Promise.resolve(decodeContent(entry?.data));
+					if (entry && entry.data) {
+						return decodeContent(entry.data);
+					}
+					return await useProjectSession.getState().projectContext!.fs.readTextFile(path);
 				};
 				const results = await runner.validate(path, getContent, context);
 				useValidationStore.getState().setResults(path, results);

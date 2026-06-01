@@ -11,10 +11,8 @@ export interface ValidationRunner {
 export function createValidationRunner(registry: ValidatorRegistry): ValidationRunner {
 	async function validate(path: string, content: () => Promise<string>, context: ValidationContext): Promise<ValidationResult[]> {
 		const validators = registry.getMatches(path);
-        
-		if (validators.length === 0) return [];
 
-		console.log(`Validate: ${path}`);
+		if (validators.length === 0) return [];
 
 		let resolvedContent: string;
 		try {
@@ -29,6 +27,10 @@ export function createValidationRunner(registry: ValidatorRegistry): ValidationR
 					startColumn: 1,
 				},
 			];
+		}
+
+		if (resolvedContent === null) {
+			throw new Error("Content is null");
 		}
 
 		const results: ValidationResult[] = [];

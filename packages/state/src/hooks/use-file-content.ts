@@ -26,7 +26,7 @@ export function useFile(path: string): UseFileResult<ArrayBuffer> {
 		if (!projectId || !path) return;
 		if (entry !== undefined) return;
 
-		useFileStore.getState().readFile(projectId, path, projectContext!.fs);
+		useFileStore.getState().loadFile(projectId, path, projectContext!.fs);
 	}, [path, projectId, projectContext, entry]);
 
 	const previousProjectId = useRef(projectId ?? null);
