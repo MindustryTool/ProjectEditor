@@ -18,6 +18,7 @@ import { ChevronsUpDown, Plus, Search, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
 import React, { useCallback, useState, type ReactNode } from "react";
 import {
+	resolveSchema,
 	detectSchemaType,
 	getSchemaEntries,
 	getArrayItemSchema,
@@ -68,7 +69,7 @@ export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 		return null;
 	}
 
-	const resolvedSchema = typeof schema === "function" ? schema(node, contents) : schema;
+	const resolvedSchema = resolveSchema(typeof schema === "function" ? schema(node, contents) : schema, node.valueOf());
 	const entries = getSchemaEntries(resolvedSchema);
 
 	return entries.map(([name, entrySchema]) => {
@@ -163,7 +164,7 @@ const schemaRenderers: Record<Type, SchemaRenderer> = {
 	array: ArrayField,
 	object: ObjectField,
 	picklist: PickListField,
-	unknown: ({ name, entrySchema }) => `Unknown field type for property ${name}: ${entrySchema.type}`,
+	unknown: ({ name, entrySchema }) => <p className="text-yellow-400 text-sm">Unknown field type for property {name}: {entrySchema.type}</p>,
 };
 
 function StringField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
@@ -337,7 +338,7 @@ function ObjectField({ name: parentName, path, node, original, onPatch, entrySch
 		return null;
 	}
 
-	const entries = getSchemaEntries(entrySchema);
+	const entries = getSchemaEntries(resolveSchema(entrySchema, node.valueOf()));
 
 	return entries.map(([name, entrySchema]) => {
 		const key = name;
@@ -704,8 +705,6 @@ function ResearchField({ name, node, original, onPatch, patchValue }: Parameters
 function EffectField({ path, name, node, original, patchValue, entrySchema, onPatch }: Parameters<SchemaRenderer>[0]) {
 	const { data = [], isLoading, isError, error } = useEffects();
 	const [filter, setFilter] = useState("");
-
-	console.log({ node, entrySchema });
 
 	if (node.isObject()) {
 		return (

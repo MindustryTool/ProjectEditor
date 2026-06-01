@@ -71,11 +71,37 @@ export function detectSchemaType(rawSchema: AnySchema): Type {
 	return getSchemaType(unwrapped);
 }
 
+export function resolveSchema(schema: AnySchema, value: unknown): AnySchema {
+	const s = schema as unknown as {
+		type: string;
+		pipe?: AnySchema[] | Array<{ type: string }>;
+		getter?: (val: unknown) => AnySchema;
+		wrapped?: AnySchema;
+	};
+
+	if (WRAPPER_TYPES.has(s.type) && s.wrapped) {
+		return resolveSchema(s.wrapped, value);
+	}
+
+	if (s.type === "lazy" && s.getter) {
+		return resolveSchema(s.getter(value), value);
+	}
+
+	if (Array.isArray(s.pipe) && s.pipe.length > 0) {
+		return resolveSchema(s.pipe[0] as AnySchema, value);
+	}
+
+	return schema;
+}
+
 export function getSchemaEntries(schema: AnySchema): [string, AnySchema][] {
 	schema = unwrapSchema(schema);
-	const s = schema as unknown as { type: string; entries?: Record<string, AnySchema> };
+	const s = schema as unknown as { type: string; entries?: Record<string, AnySchema>; pipe?: AnySchema[] };
 	if (s.type === "object" && s.entries) {
 		return Object.entries(s.entries) as [string, AnySchema][];
+	}
+	if (Array.isArray(s.pipe) && s.pipe.length > 0) {
+		return getSchemaEntries(s.pipe[0] as AnySchema);
 	}
 	return [];
 }

@@ -111,7 +111,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 				result.push({
 					path,
 					severity: Severity.error,
-					messageKey: "validation.content.invalidJson",
+					messageKey: "validation.content.invalid-field",
 					field,
 					messageParams: { error: field + ": " + issue.message },
 					startLine,
@@ -141,7 +141,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 						result.push({
 							path,
 							severity: Severity.error,
-							messageKey: "validation.content.invalidJson",
+							messageKey: "validation.content.invalid-field",
 							field: subIssue.path?.map((p) => p.key)?.join(".") || "",
 							messageParams: { error: subIssue.message },
 							startLine: subStartLine,
@@ -167,7 +167,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 				problems.push({
 					path,
 					severity: Severity.warning,
-					messageKey: "validation.content.invalidJson",
+					messageKey: "validation.content.unknown-field",
 					messageParams: { error: `Unknown field ${path}` },
 					startLine: field?.start.row ?? 1,
 					startColumn: field?.start.col ?? 1,
