@@ -856,8 +856,8 @@ function SchemaArrayItemEditor({
 					onChange(elementValue);
 					return;
 				}
-			} catch {
-				// fallback
+			} catch (error) {
+				console.error("Error parsing JSON:", error);
 			}
 			onChange(node.valueOf());
 		},

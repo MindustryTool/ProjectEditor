@@ -1,6 +1,8 @@
 import * as v from "valibot";
 import { MindustryHexColorSchema, SoundSchema, type SchemaFn } from "./base";
 
+const metadata = { type: "effect" };
+
 export const effectClasses = [
 	"ParticleEffect",
 	"MultiEffect",
@@ -58,7 +60,15 @@ const classSchemaMap: Record<EffectClass, () => v.ObjectSchema<v.ObjectEntries, 
 			lenTo: v.nullish(v.number(), 2),
 			cap: v.nullish(v.boolean(), true),
 		}),
-	MultiEffect: () => v.object({ effects: v.array(v.pipe(v.lazy(() => effectItemUnionSchema), v.metadata({ type: "effect" }))) }),
+	MultiEffect: () =>
+		v.object({
+			effects: v.array(
+				v.pipe(
+					v.lazy(() => effectItemUnionSchema),
+					v.metadata(metadata),
+				),
+			),
+		}),
 	ExplosionEffect: () =>
 		v.object({
 			waveColor: v.nullish(MindustryHexColorSchema),
@@ -79,14 +89,27 @@ const classSchemaMap: Record<EffectClass, () => v.ObjectSchema<v.ObjectEntries, 
 		}),
 	RadialEffect: () =>
 		v.object({
-			effect: v.nullish(v.pipe(v.lazy(() => effectItemUnionSchema), v.metadata({ type: "effect" }))),
+			effect: v.nullish(
+				v.pipe(
+					v.lazy(() => effectItemUnionSchema),
+					v.metadata(metadata),
+				),
+			),
 			rotationSpacing: v.nullish(v.number(), 90),
 			rotationOffset: v.nullish(v.number(), 0),
 			effectRotationOffset: v.nullish(v.number(), 0),
 			lengthOffset: v.nullish(v.number(), 0),
 			amount: v.nullish(v.number(), 4),
 		}),
-	SeqEffect: () => v.object({ effects: v.array(v.pipe(v.lazy(() => effectItemUnionSchema), v.metadata({ type: "effect" }))) }),
+	SeqEffect: () =>
+		v.object({
+			effects: v.array(
+				v.pipe(
+					v.lazy(() => effectItemUnionSchema),
+					v.metadata(metadata),
+				),
+			),
+		}),
 	SoundEffect: () =>
 		v.object({
 			sound: v.nullish(SoundSchema),
@@ -94,7 +117,12 @@ const classSchemaMap: Record<EffectClass, () => v.ObjectSchema<v.ObjectEntries, 
 			maxPitch: v.nullish(v.number(), 1.2),
 			minVolume: v.nullish(v.number(), 1),
 			maxVolume: v.nullish(v.number(), 1),
-			effect: v.nullish(v.pipe(v.lazy(() => effectItemUnionSchema), v.metadata({ type: "effect" }))),
+			effect: v.nullish(
+				v.pipe(
+					v.lazy(() => effectItemUnionSchema),
+					v.metadata(metadata),
+				),
+			),
 		}),
 	WaveEffect: () =>
 		v.object({
@@ -114,7 +142,12 @@ const classSchemaMap: Record<EffectClass, () => v.ObjectSchema<v.ObjectEntries, 
 		}),
 	WrapEffect: () =>
 		v.object({
-			effect: v.nullish(v.pipe(v.lazy(() => effectItemUnionSchema), v.metadata({ type: "effect" })), ""),
+			effect: v.nullish(
+				v.pipe(
+					v.lazy(() => effectItemUnionSchema),
+					v.metadata(metadata),
+				),
+			),
 			color: v.nullish(MindustryHexColorSchema),
 			rotation: v.nullish(v.number(), 0),
 		}),
@@ -123,25 +156,27 @@ const classSchemaMap: Record<EffectClass, () => v.ObjectSchema<v.ObjectEntries, 
 const effectItemUnionSchema = v.pipe(
 	v.lazy((input) => {
 		if (typeof input === "object" && input !== null && "type" in input) {
-			const type = (input as Record<string, unknown>).type as EffectClass;
+			const type = input.type as EffectClass;
+
 			const schemaFn = classSchemaMap[type];
+
 			if (schemaFn) {
 				return v.object({ ...effectBaseObjectSchema.entries, ...schemaFn().entries });
 			}
+
 			return effectBaseObjectSchema;
 		}
+
 		return v.pipe(v.string(), v.minLength(1), v.maxLength(127));
 	}),
-	v.metadata({ type: "effect" }),
+	v.metadata(metadata),
 );
 
-export const EffectSchema: SchemaFn = (value, _context) => {
-	return buildEffectSchema(value, _context);
+export const EffectSchema: SchemaFn = (value, context) => {
+	return buildEffectSchema(value, context);
 };
 
-const buildEffectSchema: SchemaFn = (value, _context) => {
-	const metadata = { type: "effect" };
-
+const buildEffectSchema: SchemaFn = (value) => {
 	if (value.isObject()) {
 		const type = value.get("type");
 
