@@ -23,9 +23,9 @@
         "@project/core": "workspace:*",
         "@project/fs": "workspace:*",
         "@project/hjson": "workspace:*",
+        "@project/schema": "workspace:*",
         "@project/state": "workspace:*",
         "@project/utils": "workspace:*",
-        "@project/schema": "workspace:*",
         "@project/zip": "workspace:*",
         "@tailwindcss/vite": "catalog:",
         "@tanstack/react-devtools": "catalog:",
@@ -55,6 +55,7 @@
         "tailwind-merge": "catalog:",
         "tailwindcss": "catalog:",
         "tw-animate-css": "catalog:",
+        "usehooks-ts": "^3.1.1",
         "valibot": "catalog:",
         "zustand": "catalog:"
     },

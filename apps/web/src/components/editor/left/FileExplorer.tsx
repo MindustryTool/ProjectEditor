@@ -26,6 +26,7 @@ import { Label } from "~/components/ui/label";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "~/components/ui/dropdown-menu";
 import { InputGroup, InputGroupInput, InputGroupAddon } from "#/components/ui/input-group";
 import { TemplateSelector } from "./TemplateSelector";
+import { useLocalStorage } from "usehooks-ts";
 
 interface FileExplorerContextValue {
 	selectedPath: string | null;
@@ -303,7 +304,7 @@ function TreeNodeItem({ node, depth = 0 }: TreeNodeItemProps) {
 	const context = useCurrentProject();
 	const { selectedPath, editingPath, onSelect, onEditingPathChange, onDeleteRequest, onCreateRequest, totalIssueCount, projectId } =
 		useFileExplorer();
-	const [expanded, setExpanded] = useState(node.path === "/");
+	const [expanded, setExpanded] = useLocalStorage<boolean>(node.path, node.path === "/");
 	const currentPath = node.path === "/" ? "" : node.path;
 	const isSelected = selectedPath === currentPath;
 	const isFolder = node.type === "folder";
