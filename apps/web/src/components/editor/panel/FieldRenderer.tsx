@@ -12,11 +12,11 @@ import { useItems } from "#/hooks/use-items";
 import { useFileString, useValidationStore } from "@project/state";
 import { type Research } from "@project/schema";
 import { HJSON } from "@project/hjson";
-import { HjsonObjectNode } from "@project/hjson";
+import type { HjsonObjectNode } from "@project/hjson";
 import { HjsonNode, HjsonValueNode, HjsonArrayNode } from "@project/hjson";
 import { ChevronsUpDown, Plus, Search, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
-import React, { useCallback, useState, type ReactNode } from "react";
+import React, { useCallback, useMemo, useState, type ReactNode } from "react";
 import {
 	resolveSchema,
 	detectSchemaType,
@@ -41,7 +41,7 @@ import type { SchemaFn } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/components/ui/collapsible";
 import { Separator } from "#/components/ui/separator";
-import type { Type } from "../../../../../../packages/schema/src/schema-utils";
+import type { Type } from "@project/schema";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 
 interface FieldsRendererProps {
@@ -133,6 +133,7 @@ export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 					onPatch={write}
 					patchValue={patchValue}
 					entrySchema={entrySchema as AnySchema}
+					jsonPath={name}
 				/>
 				{issue?.map((issue, index) => (
 					<span key={(issue.code || "") + index} className="text-red-400 text-xs">
@@ -152,6 +153,7 @@ type SchemaRenderer = (props: {
 	onPatch: (newContent: string) => void;
 	patchValue: (newRawValue: unknown) => void;
 	entrySchema: AnySchema;
+	jsonPath?: string;
 }) => ReactNode;
 
 const schemaRenderers: Record<Type, SchemaRenderer> = {
@@ -164,7 +166,11 @@ const schemaRenderers: Record<Type, SchemaRenderer> = {
 	array: ArrayField,
 	object: ObjectField,
 	picklist: PickListField,
-	unknown: ({ name, entrySchema }) => <p className="text-yellow-400 text-sm">Unknown field type for property {name}: {entrySchema.type}</p>,
+	unknown: ({ name, entrySchema }) => (
+		<p className="text-yellow-400 text-sm">
+			Unknown field type for property {name}: {entrySchema.type}
+		</p>
+	),
 };
 
 function StringField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
@@ -267,7 +273,7 @@ function ColorField({ name, node, patchValue, entrySchema }: Parameters<SchemaRe
 	);
 }
 
-function ArrayField({ path, name, node, original, onPatch, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
+function ArrayField({ path, name, node, original, onPatch, patchValue, entrySchema, jsonPath }: Parameters<SchemaRenderer>[0]) {
 	if (!node.isArray()) {
 		patchValue([]);
 		return null;
@@ -310,6 +316,8 @@ function ArrayField({ path, name, node, original, onPatch, patchValue, entrySche
 									itemType={itemType}
 									itemSchema={itemSchema}
 									onChange={(v) => handleItemChange(index, v)}
+									original={original}
+									jsonPath={jsonPath ? `${jsonPath}[${index}]` : `[${index}]`}
 								/>
 								<Button
 									className="absolute top-1 right-1 text-destructive"
@@ -331,7 +339,7 @@ function ArrayField({ path, name, node, original, onPatch, patchValue, entrySche
 	);
 }
 
-function ObjectField({ name: parentName, path, node, original, onPatch, entrySchema }: Parameters<SchemaRenderer>[0]) {
+function ObjectField({ name: parentName, path, node, original, onPatch, entrySchema, jsonPath }: Parameters<SchemaRenderer>[0]) {
 	const issues = useValidationStore((state) => state.results.resultsByPath[path]);
 
 	if (!node.isObject()) {
@@ -405,6 +413,7 @@ function ObjectField({ name: parentName, path, node, original, onPatch, entrySch
 					onPatch={onPatch}
 					patchValue={patchValue}
 					entrySchema={entrySchema as AnySchema}
+					jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
 				/>
 				{issue?.map((issue, index) => (
 					<span key={(issue.code || "") + index} className="text-red-400 text-xs">
@@ -702,7 +711,7 @@ function ResearchField({ name, node, original, onPatch, patchValue }: Parameters
 	);
 }
 
-function EffectField({ path, name, node, original, patchValue, entrySchema, onPatch }: Parameters<SchemaRenderer>[0]) {
+function EffectField({ path, name, node, original, patchValue, entrySchema, onPatch, jsonPath }: Parameters<SchemaRenderer>[0]) {
 	const { data = [], isLoading, isError, error } = useEffects();
 	const [filter, setFilter] = useState("");
 
@@ -737,6 +746,7 @@ function EffectField({ path, name, node, original, patchValue, entrySchema, onPa
 										entrySchema={entrySchema}
 										original={original}
 										onPatch={onPatch}
+										jsonPath={jsonPath}
 									/>
 									<Separator />
 								</div>
@@ -827,17 +837,49 @@ function SchemaArrayItemEditor({
 	itemType,
 	itemSchema,
 	onChange,
+	original = "",
+	jsonPath,
 }: {
 	path: string;
 	value: unknown;
 	itemType: Type | null;
 	itemSchema: AnySchema | null;
 	onChange: (v: unknown) => void;
+	original?: string;
+	jsonPath?: string;
 }) {
 	const renderer = getSchemaRenderer(itemType);
-	const node =
-		value instanceof HjsonNode ? value : new HjsonValueNode<unknown>(value, { row: 0, col: 0, index: 0 }, { row: 0, col: 0, index: 0 });
+	const node = useMemo(
+		() =>
+			value instanceof HjsonNode
+				? value
+				: new HjsonValueNode<unknown>(value, { row: 0, col: 0, index: 0 }, { row: 0, col: 0, index: 0 }),
+		[value],
+	);
+
 	const name = itemType || "string";
+
+	const handleOnPatch = useCallback(
+		(newContent: string) => {
+			if (!jsonPath) {
+				onChange(node.valueOf());
+				return;
+			}
+			try {
+				const root = HJSON.parseStructured(newContent);
+				const elementInfo = root.path(jsonPath);
+				if (elementInfo) {
+					const elementValue = elementInfo.value instanceof HjsonNode ? elementInfo.value.valueOf() : elementInfo.value;
+					onChange(elementValue);
+					return;
+				}
+			} catch {
+				// fallback
+			}
+			onChange(node.valueOf());
+		},
+		[onChange, node, jsonPath],
+	);
 
 	return (
 		<ErrorBoundary key={name}>
@@ -845,10 +887,11 @@ function SchemaArrayItemEditor({
 				path,
 				name,
 				node,
-				original: "",
-				onPatch: () => {},
+				original,
+				onPatch: handleOnPatch,
 				patchValue: (v) => onChange(v),
 				entrySchema: itemSchema ?? (null as unknown as AnySchema),
+				jsonPath,
 			})}
 		</ErrorBoundary>
 	);

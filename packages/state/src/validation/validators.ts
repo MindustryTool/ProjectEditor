@@ -5,7 +5,7 @@ import { HJSON, HJSONError, HjsonObjectNode } from "@project/hjson";
 import { ItemHjsonSchema, LiquidHjsonSchema, ModHjsonSchema, SectorHjsonSchema, StatusHjsonSchema } from "@project/schema";
 import * as v from "valibot";
 import { findUnknownProperties } from "./utils";
-import type { SchemaFn } from "../../../schema/src/base";
+import type { SchemaFn } from "@project/schema";
 
 const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 	const trimmed = content.trim();

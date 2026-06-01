@@ -22,5 +22,13 @@ export { StatusHjsonSchema } from "./status";
 
 export { LiquidHjsonSchema } from "./liquid";
 
-export { resolveSchema, unwrapSchema, hasNullishWrapper, detectSchemaType, getSchemaEntries, getArrayItemSchema, getSchemaMetadata } from "./schema-utils";
-export type { AnySchema, SchemaMetadata } from "./schema-utils";
+export {
+	resolveSchema,
+	unwrapSchema,
+	hasNullishWrapper,
+	detectSchemaType,
+	getSchemaEntries,
+	getArrayItemSchema,
+	getSchemaMetadata,
+} from "./schema-utils";
+export type { AnySchema, SchemaMetadata, Type } from "./schema-utils";

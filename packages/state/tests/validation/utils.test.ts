@@ -373,6 +373,171 @@ describe("findUnknownProperties", () => {
     });
   });
 
+  describe("lazy schema", () => {
+    it("resolves v.lazy returning an object and detects unknown properties", () => {
+      const schema = v.object({
+        effect: v.lazy(() => v.object({ type: v.string() })),
+      });
+      const value = { effect: { type: "foo", extra: true } };
+      expect(findUnknownProperties(schema, value)).toEqual(["effect.extra"]);
+    });
+
+    it("returns [] when lazy schema matches all keys", () => {
+      const schema = v.object({
+        cfg: v.lazy(() => v.object({ x: v.string(), y: v.number() })),
+      });
+      const value = { cfg: { x: "hello", y: 42 } };
+      expect(findUnknownProperties(schema, value)).toEqual([]);
+    });
+
+    it("resolves v.lazy wrapped in v.pipe with metadata", () => {
+      const schema = v.object({
+        effect: v.pipe(
+          v.lazy(() => v.object({ a: v.number() })),
+          v.metadata({ type: "custom" }),
+        ),
+      });
+      const value = { effect: { a: 1, extra: true } };
+      expect(findUnknownProperties(schema, value)).toEqual(["effect.extra"]);
+    });
+
+    it("resolves lazy schemas that dispatch on value (effect-like pattern)", () => {
+      const schema = v.object({
+        effect: v.lazy((input) => {
+          if (typeof input === "object" && input !== null && "type" in input) {
+            const t = (input as { type: string }).type;
+            if (t === "ParticleEffect") {
+              return v.object({
+                type: v.literal("ParticleEffect"),
+                particles: v.number(),
+              });
+            }
+            if (t === "ExplosionEffect") {
+              return v.object({
+                type: v.literal("ExplosionEffect"),
+                radius: v.number(),
+              });
+            }
+          }
+          return v.string();
+        }),
+      });
+      const value = {
+        effect: { type: "ParticleEffect", particles: 5, extra: true },
+      };
+      expect(findUnknownProperties(schema, value)).toEqual(["effect.extra"]);
+    });
+
+    it("returns [] for dispatch-based lazy with all known keys", () => {
+      const schema = v.object({
+        effect: v.lazy((input) => {
+          if (typeof input === "object" && input !== null && "type" in input) {
+            const t = (input as { type: string }).type;
+            if (t === "ExplosionEffect") {
+              return v.object({
+                type: v.literal("ExplosionEffect"),
+                radius: v.number(),
+              });
+            }
+          }
+          return v.string();
+        }),
+      });
+      const value = { effect: { type: "ExplosionEffect", radius: 10 } };
+      expect(findUnknownProperties(schema, value)).toEqual([]);
+    });
+
+    it("resolves lazy schemas inside arrays", () => {
+      const schema = v.object({
+        effects: v.array(
+          v.lazy(() => v.object({ name: v.string() })),
+        ),
+      });
+      const value = {
+        effects: [
+          { name: "a", extra: true },
+          { name: "b" },
+        ],
+      };
+      expect(findUnknownProperties(schema, value)).toEqual(["effects[0].extra"]);
+    });
+
+    it("resolves nested lazy schemas (lazy inside lazy)", () => {
+      const schema = v.object({
+        outer: v.lazy(() =>
+          v.object({
+            inner: v.lazy(() => v.object({ val: v.number() })),
+          }),
+        ),
+      });
+      const value = { outer: { inner: { val: 1, extra: true } } };
+      expect(findUnknownProperties(schema, value)).toEqual(["outer.inner.extra"]);
+    });
+
+    it("resolves lazy schema returning null (handles null value)", () => {
+      const schema = v.object({
+        field: v.nullable(v.lazy(() => v.object({ a: v.string() }))),
+      });
+      expect(findUnknownProperties(schema, { field: null })).toEqual([]);
+    });
+
+    it("resolves lazy schema from array item schema (effect array pattern)", () => {
+      const particleSchema = v.object({
+        type: v.literal("ParticleEffect"),
+        particles: v.number(),
+      });
+      const explosionSchema = v.object({
+        type: v.literal("ExplosionEffect"),
+        radius: v.number(),
+      });
+      const effectSchema = v.lazy((input) => {
+        if (typeof input === "object" && input !== null && "type" in input) {
+          const t = (input as { type: string }).type;
+          if (t === "ParticleEffect") return particleSchema;
+          if (t === "ExplosionEffect") return explosionSchema;
+        }
+        return v.string();
+      });
+      const schema = v.object({
+        effects: v.array(effectSchema),
+      });
+      const value = {
+        effects: [
+          { type: "ParticleEffect", particles: 5, extra: true },
+          { type: "ExplosionEffect", radius: 10, unknownField: "x" },
+        ],
+      };
+      const result = findUnknownProperties(schema, value);
+      expect(result).toContain("effects[0].extra");
+      expect(result).toContain("effects[1].unknownField");
+      expect(result).toHaveLength(2);
+    });
+
+    it("recurses into lazy field and detects unknown at multiple levels", () => {
+      const schema = v.object({
+        config: v.lazy(() =>
+          v.object({
+            settings: v.object({
+              nested: v.lazy(() => v.object({ flag: v.boolean() })),
+            }),
+          }),
+        ),
+      });
+      const value = {
+        config: {
+          settings: {
+            nested: { flag: true, extra: "surprise" },
+            extra2: 1,
+          },
+        },
+      };
+      const result = findUnknownProperties(schema, value);
+      expect(result).toContain("config.settings.nested.extra");
+      expect(result).toContain("config.settings.extra2");
+      expect(result).toHaveLength(2);
+    });
+  });
+
   describe("path construction", () => {
     it("joins object keys with dots", () => {
       const schema = v.object({

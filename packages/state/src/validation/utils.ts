@@ -1,4 +1,5 @@
 import type * as v from "valibot";
+import { resolveSchema } from "@project/schema";
 
 type AnySchema =
 	| v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>
@@ -48,6 +49,11 @@ export function findUnknownProperties(schema: AnySchema, value: unknown, path = 
 	// Union: can't determine which variant, skip
 	if (s.type === "union" && s.options) {
 		return unknown;
+	}
+
+	// Lazy schema: resolve via getter and recurse
+	if (s.type === "lazy") {
+		return findUnknownProperties(resolveSchema(schema, value), value, path);
 	}
 
 	// Object schema

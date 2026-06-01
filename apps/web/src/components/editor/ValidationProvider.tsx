@@ -123,7 +123,7 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 				}
 			},
 		}),
-		[contents],
+		[contents, projectId],
 	);
 
 	useEffect(() => {
