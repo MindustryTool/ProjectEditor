@@ -1,5 +1,15 @@
 import { useEffect, useRef, useCallback } from "react";
-import { useFileStore, isDirty, isError, selectEntry, selectIsSaving, getEntry, useProjectSession, getWriteQueue, disposeWriteQueue } from "@project/state";
+import {
+	useFileStore,
+	isDirty,
+	isError,
+	selectEntry,
+	selectIsSaving,
+	getEntry,
+	useProjectSession,
+	getWriteQueue,
+	disposeWriteQueue,
+} from "@project/state";
 
 export interface UseFileResult<T> {
 	data: T | null;

@@ -14,9 +14,13 @@ function EditorWithMonaco({ path }: { path: string }) {
 	const { data, write } = useFileString(path);
 	const language = getLanguageFromPath(path);
 
+	if (data === null) {
+		return <div>File not found</div>;
+	}
+
 	return (
 		<Suspense fallback={<div className="flex h-full items-center justify-center text-xs text-muted-foreground">Loading editor...</div>}>
-            <MonacoEditor path={path} value={data ?? ""} onChange={write} language={language} />
+			<MonacoEditor path={path} value={data} onChange={write} language={language} />
 		</Suspense>
 	);
 }
