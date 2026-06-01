@@ -17,7 +17,6 @@ export type EffectClass = (typeof effectClasses)[number];
 const classSchemaMap: Record<EffectClass, SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>> = {
 	ParticleEffect: () =>
 		v.object({
-			type: v.literal("ParticleEffect"),
 			colorFrom: v.nullish(MindustryHexColorSchema),
 			colorTo: v.nullish(MindustryHexColorSchema),
 			particles: v.nullish(v.pipe(v.number(), v.minValue(1)), 6),
@@ -53,10 +52,9 @@ const classSchemaMap: Record<EffectClass, SchemaFn<v.ObjectSchema<v.ObjectEntrie
 			lenTo: v.nullish(v.number(), 2),
 			cap: v.nullish(v.boolean(), true),
 		}),
-	MultiEffect: (value, context) => v.object({ type: v.literal("MultiEffect"), effects: EffectSchema(value, context) }),
+	MultiEffect: (value, context) => v.object({ effects: v.array(buildEffectSchema(value.get("effects"), context)) }),
 	ExplosionEffect: () =>
 		v.object({
-			type: v.literal("ExplosionEffect"),
 			waveColor: v.nullish(MindustryHexColorSchema),
 			smokeColor: v.nullish(MindustryHexColorSchema),
 			sparkColor: v.nullish(MindustryHexColorSchema),
@@ -75,28 +73,25 @@ const classSchemaMap: Record<EffectClass, SchemaFn<v.ObjectSchema<v.ObjectEntrie
 		}),
 	RadialEffect: (value, context) =>
 		v.object({
-			type: v.literal("RadialEffect"),
-			effect: v.nullish(EffectSchema(value, context)),
+			effect: v.nullish(buildEffectSchema(value.get("effect"), context)),
 			rotationSpacing: v.nullish(v.number(), 90),
 			rotationOffset: v.nullish(v.number(), 0),
 			effectRotationOffset: v.nullish(v.number(), 0),
 			lengthOffset: v.nullish(v.number(), 0),
 			amount: v.nullish(v.number(), 4),
 		}),
-	SeqEffect: (value, context) => v.object({ type: v.literal("SeqEffect"), effects: v.array(EffectSchema(value, context)) }),
+	SeqEffect: (value, context) => v.object({ effects: v.array(buildEffectSchema(value.get("effects"), context)) }),
 	SoundEffect: (value, context) =>
 		v.object({
-			type: v.literal("SoundEffect"),
 			sound: v.nullish(SoundSchema),
 			minPitch: v.nullish(v.number(), 0.8),
 			maxPitch: v.nullish(v.number(), 1.2),
 			minVolume: v.nullish(v.number(), 1),
 			maxVolume: v.nullish(v.number(), 1),
-			effect: v.nullish(EffectSchema(value, context)),
+			effect: v.nullish(buildEffectSchema(value.get("effect"), context)),
 		}),
 	WaveEffect: () =>
 		v.object({
-			type: v.literal("WaveEffect"),
 			colorFrom: v.nullish(MindustryHexColorSchema),
 			colorTo: v.nullish(MindustryHexColorSchema),
 			lightColor: v.nullish(MindustryHexColorSchema),
@@ -113,17 +108,18 @@ const classSchemaMap: Record<EffectClass, SchemaFn<v.ObjectSchema<v.ObjectEntrie
 		}),
 	WrapEffect: (value, context) =>
 		v.object({
-			type: v.literal("WrapEffect"),
-			effect: v.nullish(EffectSchema(value, context)),
+			effect: v.nullish(buildEffectSchema(value.get("effect"), context), ""),
 			color: v.nullish(MindustryHexColorSchema),
 			rotation: v.nullish(v.number(), 0),
 		}),
 };
 
 export const EffectSchema: SchemaFn = (value, context) => {
-	if (value.isMissing()) {
-		return v.null();
-	}
+	return buildEffectSchema(value, context);
+};
+
+const buildEffectSchema: SchemaFn = (value, context) => {
+	const metadata = { type: "effect" };
 
 	if (value.isObject()) {
 		const baseSchema = v.object({
@@ -141,15 +137,11 @@ export const EffectSchema: SchemaFn = (value, context) => {
 
 		if (type.isString() && classSchemaMap[type.valueOf() as EffectClass]) {
 			const schema = classSchemaMap[type.valueOf() as EffectClass];
-			return v.intersect([baseSchema, schema(value, context)]);
+			return v.pipe(v.object({ ...baseSchema.entries, ...schema(value, context).entries }), v.metadata(metadata));
 		}
 
-		return baseSchema;
+		return v.pipe(baseSchema, v.metadata(metadata));
 	}
 
-	if (value.isArray()) {
-		return v.array(EffectSchema(value, context));
-	}
-
-	return v.pipe(v.string(), v.minLength(1), v.maxLength(127));
+	return v.pipe(v.string(), v.minLength(1), v.maxLength(127), v.metadata(metadata));
 };

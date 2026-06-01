@@ -1,6 +1,6 @@
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
-import { unwrapSchema, hasNullishWrapper, detectSchemaType, getSchemaEntries, getArrayItemSchema, getSchemaMetadata, type AnySchema, MindustryHexColorSchema, ResearchSchema, ContentNameSchema } from "@project/schema";
+import { unwrapSchema, hasNullishWrapper, detectSchemaType, getSchemaEntries, getArrayItemSchema, getSchemaMetadata, type AnySchema, MindustryHexColorSchema, ContentNameSchema } from "@project/schema";
 
 describe("unwrapSchema", () => {
 	it("returns the same schema for non-wrapped types", () => {
@@ -103,12 +103,28 @@ describe("detectSchemaType", () => {
 		expect(detectSchemaType(wrapped as AnySchema)).toBe("color");
 	});
 
-	it("detects research by identity", () => {
-		expect(detectSchemaType(ResearchSchema as AnySchema)).toBe("research");
+	it("detects research via metadata", () => {
+		const researchPipe = v.pipe(v.string(), v.metadata({ type: "research" }));
+		expect(detectSchemaType(researchPipe as AnySchema)).toBe("research");
+	});
+
+	it("detects research through nullish wrapper via metadata", () => {
+		const wrapped = v.nullish(v.pipe(v.string(), v.metadata({ type: "research" })));
+		expect(detectSchemaType(wrapped as AnySchema)).toBe("research");
+	});
+
+	it("detects effect via metadata", () => {
+		const effectPipe = v.pipe(v.string(), v.metadata({ type: "effect" }));
+		expect(detectSchemaType(effectPipe as AnySchema)).toBe("effect");
 	});
 
 	it("does not detect ContentNameSchema as color", () => {
 		expect(detectSchemaType(ContentNameSchema as AnySchema)).not.toBe("color");
+	});
+
+	it("falls back to base type when metadata type is not in known types", () => {
+		const customMetadata = v.pipe(v.number(), v.metadata({ type: "custom_widget" }));
+		expect(detectSchemaType(customMetadata as AnySchema)).toBe("number");
 	});
 
 	it("returns 'unknown' for a custom schema", () => {

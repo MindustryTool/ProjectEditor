@@ -12,6 +12,9 @@ export const ContentNameSchema = v.pipe(
 export const MindustryHexColorSchema = v.pipe(
 	v.string(),
 	v.regex(/^[#]{0,1}(?:[0-9a-fA-F]{1,6}|[0-9a-fA-F]{8})$/, "Must be a valid hex color"),
+    v.metadata({
+        type: "color",
+    })
 );
 
 export const ItemRequirementSchema = v.pipe(
@@ -57,6 +60,9 @@ export const ResearchSchema: SchemaFn = (_value, context) =>
 					robot: v.nullish(v.boolean()),
 				}),
 			]),
+            v.metadata({
+                type: "research",
+            }),
 			v.rawCheck(({ dataset, addIssue }) => {
 				if (dataset.typed) {
 					const value = dataset.value;

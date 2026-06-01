@@ -425,9 +425,6 @@ importers:
       '@project/config':
         specifier: workspace:*
         version: link:../config
-      '@project/schema':
-        specifier: workspace:*
-        version: link:../schema
       '@project/utils':
         specifier: workspace:*
         version: link:../utils

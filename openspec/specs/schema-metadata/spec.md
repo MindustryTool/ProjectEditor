@@ -24,7 +24,7 @@ The system SHALL provide a function `getSchemaMetadata(schema)` that extracts me
 - **THEN** the function SHALL return the metadata from the last `v.metadata()` action
 
 ### Requirement: Detect pipe schema with metadata in type detection
-The system SHALL correctly detect the base type of a pipe schema that also has metadata.
+The system SHALL correctly detect the base type of a pipe schema that also has metadata, **including metadata-based special type detection**.
 
 #### Scenario: Pipe with metadata still detects as string
 - **WHEN** `v.pipe(v.string(), v.metadata({ visibleWhen: { field: "x", value: true } }))` is passed to `detectSchemaType`
@@ -33,3 +33,7 @@ The system SHALL correctly detect the base type of a pipe schema that also has m
 #### Scenario: Pipe with metadata still detects as number
 - **WHEN** `v.pipe(v.number(), v.minValue(0), v.metadata({ visibleWhen: { field: "x", value: true } }))` is passed to `detectSchemaType`
 - **THEN** the returned type SHALL be `"number"`
+
+#### Scenario: Pipe with metadata type annotation detects as special type
+- **WHEN** `v.pipe(MindustryHexColorSchema, v.metadata({ visibleWhen: { field: "gas", value: true } }))` is passed to `detectSchemaType`
+- **THEN** the returned type SHALL be `"color"` (inner schema's metadata type takes precedence)

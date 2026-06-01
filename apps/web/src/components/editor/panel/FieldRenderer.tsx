@@ -9,12 +9,12 @@ import { Input } from "#/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { useItems } from "#/hooks/use-items";
-import { useValidationStore } from "@project/state";
+import { useFileString, useValidationStore } from "@project/state";
 import { type Research } from "@project/schema";
 import { HJSON } from "@project/hjson";
-import type { HjsonObjectNode } from "@project/hjson";
+import { HjsonObjectNode } from "@project/hjson";
 import { HjsonNode, HjsonValueNode, HjsonArrayNode } from "@project/hjson";
-import { Plus, Search, X } from "lucide-react";
+import { ChevronsUpDown, Plus, Search, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
 import React, { useCallback, useState, type ReactNode } from "react";
 import {
@@ -36,22 +36,45 @@ import { useEffects } from "#/hooks/use-effects";
 import { Spinner } from "#/components/ui/spinner";
 import { ErrorDisplay } from "#/components/ui/error-display";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
+import type { SchemaFn } from "@project/schema";
+import { useProjectContext } from "#/components/editor/ProjectProvider";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/components/ui/collapsible";
+import { Separator } from "#/components/ui/separator";
+import type { Type } from "../../../../../../packages/schema/src/schema-utils";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 
 interface FieldsRendererProps {
 	path: string;
-	schema: AnySchema;
-	node: HjsonObjectNode;
-	original: string;
-	onPatch: (newContent: string) => void;
+	schema: AnySchema | SchemaFn;
 }
 
-export function FieldsRenderer({ path, schema, node, original, onPatch }: FieldsRendererProps) {
+export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
+	const { data, isLoading, write } = useFileString(path);
+	const { contents } = useProjectContext();
 	const issues = useValidationStore((state) => state.results.resultsByPath[path]);
-	const entries = getSchemaEntries(schema);
+
+	if (isLoading || data === null) {
+		return null;
+	}
+
+	let node = null;
+	try {
+		node = HJSON.parseStructured(data);
+	} catch (error) {
+		console.error("Error parsing JSON:", error);
+	}
+
+	if (node === null || !node.isObject()) {
+		return null;
+	}
+
+	const resolvedSchema = typeof schema === "function" ? schema(node, contents) : schema;
+	const entries = getSchemaEntries(resolvedSchema);
 
 	return entries.map(([name, entrySchema]) => {
 		const key = name + path;
 		const type = detectSchemaType(entrySchema);
+
 		const Renderer = schemaRenderers[type] as SchemaRenderer | undefined;
 
 		if (Renderer === undefined) {
@@ -79,39 +102,41 @@ export function FieldsRenderer({ path, schema, node, original, onPatch }: Fields
 
 		const patchValue = (newRawValue: unknown) => {
 			if (v.getDefault(entrySchema) === newRawValue) {
-				const newContent = node.removeField(original, name);
-				onPatch(newContent);
+				const newContent = node.removeField(data, name);
+				write(newContent);
 				return;
 			}
 
 			if (newRawValue === undefined || newRawValue === null || (typeof newRawValue === "number" && isNaN(newRawValue))) {
 				if (isNullable) {
-					const newContent = node.removeField(original, name);
-					onPatch(newContent);
+					const newContent = node.removeField(data, name);
+					write(newContent);
 					return;
 				}
-				const newContent = node.patchField(original, name, "null");
-				onPatch(newContent);
+				const newContent = node.patchField(data, name, "null");
+				write(newContent);
 				return;
 			}
 			const serialized = HJSON.stringify(newRawValue);
-			const newContent = node.patchField(original, name, serialized);
-			onPatch(newContent);
+			const newContent = node.patchField(data, name, serialized);
+			write(newContent);
 		};
 
 		return (
 			<ErrorBoundary key={key}>
 				<Renderer
+					path={path}
 					name={name}
 					node={childNode}
-					original={original}
-					onPatch={onPatch}
+					original={data}
+					onPatch={write}
 					patchValue={patchValue}
 					entrySchema={entrySchema as AnySchema}
 				/>
 				{issue?.map((issue, index) => (
-					<span key={(issue.code || "") + index} className="text-red-400">
+					<span key={(issue.code || "") + index} className="text-red-400 text-xs">
 						{issue.code}
+						{issue.messageKey}
 					</span>
 				)) || null}
 			</ErrorBoundary>
@@ -120,6 +145,7 @@ export function FieldsRenderer({ path, schema, node, original, onPatch }: Fields
 }
 type SchemaRenderer = (props: {
 	name: string;
+	path: string;
 	node: HjsonNode;
 	original: string;
 	onPatch: (newContent: string) => void;
@@ -127,7 +153,7 @@ type SchemaRenderer = (props: {
 	entrySchema: AnySchema;
 }) => ReactNode;
 
-const schemaRenderers: Record<string, SchemaRenderer> = {
+const schemaRenderers: Record<Type, SchemaRenderer> = {
 	string: StringField,
 	number: NumberField,
 	boolean: BooleanField,
@@ -136,6 +162,8 @@ const schemaRenderers: Record<string, SchemaRenderer> = {
 	effect: EffectField,
 	array: ArrayField,
 	object: ObjectField,
+	picklist: PickListField,
+	unknown: ({ name, entrySchema }) => `Unknown field type for property ${name}: ${entrySchema.type}`,
 };
 
 function StringField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
@@ -174,8 +202,41 @@ function BooleanField({ name, node, patchValue, entrySchema }: Parameters<Schema
 	);
 }
 
+function PickListField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
+	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "";
+
+	if ("options" in entrySchema && Array.isArray(entrySchema.options)) {
+		const options = entrySchema.options.map((v) => String(v));
+
+		return (
+			<FormField>
+				<FormLabel>{name}</FormLabel>
+				<FormControl>
+					<Select value={value} onValueChange={patchValue}>
+						<SelectTrigger className="w-full">
+							<SelectValue placeholder="None (empty file)" />
+						</SelectTrigger>
+						<SelectContent position="popper">
+							<SelectGroup>
+								{options.map((option) => (
+									<SelectItem key={option} value={option}>
+										{option}
+									</SelectItem>
+								))}
+							</SelectGroup>
+						</SelectContent>
+					</Select>
+				</FormControl>
+			</FormField>
+		);
+	}
+
+	throw new Error(`Unknown option ${value}, this should not happen`);
+}
+
 function ColorField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
-	let value = node.isString() ? node.valueOf() : v.getDefault(entrySchema);
+	let value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "333333";
+
 	value = value?.startsWith("#") ? value : "#" + value;
 
 	return (
@@ -205,29 +266,32 @@ function ColorField({ name, node, patchValue, entrySchema }: Parameters<SchemaRe
 	);
 }
 
-function ArrayField({ name, node, original, onPatch, entrySchema }: Parameters<SchemaRenderer>[0]) {
-	if (!node.isArray()) return null;
-	const arrNode = node as HjsonArrayNode;
-	const items = arrNode.elements();
+function ArrayField({ path, name, node, original, onPatch, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
+	if (!node.isArray()) {
+		patchValue([]);
+		return null;
+	}
+
+	const items = node.elements();
 	const itemSchema = getArrayItemSchema(entrySchema);
 	const itemType = itemSchema ? detectSchemaType(itemSchema) : null;
 
-	function handleRemove(index: number) {
-		const newContent = arrNode.removeElement(original, index);
+	const handleRemove = (index: number) => {
+		const newContent = node.removeElement(original, index);
 		onPatch(newContent);
-	}
+	};
 
-	function handleItemChange(index: number, rawValue: unknown) {
+	const handleItemChange = (index: number, rawValue: unknown) => {
 		const serialized = HJSON.stringify(rawValue);
-		const newContent = arrNode.patchElement(original, index, serialized);
+		const newContent = node.patchElement(original, index, serialized);
 		onPatch(newContent);
-	}
+	};
 
-	function handleAdd() {
+	const handleAdd = () => {
 		const serialized = itemSchema ? HJSON.stringify(v.getDefault(itemSchema)) : '""';
-		const newContent = arrNode.insertElement(original, items.length, serialized);
+		const newContent = node.insertElement(original, items.length, serialized);
 		onPatch(newContent);
-	}
+	};
 
 	return (
 		<FormField>
@@ -236,18 +300,25 @@ function ArrayField({ name, node, original, onPatch, entrySchema }: Parameters<S
 				<div className="flex flex-col gap-2">
 					{items.length === 0 && <span className="text-muted-foreground text-sm italic">(empty)</span>}
 					{items.map((el, index) => (
-						<div key={index} className="flex items-center gap-2">
-							<div className="flex-1">
+						<div key={index} className="flex gap-2">
+							<div className="flex-1 p-2 border rounded-md relative">
+								<span className="font-semibold text-sm">{index + 1}</span>
 								<SchemaArrayItemEditor
+									path={path}
 									value={el.value}
 									itemType={itemType}
 									itemSchema={itemSchema}
 									onChange={(v) => handleItemChange(index, v)}
 								/>
+								<Button
+									className="absolute top-1 right-1 text-destructive"
+									size="icon-sm"
+									variant="ghost"
+									onClick={() => handleRemove(index)}
+								>
+									<X />
+								</Button>
 							</div>
-							<Button className="size-9 shrink-0" type="button" variant="outline" onClick={() => handleRemove(index)}>
-								<X />
-							</Button>
 						</div>
 					))}
 					<Button type="button" variant="outline" size="sm" onClick={handleAdd}>
@@ -259,20 +330,90 @@ function ArrayField({ name, node, original, onPatch, entrySchema }: Parameters<S
 	);
 }
 
-function ObjectField({ name, node, original, onPatch, entrySchema }: Parameters<SchemaRenderer>[0]) {
-	if (!node.isObject()) return null;
-	const objNode = node as HjsonObjectNode;
+function ObjectField({ name: parentName, path, node, original, onPatch, entrySchema }: Parameters<SchemaRenderer>[0]) {
+	const issues = useValidationStore((state) => state.results.resultsByPath[path]);
 
-	return (
-		<FormField>
-			<FormLabel>{name}</FormLabel>
-			<FormControl>
-				<div className="pl-4 border-l-2 border-border space-y-2">
-					<FieldsRenderer path={name} schema={entrySchema} node={objNode} original={original} onPatch={onPatch} />
-				</div>
-			</FormControl>
-		</FormField>
-	);
+	if (!node.isObject()) {
+		return null;
+	}
+
+	const entries = getSchemaEntries(entrySchema);
+
+	return entries.map(([name, entrySchema]) => {
+		const key = name;
+		const type = detectSchemaType(entrySchema);
+
+		const Renderer = schemaRenderers[type] as SchemaRenderer | undefined;
+
+		if (Renderer === undefined) {
+			return (
+				<FormControl>
+					<FormLabel>{name}</FormLabel>
+					<span key={key} className="text-yellow-400 text-sm">
+						Unknown field type {type}
+					</span>
+				</FormControl>
+			);
+		}
+
+		const childNode = node.get(name);
+		const metadata = getSchemaMetadata(entrySchema);
+		const isNullable = hasNullishWrapper(entrySchema);
+		const issue = issues?.filter((issue) => issue.field === `${parentName}.${name}`);
+
+		if (metadata?.visibleWhen) {
+			const refNode = node.get(metadata.visibleWhen.field);
+			if (refNode.isMissing()) return null;
+			if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) return null;
+		}
+
+		const patchValue = (newRawValue: unknown) => {
+			if (v.getDefault(entrySchema) === newRawValue) {
+				const newContent = node.removeField(original, name);
+				onPatch(newContent);
+				return;
+			}
+
+			if (newRawValue === undefined || newRawValue === null || (typeof newRawValue === "number" && isNaN(newRawValue))) {
+				if (isNullable) {
+					const newContent = node.removeField(original, name);
+					onPatch(newContent);
+					return;
+				}
+				const newContent = node.patchField(original, name, "null");
+				onPatch(newContent);
+				return;
+			}
+			const serialized = HJSON.stringify(newRawValue);
+			const newContent = node.patchField(original, name, serialized);
+			onPatch(newContent);
+		};
+
+		if (metadata?.visibleWhen) {
+			const refNode = node.get(metadata.visibleWhen.field);
+			if (refNode.isMissing()) return null;
+			if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) return null;
+		}
+		return (
+			<ErrorBoundary key={key}>
+				<Renderer
+					path={path}
+					name={name}
+					node={childNode}
+					original={original}
+					onPatch={onPatch}
+					patchValue={patchValue}
+					entrySchema={entrySchema as AnySchema}
+				/>
+				{issue?.map((issue, index) => (
+					<span key={(issue.code || "") + index} className="text-red-400 text-xs">
+						{issue.code}
+						{issue.messageKey}
+					</span>
+				)) || null}
+			</ErrorBoundary>
+		);
+	});
 }
 
 function ResearchField({ name, node, original, onPatch, patchValue }: Parameters<SchemaRenderer>[0]) {
@@ -560,47 +701,104 @@ function ResearchField({ name, node, original, onPatch, patchValue }: Parameters
 	);
 }
 
-function EffectField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
+function EffectField({ path, name, node, original, patchValue, entrySchema, onPatch }: Parameters<SchemaRenderer>[0]) {
 	const { data = [], isLoading, isError, error } = useEffects();
-	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema);
 	const [filter, setFilter] = useState("");
 
+	console.log({ node, entrySchema });
+
+	if (node.isObject()) {
+		return (
+			<div className="grid gap-2">
+				<FormLabel>{name}</FormLabel>
+				<div className="grid grid-cols-2 gap-2">
+					<Button variant="outline" onClick={() => patchValue(data[0]?.name)}>
+						Built-In
+					</Button>
+					<Button variant="outline" disabled>
+						Custom
+					</Button>
+				</div>
+				<Collapsible>
+					<FormField>
+						<CollapsibleTrigger asChild>
+							<Button variant="outline" className="flex items-center justify-between w-full">
+								<span>{node.get("type").asString()}</span>
+								<ChevronsUpDown className="size-4" />
+							</Button>
+						</CollapsibleTrigger>
+						<CollapsibleContent>
+							<FormControl>
+								<div className="pl-4 border-l-2 border-border grid gap-6">
+									<ObjectField
+										path={path}
+										name={name}
+										node={node}
+										patchValue={patchValue}
+										entrySchema={entrySchema}
+										original={original}
+										onPatch={onPatch}
+									/>
+									<Separator />
+								</div>
+							</FormControl>
+						</CollapsibleContent>
+					</FormField>
+				</Collapsible>
+			</div>
+		);
+	}
+
+	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema);
+
 	return (
-		<FormField>
+		<div className="grid gap-2">
 			<FormLabel>{name}</FormLabel>
-			<Dialog>
-				<DialogTrigger asChild>
-					<Button variant="outline">{value || "None"}</Button>
-				</DialogTrigger>
-				<DialogContent className="w-sm" showCloseButton={false}>
-					<VisuallyHidden.Root>
-						<DialogTitle />
-						<DialogDescription />
-					</VisuallyHidden.Root>
-					<ToggleGroup type="single" value={value} onValueChange={(v) => patchValue(v)} asChild>
-						<div>
-							<InputGroup>
-								<InputGroupAddon>
-									<Search />
-								</InputGroupAddon>
-								<InputGroupInput value={filter} onChange={(event) => setFilter(event.currentTarget.value)} />
-							</InputGroup>
-							<div className="max-h-[90dvh] md:max-h-[50dvh] overflow-y-auto">
-								{isLoading && <Spinner />}
-								{isError && <ErrorDisplay message={error.message} />}
-								{data
-									.filter((i) => i.name !== value && i.name.includes(filter))
-									.map((item) => (
-										<ToggleGroupItem key={item.name} value={item.name}>
-											{item.name}
-										</ToggleGroupItem>
-									))}
+			<div className="grid grid-cols-2 gap-2">
+				<Button variant="outline" disabled>
+					Built-In
+				</Button>
+				<Button variant="outline" onClick={() => patchValue({ type: "ParticleEffect" })}>
+					Custom
+				</Button>
+			</div>
+			<FormField>
+				<Dialog>
+					<DialogTrigger asChild>
+						<Button className="w-full justify-start" variant="outline">
+							{value || "None"}
+						</Button>
+					</DialogTrigger>
+					<DialogContent className="w-sm" showCloseButton={false}>
+						<VisuallyHidden.Root>
+							<DialogTitle />
+							<DialogDescription />
+						</VisuallyHidden.Root>
+						<ToggleGroup type="single" value={value} onValueChange={(v) => patchValue(v)} asChild>
+							<div className="space-y-2">
+								<InputGroup>
+									<InputGroupAddon>
+										<Search />
+									</InputGroupAddon>
+									<InputGroupInput value={filter} onChange={(event) => setFilter(event.currentTarget.value)} />
+								</InputGroup>
+								<div className="max-h-[80dvh] md:max-h-[50dvh] overflow-y-auto border p-2 rounded-md">
+									{isLoading && <Spinner />}
+									{isError && <ErrorDisplay message={error.message} />}
+									{data
+										.filter((i) => i.name !== value && i.name.includes(filter))
+										.map((item) => (
+											<ToggleGroupItem key={item.name} value={item.name}>
+												{item.name}
+											</ToggleGroupItem>
+										))}
+								</div>
 							</div>
-						</div>
-					</ToggleGroup>
-				</DialogContent>
-			</Dialog>
-		</FormField>
+						</ToggleGroup>
+					</DialogContent>
+				</Dialog>
+			</FormField>
+		</div>
 	);
 }
 
@@ -616,7 +814,7 @@ function ItemGrid({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function getSchemaRenderer(type: string | null): SchemaRenderer {
+function getSchemaRenderer(type: Type | null): SchemaRenderer {
 	if (type) {
 		const r = schemaRenderers[type];
 		if (r) return r;
@@ -625,13 +823,15 @@ function getSchemaRenderer(type: string | null): SchemaRenderer {
 }
 
 function SchemaArrayItemEditor({
+	path,
 	value,
 	itemType,
 	itemSchema,
 	onChange,
 }: {
+	path: string;
 	value: unknown;
-	itemType: string | null;
+	itemType: Type | null;
 	itemSchema: AnySchema | null;
 	onChange: (v: unknown) => void;
 }) {
@@ -643,6 +843,7 @@ function SchemaArrayItemEditor({
 	return (
 		<ErrorBoundary key={name}>
 			{renderer({
+				path,
 				name,
 				node,
 				original: "",

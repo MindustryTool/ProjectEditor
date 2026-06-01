@@ -1,7 +1,4 @@
 import type * as v from "valibot";
-import { MindustryHexColorSchema } from "./base";
-import { ResearchSchema } from "./base";
-import { EffectSchema } from "./effect";
 
 export type AnySchema =
 	| v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>
@@ -10,7 +7,7 @@ export type AnySchema =
 
 const WRAPPER_TYPES = new Set(["optional", "nullable", "nullish", "undefinedable", "exact_optional"]);
 
-export const types = ["color", "research", "effect", "string", "number", "boolean", "object", "array", "unknown"] as const;
+export const types = ["color", "research", "effect", "string", "number", "boolean", "object", "array", "unknown", "picklist"] as const;
 
 export type Type = (typeof types)[number];
 
@@ -26,10 +23,24 @@ export function hasNullishWrapper(schema: AnySchema): boolean {
 	return WRAPPER_TYPES.has(s.type);
 }
 
-const specialSchemaRegistry = new Map<AnySchema, Type>();
-specialSchemaRegistry.set(MindustryHexColorSchema as unknown as AnySchema, "color");
-specialSchemaRegistry.set(ResearchSchema as unknown as AnySchema, "research");
-specialSchemaRegistry.set(EffectSchema as unknown as AnySchema, "effect");
+function getTypeFromMetadata(schema: AnySchema): Type | null {
+	const unwrapped = unwrapSchema(schema);
+	const s = unwrapped as unknown as { type: string; pipe?: Array<{ type: string; metadata: Record<string, unknown> }> };
+
+	if (!s.pipe) return null;
+
+	let result: Type | null = null;
+	for (const action of s.pipe) {
+		if (action.type === "metadata" && action.metadata && typeof action.metadata.type === "string") {
+			const t = action.metadata.type;
+			if ((types as readonly string[]).includes(t)) {
+				result = t as Type;
+			}
+		}
+	}
+
+	return result;
+}
 
 function getSchemaType(schema: AnySchema): Type {
 	const s = schema as unknown as { type: string; pipe?: AnySchema[] };
@@ -44,22 +55,24 @@ function getSchemaType(schema: AnySchema): Type {
 	if (s.type === "boolean") return "boolean";
 	if (s.type === "object") return "object";
 	if (s.type === "array") return "array";
+	if (s.type === "picklist") return "picklist";
+
+	console.warn({ unknownType: s.type });
+
 	return "unknown";
 }
 
 export function detectSchemaType(rawSchema: AnySchema): Type {
-	const specialBefore = specialSchemaRegistry.get(rawSchema);
-	if (specialBefore) return specialBefore;
-
 	const unwrapped = unwrapSchema(rawSchema);
 
-	const specialAfter = specialSchemaRegistry.get(unwrapped);
-	if (specialAfter) return specialAfter;
+	const metadataType = getTypeFromMetadata(unwrapped);
+	if (metadataType) return metadataType;
 
 	return getSchemaType(unwrapped);
 }
 
 export function getSchemaEntries(schema: AnySchema): [string, AnySchema][] {
+	schema = unwrapSchema(schema);
 	const s = schema as unknown as { type: string; entries?: Record<string, AnySchema> };
 	if (s.type === "object" && s.entries) {
 		return Object.entries(s.entries) as [string, AnySchema][];

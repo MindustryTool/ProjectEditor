@@ -14,7 +14,7 @@ export type { ModHjsonData } from "./mod-hjson";
 export { ItemHjsonSchema } from "./item";
 
 export { ContentNameSchema, MindustryHexColorSchema, ResearchSchema } from "./base";
-export type { Research } from "./base";
+export type { Research, SchemaFn } from "./base";
 
 export { SectorHjsonSchema } from "./sector";
 
