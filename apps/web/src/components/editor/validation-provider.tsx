@@ -8,7 +8,7 @@ import {
 	useAppStore,
 	useProjectSession,
 } from "@project/state";
-import type { ValidationContext } from "@project/state";
+import type { ValidationContext, ValidationRunner, ValidatorRegistry } from "@project/state";
 import { useShallow } from "zustand/react/shallow";
 import { useItems } from "#/hooks/use-items";
 import { useBlocks } from "#/hooks/use-blocks";
@@ -21,6 +21,9 @@ const registry = createDefaultValidators();
 const runner = createValidationRunner(registry);
 
 export interface ValidationContextValue {
+	registry: ValidatorRegistry;
+	runner: ValidationRunner;
+	context: ValidationContext;
 	validateFile: (path: string, content: () => Promise<string>) => Promise<void>;
 }
 
@@ -113,6 +116,9 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 
 	const ctxValue = useMemo<ValidationContextValue>(
 		() => ({
+			registry,
+			runner,
+			context: validationContext,
 			validateFile: async (path: string, getContent: () => Promise<string>) => {
 				try {
 					const results = await runner.validate(path, getContent, validationContext);

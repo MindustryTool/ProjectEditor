@@ -25,16 +25,16 @@ export function ValidationErrorList({ items, onNavigate, className }: Validation
 	return (
 		<div className={cn("max-h-48 overflow-y-auto flex flex-col gap-1", className)}>
 			{items.map((err, i) => (
-				<div key={i} className={cn("flex gap-2 rounded p-1.5 text-xs", severityClass[err.severity] ?? "")}>
+				<div key={i} className={cn("flex gap-2 flex-col rounded p-1.5 text-xs", severityClass[err.severity] ?? "")}>
 					<button
 						type="button"
-						className="shrink-0 font-medium underline-offset-2 hover:underline cursor-pointer text-left"
+						className="shrink-0 font-medium underline-offset-2 hover:underline cursor-pointer text-left text-sm"
 						onClick={() => onNavigate(err.filePath)}
 						title={err.filePath}
 					>
 						{err.filePath}
 					</button>
-					<span className="text-inherit opacity-80">{(t as (key: string, params?: Record<string, string | number>) => string)(err.messageKey, err.messageParams)}</span>
+					<p className="text-inherit opacity-80">{(t as (key: string, params?: Record<string, string | number>) => string)(err.messageKey, err.messageParams)}</p>
 				</div>
 			))}
 		</div>
