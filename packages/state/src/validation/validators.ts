@@ -3,7 +3,7 @@ import { Severity } from "./types";
 import { createValidatorRegistry } from "./registry";
 import type { HjsonNode } from "@project/hjson";
 import { HJSON, HJSONError, HjsonObjectNode } from "@project/hjson";
-import { ItemHjsonSchema, ModHjsonSchema } from "@project/schema";
+import { ItemHjsonSchema, LiquidHjsonSchema, ModHjsonSchema, type ResearchSchema } from "@project/schema";
 import * as v from "valibot";
 import { findUnknownProperties } from "./utils";
 
@@ -67,15 +67,17 @@ const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 	}
 };
 
+type PostValidatorFn<T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>> = (c: {
+	path: string;
+	content: string;
+	context: ValidationContext;
+	result: v.InferOutput<T>;
+	node: HjsonNode;
+}) => ValidationResult[];
+
 function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>>(
 	schema: T,
-	validator?: (c: {
-		path: string;
-		content: string;
-		context: ValidationContext;
-		result: v.InferOutput<T>;
-		node: HjsonNode;
-	}) => ValidationResult[],
+	validator?: PostValidatorFn<T>,
 ): ValidatorFn {
 	return ({ path, content, context }) => {
 		const data = HJSON.parseStructured(content);
@@ -235,10 +237,8 @@ function findContent(name: string, context: ValidationContext) {
 	return null;
 }
 
-const modMetaValidator: ValidatorFn = createValibotValidator(ModHjsonSchema);
-const itemHjsonValidator: ValidatorFn = createValibotValidator(ItemHjsonSchema, ({ path, context, result, node }) => {
-	const items = context.getItems();
-	const research = result.research;
+const researchValidator: PostValidatorFn<typeof ResearchSchema> = ({ path, context, result, node }) => {
+	const research = result;
 	const issues: ValidationResult[] = [];
 
 	if (!research) {
@@ -286,6 +286,7 @@ const itemHjsonValidator: ValidatorFn = createValibotValidator(ItemHjsonSchema, 
 		const requirementsField = researchField.get("requirements")!;
 
 		if (requirement) {
+			const items = context.getItems();
 			for (let i = 0; i < requirement.length; i++) {
 				const req = requirement[i]!;
 				const reqField = requirementsField.get(i)!;
@@ -310,7 +311,15 @@ const itemHjsonValidator: ValidatorFn = createValibotValidator(ItemHjsonSchema, 
 	}
 
 	return issues;
-});
+};
+
+const modMetaValidator: ValidatorFn = createValibotValidator(ModHjsonSchema);
+const itemHjsonValidator: ValidatorFn = createValibotValidator(ItemHjsonSchema, (result) =>
+	researchValidator({ ...result, result: result.result.research }),
+);
+const liquidHjsonValidator: ValidatorFn = createValibotValidator(LiquidHjsonSchema, (result) =>
+	researchValidator({ ...result, result: result.result.research }),
+);
 
 export function createDefaultValidators() {
 	const registry = createValidatorRegistry();
@@ -331,6 +340,12 @@ export function createDefaultValidators() {
 		name: "items-hjson",
 		pattern: (path) => path.startsWith("content/item") || (path.endsWith(".json") && path.endsWith(".hjson")),
 		validate: itemHjsonValidator,
+	});
+
+	registry.register({
+		name: "liquids-hjson",
+		pattern: (path) => path.startsWith("content/liquid") || (path.endsWith(".json") && path.endsWith(".hjson")),
+		validate: liquidHjsonValidator,
 	});
 
 	return registry;

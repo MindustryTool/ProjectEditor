@@ -16,6 +16,7 @@ import { useLiquids } from "#/hooks/use-liquids";
 import { useSectors } from "#/hooks/use-sectors";
 import { useStatuses } from "#/hooks/use-statuses";
 import { useUnits } from "#/hooks/use-units";
+import { usePath } from "#/hooks/use-path";
 
 const registry = createDefaultValidators();
 const runner = createValidationRunner(registry);
@@ -97,6 +98,7 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 	const units = useUnits();
 	const projectContext = useProjectSession((s) => s.projectContext);
 	const projectId = projectContext?.project.id;
+	const [path] = usePath();
 
 	const validationContext = useMemo(
 		() => ({
@@ -126,6 +128,12 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 		}),
 		[validationContext],
 	);
+
+	useEffect(() => {
+		if (path && projectId) {
+			scheduleValidation(projectId, path, timersRef.current, validationDelayMs, validationContext);
+		}
+	}, [path, projectId, validationContext, validationDelayMs]);
 
 	useEffect(() => {
 		if (!projectId) {

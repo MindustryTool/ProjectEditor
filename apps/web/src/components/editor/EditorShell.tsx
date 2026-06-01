@@ -15,6 +15,7 @@ import { StatusBarRight } from "./statusbar/StatusBarRight";
 import { ValidationProvider } from "#/components/editor/validation-provider";
 import { EditorMobileLayout } from "#/components/editor/EditorMobileLayout";
 import { Fragment } from "react/jsx-runtime";
+import { ErrorBoundary } from "#/components/ui/error-boundary";
 
 interface EditorShellProps {
 	path: string | null;
@@ -38,9 +39,21 @@ export function EditorShell({ path }: EditorShellProps) {
 							defaultLeftWidth={260}
 							defaultRightWidth={360}
 							minPanelWidth={300}
-							left={<EditorLeftPanel />}
-							center={<EditorCenterPanel path={path} />}
-							right={<EditorRightPanel path={path} />}
+							left={
+								<ErrorBoundary>
+									<EditorLeftPanel />
+								</ErrorBoundary>
+							}
+							center={
+								<ErrorBoundary>
+									<EditorCenterPanel path={path} />
+								</ErrorBoundary>
+							}
+							right={
+								<ErrorBoundary>
+									<EditorRightPanel path={path} />
+								</ErrorBoundary>
+							}
 						/>
 						<StatusBar left={<StatusBarLeft />} center={<StatusBarCenter />} right={<StatusBarRight />} />
 					</Fragment>

@@ -17,6 +17,7 @@ import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Button } from "~/components/ui/button";
 import { Panel } from "#/components/editor/Panel";
+import { ErrorBoundary } from "#/components/ui/error-boundary";
 
 interface EditorMobileLayoutProps {
 	path: string | null;
@@ -51,14 +52,22 @@ export function EditorMobileLayout({ path }: EditorMobileLayoutProps) {
 					{/* Those 2 divs are required for monaco to work, idk why but it work */}
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
 						<div className="flex flex-1 overflow-hidden bg-background w-full">
-							<EditorCenterPanel path={path} />
+							<ErrorBoundary>
+								<EditorCenterPanel path={path} />
+							</ErrorBoundary>
 						</div>
 					</div>
 				</TabsContent>
 				<TabsContent value="right" className="flex flex-1 overflow-hidden bg-background w-full h-full">
 					{/* Same to above */}
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
-						<div className="flex flex-1 overflow-hidden bg-background w-full">{path && <EditorRightPanel path={path} />}</div>
+						<div className="flex flex-1 overflow-hidden bg-background w-full">
+							{path && (
+								<ErrorBoundary>
+									<EditorRightPanel path={path} />
+								</ErrorBoundary>
+							)}
+						</div>
 					</div>
 				</TabsContent>
 				<TabsList className="w-full justify-around rounded-none border-t bg-muted shrink-0">
