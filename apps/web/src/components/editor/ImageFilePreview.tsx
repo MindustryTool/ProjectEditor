@@ -1,6 +1,7 @@
 import { cn, getImageUrl } from "#/lib/utils";
 import { useFile } from "@project/state";
 import { resolveContentSprite } from "@project/utils";
+import { File } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
 export interface ImageFilePreviewProps {
@@ -17,7 +18,7 @@ export function ImageFilePreview({ path, className, showSize = true, fallback }:
 		if (path.endsWith(".json")) {
 			resolvedPath = resolveContentSprite(path);
 			if (!resolvedPath) {
-				throw new Error(`Invalid content path: ${path}`);
+				return <File className={className} />;
 			}
 		}
 
@@ -26,8 +27,13 @@ export function ImageFilePreview({ path, className, showSize = true, fallback }:
 		}
 	}
 
-	const { data } = useFile(resolvedPath);
+	return <Image path={resolvedPath} className={className} showSize={showSize} fallback={fallback} />;
+}
+
+function Image({ path, className, showSize = true, fallback }: ImageFilePreviewProps) {
+	const { data } = useFile(path);
 	const [size, setSize] = useState({ width: 0, height: 0 });
+	const [error, setError] = useState(false);
 
 	if (data === null) {
 		return <div className={cn("relative flex justify-center items-center h-full w-full", className)}>{fallback}</div>;
@@ -35,11 +41,15 @@ export function ImageFilePreview({ path, className, showSize = true, fallback }:
 
 	const objectUrl = getImageUrl(data);
 
+	if (error) {
+		return <div className={cn("relative flex justify-center items-center h-full w-full", className)}>{fallback}</div>;
+	}
+
 	return (
 		<div className={cn("relative flex justify-center items-center h-full w-full overflow-hidden", className)}>
 			<img
 				src={objectUrl}
-				alt={resolvedPath}
+				alt={path}
 				loading="lazy"
 				onLoad={(e) => {
 					const img = e.currentTarget;
@@ -53,6 +63,7 @@ export function ImageFilePreview({ path, className, showSize = true, fallback }:
 						height: img.naturalHeight,
 					});
 				}}
+				onError={() => setError(true)}
 			/>
 			{showSize && (
 				<div className="absolute bottom-0.5 backdrop-blur-xs backdrop-brightness-75 p-0.5 right-0.5 text-xs text-muted-foreground">

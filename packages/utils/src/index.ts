@@ -41,7 +41,7 @@ export function sanitizeFilename(name: string, options?: { maxLength?: number; f
 }
 
 export function resolveContentSprite(path: string): string | null {
-	if (!path.startsWith("content/") || !path.endsWith(".json")) {
+	if (!path.startsWith("content/") || !path.endsWith(".json") || path.startsWith("content/sectors")) {
 		return null;
 	}
 

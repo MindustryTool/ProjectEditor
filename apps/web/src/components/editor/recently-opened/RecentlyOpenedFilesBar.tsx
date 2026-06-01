@@ -47,7 +47,7 @@ export function RecentlyOpenedFilesBar() {
 	if (recentFiles.length === 0) return null;
 
 	return (
-		<div className="flex items-center gap-px overflow-x-hidden flex-wrap bg-muted/30 py-0.5 divide-x">
+		<div className="flex items-center gap-px overflow-x-auto bg-muted/30 py-0.5">
 			{recentFiles.map((entry) => {
 				const isActive = entry.path === path;
 				const isMissing = !treeSnapshot.contains(entry.path);
@@ -57,7 +57,7 @@ export function RecentlyOpenedFilesBar() {
 					<button
 						key={entry.path}
 						className={cn(
-							"group flex flex-1 shrink-0 items-center gap-1 px-2 py-1 text-xs transition-colors max-w-40",
+							"group flex items-center gap-1 px-2 py-1 text-xs transition-colors bg-accent/40",
 							isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground",
 							isMissing && "line-through text-destructive",
 						)}

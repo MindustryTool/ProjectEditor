@@ -354,7 +354,8 @@ export class OPFSAdapter implements VirtualFileSystem {
 			const file = await fileHandle.getFile();
 			return file.arrayBuffer();
 		} catch (err) {
-			console.error("Error reading file:" + path, new Error(String(err)));
+			const message = err instanceof DOMException && err.name === "NotFoundError" ? "File not found" : "Error reading file";
+			console.error(message, path, err);
 			throw err;
 		}
 	}
@@ -367,7 +368,8 @@ export class OPFSAdapter implements VirtualFileSystem {
 			await writable.write(data);
 			await writable.close();
 		} catch (err) {
-			console.error("Error writing file:", path, err);
+			const message = err instanceof DOMException && err.name === "NotFoundError" ? "File not found" : "Error writing file";
+			console.error(message, path, err);
 			throw err;
 		}
 	}
@@ -377,7 +379,8 @@ export class OPFSAdapter implements VirtualFileSystem {
 			const [dir, name] = await resolveHandle(this.root, path);
 			await dir.removeEntry(name, { recursive: true });
 		} catch (err) {
-			console.error("Error deleting file:", path, err);
+			const message = err instanceof DOMException && err.name === "NotFoundError" ? "File not found" : "Error deleting file";
+			console.error(message, path, err);
 			throw err;
 		}
 	}
@@ -387,7 +390,8 @@ export class OPFSAdapter implements VirtualFileSystem {
 			const [dir, name] = await resolveHandle(this.root, path, true);
 			await dir.getDirectoryHandle(name, { create: true });
 		} catch (err) {
-			console.error("Error creating directory:", path, err);
+			const message = err instanceof DOMException && err.name === "NotFoundError" ? "Directory not found" : "Error creating directory";
+			console.error(message, path, err);
 			throw err;
 		}
 	}
@@ -408,7 +412,8 @@ export class OPFSAdapter implements VirtualFileSystem {
 			}
 			return entries;
 		} catch (err) {
-			console.error("Error reading directory:", path, err);
+			const message = err instanceof DOMException && err.name === "NotFoundError" ? "Directory not found" : "Error reading directory";
+			console.error(message, path, err);
 			throw err;
 		}
 	}
@@ -455,7 +460,8 @@ export class OPFSAdapter implements VirtualFileSystem {
 			await this.writeFile(newPath, data);
 			await this.delete(oldPath);
 		} catch (err) {
-			console.error("Error renaming file:", oldPath, newPath, err);
+			const message = err instanceof DOMException && err.name === "NotFoundError" ? "File not found" : "Error renaming file";
+			console.error(message, oldPath, newPath, err);
 			throw err;
 		}
 	}
@@ -464,7 +470,8 @@ export class OPFSAdapter implements VirtualFileSystem {
 		try {
 			await this.rename(src, dst);
 		} catch (err) {
-			console.error("Error moving file:", src, dst, err);
+			const message = err instanceof DOMException && err.name === "NotFoundError" ? "File not found" : "Error moving file";
+			console.error(message, src, dst, err);
 			throw err;
 		}
 	}
@@ -474,7 +481,8 @@ export class OPFSAdapter implements VirtualFileSystem {
 			const data = await this.readFile(src);
 			await this.writeFile(dst, data);
 		} catch (err) {
-			console.error("Error copying file:", src, dst, err);
+			const message = err instanceof DOMException && err.name === "NotFoundError" ? "File not found" : "Error copying file";
+			console.error(message, src, dst, err);
 			throw err;
 		}
 	}
@@ -530,7 +538,7 @@ export const jsonProjectTree = new DefaultProjectFileTree([
 	{
 		name: "content",
 		type: "folder",
-        path: "content",
+		path: "content",
 		children: [
 			{ name: "items", type: "folder", path: "content/items" },
 			{ name: "blocks", type: "folder", path: "content/blocks" },
