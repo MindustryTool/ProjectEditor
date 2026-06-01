@@ -72,10 +72,9 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 		const data = HJSON.parseStructured(content);
 		const resolved = typeof schema === "function" ? schema(data, context) : schema;
 		const { success, issues } = v.safeParse(resolved, data.valueOf());
+		const problems = [];
 
 		if (!success) {
-			const result = [];
-
 			const resolveFieldData = (fieldData: ReturnType<typeof data.get>, path: (string | number)[]) => {
 				for (const key of path.filter((p) => p !== undefined || p !== null || p !== "")) {
 					const nested = fieldData.get(key);
@@ -108,7 +107,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 					endColumn = fieldInfo.end.col;
 				}
 
-				result.push({
+				problems.push({
 					path,
 					severity: Severity.error,
 					messageKey: "validation.content.invalid-field",
@@ -138,7 +137,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 							subEndColumn = subFieldInfo.end.col;
 						}
 
-						result.push({
+						problems.push({
 							path,
 							severity: Severity.error,
 							messageKey: "validation.content.invalid-field",
@@ -152,11 +151,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 					}
 				}
 			}
-
-			return result;
 		}
-
-		const problems = [];
 
 		if (data instanceof HjsonObjectNode) {
 			const unknownPaths = findUnknownProperties(resolved, data.valueOf());

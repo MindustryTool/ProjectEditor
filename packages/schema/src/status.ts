@@ -28,6 +28,16 @@ export const StatusHjsonSchema: SchemaFn = (value, context) =>
 		applyColor: v.nullish(MindustryHexColorSchema),
 		parentizeApplyEffect: v.nullish(v.boolean(), false),
 		outline: v.nullish(v.boolean(), true),
-		affinities: v.nullish(v.array(v.pipe(v.picklist(context.getStatuses().map((status) => status.name)))), []),
+		affinities: v.nullish(
+			v.array(
+				v.pipe(
+					v.picklist(
+						context.getStatuses().map((status) => status.name),
+						"Not a vailid status name",
+					),
+				),
+			),
+			[],
+		),
 		opposites: v.nullish(v.array(v.pipe(v.picklist(context.getStatuses().map((status) => status.name)))), []),
 	});
