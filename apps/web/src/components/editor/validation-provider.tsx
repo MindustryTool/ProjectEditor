@@ -7,6 +7,7 @@ import {
 	createValidationRunner,
 	useAppStore,
 	useProjectSession,
+	useCurrentProject,
 } from "@project/state";
 import type { ValidationContext, ValidationRunner, ValidatorRegistry } from "@project/state";
 import { useShallow } from "zustand/react/shallow";
@@ -25,7 +26,7 @@ export interface ValidationContextValue {
 	registry: ValidatorRegistry;
 	runner: ValidationRunner;
 	context: ValidationContext;
-	validateFile: (path: string, content: () => Promise<string>) => Promise<void>;
+	validateFile: (path: string) => Promise<void>;
 }
 
 const ValidationFileContext = createContext<ValidationContextValue | null>(null);
@@ -79,7 +80,11 @@ function scheduleValidation(
 					if (entry && entry.data) {
 						return decodeContent(entry.data);
 					}
-					return await useProjectSession.getState().projectContext!.fs.readTextFile(path);
+					const data = await useProjectSession.getState().projectContext!.fs.readTextFile(path);
+					if (data === null) {
+						return "";
+					}
+					return data;
 				};
 				const results = await runner.validate(path, getContent, context);
 				useValidationStore.getState().setResults(path, results);
@@ -91,6 +96,7 @@ function scheduleValidation(
 }
 
 export function ValidationProvider({ children }: { children: ReactNode }) {
+	const [path] = usePath();
 	const timersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
 	const validationDelayMs = useAppStore(useShallow((s) => s.settings.validationDelayMs));
 	const items = useItems({ base: true, project: true });
@@ -99,9 +105,8 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 	const sectors = useSectors();
 	const statuses = useStatuses();
 	const units = useUnits();
-	const projectContext = useProjectSession((s) => s.projectContext);
-	const projectId = projectContext?.project.id;
-	const [path] = usePath();
+	const projectContext = useCurrentProject();
+	const projectId = projectContext.project.id;
 
 	const validationContext = useMemo(
 		() => ({
@@ -120,8 +125,20 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 			registry,
 			runner,
 			context: validationContext,
-			validateFile: async (path: string, getContent: () => Promise<string>) => {
+			validateFile: async (path: string) => {
 				try {
+					const getContent = async () => {
+						const key = cacheKey(projectId, path);
+						const entry = useFileStore.getState().fileContents[key];
+						if (entry && entry.data) {
+							return decodeContent(entry.data);
+						}
+						const data = await useProjectSession.getState().projectContext!.fs.readTextFile(path);
+						if (data === null) {
+							return "";
+						}
+						return data;
+					};
 					const results = await runner.validate(path, getContent, validationContext);
 					useValidationStore.getState().setResults(path, results);
 				} catch (err) {

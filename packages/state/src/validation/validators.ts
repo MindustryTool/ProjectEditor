@@ -83,12 +83,13 @@ type PostValidatorFn<T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknow
 }) => ValidationResult[];
 
 function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>>(
-	schema: T,
+	schema: T | ((value: HjsonNode) => T),
 	validator?: PostValidatorFn<T>,
 ): ValidatorFn {
 	return ({ path, content, context }) => {
 		const data = HJSON.parseStructured(content);
-		const { success, output: result, issues } = v.safeParse(schema, data.valueOf());
+		const resolved = typeof schema === "function" ? schema(data) : schema;
+		const { success, output: result, issues } = v.safeParse(resolved, data.valueOf());
 
 		if (!success) {
 			const result = [];
@@ -180,7 +181,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 		}
 
 		if (data instanceof HjsonObjectNode) {
-			const unknownPaths = findUnknownProperties(schema, data.valueOf());
+			const unknownPaths = findUnknownProperties(resolved, data.valueOf());
 
 			for (const path of unknownPaths) {
 				const field = data.path(path);

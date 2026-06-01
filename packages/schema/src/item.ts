@@ -15,5 +15,3 @@ export const ItemHjsonSchema = v.object({
 	buildable: v.nullish(v.boolean()),
 	hidden: v.nullish(v.boolean(), false),
 });
-
-export type ItemHjsonData = v.InferOutput<typeof ItemHjsonSchema>;

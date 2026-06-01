@@ -22,19 +22,15 @@ export { ModHjsonSchema } from "./mod-hjson";
 export type { ModHjsonData } from "./mod-hjson";
 
 export { ItemHjsonSchema } from "./item";
-export type { ItemHjsonData } from "./item";
 
 export { ContentNameSchema, MindustryHexColorSchema, ResearchSchema } from "./base";
 export type { Research } from "./base";
 
 export { SectorHjsonSchema } from "./sector";
-export type { SectorHjsonData } from "./sector";
 
 export { StatusHjsonSchema } from "./status";
-export type { StatusHjsonData } from "./status";
 
 export { LiquidHjsonSchema } from "./liquid";
-export type { LiquidHjsonData } from "./liquid";
 
 export { unwrapSchema, hasNullishWrapper, detectSchemaType, getSchemaEntries, getArrayItemSchema, getSchemaMetadata } from "./schema-utils";
 export type { AnySchema, SchemaMetadata } from "./schema-utils";

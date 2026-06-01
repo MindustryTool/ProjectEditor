@@ -26,7 +26,7 @@ export function LiquidPanel({ path }: LiquidPanelProps) {
 				{fileName !== null && <div className="text-lg font-bold">{fileName}</div>}
 				<SpritePicker path={path} />
 				{result && result instanceof HjsonObjectNode && (
-					<FieldsRenderer path={path} schema={LiquidHjsonSchema} node={result} original={data} onPatch={write} />
+					<FieldsRenderer path={path} schema={LiquidHjsonSchema(result)} node={result} original={data} onPatch={write} />
 				)}
 			</div>
 		</Panel>

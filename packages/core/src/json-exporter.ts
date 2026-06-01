@@ -10,6 +10,10 @@ export class JsonExporter implements Exporter {
 			if (entry.kind !== "file") continue;
 			const relativePath = entry.path.startsWith(projectRootPrefix) ? entry.path.slice(projectRootPrefix.length) : entry.path;
 			const data = await context.fs.readFile(entry.path);
+			if (data === null) {
+				console.warn(`File not found ${entry.path}`);
+				continue;
+			}
 			entries.push({ name: `${context.project.name}/${relativePath}`, data: new Uint8Array(data) });
 		}
 		return createZip(entries);

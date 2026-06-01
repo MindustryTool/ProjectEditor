@@ -1,9 +1,8 @@
+import type { TreeSnapshot, ValidatorRegistry } from "@project/state";
 import { useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { getExporter } from "@project/core";
 import { useProjectSession, useValidationStore, Severity } from "@project/state";
-import type { ProjectFileSystem } from "@project/fs";
-import type { TreeSnapshot, ValidatorRegistry } from "@project/state";
 import { cn } from "~/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
@@ -25,16 +24,10 @@ interface ExportMenuProps {
 	className?: string;
 }
 
-function decodeContent(data: ArrayBuffer): string {
-	if (data.byteLength === 0) return "";
-	return new TextDecoder().decode(data);
-}
-
 async function loadAndValidateAll(
-	fs: ProjectFileSystem,
 	registry: ValidatorRegistry,
 	treeSnapshot: TreeSnapshot,
-	validateFile: (path: string, content: () => Promise<string>) => Promise<void>,
+	validateFile: (path: string) => Promise<void>,
 	onProgress: (current: string, completed: number, total: number) => void,
 ) {
 	const entries = treeSnapshot.getEntries().filter((e) => e.kind === "file" && registry.getMatches(e.path).length > 0);
@@ -45,10 +38,7 @@ async function loadAndValidateAll(
 		onProgress(entry.path, i, total);
 
 		try {
-			await validateFile(entry.path, async () => {
-				const data = await fs.readFile(entry.path);
-				return decodeContent(data);
-			});
+			await validateFile(entry.path);
 		} catch (err) {
 			useValidationStore.getState().setResults(entry.path, [
 				{
@@ -135,7 +125,7 @@ export function ExportMenu({ className }: ExportMenuProps) {
 		setValidationProgress(0);
 		setCurrentFile("");
 		try {
-			await loadAndValidateAll(projectContext.fs, registry, treeSnapshot, validateFile, (path, completed, total) => {
+			await loadAndValidateAll(registry, treeSnapshot, validateFile, (path, completed, total) => {
 				currentFileRef.current = path;
 				progressRef.current = Math.round(((completed + 1) / total) * 100);
 

@@ -1,6 +1,7 @@
 import type * as v from "valibot";
-import { EffectSchema, MindustryHexColorSchema } from "./base";
+import { MindustryHexColorSchema } from "./base";
 import { ResearchSchema } from "./base";
+import { EffectSchema } from "./effect";
 
 export type AnySchema =
 	| v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>
@@ -8,6 +9,10 @@ export type AnySchema =
 	| v.TupleSchema<v.TupleItems, v.ErrorMessage<v.TupleIssue> | undefined>;
 
 const WRAPPER_TYPES = new Set(["optional", "nullable", "nullish", "undefinedable", "exact_optional"]);
+
+export const types = ["color", "research", "effect", "string", "number", "boolean", "object", "array", "unknown"] as const;
+
+export type Type = (typeof types)[number];
 
 export function unwrapSchema(schema: AnySchema): AnySchema {
 	if (WRAPPER_TYPES.has((schema as unknown as { type: string }).type) && "wrapped" in schema) {
@@ -21,12 +26,12 @@ export function hasNullishWrapper(schema: AnySchema): boolean {
 	return WRAPPER_TYPES.has(s.type);
 }
 
-const specialSchemaRegistry = new Map<AnySchema, string>();
+const specialSchemaRegistry = new Map<AnySchema, Type>();
 specialSchemaRegistry.set(MindustryHexColorSchema as unknown as AnySchema, "color");
 specialSchemaRegistry.set(ResearchSchema as unknown as AnySchema, "research");
 specialSchemaRegistry.set(EffectSchema as unknown as AnySchema, "effect");
 
-function getSchemaType(schema: AnySchema): string {
+function getSchemaType(schema: AnySchema): Type {
 	const s = schema as unknown as { type: string; pipe?: AnySchema[] };
 
 	if (s.pipe && s.pipe.length > 0) {
@@ -42,7 +47,7 @@ function getSchemaType(schema: AnySchema): string {
 	return "unknown";
 }
 
-export function detectSchemaType(rawSchema: AnySchema): string {
+export function detectSchemaType(rawSchema: AnySchema): Type {
 	const specialBefore = specialSchemaRegistry.get(rawSchema);
 	if (specialBefore) return specialBefore;
 

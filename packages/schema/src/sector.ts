@@ -20,5 +20,3 @@ export const SectorHjsonSchema = v.object({
 	sector: v.nullish(v.pipe(v.number(), v.minValue(0)), 0),
 	research: ResearchSchema,
 });
-
-export type SectorHjsonData = v.InferOutput<typeof SectorHjsonSchema>;

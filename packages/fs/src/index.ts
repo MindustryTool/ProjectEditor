@@ -33,7 +33,7 @@ export type Unsubscribe = () => void;
 // VirtualFileSystem interface
 
 export interface VirtualFileSystem {
-	readFile(path: string): Promise<ArrayBuffer>;
+	readFile(path: string): Promise<ArrayBuffer | null>;
 	writeFile(path: string, data: BufferSource): Promise<void>;
 	delete(path: string): Promise<void>;
 	mkdir(path: string): Promise<void>;
@@ -84,7 +84,7 @@ export class ProjectFileSystem {
 		return path.replace(this.projectRoot, "");
 	}
 
-	async readFile(path: string): Promise<ArrayBuffer> {
+	async readFile(path: string): Promise<ArrayBuffer | null> {
 		return this.vfs.readFile(this.scopePath(path));
 	}
 
@@ -219,8 +219,9 @@ export class ProjectFileSystem {
 		});
 	}
 
-	async readTextFile(path: string): Promise<string> {
+	async readTextFile(path: string): Promise<string | null> {
 		const bytes = await this.readFile(path);
+		if (bytes === null) return null;
 		return new TextDecoder().decode(bytes);
 	}
 
@@ -235,8 +236,9 @@ export class ProjectFileSystem {
 		await this.refreshTree();
 	}
 
-	async readJsonFile<T>(path: string): Promise<T> {
+	async readJsonFile<T>(path: string): Promise<T | null> {
 		const text = await this.readTextFile(path);
+		if (text === null) return null;
 		return JSON.parse(text) as T;
 	}
 
@@ -347,13 +349,14 @@ async function getDirHandle(dir: FileSystemDirectoryHandle, name: string): Promi
 export class OPFSAdapter implements VirtualFileSystem {
 	constructor(private root: FileSystemDirectoryHandle) {}
 
-	async readFile(path: string): Promise<ArrayBuffer> {
+	async readFile(path: string): Promise<ArrayBuffer | null> {
 		try {
 			const [dir, name] = await resolveHandle(this.root, path);
 			const fileHandle = await dir.getFileHandle(name);
 			const file = await fileHandle.getFile();
 			return file.arrayBuffer();
 		} catch (err) {
+			if (err instanceof DOMException && err.name === "NotFoundError") return null;
 			const message = err instanceof DOMException && err.name === "NotFoundError" ? "File not found" : "Error reading file";
 			console.error(message, path, err);
 			throw err;
@@ -457,7 +460,9 @@ export class OPFSAdapter implements VirtualFileSystem {
 		try {
 			if (oldPath === newPath) return;
 			const data = await this.readFile(oldPath);
-			await this.writeFile(newPath, data);
+			if (data !== null) {
+				await this.writeFile(newPath, data);
+			}
 			await this.delete(oldPath);
 		} catch (err) {
 			const message = err instanceof DOMException && err.name === "NotFoundError" ? "File not found" : "Error renaming file";
@@ -479,7 +484,7 @@ export class OPFSAdapter implements VirtualFileSystem {
 	async copy(src: string, dst: string): Promise<void> {
 		try {
 			const data = await this.readFile(src);
-			await this.writeFile(dst, data);
+			await this.writeFile(dst, data || new ArrayBuffer(0));
 		} catch (err) {
 			const message = err instanceof DOMException && err.name === "NotFoundError" ? "File not found" : "Error copying file";
 			console.error(message, src, dst, err);

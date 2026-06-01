@@ -1,7 +1,9 @@
 import * as v from "valibot";
-import { EffectSchema, MindustryHexColorSchema } from "./base";
+import { MindustryHexColorSchema } from "./base";
+import { EffectSchema } from "./effect";
+import type { HjsonNode } from "@project/hjson";
 
-export const StatusHjsonSchema = v.object({
+export const StatusHjsonSchema = (value: HjsonNode) => v.object({
 	damageMultiplier: v.nullish(v.number(), 1),
 	healthMultiplier: v.nullish(v.number(), 1),
 	speedMultiplier: v.nullish(v.number(), 1),
@@ -17,15 +19,13 @@ export const StatusHjsonSchema = v.object({
 	effectChance: v.nullish(v.number(), 0.15),
 	parentizeEffect: v.nullish(v.boolean(), false),
 	permanent: v.nullish(v.boolean(), false),
-    reactive: v.nullish(v.boolean(), false),
+	reactive: v.nullish(v.boolean(), false),
 	show: v.nullish(v.boolean(), true),
 	color: v.nullish(MindustryHexColorSchema),
-	effect: v.nullish(EffectSchema),
-	applyEffect: v.nullish(EffectSchema),
+	effect: v.nullish(EffectSchema(value.get("effect"))),
+	applyEffect: v.nullish(EffectSchema(value.get("applyEffect"))),
 	applyExtend: v.nullish(v.boolean(), false),
 	applyColor: v.nullish(MindustryHexColorSchema),
 	parentizeApplyEffect: v.nullish(v.boolean(), false),
 	outline: v.nullish(v.boolean(), true),
 });
-
-export type StatusHjsonData = v.InferOutput<typeof StatusHjsonSchema>;

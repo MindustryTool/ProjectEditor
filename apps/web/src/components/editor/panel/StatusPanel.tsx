@@ -24,7 +24,7 @@ export function StatusPanel({ path }: StatusPanelProps) {
 			<div className="space-y-6 h-full w-full">
 				{fileName !== null && <div className="text-lg font-bold">{fileName}</div>}
 				{result && result instanceof HjsonObjectNode && (
-					<FieldsRenderer path={path} schema={StatusHjsonSchema} node={result} original={data} onPatch={write} />
+					<FieldsRenderer path={path} schema={StatusHjsonSchema(result)} node={result} original={data} onPatch={write} />
 				)}
 			</div>
 		</Panel>

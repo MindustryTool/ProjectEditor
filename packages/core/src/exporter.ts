@@ -4,8 +4,8 @@ import { JsonExporter } from "./json-exporter.js";
 export interface ExportFs {
 	readdir(path: string): Promise<{ name: string; path: string; kind: "file" | "directory" }[]>;
 	listFiles(dir: string, options?: { recursive?: boolean }): Promise<{ name: string; path: string; kind: "file" | "directory" }[]>;
-	readFile(path: string): Promise<ArrayBuffer>;
-	readTextFile(path: string): Promise<string>;
+	readFile(path: string): Promise<ArrayBuffer | null>;
+	readTextFile(path: string): Promise<string | null>;
 }
 
 export interface ExportContext {

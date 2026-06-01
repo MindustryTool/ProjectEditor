@@ -466,6 +466,9 @@ importers:
 
   packages/schema:
     dependencies:
+      '@project/hjson':
+        specifier: workspace:*
+        version: link:../hjson
       valibot:
         specifier: 'catalog:'
         version: 1.4.0(typescript@5.9.3)

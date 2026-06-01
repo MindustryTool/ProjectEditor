@@ -1,7 +1,9 @@
 import * as v from "valibot";
-import { EffectSchema, MindustryHexColorSchema, ResearchSchema } from "./base";
+import { MindustryHexColorSchema, ResearchSchema } from "./base";
+import { EffectSchema } from "./effect";
+import type { HjsonNode } from "@project/hjson";
 
-export const LiquidHjsonSchema = v.object({
+export const LiquidHjsonSchema = (value: HjsonNode) => v.object({
 	color: v.nullish(MindustryHexColorSchema),
 	gas: v.nullish(v.boolean(), false),
 	gasColor: v.nullish(
@@ -26,15 +28,13 @@ export const LiquidHjsonSchema = v.object({
 	coolant: v.nullish(v.boolean(), true),
 	moveThroughBlocks: v.nullish(v.boolean(), false),
 	incinerable: v.nullish(v.boolean(), true),
-	effect: v.nullish(EffectSchema),
-	particleEffect: v.nullish(EffectSchema),
+	effect: v.nullish(EffectSchema(value.get("effect"))),
+	particleEffect: v.nullish(EffectSchema(value.get("particleEffect"))),
 	particleSpacing: v.nullish(v.pipe(v.number())),
 	boilPoint: v.nullish(v.pipe(v.number())),
 	capPuddles: v.nullish(v.boolean(), true),
-	vaporEffect: v.nullish(EffectSchema),
+	vaporEffect: v.nullish(EffectSchema(value.get("vaporEffect"))),
 	hidden: v.nullish(v.boolean(), false),
 	canStayOn: v.nullish(v.array(v.string())),
-    research: ResearchSchema,
+	research: ResearchSchema,
 });
-
-export type LiquidHjsonData = v.InferOutput<typeof LiquidHjsonSchema>;

@@ -17,7 +17,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "valibot": "catalog:"
+    "valibot": "catalog:",
+    "@project/hjson": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.7.0",
