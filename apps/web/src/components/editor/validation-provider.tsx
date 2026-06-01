@@ -33,7 +33,9 @@ const ValidationFileContext = createContext<ValidationContextValue | null>(null)
 
 export function useValidationContext(): ValidationContextValue {
 	const ctx = useContext(ValidationFileContext);
-	if (!ctx) throw new Error("useValidationContext must be used within a ValidationProvider");
+
+	if (!ctx) throw new Error("useValidationContext() must be used within a ValidationProvider");
+
 	return ctx;
 }
 
@@ -130,13 +132,17 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 					const getContent = async () => {
 						const key = cacheKey(projectId, path);
 						const entry = useFileStore.getState().fileContents[key];
-						if (entry && entry.data) {
+						
+                        if (entry && entry.data) {
 							return decodeContent(entry.data);
 						}
+
 						const data = await useProjectSession.getState().projectContext!.fs.readTextFile(path);
-						if (data === null) {
+						
+                        if (data === null) {
 							return "";
 						}
+
 						return data;
 					};
 					const results = await runner.validate(path, getContent, validationContext);

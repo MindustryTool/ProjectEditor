@@ -25,8 +25,8 @@ export function EditorShell({ path }: EditorShellProps) {
 	const isDesktop = useIsDesktop();
 
 	return (
-		<div className="flex min-h-0 flex-1 flex-col bg-background text-foreground overflow-hidden h-dvh max-h-dvh">
-			<ValidationProvider>
+		<ValidationProvider>
+			<div className="flex min-h-0 flex-1 flex-col bg-background text-foreground overflow-hidden h-dvh max-h-dvh">
 				{isDesktop ? (
 					<Fragment>
 						<Toolbar>
@@ -60,7 +60,7 @@ export function EditorShell({ path }: EditorShellProps) {
 				) : (
 					<EditorMobileLayout path={path} />
 				)}
-			</ValidationProvider>
-		</div>
+			</div>
+		</ValidationProvider>
 	);
 }
