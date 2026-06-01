@@ -30,6 +30,9 @@ export type { Research } from "./base";
 export { SectorHjsonSchema } from "./sector";
 export type { SectorHjsonData } from "./sector";
 
+export { StatusHjsonSchema } from "./status";
+export type { StatusHjsonData } from "./status";
+
 export { LiquidHjsonSchema } from "./liquid";
 export type { LiquidHjsonData } from "./liquid";
 
