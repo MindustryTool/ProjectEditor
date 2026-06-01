@@ -1,6 +1,6 @@
 import type * as v from "valibot";
 import { MindustryHexColorSchema } from "./base";
-import { ResearchSchema } from "./item";
+import { ResearchSchema } from "./base";
 
 export type AnySchema =
 	| v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>

@@ -21,10 +21,14 @@ export const SettingsSchema = v.object({
 export { ModHjsonSchema } from "./mod-hjson";
 export type { ModHjsonData } from "./mod-hjson";
 
-export { ItemHjsonSchema, ResearchSchema } from "./item";
-export type { ItemHjsonData, Research } from "./item";
+export { ItemHjsonSchema } from "./item";
+export type { ItemHjsonData } from "./item";
 
-export { ContentNameSchema, MindustryHexColorSchema } from "./base";
+export { ContentNameSchema, MindustryHexColorSchema, ResearchSchema } from "./base";
+export type { Research } from "./base";
+
+export { LiquidHjsonSchema } from "./liquid";
+export type { LiquidHjsonData } from "./liquid";
 
 export { unwrapSchema, hasNullishWrapper, detectSchemaType, getSchemaEntries, getArrayItemSchema } from "./schema-utils";
 export type { AnySchema } from "./schema-utils";

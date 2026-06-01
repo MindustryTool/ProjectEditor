@@ -18,6 +18,7 @@ import { Plus, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
 import { type ReactNode } from "react";
 import { detectSchemaType, getSchemaEntries, getArrayItemSchema, hasNullishWrapper, type AnySchema } from "@project/schema";
+import * as v from "valibot";
 
 interface FieldsRendererProps {
 	path: string;
@@ -28,8 +29,7 @@ interface FieldsRendererProps {
 }
 
 export function FieldsRenderer({ path, schema, node, original, onPatch }: FieldsRendererProps) {
-const issues = useValidationStore((state) => 
-state.results.resultsByPath[path]);
+	const issues = useValidationStore((state) => state.results.resultsByPath[path]);
 	const entries = getSchemaEntries(schema);
 
 	return entries.map(([name, entrySchema]) => {
@@ -50,6 +50,12 @@ state.results.resultsByPath[path]);
 		const isNullable = hasNullishWrapper(entrySchema);
 
 		const patchValue = (newRawValue: unknown) => {
+			if (v.getDefault(entrySchema) === newRawValue) {
+				const newContent = node.removeField(original, name);
+				onPatch(newContent);
+				return;
+			}
+
 			if (newRawValue === undefined || newRawValue === null || (typeof newRawValue === "number" && isNaN(newRawValue))) {
 				if (isNullable) {
 					const newContent = node.removeField(original, name);
@@ -84,20 +90,18 @@ state.results.resultsByPath[path]);
 		);
 	});
 }
-type SchemaRenderer = (
-	props: {
-		name: string;
-		node: HjsonNode;
-		original: string;
-		onPatch: (newContent: string) => void;
-		patchValue: (newRawValue: unknown) => void;
-		entrySchema: AnySchema;
-	},
-) => ReactNode;
+type SchemaRenderer = (props: {
+	name: string;
+	node: HjsonNode;
+	original: string;
+	onPatch: (newContent: string) => void;
+	patchValue: (newRawValue: unknown) => void;
+	entrySchema: AnySchema;
+}) => ReactNode;
 
 const schemaRenderers: Record<string, SchemaRenderer> = {
-	string: ({ name, node, patchValue }) => {
-		const value = node.isString() ? node.valueOf() : "";
+	string: ({ name, node, patchValue, entrySchema }) => {
+		const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema);
 		return (
 			<FormField>
 				<FormLabel>{name}</FormLabel>
@@ -107,8 +111,8 @@ const schemaRenderers: Record<string, SchemaRenderer> = {
 			</FormField>
 		);
 	},
-	number: ({ name, node, patchValue }) => {
-		const value = node.isNumber() ? node.valueOf() : "";
+	number: ({ name, node, patchValue, entrySchema }) => {
+		const value = node.isNumber() ? node.valueOf() : v.getDefault(entrySchema);
 		return (
 			<FormField>
 				<FormLabel>{name}</FormLabel>
@@ -118,8 +122,8 @@ const schemaRenderers: Record<string, SchemaRenderer> = {
 			</FormField>
 		);
 	},
-	boolean: ({ name, node, patchValue }) => {
-		const checked = node.isBoolean() ? node.valueOf() : false;
+	boolean: ({ name, node, patchValue, entrySchema }) => {
+		const checked = node.isBoolean() ? node.valueOf() : v.getDefault(entrySchema);
 		return (
 			<FormField>
 				<FormControl className="flex-row flex gap-1">
@@ -129,8 +133,10 @@ const schemaRenderers: Record<string, SchemaRenderer> = {
 			</FormField>
 		);
 	},
-	"hex-color": ({ name, node, patchValue }) => {
-		const value = node.isString() ? node.valueOf() : "";
+	"hex-color": ({ name, node, patchValue, entrySchema }) => {
+		let value = node.isString() ? node.valueOf() : v.getDefault(entrySchema);
+		value = value?.startsWith("#") ? value : "#" + value;
+
 		return (
 			<FormField>
 				<FormLabel>{name}</FormLabel>
@@ -139,12 +145,12 @@ const schemaRenderers: Record<string, SchemaRenderer> = {
 						<Popover>
 							<PopoverTrigger
 								className="h-16 w-full relative cursor-pointer rounded border border-border bg-transparent p-0"
-								style={{ backgroundColor: value || "#000000" }}
+								style={{ backgroundColor: value }}
 							>
 								<span className="text-sm absolute left-1 bottom-1">{value}</span>
 							</PopoverTrigger>
 							<PopoverContent className="w-64 p-3" side="bottom" align="start">
-								<ColorPicker value={value || "#000000"} onChange={(val) => patchValue(val)}>
+								<ColorPicker value={value} onChange={(val) => patchValue(val)}>
 									<ColorPickerSelection className="h-40 rounded-lg" />
 									<ColorPickerHue />
 									<ColorPickerAlpha />
@@ -191,7 +197,12 @@ const schemaRenderers: Record<string, SchemaRenderer> = {
 						{items.map((el, index) => (
 							<div key={index} className="flex items-center gap-2">
 								<div className="flex-1">
-									<SchemaArrayItemEditor value={el.value} itemType={itemType} itemSchema={itemSchema} onChange={(v) => handleItemChange(index, v)} />
+									<SchemaArrayItemEditor
+										value={el.value}
+										itemType={itemType}
+										itemSchema={itemSchema}
+										onChange={(v) => handleItemChange(index, v)}
+									/>
 								</div>
 								<Button className="size-9 shrink-0" type="button" variant="outline" onClick={() => handleRemove(index)}>
 									<X />
@@ -407,7 +418,17 @@ function getSchemaRenderer(type: string | null): SchemaRenderer {
 	return schemaRenderers.string!;
 }
 
-function SchemaArrayItemEditor({ value, itemType, itemSchema, onChange }: { value: unknown; itemType: string | null; itemSchema: AnySchema | null; onChange: (v: unknown) => void }) {
+function SchemaArrayItemEditor({
+	value,
+	itemType,
+	itemSchema,
+	onChange,
+}: {
+	value: unknown;
+	itemType: string | null;
+	itemSchema: AnySchema | null;
+	onChange: (v: unknown) => void;
+}) {
 	const renderer = getSchemaRenderer(itemType);
 	const node =
 		value instanceof HjsonNode ? value : new HjsonValueNode<unknown>(value, { row: 0, col: 0, index: 0 }, { row: 0, col: 0, index: 0 });
@@ -443,5 +464,3 @@ function defaultForDetectedType(schema: AnySchema): unknown {
 			return "";
 	}
 }
-
-

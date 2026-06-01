@@ -86,11 +86,6 @@ function scheduleValidation(
 	);
 }
 
-function extractPath(compositeKey: string): string {
-	const idx = compositeKey.indexOf("::");
-	return idx >= 0 ? compositeKey.slice(idx + 2) : compositeKey;
-}
-
 export function ValidationProvider({ children }: { children: ReactNode }) {
 	const timersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
 	const validationDelayMs = useAppStore(useShallow((s) => s.settings.validationDelayMs));
@@ -101,6 +96,7 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 	const statuses = useStatuses();
 	const units = useUnits();
 	const projectContext = useProjectSession((s) => s.projectContext);
+	const projectId = projectContext?.project.id;
 
 	const validationContext = useMemo(
 		() => ({
@@ -132,15 +128,14 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 	);
 
 	useEffect(() => {
-		if (!projectContext) {
+		if (!projectId) {
 			return;
 		}
-		const projectId = projectContext.project.id;
 
 		for (const path of Object.keys(useValidationStore.getState().results.resultsByPath)) {
 			scheduleValidation(projectId, path, timersRef.current, validationDelayMs, validationContext);
 		}
-	}, [projectContext, validationContext, validationDelayMs]);
+	}, [projectId, validationContext, validationDelayMs]);
 
 	useEffect(() => {
 		if (!projectContext) {
@@ -163,31 +158,10 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 			useValidationStore.getState().clearResults(event.path);
 		});
 
-		const unsubHydration = useValidationStore.persist.onFinishHydration((state) => {
-			for (const path of Object.keys(state.results.resultsByPath)) {
-				useFileStore.getState().readFile(projectId, path, projectContext.fs);
-			}
-		});
-
-		const unsubStore = useFileStore.subscribe((state, prevState) => {
-			const prefix = `${projectId}::`;
-			for (const key of Object.keys(state.fileContents)) {
-				if (!key.startsWith(prefix)) continue;
-				const curr = state.fileContents[key];
-				const prev = prevState.fileContents[key];
-				if (curr && !curr.loading && prev?.loading && curr.data !== prev.data) {
-					const path = extractPath(key);
-					scheduleValidation(projectId, path, timers, validationDelayMs, validationContext);
-				}
-			}
-		});
-
 		return () => {
 			unsubWrite();
 			unsubCreate();
 			unsubDelete();
-			unsubHydration();
-			unsubStore();
 			for (const [, timer] of timers) {
 				clearTimeout(timer);
 			}
