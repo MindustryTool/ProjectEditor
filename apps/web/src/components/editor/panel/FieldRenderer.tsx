@@ -16,7 +16,7 @@ import type { HjsonObjectNode } from "@project/hjson";
 import { HjsonNode, HjsonValueNode, HjsonArrayNode } from "@project/hjson";
 import { Plus, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
-import { type ReactNode } from "react";
+import React, { useCallback, type ReactNode } from "react";
 import {
 	detectSchemaType,
 	getSchemaEntries,
@@ -26,6 +26,12 @@ import {
 	type AnySchema,
 } from "@project/schema";
 import * as v from "valibot";
+import { useBlocks, type ContentEntry } from "#/hooks/use-blocks";
+import { useUnits } from "#/hooks/use-units";
+import { useLiquids } from "#/hooks/use-liquids";
+import { useSectors } from "#/hooks/use-sectors";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
+import { cn } from "#/lib/utils";
 
 interface FieldsRendererProps {
 	path: string;
@@ -251,6 +257,21 @@ const schemaRenderers: Record<string, SchemaRenderer> = {
 
 function ResearchField({ name, node, original, onPatch, patchValue }: Parameters<SchemaRenderer>[0]) {
 	const items = useItems({ project: true, base: true });
+	const blocks = useBlocks();
+	const units = useUnits();
+	const liquids = useLiquids();
+	const sectors = useSectors();
+
+	const findContent = useCallback((name: string, entries: ContentEntry[][]) => {
+		for (const entry of entries) {
+			for (const item of entry) {
+				if (item.name === name) {
+					return item;
+				}
+			}
+		}
+		return null;
+	}, []);
 
 	function getCurrentValue(): Research | string | null {
 		if (node.isValue()) {
@@ -292,6 +313,7 @@ function ResearchField({ name, node, original, onPatch, patchValue }: Parameters
 				onPatch(newContent);
 				return;
 			}
+
 			if (reqsChanged && !parentChanged && newRequirements.length > 0) {
 				const reqField = researchNode.field("requirements");
 				const arrNode = reqField?.value instanceof HjsonArrayNode ? reqField.value : null;
@@ -361,67 +383,172 @@ function ResearchField({ name, node, original, onPatch, patchValue }: Parameters
 		);
 	}
 
+	const parentEntry = findContent(parent, [items, blocks, liquids, sectors, units]);
+
 	return (
 		<>
 			<FormField>
 				<FormLabel>{name}</FormLabel>
 				<FormControl>
-					<Input value={parent} onChange={(v) => handleChange(v.currentTarget.value, requirements)} />
+					<Dialog>
+						<DialogTrigger asChild>
+							{parentEntry ? (
+								<Button variant="outline" size="icon">
+									<ContentImage className="p-1" entry={parentEntry} />
+								</Button>
+							) : (
+								<Button variant="outline">{parent || "Select"}</Button>
+							)}
+						</DialogTrigger>
+						<DialogContent className="w-sm" showCloseButton={false}>
+							<VisuallyHidden.Root>
+								<DialogTitle />
+								<DialogDescription />
+							</VisuallyHidden.Root>
+							<ToggleGroup
+								className="w-full"
+								type="single"
+								value={parentEntry?.name}
+								onValueChange={(v) => handleChange(v, requirements)}
+							>
+								<Tabs className="w-full">
+									<TabsList>
+										<TabsTrigger value="item">Item</TabsTrigger>
+										<TabsTrigger value="block">Block</TabsTrigger>
+										<TabsTrigger value="liquid">Liquid</TabsTrigger>
+										<TabsTrigger value="sector">Sector</TabsTrigger>
+										<TabsTrigger value="unit">Unit</TabsTrigger>
+									</TabsList>
+									<TabsContent asChild value="item">
+										<ItemGrid>
+											{items
+												.filter((i) => i.name !== parentEntry?.name && !addedReq.includes(i.name))
+												.map((item) => (
+													<ToggleGroupItem key={item.name} value={item.name}>
+														<ContentImage entry={item} />
+													</ToggleGroupItem>
+												))}
+										</ItemGrid>
+									</TabsContent>
+									<TabsContent asChild value="block">
+										<ItemGrid>
+											{blocks
+												.filter((i) => i.name !== parentEntry?.name && !addedReq.includes(i.name))
+												.map((item) => (
+													<ToggleGroupItem key={item.name} value={item.name}>
+														<ContentImage entry={item} />
+													</ToggleGroupItem>
+												))}
+										</ItemGrid>
+									</TabsContent>
+									<TabsContent asChild value="liquid">
+										<ItemGrid>
+											{liquids
+												.filter((i) => i.name !== parentEntry?.name && !addedReq.includes(i.name))
+												.map((item) => (
+													<ToggleGroupItem key={item.name} value={item.name}>
+														<ContentImage entry={item} />
+													</ToggleGroupItem>
+												))}
+										</ItemGrid>
+									</TabsContent>
+									<TabsContent asChild value="sector">
+										<ItemGrid>
+											{sectors
+												.filter((i) => i.name !== parentEntry?.name && !addedReq.includes(i.name))
+												.map((item) => (
+													<ToggleGroupItem key={item.name} value={item.name}>
+														<ContentImage entry={item} />
+													</ToggleGroupItem>
+												))}
+										</ItemGrid>
+									</TabsContent>
+									<TabsContent asChild value="unit">
+										<ItemGrid>
+											{units
+												.filter((i) => i.name !== parentEntry?.name && !addedReq.includes(i.name))
+												.map((item) => (
+													<ToggleGroupItem key={item.name} value={item.name}>
+														<ContentImage entry={item} />
+													</ToggleGroupItem>
+												))}
+										</ItemGrid>
+									</TabsContent>
+								</Tabs>
+							</ToggleGroup>
+						</DialogContent>
+					</Dialog>
+				</FormControl>
+				<FormControl className="grid gap-2">
+					{requirements.map((requirement: string, index: number) => {
+						const parts = requirement.split("/");
+						const itemName = parts[0]!;
+						const reqNumber = Number(parts[1]);
+
+						const selectedItem = items.find((i) => i.name === itemName);
+
+						return (
+							<FormField key={index}>
+								<FormControl className="flex gap-1">
+									<Dialog>
+										<DialogTrigger asChild>
+											<Button variant="outline" size="icon">
+												{selectedItem ? <ContentImage className="p-1" entry={selectedItem} /> : itemName}
+											</Button>
+										</DialogTrigger>
+										<DialogContent className="w-sm" showCloseButton={false}>
+											<VisuallyHidden.Root>
+												<DialogTitle />
+												<DialogDescription />
+											</VisuallyHidden.Root>
+											<ToggleGroup
+												type="single"
+												value={itemName}
+												onValueChange={(v) => (v ? handleUpdateReq(index, v, reqNumber) : handleRemoveReq(index))}
+												asChild
+											>
+												<ItemGrid>
+													{items
+														.filter((i) => i.name !== itemName && !addedReq.includes(i.name))
+														.map((item) => (
+															<ToggleGroupItem key={item.name} value={item.name}>
+																<ContentImage entry={item} />
+															</ToggleGroupItem>
+														))}
+												</ItemGrid>
+											</ToggleGroup>
+										</DialogContent>
+									</Dialog>
+									<Input
+										type="number"
+										value={reqNumber}
+										onChange={(v) => handleUpdateReq(index, itemName, Number(v.currentTarget.valueAsNumber))}
+									/>
+									<Button className="text-destructive" variant="outline" size="icon" onClick={() => handleRemoveReq(index)}>
+										<X />
+									</Button>
+								</FormControl>
+							</FormField>
+						);
+					})}
+					<Button className="w-full" variant="outline" onClick={handleAddNewReq}>
+						<Plus />
+					</Button>
 				</FormControl>
 			</FormField>
-			{requirements.map((requirement: string, index: number) => {
-				const parts = requirement.split("/");
-				const itemName = parts[0]!;
-				const reqNumber = Number(parts[1]);
-
-				const selectedItem = items.find((i) => i.name === itemName);
-
-				return (
-					<FormField key={index}>
-						<FormControl className="flex gap-1">
-							<Dialog>
-								<DialogTrigger asChild>
-									<Button variant="outline" size="icon">
-										{selectedItem ? <ContentImage className="p-1" entry={selectedItem} /> : itemName}
-									</Button>
-								</DialogTrigger>
-								<DialogContent className="w-sm" showCloseButton={false}>
-									<VisuallyHidden.Root>
-										<DialogTitle />
-										<DialogDescription />
-									</VisuallyHidden.Root>
-									<ToggleGroup
-										className="grid w-full grid-cols-[repeat(auto-fill,minmax(32px,1fr))] gap-1"
-										type="single"
-										value={itemName}
-										onValueChange={(v) => (v ? handleUpdateReq(index, v, reqNumber) : handleRemoveReq(index))}
-									>
-										{items
-											.filter((i) => i.name !== itemName && !addedReq.includes(i.name))
-											.map((item) => (
-												<ToggleGroupItem key={item.name} value={item.name}>
-													<ContentImage entry={item} />
-												</ToggleGroupItem>
-											))}
-									</ToggleGroup>
-								</DialogContent>
-							</Dialog>
-							<Input
-								type="number"
-								value={reqNumber}
-								onChange={(v) => handleUpdateReq(index, itemName, Number(v.currentTarget.valueAsNumber))}
-							/>
-							<Button className="text-destructive" variant="outline" size="icon" onClick={() => handleRemoveReq(index)}>
-								<X />
-							</Button>
-						</FormControl>
-					</FormField>
-				);
-			})}
-			<Button className="w-full" variant="outline" onClick={handleAddNewReq}>
-				<Plus />
-			</Button>
 		</>
+	);
+}
+
+function ItemGrid({ className, ...props }: React.ComponentProps<"div">) {
+	return (
+		<div
+			className={cn(
+				"grid w-full grid-cols-[repeat(auto-fill,minmax(32px,1fr))] gap-1 max-h-[90dhv] md:max-h-[50dvh] overflow-y-auto",
+				className,
+			)}
+			{...props}
+		/>
 	);
 }
 
