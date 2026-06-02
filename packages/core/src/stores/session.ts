@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { ProjectInfo, EventBus, ProjectEventMap } from "../index.js";
+import type { ProjectInfo, EventBus, ProjectEventMap } from "@project/core";
 import type { FileEntry } from "@project/fs";
-import type { ProjectFileSystem } from "../fs/project-file-system.js";
+import type { ProjectFileSystem } from "@project/core";
 
 export interface ProjectContext {
 	project: ProjectInfo;

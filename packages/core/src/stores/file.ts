@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { ProjectFileSystem } from "../project-file-system.js";
-import type { EventBus, ProjectEventMap } from "../index.js";
+import type { ProjectFileSystem } from "@project/core";
+import type { EventBus, ProjectEventMap } from "@project/core";
 
 const MAX_CACHE_ENTRIES = 100;
 

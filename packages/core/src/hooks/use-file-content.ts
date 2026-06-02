@@ -6,9 +6,9 @@ import {
 	selectEntry,
 	selectIsSaving,
 	getEntry,
-} from "../stores/file";
-import { useProjectSession } from "../stores/session";
-import { getWriteQueue, disposeWriteQueue } from "../services/write-queue";
+} from "@project/core";
+import { useProjectSession } from "@project/core";
+import { getWriteQueue, disposeWriteQueue } from "@project/core";
 
 export interface UseFileResult<T> {
 	data: T | null;
@@ -59,7 +59,7 @@ export function useFile(path: string): UseFileResult<ArrayBuffer> {
 
 			store.markSaving(projectId, path);
 			const queue = getWriteQueue(projectId, projectContext.fs);
-			queue.enqueue(path, content, version).then(
+			queue.write(path, content).then(
 				() => {
 					const updatedEntry = getEntry(projectId, path);
 					if (!updatedEntry || updatedEntry.currentVersion !== version) return;
