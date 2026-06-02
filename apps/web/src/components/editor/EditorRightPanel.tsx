@@ -4,6 +4,7 @@ import { ItemPanel } from "#/components/editor/panel/ItemPanel";
 import { LiquidPanel } from "#/components/editor/panel/LiquidPanel";
 import { SectorPanel } from "#/components/editor/panel/SectorPanel";
 import { StatusPanel } from "#/components/editor/panel/StatusPanel";
+import { UnitPanel } from "#/components/editor/panel/UnitPanel";
 
 interface EditorRightPanelProps {
 	path: string | null;
@@ -33,6 +34,10 @@ export const EditorRightPanel = memo(function EditorRightPanel({ path }: EditorR
 	if (path.startsWith("content/status") && path.endsWith(".json")) {
 		return <StatusPanel path={path} />;
 	}
+
+    if (path.startsWith("content/units") && path.endsWith(".json")) {
+        return <UnitPanel path={path} />;
+    }
 
 	if (path.startsWith("content")) {
 		return null;

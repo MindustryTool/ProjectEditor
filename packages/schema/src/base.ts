@@ -2,48 +2,6 @@ import { type ProjectContents } from "@project/types";
 import type { HjsonNode } from "@project/hjson";
 import * as v from "valibot";
 
-export function findContent(name: string, context: ProjectContents) {
-	const items = context.getItems();
-
-	const item = items.find((i) => i.name === name);
-
-	if (item) {
-		return item;
-	}
-
-	const blocks = context.getBlocks();
-	const block = blocks.find((b) => b.name === name);
-	if (block) {
-		return block;
-	}
-
-	const liquids = context.getLiquids();
-	const liquid = liquids.find((l) => l.name === name);
-	if (liquid) {
-		return liquid;
-	}
-
-	const sectors = context.getSectors();
-	const sector = sectors.find((s) => s.name === name);
-	if (sector) {
-		return sector;
-	}
-
-	const statuses = context.getStatuses();
-	const status = statuses.find((s) => s.name === name);
-	if (status) {
-		return status;
-	}
-
-	const units = context.getUnits();
-	const unit = units.find((u) => u.name === name);
-	if (unit) {
-		return unit;
-	}
-
-	return null;
-}
-
 export const ContentNameSchema = v.pipe(
 	v.string(),
 	v.regex(/^[a-z][a-zA-Z0-9-]*$/, "Must be lowercase letters, digits, hyphens"),
@@ -53,11 +11,28 @@ export const ContentNameSchema = v.pipe(
 
 export const MindustryHexColorSchema = v.pipe(
 	v.string(),
-	v.regex(/^[#]{0,1}(?:[0-9a-fA-F]{1,6}|[0-9a-fA-F]{8})$/, "Must be a valid hex color"),
+	v.regex(/^[#]{0,1}(?:[0-9a-fA-F]{1,8})$/, "Must be a valid hex color"),
 	v.metadata({
 		type: "color",
 	}),
 );
+
+export const Envs = {
+	terrestrial: 1,
+	space: 1 << 1,
+	underwater: 1 << 2,
+	spores: 1 << 3,
+	scorching: 1 << 4,
+	groundOil: 1 << 5,
+	groundWater: 1 << 6,
+	oxygen: 1 << 7,
+	any: 0xffffffff,
+	none: 0,
+} as const satisfies Record<string, number>;
+
+export const EnvValues = Object.values(Envs);
+
+export const EnvSchema = v.pipe(v.number(), v.picklist(EnvValues), v.metadata({ type: "env" }));
 
 export const ItemRequirementSchema = v.pipe(
 	v.string(),
@@ -179,7 +154,7 @@ export const ResearchSchema: SchemaFn = (_value, context) =>
 
 export type Research = v.InferOutput<ReturnType<typeof ResearchSchema>>;
 
-export const SoundSchema = v.pipe(
+export const SoundHjsonSchema = v.pipe(
 	v.string(),
 	v.minLength(1),
 	v.maxLength(127),
@@ -260,3 +235,45 @@ export const Interps = [
 	"bounceIn",
 	"bounceOut",
 ] as const;
+
+export function findContent(name: string, context: ProjectContents) {
+	const items = context.getItems();
+
+	const item = items.find((i) => i.name === name);
+
+	if (item) {
+		return item;
+	}
+
+	const blocks = context.getBlocks();
+	const block = blocks.find((b) => b.name === name);
+	if (block) {
+		return block;
+	}
+
+	const liquids = context.getLiquids();
+	const liquid = liquids.find((l) => l.name === name);
+	if (liquid) {
+		return liquid;
+	}
+
+	const sectors = context.getSectors();
+	const sector = sectors.find((s) => s.name === name);
+	if (sector) {
+		return sector;
+	}
+
+	const statuses = context.getStatuses();
+	const status = statuses.find((s) => s.name === name);
+	if (status) {
+		return status;
+	}
+
+	const units = context.getUnits();
+	const unit = units.find((u) => u.name === name);
+	if (unit) {
+		return unit;
+	}
+
+	return null;
+}

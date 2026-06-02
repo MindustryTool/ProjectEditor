@@ -1,6 +1,6 @@
 import * as v from "valibot";
 import { MindustryHexColorSchema, ResearchSchema, type SchemaFn } from "./base";
-import { EffectSchema } from "./effect";
+import { EffectHjsonSchema } from "./effect";
 export const LiquidHjsonSchema: SchemaFn = (value, context) =>
 	v.object({
 		color: v.nullish(MindustryHexColorSchema),
@@ -27,12 +27,12 @@ export const LiquidHjsonSchema: SchemaFn = (value, context) =>
 		coolant: v.nullish(v.boolean(), true),
 		moveThroughBlocks: v.nullish(v.boolean(), false),
 		incinerable: v.nullish(v.boolean(), true),
-		effect: v.nullish(EffectSchema(value.get("effect"), context)),
-		particleEffect: v.nullish(EffectSchema(value.get("particleEffect"), context)),
+		effect: v.nullish(EffectHjsonSchema(value.get("effect"), context)),
+		particleEffect: v.nullish(EffectHjsonSchema(value.get("particleEffect"), context)),
 		particleSpacing: v.nullish(v.pipe(v.number())),
 		boilPoint: v.nullish(v.pipe(v.number())),
 		capPuddles: v.nullish(v.boolean(), true),
-		vaporEffect: v.nullish(EffectSchema(value.get("vaporEffect"), context)),
+		vaporEffect: v.nullish(EffectHjsonSchema(value.get("vaporEffect"), context)),
 		hidden: v.nullish(v.boolean(), false),
 		canStayOn: v.nullish(v.array(v.pipe(v.picklist(context.getLiquids().map((liquid) => liquid.name)), v.metadata({ type: "liquids" })))),
 		research: ResearchSchema(value.get("research"), context),

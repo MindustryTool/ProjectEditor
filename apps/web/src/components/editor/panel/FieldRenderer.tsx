@@ -250,8 +250,8 @@ function BooleanField({ name, node, patchValue, entrySchema, issues }: Parameter
 function LiquidsListField({ name, node, patchValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
 	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "";
 	const context = useProjectContext();
-    const unwrappedSchema = unwrapSchema(entrySchema);
-    
+	const unwrappedSchema = unwrapSchema(entrySchema);
+
 	if ("options" in unwrappedSchema && Array.isArray(unwrappedSchema.options)) {
 		const options = unwrappedSchema.options
 			.map((v) => String(v))
@@ -288,8 +288,8 @@ function LiquidsListField({ name, node, patchValue, entrySchema, issues }: Param
 
 function PickListField({ name, node, patchValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
 	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "";
-    const unwrappedSchema = unwrapSchema(entrySchema);
-    
+	const unwrappedSchema = unwrapSchema(entrySchema);
+
 	if ("options" in unwrappedSchema && Array.isArray(unwrappedSchema.options)) {
 		const options = unwrappedSchema.options.map((v) => String(v));
 
@@ -369,7 +369,6 @@ function ArrayField({ path, name, node, original, onPatch, patchValue, entrySche
 		throw new Error("Array schema must have item schema: " + entrySchema);
 	}
 
-	const itemType = itemSchema ? detectSchemaType(itemSchema) : null;
 	const metadata = getSchemaMetadata(entrySchema);
 	const label = metadata?.name ? _t(metadata.name) : name;
 	const description = metadata?.description ? _t(metadata.description) : undefined;
@@ -386,7 +385,8 @@ function ArrayField({ path, name, node, original, onPatch, patchValue, entrySche
 	};
 
 	const handleAdd = () => {
-		const serialized = itemSchema ? HJSON.stringify(v.getDefault(itemSchema)) : '""';
+		const nextItemSchema = getArrayItemSchema(entrySchema, items.length) ?? itemSchema;
+		const serialized = nextItemSchema ? HJSON.stringify(v.getDefault(nextItemSchema)) : '""';
 		const newContent = node.insertElement(original, items.length, serialized);
 		onPatch(newContent);
 	};
@@ -398,6 +398,8 @@ function ArrayField({ path, name, node, original, onPatch, patchValue, entrySche
 			<FormControl>
 				<div className="flex flex-col gap-2">
 					{items.map((el, index) => {
+						const currentItemSchema = getArrayItemSchema(entrySchema, index) ?? itemSchema;
+						const currentItemType = detectSchemaType(currentItemSchema);
 						const entryJsonPath = jsonPath ? `${jsonPath}[${index}]` : `[${index}]`;
 						const entryIssues = issues.filter((issue) => issue.field?.startsWith(entryJsonPath));
 
@@ -406,8 +408,8 @@ function ArrayField({ path, name, node, original, onPatch, patchValue, entrySche
 								<SchemaArrayItemEditor
 									path={path}
 									value={el.value}
-									itemType={itemType}
-									itemSchema={itemSchema}
+									itemType={currentItemType}
+									itemSchema={currentItemSchema}
 									onChange={(v) => handleItemChange(index, v)}
 									original={original}
 									jsonPath={entryJsonPath}
@@ -435,7 +437,7 @@ function ObjectField({ name: parentName, path, node, original, onPatch, entrySch
 
 	const entries = getSchemaEntries(resolveSchema(entrySchema, node.valueOf()));
 
-	return entries.map(([name, entrySchema]) => {
+	const results = entries.map(([name, entrySchema]) => {
 		const key = name;
 		const type = detectSchemaType(entrySchema);
 		const childNode = node.get(name);
@@ -495,6 +497,8 @@ function ObjectField({ name: parentName, path, node, original, onPatch, entrySch
 			</ErrorBoundary>
 		);
 	});
+
+	return <div className="pl-4 border-l-2 border-border grid gap-6">{results}</div>;
 }
 
 function ResearchField({ name, node, original, onPatch, patchValue, issues }: Parameters<SchemaRenderer>[0]) {
@@ -810,20 +814,18 @@ function EffectField({ path, name, node, original, patchValue, entrySchema, onPa
 						</CollapsibleTrigger>
 						<CollapsibleContent>
 							<FormControl>
-								<div className="pl-4 border-l-2 border-border grid gap-6">
-									<ObjectField
-										path={path}
-										name={name}
-										node={node}
-										patchValue={patchValue}
-										entrySchema={entrySchema}
-										original={original}
-										onPatch={onPatch}
-										jsonPath={jsonPath}
-										issues={issues}
-									/>
-									<Separator />
-								</div>
+								<ObjectField
+									path={path}
+									name={name}
+									node={node}
+									patchValue={patchValue}
+									entrySchema={entrySchema}
+									original={original}
+									onPatch={onPatch}
+									jsonPath={jsonPath}
+									issues={issues}
+								/>
+								<Separator />
 							</FormControl>
 						</CollapsibleContent>
 					</FormField>

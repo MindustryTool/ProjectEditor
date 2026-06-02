@@ -25,7 +25,7 @@ export function EditorPage() {
 
 	function randomLoad() {
 		const added = Math.floor(Math.random() * 10 + 5);
-		setLoading((prev) => Math.min(100, prev + added));
+		setLoading((prev) => (prev > 70 ? prev : Math.min(100, prev + added)));
 	}
 
 	useEffect(() => {

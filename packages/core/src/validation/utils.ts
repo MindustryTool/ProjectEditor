@@ -1,5 +1,5 @@
 import type * as v from "valibot";
-import { resolveSchema } from "@project/schema";
+import { getArrayItemSchema, resolveSchema } from "@project/schema";
 
 type AnySchema =
 	| v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>
@@ -89,7 +89,8 @@ export function findUnknownProperties(schema: AnySchema, value: unknown, path = 
 		}
 
 		for (let i = 0; i < value.length; i++) {
-			unknown.push(...findUnknownProperties(schema.item as AnySchema, value[i], `${path}[${i}]`));
+			const itemSchema = getArrayItemSchema(schema as unknown as AnySchema, i) ?? (schema.item as AnySchema);
+			unknown.push(...findUnknownProperties(itemSchema, value[i], `${path}[${i}]`));
 		}
 
 		return unknown;

@@ -1,6 +1,6 @@
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
-import { resolveSchema, unwrapSchema, hasNullishWrapper, detectSchemaType, getSchemaEntries, getArrayItemSchema, getSchemaMetadata, type AnySchema, MindustryHexColorSchema, ContentNameSchema } from "@project/schema";
+import { lazyArray, resolveSchema, unwrapSchema, hasNullishWrapper, detectSchemaType, getSchemaEntries, getArrayItemSchema, getSchemaMetadata, type AnySchema, MindustryHexColorSchema, ContentNameSchema } from "@project/schema";
 
 describe("unwrapSchema", () => {
 	it("returns the same schema for non-wrapped types", () => {
@@ -174,6 +174,12 @@ describe("getArrayItemSchema", () => {
 		expect(getArrayItemSchema(schema as AnySchema)).toBe(item);
 	});
 
+	it("returns indexed item schema for lazyArray", () => {
+		const schema = lazyArray((index) => (index % 2 === 0 ? v.string() : v.number()));
+		expect(detectSchemaType(getArrayItemSchema(schema as AnySchema, 0) as AnySchema)).toBe("string");
+		expect(detectSchemaType(getArrayItemSchema(schema as AnySchema, 1) as AnySchema)).toBe("number");
+	});
+
 	it("returns null for non-array schema", () => {
 		expect(getArrayItemSchema(v.string() as AnySchema)).toBeNull();
 	});
@@ -310,6 +316,28 @@ describe("resolveSchema", () => {
 		const schema = v.object({ a: v.string(), b: v.number() });
 		const resolved = resolveSchema(schema as AnySchema, {});
 		expect(getSchemaEntries(resolved as AnySchema)).toHaveLength(2);
+	});
+
+	it("parses each lazyArray item with schema resolved from index", () => {
+		const schema = lazyArray((index) =>
+			index % 2 === 0
+				? v.pipe(v.string(), v.minLength(2))
+				: v.pipe(v.number(), v.minValue(10)),
+		);
+
+		const success = v.safeParse(schema, ["ab", 12, "cd"]);
+		expect(success.success).toBe(true);
+		if (success.success) {
+			expect(success.output).toEqual(["ab", 12, "cd"]);
+		}
+
+		const failure = v.safeParse(schema, ["a", 3]);
+		expect(failure.success).toBe(false);
+		if (!failure.success) {
+			expect(failure.issues).toHaveLength(2);
+			expect(failure.issues[0]?.path?.[0]?.key).toBe(0);
+			expect(failure.issues[1]?.path?.[0]?.key).toBe(1);
+		}
 	});
 });
 

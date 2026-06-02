@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import * as v from "valibot";
 import { findUnknownProperties } from "@project/core";
+import { lazyArray } from "@project/schema";
 
 describe("findUnknownProperties", () => {
   describe("leaf / non-structural schemas", () => {
@@ -214,6 +215,14 @@ describe("findUnknownProperties", () => {
       const schema = v.array(v.object({ a: v.string() }));
       const value = [{ a: "x" }, { a: "y", b: "extra" }];
       expect(findUnknownProperties(schema, value)).toEqual(["[1].b"]);
+    });
+
+    it("uses indexed schema from lazyArray", () => {
+      const schema = lazyArray((index) =>
+        index === 0 ? v.object({ first: v.string() }) : v.object({ second: v.number() }),
+      );
+      const value = [{ first: "ok", extraA: true }, { second: 1, extraB: true }];
+      expect(findUnknownProperties(schema, value)).toEqual(["[0].extraA", "[1].extraB"]);
     });
   });
 

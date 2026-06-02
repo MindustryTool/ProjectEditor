@@ -22,6 +22,17 @@ export { StatusHjsonSchema } from "./status";
 
 export { LiquidHjsonSchema } from "./liquid";
 
+export { UnitHjsonSchema } from "./unit";
+
+export { WeaponHjsonSchema } from "./weapon";
+
+export { AbilityHjsonSchema } from "./ability";
+
+export { BulletHjsonSchema } from "./bullet";
+
+export { lazyArray } from "./lazy-array";
+export type { LazyArraySchema } from "./lazy-array";
+
 export {
 	resolveSchema,
 	unwrapSchema,

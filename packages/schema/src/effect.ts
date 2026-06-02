@@ -1,5 +1,5 @@
 import * as v from "valibot";
-import { Interps, MindustryHexColorSchema, SoundSchema, type SchemaFn } from "./base";
+import { Interps, MindustryHexColorSchema, SoundHjsonSchema, type SchemaFn } from "./base";
 
 const metadata = { type: "effect" };
 
@@ -39,7 +39,7 @@ const classSchemaMap: Record<EffectClass, () => v.ObjectSchema<v.ObjectEntries, 
 			length: v.nullish(v.number(), 20),
 			baseLength: v.nullish(v.number(), 0),
 			interp: v.nullish(v.picklist(Interps), "linear"),
-            sizeInterp: v.nullish(v.picklist(Interps), "linear"),
+			sizeInterp: v.nullish(v.picklist(Interps), "linear"),
 			offsetX: v.nullish(v.number(), 0),
 			offsetY: v.nullish(v.number(), 0),
 			lightScl: v.nullish(v.number(), 2),
@@ -113,7 +113,7 @@ const classSchemaMap: Record<EffectClass, () => v.ObjectSchema<v.ObjectEntries, 
 		}),
 	SoundEffect: () =>
 		v.object({
-			sound: v.nullish(SoundSchema),
+			sound: v.nullish(SoundHjsonSchema),
 			minPitch: v.nullish(v.number(), 0.8),
 			maxPitch: v.nullish(v.number(), 1.2),
 			minVolume: v.nullish(v.number(), 1),
@@ -154,7 +154,7 @@ const classSchemaMap: Record<EffectClass, () => v.ObjectSchema<v.ObjectEntries, 
 		}),
 };
 
-const effectItemUnionSchema = v.pipe(
+export const effectItemUnionSchema = v.pipe(
 	v.lazy((input) => {
 		if (typeof input === "object" && input !== null && "type" in input) {
 			const type = input.type as EffectClass;
@@ -173,11 +173,11 @@ const effectItemUnionSchema = v.pipe(
 	v.metadata(metadata),
 );
 
-export const EffectSchema: SchemaFn = (value, context) => {
-	return buildEffectSchema(value, context);
+export const EffectHjsonSchema: SchemaFn = (value, context) => {
+	return buildEffectHjsonSchema(value, context);
 };
 
-const buildEffectSchema: SchemaFn = (value) => {
+const buildEffectHjsonSchema: SchemaFn = (value) => {
 	if (value.isObject()) {
 		const type = value.get("type");
 

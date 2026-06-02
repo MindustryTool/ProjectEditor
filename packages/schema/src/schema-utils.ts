@@ -118,11 +118,16 @@ export function getSchemaEntries(schema: AnySchema): [string, AnySchema][] {
 	return [];
 }
 
-export function getArrayItemSchema(schema: AnySchema): AnySchema | null {
-	const s = unwrapSchema(schema) as unknown as { type: string; item?: AnySchema };
+export function getArrayItemSchema(schema: AnySchema, index = 0): AnySchema | null {
+	const s = unwrapSchema(schema) as unknown as { type: string; item?: AnySchema; getter?: (index: number) => AnySchema };
 
-	if (s.type === "array" && s.item) {
-		return s.item as AnySchema;
+	if (s.type === "array") {
+		if (s.getter) {
+			return s.getter(index);
+		}
+		if (s.item) {
+			return s.item as AnySchema;
+		}
 	}
 
 	return null;
