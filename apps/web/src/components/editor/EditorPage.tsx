@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "@tanstack/react-router";
-import { useAppStore, useProjectSession } from "@project/state";
+import { useAppStore, useProjectSession } from "@project/core";
 import { EditorShell } from "./EditorShell";
 import { useProjectActions } from "~/hooks/use-project-actions";
 import { useTranslation } from "react-i18next";

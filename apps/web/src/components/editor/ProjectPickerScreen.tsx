@@ -4,7 +4,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import type { ProjectLanguage } from "@project/core";
-import { useAppStore } from "@project/state";
+import { useAppStore } from "@project/core";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { FolderOpen, Plus, Settings, Upload } from "lucide-react";
 import { toast } from "sonner";

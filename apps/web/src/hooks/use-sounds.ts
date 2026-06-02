@@ -1,4 +1,4 @@
-import { useProjectSession, useCurrentProject } from "@project/state";
+import { useProjectSession, useCurrentProject } from "@project/core";
 import { useMemo } from "react";
 import type { ContentEntry } from "./use-blocks";
 import { useBaseSounds } from "#/hooks/use-base-sounds";

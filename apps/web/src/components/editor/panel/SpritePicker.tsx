@@ -1,5 +1,5 @@
 import { useCallback, useRef } from "react";
-import { useCurrentProject, useProjectSession, useFile } from "@project/state";
+import { useCurrentProject, useProjectSession, useFile } from "@project/core";
 import { Button } from "#/components/ui/button";
 import { FormControl, FormField, FormLabel } from "#/components/ui/form";
 import { resolveContentSprite } from "@project/utils";

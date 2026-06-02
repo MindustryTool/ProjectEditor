@@ -2,8 +2,8 @@ import { useMemo, useState, useRef, useEffect, useCallback, createContext, useCo
 import { Folder, FolderOpen, ChevronRight, ChevronDown, Pencil, Trash2, Plus, MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { isDefaultPath, type TreeNode } from "@project/fs";
-import type { TreeSnapshot } from "@project/state";
-import { useCurrentProject, useProjectSession, useFileStore, isDirty, selectEntry, selectIsSaving } from "@project/state";
+import type { TreeSnapshot } from "@project/core";
+import { useCurrentProject, useProjectSession, useFileStore, isDirty, selectEntry, selectIsSaving } from "@project/core";
 import { cn } from "~/lib/utils";
 import {
 	AlertDialog,

@@ -4,12 +4,12 @@ import { useNavigate } from "@tanstack/react-router";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import { cn } from "~/lib/utils";
-import { useProjectSession, useAppStore } from "@project/state";
+import { useProjectSession, useAppStore } from "@project/core";
 import { toast } from "sonner";
 import { ProjectPickerDialog } from "#/components/editor/ProjectPickerDialog";
 import { ProjectSettingsDialog } from "./ProjectSettingsDialog";
 import { useProjectActions } from "#/hooks/use-project-actions";
-import type { ProjectRecord } from "@project/state";
+import type { ProjectRecord } from "@project/core";
 import type { ProjectLanguage } from "@project/core";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "#/components/ui/dialog";
 

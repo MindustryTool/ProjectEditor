@@ -1,8 +1,8 @@
-import type { TreeSnapshot, ValidatorRegistry } from "@project/state";
+import type { TreeSnapshot, ValidatorRegistry } from "@project/core";
 import { useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { getExporter } from "@project/core";
-import { useProjectSession, useValidationStore } from "@project/state";
+import { useProjectSession, useValidationStore } from "@project/core";
 import { cn } from "~/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";

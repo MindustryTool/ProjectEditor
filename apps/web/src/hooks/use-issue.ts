@@ -1,4 +1,4 @@
-import { useValidationStore } from "@project/state";
+import { useValidationStore } from "@project/core";
 import { useMemo } from "react";
 
 export function useIssues() {

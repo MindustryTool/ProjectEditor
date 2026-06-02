@@ -24,7 +24,6 @@
         "@project/fs": "workspace:*",
         "@project/hjson": "workspace:*",
         "@project/schema": "workspace:*",
-        "@project/state": "workspace:*",
         "@project/utils": "workspace:*",
     "@valibot/i18n": "catalog:",
         "@project/zip": "workspace:*",

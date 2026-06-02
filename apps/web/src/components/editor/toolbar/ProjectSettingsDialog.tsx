@@ -2,9 +2,9 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { deleteProjectFiles } from "@project/fs";
-import { useAppStore, useProjectSession } from "@project/state";
-import type { ProjectRecord } from "@project/state";
+import { deleteProjectFiles } from "@project/core";
+import { useAppStore, useProjectSession } from "@project/core";
+import type { ProjectRecord } from "@project/core";
 import { Spinner } from "~/components/ui/spinner";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";

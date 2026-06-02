@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import * as v from "valibot";
-import { findUnknownProperties } from "@project/state";
+import { findUnknownProperties } from "@project/core";
 
 describe("findUnknownProperties", () => {
   describe("leaf / non-structural schemas", () => {

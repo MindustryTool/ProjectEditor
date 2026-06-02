@@ -1,5 +1,5 @@
 import { Button } from "./components";
-import { useAppStore, useProjectSession } from "@project/state";
+import { useAppStore, useProjectSession } from "@project/core";
 
 export function App() {
   const projectContext = useProjectSession((s) => s.projectContext);

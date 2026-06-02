@@ -16,7 +16,6 @@
     "react-router-dom": "catalog:",
     "@project/api": "workspace:*",
     "@project/core": "workspace:*",
-    "@project/state": "workspace:*",
     "@project/fs": "workspace:*",
     "@project/zip": "workspace:*",
     "@project/schema": "workspace:*",

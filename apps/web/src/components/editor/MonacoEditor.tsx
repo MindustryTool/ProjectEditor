@@ -16,9 +16,9 @@ import {
 	toPickerColorValue,
 	type MindustryColorTagMatch,
 } from "~/lib/monaco/colorTags";
-import { useValidationStore } from "@project/state";
-import { useFileStore } from "@project/state";
-import { useProjectSession } from "@project/state";
+import { useValidationStore } from "@project/core";
+import { useFileStore } from "@project/core";
+import { useProjectSession } from "@project/core";
 import { useTranslation } from "react-i18next";
 import { configureMonaco } from "~/lib/monaco/setup";
 import { useMonacoTheme } from "#/lib/monaco/use-monaco-theme";

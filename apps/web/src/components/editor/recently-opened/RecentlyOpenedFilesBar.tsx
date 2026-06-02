@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { X } from "lucide-react";
-import { useProjectSession, useCurrentProject } from "@project/state";
+import { useProjectSession, useCurrentProject } from "@project/core";
 import { cn } from "~/lib/utils";
 import { usePath } from "#/hooks/use-path";
 import { FileIcon } from "#/components/editor/FileIcon";

@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useValidationStore } from "@project/state";
+import { useValidationStore } from "@project/core";
 import { useTranslation } from "react-i18next";
 import { FileJson, Image } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog";

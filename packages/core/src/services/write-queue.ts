@@ -1,4 +1,4 @@
-import type { ProjectFileSystem } from "@project/fs";
+import type { ProjectFileSystem } from "../fs/project-file-system.js";
 
 interface PendingWrite {
   path: string;

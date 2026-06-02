@@ -1,4 +1,4 @@
-import type { ProjectContents } from "@project/core";
+import type { ProjectContents } from "../content.js";
 import type { ValidationResult, ValidatorRegistry } from "./types";
 
 export interface ValidationRunner {

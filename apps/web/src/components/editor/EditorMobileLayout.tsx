@@ -32,7 +32,7 @@ export function EditorMobileLayout({ path }: EditorMobileLayoutProps) {
 				<Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
 					<SheetTrigger asChild>
 						<button className="flex text-nowrap items-center gap-1 rounded px-2 py-1 text-xs font-medium text-foreground hover:bg-accent active:bg-accent">
-							{t("editor.file-explorer")}
+							{t("editor.files")}
 							<ChevronDown className="h-3 w-3 text-muted-foreground" />
 						</button>
 					</SheetTrigger>

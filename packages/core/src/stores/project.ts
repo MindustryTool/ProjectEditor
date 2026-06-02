@@ -7,8 +7,8 @@ import {
 	type ProjectEventMap,
 	importProject,
 	type ProjectInfo,
-} from "@project/core";
-import { createProjectFileSystem } from "@project/fs";
+} from "../index.js";
+import { createProjectFileSystem } from "../fs/project-file-system.js";
 import { TreeSnapshot, useProjectSession } from "./session";
 
 export interface AppSettings {

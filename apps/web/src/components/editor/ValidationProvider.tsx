@@ -7,8 +7,8 @@ import {
 	useAppStore,
 	useProjectSession,
 	useCurrentProject,
-} from "@project/state";
-import type { ValidationRunner, ValidatorRegistry } from "@project/state";
+} from "@project/core";
+import type { ValidationRunner, ValidatorRegistry } from "@project/core";
 import { useShallow } from "zustand/react/shallow";
 import { usePath } from "#/hooks/use-path";
 import type { ProjectContents } from "@project/core";

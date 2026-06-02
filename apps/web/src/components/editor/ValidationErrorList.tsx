@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import type { ValidationResult } from "@project/state";
+import type { ValidationResult } from "@project/core";
 import { cn } from "~/lib/utils";
 
 export type ValidationFileError = ValidationResult & { filePath: string };

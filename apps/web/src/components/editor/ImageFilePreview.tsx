@@ -1,5 +1,5 @@
 import { cn, getImageUrl } from "#/lib/utils";
-import { useFile } from "@project/state";
+import { useFile } from "@project/core";
 import { resolveContentSprite } from "@project/utils";
 import { File } from "lucide-react";
 import { useState, type ReactNode } from "react";

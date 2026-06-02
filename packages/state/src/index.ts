@@ -1,20 +1,13 @@
-export type { AppSettings, ProjectRecord } from "./stores/project";
-export type { ProjectContext, RecentFileEntry } from "./stores/session";
-export { useAppStore } from "./stores/project";
-export { useProjectSession, useCurrentProject, TreeSnapshot } from "./stores/session";
-
-export type { FileEntry, FileStore } from "./stores/file";
-export { useFileStore, isDirty, isError, getEntry, selectEntry, selectIsSaving } from "./stores/file";
-
-export { WriteQueue, getWriteQueue, disposeWriteQueue } from "./services/write-queue";
-export type { UseFileResult } from "./hooks/use-file-content";
-export { useFile } from "./hooks/use-file-content";
-export type { UseFileStringResult } from "./hooks/use-file-content-string";
-export { useFileString } from "./hooks/use-file-content-string";
-
-export { severityLabel, isErrorOrWarning } from "./validation/types";
-export { findUnknownProperties } from "./validation/utils.js";
+// Re-export shim for backward compatibility — all state APIs now live in @project/core
 export type {
+	AppSettings,
+	ProjectRecord,
+	ProjectContext,
+	RecentFileEntry,
+	FileEntry,
+	FileStore,
+	UseFileResult,
+	UseFileStringResult,
 	SeverityLevel,
 	ValidationResult,
 	ValidatorFn,
@@ -22,10 +15,29 @@ export type {
 	ValidatorRegistry,
 	ValidationSummary,
 	ValidationStore,
-} from "./validation/types";
-export { createValidatorRegistry } from "./validation/registry";
-export { createValidationRunner } from "./validation/runner";
-export type { ValidationRunner } from "./validation/runner";
-export { useValidationStore } from "./validation/store";
-export { createDefaultValidators } from "./validation/validators";
-export { ValidationResults } from "./validation/types";
+} from "@project/core";
+export {
+	useAppStore,
+	useProjectSession,
+	useCurrentProject,
+	TreeSnapshot,
+	useFileStore,
+	isDirty,
+	isError,
+	getEntry,
+	selectEntry,
+	selectIsSaving,
+	WriteQueue,
+	getWriteQueue,
+	disposeWriteQueue,
+	useFile,
+	useFileString,
+	severityLabel,
+	isErrorOrWarning,
+	findUnknownProperties,
+	createValidatorRegistry,
+	createValidationRunner,
+	useValidationStore,
+	createDefaultValidators,
+	ValidationResults,
+} from "@project/core";

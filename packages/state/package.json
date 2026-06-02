@@ -11,28 +11,12 @@
     }
   },
   "scripts": {
-    "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "zustand": "catalog:",
-    "@project/core": "workspace:*",
-    "@project/fs": "workspace:*",
-    "@project/config": "workspace:*",
-    "@project/schema": "workspace:*",
-    "@project/hjson": "workspace:*",
-    "valibot": "catalog:"
-  },
-  "peerDependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "@project/core": "workspace:*"
   },
   "devDependencies": {
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "typescript": "^5.7.0",
-    "vitest": "catalog:"
+    "typescript": "^5.7.0"
   }
 }

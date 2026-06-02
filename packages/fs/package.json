@@ -14,10 +14,6 @@
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
-  "dependencies": {
-    "@project/core": "workspace:*",
-    "@project/zip": "workspace:*"
-  },
   "devDependencies": {
     "typescript": "^5.7.0"
   }

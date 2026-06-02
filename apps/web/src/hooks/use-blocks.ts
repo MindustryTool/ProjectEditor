@@ -1,5 +1,5 @@
 import { useBaseBlocks } from "#/hooks/use-base-blocks";
-import { useProjectSession, useCurrentProject } from "@project/state";
+import { useProjectSession, useCurrentProject } from "@project/core";
 import { useMemo } from "react";
 
 export type ContentEntry = {

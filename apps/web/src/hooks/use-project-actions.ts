@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 import { createEventBus, type ProjectInfo, type ProjectLanguage, type ProjectEventMap } from "@project/core";
-import { createProjectFileSystem } from "@project/fs";
-import { TreeSnapshot, useAppStore, useProjectSession, useValidationStore, ValidationResults } from "@project/state";
-import type { ProjectRecord } from "@project/state";
+import { createProjectFileSystem } from "@project/core";
+import { TreeSnapshot, useAppStore, useProjectSession, useValidationStore, ValidationResults } from "@project/core";
+import type { ProjectRecord } from "@project/core";
 import { useNavigate, useParams } from "@tanstack/react-router";
 
 export function useProjectActions() {

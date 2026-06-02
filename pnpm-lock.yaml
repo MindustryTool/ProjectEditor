@@ -197,9 +197,6 @@ importers:
       '@project/schema':
         specifier: workspace:*
         version: link:../../packages/schema
-      '@project/state':
-        specifier: workspace:*
-        version: link:../../packages/state
       '@project/utils':
         specifier: workspace:*
         version: link:../../packages/utils
@@ -258,9 +255,6 @@ importers:
       '@project/schema':
         specifier: workspace:*
         version: link:../../packages/schema
-      '@project/state':
-        specifier: workspace:*
-        version: link:../../packages/state
       '@project/utils':
         specifier: workspace:*
         version: link:../../packages/utils
@@ -431,31 +425,48 @@ importers:
       '@project/config':
         specifier: workspace:*
         version: link:../config
-      '@project/core':
+      '@project/fs':
         specifier: workspace:*
-        version: 'link:'
+        version: link:../fs
+      '@project/hjson':
+        specifier: workspace:*
+        version: link:../hjson
+      '@project/schema':
+        specifier: workspace:*
+        version: link:../schema
       '@project/utils':
         specifier: workspace:*
         version: link:../utils
       '@project/zip':
         specifier: workspace:*
         version: link:../zip
+      react:
+        specifier: ^19.0.0
+        version: 19.2.6
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.6(react@19.2.6)
       valibot:
         specifier: 'catalog:'
         version: 1.4.0(typescript@5.9.3)
+      zustand:
+        specifier: 'catalog:'
+        version: 5.0.13(@types/react@19.2.15)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6))
     devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.15
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.2.3(@types/react@19.2.15)
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.7(@types/node@22.19.19)(jsdom@28.1.0(@noble/hashes@1.8.0))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.14(@types/node@22.19.19)(esbuild@0.27.3)(jiti@2.7.0))
 
   packages/fs:
-    dependencies:
-      '@project/core':
-        specifier: workspace:*
-        version: link:../core
-      '@project/zip':
-        specifier: workspace:*
-        version: link:../zip
     devDependencies:
       typescript:
         specifier: ^5.7.0
@@ -491,46 +502,13 @@ importers:
 
   packages/state:
     dependencies:
-      '@project/config':
-        specifier: workspace:*
-        version: link:../config
       '@project/core':
         specifier: workspace:*
         version: link:../core
-      '@project/fs':
-        specifier: workspace:*
-        version: link:../fs
-      '@project/hjson':
-        specifier: workspace:*
-        version: link:../hjson
-      '@project/schema':
-        specifier: workspace:*
-        version: link:../schema
-      react:
-        specifier: ^19.0.0
-        version: 19.2.6
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.2.6(react@19.2.6)
-      valibot:
-        specifier: 'catalog:'
-        version: 1.4.0(typescript@5.9.3)
-      zustand:
-        specifier: 'catalog:'
-        version: 5.0.13(@types/react@19.2.15)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6))
     devDependencies:
-      '@types/react':
-        specifier: ^19.0.0
-        version: 19.2.15
-      '@types/react-dom':
-        specifier: ^19.0.0
-        version: 19.2.3(@types/react@19.2.15)
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
-      vitest:
-        specifier: 'catalog:'
-        version: 4.1.7(@types/node@22.19.19)(jsdom@28.1.0(@noble/hashes@1.8.0))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.14(@types/node@22.19.19)(esbuild@0.27.3)(jiti@2.7.0))
 
   packages/utils:
     devDependencies:

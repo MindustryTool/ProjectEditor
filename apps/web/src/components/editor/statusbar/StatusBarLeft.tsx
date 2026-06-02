@@ -1,4 +1,4 @@
-import { useProjectSession } from "@project/state";
+import { useProjectSession } from "@project/core";
 import { useTranslation } from "react-i18next";
 
 export function StatusBarLeft() {

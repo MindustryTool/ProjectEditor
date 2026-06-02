@@ -12,16 +12,28 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@project/zip": "workspace:*",
     "@project/utils": "workspace:*",
     "@project/config": "workspace:*",
-    "@project/core": "workspace:*",
+    "@project/fs": "workspace:*",
+    "@project/schema": "workspace:*",
+    "@project/hjson": "workspace:*",
+    "zustand": "catalog:",
     "valibot": "catalog:"
   },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
   "devDependencies": {
-    "typescript": "^5.7.0"
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "catalog:"
   }
 }

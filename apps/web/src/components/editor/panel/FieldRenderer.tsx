@@ -10,7 +10,7 @@ import { Textarea } from "#/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { useItems } from "#/hooks/use-items";
-import { useFileString, useValidationStore, type ValidationResult } from "@project/state";
+import { useFileString, useValidationStore, type ValidationResult } from "@project/core";
 import { type Research } from "@project/schema";
 import { HJSON } from "@project/hjson";
 import type { HjsonObjectNode } from "@project/hjson";

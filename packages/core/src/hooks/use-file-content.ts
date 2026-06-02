@@ -6,10 +6,9 @@ import {
 	selectEntry,
 	selectIsSaving,
 	getEntry,
-	useProjectSession,
-	getWriteQueue,
-	disposeWriteQueue,
-} from "@project/state";
+} from "../stores/file";
+import { useProjectSession } from "../stores/session";
+import { getWriteQueue, disposeWriteQueue } from "../services/write-queue";
 
 export interface UseFileResult<T> {
 	data: T | null;

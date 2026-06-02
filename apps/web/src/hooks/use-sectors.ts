@@ -1,5 +1,5 @@
 import { useBaseSectors } from "#/hooks/use-base-sectors";
-import { useProjectSession, useCurrentProject } from "@project/state";
+import { useProjectSession, useCurrentProject } from "@project/core";
 import { useMemo } from "react";
 import type { ContentEntry } from "./use-blocks";
 
