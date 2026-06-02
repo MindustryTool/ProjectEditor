@@ -355,6 +355,7 @@ function ColorField({ name, node, patchValue, entrySchema, issues }: Parameters<
 function ArrayField({ path, name, node, original, onPatch, patchValue, entrySchema, jsonPath, issues }: Parameters<SchemaRenderer>[0]) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
+
 	if (!node.isArray()) {
 		patchValue([]);
 		return null;
@@ -362,6 +363,11 @@ function ArrayField({ path, name, node, original, onPatch, patchValue, entrySche
 
 	const items = node.elements();
 	const itemSchema = getArrayItemSchema(entrySchema);
+
+	if (!itemSchema) {
+		throw new Error("Array schema must have item schema: " + entrySchema);
+	}
+
 	const itemType = itemSchema ? detectSchemaType(itemSchema) : null;
 	const metadata = getSchemaMetadata(entrySchema);
 	const label = metadata?.name ? _t(metadata.name) : name;
@@ -874,7 +880,7 @@ function EffectField({ path, name, node, original, patchValue, entrySchema, onPa
 						</ToggleGroup>
 					</DialogContent>
 				</Dialog>
-                <FieldIssue issues={issues} />
+				<FieldIssue issues={issues} />
 			</FormField>
 		</div>
 	);
