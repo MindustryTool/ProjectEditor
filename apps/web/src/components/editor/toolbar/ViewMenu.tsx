@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "@tanstack/react-router";
+import { useAppStore } from "@project/core";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -32,9 +33,11 @@ export function ViewMenu({ className }: ViewMenuProps) {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { theme, setTheme } = useTheme();
+	const updateSettings = useAppStore((s) => s.updateSettings);
 
 	function handleThemeChange(mode: Theme) {
 		setTheme(mode);
+		updateSettings({ theme: mode });
 	}
 
 	function handleLanguageChange(code: Locale) {

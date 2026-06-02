@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
-import { useFileString } from "@project/core";
+import { useAppStore, useFileString } from "@project/core";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import { cn } from "~/lib/utils";
 import { usePath } from "#/hooks/use-path";
@@ -17,12 +17,13 @@ export function EditMenu({ className }: EditMenuProps) {
 	const [path] = usePath();
 	const { data, isLoading, write } = useFileString(path ?? "");
 	const canFormat = canFormatFilePath(path);
+	const settings = useAppStore((s) => s.settings);
 
 	const handleFormat = useCallback(() => {
 		if (!path || data === null || !canFormatFilePath(path)) return;
 
 		try {
-			write(formatFileContent(path, data));
+			write(formatFileContent(path, data, { indent: settings.tabSize }));
 		} catch (error) {
 			toast.error(
 				t("edit-menu.format-failed", {
@@ -30,7 +31,7 @@ export function EditMenu({ className }: EditMenuProps) {
 				}),
 			);
 		}
-	}, [data, path, t, write]);
+	}, [data, path, settings.tabSize, t, write]);
 
 	return (
 		<DropdownMenu>

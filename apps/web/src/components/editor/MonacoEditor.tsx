@@ -16,7 +16,7 @@ import {
 	toPickerColorValue,
 	type MindustryColorTagMatch,
 } from "~/lib/monaco/colorTags";
-import { useValidationStore } from "@project/core";
+import { useAppStore, useValidationStore } from "@project/core";
 import { useFileStore } from "@project/core";
 import { useProjectSession } from "@project/core";
 import { useTranslation } from "react-i18next";
@@ -48,6 +48,8 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 	const editorDisposablesRef = useRef<IDisposable[]>([]);
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const theme = useMonacoTheme();
+	const fontSize = useAppStore((s) => s.settings.fontSize);
+	const tabSize = useAppStore((s) => s.settings.tabSize);
 	const { t } = useTranslation();
 	const monacoConfigured = useRef(false);
 	const [activeColorTag, setActiveColorTag] = useState<ActiveColorTagState | null>(null);
@@ -384,7 +386,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 				options={{
 					readOnly,
 					minimap: { enabled: false },
-					fontSize: 15,
+					fontSize,
 					lineNumbers: "on",
 					renderWhitespace: "selection",
 					bracketPairColorization: { enabled: true },
@@ -392,7 +394,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 					autoClosingQuotes: "always",
 					scrollBeyondLastLine: false,
 					wordWrap: "on",
-					tabSize: 2,
+					tabSize,
 					insertSpaces: true,
 					padding: { top: 8 },
 					automaticLayout: true,

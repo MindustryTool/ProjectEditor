@@ -11,12 +11,12 @@ export function canFormatFilePath(path: string | null | undefined): boolean {
 	return loweredPath.endsWith(".json") || loweredPath.endsWith(".hjson");
 }
 
-export function formatFileContent(path: string, content: string): string {
+export function formatFileContent(path: string, content: string, options?: { indent: number }): string {
 	const loweredPath = path.toLowerCase();
 	const eol = detectEol(content);
 
 	if (loweredPath.endsWith(".hjson") || loweredPath.endsWith(".json")) {
-		return HJSON.format(content, { eol });
+		return HJSON.format(content, { eol, indent: options?.indent });
 	}
 
 	throw new Error(`Unsupported file type for formatting: ${path}`);
