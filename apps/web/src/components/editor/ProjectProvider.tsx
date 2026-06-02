@@ -4,7 +4,7 @@ import { useLiquids } from "#/hooks/use-liquids";
 import { useSectors } from "#/hooks/use-sectors";
 import { useStatuses } from "#/hooks/use-statuses";
 import { useUnits } from "#/hooks/use-units";
-import type { ProjectContents } from "@project/core";
+import type { ProjectContents } from "@project/types";
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 
 export interface ProjectContextValue {

@@ -1,6 +1,48 @@
-import { findContent, type ProjectContents } from "@project/core";
+import { type ProjectContents } from "@project/types";
 import type { HjsonNode } from "@project/hjson";
 import * as v from "valibot";
+
+export function findContent(name: string, context: ProjectContents) {
+	const items = context.getItems();
+
+	const item = items.find((i) => i.name === name);
+
+	if (item) {
+		return item;
+	}
+
+	const blocks = context.getBlocks();
+	const block = blocks.find((b) => b.name === name);
+	if (block) {
+		return block;
+	}
+
+	const liquids = context.getLiquids();
+	const liquid = liquids.find((l) => l.name === name);
+	if (liquid) {
+		return liquid;
+	}
+
+	const sectors = context.getSectors();
+	const sector = sectors.find((s) => s.name === name);
+	if (sector) {
+		return sector;
+	}
+
+	const statuses = context.getStatuses();
+	const status = statuses.find((s) => s.name === name);
+	if (status) {
+		return status;
+	}
+
+	const units = context.getUnits();
+	const unit = units.find((u) => u.name === name);
+	if (unit) {
+		return unit;
+	}
+
+	return null;
+}
 
 export const ContentNameSchema = v.pipe(
 	v.string(),
@@ -151,71 +193,70 @@ export type SchemaFn<
 > = (value: HjsonNode, context: ProjectContents) => T;
 
 export const Interps = [
-    'linear',
-    'reverse',
-    'smooth',
-    'smooth2' ,
-    'one' ,
-    'zero' ,
-    'slope' ,
-    'smoother' ,
-    'fade' ,
-    'pow2' ,
-    'pow2In' ,
-    'slowFast' ,
-    'pow2Out' ,
-    'fastSlow' ,
-    'pow2InInverse' ,
-    'pow2OutInverse' ,
-    'pow3' ,
-    'pow3In' ,
-    'pow3Out' ,
-    'pow3InInverse' ,
-    'pow3OutInverse' ,
-    'pow4' ,
-    'pow4In' ,
-    'pow4Out' ,
-    'pow5' ,
-    'pow5In' ,
-    'pow10In' , 
-    'pow10Out' ,
-    'pow5Out' ,
-    'sine' ,
-    'sineIn' ,
-    'sineOut' ,
-    'exp10' ,
-    'exp10In' ,
-    'exp10Out' ,
-    'exp5' ,
-    'exp5In' ,
-    'exp5Out' ,
-    'exp10' ,
-    'exp10In' ,
-    'exp10Out' ,
-    'exp5' ,
-    'circle' ,
-    'circleIn' ,
-    'circleOut' ,
-    'exp5' ,
-    'exp5In' ,
-    'exp5Out' ,
-    'circle' ,
-    'circleIn' ,
-    'circleOut' ,
-    'exp5' ,
-    'exp5In' ,
-    'exp5Out' ,
-    'circle' ,
-    'circleIn' ,
-    'circleOut' ,
-    'elastic' ,
-    'elasticIn' ,
-    'elasticOut' ,
-    'swing' ,
-    'swingIn' ,
-    'swingOut' ,
-    'bounce' ,
-    'bounceIn' ,
-    'bounceOut' ,
-] as const
-
+	"linear",
+	"reverse",
+	"smooth",
+	"smooth2",
+	"one",
+	"zero",
+	"slope",
+	"smoother",
+	"fade",
+	"pow2",
+	"pow2In",
+	"slowFast",
+	"pow2Out",
+	"fastSlow",
+	"pow2InInverse",
+	"pow2OutInverse",
+	"pow3",
+	"pow3In",
+	"pow3Out",
+	"pow3InInverse",
+	"pow3OutInverse",
+	"pow4",
+	"pow4In",
+	"pow4Out",
+	"pow5",
+	"pow5In",
+	"pow10In",
+	"pow10Out",
+	"pow5Out",
+	"sine",
+	"sineIn",
+	"sineOut",
+	"exp10",
+	"exp10In",
+	"exp10Out",
+	"exp5",
+	"exp5In",
+	"exp5Out",
+	"exp10",
+	"exp10In",
+	"exp10Out",
+	"exp5",
+	"circle",
+	"circleIn",
+	"circleOut",
+	"exp5",
+	"exp5In",
+	"exp5Out",
+	"circle",
+	"circleIn",
+	"circleOut",
+	"exp5",
+	"exp5In",
+	"exp5Out",
+	"circle",
+	"circleIn",
+	"circleOut",
+	"elastic",
+	"elasticIn",
+	"elasticOut",
+	"swing",
+	"swingIn",
+	"swingOut",
+	"bounce",
+	"bounceIn",
+	"bounceOut",
+] as const;

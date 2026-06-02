@@ -117,10 +117,7 @@ export interface ProjectEventMap {
 	"file:mkdir": [{ path: string }];
 }
 
-export { findContent } from "./content.js";
-export type * from "./content.js";
-
-// === State (merged from @project/state) ===
+export type * from "@project/types";
 
 export type { AppSettings, ProjectRecord } from "./stores/project";
 export type { ProjectContext, RecentFileEntry } from "./stores/session";
@@ -130,7 +127,7 @@ export { useProjectSession, useCurrentProject, TreeSnapshot } from "./stores/ses
 export type { FileEntry, FileStore } from "./stores/file";
 export { useFileStore, isDirty, isError, getEntry, selectEntry, selectIsSaving } from "./stores/file";
 
-export { WriteQueue, getWriteQueue, disposeWriteQueue } from "./services/write-queue";
+export { WriteQueue, getWriteQueue, disposeWriteQueue } from "./write-queue.js";
 export type { UseFileResult } from "./hooks/use-file-content";
 export { useFile } from "./hooks/use-file-content";
 export type { UseFileStringResult } from "./hooks/use-file-content-string";
@@ -156,5 +153,5 @@ export { ValidationResults } from "./validation/types";
 
 // === ProjectFileSystem (moved from @project/fs) ===
 
-export { ProjectFileSystem, createProjectFileSystem, deleteProjectFiles } from "./fs/project-file-system.js";
-export type { ProjectFileSystemOptions } from "./fs/project-file-system.js";
+export { ProjectFileSystem, createProjectFileSystem, deleteProjectFiles } from "./project-file-system.js";
+export type { ProjectFileSystemOptions } from "./project-file-system.js";

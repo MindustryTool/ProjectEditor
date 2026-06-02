@@ -11,7 +11,7 @@ import {
 import type { ValidationRunner, ValidatorRegistry } from "@project/core";
 import { useShallow } from "zustand/react/shallow";
 import { usePath } from "#/hooks/use-path";
-import type { ProjectContents } from "@project/core";
+import type { ProjectContents } from "@project/types";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 
 const registry = createDefaultValidators();

@@ -23,6 +23,7 @@
     "@project/fs": "workspace:*",
     "@project/schema": "workspace:*",
     "@project/hjson": "workspace:*",
+    "@project/types": "workspace:*",
     "zustand": "catalog:",
     "valibot": "catalog:"
   },

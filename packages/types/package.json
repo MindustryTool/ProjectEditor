@@ -1,5 +1,5 @@
 {
-  "name": "@project/schema",
+  "name": "@project/types",
   "type": "module",
   "version": "0.1.0",
   "private": true,
@@ -12,17 +12,9 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
     "clean": "rm -rf dist"
   },
-  "dependencies": {
-    "valibot": "catalog:",
-    "@project/hjson": "workspace:*",
-    "@project/types": "workspace:*"
-  },
   "devDependencies": {
-    "typescript": "^5.7.0",
-    "vitest": "catalog:"
+    "typescript": "^5.7.0"
   }
 }

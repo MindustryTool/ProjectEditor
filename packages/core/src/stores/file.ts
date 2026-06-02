@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { ProjectFileSystem } from "../fs/project-file-system.js";
+import type { ProjectFileSystem } from "../project-file-system.js";
 import type { EventBus, ProjectEventMap } from "../index.js";
 
 const MAX_CACHE_ENTRIES = 100;

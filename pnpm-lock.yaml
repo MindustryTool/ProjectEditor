@@ -255,6 +255,9 @@ importers:
       '@project/schema':
         specifier: workspace:*
         version: link:../../packages/schema
+      '@project/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@project/utils':
         specifier: workspace:*
         version: link:../../packages/utils
@@ -434,6 +437,9 @@ importers:
       '@project/schema':
         specifier: workspace:*
         version: link:../schema
+      '@project/types':
+        specifier: workspace:*
+        version: link:../types
       '@project/utils':
         specifier: workspace:*
         version: link:../utils
@@ -483,12 +489,12 @@ importers:
 
   packages/schema:
     dependencies:
-      '@project/core':
-        specifier: workspace:*
-        version: link:../core
       '@project/hjson':
         specifier: workspace:*
         version: link:../hjson
+      '@project/types':
+        specifier: workspace:*
+        version: link:../types
       valibot:
         specifier: 'catalog:'
         version: 1.4.0(typescript@5.9.3)
@@ -505,6 +511,12 @@ importers:
       '@project/core':
         specifier: workspace:*
         version: link:../core
+    devDependencies:
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+
+  packages/types:
     devDependencies:
       typescript:
         specifier: ^5.7.0

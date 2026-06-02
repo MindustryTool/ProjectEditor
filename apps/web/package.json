@@ -20,6 +20,7 @@
         "@monaco-editor/react": "catalog:",
         "@project/api": "workspace:*",
         "@project/config": "workspace:*",
+        "@project/types": "workspace:*",
         "@project/core": "workspace:*",
         "@project/fs": "workspace:*",
         "@project/hjson": "workspace:*",

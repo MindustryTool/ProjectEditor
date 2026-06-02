@@ -1,4 +1,4 @@
-import type { ProjectContents } from "../content.js";
+import type { ProjectContents } from "@project/types";
 
 export type SeverityLevel = "error" | "warning" | "info" | "deprecated";
 
