@@ -1,10 +1,9 @@
 import { useCallback } from "react";
-import { File, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useProjectSession, useCurrentProject } from "@project/state";
 import { cn } from "~/lib/utils";
 import { usePath } from "#/hooks/use-path";
-import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
-import { resolveContentSprite } from "@project/utils";
+import { FileIcon } from "#/components/editor/FileIcon";
 
 const EMPTY: never[] = [];
 
@@ -68,7 +67,7 @@ export function RecentlyOpenedFilesBar() {
 							handleClose(e, entry.path);
 						}}
 					>
-						{getIcon(entry.path)}
+						<FileIcon path={entry.path} />
 						<span className="truncate">{name}</span>
 						<span
 							role="button"
@@ -86,25 +85,4 @@ export function RecentlyOpenedFilesBar() {
 			})}
 		</div>
 	);
-}
-
-function getIcon(path: string) {
-	if (path.endsWith(".png")) {
-		return <ImageFilePreview path={path} showSize={false} className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4" />;
-	}
-
-	const assetPath = resolveContentSprite(path);
-
-	if (assetPath) {
-		return (
-			<ImageFilePreview
-				path={assetPath}
-				showSize={false}
-				className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4"
-				fallback={<File />}
-			/>
-		);
-	}
-
-	return <File className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4" />;
 }

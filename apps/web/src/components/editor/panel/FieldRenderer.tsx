@@ -166,6 +166,7 @@ const schemaRenderers: Record<Type, SchemaRenderer> = {
 	array: ArrayField,
 	object: ObjectField,
 	picklist: PickListField,
+	liquids: LiquidsListField,
 	unknown: ({ name, entrySchema }) => (
 		<p className="text-yellow-400 text-sm">
 			Unknown field type for property {name}: {entrySchema.type}
@@ -207,6 +208,43 @@ function BooleanField({ name, node, patchValue, entrySchema }: Parameters<Schema
 			</FormControl>
 		</FormField>
 	);
+}
+
+function LiquidsListField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
+	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "";
+	const context = useProjectContext();
+
+	if ("options" in entrySchema && Array.isArray(entrySchema.options)) {
+		const options = entrySchema.options
+			.map((v) => String(v))
+			.map((v) => context.contents.getLiquids().find((l) => l.name === v))
+			.filter(Boolean)
+            .map((option) => option!);
+
+		return (
+			<FormField>
+				<FormLabel>{name}</FormLabel>
+				<FormControl>
+					<Select value={value} onValueChange={patchValue}>
+						<SelectTrigger className="w-full">
+							<SelectValue placeholder="None (empty file)" />
+						</SelectTrigger>
+						<SelectContent position="popper">
+							<SelectGroup className="grid grid-cols-4">
+								{options.map((option) => (
+									<SelectItem key={option.name} value={option.name}>
+										<ContentImage className="size-5" entry={option} />
+									</SelectItem>
+								))}
+							</SelectGroup>
+						</SelectContent>
+					</Select>
+				</FormControl>
+			</FormField>
+		);
+	}
+
+	throw new Error(`Unknown option ${value}, this should not happen`);
 }
 
 function PickListField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
@@ -388,8 +426,8 @@ function ObjectField({ name: parentName, path, node, original, onPatch, entrySch
 			if (refNode.isMissing()) return null;
 			if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) return null;
 		}
-		
-        const Renderer = schemaRenderers[type];
+
+		const Renderer = schemaRenderers[type];
 
 		return (
 			<ErrorBoundary key={key}>
@@ -451,7 +489,7 @@ function ResearchField({ name, node, original, onPatch, patchValue }: Parameters
 			: typeof currentValue === "string"
 				? currentValue
 				: (((currentValue as Record<string, unknown>)?.parent as string) ?? "")) || "";
-                
+
 	const requirements = (
 		!currentValue
 			? []

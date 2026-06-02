@@ -18,6 +18,7 @@
     "@project/zip": "workspace:*",
     "@project/utils": "workspace:*",
     "@project/config": "workspace:*",
+    "@project/core": "workspace:*",
     "valibot": "catalog:"
   },
   "devDependencies": {

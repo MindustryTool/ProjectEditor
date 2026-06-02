@@ -7,7 +7,19 @@ export type AnySchema =
 
 const WRAPPER_TYPES = new Set(["optional", "nullable", "nullish", "undefinedable", "exact_optional"]);
 
-export const types = ["color", "research", "effect", "string", "number", "boolean", "object", "array", "unknown", "picklist"] as const;
+export const types = [
+	"color",
+	"research",
+	"effect",
+	"string",
+	"number",
+	"boolean",
+	"object",
+	"array",
+	"unknown",
+	"picklist",
+	"liquids",
+] as const;
 
 export type Type = (typeof types)[number];
 

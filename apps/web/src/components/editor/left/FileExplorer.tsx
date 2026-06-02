@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef, useEffect, useCallback, createContext, useContext } from "react";
-import { File, Folder, FolderOpen, ChevronRight, ChevronDown, Pencil, Trash2, Plus, MoreHorizontal } from "lucide-react";
+import { Folder, FolderOpen, ChevronRight, ChevronDown, Pencil, Trash2, Plus, MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { isDefaultPath, type TreeNode } from "@project/fs";
 import type { TreeSnapshot } from "@project/state";
@@ -16,9 +16,7 @@ import {
 	AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import { usePath } from "#/hooks/use-path";
-import { resolveContentSprite } from "@project/utils";
 import { useIssues } from "#/hooks/use-issue";
-import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "~/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Button } from "~/components/ui/button";
@@ -27,6 +25,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { InputGroup, InputGroupInput, InputGroupAddon } from "#/components/ui/input-group";
 import { TemplateSelector } from "./TemplateSelector";
 import { useLocalStorage } from "usehooks-ts";
+import { FileIcon } from "#/components/editor/FileIcon";
 
 interface FileExplorerContextValue {
 	selectedPath: string | null;
@@ -275,24 +274,7 @@ function getIcon(node: TreeNode, expanded: boolean) {
 		);
 	}
 
-	if (node.name.endsWith(".png")) {
-		return <ImageFilePreview path={node.path} showSize={false} className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4" />;
-	}
-
-	const assetPath = resolveContentSprite(node.path);
-
-	if (assetPath) {
-		return (
-			<ImageFilePreview
-				path={assetPath}
-				showSize={false}
-				className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4"
-				fallback={<File />}
-			/>
-		);
-	}
-
-	return <File className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4" />;
+	return <FileIcon path={node.path} />;
 }
 
 interface TreeNodeItemProps {

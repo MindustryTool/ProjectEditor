@@ -34,6 +34,6 @@ export const LiquidHjsonSchema: SchemaFn = (value, context) =>
 		capPuddles: v.nullish(v.boolean(), true),
 		vaporEffect: v.nullish(EffectSchema(value.get("vaporEffect"), context)),
 		hidden: v.nullish(v.boolean(), false),
-		canStayOn: v.nullish(v.array(v.string())),
+		canStayOn: v.nullish(v.array(v.pipe(v.picklist(context.getLiquids().map((liquid) => liquid.name)), v.metadata({ type: "liquids" })))),
 		research: ResearchSchema(value.get("research"), context),
 	});

@@ -4,7 +4,13 @@ import type { ContentEntry } from "#/hooks/use-blocks";
 import { ImageFilePreview } from "./ImageFilePreview";
 import { ContentApiImage } from "./ContentApiImage";
 
-export const ContentImage = memo(function ContentImage({ entry, className }: { entry: ContentEntry; className?: string }) {
+export const ContentImage = memo(function ContentImage({
+	entry,
+	className,
+}: {
+	entry: Pick<ContentEntry, "contentType" | "type" | "name" | "path">;
+	className?: string;
+}) {
 	if (entry.type === "base") {
 		return <ContentApiImage type={entry.contentType} name={entry.name} className={className} />;
 	}

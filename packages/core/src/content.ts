@@ -1,25 +1,43 @@
 export type ItemDto = {
 	name: string;
+	type: "project" | "base";
+	path: string;
+	contentType: string;
 };
 
 export type BlockDto = {
 	name: string;
+	type: "project" | "base";
+	path: string;
+	contentType: string;
 };
 
 export type LiquidDto = {
 	name: string;
+	type: "project" | "base";
+	path: string;
+	contentType: string;
 };
 
 export type SectorDto = {
 	name: string;
+	type: "project" | "base";
+	path: string;
+	contentType: string;
 };
 
 export type StatusDto = {
 	name: string;
+	type: "project" | "base";
+	path: string;
+	contentType: string;
 };
 
 export type UnitDto = {
 	name: string;
+	type: "project" | "base";
+	path: string;
+	contentType: string;
 };
 
 export type ProjectContents = {
