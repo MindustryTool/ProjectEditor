@@ -276,13 +276,6 @@ export async function createProjectFileSystem(
 		await ensureNode(fs, node);
 	}
 
-	const hasModJson = await fs.exists("/mod.json");
-	const hasModHjson = await fs.exists("/mod.hjson");
-
-	if (!hasModJson && !hasModHjson) {
-		await fs.createFile("/mod.hjson");
-	}
-
 	await fs.refreshTree();
 	return fs;
 }

@@ -1,11 +1,12 @@
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: ValidationResults class encapsulates results data and derived views
 The system SHALL provide an immutable `ValidationResults` class that holds `resultsByPath: Record<string, ValidationResult[]>` and provides derived `summary` and ancestor-path rollup views.
 
 #### Scenario: Create empty instance
 - **WHEN** `new ValidationResults()` is constructed with no arguments
-- **THEN** `resultsByPath` SHALL be an empty object, `summary` SHALL be `{total: 0, errors: 0, warnings: 0, infos: 0, deprecated: 0}`, and `getRollup()` SHALL return an empty object
+- **THEN** `resultsByPath` SHALL be an empty object, `summary` SHALL be `{total: 0}`, and `getRollup()` SHALL return an empty object
+- **AND** `summary` SHALL NOT contain individual severity count fields (they are accessed via `summary[severityLabel]`)
 
 #### Scenario: Create instance with results
 - **WHEN** `new ValidationResults({ "/path/file.hjson": [...] })` is constructed
@@ -15,7 +16,7 @@ The system SHALL provide an immutable `ValidationResults` class that holds `resu
 `ValidationResults.setResults(path, results)` SHALL return a new `ValidationResults` instance with the results for the given path replaced, with `summary` and rollup recomputed.
 
 #### Scenario: Replace existing results
-- **WHEN** `instance.setResults("/a.hjson", [{severity: 0, ...}])` is called
+- **WHEN** `instance.setResults("/a.hjson", [{severity: "error", ...}])` is called
 - **THEN** a new instance SHALL be returned with the updated results for that path, and the original instance SHALL remain unchanged
 
 #### Scenario: Add results for new path

@@ -9,14 +9,15 @@ import {
 	type ProjectInfo,
 } from "@project/core";
 import { createProjectFileSystem } from "@project/fs";
-import { DEFAULT_SETTINGS } from "@project/config";
 import { TreeSnapshot, useProjectSession } from "./session";
 
 export interface AppSettings {
 	theme: "light" | "dark" | "system";
 	fontSize: number;
 	tabSize: number;
-    validationDelayMs: number;
+	validation: {
+		validationDelayMs: number;
+	};
 }
 
 export interface ProjectRecord {
@@ -47,7 +48,7 @@ export const useAppStore = create<AppState>()(
 		(set, get) => ({
 			hydrated: false,
 			projects: {},
-			settings: DEFAULT_SETTINGS as AppSettings,
+			settings: { theme: "system" as const, fontSize: 14, tabSize: 2, validation: { validationDelayMs: 3000 } },
 
 			createNewProject: async (name: string, language?: ProjectLanguage) => {
 				const project = createProjectInfo(name, language);
@@ -64,6 +65,13 @@ export const useAppStore = create<AppState>()(
 						useProjectSession.setState({ treeSnapshot: new TreeSnapshot(snapshot) });
 					},
 				});
+				const hasModJson = await fs.exists("/mod.json");
+				const hasModHjson = await fs.exists("/mod.hjson");
+
+				if (!hasModJson && !hasModHjson) {
+					await fs.createFile("/mod.hjson");
+				}
+
 				useProjectSession.getState().setCurrentProject({ project, fs, events });
 				return project.id;
 			},
@@ -107,7 +115,7 @@ export const useAppStore = create<AppState>()(
 					onTreeSnapshotChange: (snapshot) => useProjectSession.setState({ treeSnapshot: new TreeSnapshot(snapshot) }),
 				});
 
-				const unsubscribe = events.on('file:write', (event) => {
+				const unsubscribe = events.on("file:write", (event) => {
 					callback(event.path);
 				});
 

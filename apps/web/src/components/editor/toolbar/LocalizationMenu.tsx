@@ -23,7 +23,7 @@ export function LocalizationMenu({ className }: LocalizationMenuProps) {
             className
           )}
         >
-          {t("localizationMenu.label")}
+          {t("localization-menu.label")}
           <ChevronDown className="h-3 w-3 text-muted-foreground" />
         </button>
       </DropdownMenuTrigger>

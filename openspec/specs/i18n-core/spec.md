@@ -1,7 +1,7 @@
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Translation framework initialized
-The system SHALL initialize i18next with `react-i18next` on app startup, loading locale JSON files and setting the active language.
+The system SHALL initialize i18next with `react-i18next` on app startup, loading locale `.ts` files and setting the active language.
 
 #### Scenario: Initialization on mount
 - **WHEN** the app starts
@@ -10,7 +10,7 @@ The system SHALL initialize i18next with `react-i18next` on app startup, loading
 
 #### Scenario: Loads locale file
 - **WHEN** the active language is set to a supported locale
-- **THEN** the corresponding `locales/{lang}/translation.json` SHALL be loaded and available for translations
+- **THEN** the corresponding `locales/{lang}/translation.ts` SHALL be loaded and available for translations
 
 ### Requirement: String interpolation
 The system SHALL support simple string interpolation in translations using `{{variable}}` syntax.
@@ -30,7 +30,7 @@ The system SHALL allow switching the active language at runtime.
 The system SHALL fall back to English when a translation key is missing in the active locale.
 
 #### Scenario: Missing key fallback
-- **WHEN** `t("missing.key")` is called and the key does not exist in the active locale
+- **WHEN** `t("missing-key")` is called and the key does not exist in the active locale
 - **THEN** the English value for that key SHALL be returned
 
 ### Requirement: Browser language detection
@@ -77,3 +77,9 @@ The system SHALL set the `<html lang>` attribute to match the current locale fro
 - **THEN** the `<html>` element SHALL have `lang="vi"`
 - **WHEN** the user visits `/en/about`
 - **THEN** the `<html>` element SHALL have `lang="en"`
+
+## REMOVED Requirements
+
+### Requirement: Loads locale file
+**Reason**: Replaced by .ts file loading
+**Migration**: JSON import replaced with .ts import in `i18n.ts`

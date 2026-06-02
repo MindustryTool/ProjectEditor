@@ -46,9 +46,9 @@ function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: s
 	return (
 		<div className="flex flex-col gap-3">
 			<div className="flex gap-2 flex-col">
-				<label className="text-xs font-medium text-muted-foreground">{t("projectPickerScreen.name")}</label>
+				<label className="text-xs font-medium text-muted-foreground">{t("project-picker-screen.name")}</label>
 				<Input
-					placeholder={t("projectPickerScreen.namePlaceholder")}
+					placeholder={t("project-picker-screen.name-placeholder")}
 					value={name}
 					onChange={(e) => {
 						setName(e.target.value);
@@ -61,7 +61,7 @@ function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: s
 			</div>
 			{nameError && <p className="text-xs text-destructive">{nameError}</p>}
 			<div className="flex flex-col gap-2">
-				<label className="text-xs font-medium text-muted-foreground">{t("projectPickerScreen.language")}</label>
+				<label className="text-xs font-medium text-muted-foreground">{t("project-picker-screen.language")}</label>
 				<Select value={language} onValueChange={(v: ProjectLanguage) => setLanguage(v)}>
 					<SelectTrigger className="h-7 w-32 text-xs">
 						<SelectValue />
@@ -75,7 +75,7 @@ function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: s
 					</SelectContent>
 				</Select>
 			</div>
-			<Button onClick={handleCreate}>{t("projectPickerScreen.create")}</Button>
+			<Button onClick={handleCreate}>{t("project-picker-screen.create")}</Button>
 		</div>
 	);
 }
@@ -117,10 +117,10 @@ function ImportProjectSection({ onImported }: { onImported: (id: string) => void
 
 	return (
 		<div className="flex flex-col gap-3">
-			<p className="text-xs text-muted-foreground">{t("projectPickerScreen.importDescription")}</p>
+			<p className="text-xs text-muted-foreground">{t("project-picker-screen.import-description")}</p>
 			<input ref={fileInputRef} type="file" accept=".zip" className="hidden" onChange={handleFileSelected} />
 			<Button onClick={() => fileInputRef.current?.click()} disabled={importing}>
-				{importing ? <Spinner /> : t("projectPickerScreen.selectZip")}
+				{importing ? <Spinner /> : t("project-picker-screen.select-zip")}
 			</Button>
 			{importing && paths.length > 0 && (
 				<div className="grid gap-1 p-2 rounded-md border max-h-[200px] overflow-y-auto" ref={listRef}>
@@ -143,11 +143,11 @@ function ProjectActionsSection({ onProjectSelected }: { onProjectSelected: (id: 
 			<TabsList className="w-full">
 				<TabsTrigger value="create" className="flex-1">
 					<Plus className="size-4" />
-					{t("projectPickerScreen.createNew")}
+					{t("project-picker-screen.create-new")}
 				</TabsTrigger>
 				<TabsTrigger value="import" className="flex-1">
 					<Upload className="size-4" />
-					{t("projectPickerScreen.importProject")}
+					{t("project-picker-screen.import-project")}
 				</TabsTrigger>
 			</TabsList>
 			<TabsContent value="create" className="m-0 p-4">
@@ -168,7 +168,7 @@ function ProjectListSection({ onProjectSelected }: { onProjectSelected: (id: str
 		<div className="space-y-2">
 			<div className="flex items-center gap-2 text-sm font-medium text-foreground">
 				<FolderOpen className="h-4 w-4" />
-				{t("projectPickerScreen.recentProjects")}
+				{t("project-picker-screen.recent-projects")}
 			</div>
 			<div className="space-y-1">
 				{Object.values(projects).map((project) => (
@@ -210,7 +210,7 @@ export function ProjectPickerScreen({ onProjectSelected }: ProjectPickerScreenPr
 			<div className="w-full max-w-md space-y-4 px-4">
 				<div className="space-y-2 text-center">
 					<h1 className="text-xl font-medium text-foreground">{t("app.title")}</h1>
-					<p className="text-xs text-muted-foreground">{t("projectPickerScreen.description")}</p>
+					<p className="text-xs text-muted-foreground">{t("project-picker-screen.description")}</p>
 				</div>
 				<ProjectActionsSection onProjectSelected={handleCreated} />
 				<Separator />

@@ -112,21 +112,21 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 							className,
 						)}
 					>
-						{t("projectMenu.label")}
+						{t("project-menu.label")}
 						<ChevronDown className="h-3 w-3 text-muted-foreground" />
 					</button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="start" className="w-44">
-					<DropdownMenuItem onClick={handleImportProject}>{t("projectMenu.importProject")}</DropdownMenuItem>
+					<DropdownMenuItem onClick={handleImportProject}>{t("project-menu.import-project")}</DropdownMenuItem>
 					<ProjectPickerDialog
 						mode="create"
-						trigger={<DropdownMenuItem onSelect={(e) => e.preventDefault()}>{t("projectMenu.createProject")}</DropdownMenuItem>}
+						trigger={<DropdownMenuItem onSelect={(e) => e.preventDefault()}>{t("project-menu.create-project")}</DropdownMenuItem>}
 						onCreateProject={handleCreateProject}
 						onSelectProject={handleOpenProject}
 					/>
 					<ProjectPickerDialog
 						mode="open"
-						trigger={<DropdownMenuItem onSelect={(e) => e.preventDefault()}>{t("projectMenu.openProject")}</DropdownMenuItem>}
+						trigger={<DropdownMenuItem onSelect={(e) => e.preventDefault()}>{t("project-menu.open-project")}</DropdownMenuItem>}
 						onCreateProject={handleCreateProject}
 						onSelectProject={handleOpenProject}
 					/>
@@ -134,7 +134,7 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 						mode="change"
 						trigger={
 							<DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={!hasProject}>
-								{t("projectMenu.changeProject")}
+								{t("project-menu.change-project")}
 							</DropdownMenuItem>
 						}
 						onCreateProject={handleCreateProject}
@@ -143,18 +143,18 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 					<ProjectSettingsDialog
 						trigger={
 							<DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={!hasProject}>
-								{t("projectMenu.projectSettings")}
+								{t("project-menu.project-settings")}
 							</DropdownMenuItem>
 						}
 					/>
 					<DropdownMenuItem onClick={closeProject} disabled={!hasProject}>
-						{t("projectMenu.closeProject")}
+						{t("project-menu.close-project")}
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
 			<Dialog open={importing}>
 				<DialogContent>
-					<DialogTitle>{t("projectMenu.importProject")}</DialogTitle>
+					<DialogTitle>{t("project-menu.import-project")}</DialogTitle>
 					<DialogDescription />
 					<div className="grid gap-1 p-2 rounded-md border max-h-[200px] overflow-y-auto" ref={listRef}>
 						{paths.length > 0 &&

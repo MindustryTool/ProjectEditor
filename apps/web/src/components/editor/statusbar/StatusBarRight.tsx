@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useValidationStore, Severity } from "@project/state";
+import { useValidationStore } from "@project/state";
 import { useTranslation } from "react-i18next";
 import { FileJson, Image } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog";
@@ -34,27 +34,27 @@ export function StatusBarRight() {
 
 	const dialogItems: ValidationFileError[] = Object.entries(validationResults).flatMap(([filePath, results]) =>
 		results
-			.filter((r) => (dialogFilter === "error" ? r.severity === Severity.error : r.severity === Severity.warning))
+			.filter((r) => (dialogFilter === "error" ? r.severity === "error" : r.severity === "warning"))
 			.map((r) => ({ filePath, ...r })),
 	);
 
 	return (
 		<>
 			<div className="flex items-center gap-2">
-				{validationSummary.errors > 0 && (
-					<button type="button" className="text-red-500 underline-offset-2 hover:underline cursor-pointer" onClick={handleErrorClick}>
-						{t("statusBar.validationErrors", { count: validationSummary.errors })}
-					</button>
-				)}
-				{validationSummary.warnings > 0 && (
-					<button
-						type="button"
-						className="text-yellow-500 underline-offset-2 hover:underline cursor-pointer"
-						onClick={handleWarningClick}
-					>
-						{t("statusBar.validationWarnings", { count: validationSummary.warnings })}
-					</button>
-				)}
+			{(validationSummary["error"] ?? 0) > 0 && (
+				<button type="button" className="text-red-500 underline-offset-2 hover:underline cursor-pointer" onClick={handleErrorClick}>
+					{t("status-bar.validation-errors", { count: validationSummary["error"] ?? 0 })}
+				</button>
+			)}
+			{(validationSummary["warning"] ?? 0) > 0 && (
+				<button
+					type="button"
+					className="text-yellow-500 underline-offset-2 hover:underline cursor-pointer"
+					onClick={handleWarningClick}
+				>
+					{t("status-bar.validation-warnings", { count: validationSummary["warning"] ?? 0 })}
+				</button>
+			)}
 				<FileJson className="h-3 w-3" />
 				<Image className="h-3 w-3" />
 			</div>
@@ -63,8 +63,8 @@ export function StatusBarRight() {
 					<DialogHeader>
 						<DialogTitle>
 							{dialogFilter === "error"
-								? t("statusBar.validationErrors", { count: validationSummary.errors })
-								: t("statusBar.validationWarnings", { count: validationSummary.warnings })}
+								? t("status-bar.validation-errors", { count: validationSummary["error"] ?? 0 })
+								: t("status-bar.validation-warnings", { count: validationSummary["warning"] ?? 0 })}
 						</DialogTitle>
 					</DialogHeader>
 					<ValidationErrorList items={dialogItems} onNavigate={handleNavigate} />

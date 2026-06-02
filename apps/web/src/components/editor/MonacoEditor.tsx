@@ -16,7 +16,7 @@ import {
 	toPickerColorValue,
 	type MindustryColorTagMatch,
 } from "~/lib/monaco/colorTags";
-import { useValidationStore, Severity } from "@project/state";
+import { useValidationStore } from "@project/state";
 import { useFileStore } from "@project/state";
 import { useProjectSession } from "@project/state";
 import { useTranslation } from "react-i18next";
@@ -75,14 +75,14 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 		const markers: editor.IMarkerData[] = [];
 
 		for (const r of results) {
-			const monacoSeverity = r.severity === Severity.error ? 8 : r.severity === Severity.warning ? 4 : 2;
+			const monacoSeverity = r.severity === "error" ? 8 : r.severity === "warning" ? 4 : 2;
 			const endLineNumber = r.endLine ?? r.startLine;
 			const rawEndColumn = r.endColumn ?? r.startColumn;
 			const endColumn = endLineNumber === r.startLine && rawEndColumn === r.startColumn ? r.startColumn + 1 : rawEndColumn;
 
 			markers.push({
 				severity: monacoSeverity as editor.IMarkerData["severity"],
-				message: (t as (key: string, params?: Record<string, string | number>) => string)(r.messageKey, r.messageParams),
+				message: (t as (key: string, params?: Record<string, unknown>) => string)(r.messageKey, r.messageParams),
 				startLineNumber: r.startLine,
 				startColumn: r.startColumn,
 				endLineNumber,

@@ -1,5 +1,4 @@
-import type { ValidatorFn } from "./types";
-import { Severity } from "./types";
+import type { ValidationResult, ValidatorFn } from "./types";
 import { createValidatorRegistry } from "./registry";
 import { HJSON, HJSONError, HjsonObjectNode } from "@project/hjson";
 import { ItemHjsonSchema, LiquidHjsonSchema, ModHjsonSchema, SectorHjsonSchema, StatusHjsonSchema } from "@project/schema";
@@ -22,8 +21,8 @@ const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 			return [
 				{
 					path,
-					severity: Severity.error,
-					messageKey: "validation.content.invalidJson",
+					severity: "error",
+					messageKey: "validation.content.invalid-json",
 					messageParams: { error: `${code}: ${message}` },
 					startLine,
 					startColumn,
@@ -53,8 +52,8 @@ const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 		return [
 			{
 				path,
-				severity: Severity.error,
-				messageKey: "validation.content.invalidJson",
+				severity: "error",
+				messageKey: "validation.content.invalid-json",
 				messageParams: { error: message },
 				startLine,
 				startColumn,
@@ -72,7 +71,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 		const data = HJSON.parseStructured(content);
 		const resolved = typeof schema === "function" ? schema(data, context) : schema;
 		const { success, issues } = v.safeParse(resolved, data.valueOf());
-		const problems = [];
+		const problems: ValidationResult[] = [];
 
 		if (!success) {
 			const resolveFieldData = (fieldData: ReturnType<typeof data.get>, path: (string | number)[]) => {
@@ -109,10 +108,10 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 
 				problems.push({
 					path,
-					severity: Severity.error,
+					severity: "error",
 					messageKey: "validation.content.invalid-field",
 					field,
-					messageParams: { error: field + ": " + issue.message },
+					messageParams: { field, error: issue.message },
 					startLine,
 					startColumn,
 					endLine,
@@ -137,12 +136,14 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 							subEndColumn = subFieldInfo.end.col;
 						}
 
+						const field = subIssue.path?.map((p) => p.key)?.join(".") || "";
+
 						problems.push({
 							path,
-							severity: Severity.error,
+							severity: "error",
 							messageKey: "validation.content.invalid-field",
-							field: subIssue.path?.map((p) => p.key)?.join(".") || "",
-							messageParams: { error: subIssue.message },
+							field,
+							messageParams: { field, error: subIssue.message },
 							startLine: subStartLine,
 							startColumn: subStartColumn,
 							endLine: subEndLine,
@@ -161,7 +162,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 
 				problems.push({
 					path,
-					severity: Severity.warning,
+					severity: "warning",
 					messageKey: "validation.content.unknown-field",
 					messageParams: { error: `Unknown field ${path}` },
 					startLine: field?.start.row ?? 1,

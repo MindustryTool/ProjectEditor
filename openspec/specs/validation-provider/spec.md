@@ -1,8 +1,5 @@
-# validation-provider Specification
+## MODIFIED Requirements
 
-## Purpose
-The system SHALL provide a `ValidationProvider` React component that manages the file content validation listener lifecycle and provides validation context via React Query.
-## Requirements
 ### Requirement: ValidationProvider manages listener lifecycle
 The system SHALL provide a `ValidationProvider` React component that registers validation listeners on mount and unregisters on unmount.
 
@@ -81,4 +78,3 @@ The `ValidationProvider` SHALL expose a `ValidationContextValue` with a `validat
 - **WHEN** there are no matching validators
 - **THEN** the runner SHALL NOT invoke `getContent()`
 - **THEN** no results SHALL be stored
-

@@ -7,9 +7,9 @@ export function StatusBarLeft() {
 
 	return (
 		<>
-			<span>{t("statusBar.project", { name: projectName })}</span>
+			<span>{t("status-bar.project", { name: projectName })}</span>
 			<span className="text-muted-foreground">|</span>
-			<span>{t("statusBar.files", { count: 0 })}</span>
+			<span>{t("status-bar.files", { count: 0 })}</span>
 		</>
 	);
 }

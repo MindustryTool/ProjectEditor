@@ -108,15 +108,15 @@ function EditProjectName({ defaultProject }: { defaultProject?: ProjectRecord })
 
 	return (
 		<div className="flex flex-col gap-2">
-			<label className="text-xs font-medium text-muted-foreground">{t("projectSettings.nameLabel")}</label>
+			<label className="text-xs font-medium text-muted-foreground">{t("project-settings.name-label")}</label>
 			<Input
 				value={name}
 				onChange={handleNameChange}
-				placeholder={t("projectSettings.namePlaceholder")}
+				placeholder={t("project-settings.name-placeholder")}
 				aria-invalid={nameError !== null}
 			/>
-			{nameError === "invalid" && <p className="text-xs text-destructive">{t("projectSettings.nameInvalid")}</p>}
-			{nameError === "empty" && <p className="text-xs text-destructive">{t("projectSettings.nameEmpty")}</p>}
+			{nameError === "invalid" && <p className="text-xs text-destructive">{t("project-settings.name-invalid")}</p>}
+			{nameError === "empty" && <p className="text-xs text-destructive">{t("project-settings.name-empty")}</p>}
 		</div>
 	);
 }
@@ -154,15 +154,15 @@ function DeleteProject({ projectId: propId, onDeleted }: { projectId?: string; o
 	return (
 		<AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
 			<AlertDialogTrigger asChild>
-				<Button variant="destructive">{t("projectSettings.deleteProject")}</Button>
+				<Button variant="destructive">{t("project-settings.delete-project")}</Button>
 			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
-					<AlertDialogTitle>{t("projectSettings.deleteTitle")}</AlertDialogTitle>
-					<AlertDialogDescription>{t("projectSettings.deleteDescription")}</AlertDialogDescription>
+					<AlertDialogTitle>{t("project-settings.delete-title")}</AlertDialogTitle>
+					<AlertDialogDescription>{t("project-settings.delete-description")}</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel>{t("projectSettings.cancel")}</AlertDialogCancel>
+					<AlertDialogCancel>{t("project-settings.cancel")}</AlertDialogCancel>
 					<AlertDialogAction
 						variant="destructive"
 						onClick={(event) => {
@@ -172,7 +172,7 @@ function DeleteProject({ projectId: propId, onDeleted }: { projectId?: string; o
 						}}
 						disabled={deleteMutation.isPending}
 					>
-						{deleteMutation.isPending ? <Spinner /> : t("projectSettings.confirmDelete")}
+						{deleteMutation.isPending ? <Spinner /> : t("project-settings.confirm-delete")}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>
@@ -197,7 +197,7 @@ export function ProjectSettingsDialog({ trigger, project, onDeleted }: ProjectSe
 			<DialogTrigger asChild>{trigger}</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>{t("projectSettings.dialogTitle")}</DialogTitle>
+					<DialogTitle>{t("project-settings.dialog-title")}</DialogTitle>
 				</DialogHeader>
 				<EditProjectName key={resetKey} defaultProject={project} />
 				<DialogFooter>

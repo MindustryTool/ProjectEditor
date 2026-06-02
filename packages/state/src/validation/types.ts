@@ -1,42 +1,31 @@
 import type { ProjectContents } from "@project/core";
 
-export const Severity = {
-	error: 0,
-	warning: 1,
-	info: 2,
-	deprecated: 3,
-} as const;
+export type SeverityLevel = "error" | "warning" | "info" | "deprecated";
 
-export type SeverityLevel = (typeof Severity)[keyof typeof Severity];
-
-export function severityLabel(level: SeverityLevel): string {
-	switch (level) {
-		case Severity.error:
-			return "error";
-		case Severity.warning:
-			return "warning";
-		case Severity.info:
-			return "info";
-		case Severity.deprecated:
-			return "deprecated";
-	}
+export function severityLabel(level: string): string {
+	if (level === "error" || level === "warning" || level === "info" || level === "deprecated") return level;
+	return "error";
 }
 
-export function isErrorOrWarning(level: SeverityLevel): boolean {
-	return level <= Severity.warning;
+export function isErrorOrWarning(level: string): boolean {
+	return level === "error" || level === "warning";
 }
 
-export interface ValidationResult {
+export interface ValidationResult<Tkey extends string = string> {
 	path: string;
-	severity: SeverityLevel;
-	messageKey: string;
-	messageParams?: Record<string, string | number>;
+	severity: string;
+	messageKey: Tkey;
+	messageParams?: Record<string, unknown>;
 	startLine: number;
 	startColumn: number;
 	endLine?: number;
 	endColumn?: number;
 	field?: string;
-	code?: string;
+	fixs?: {
+		messageKey: Tkey;
+		messageParams?: Record<string, unknown>;
+		action: () => Promise<void>;
+	}[];
 }
 
 export type ValidatorFn = (params: { path: string; content: string; context: ProjectContents }) => ValidationResult[];
@@ -56,10 +45,7 @@ export interface ValidatorRegistry {
 
 export interface ValidationSummary {
 	total: number;
-	errors: number;
-	warnings: number;
-	infos: number;
-	deprecated: number;
+	[severity: string]: number;
 }
 
 export interface ValidationStore {
@@ -70,26 +56,18 @@ export interface ValidationStore {
 }
 
 function computeSummary(resultsByPath: Record<string, ValidationResult[]>): ValidationSummary {
-	let errors = 0;
-	let warnings = 0;
-	let infos = 0;
-	let deprecated = 0;
+	const counts: Record<string, number> = {};
 
 	for (const results of Object.values(resultsByPath)) {
 		for (const r of results) {
-			if (r.severity === Severity.error) errors++;
-			else if (r.severity === Severity.warning) warnings++;
-			else if (r.severity === Severity.info) infos++;
-			else if (r.severity === Severity.deprecated) deprecated++;
+			const key = r.severity || "error";
+			counts[key] = (counts[key] ?? 0) + 1;
 		}
 	}
 
 	return {
-		total: errors + warnings + infos + deprecated,
-		errors,
-		warnings,
-		infos,
-		deprecated,
+		total: Object.values(counts).reduce((sum, c) => sum + c, 0),
+		...counts,
 	};
 }
 
@@ -106,8 +84,8 @@ function computeRollup(resultsByPath: Record<string, ValidationResult[]>): Recor
 
 			if (result[currentPath] == null) result[currentPath] = { error: 0, warning: 0 };
 
-			const errors = results.filter((r) => r.severity === Severity.error).length;
-			const warnings = results.filter((r) => r.severity === Severity.warning).length;
+			const errors = results.filter((r) => r.severity === "error").length;
+			const warnings = results.filter((r) => r.severity === "warning").length;
 			result[currentPath]!.error += errors;
 			result[currentPath]!.warning += warnings;
 		}

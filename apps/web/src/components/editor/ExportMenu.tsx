@@ -2,7 +2,7 @@ import type { TreeSnapshot, ValidatorRegistry } from "@project/state";
 import { useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { getExporter } from "@project/core";
-import { useProjectSession, useValidationStore, Severity } from "@project/state";
+import { useProjectSession, useValidationStore } from "@project/state";
 import { cn } from "~/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
@@ -43,7 +43,7 @@ async function loadAndValidateAll(
 			useValidationStore.getState().setResults(entry.path, [
 				{
 					path: entry.path,
-					severity: Severity.error,
+					severity: "error",
 					messageKey: err instanceof Error ? err.message : "Unknown error",
 					startLine: 1,
 					startColumn: 1,
@@ -92,7 +92,7 @@ export function ExportMenu({ className }: ExportMenuProps) {
 				document.body.removeChild(a);
 				URL.revokeObjectURL(url);
 			} catch {
-				alert(t("exportMenu.exportFailed"));
+				alert(t("export-menu.export-failed"));
 			}
 		},
 		[projectContext, t],
@@ -143,7 +143,7 @@ export function ExportMenu({ className }: ExportMenuProps) {
 		}
 
 		const freshResults = useValidationStore.getState().results.resultsByPath;
-		const hasErrors = Object.values(freshResults).some((results) => results.some((r) => r.severity === Severity.error));
+		const hasErrors = Object.values(freshResults).some((results) => results.some((r) => r.severity === "error"));
 
 		if (hasErrors) {
 			setValidationOpen(true);
@@ -177,7 +177,7 @@ export function ExportMenu({ className }: ExportMenuProps) {
 	);
 
 	const allErrors: ValidationFileError[] = Object.entries(validationResults).flatMap(([filePath, results]) =>
-		results.filter((r) => r.severity === Severity.error).map((r) => ({ filePath, ...r })),
+		results.filter((r) => r.severity === "error").map((r) => ({ filePath, ...r })),
 	);
 
 	return (
@@ -189,12 +189,12 @@ export function ExportMenu({ className }: ExportMenuProps) {
 					className,
 				)}
 			>
-				{t("exportMenu.label")}
+				{t("export-menu.label")}
 			</button>
 			<Dialog open={open} onOpenChange={setOpen}>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>{t("exportMenu.dialogTitle")}</DialogTitle>
+						<DialogTitle>{t("export-menu.dialog-title")}</DialogTitle>
 					</DialogHeader>
 					{downloadLoading ? (
 						<div className="flex flex-col gap-2">
@@ -203,28 +203,28 @@ export function ExportMenu({ className }: ExportMenuProps) {
 						</div>
 					) : (
 						<div className="flex flex-col gap-2">
-							<label className="text-xs font-medium text-muted-foreground">{t("exportMenu.filenameLabel")}</label>
+							<label className="text-xs font-medium text-muted-foreground">{t("export-menu.filename-label")}</label>
 							<InputGroup>
 								<InputGroupInput
 									value={filename}
 									onChange={handleFilenameChange}
-									placeholder={t("exportMenu.filenameLabel")}
+									placeholder={t("export-menu.filename-label")}
 									aria-invalid={!!warning}
 								/>
 								<InputGroupAddon align="inline-end">
 									<InputGroupText>.zip</InputGroupText>
 								</InputGroupAddon>
 							</InputGroup>
-							{warning === "invalid" && <p className="text-xs text-destructive">{t("exportMenu.filenameWarning")}</p>}
-							{warning === "empty" && <p className="text-xs text-destructive">{t("exportMenu.filenameEmpty")}</p>}
+							{warning === "invalid" && <p className="text-xs text-destructive">{t("export-menu.filename-warning")}</p>}
+							{warning === "empty" && <p className="text-xs text-destructive">{t("export-menu.filename-empty")}</p>}
 						</div>
 					)}
 					<DialogFooter>
 						<Button variant="outline" onClick={handleCancel}>
-							{t("exportMenu.cancel")}
+							{t("export-menu.cancel")}
 						</Button>
 						<Button onClick={handleDownload} disabled={downloadLoading}>
-							{downloadLoading ? t("exportMenu.validating") : t("exportMenu.download")}
+							{downloadLoading ? t("export-menu.validating") : t("export-menu.download")}
 						</Button>
 					</DialogFooter>
 				</DialogContent>
@@ -232,17 +232,17 @@ export function ExportMenu({ className }: ExportMenuProps) {
 			<Dialog open={validationOpen} onOpenChange={setValidationOpen}>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>{t("exportMenu.validationTitle")}</DialogTitle>
+						<DialogTitle>{t("export-menu.validation-title")}</DialogTitle>
 					</DialogHeader>
 					<div className="flex flex-col gap-2">
-						<p className="text-xs text-muted-foreground">{t("exportMenu.validationMessage")}</p>
+						<p className="text-xs text-muted-foreground">{t("export-menu.validation-message")}</p>
 						<ValidationErrorList items={allErrors} onNavigate={handleNavigate} />
 					</div>
 					<DialogFooter>
 						<Button variant="outline" onClick={handleValidationCancel}>
-							{t("exportMenu.validationCancel")}
+							{t("export-menu.validation-cancel")}
 						</Button>
-						<Button onClick={handleExportAnyway}>{t("exportMenu.exportAnyway")}</Button>
+						<Button onClick={handleExportAnyway}>{t("export-menu.export-anyway")}</Button>
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>

@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Severity, type ValidationResult } from "@project/state";
+import type { ValidationResult } from "@project/state";
 import { cn } from "~/lib/utils";
 
 export type ValidationFileError = ValidationResult & { filePath: string };
@@ -10,11 +10,11 @@ interface ValidationErrorListProps {
 	className?: string;
 }
 
-const severityClass: Record<number, string> = {
-	[Severity.error]: "bg-destructive/10 text-destructive",
-	[Severity.warning]: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
-	[Severity.info]: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-	[Severity.deprecated]: "bg-muted text-muted-foreground",
+const severityClass: Record<string, string> = {
+	error: "bg-destructive/10 text-destructive",
+	warning: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
+	info: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+	deprecated: "bg-muted text-muted-foreground",
 };
 
 export function ValidationErrorList({ items, onNavigate, className }: ValidationErrorListProps) {
@@ -34,7 +34,7 @@ export function ValidationErrorList({ items, onNavigate, className }: Validation
 					>
 						{err.filePath}
 					</button>
-					<p className="text-inherit opacity-80">{(t as (key: string, params?: Record<string, string | number>) => string)(err.messageKey, err.messageParams)}</p>
+					<p className="text-inherit opacity-80">{(t as (key: string, params?: Record<string, unknown>) => string)(err.messageKey, err.messageParams)}</p>
 				</div>
 			))}
 		</div>

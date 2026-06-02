@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode }
 import {
 	useFileStore,
 	useValidationStore,
-	Severity,
 	createDefaultValidators,
 	createValidationRunner,
 	useAppStore,
@@ -44,7 +43,7 @@ function toErrorResult(path: string, err: unknown) {
 	return [
 		{
 			path,
-			severity: Severity.error,
+			severity: "error",
 			messageKey: err instanceof Error ? err.message : "Unknown error",
 			startLine: 1,
 			startColumn: 1,
@@ -89,7 +88,7 @@ function scheduleValidation(projectId: string, path: string, timers: Map<string,
 export function ValidationProvider({ children }: { children: ReactNode }) {
 	const [path] = usePath();
 	const timersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
-	const validationDelayMs = useAppStore(useShallow((s) => s.settings.validationDelayMs));
+	const validationDelayMs = useAppStore(useShallow((s) => s.settings.validation.validationDelayMs));
 	const projectContext = useCurrentProject();
 	const projectId = projectContext.project.id;
 	const { contents } = useProjectContext();

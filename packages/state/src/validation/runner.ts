@@ -22,7 +22,7 @@ export function createValidationRunner(registry: ValidatorRegistry): ValidationR
 			return [
 				{
 					path,
-					severity: 0,
+					severity: "error",
 					messageKey: err instanceof Error ? err.message : "Unknown error",
 					startLine: 1,
 					startColumn: 1,
@@ -48,8 +48,8 @@ export function createValidationRunner(registry: ValidatorRegistry): ValidationR
 			} catch (err) {
 				results.push({
 					path,
-					severity: 0,
-					messageKey: "validation.internal.validatorError",
+					severity: "error",
+					messageKey: "validation.internal.validator-error",
 					messageParams: { name: v.name, error: String(err) },
 					startLine: 1,
 					startColumn: 1,

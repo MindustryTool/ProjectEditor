@@ -173,8 +173,8 @@ export function ModHjsonPanel({ path }: { path: string }) {
 		<Panel>
 			<div className="flex flex-col gap-4">
 				<TextFieldRow
-					label={t("editor.modHjson.name")}
-					description={t("editor.modHjson.nameDescription")}
+					label={t("editor.mod-hjson.name")}
+					description={t("editor.mod-hjson.name-description")}
 					placeholder="example-mod"
 					value={String(values.name ?? "")}
 					issues={issues.filter((issue) => issue.field === "name").map((issue) => issue.messageKey)}
@@ -182,8 +182,8 @@ export function ModHjsonPanel({ path }: { path: string }) {
 				/>
 
 				<TextFieldRow
-					label={t("editor.modHjson.displayName")}
-					description={t("editor.modHjson.displayNameDescription")}
+					label={t("editor.mod-hjson.display-name")}
+					description={t("editor.mod-hjson.display-name-description")}
 					placeholder="Example Mod"
 					value={String(values.displayName ?? "")}
 					issues={issues.filter((issue) => issue.field === "displayName").map((issue) => issue.messageKey)}
@@ -191,8 +191,8 @@ export function ModHjsonPanel({ path }: { path: string }) {
 				/>
 
 				<TextFieldRow
-					label={t("editor.modHjson.author")}
-					description={t("editor.modHjson.authorDescription")}
+					label={t("editor.mod-hjson.author")}
+					description={t("editor.mod-hjson.author-description")}
 					placeholder="Author Name"
 					value={String(values.author ?? "")}
 					issues={issues.filter((issue) => issue.field === "author").map((issue) => issue.messageKey)}
@@ -200,8 +200,8 @@ export function ModHjsonPanel({ path }: { path: string }) {
 				/>
 
 				<TextFieldRow
-					label={t("editor.modHjson.description")}
-					description={t("editor.modHjson.descriptionDescription")}
+					label={t("editor.mod-hjson.description")}
+					description={t("editor.mod-hjson.description-description")}
 					placeholder="A brief description..."
 					value={String(values.description ?? "")}
 					issues={issues.filter((issue) => issue.field === "description").map((issue) => issue.messageKey)}
@@ -210,8 +210,8 @@ export function ModHjsonPanel({ path }: { path: string }) {
 				/>
 
 				<TextFieldRow
-					label={t("editor.modHjson.version")}
-					description={t("editor.modHjson.versionDescription")}
+					label={t("editor.mod-hjson.version")}
+					description={t("editor.mod-hjson.version-description")}
 					placeholder="1.0.0"
 					value={String(values.version ?? "")}
 					issues={issues.filter((issue) => issue.field === "version").map((issue) => issue.messageKey)}
@@ -219,8 +219,8 @@ export function ModHjsonPanel({ path }: { path: string }) {
 				/>
 
 				<TextFieldRow
-					label={t("editor.modHjson.minGameVersion")}
-					description={t("editor.modHjson.minGameVersionDescription")}
+					label={t("editor.mod-hjson.min-game-version")}
+					description={t("editor.mod-hjson.min-game-version-description")}
 					placeholder="158"
 					value={String(values.minGameVersion ?? "")}
 					issues={issues.filter((issue) => issue.field === "minGameVersion").map((issue) => issue.messageKey)}
@@ -228,15 +228,15 @@ export function ModHjsonPanel({ path }: { path: string }) {
 				/>
 
 				<HiddenFieldRow
-					label={t("editor.modHjson.hidden")}
-					description={t("editor.modHjson.hiddenDescription")}
+					label={t("editor.mod-hjson.hidden")}
+					description={t("editor.mod-hjson.hidden-description")}
 					checked={!!values.hidden}
 					onCheckedChange={(checked) => updateValue("hidden", checked)}
 				/>
 
 				<DependenciesFieldRow
-					label={t("editor.modHjson.dependencies")}
-					description={t("editor.modHjson.dependenciesDescription")}
+					label={t("editor.mod-hjson.dependencies")}
+					description={t("editor.mod-hjson.dependencies-description")}
 					dependencies={depsDisplay}
 					onChange={handleDepChange}
 					onAdd={handleDepAdd}

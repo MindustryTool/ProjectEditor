@@ -55,7 +55,7 @@ export function ProjectPickerDialog({ mode, trigger, onSelectProject, onCreatePr
 		} catch {}
 	}
 
-	const titleKey = mode === "create" ? "projectPickerDialog.createTitle" : "projectPickerDialog.title";
+	const titleKey = mode === "create" ? "project-picker-dialog.create-title" : "project-picker-dialog.title";
 	const showCreateForm = mode !== "change";
 
 	return (
@@ -64,15 +64,15 @@ export function ProjectPickerDialog({ mode, trigger, onSelectProject, onCreatePr
 			<DialogContent className="sm:max-w-lg">
 				<DialogHeader>
 					<DialogTitle>{t(titleKey)}</DialogTitle>
-					<DialogDescription>{t("projectPickerDialog.description")}</DialogDescription>
+					<DialogDescription>{t("project-picker-dialog.description")}</DialogDescription>
 				</DialogHeader>
 				<div className="space-y-4">
 					{showCreateForm && (
 						<div className="gap-3 flex flex-col rounded-lg">
 							<div className="flex gap-2 flex-col">
-								<label className="text-xs font-medium text-muted-foreground">{t("projectPickerDialog.namePlaceholder")}</label>
+								<label className="text-xs font-medium text-muted-foreground">{t("project-picker-dialog.name-placeholder")}</label>
 								<Input
-									placeholder={t("projectPickerDialog.namePlaceholder")}
+									placeholder={t("project-picker-dialog.name-placeholder")}
 									value={newName}
 									onChange={(e) => {
 										setNewName(e.target.value);
@@ -95,7 +95,7 @@ export function ProjectPickerDialog({ mode, trigger, onSelectProject, onCreatePr
 								/>
 							</div>
 							<div className="flex flex-col gap-2">
-								<label className="text-xs font-medium text-muted-foreground">{t("projectPickerDialog.language")}</label>
+								<label className="text-xs font-medium text-muted-foreground">{t("project-picker-dialog.language")}</label>
 								<Select value={newLanguage} onValueChange={(v: ProjectLanguage) => setNewLanguage(v)}>
 									<SelectTrigger className="h-7 w-32 text-xs">
 										<SelectValue />
@@ -125,7 +125,7 @@ export function ProjectPickerDialog({ mode, trigger, onSelectProject, onCreatePr
 									})();
 								}}
 							>
-								{t("projectPickerDialog.create")}
+								{t("project-picker-dialog.create")}
 							</Button>
 						</div>
 					)}
@@ -136,11 +136,11 @@ export function ProjectPickerDialog({ mode, trigger, onSelectProject, onCreatePr
 						<div className="space-y-2">
 							<div className="flex items-center gap-1 text-sm font-medium text-foreground">
 								<FolderOpen className="h-4 w-4" />
-								{t("projectPickerDialog.recentProjects")}
+								{t("project-picker-dialog.recent-projects")}
 							</div>
 							<div className="max-h-60 space-y-1 overflow-y-auto">
 								{projects.length === 0 && (
-									<p className="py-4 text-center text-xs text-muted-foreground">{t("projectPickerDialog.noProjects")}</p>
+									<p className="py-4 text-center text-xs text-muted-foreground">{t("project-picker-dialog.no-projects")}</p>
 								)}
 								{projects.map((project) => (
 									<button
@@ -165,11 +165,11 @@ export function ProjectPickerDialog({ mode, trigger, onSelectProject, onCreatePr
 				</div>
 				<DialogFooter>
 					<Button variant="outline" onClick={() => setOpen(false)}>
-						{t("projectPickerDialog.cancel")}
+						{t("project-picker-dialog.cancel")}
 					</Button>
 					{mode !== "create" && (
 						<Button onClick={() => void handleSelect()} disabled={!selectedId}>
-							{t("projectPickerDialog.open")}
+							{t("project-picker-dialog.open")}
 						</Button>
 					)}
 				</DialogFooter>

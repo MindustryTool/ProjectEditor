@@ -56,24 +56,24 @@ export function ViewMenu({ className }: ViewMenuProps) {
 						className,
 					)}
 				>
-					{t("viewMenu.label")}
+					{t("view-menu.label")}
 					<ChevronDown className="h-3 w-3 text-muted-foreground" />
 				</button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="start" className="w-44">
 				<DropdownMenuSub>
-					<DropdownMenuSubTrigger>{t("viewMenu.changeTheme")}</DropdownMenuSubTrigger>
+					<DropdownMenuSubTrigger>{t("view-menu.change-theme")}</DropdownMenuSubTrigger>
 					<DropdownMenuSubContent className="w-36">
 						<DropdownMenuRadioGroup value={theme} onValueChange={(value) => handleThemeChange(value as Theme)}>
-							<DropdownMenuRadioItem value="light">{t("viewMenu.themeLight")}</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem value="dark">{t("viewMenu.themeDark")}</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem value="system">{t("viewMenu.themeAuto")}</DropdownMenuRadioItem>
+							<DropdownMenuRadioItem value="light">{t("view-menu.theme-light")}</DropdownMenuRadioItem>
+							<DropdownMenuRadioItem value="dark">{t("view-menu.theme-dark")}</DropdownMenuRadioItem>
+							<DropdownMenuRadioItem value="system">{t("view-menu.theme-auto")}</DropdownMenuRadioItem>
 						</DropdownMenuRadioGroup>
 					</DropdownMenuSubContent>
 				</DropdownMenuSub>
 
 				<DropdownMenuSub>
-					<DropdownMenuSubTrigger>{t("viewMenu.changeLanguage")}</DropdownMenuSubTrigger>
+					<DropdownMenuSubTrigger>{t("view-menu.change-language")}</DropdownMenuSubTrigger>
 					<DropdownMenuSubContent className="w-36">
 						{locales.map((locale) => (
 							<DropdownMenuItem key={locale.code} onClick={() => handleLanguageChange(locale.code as Locale)}>

@@ -136,8 +136,7 @@ export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 					jsonPath={name}
 				/>
 				{issue?.map((issue, index) => (
-					<span key={(issue.code || "") + index} className="text-red-400 text-xs">
-						{issue.code}
+					<span key={index} className="text-red-400 text-xs">
 						{issue.messageKey}
 					</span>
 				)) || null}
@@ -442,8 +441,7 @@ function ObjectField({ name: parentName, path, node, original, onPatch, entrySch
 					jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
 				/>
 				{issue?.map((issue, index) => (
-					<span key={(issue.code || "") + index} className="text-red-400 text-xs">
-						{issue.code}
+					<span key={index} className="text-red-400 text-xs">
 						{issue.messageKey}
 					</span>
 				)) || null}

@@ -1,6 +1,5 @@
-// i18n.ts or @types/i18next.d.ts
 import "i18next";
-import type en from "./locales/en/translation.json";
+import type { en } from "./locales/en/translation";
 
 declare module "i18next" {
 	interface CustomTypeOptions {
