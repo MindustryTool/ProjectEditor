@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { useItems } from "#/hooks/use-items";
 import { useFileString, useValidationStore, type ValidationResult } from "@project/core";
-import { type Research } from "@project/schema";
+import { unwrapSchema, type Research } from "@project/schema";
 import { HJSON } from "@project/hjson";
 import type { HjsonObjectNode } from "@project/hjson";
 import { HjsonNode, HjsonValueNode, HjsonArrayNode } from "@project/hjson";
@@ -94,7 +94,6 @@ export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 		const entryIssues = issues?.filter((issue) => issue.field?.startsWith(name));
 		const childNode = node.get(name);
 		const isNullable = hasNullishWrapper(entrySchema);
-
 		const metadata = getSchemaMetadata(entrySchema);
 
 		if (metadata?.visibleWhen) {
@@ -251,9 +250,10 @@ function BooleanField({ name, node, patchValue, entrySchema, issues }: Parameter
 function LiquidsListField({ name, node, patchValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
 	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "";
 	const context = useProjectContext();
-
-	if ("options" in entrySchema && Array.isArray(entrySchema.options)) {
-		const options = entrySchema.options
+    const unwrappedSchema = unwrapSchema(entrySchema);
+    
+	if ("options" in unwrappedSchema && Array.isArray(unwrappedSchema.options)) {
+		const options = unwrappedSchema.options
 			.map((v) => String(v))
 			.map((v) => context.contents.getLiquids().find((l) => l.name === v))
 			.filter(Boolean)
@@ -288,9 +288,10 @@ function LiquidsListField({ name, node, patchValue, entrySchema, issues }: Param
 
 function PickListField({ name, node, patchValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
 	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "";
-
-	if ("options" in entrySchema && Array.isArray(entrySchema.options)) {
-		const options = entrySchema.options.map((v) => String(v));
+    const unwrappedSchema = unwrapSchema(entrySchema);
+    
+	if ("options" in unwrappedSchema && Array.isArray(unwrappedSchema.options)) {
+		const options = unwrappedSchema.options.map((v) => String(v));
 
 		return (
 			<FormField>

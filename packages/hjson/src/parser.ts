@@ -1,8 +1,7 @@
 import { Tokenizer, type Token } from "./tokenizer.js";
 import type { HjsonNode, ObjectNode, ArrayNode, StringNode, NumberNode, BooleanNode, NullNode, MemberNode } from "./ast.js";
 import { HJSONError, HJSONErrorCode } from "./errors.js";
-import type {
-	HjsonNode as HjsonStructuredNode} from "./structured.js";
+import type { HjsonNode as HjsonStructuredNode } from "./structured.js";
 import {
 	HjsonObjectNode,
 	HjsonArrayNode,
@@ -18,7 +17,44 @@ export interface HJSONParseOptions {
 	structured?: boolean;
 }
 
+export interface HJSONPreservedSegment {
+	start: { row: number; col: number; index: number };
+	end: { row: number; col: number; index: number };
+	text: string;
+}
+
+export interface HJSONTolerantStructuredResult {
+	node?: HjsonStructuredNode;
+	issues: HJSONError[];
+	preservedSegments: HJSONPreservedSegment[];
+}
+
 const MAX_DEPTH = 512;
+
+function getEndPosition(input: string): { row: number; col: number; index: number } {
+	let row = 1;
+	let col = 1;
+
+	for (let i = 0; i < input.length; i++) {
+		const ch = input[i]!;
+		if (ch === "\r") {
+			if (input[i + 1] === "\n") {
+				i++;
+			}
+			row++;
+			col = 1;
+			continue;
+		}
+		if (ch === "\n") {
+			row++;
+			col = 1;
+			continue;
+		}
+		col++;
+	}
+
+	return { row, col, index: input.length };
+}
 
 export class Parser {
 	private tokenizer: Tokenizer;
@@ -454,11 +490,44 @@ export class Parser {
 		return parser.toJSValue(ast, reviver);
 	}
 
+	static parseStructuredTolerant(
+		input: string,
+		reviver?: (key: string, value: unknown) => unknown,
+		options?: HJSONParseOptions,
+	): HJSONTolerantStructuredResult {
+		try {
+			return {
+				node: Parser.parse(input, reviver, { ...options, structured: true }) as HjsonStructuredNode,
+				issues: [],
+				preservedSegments: [],
+			};
+		} catch (error) {
+			if (!(error instanceof HJSONError)) {
+				throw error;
+			}
+
+			return {
+				issues: [error],
+				preservedSegments: [
+					{
+						start: { row: 1, col: 1, index: 0 },
+						end: getEndPosition(input),
+						text: input,
+					},
+				],
+			};
+		}
+	}
+
 	toStructuredValue(node: HjsonNode, reviver?: (key: string, value: unknown) => unknown): HjsonStructuredNode {
 		return this.convertNodeStructured(node, "", reviver);
 	}
 
-	private convertNodeStructured(node: HjsonNode, keyHint: string, reviver?: (key: string, value: unknown) => unknown): HjsonStructuredNode {
+	private convertNodeStructured(
+		node: HjsonNode,
+		keyHint: string,
+		reviver?: (key: string, value: unknown) => unknown,
+	): HjsonStructuredNode {
 		switch (node.kind) {
 			case "null":
 			case "boolean":
@@ -472,16 +541,7 @@ export class Parser {
 				const data: unknown[] = [];
 				node.elements.forEach((el, i) => {
 					const val = this.convertNodeStructured(el, String(i), reviver);
-					elements.push(
-						createElementInfo(
-							i,
-							val,
-							{ ...el.loc.start },
-							{ ...el.loc.end },
-							{ ...el.loc.start },
-							{ ...el.loc.end },
-						),
-					);
+					elements.push(createElementInfo(i, val, { ...el.loc.start }, { ...el.loc.end }, { ...el.loc.start }, { ...el.loc.end }));
 					data.push(val.valueOf());
 				});
 				const finalData = reviver ? reviver(keyHint, data) : data;
@@ -536,7 +596,11 @@ export class Parser {
 		}
 	}
 
-	static async parseAsync(input: string, reviver?: (key: string, value: unknown) => unknown, options?: HJSONParseOptions): Promise<unknown> {
+	static async parseAsync(
+		input: string,
+		reviver?: (key: string, value: unknown) => unknown,
+		options?: HJSONParseOptions,
+	): Promise<unknown> {
 		return new Promise((resolve, reject) => {
 			queueMicrotask(() => {
 				try {

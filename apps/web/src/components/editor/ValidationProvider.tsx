@@ -132,20 +132,12 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 	}, [path, projectId, contents, validationDelayMs]);
 
 	useEffect(() => {
-		if (!projectId) {
-			return;
-		}
-
 		for (const path of Object.keys(useValidationStore.getState().results.resultsByPath)) {
 			scheduleValidation(projectId, path, timersRef.current, validationDelayMs, contents);
 		}
 	}, [projectId, contents, validationDelayMs]);
 
 	useEffect(() => {
-		if (!projectContext) {
-			return;
-		}
-
 		const events = projectContext.events;
 		const projectId = projectContext.project.id;
 		const timers = timersRef.current;

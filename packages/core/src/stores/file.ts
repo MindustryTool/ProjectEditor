@@ -49,6 +49,7 @@ export interface FileStore {
 	fileContents: Record<string, FileEntry>;
 	savingPaths: string[];
 	writeBuffer: (projectId: string, path: string, content: ArrayBuffer | string) => void;
+    getEntry: (projectId: string, path: string) => FileEntry | undefined;
 	markPersisted: (projectId: string, path: string) => void;
 	setBufferError: (projectId: string, path: string, error: string) => void;
 	markSaving: (projectId: string, path: string) => void;
@@ -109,6 +110,8 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 		enforceLRULimit();
 		set({ fileContents: buildFiles() });
 	},
+
+    getEntry: (projectId, path) => lruMap.get(cacheKey(projectId, path)),
 
 	markPersisted: (projectId, path) => {
 		const key = cacheKey(projectId, path);

@@ -17,7 +17,7 @@ export const SectorHjsonSchema: SchemaFn = (value, context) =>
 		allowLaunchLoadout: v.nullish(v.boolean(), false),
 		attackAfterWaves: v.nullish(v.boolean(), false),
 		originalPosition: v.nullish(v.number(), 0),
-		planet: v.nullish(v.string(), ""),
+		planet: v.nullish(v.picklist(["serpulo", "erekir"])),
 		sector: v.nullish(v.pipe(v.number(), v.minValue(0)), 0),
 		research: ResearchSchema(value.get("research"), context),
 	});
