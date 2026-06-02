@@ -10,7 +10,7 @@ import { lazyArray } from "./lazy-array";
 export const WeaponHjsonSchema: SchemaFn = (value, context) =>
 	v.object({
 		name: v.optional(v.string()),
-
+        shots: v.optional(v.number(), 1),
 		bullet: v.optional(BulletHjsonSchema(value.get("bullet"), context)),
 		ejectEffect: v.optional(EffectHjsonSchema(value.get("ejectEffect"), context)),
 
