@@ -42,7 +42,9 @@ export function createValidationRunner(registry: ValidatorRegistry): ValidationR
 				const validatorResults = v.validate({ path, content: resolvedContent, context });
 				results.push(...validatorResults);
 				const duration = Date.now() - start;
-				console.log({ task: "Validate", name: v.name, path, finish: true, duration: `${duration.toString()}ms` });
+				if (duration > 100) {
+					console.log({ task: "Validate", name: v.name, path, finish: true, duration: `${duration.toString()}ms` });
+				}
 			} catch (err) {
 				results.push({
 					path,

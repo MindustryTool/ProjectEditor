@@ -1,5 +1,5 @@
 import * as v from "valibot";
-import { MindustryHexColorSchema, SoundSchema, type SchemaFn } from "./base";
+import { Interps, MindustryHexColorSchema, SoundSchema, type SchemaFn } from "./base";
 
 const metadata = { type: "effect" };
 
@@ -38,7 +38,8 @@ const classSchemaMap: Record<EffectClass, () => v.ObjectSchema<v.ObjectEntries, 
 			cone: v.nullish(v.number(), 180),
 			length: v.nullish(v.number(), 20),
 			baseLength: v.nullish(v.number(), 0),
-			interp: v.nullish(v.string(), "linear"),
+			interp: v.nullish(v.picklist(Interps), "linear"),
+            sizeInterp: v.nullish(v.picklist(Interps), "linear"),
 			offsetX: v.nullish(v.number(), 0),
 			offsetY: v.nullish(v.number(), 0),
 			lightScl: v.nullish(v.number(), 2),
@@ -137,8 +138,8 @@ const classSchemaMap: Record<EffectClass, () => v.ObjectSchema<v.ObjectEntries, 
 			rotation: v.nullish(v.number(), 0),
 			strokeFrom: v.nullish(v.number(), 2),
 			strokeTo: v.nullish(v.number(), 0),
-			interp: v.nullish(v.string(), "linear"),
-			lightInterp: v.nullish(v.string(), "reverse"),
+			interp: v.nullish(v.picklist(Interps), "linear"),
+			lightInterp: v.nullish(v.picklist(Interps), "reverse"),
 		}),
 	WrapEffect: () =>
 		v.object({
