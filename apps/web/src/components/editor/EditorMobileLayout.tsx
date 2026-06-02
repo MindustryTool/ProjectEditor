@@ -1,5 +1,5 @@
 import { Fragment, useState } from "react";
-import { FolderOpen } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Toolbar } from "./Toolbar";
 import { StatusBar } from "./StatusBar";
@@ -15,7 +15,6 @@ import { EditorRightPanel } from "./EditorRightPanel";
 import { FileExplorer } from "./left/FileExplorer";
 import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { Button } from "~/components/ui/button";
 import { Panel } from "#/components/editor/Panel";
 import { ErrorBoundary } from "#/components/ui/error-boundary";
 
@@ -32,9 +31,10 @@ export function EditorMobileLayout({ path }: EditorMobileLayoutProps) {
 			<Toolbar>
 				<Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
 					<SheetTrigger asChild>
-						<Button variant="ghost" size="icon-sm" className="shrink-0">
-							<FolderOpen className="size-4" />
-						</Button>
+						<button className="flex text-nowrap items-center gap-1 rounded px-2 py-1 text-xs font-medium text-foreground hover:bg-accent active:bg-accent">
+							{t("editor.file-explorer")}
+							<ChevronDown className="h-3 w-3 text-muted-foreground" />
+						</button>
 					</SheetTrigger>
 					<SheetContent side="left" showCloseButton={false} className="w-4/5 sm:max-w-sm max-h-dvh">
 						<Panel>

@@ -133,6 +133,9 @@ export interface SchemaMetadata {
 		field: string;
 		value: unknown;
 	};
+	name?: string;
+	description?: string;
+	multiline?: boolean;
 }
 
 export function getSchemaMetadata(schema: AnySchema): SchemaMetadata | null {

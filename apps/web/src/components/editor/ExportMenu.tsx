@@ -185,7 +185,7 @@ export function ExportMenu({ className }: ExportMenuProps) {
 			<button
 				onClick={handleOpen}
 				className={cn(
-					"inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-foreground hover:bg-accent active:bg-accent",
+					"inline-flex items-center text-nowrap gap-1 rounded px-2 py-1 text-xs font-medium text-foreground hover:bg-accent active:bg-accent",
 					className,
 				)}
 			>

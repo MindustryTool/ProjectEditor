@@ -108,7 +108,7 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 				<DropdownMenuTrigger asChild>
 					<button
 						className={cn(
-							"inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-foreground hover:bg-accent active:bg-accent",
+							"inline-flex text-nowrap items-center gap-1 rounded px-2 py-1 text-xs font-medium text-foreground hover:bg-accent active:bg-accent",
 							className,
 						)}
 					>

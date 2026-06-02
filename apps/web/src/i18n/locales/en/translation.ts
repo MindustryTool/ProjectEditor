@@ -7,6 +7,7 @@ export const en = {
 	"editor.properties-placeholder": "Select an element to view its properties.",
 	"editor.explorer": "Explorer",
 	"editor.editor": "Editor",
+	"editor.file-explorer": "File Explorer",
 	"editor.no-file-selected": "No file selected",
 	"editor.mod-hjson.name": "Name",
 	"editor.mod-hjson.name-description": "The internal mod identifier (e.g., 'example-mod')",

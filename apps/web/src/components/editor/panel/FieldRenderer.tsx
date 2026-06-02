@@ -4,12 +4,13 @@ import { Checkbox } from "#/components/ui/checkbox";
 import { ColorPicker, ColorPickerAlpha, ColorPickerFormat, ColorPickerHue, ColorPickerSelection } from "#/components/ui/color-picker";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
 import { ErrorBoundary } from "#/components/ui/error-boundary";
-import { FormControl, FormField, FormLabel } from "#/components/ui/form";
+import { FormControl, FormField, FormLabel, FormDescription, FormMessage } from "#/components/ui/form";
 import { Input } from "#/components/ui/input";
+import { Textarea } from "#/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { useItems } from "#/hooks/use-items";
-import { useFileString, useValidationStore } from "@project/state";
+import { useFileString, useValidationStore, type ValidationResult } from "@project/state";
 import { type Research } from "@project/schema";
 import { HJSON } from "@project/hjson";
 import type { HjsonObjectNode } from "@project/hjson";
@@ -32,7 +33,7 @@ import { useUnits } from "#/hooks/use-units";
 import { useLiquids } from "#/hooks/use-liquids";
 import { useSectors } from "#/hooks/use-sectors";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
-import { cn } from "#/lib/utils";
+import { cn, EMPTY_ARRAY } from "#/lib/utils";
 import { useEffects } from "#/hooks/use-effects";
 import { Spinner } from "#/components/ui/spinner";
 import { ErrorDisplay } from "#/components/ui/error-display";
@@ -43,6 +44,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/component
 import { Separator } from "#/components/ui/separator";
 import type { Type } from "@project/schema";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
+import { useTranslation } from "react-i18next";
 
 interface FieldsRendererProps {
 	path: string;
@@ -52,7 +54,7 @@ interface FieldsRendererProps {
 export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 	const { data, isLoading, write } = useFileString(path);
 	const { contents } = useProjectContext();
-	const issues = useValidationStore((state) => state.results.resultsByPath[path]);
+	const issues = useValidationStore((state) => state.results.resultsByPath[path] || EMPTY_ARRAY);
 
 	if (isLoading || data === null) {
 		return null;
@@ -89,7 +91,7 @@ export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 			);
 		}
 
-		const issue = issues?.filter((issue) => issue.field === name);
+		const entryIssues = issues?.filter((issue) => issue.field?.startsWith(name));
 		const childNode = node.get(name);
 		const isNullable = hasNullishWrapper(entrySchema);
 
@@ -134,12 +136,8 @@ export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 					patchValue={patchValue}
 					entrySchema={entrySchema as AnySchema}
 					jsonPath={name}
+					issues={entryIssues}
 				/>
-				{issue?.map((issue, index) => (
-					<span key={index} className="text-red-400 text-xs">
-						{issue.messageKey}
-					</span>
-				)) || null}
 			</ErrorBoundary>
 		);
 	});
@@ -153,6 +151,7 @@ type SchemaRenderer = (props: {
 	patchValue: (newRawValue: unknown) => void;
 	entrySchema: AnySchema;
 	jsonPath?: string;
+	issues: ValidationResult[];
 }) => ReactNode;
 
 const schemaRenderers: Record<Type, SchemaRenderer> = {
@@ -173,43 +172,83 @@ const schemaRenderers: Record<Type, SchemaRenderer> = {
 	),
 };
 
-function StringField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
+function FieldIssue({ issues }: { issues: ValidationResult[] }) {
+	const { t } = useTranslation();
+
+	if (issues.length === 0) return null;
+
+	return (
+		<FormMessage>
+			{issues.map((issue) => (t as (key: string, params?: Record<string, unknown>) => string)(issue.messageKey, issue.messageParams))}
+		</FormMessage>
+	);
+}
+
+function StringField({ name, node, patchValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
+	const { t } = useTranslation();
+	const _t = t as (key: string) => string;
 	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema);
+	const metadata = getSchemaMetadata(entrySchema);
+	const label = metadata?.name ? _t(metadata.name) : name;
+	const description = metadata?.description ? _t(metadata.description) : undefined;
+
 	return (
 		<FormField>
-			<FormLabel>{name}</FormLabel>
+			<FormLabel>{label}</FormLabel>
 			<FormControl>
-				<Input value={value} onChange={(v) => patchValue(v.currentTarget.value)} />
+				{metadata?.multiline ? (
+					<Textarea value={value} onChange={(v) => patchValue(v.currentTarget.value)} />
+				) : (
+					<Input value={value} onChange={(v) => patchValue(v.currentTarget.value)} />
+				)}
 			</FormControl>
+			{description && <FormDescription>{description}</FormDescription>}
+			<FieldIssue issues={issues} />
 		</FormField>
 	);
 }
 
-function NumberField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
+function NumberField({ name, node, patchValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
+	const { t } = useTranslation();
+	const _t = t as (key: string) => string;
 	const value = node.isNumber() ? node.valueOf() : v.getDefault(entrySchema);
+	const metadata = getSchemaMetadata(entrySchema);
+	const label = metadata?.name ? _t(metadata.name) : name;
+	const description = metadata?.description ? _t(metadata.description) : undefined;
+
 	return (
 		<FormField>
-			<FormLabel>{name}</FormLabel>
+			<FormLabel>{label}</FormLabel>
 			<FormControl>
 				<Input value={value} onChange={(v) => patchValue(v.currentTarget.valueAsNumber)} type="number" />
 			</FormControl>
+			{description && <FormDescription>{description}</FormDescription>}
+			<FieldIssue issues={issues} />
 		</FormField>
 	);
 }
 
-function BooleanField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
+function BooleanField({ name, node, patchValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
+	const { t } = useTranslation();
+	const _t = t as (key: string) => string;
 	const checked = node.isBoolean() ? node.valueOf() : v.getDefault(entrySchema);
+	const metadata = getSchemaMetadata(entrySchema);
+	const label = metadata?.name ? _t(metadata.name) : name;
+	const description = metadata?.description ? _t(metadata.description) : undefined;
+
 	return (
 		<FormField>
 			<FormControl className="flex-row flex gap-1">
 				<Checkbox checked={checked} onCheckedChange={(value) => patchValue(value === true)} />
-				<FormLabel>{name}</FormLabel>
+				<FormLabel>{label}</FormLabel>
 			</FormControl>
+			{description && <FormDescription>{description}</FormDescription>}
+			<FieldIssue issues={issues} />
 		</FormField>
 	);
 }
 
-function LiquidsListField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
+function LiquidsListField({ name, node, patchValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
 	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "";
 	const context = useProjectContext();
 
@@ -218,7 +257,7 @@ function LiquidsListField({ name, node, patchValue, entrySchema }: Parameters<Sc
 			.map((v) => String(v))
 			.map((v) => context.contents.getLiquids().find((l) => l.name === v))
 			.filter(Boolean)
-            .map((option) => option!);
+			.map((option) => option!);
 
 		return (
 			<FormField>
@@ -239,6 +278,7 @@ function LiquidsListField({ name, node, patchValue, entrySchema }: Parameters<Sc
 						</SelectContent>
 					</Select>
 				</FormControl>
+				<FieldIssue issues={issues} />
 			</FormField>
 		);
 	}
@@ -246,7 +286,7 @@ function LiquidsListField({ name, node, patchValue, entrySchema }: Parameters<Sc
 	throw new Error(`Unknown option ${value}, this should not happen`);
 }
 
-function PickListField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
+function PickListField({ name, node, patchValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
 	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "";
 
 	if ("options" in entrySchema && Array.isArray(entrySchema.options)) {
@@ -271,6 +311,7 @@ function PickListField({ name, node, patchValue, entrySchema }: Parameters<Schem
 						</SelectContent>
 					</Select>
 				</FormControl>
+				<FieldIssue issues={issues} />
 			</FormField>
 		);
 	}
@@ -278,7 +319,7 @@ function PickListField({ name, node, patchValue, entrySchema }: Parameters<Schem
 	throw new Error(`Unknown option ${value}, this should not happen`);
 }
 
-function ColorField({ name, node, patchValue, entrySchema }: Parameters<SchemaRenderer>[0]) {
+function ColorField({ name, node, patchValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
 	let value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "333333";
 
 	value = value?.startsWith("#") ? value : "#" + value;
@@ -306,11 +347,14 @@ function ColorField({ name, node, patchValue, entrySchema }: Parameters<SchemaRe
 					</Popover>
 				</div>
 			</FormControl>
+			<FieldIssue issues={issues} />
 		</FormField>
 	);
 }
 
-function ArrayField({ path, name, node, original, onPatch, patchValue, entrySchema, jsonPath }: Parameters<SchemaRenderer>[0]) {
+function ArrayField({ path, name, node, original, onPatch, patchValue, entrySchema, jsonPath, issues }: Parameters<SchemaRenderer>[0]) {
+	const { t } = useTranslation();
+	const _t = t as (key: string) => string;
 	if (!node.isArray()) {
 		patchValue([]);
 		return null;
@@ -319,6 +363,9 @@ function ArrayField({ path, name, node, original, onPatch, patchValue, entrySche
 	const items = node.elements();
 	const itemSchema = getArrayItemSchema(entrySchema);
 	const itemType = itemSchema ? detectSchemaType(itemSchema) : null;
+	const metadata = getSchemaMetadata(entrySchema);
+	const label = metadata?.name ? _t(metadata.name) : name;
+	const description = metadata?.description ? _t(metadata.description) : undefined;
 
 	const handleRemove = (index: number) => {
 		const newContent = node.removeElement(original, index);
@@ -339,13 +386,16 @@ function ArrayField({ path, name, node, original, onPatch, patchValue, entrySche
 
 	return (
 		<FormField>
-			<FormLabel>{name}</FormLabel>
+			<FormLabel>{label}</FormLabel>
+			{description && <FormDescription>{description}</FormDescription>}
 			<FormControl>
 				<div className="flex flex-col gap-2">
-					{items.map((el, index) => (
-						<div key={index} className="flex gap-2">
-							<div className="flex-1 p-2 border rounded-md relative">
-								<span className="font-semibold text-sm">{index + 1}</span>
+					{items.map((el, index) => {
+						const entryJsonPath = jsonPath ? `${jsonPath}[${index}]` : `[${index}]`;
+						const entryIssues = issues.filter((issue) => issue.field?.startsWith(entryJsonPath));
+
+						return (
+							<div key={index} className="flex items-center gap-2">
 								<SchemaArrayItemEditor
 									path={path}
 									value={el.value}
@@ -353,19 +403,15 @@ function ArrayField({ path, name, node, original, onPatch, patchValue, entrySche
 									itemSchema={itemSchema}
 									onChange={(v) => handleItemChange(index, v)}
 									original={original}
-									jsonPath={jsonPath ? `${jsonPath}[${index}]` : `[${index}]`}
+									jsonPath={entryJsonPath}
+									issues={entryIssues}
 								/>
-								<Button
-									className="absolute top-1 right-1 text-destructive"
-									size="icon-sm"
-									variant="ghost"
-									onClick={() => handleRemove(index)}
-								>
+								<Button className="size-9" type="button" variant="outline" onClick={() => handleRemove(index)}>
 									<X />
 								</Button>
 							</div>
-						</div>
-					))}
+						);
+					})}
 					<Button type="button" variant="outline" size="sm" onClick={handleAdd}>
 						<Plus /> Add
 					</Button>
@@ -375,9 +421,7 @@ function ArrayField({ path, name, node, original, onPatch, patchValue, entrySche
 	);
 }
 
-function ObjectField({ name: parentName, path, node, original, onPatch, entrySchema, jsonPath }: Parameters<SchemaRenderer>[0]) {
-	const issues = useValidationStore((state) => state.results.resultsByPath[path]);
-
+function ObjectField({ name: parentName, path, node, original, onPatch, entrySchema, jsonPath, issues }: Parameters<SchemaRenderer>[0]) {
 	if (!node.isObject()) {
 		return null;
 	}
@@ -390,7 +434,7 @@ function ObjectField({ name: parentName, path, node, original, onPatch, entrySch
 		const childNode = node.get(name);
 		const metadata = getSchemaMetadata(entrySchema);
 		const isNullable = hasNullishWrapper(entrySchema);
-		const issue = issues?.filter((issue) => issue.field === `${parentName}.${name}`);
+		const entryIssues = issues.filter((issue) => issue.field?.startsWith(`${parentName}.${name}`));
 
 		if (metadata?.visibleWhen) {
 			const refNode = node.get(metadata.visibleWhen.field);
@@ -439,18 +483,14 @@ function ObjectField({ name: parentName, path, node, original, onPatch, entrySch
 					patchValue={patchValue}
 					entrySchema={entrySchema as AnySchema}
 					jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
+					issues={entryIssues}
 				/>
-				{issue?.map((issue, index) => (
-					<span key={index} className="text-red-400 text-xs">
-						{issue.messageKey}
-					</span>
-				)) || null}
 			</ErrorBoundary>
 		);
 	});
 }
 
-function ResearchField({ name, node, original, onPatch, patchValue }: Parameters<SchemaRenderer>[0]) {
+function ResearchField({ name, node, original, onPatch, patchValue, issues }: Parameters<SchemaRenderer>[0]) {
 	const items = useItems({ project: true, base: true });
 	const blocks = useBlocks();
 	const units = useUnits();
@@ -675,6 +715,7 @@ function ResearchField({ name, node, original, onPatch, patchValue }: Parameters
 						</DialogContent>
 					</Dialog>
 				</FormControl>
+				<FieldIssue issues={issues} />
 				<FormControl className="grid gap-2">
 					{requirements.map((requirement: string, index: number) => {
 						const parts = requirement.split("/");
@@ -736,7 +777,7 @@ function ResearchField({ name, node, original, onPatch, patchValue }: Parameters
 	);
 }
 
-function EffectField({ path, name, node, original, patchValue, entrySchema, onPatch, jsonPath }: Parameters<SchemaRenderer>[0]) {
+function EffectField({ path, name, node, original, patchValue, entrySchema, onPatch, jsonPath, issues }: Parameters<SchemaRenderer>[0]) {
 	const { data = [], isLoading, isError, error } = useEffects();
 	const [filter, setFilter] = useState("");
 
@@ -772,12 +813,14 @@ function EffectField({ path, name, node, original, patchValue, entrySchema, onPa
 										original={original}
 										onPatch={onPatch}
 										jsonPath={jsonPath}
+										issues={issues}
 									/>
 									<Separator />
 								</div>
 							</FormControl>
 						</CollapsibleContent>
 					</FormField>
+					<FieldIssue issues={issues} />
 				</Collapsible>
 			</div>
 		);
@@ -809,7 +852,7 @@ function EffectField({ path, name, node, original, patchValue, entrySchema, onPa
 							<DialogDescription />
 						</VisuallyHidden.Root>
 						<ToggleGroup type="single" value={value} onValueChange={(v) => patchValue(v)} asChild>
-							<div className="space-y-2">
+							<div className="grid gap-2">
 								<InputGroup>
 									<InputGroupAddon>
 										<Search />
@@ -831,6 +874,7 @@ function EffectField({ path, name, node, original, patchValue, entrySchema, onPa
 						</ToggleGroup>
 					</DialogContent>
 				</Dialog>
+                <FieldIssue issues={issues} />
 			</FormField>
 		</div>
 	);
@@ -856,6 +900,7 @@ function SchemaArrayItemEditor({
 	onChange,
 	original = "",
 	jsonPath,
+	issues,
 }: {
 	path: string;
 	value: unknown;
@@ -864,9 +909,9 @@ function SchemaArrayItemEditor({
 	onChange: (v: unknown) => void;
 	original?: string;
 	jsonPath?: string;
+	issues: ValidationResult[];
 }) {
 	const type = detectSchemaType(itemSchema);
-	const Renderer = schemaRenderers[type];
 
 	const node = useMemo(
 		() =>
@@ -875,8 +920,6 @@ function SchemaArrayItemEditor({
 				: new HjsonValueNode<unknown>(value, { row: 0, col: 0, index: 0 }, { row: 0, col: 0, index: 0 }),
 		[value],
 	);
-
-	const name = itemType || "string";
 
 	const handleOnPatch = useCallback(
 		(newContent: string) => {
@@ -900,6 +943,14 @@ function SchemaArrayItemEditor({
 		[onChange, node, jsonPath],
 	);
 
+	if (type === "string") {
+		const stringValue = node.isString() ? node.valueOf() : v.getDefault(itemSchema);
+		return <Input value={stringValue} onChange={(e) => onChange(e.currentTarget.value)} placeholder="mod-name" className="flex-1" />;
+	}
+
+	const Renderer = schemaRenderers[type];
+	const name = itemType || "string";
+
 	return (
 		<ErrorBoundary key={name}>
 			<Renderer
@@ -911,6 +962,7 @@ function SchemaArrayItemEditor({
 				patchValue={(v) => onChange(v)}
 				entrySchema={itemSchema}
 				jsonPath={jsonPath}
+				issues={issues}
 			/>
 		</ErrorBoundary>
 	);

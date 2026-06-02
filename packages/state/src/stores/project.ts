@@ -34,7 +34,6 @@ interface AppState {
 	hydrated: boolean;
 	projects: Record<string, ProjectRecord>;
 	settings: AppSettings;
-
 	createNewProject: (name: string, language?: ProjectLanguage) => Promise<string>;
 	updateSettings: (settings: Partial<AppSettings>) => void;
 	saveProject: (record: ProjectRecord) => Promise<void>;
@@ -48,7 +47,7 @@ export const useAppStore = create<AppState>()(
 		(set, get) => ({
 			hydrated: false,
 			projects: {},
-			settings: { theme: "system" as const, fontSize: 14, tabSize: 2, validation: { validationDelayMs: 3000 } },
+			settings: { theme: "system" as const, fontSize: 14, tabSize: 2, validation: { validationDelayMs: 500 } },
 
 			createNewProject: async (name: string, language?: ProjectLanguage) => {
 				const project = createProjectInfo(name, language);
