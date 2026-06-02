@@ -40,6 +40,10 @@ export type Unit = {
 	contentType: string;
 };
 
+export type Sprite = {
+    name: string;
+}
+
 export type ProjectContents = {
 	getItems(): Item[];
 	getBlocks(): Block[];
@@ -47,4 +51,5 @@ export type ProjectContents = {
 	getSectors(): Sector[];
 	getStatuses(): Status[];
 	getUnits(): Unit[];
+    getSprites(): Sprite[];
 };

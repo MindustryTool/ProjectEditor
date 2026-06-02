@@ -2,6 +2,7 @@ import { useBlocks } from "#/hooks/use-blocks";
 import { useItems } from "#/hooks/use-items";
 import { useLiquids } from "#/hooks/use-liquids";
 import { useSectors } from "#/hooks/use-sectors";
+import { useSprites } from "#/hooks/use-Sprites";
 import { useStatuses } from "#/hooks/use-statuses";
 import { useUnits } from "#/hooks/use-units";
 import type { ProjectContents } from "@project/types";
@@ -27,6 +28,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 	const sectors = useSectors();
 	const statuses = useStatuses();
 	const units = useUnits();
+    const sprites = useSprites();
 
 	const contents = useMemo(
 		() => ({
@@ -36,8 +38,9 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 			getSectors: () => sectors,
 			getStatuses: () => statuses,
 			getUnits: () => units,
+            getSprites: () => sprites,
 		}),
-		[items, blocks, liquids, sectors, statuses, units],
+		[items, blocks, liquids, sectors, statuses, units, sprites],
 	);
 
 	return <ProjectContext.Provider value={{ contents }}>{children}</ProjectContext.Provider>;

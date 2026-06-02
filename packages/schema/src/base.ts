@@ -163,6 +163,16 @@ export const SoundHjsonSchema = v.pipe(
 	}),
 );
 
+export const SpriteHjsonSchema: SchemaFn = (_, context) =>
+	v.pipe(
+		v.picklist(context.getSprites().map((s) => s.name)),
+		v.minLength(1),
+		v.maxLength(127),
+		v.metadata({
+			type: "sprite",
+		}),
+	);
+
 export type SchemaFn<
 	T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>> = v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>,
 > = (value: HjsonNode, context: ProjectContents) => T;
@@ -203,22 +213,6 @@ export const Interps = [
 	"exp10",
 	"exp10In",
 	"exp10Out",
-	"exp5",
-	"exp5In",
-	"exp5Out",
-	"exp10",
-	"exp10In",
-	"exp10Out",
-	"exp5",
-	"circle",
-	"circleIn",
-	"circleOut",
-	"exp5",
-	"exp5In",
-	"exp5Out",
-	"circle",
-	"circleIn",
-	"circleOut",
 	"exp5",
 	"exp5In",
 	"exp5Out",

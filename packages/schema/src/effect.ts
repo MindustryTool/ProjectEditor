@@ -1,5 +1,6 @@
 import * as v from "valibot";
 import { Interps, MindustryHexColorSchema, SoundHjsonSchema, type SchemaFn } from "./base";
+import { lazyArray } from "./lazy-array";
 
 const metadata = { type: "effect" };
 
@@ -27,8 +28,20 @@ const effectBaseObjectSchema = v.object({
 	layerDuration: v.nullish(v.number(), 0),
 });
 
-const classSchemaMap: Record<EffectClass, () => v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>> = {
-	ParticleEffect: () =>
+type EffectObjectSchema = v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>;
+
+type EffectSchemaFactory = (value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) => EffectObjectSchema;
+
+function createEffectFieldSchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1], key: "effect") {
+	return v.nullish(EffectHjsonSchema(value.get(key), context));
+}
+
+function createEffectArraySchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1], key: "effects") {
+	return lazyArray((index) => EffectHjsonSchema(value.get(key).get(index), context));
+}
+
+const classSchemaMap: Record<EffectClass, EffectSchemaFactory> = {
+	ParticleEffect: (_value, _context) =>
 		v.object({
 			colorFrom: v.nullish(MindustryHexColorSchema),
 			colorTo: v.nullish(MindustryHexColorSchema),
@@ -61,16 +74,11 @@ const classSchemaMap: Record<EffectClass, () => v.ObjectSchema<v.ObjectEntries, 
 			lenTo: v.nullish(v.number(), 2),
 			cap: v.nullish(v.boolean(), true),
 		}),
-	MultiEffect: () =>
+	MultiEffect: (value, context) =>
 		v.object({
-			effects: v.array(
-				v.pipe(
-					v.lazy(() => effectItemUnionSchema),
-					v.metadata(metadata),
-				),
-			),
+			effects: createEffectArraySchema(value, context, "effects"),
 		}),
-	ExplosionEffect: () =>
+	ExplosionEffect: (_value, _context) =>
 		v.object({
 			waveColor: v.nullish(MindustryHexColorSchema),
 			smokeColor: v.nullish(MindustryHexColorSchema),
@@ -88,44 +96,29 @@ const classSchemaMap: Record<EffectClass, () => v.ObjectSchema<v.ObjectEntries, 
 			smokes: v.nullish(v.number(), 5),
 			sparks: v.nullish(v.number(), 4),
 		}),
-	RadialEffect: () =>
+	RadialEffect: (value, context) =>
 		v.object({
-			effect: v.nullish(
-				v.pipe(
-					v.lazy(() => effectItemUnionSchema),
-					v.metadata(metadata),
-				),
-			),
+			effect: createEffectFieldSchema(value, context, "effect"),
 			rotationSpacing: v.nullish(v.number(), 90),
 			rotationOffset: v.nullish(v.number(), 0),
 			effectRotationOffset: v.nullish(v.number(), 0),
 			lengthOffset: v.nullish(v.number(), 0),
 			amount: v.nullish(v.number(), 4),
 		}),
-	SeqEffect: () =>
+	SeqEffect: (value, context) =>
 		v.object({
-			effects: v.array(
-				v.pipe(
-					v.lazy(() => effectItemUnionSchema),
-					v.metadata(metadata),
-				),
-			),
+			effects: createEffectArraySchema(value, context, "effects"),
 		}),
-	SoundEffect: () =>
+	SoundEffect: (value, context) =>
 		v.object({
 			sound: v.nullish(SoundHjsonSchema),
 			minPitch: v.nullish(v.number(), 0.8),
 			maxPitch: v.nullish(v.number(), 1.2),
 			minVolume: v.nullish(v.number(), 1),
 			maxVolume: v.nullish(v.number(), 1),
-			effect: v.nullish(
-				v.pipe(
-					v.lazy(() => effectItemUnionSchema),
-					v.metadata(metadata),
-				),
-			),
+			effect: createEffectFieldSchema(value, context, "effect"),
 		}),
-	WaveEffect: () =>
+	WaveEffect: (_value, _context) =>
 		v.object({
 			colorFrom: v.nullish(MindustryHexColorSchema),
 			colorTo: v.nullish(MindustryHexColorSchema),
@@ -141,49 +134,21 @@ const classSchemaMap: Record<EffectClass, () => v.ObjectSchema<v.ObjectEntries, 
 			interp: v.nullish(v.picklist(Interps), "linear"),
 			lightInterp: v.nullish(v.picklist(Interps), "reverse"),
 		}),
-	WrapEffect: () =>
+	WrapEffect: (value, context) =>
 		v.object({
-			effect: v.nullish(
-				v.pipe(
-					v.lazy(() => effectItemUnionSchema),
-					v.metadata(metadata),
-				),
-			),
+			effect: createEffectFieldSchema(value, context, "effect"),
 			color: v.nullish(MindustryHexColorSchema),
 			rotation: v.nullish(v.number(), 0),
 		}),
 };
 
-export const effectItemUnionSchema = v.pipe(
-	v.lazy((input) => {
-		if (typeof input === "object" && input !== null && "type" in input) {
-			const type = input.type as EffectClass;
-
-			const schemaFn = classSchemaMap[type];
-
-			if (schemaFn) {
-				return v.object({ ...effectBaseObjectSchema.entries, ...schemaFn().entries });
-			}
-
-			return effectBaseObjectSchema;
-		}
-
-		return v.pipe(v.string(), v.minLength(1), v.maxLength(127));
-	}),
-	v.metadata(metadata),
-);
-
 export const EffectHjsonSchema: SchemaFn = (value, context) => {
-	return buildEffectHjsonSchema(value, context);
-};
-
-const buildEffectHjsonSchema: SchemaFn = (value) => {
 	if (value.isObject()) {
 		const type = value.get("type");
 
 		if (type.isString() && classSchemaMap[type.valueOf() as EffectClass]) {
 			const schema = classSchemaMap[type.valueOf() as EffectClass];
-			return v.pipe(v.object({ ...effectBaseObjectSchema.entries, ...schema().entries }), v.metadata(metadata));
+			return v.pipe(v.object({ ...effectBaseObjectSchema.entries, ...schema(value, context).entries }), v.metadata(metadata));
 		}
 
 		return v.pipe(effectBaseObjectSchema, v.metadata(metadata));

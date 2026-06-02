@@ -1,5 +1,6 @@
 import * as v from "valibot";
 import type { SchemaFn } from "./base";
+import { lazyArray } from "./lazy-array";
 
 const metadata = { type: "shoot-pattern" };
 
@@ -16,60 +17,62 @@ export const shootPatternTypes = [
 export type ShootPatternType = (typeof shootPatternTypes)[number];
 
 const shootPatternBaseObjectSchema = v.object({
-	type: v.picklist(shootPatternTypes),
+	type: v.optional(v.picklist(shootPatternTypes), shootPatternTypes[0]),
 	name: v.nullish(v.string()),
 	shots: v.nullish(v.number(), 1),
 	firstShotDelay: v.nullish(v.number(), 0),
 	shotDelay: v.nullish(v.number(), 0),
 });
 
-const classSchemaMap: Record<ShootPatternType, () => v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>> = {
-	ShootAlternate: () =>
+type ShootPatternObjectSchema = v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>;
+
+type ShootPatternSchemaFactory = (value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) => ShootPatternObjectSchema;
+
+function createShootPatternFieldSchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1], key: "source") {
+	return v.nullish(ShootPatternHjsonSchema(value.get(key), context));
+}
+
+function createShootPatternArraySchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1], key: "dest") {
+	return v.nullish(
+		lazyArray((index) => ShootPatternHjsonSchema(value.get(key).get(index), context)),
+		[],
+	);
+}
+
+const classSchemaMap: Record<ShootPatternType, ShootPatternSchemaFactory> = {
+	ShootAlternate: (_value, _context) =>
 		v.object({
 			barrels: v.nullish(v.number(), 2),
 			spread: v.nullish(v.number(), 5),
 			barrelOffset: v.nullish(v.number(), 0),
 			mirror: v.nullish(v.boolean(), false),
 		}),
-	ShootBarrel: () =>
+	ShootBarrel: (_value, _context) =>
 		v.object({
 			barrels: v.nullish(v.array(v.number()), [0, 0, 0]),
 			barrelOffset: v.nullish(v.number(), 0),
 		}),
-	ShootHelix: () =>
+	ShootHelix: (_value, _context) =>
 		v.object({
 			scl: v.nullish(v.number(), 2),
 			mag: v.nullish(v.number(), 1.5),
 			offset: v.nullish(v.number(), Math.PI * 1.25),
 		}),
-	ShootMulti: () =>
+	ShootMulti: (value, context) =>
 		v.object({
-			source: v.nullish(
-				v.pipe(
-					v.lazy(() => shootPatternItemUnionSchema),
-					v.metadata(metadata),
-				),
-			),
-			dest: v.nullish(
-				v.array(
-					v.pipe(
-						v.lazy(() => shootPatternItemUnionSchema),
-						v.metadata(metadata),
-					),
-				),
-				[],
-			),
+			source: createShootPatternFieldSchema(value, context, "source"),
+			dest: createShootPatternArraySchema(value, context, "dest"),
 		}),
-	ShootSine: () =>
+	ShootSine: (_value, _context) =>
 		v.object({
 			scl: v.nullish(v.number(), 4),
 			mag: v.nullish(v.number(), 20),
 		}),
-	ShootSpread: () =>
+	ShootSpread: (_value, _context) =>
 		v.object({
 			spread: v.nullish(v.number(), 5),
 		}),
-	ShootSummon: () =>
+	ShootSummon: (_value, _context) =>
 		v.object({
 			x: v.nullish(v.number(), 0),
 			y: v.nullish(v.number(), 0),
@@ -78,30 +81,7 @@ const classSchemaMap: Record<ShootPatternType, () => v.ObjectSchema<v.ObjectEntr
 		}),
 };
 
-export const shootPatternItemUnionSchema = v.pipe(
-	v.lazy((input) => {
-		if (typeof input === "object" && input !== null && "type" in input) {
-			const type = input.type as ShootPatternType;
-			const schemaFn = classSchemaMap[type];
-
-			if (schemaFn) {
-				return v.object({
-					...shootPatternBaseObjectSchema.entries,
-					...schemaFn().entries,
-				});
-			}
-		}
-
-		return shootPatternBaseObjectSchema;
-	}),
-	v.metadata(metadata),
-);
-
 export const ShootPatternHjsonSchema: SchemaFn = (value, context) => {
-	return buildShootPatternHjsonSchema(value, context);
-};
-
-const buildShootPatternHjsonSchema: SchemaFn = (value) => {
 	if (value.isObject()) {
 		const type = value.get("type");
 
@@ -110,7 +90,7 @@ const buildShootPatternHjsonSchema: SchemaFn = (value) => {
 			return v.pipe(
 				v.object({
 					...shootPatternBaseObjectSchema.entries,
-					...schema().entries,
+					...schema(value, context).entries,
 				}),
 				v.metadata(metadata),
 			);

@@ -45,6 +45,7 @@ export class TreeSnapshot {
 	readonly statuses: FileEntry[];
 	readonly units: FileEntry[];
 	readonly sounds: FileEntry[];
+	readonly sprites: FileEntry[];
 
 	constructor(private readonly entries: FileEntry[]) {
 		const items: FileEntry[] = [];
@@ -54,6 +55,7 @@ export class TreeSnapshot {
 		const statuses: FileEntry[] = [];
 		const units: FileEntry[] = [];
 		const sounds: FileEntry[] = [];
+		const sprites: FileEntry[] = [];
 
 		for (const entry of this.entries) {
 			if (entry.kind === "file") {
@@ -74,6 +76,8 @@ export class TreeSnapshot {
 					(entry.name.endsWith(".mp3") || entry.name.endsWith(".ogg") || entry.name.endsWith(".wav"))
 				) {
 					sounds.push(entry);
+				} else if (entry.path.includes("sprites") && entry.name.endsWith(".png")) {
+					sprites.push(entry);
 				}
 			}
 		}
@@ -85,6 +89,7 @@ export class TreeSnapshot {
 		this.statuses = statuses;
 		this.units = units;
 		this.sounds = sounds;
+		this.sprites = sprites;
 	}
 
 	getEntries() {

@@ -1,7 +1,6 @@
 import * as v from "valibot";
-import type { AnySchema } from "./schema-utils";
 import { MindustryHexColorSchema, type SchemaFn } from "./base";
-import { EffectHjsonSchema, effectItemUnionSchema } from "./effect";
+import { EffectHjsonSchema } from "./effect";
 import { lazyArray } from "./lazy-array";
 
 const metadata = { type: "part" };
@@ -30,30 +29,22 @@ const drawPartBaseObjectSchema = v.object({
 	recoilIndex: v.nullish(v.number(), -1),
 });
 
-const partEffectSchema = v.nullish(
-	v.pipe(
-		v.lazy(() => effectItemUnionSchema),
-		v.metadata({ type: "effect" }),
-	),
-);
+type PartObjectSchema = v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>;
 
-function createPartEffectFieldSchema(value?: Parameters<SchemaFn>[0], context?: Parameters<SchemaFn>[1]) {
-	if (value && context) {
-		return v.nullish(EffectHjsonSchema(value.get("effect"), context));
-	}
-
-	return partEffectSchema;
+function createPartChildrenSchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) {
+	return v.nullish(
+		lazyArray((index) => PartHjsonSchema(value.get("children").get(index), context)),
+		[],
+	);
 }
 
-const classSchemaMap: Record<
-	PartClass,
-	(
-		value?: Parameters<SchemaFn>[0],
-		context?: Parameters<SchemaFn>[1],
-	) => v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>
-> = {
-	DrawPart: () => v.object({}),
-	RegionPart: () =>
+function createPartEffectFieldSchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) {
+	return v.nullish(EffectHjsonSchema(value.get("effect"), context));
+}
+
+const classSchemaMap: Record<PartClass, (value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) => PartObjectSchema> = {
+	DrawPart: (_value, _context) => v.object({}),
+	RegionPart: (value, context) =>
 		v.object({
 			suffix: v.nullish(v.string(), ""),
 			name: v.nullish(v.string()),
@@ -90,7 +81,7 @@ const classSchemaMap: Record<
 			mixColor: v.nullish(MindustryHexColorSchema),
 			mixColorTo: v.nullish(MindustryHexColorSchema),
 			heatColor: v.nullish(MindustryHexColorSchema),
-			children: v.nullish(lazyArray(() => partItemUnionSchema), []),
+			children: createPartChildrenSchema(value, context),
 			moves: v.nullish(v.array(partMoveSchema), []),
 		}),
 	EffectSpawnerPart: (value, context) =>
@@ -111,7 +102,7 @@ const classSchemaMap: Record<
 			useProgress: v.nullish(v.boolean(), true),
 			progress: v.nullish(v.picklist(PartProgresses), "warmup"),
 		}),
-	FlarePart: () =>
+	FlarePart: (_value, _context) =>
 		v.object({
 			sides: v.nullish(v.number(), 4),
 			radius: v.nullish(v.number(), 100),
@@ -131,7 +122,7 @@ const classSchemaMap: Record<
 			progress: v.nullish(v.picklist(PartProgresses), "warmup"),
 			layer: v.nullish(v.number(), 100), // Layer.effect
 		}),
-	HaloPart: () =>
+	HaloPart: (_value, _context) =>
 		v.object({
 			hollow: v.nullish(v.boolean(), false),
 			tri: v.nullish(v.boolean(), false),
@@ -162,7 +153,7 @@ const classSchemaMap: Record<
 			layer: v.nullish(v.number(), -1),
 			layerOffset: v.nullish(v.number(), 0),
 		}),
-	HoverPart: () =>
+	HoverPart: (_value, _context) =>
 		v.object({
 			radius: v.nullish(v.number(), 4),
 			x: v.nullish(v.number(), 0),
@@ -178,7 +169,7 @@ const classSchemaMap: Record<
 			layer: v.nullish(v.number(), -1),
 			layerOffset: v.nullish(v.number(), 0),
 		}),
-	ShapePart: () =>
+	ShapePart: (_value, _context) =>
 		v.object({
 			circle: v.nullish(v.boolean(), false),
 			hollow: v.nullish(v.boolean(), false),
@@ -204,29 +195,7 @@ const classSchemaMap: Record<
 		}),
 };
 
-const partItemUnionSchema: AnySchema = v.pipe(
-	v.lazy((input) => {
-		if (typeof input === "object" && input !== null && "type" in input) {
-			const type = input.type as PartClass;
-			const schemaFn = classSchemaMap[type];
-
-			if (schemaFn) {
-				return v.object({ ...drawPartBaseObjectSchema.entries, ...schemaFn().entries });
-			}
-
-			return drawPartBaseObjectSchema;
-		}
-
-		return v.pipe(v.string(), v.minLength(1), v.maxLength(127));
-	}),
-	v.metadata(metadata),
-);
-
 export const PartHjsonSchema: SchemaFn = (value, context) => {
-	return buildPartHjsonSchema(value, context);
-};
-
-const buildPartHjsonSchema: SchemaFn = (value, context) => {
 	if (value.isObject()) {
 		const type = value.get("type");
 

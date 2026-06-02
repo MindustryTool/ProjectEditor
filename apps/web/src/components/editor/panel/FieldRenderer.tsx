@@ -164,6 +164,7 @@ const schemaRenderers: Record<Type, SchemaRenderer> = {
 	object: ObjectField,
 	picklist: PickListField,
 	liquids: LiquidsListField,
+	never: () => null,
 	unknown: ({ name, entrySchema }) => (
 		<p className="text-yellow-400 text-sm">
 			Unknown field type for property {name}: {entrySchema.type}
@@ -404,7 +405,8 @@ function ArrayField({ path, name, node, original, onPatch, patchValue, entrySche
 						const entryIssues = issues.filter((issue) => issue.field?.startsWith(entryJsonPath));
 
 						return (
-							<div key={index} className="flex items-center gap-2">
+							<div key={index} className="flex flex-col gap-2 relative border p-2 rounded-md">
+								<p className="font-semibold">{index + 1}</p>
 								<SchemaArrayItemEditor
 									path={path}
 									value={el.value}
@@ -415,7 +417,12 @@ function ArrayField({ path, name, node, original, onPatch, patchValue, entrySche
 									jsonPath={entryJsonPath}
 									issues={entryIssues}
 								/>
-								<Button className="size-9" type="button" variant="outline" onClick={() => handleRemove(index)}>
+								<Button
+									size="sm"
+									className="absolute top-1 right-1 text-destructive"
+									variant="ghost"
+									onClick={() => handleRemove(index)}
+								>
 									<X />
 								</Button>
 							</div>

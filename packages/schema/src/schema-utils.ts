@@ -19,6 +19,7 @@ export const types = [
 	"unknown",
 	"picklist",
 	"liquids",
+	"never",
 ] as const;
 
 export type Type = (typeof types)[number];
@@ -68,6 +69,7 @@ function getSchemaType(schema: AnySchema): Type {
 	if (s.type === "object") return "object";
 	if (s.type === "array") return "array";
 	if (s.type === "picklist") return "picklist";
+	if (s.type === "never") return "never";
 
 	console.warn({ unknownType: s.type });
 
