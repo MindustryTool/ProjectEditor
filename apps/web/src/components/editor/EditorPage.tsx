@@ -6,6 +6,7 @@ import { useProjectActions } from "~/hooks/use-project-actions";
 import { useTranslation } from "react-i18next";
 import { Progress } from "#/components/ui/progress";
 import { usePath } from "#/hooks/use-path";
+import { useInterval } from "usehooks-ts";
 
 export function EditorPage() {
 	const [path] = usePath();
@@ -13,53 +14,55 @@ export function EditorPage() {
 	const [loading, setLoading] = useState(0);
 	const { t } = useTranslation();
 	const navigate = useNavigate();
+	const { openProjectFromRecord } = useProjectActions();
 	const { id, lang } = useParams({ from: "/$lang/projects/$id" });
 
 	const projectContext = useProjectSession((s) => s.projectContext);
-	const hydrated = useAppStore((s) => s.hydrated);
 
-	const { openProjectFromRecord } = useProjectActions();
+	function handleLoad(percent: number) {
+		setLoading((prev) => (prev > percent ? prev + 1 : percent));
+	}
+
+	function randomLoad() {
+		const added = Math.floor(Math.random() * 10 + 5);
+		setLoading((prev) => Math.min(100, prev + added));
+	}
 
 	useEffect(() => {
-		if (projectContext !== null) {
+		if (projectContext !== null && id === projectContext.project.id) {
 			setLoading(100);
-			setIsLoading(false);
+			setTimeout(() => {
+				setIsLoading(false);
+			}, 1000);
 			return;
 		}
 
-		if (!hydrated) {
-			setLoading(20);
-			return;
-		}
-
-		if (!id) {
-			navigate({ to: `/${lang}/projects`, replace: true });
-			setLoading(100);
-			setTimeout(() => setIsLoading(false), 1000);
-			return;
-		}
-
-		let cancelled = false;
-
-		(async () => {
+		const load = async () => {
 			try {
 				const record = useAppStore.getState().projects[id];
-				if (record && !cancelled) {
+				if (record) {
 					await openProjectFromRecord(record);
-					setLoading(50);
-				} else if (!cancelled) {
+					handleLoad(50);
+				} else {
 					navigate({ to: `/${lang}/projects`, replace: true });
 				}
 			} finally {
 				setLoading(100);
-				setTimeout(() => setIsLoading(false), 1000);
+				setTimeout(() => {
+					setIsLoading(false);
+				}, 1000);
 			}
-		})();
-
-		return () => {
-			cancelled = true;
 		};
-	}, [projectContext, hydrated, id, openProjectFromRecord, navigate, lang]);
+
+		load();
+	}, [projectContext, id, openProjectFromRecord, navigate, lang]);
+
+	useInterval(() => {
+		if (!isLoading) {
+			return;
+		}
+		randomLoad();
+	}, 100);
 
 	if (isLoading) {
 		return (
@@ -86,7 +89,7 @@ function LoadingDot() {
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setValue((v) => (v + 1) % 4);
-		}, 400);
+		}, 300);
 
 		return () => clearInterval(interval);
 	}, []);

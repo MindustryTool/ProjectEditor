@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Toolbar } from "./Toolbar";
 import { StatusBar } from "./StatusBar";
 import { ProjectMenu } from "./toolbar/ProjectMenu";
+import { EditMenu } from "./toolbar/EditMenu";
 import { ViewMenu } from "./toolbar/ViewMenu";
 import { ExportMenu } from "./ExportMenu";
 import { LocalizationMenu } from "./toolbar/LocalizationMenu";
@@ -43,6 +44,7 @@ export function EditorMobileLayout({ path }: EditorMobileLayoutProps) {
 					</SheetContent>
 				</Sheet>
 				<ProjectMenu />
+				<EditMenu />
 				<ViewMenu />
 				<ExportMenu />
 				<LocalizationMenu />

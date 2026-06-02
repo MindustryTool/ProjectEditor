@@ -1,5 +1,6 @@
 import { useIsDesktop } from "~/hooks/use-is-desktop";
 import { ProjectMenu } from "./toolbar/ProjectMenu";
+import { EditMenu } from "./toolbar/EditMenu";
 import { ViewMenu } from "./toolbar/ViewMenu";
 import { ExportMenu } from "./ExportMenu";
 import { LocalizationMenu } from "./toolbar/LocalizationMenu";
@@ -33,6 +34,7 @@ export function EditorShell({ path }: EditorShellProps) {
 						<Fragment>
 							<Toolbar>
 								<ProjectMenu />
+								<EditMenu />
 								<ViewMenu />
 								<ExportMenu />
 								<LocalizationMenu />
