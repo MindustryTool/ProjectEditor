@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
-import { useAppStore, useFileString } from "@project/core";
+import { useAppStore, useFileStore, useProjectSession } from "@project/core";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import { cn } from "~/lib/utils";
 import { usePath } from "#/hooks/use-path";
@@ -15,15 +15,26 @@ interface EditMenuProps {
 export function EditMenu({ className }: EditMenuProps) {
 	const { t } = useTranslation();
 	const [path] = usePath();
-	const { data, isLoading, write } = useFileString(path ?? "");
-	const canFormat = canFormatFilePath(path);
 	const settings = useAppStore((s) => s.settings);
+	const projectId = useProjectSession((s) => s.projectContext?.project.id);
+	const canFormat = canFormatFilePath(path);
 
 	const handleFormat = useCallback(() => {
-		if (!path || data === null || !canFormatFilePath(path)) return;
+		if (!projectId || !path || !canFormatFilePath(path)) {
+			return;
+		}
+
+		const data = useFileStore.getState().getEntry(projectId, path)?.data;
+
+		if (!data) {
+			return;
+		}
 
 		try {
-			write(formatFileContent(path, data, { indent: settings.tabSize }));
+			const decoder = new TextDecoder();
+			const formatted = formatFileContent(path, decoder.decode(data), { indent: settings.tabSize });
+			const encoder = new TextEncoder();
+			useFileStore.getState().writeBuffer(projectId, path, encoder.encode(formatted).buffer);
 		} catch (error) {
 			toast.error(
 				t("edit-menu.format-failed", {
@@ -31,7 +42,7 @@ export function EditMenu({ className }: EditMenuProps) {
 				}),
 			);
 		}
-	}, [data, path, settings.tabSize, t, write]);
+	}, [projectId, path, settings.tabSize, t]);
 
 	return (
 		<DropdownMenu>
@@ -47,7 +58,7 @@ export function EditMenu({ className }: EditMenuProps) {
 				</button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="start" className="w-44">
-				<DropdownMenuItem onClick={handleFormat} disabled={!canFormat || isLoading || data === null}>
+				<DropdownMenuItem onClick={handleFormat} disabled={!canFormat}>
 					{t("edit-menu.format")}
 				</DropdownMenuItem>
 			</DropdownMenuContent>

@@ -95,7 +95,7 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 		const key = cacheKey(projectId, path);
 		const existing = lruMap.get(key);
 		const nextVersion = (existing?.currentVersion ?? 0) + 1;
-		const data = typeof content === "string" ? (new TextEncoder().encode(content).buffer as ArrayBuffer) : content;
+		const data = typeof content === "string" ? new TextEncoder().encode(content).buffer : content;
 
 		lruMap.set(key, {
 			data,

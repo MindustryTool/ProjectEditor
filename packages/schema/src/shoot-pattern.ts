@@ -24,6 +24,40 @@ const shootPatternBaseObjectSchema = v.object({
 	shotDelay: v.nullish(v.number(), 0),
 });
 
+export const shootAlternateObjectSchema = v.object({
+	barrels: v.nullish(v.number(), 2),
+	spread: v.nullish(v.number(), 5),
+	barrelOffset: v.nullish(v.number(), 0),
+	mirror: v.nullish(v.boolean(), false),
+});
+
+export const shootBarrelObjectSchema = v.object({
+	barrels: v.nullish(v.array(v.number()), [0, 0, 0]),
+	barrelOffset: v.nullish(v.number(), 0),
+});
+
+export const shootHelixObjectSchema = v.object({
+	scl: v.nullish(v.number(), 2),
+	mag: v.nullish(v.number(), 1.5),
+	offset: v.nullish(v.number(), Math.PI * 1.25),
+});
+
+export const shootSineObjectSchema = v.object({
+	scl: v.nullish(v.number(), 4),
+	mag: v.nullish(v.number(), 20),
+});
+
+export const shootSpreadObjectSchema = v.object({
+	spread: v.nullish(v.number(), 5),
+});
+
+export const shootSummonObjectSchema = v.object({
+	x: v.nullish(v.number(), 0),
+	y: v.nullish(v.number(), 0),
+	radius: v.nullish(v.number(), 0),
+	spread: v.nullish(v.number(), 0),
+});
+
 type ShootPatternObjectSchema = v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>;
 
 type ShootPatternSchemaFactory = (value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) => ShootPatternObjectSchema;
@@ -40,45 +74,17 @@ function createShootPatternArraySchema(value: Parameters<SchemaFn>[0], context: 
 }
 
 const classSchemaMap: Record<ShootPatternType, ShootPatternSchemaFactory> = {
-	ShootAlternate: (_value, _context) =>
-		v.object({
-			barrels: v.nullish(v.number(), 2),
-			spread: v.nullish(v.number(), 5),
-			barrelOffset: v.nullish(v.number(), 0),
-			mirror: v.nullish(v.boolean(), false),
-		}),
-	ShootBarrel: (_value, _context) =>
-		v.object({
-			barrels: v.nullish(v.array(v.number()), [0, 0, 0]),
-			barrelOffset: v.nullish(v.number(), 0),
-		}),
-	ShootHelix: (_value, _context) =>
-		v.object({
-			scl: v.nullish(v.number(), 2),
-			mag: v.nullish(v.number(), 1.5),
-			offset: v.nullish(v.number(), Math.PI * 1.25),
-		}),
+	ShootAlternate: (_value, _context) => shootAlternateObjectSchema,
+	ShootBarrel: (_value, _context) => shootBarrelObjectSchema,
+	ShootHelix: (_value, _context) => shootHelixObjectSchema,
 	ShootMulti: (value, context) =>
 		v.object({
 			source: createShootPatternFieldSchema(value, context, "source"),
 			dest: createShootPatternArraySchema(value, context, "dest"),
 		}),
-	ShootSine: (_value, _context) =>
-		v.object({
-			scl: v.nullish(v.number(), 4),
-			mag: v.nullish(v.number(), 20),
-		}),
-	ShootSpread: (_value, _context) =>
-		v.object({
-			spread: v.nullish(v.number(), 5),
-		}),
-	ShootSummon: (_value, _context) =>
-		v.object({
-			x: v.nullish(v.number(), 0),
-			y: v.nullish(v.number(), 0),
-			radius: v.nullish(v.number(), 0),
-			spread: v.nullish(v.number(), 0),
-		}),
+	ShootSine: (_value, _context) => shootSineObjectSchema,
+	ShootSpread: (_value, _context) => shootSpreadObjectSchema,
+	ShootSummon: (_value, _context) => shootSummonObjectSchema,
 };
 
 export const ShootPatternHjsonSchema: SchemaFn = (value, context) => {

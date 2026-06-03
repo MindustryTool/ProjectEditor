@@ -12,65 +12,18 @@ import { ValidationErrorList, type ValidationFileError } from "#/components/edit
 import { useValidationContext } from "#/components/editor/ValidationProvider";
 import { usePath } from "#/hooks/use-path";
 
-export function sanitizeFilename(name: string): string {
-	let result = name.replace(/[^a-zA-Z0-9._-]/g, "-");
-	result = result.replace(/-+/g, "-");
-	result = result.replace(/^[-.]+|[-.]+$/g, "");
-	result = result.slice(0, 200);
-	return result || "export";
-}
-
 interface ExportMenuProps {
 	className?: string;
-}
-
-async function loadAndValidateAll(
-	registry: ValidatorRegistry,
-	treeSnapshot: TreeSnapshot,
-	validateFile: (path: string) => Promise<void>,
-	onProgress: (current: string, completed: number, total: number) => void,
-) {
-	const entries = treeSnapshot.getEntries().filter((e) => e.kind === "file" && registry.getMatches(e.path).length > 0);
-	const total = entries.length;
-
-	for (let i = 0; i < total; i++) {
-		const entry = entries[i]!;
-		onProgress(entry.path, i, total);
-
-		try {
-			await validateFile(entry.path);
-		} catch (err) {
-			useValidationStore.getState().setResults(entry.path, [
-				{
-					path: entry.path,
-					severity: "error",
-					messageKey: err instanceof Error ? err.message : "Unknown error",
-					startLine: 1,
-					startColumn: 1,
-				},
-			]);
-		}
-	}
 }
 
 export function ExportMenu({ className }: ExportMenuProps) {
 	const { t } = useTranslation();
 	const projectContext = useProjectSession((s) => s.projectContext);
-	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
-	const validationResults = useValidationStore((s) => s.results.resultsByPath);
-	const { validateFile, registry } = useValidationContext();
 	const [, setPath] = usePath();
 	const [open, setOpen] = useState(false);
 	const [validationOpen, setValidationOpen] = useState(false);
-	const [downloadLoading, setDownloadLoading] = useState(false);
 	const [filename, setFilename] = useState("");
 	const [warning, setWarning] = useState<string | null>(null);
-	const [currentFile, setCurrentFile] = useState("");
-	const [validationProgress, setValidationProgress] = useState(0);
-	const currentFileRef = useRef("");
-	const progressRef = useRef(0);
-	const lastUpdateRef = useRef(0);
-	const THROTTLE_MS = 50;
 
 	const handleExport = useCallback(
 		async (fileName: string) => {
@@ -118,6 +71,117 @@ export function ExportMenu({ className }: ExportMenuProps) {
 		}
 	}, []);
 
+	const handleCancel = useCallback(() => {
+		setOpen(false);
+	}, []);
+
+	const handleExportAnyway = useCallback(() => {
+		setValidationOpen(false);
+		handleExport(filename);
+		setOpen(false);
+	}, [filename, handleExport]);
+
+	const handleNavigate = useCallback(
+		(filePath: string) => {
+			setValidationOpen(false);
+			setOpen(false);
+			setPath(filePath);
+		},
+		[setPath],
+	);
+
+	return (
+		<>
+			<button
+				onClick={handleOpen}
+				className={cn(
+					"inline-flex items-center text-nowrap gap-1 rounded px-2 py-1 text-xs font-medium text-foreground hover:bg-accent active:bg-accent",
+					className,
+				)}
+			>
+				{t("export-menu.label")}
+			</button>
+			<Dialog open={open} onOpenChange={setOpen}>
+				<DialogContent>
+					<ExportDialogContent
+						filename={filename}
+						warning={warning}
+						onFilenameChange={handleFilenameChange}
+						onClose={handleCancel}
+						onOpenValidation={() => setValidationOpen(true)}
+						handleExport={handleExport}
+					/>
+				</DialogContent>
+			</Dialog>
+			<Dialog open={validationOpen} onOpenChange={setValidationOpen}>
+				<DialogContent>
+					<ValidationDialogContent
+						onClose={() => setValidationOpen(false)}
+						onNavigate={handleNavigate}
+						onExportAnyway={handleExportAnyway}
+					/>
+				</DialogContent>
+			</Dialog>
+		</>
+	);
+}
+
+async function loadAndValidateAll(
+	registry: ValidatorRegistry,
+	treeSnapshot: TreeSnapshot,
+	validateFile: (path: string) => Promise<void>,
+	onProgress: (current: string, completed: number, total: number) => void,
+) {
+	const entries = treeSnapshot.getEntries().filter((e) => e.kind === "file" && registry.getMatches(e.path).length > 0);
+	const total = entries.length;
+
+	for (let i = 0; i < total; i++) {
+		const entry = entries[i]!;
+		onProgress(entry.path, i, total);
+
+		try {
+			await validateFile(entry.path);
+		} catch (err) {
+			useValidationStore.getState().setResults(entry.path, [
+				{
+					path: entry.path,
+					severity: "error",
+					messageKey: err instanceof Error ? err.message : "Unknown error",
+					startLine: 1,
+					startColumn: 1,
+				},
+			]);
+		}
+	}
+}
+
+function ExportDialogContent({
+	filename,
+	warning,
+	onFilenameChange,
+	onClose,
+	onOpenValidation,
+	handleExport,
+}: {
+	filename: string;
+	warning: string | null;
+	onFilenameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	onClose: () => void;
+	onOpenValidation: () => void;
+	handleExport: (fileName: string) => Promise<void>;
+}) {
+	const { t } = useTranslation();
+	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
+	const projectContext = useProjectSession((s) => s.projectContext);
+	const { validateFile, registry } = useValidationContext();
+	const [downloadLoading, setDownloadLoading] = useState(false);
+	const [currentFile, setCurrentFile] = useState("");
+	const [validationProgress, setValidationProgress] = useState(0);
+	const currentFileRef = useRef("");
+	const progressRef = useRef(0);
+	const lastUpdateRef = useRef(0);
+	const THROTTLE_MS = 50;
+
 	const handleDownload = useCallback(async () => {
 		if (!projectContext || !treeSnapshot) return;
 
@@ -146,35 +210,64 @@ export function ExportMenu({ className }: ExportMenuProps) {
 		const hasErrors = Object.values(freshResults).some((results) => results.some((r) => r.severity === "error"));
 
 		if (hasErrors) {
-			setValidationOpen(true);
+			onOpenValidation();
 		} else {
 			handleExport(filename);
-			setOpen(false);
+			onClose();
 		}
-	}, [projectContext, treeSnapshot, registry, validateFile, handleExport, filename]);
+	}, [projectContext, treeSnapshot, registry, validateFile, handleExport, filename, onClose, onOpenValidation]);
 
-	const handleExportAnyway = useCallback(() => {
-		setValidationOpen(false);
-		handleExport(filename);
-		setOpen(false);
-	}, [filename, handleExport]);
-
-	const handleValidationCancel = useCallback(() => {
-		setValidationOpen(false);
-	}, []);
-
-	const handleCancel = useCallback(() => {
-		setOpen(false);
-	}, []);
-
-	const handleNavigate = useCallback(
-		(filePath: string) => {
-			setValidationOpen(false);
-			setOpen(false);
-			setPath(filePath);
-		},
-		[setPath],
+	return (
+		<>
+			<DialogHeader>
+				<DialogTitle>{t("export-menu.dialog-title")}</DialogTitle>
+			</DialogHeader>
+			{downloadLoading ? (
+				<div className="flex flex-col gap-2">
+					{currentFile && <p className="truncate text-xs text-muted-foreground">{currentFile}</p>}
+					<Progress value={validationProgress} />
+				</div>
+			) : (
+				<div className="flex flex-col gap-2">
+					<label className="text-xs font-medium text-muted-foreground">{t("export-menu.filename-label")}</label>
+					<InputGroup>
+						<InputGroupInput
+							value={filename}
+							onChange={onFilenameChange}
+							placeholder={t("export-menu.filename-label")}
+							aria-invalid={!!warning}
+						/>
+						<InputGroupAddon align="inline-end">
+							<InputGroupText>.zip</InputGroupText>
+						</InputGroupAddon>
+					</InputGroup>
+					{warning === "invalid" && <p className="text-xs text-destructive">{t("export-menu.filename-warning")}</p>}
+					{warning === "empty" && <p className="text-xs text-destructive">{t("export-menu.filename-empty")}</p>}
+				</div>
+			)}
+			<DialogFooter>
+				<Button variant="outline" onClick={onClose}>
+					{t("export-menu.cancel")}
+				</Button>
+				<Button onClick={handleDownload} disabled={downloadLoading}>
+					{downloadLoading ? t("export-menu.validating") : t("export-menu.download")}
+				</Button>
+			</DialogFooter>
+		</>
 	);
+}
+
+function ValidationDialogContent({
+	onClose,
+	onNavigate,
+	onExportAnyway,
+}: {
+	onClose: () => void;
+	onNavigate: (filePath: string) => void;
+	onExportAnyway: () => void;
+}) {
+	const { t } = useTranslation();
+	const validationResults = useValidationStore((s) => s.results.resultsByPath);
 
 	const allErrors: ValidationFileError[] = Object.entries(validationResults).flatMap(([filePath, results]) =>
 		results.filter((r) => r.severity === "error").map((r) => ({ filePath, ...r })),
@@ -182,70 +275,27 @@ export function ExportMenu({ className }: ExportMenuProps) {
 
 	return (
 		<>
-			<button
-				onClick={handleOpen}
-				className={cn(
-					"inline-flex items-center text-nowrap gap-1 rounded px-2 py-1 text-xs font-medium text-foreground hover:bg-accent active:bg-accent",
-					className,
-				)}
-			>
-				{t("export-menu.label")}
-			</button>
-			<Dialog open={open} onOpenChange={setOpen}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>{t("export-menu.dialog-title")}</DialogTitle>
-					</DialogHeader>
-					{downloadLoading ? (
-						<div className="flex flex-col gap-2">
-							{currentFile && <p className="truncate text-xs text-muted-foreground">{currentFile}</p>}
-							<Progress value={validationProgress} />
-						</div>
-					) : (
-						<div className="flex flex-col gap-2">
-							<label className="text-xs font-medium text-muted-foreground">{t("export-menu.filename-label")}</label>
-							<InputGroup>
-								<InputGroupInput
-									value={filename}
-									onChange={handleFilenameChange}
-									placeholder={t("export-menu.filename-label")}
-									aria-invalid={!!warning}
-								/>
-								<InputGroupAddon align="inline-end">
-									<InputGroupText>.zip</InputGroupText>
-								</InputGroupAddon>
-							</InputGroup>
-							{warning === "invalid" && <p className="text-xs text-destructive">{t("export-menu.filename-warning")}</p>}
-							{warning === "empty" && <p className="text-xs text-destructive">{t("export-menu.filename-empty")}</p>}
-						</div>
-					)}
-					<DialogFooter>
-						<Button variant="outline" onClick={handleCancel}>
-							{t("export-menu.cancel")}
-						</Button>
-						<Button onClick={handleDownload} disabled={downloadLoading}>
-							{downloadLoading ? t("export-menu.validating") : t("export-menu.download")}
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
-			<Dialog open={validationOpen} onOpenChange={setValidationOpen}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>{t("export-menu.validation-title")}</DialogTitle>
-					</DialogHeader>
-					<div className="flex flex-col gap-2">
-						<p className="text-xs text-muted-foreground">{t("export-menu.validation-message")}</p>
-						<ValidationErrorList items={allErrors} onNavigate={handleNavigate} />
-					</div>
-					<DialogFooter>
-						<Button variant="outline" onClick={handleValidationCancel}>
-							{t("export-menu.validation-cancel")}
-						</Button>
-						<Button onClick={handleExportAnyway}>{t("export-menu.export-anyway")}</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
+			<DialogHeader>
+				<DialogTitle>{t("export-menu.validation-title")}</DialogTitle>
+			</DialogHeader>
+			<div className="flex flex-col gap-2">
+				<p className="text-xs text-muted-foreground">{t("export-menu.validation-message")}</p>
+				<ValidationErrorList items={allErrors} onNavigate={onNavigate} />
+			</div>
+			<DialogFooter>
+				<Button variant="outline" onClick={onClose}>
+					{t("export-menu.validation-cancel")}
+				</Button>
+				<Button onClick={onExportAnyway}>{t("export-menu.export-anyway")}</Button>
+			</DialogFooter>
 		</>
 	);
+}
+
+export function sanitizeFilename(name: string): string {
+	let result = name.replace(/[^a-zA-Z0-9._-]/g, "-");
+	result = result.replace(/-+/g, "-");
+	result = result.replace(/^[-.]+|[-.]+$/g, "");
+	result = result.slice(0, 200);
+	return result || "export";
 }

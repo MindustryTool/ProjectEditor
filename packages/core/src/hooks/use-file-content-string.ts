@@ -22,7 +22,7 @@ export function useFileString(path: string): { data: string | null; isLoading: b
 
 	const write = useCallback(
 		(content: string) => {
-			const encoded = new TextEncoder().encode(content).buffer as ArrayBuffer;
+			const encoded = new TextEncoder().encode(content).buffer;
 			resultWrite(encoded);
 		},
 		[resultWrite],
