@@ -63,12 +63,13 @@ export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 
 	let node = null;
 	try {
-		node = HJSON.parseStructured(data);
+		node = HJSON.parseWithCache(data);
 	} catch (error) {
 		console.error("Error parsing JSON:", error);
+        return null;
 	}
 
-	if (node === null || !node.isObject()) {
+	if (!node.isObject()) {
 		return null;
 	}
 

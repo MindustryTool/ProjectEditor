@@ -9,7 +9,35 @@ export type Replacer = ReplacerFunction | (string | number)[];
 export type Space = string | number;
 export type { HJSONParseOptions, HJSONFormatOptions };
 
+const cache: { content: string; node: HjsonNode; hit: number; time: number }[] = [];
+
 export const HJSON = {
+	parseWithCache(content: string) {
+		const existing = cache.find((item) => item.content === content);
+
+		if (existing) {
+            existing.hit++;
+            console.log(`Cache hit`);
+			return existing.node;
+		}
+
+		const node = HJSON.parseStructured(content);
+		cache.push({ content, node, hit: 0, time: Date.now() });
+
+		if (cache.length > 100) {
+			cache.sort((a, b) => {
+                if (a.hit !== b.hit) {
+                    return b.hit - a.hit;
+                }
+                return a.time - b.time;
+            });
+			cache.shift();
+		}
+
+        console.log(`Cache miss`);
+		return node;
+	},
+
 	parse<T = unknown>(text: string, reviver?: Reviver, options?: HJSONParseOptions): T {
 		return Parser.parse(text, reviver, options) as T;
 	},

@@ -52,7 +52,7 @@ function SpriteViewer({ path: spritePath }: { path: string }) {
 	}, [fs, spritePath]);
 
 	if (isLoading) {
-		return <p className="text-sm text-muted-foreground">Loading sprite...</p>;
+		return <p className="text-sm text-muted-foreground aspect-square">Loading sprite...</p>;
 	}
 
 	if (isError) {
@@ -72,13 +72,11 @@ function SpriteViewer({ path: spritePath }: { path: string }) {
 
 	return (
 		<div className="relative">
-			{objectUrl && (
-				<img
-					className="object-contain p-2 w-full rounded border border-border [image-rendering:pixelated]"
-					src={objectUrl}
-					alt={spritePath}
-				/>
-			)}
+			<img
+				className="object-contain p-2 w-full rounded border border-border [image-rendering:pixelated]"
+				src={objectUrl}
+				alt={spritePath}
+			/>
 			<div className="backdrop-blur-sm justify-end flex gap-1 py-1">
 				<Button className="bg-transparent" variant="outline" size="icon" aria-label="Replace sprite" onClick={handleReplace}>
 					<Upload className="w-4 h-4" />

@@ -60,7 +60,7 @@ const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 	if (!trimmed) return [];
 
 	try {
-		HJSON.parse(trimmed);
+		HJSON.parseWithCache(trimmed);
 		return [];
 	} catch (err) {
 		if (err instanceof HJSONError) {
@@ -116,7 +116,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 	schema: T | SchemaFn<T>,
 ): ValidatorFn {
 	return ({ path, content, context }) => {
-		const data = HJSON.parseStructured(content);
+		const data = HJSON.parseWithCache(content);
 		const resolved = typeof schema === "function" ? schema(data, context) : schema;
 		const { success, issues } = v.safeParse(resolved, data.valueOf());
 		const problems: ValidationResult[] = [];
