@@ -12,6 +12,7 @@ export function useFileString(path: string): {
 } {
 	const result = useFile(path);
 	const projectId = useProjectSession((s) => s.projectContext?.project.id);
+	const { write: resultWrite, isLoading } = result;
 
 	const data = useMemo<string | null>(() => {
 		if (result.data === null) {
@@ -25,7 +26,6 @@ export function useFileString(path: string): {
 		return new TextDecoder().decode(result.data);
 	}, [result.data]);
 
-	const { write: resultWrite } = result;
 
 	const write = useCallback(
 		(contentOrUpdater: string | ((prev: string | null) => string)) => {
@@ -45,7 +45,7 @@ export function useFileString(path: string): {
 
 	return {
 		data,
-		isLoading: result.isLoading,
+		isLoading,
 		write,
 	};
 }

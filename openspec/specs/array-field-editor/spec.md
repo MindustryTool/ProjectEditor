@@ -20,21 +20,32 @@ The array renderer SHALL provide Add and Remove buttons for mutating the array.
 
 #### Scenario: Add button appends new item
 - **WHEN** the user clicks the Add button on an array field
-- **THEN** the renderer SHALL call `onPatch` with the result of `arrayNode.insertElement(original, length, newValue)`
+- **THEN** the renderer SHALL call `onChange(jsonPath, (parent, key, original) => { const arr = parent.get(key); if (!arr.isArray()) throw new Error(...); return arr.insertElement(original, length, newValue); })`
 - **AND** a new item editor SHALL appear
 
 #### Scenario: Remove button removes item by index
 - **WHEN** the user clicks the Remove button on an array item
-- **THEN** the renderer SHALL call `onPatch` with the result of `arrayNode.removeElement(original, index)`
+- **THEN** the renderer SHALL call `onChange(jsonPath, (parent, key, original) => { const arr = parent.get(key); return arr.arrayNode(jsonPath).removeElement(original, index); })`
 - **AND** that item SHALL be removed from the display
 
-### Requirement: Array item changes patch via HjsonArrayNode
-When an array item value changes, the renderer SHALL use `arrayNode.patchElement()` for surgical single-item replacement.
+### Requirement: Array item changes use onChange with element jsonPath
+When an array item value changes, the renderer SHALL use `onChange` with element-specific jsonPath.
 
-#### Scenario: Array item modification uses patchElement
+#### Scenario: Array item modification uses element jsonPath
 - **WHEN** an array item's value is modified
-- **THEN** the renderer SHALL call `arrayNode.patchElement(original, index, HJSON.stringify(newValue))`
+- **THEN** the renderer SHALL call `onChange(jsonPath + "[" + index + "]", updater)` where updater patches the specific element
 - **AND** only the modified item SHALL be replaced in the source string
+
+### Requirement: SchemaArrayItemEditor receives new onChange type
+`SchemaArrayItemEditor` SHALL accept the new `onChange(jsonPath, updater)` callback type instead of `onChange(value)`.
+
+#### Scenario: String item renders directly with updater
+- **WHEN** an array item schema type is `"string"`
+- **THEN** the editor SHALL call `onChange(jsonPath, (parent, key, original) => { if (!parent.isArray()) throw new Error(...); return parent.patchElement(original, Number(key), HJSON.stringify(e.target.value)); })` on input change
+
+#### Scenario: Complex item passes onChange to child renderer
+- **WHEN** an array item schema type is non-string
+- **THEN** the editor SHALL pass `onChange` directly to the child renderer with the correct `jsonPath`
 
 ### Requirement: Array field items render using itemType
 Array item editors SHALL use the schema-derived renderer specified by the item schema, passing the raw element value instead of an HjsonNode.

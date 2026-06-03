@@ -16,7 +16,7 @@ import { HJSON } from "@project/hjson";
 import { HjsonNode } from "@project/hjson";
 import { ChevronsUpDown, Plus, Search, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
-import React, { useCallback, useState, type ReactNode } from "react";
+import React, { useCallback, useState } from "react";
 import {
 	resolveSchema,
 	detectSchemaType,
@@ -45,17 +45,18 @@ import type { Type } from "@project/schema";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
+import { hasNullableWrapper } from "@project/schema";
 
 interface FieldsRendererProps {
 	path: string;
 	schema: AnySchema | SchemaFn;
 }
 
-export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
+export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 	const { data, isLoading, write } = useFileString(path);
 	const { contents } = useProjectContext();
 
-const onChange = useCallback(
+	const onChange = useCallback(
 		(jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => {
 			write((prev: string | null) => {
 				const content = prev ?? "";
@@ -129,7 +130,7 @@ const onChange = useCallback(
 			</ErrorBoundary>
 		);
 	});
-}
+});
 type SchemaRendererProps = {
 	name: string;
 	path: string;
@@ -138,33 +139,12 @@ type SchemaRendererProps = {
 	jsonPath: string;
 	onChange: (jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => void;
 };
-type SchemaRenderer = (props: SchemaRendererProps) => ReactNode;
+type SchemaRenderer = React.ComponentType<SchemaRendererProps>;
 
-const schemaRenderers: Record<Type, SchemaRenderer> = {
-	string: StringField,
-	number: NumberField,
-	boolean: BooleanField,
-	color: ColorField,
-	research: ResearchField,
-	effect: EffectField,
-	array: ArrayField,
-	object: ObjectField,
-	picklist: PickListField,
-	liquids: LiquidsListField,
-	select: SelectField,
-	sprite: SpriteField,
-	never: () => null,
-	unknown: ({ name, entrySchema }) => (
-		<p className="text-yellow-400 text-sm">
-			Unknown field type for property {name}: {entrySchema.type}
-		</p>
-	),
-};
-
-function SpriteField() {
+const SpriteField = React.memo(function SpriteField() {
 	// TODO: impl
 	return null;
-}
+});
 
 function removeByJsonPath(parent: HjsonNode, key: string, original: string): string {
 	if (parent.isObject()) return parent.removeField(original, key);
@@ -172,7 +152,7 @@ function removeByJsonPath(parent: HjsonNode, key: string, original: string): str
 	throw new Error(`unexpected parent node type for removal`);
 }
 
-function FieldIssue({ path, jsonPath }: { path: string; jsonPath: string }) {
+const FieldIssue = React.memo(function FieldIssue({ path, jsonPath }: { path: string; jsonPath: string }) {
 	const { t } = useTranslation();
 	const issues = useValidationStore(
 		useShallow((state) => (state.results.resultsByPath[path] || EMPTY_ARRAY).filter((issue) => issue.field?.startsWith(jsonPath))),
@@ -189,9 +169,9 @@ function FieldIssue({ path, jsonPath }: { path: string; jsonPath: string }) {
 			))}
 		</FormMessage>
 	);
-}
+});
 
-function StringField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
+const StringField = React.memo(function StringField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
 	const stringValue = typeof value === "string" ? value : String(value);
@@ -200,7 +180,10 @@ function StringField({ name, value, onChange, entrySchema, jsonPath, path }: Sch
 	const description = metadata?.description ? _t(metadata.description) : undefined;
 
 	function handleChange(newVal: string) {
-		if (newVal === v.getDefault(entrySchema) && !hasNullishWrapper(entrySchema)) {
+		const isDefault = newVal === v.getDefault(entrySchema);
+		const isNullable = hasNullableWrapper(entrySchema);
+
+		if (newVal === "" || (isDefault && !isNullable)) {
 			onChange(jsonPath, (parent, key, original) => removeByJsonPath(parent, key, original));
 			return;
 		}
@@ -221,9 +204,9 @@ function StringField({ name, value, onChange, entrySchema, jsonPath, path }: Sch
 			<FieldIssue path={path} jsonPath={jsonPath} />
 		</FormField>
 	);
-}
+});
 
-function NumberField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
+const NumberField = React.memo(function NumberField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
 	const numValue = typeof value === "number" ? value : String(value);
@@ -232,33 +215,30 @@ function NumberField({ name, value, onChange, entrySchema, jsonPath, path }: Sch
 	const description = metadata?.description ? _t(metadata.description) : undefined;
 
 	function handleChange(newVal: number) {
-		if (newVal === v.getDefault(entrySchema) && !hasNullishWrapper(entrySchema)) {
+		const isDefault = newVal === v.getDefault(entrySchema);
+		const isNullable = hasNullableWrapper(entrySchema);
+
+		if (Number.isNaN(newVal) || (isDefault && !isNullable)) {
 			onChange(jsonPath, (parent, key, original) => removeByJsonPath(parent, key, original));
 			return;
 		}
-		onChange(jsonPath, (parent, key, original) =>
-			parent.objectNode(key).patchField(original, key, HJSON.stringify(newVal)),
-		);
+
+		onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(newVal)));
 	}
 
 	return (
 		<FormField>
 			<FormLabel>{label}</FormLabel>
 			<FormControl>
-				<Input
-					key={name}
-					value={numValue}
-					onChange={(v) => handleChange(v.currentTarget.valueAsNumber)}
-					type="number"
-				/>
+				<Input key={name} value={numValue} onChange={(v) => handleChange(v.currentTarget.valueAsNumber)} type="number" />
 			</FormControl>
 			{description && <FormDescription>{description}</FormDescription>}
 			<FieldIssue path={path} jsonPath={jsonPath} />
 		</FormField>
 	);
-}
+});
 
-function BooleanField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
+const BooleanField = React.memo(function BooleanField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
 	const checked = typeof value === "boolean" ? value : v.getDefault(entrySchema);
@@ -277,24 +257,20 @@ function BooleanField({ name, value, onChange, entrySchema, jsonPath, path }: Sc
 	return (
 		<FormField>
 			<FormControl className="flex-row flex gap-1">
-				<Checkbox
-					key={name}
-					checked={checked}
-					onCheckedChange={(val) => handleChange(val === true)}
-				/>
+				<Checkbox key={name} checked={checked} onCheckedChange={(val) => handleChange(val === true)} />
 				<FormLabel>{label}</FormLabel>
 			</FormControl>
 			{description && <FormDescription>{description}</FormDescription>}
 			<FieldIssue path={path} jsonPath={jsonPath} />
 		</FormField>
 	);
-}
+});
 
-function SelectField(_props: SchemaRendererProps) {
+const SelectField = React.memo(function SelectField(_props: SchemaRendererProps) {
 	return null;
-}
+});
 
-function LiquidsListField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
+const LiquidsListField = React.memo(function LiquidsListField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const stringValue = typeof value === "string" ? value : ((v.getDefault(entrySchema) ?? "") as string);
 	const context = useProjectContext();
 	const unwrappedSchema = unwrapSchema(entrySchema);
@@ -314,7 +290,9 @@ function LiquidsListField({ name, value, onChange, entrySchema, jsonPath, path }
 						key={name}
 						value={stringValue}
 						onValueChange={(nextValue) =>
-							onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(nextValue)))
+							onChange(jsonPath, (parent, key, original) =>
+								parent.objectNode(key).patchField(original, key, HJSON.stringify(nextValue)),
+							)
 						}
 					>
 						<SelectTrigger className="w-full">
@@ -337,9 +315,9 @@ function LiquidsListField({ name, value, onChange, entrySchema, jsonPath, path }
 	}
 
 	throw new Error(`Unknown option ${value}, this should not happen`);
-}
+});
 
-function PickListField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
+const PickListField = React.memo(function PickListField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const stringValue = typeof value === "string" ? value : ((v.getDefault(entrySchema) ?? "") as string);
 	const unwrappedSchema = unwrapSchema(entrySchema);
 
@@ -354,7 +332,9 @@ function PickListField({ name, value, onChange, entrySchema, jsonPath, path }: S
 						key={name}
 						value={stringValue}
 						onValueChange={(nextValue) =>
-							onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(nextValue)))
+							onChange(jsonPath, (parent, key, original) =>
+								parent.objectNode(key).patchField(original, key, HJSON.stringify(nextValue)),
+							)
 						}
 					>
 						<SelectTrigger className="w-full">
@@ -377,9 +357,9 @@ function PickListField({ name, value, onChange, entrySchema, jsonPath, path }: S
 	}
 
 	throw new Error(`Unknown option ${value}, this should not happen`);
-}
+});
 
-function ColorField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
+const ColorField = React.memo(function ColorField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	let hexValue = typeof value === "string" ? value : ((v.getDefault(entrySchema) ?? "333333") as string);
 
 	hexValue = hexValue?.startsWith("#") ? hexValue : "#" + hexValue;
@@ -400,7 +380,9 @@ function ColorField({ name, value, onChange, entrySchema, jsonPath, path }: Sche
 							<ColorPicker
 								value={hexValue}
 								onChange={(val) =>
-									onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(val)))
+									onChange(jsonPath, (parent, key, original) =>
+										parent.objectNode(key).patchField(original, key, HJSON.stringify(val)),
+									)
 								}
 							>
 								<ColorPickerSelection className="h-40 rounded-lg" />
@@ -415,9 +397,9 @@ function ColorField({ name, value, onChange, entrySchema, jsonPath, path }: Sche
 			<FieldIssue path={path} jsonPath={jsonPath} />
 		</FormField>
 	);
-}
+});
 
-function ArrayField({ path, name, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
+const ArrayField = React.memo(function ArrayField({ path, name, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
 
@@ -500,9 +482,9 @@ function ArrayField({ path, name, value, onChange, entrySchema, jsonPath }: Sche
 			</FormField>
 		</Collapsible>
 	);
-}
+});
 
-function ObjectField({ path, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
+const ObjectField = React.memo(function ObjectField({ path, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
 	if (typeof value !== "object" || value === null) {
 		return null;
 	}
@@ -546,9 +528,9 @@ function ObjectField({ path, value, onChange, entrySchema, jsonPath }: SchemaRen
 	});
 
 	return <div className="pl-4 border-l-2 border-border grid gap-6">{results}</div>;
-}
+});
 
-function ResearchField({ name, value, onChange, jsonPath, path }: SchemaRendererProps) {
+const ResearchField = React.memo(function ResearchField({ name, value, onChange, jsonPath, path }: SchemaRendererProps) {
 	const currentValue = value as Research | string | null | undefined;
 
 	const parent =
@@ -610,9 +592,15 @@ function ResearchField({ name, value, onChange, jsonPath, path }: SchemaRenderer
 			</FormField>
 		</>
 	);
-}
+});
 
-function ResearchRequirementList({ requirements, onChange }: { requirements: string[]; onChange: (requirements: string[]) => void }) {
+const ResearchRequirementList = React.memo(function ResearchRequirementList({
+	requirements,
+	onChange,
+}: {
+	requirements: string[];
+	onChange: (requirements: string[]) => void;
+}) {
 	const items = useItems({ project: true, base: true });
 	const addedReq = requirements.map((requirement: string) => requirement.split("/")[0]!);
 
@@ -675,9 +663,9 @@ function ResearchRequirementList({ requirements, onChange }: { requirements: str
 			</FormField>
 		);
 	});
-}
+});
 
-function ResearchParentTrigger({ parent }: { parent: string }) {
+const ResearchParentTrigger = React.memo(function ResearchParentTrigger({ parent }: { parent: string }) {
 	const items = useItems({ project: true, base: true });
 	const blocks = useBlocks();
 	const units = useUnits();
@@ -704,9 +692,15 @@ function ResearchParentTrigger({ parent }: { parent: string }) {
 	) : (
 		<Button variant="outline">{parent || "Select"}</Button>
 	);
-}
+});
 
-function ResearchParentToggleGroup({ value, onValueChange }: { value: string | undefined; onValueChange: (v: string) => void }) {
+const ResearchParentToggleGroup = React.memo(function ResearchParentToggleGroup({
+	value,
+	onValueChange,
+}: {
+	value: string | undefined;
+	onValueChange: (v: string) => void;
+}) {
 	const items = useItems({ project: true, base: true });
 	const blocks = useBlocks();
 	const units = useUnits();
@@ -771,9 +765,9 @@ function ResearchParentToggleGroup({ value, onValueChange }: { value: string | u
 			</Tabs>
 		</ToggleGroup>
 	);
-}
+});
 
-function EffectField({ path, name, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
+const EffectField = React.memo(function EffectField({ path, name, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
 	const { data = [], isLoading, isError, error } = useEffects();
 	const [filter, setFilter] = useState("");
 
@@ -786,7 +780,9 @@ function EffectField({ path, name, value, onChange, entrySchema, jsonPath }: Sch
 					<Button
 						variant="outline"
 						onClick={() =>
-							onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(data[0]?.name)))
+							onChange(jsonPath, (parent, key, original) =>
+								parent.objectNode(key).patchField(original, key, HJSON.stringify(data[0]?.name)),
+							)
 						}
 					>
 						Built-In
@@ -835,16 +831,16 @@ function EffectField({ path, name, value, onChange, entrySchema, jsonPath }: Sch
 				<Button
 					variant="outline"
 					onClick={() =>
-							onChange(jsonPath, (parent, key, original) =>
-								parent.objectNode(key).patchField(original, key, HJSON.stringify({ type: "ParticleEffect" })),
-							)
-						}
-					>
-						Custom
-					</Button>
-				</div>
-				<FormField>
-					<Dialog>
+						onChange(jsonPath, (parent, key, original) =>
+							parent.objectNode(key).patchField(original, key, HJSON.stringify({ type: "ParticleEffect" })),
+						)
+					}
+				>
+					Custom
+				</Button>
+			</div>
+			<FormField>
+				<Dialog>
 					<DialogTrigger asChild>
 						<Button className="w-full justify-start" variant="outline">
 							{stringValue || "None"}
@@ -889,9 +885,9 @@ function EffectField({ path, name, value, onChange, entrySchema, jsonPath }: Sch
 			</FormField>
 		</div>
 	);
-}
+});
 
-function ItemGrid({ className, ...props }: React.ComponentProps<"div">) {
+const ItemGrid = React.memo(function ItemGrid({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
 			className={cn(
@@ -901,9 +897,9 @@ function ItemGrid({ className, ...props }: React.ComponentProps<"div">) {
 			{...props}
 		/>
 	);
-}
+});
 
-function SchemaArrayItemEditor({
+const SchemaArrayItemEditor = React.memo(function SchemaArrayItemEditor({
 	path,
 	value,
 	itemSchema,
@@ -924,11 +920,11 @@ function SchemaArrayItemEditor({
 			<Input
 				value={stringValue}
 				onChange={(e) =>
-						onChange(jsonPath, (parent, key, original) => {
-							if (!parent.isArray()) throw new Error(`expected array at ${jsonPath}`);
-							return parent.patchElement(original, Number(key), HJSON.stringify(e.currentTarget.value));
-						})
-					}
+					onChange(jsonPath, (parent, key, original) => {
+						if (!parent.isArray()) throw new Error(`expected array at ${jsonPath}`);
+						return parent.patchElement(original, Number(key), HJSON.stringify(e.currentTarget.value));
+					})
+				}
 				placeholder="mod-name"
 				className="flex-1"
 			/>
@@ -938,9 +934,28 @@ function SchemaArrayItemEditor({
 	const Renderer = schemaRenderers[type];
 	const name = String(type);
 
+	if (Renderer === undefined) {
+		return <span className="text-yellow-400 text-sm">Unknown field type {name}</span>;
+	}
+
 	return (
 		<ErrorBoundary key={name}>
 			<Renderer path={path} name={name} value={value} onChange={onChange} entrySchema={itemSchema} jsonPath={jsonPath} />
 		</ErrorBoundary>
 	);
-}
+});
+
+const schemaRenderers: Partial<Record<Type, SchemaRenderer>> = {
+	string: StringField,
+	number: NumberField,
+	boolean: BooleanField,
+	object: ObjectField,
+	array: ArrayField,
+	color: ColorField,
+	research: ResearchField,
+	effect: EffectField,
+	picklist: PickListField,
+	liquids: LiquidsListField,
+	select: SelectField,
+	sprite: SpriteField,
+};

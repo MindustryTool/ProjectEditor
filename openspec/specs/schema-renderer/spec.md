@@ -51,7 +51,7 @@ The system SHALL detect the renderer type from a valibot schema by inspecting it
 - **THEN** the renderer type SHALL be `"unknown"`
 
 ### Requirement: Renderer receives value prop instead of HjsonNode
-The schema renderer functions SHALL receive the actual deserialized value as `value` prop instead of an `HjsonNode` as `node` prop.
+The schema renderer functions SHALL receive the actual deserialized value as `value` prop instead of an `HjsonNode` as `node` prop. Renderers SHALL NOT receive `original` or `onPatch` props.
 
 #### Scenario: String renderer displays value
 - **WHEN** the value is a string `"hello"`
@@ -59,7 +59,7 @@ The schema renderer functions SHALL receive the actual deserialized value as `va
 
 #### Scenario: String renderer calls onChange on edit
 - **WHEN** the user types in the input
-- **THEN** `onChange(newValue)` SHALL be called with the new string
+- **THEN** `onChange(jsonPath, updater)` SHALL be called with the `jsonPath` prop and an updater that patches the value
 
 #### Scenario: Number renderer displays value
 - **WHEN** the value is `42`
@@ -67,7 +67,7 @@ The schema renderer functions SHALL receive the actual deserialized value as `va
 
 #### Scenario: Number renderer calls onChange on edit
 - **WHEN** the user types in the number input
-- **THEN** `onChange(newValue)` SHALL be called with the new number
+- **THEN** `onChange(jsonPath, updater)` SHALL be called
 
 #### Scenario: Boolean renderer reflects value
 - **WHEN** the value is `true`
@@ -75,7 +75,7 @@ The schema renderer functions SHALL receive the actual deserialized value as `va
 
 #### Scenario: Boolean renderer calls onChange on toggle
 - **WHEN** the user clicks the checkbox
-- **THEN** `onChange(newValue)` SHALL be called with the new boolean
+- **THEN** `onChange(jsonPath, updater)` SHALL be called
 
 #### Scenario: Color renderer displays hex value
 - **WHEN** the value is `"ff0000"`
@@ -83,22 +83,22 @@ The schema renderer functions SHALL receive the actual deserialized value as `va
 
 #### Scenario: Color renderer calls onChange on pick
 - **WHEN** the user selects a color in the color picker
-- **THEN** `onChange(newHex)` SHALL be called
+- **THEN** `onChange(jsonPath, updater)` SHALL be called
 
-### Requirement: Single onChange callback
-Each renderer SHALL use a single `onChange?: (value: unknown) => void` callback for all mutations, replacing the previous `writePrimitiveValue`, `replaceFieldValue`, and `initializeArrayValue` props.
+### Requirement: Single onChange callback with updater pattern
+Each renderer SHALL use a single `onChange(jsonPath, updater)` callback for all mutations, where `updater` receives `(parent: HjsonNode, key: string, original: string, root: HjsonNode) => string`.
 
-#### Scenario: onChange with value replaces field
-- **WHEN** `onChange("newVal")` is called
-- **THEN** the HJSON field SHALL be patched with `"newVal"`
+#### Scenario: onChange with updater patches value
+- **WHEN** `onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify("newVal")))` is called
+- **THEN** the HJSON field at `jsonPath` SHALL be patched with `"newVal"` (inserted if missing)
 
-#### Scenario: onChange with undefined removes field
-- **WHEN** `onChange(undefined)` is called
-- **THEN** the field SHALL be removed from the HJSON document
+#### Scenario: onChange with removal updater removes field
+- **WHEN** `onChange(jsonPath, (parent, key, original) => removeByJsonPath(parent, key, original))` is called
+- **THEN** the field at `jsonPath` SHALL be removed from the HJSON document
 
-#### Scenario: onChange with schema default removes field
-- **WHEN** `onChange` is called with a value equal to the schema's default
-- **THEN** the field SHALL be removed (no redundant data)
+#### Scenario: onChange with default value removes field
+- **WHEN** the new value equals the schema's default AND the schema is non-nullable
+- **THEN** `onChange` SHALL call the removal updater to remove the field (no redundant data)
 
 ### Requirement: String renderer
 The system SHALL render a `v.string()` field as an `<Input>` text field, receiving the value directly instead of an HjsonNode.

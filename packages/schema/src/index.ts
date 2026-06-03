@@ -37,6 +37,7 @@ export {
 	resolveSchema,
 	unwrapSchema,
 	hasNullishWrapper,
+	hasNullableWrapper,
 	detectSchemaType,
 	getSchemaEntries,
 	getArrayItemSchema,

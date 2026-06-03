@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: HjsonValueNode provides patchValue method
 `HjsonValueNode` SHALL provide a `patchValue(original: string, newValue: string): string` method that surgically replaces the value node's content in the source string.
