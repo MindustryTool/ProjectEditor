@@ -47,6 +47,21 @@ export abstract class HjsonNode {
 	abstract isNumber(): this is HjsonValueNode<number>;
 	abstract isBoolean(): this is HjsonValueNode<boolean>;
 
+	valueNode(label: string): HjsonValueNode {
+		if (!this.isValue()) throw new Error(`expected value node at ${label}`);
+		return this;
+	}
+
+	arrayNode(label: string): HjsonArrayNode {
+		if (!this.isArray()) throw new Error(`expected array node at ${label}`);
+		return this;
+	}
+
+	objectNode(label: string): HjsonObjectNode {
+		if (!this.isObject()) throw new Error(`expected object node at ${label}`);
+		return this;
+	}
+
 	abstract get(key: string | number): HjsonNode;
 
 	path(pathStr: string): FieldInfo | ElementInfo | undefined {
@@ -661,21 +676,6 @@ export class HjsonMissingNode extends HjsonNode {
 	valueOf(): undefined {
 		return undefined;
 	}
-}
-
-export function valueNode(node: HjsonNode, label: string): HjsonValueNode {
-	if (!node.isValue()) throw new Error(`expected value node at ${label}`);
-	return node;
-}
-
-export function arrayNode(node: HjsonNode, label: string): HjsonArrayNode {
-	if (!node.isArray()) throw new Error(`expected array node at ${label}`);
-	return node;
-}
-
-export function objectNode(node: HjsonNode, label: string): HjsonObjectNode {
-	if (!node.isObject()) throw new Error(`expected object node at ${label}`);
-	return node;
 }
 
 export type HjsonResult<T> =

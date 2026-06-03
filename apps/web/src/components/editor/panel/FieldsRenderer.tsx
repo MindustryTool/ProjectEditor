@@ -13,7 +13,7 @@ import { useItems } from "#/hooks/use-items";
 import { useFileString, useValidationStore } from "@project/core";
 import { unwrapSchema, type Research } from "@project/schema";
 import { HJSON } from "@project/hjson";
-import { HjsonNode, valueNode, arrayNode } from "@project/hjson";
+import { HjsonNode } from "@project/hjson";
 import { ChevronsUpDown, Plus, Search, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
 import React, { useCallback, useState, type ReactNode } from "react";
@@ -55,16 +55,22 @@ export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 	const { data, isLoading, write } = useFileString(path);
 	const { contents } = useProjectContext();
 
-	const onChange = useCallback(
-		(jsonPath: string, updater: (node: HjsonNode, original: string, root: HjsonNode) => string) => {
+const onChange = useCallback(
+		(jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => {
 			write((prev: string | null) => {
 				const content = prev ?? "";
-		const root = HJSON.parseWithCache(content);
-			const info = root.path(jsonPath);
-			if (!info) throw new Error(`path not found: ${jsonPath}`);
-			const node = info.value;
-			if (!(node instanceof HjsonNode)) throw new Error(`expected node at ${jsonPath}`);
-			return updater(node, content, root);
+				const root = HJSON.parseWithCache(content);
+				const splitAt = Math.max(jsonPath.lastIndexOf("."), jsonPath.lastIndexOf("["));
+				if (splitAt === -1) {
+					return updater(root, jsonPath, content, root);
+				}
+				const parentPath = jsonPath.slice(0, splitAt);
+				const key = jsonPath.slice(splitAt + 1).replace(/]$/, "");
+				const parentInfo = root.path(parentPath);
+				if (!parentInfo) throw new Error(`parent path not found: ${parentPath}`);
+				const parent = parentInfo.value;
+				if (!(parent instanceof HjsonNode)) throw new Error(`expected node at ${parentPath}`);
+				return updater(parent, key, content, root);
 			});
 		},
 		[write],
@@ -130,7 +136,7 @@ type SchemaRendererProps = {
 	value: unknown;
 	entrySchema: AnySchema;
 	jsonPath: string;
-	onChange: (jsonPath: string, updater: (node: HjsonNode, original: string, root: HjsonNode) => string) => void;
+	onChange: (jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => void;
 };
 type SchemaRenderer = (props: SchemaRendererProps) => ReactNode;
 
@@ -160,21 +166,10 @@ function SpriteField() {
 	return null;
 }
 
-function removeByJsonPath(root: HjsonNode, original: string, jsonPath: string): string {
-	const splitAt = Math.max(jsonPath.lastIndexOf("."), jsonPath.lastIndexOf("["));
-	if (splitAt === -1) {
-		if (!root.isObject()) throw new Error(`expected object node at root for removal of ${jsonPath}`);
-		return root.removeField(original, jsonPath);
-	}
-	const parentPath = jsonPath.slice(0, splitAt);
-	const fieldPart = jsonPath.slice(splitAt + 1).replace(/]$/, "");
-	const parentInfo = root.path(parentPath);
-	if (!parentInfo) throw new Error(`parent path not found: ${parentPath}`);
-	const parent = parentInfo.value;
-	if (!(parent instanceof HjsonNode)) throw new Error(`expected node at parent path ${parentPath}`);
-	if (parent.isObject()) return parent.removeField(original, fieldPart);
-	if (parent.isArray()) return parent.removeElement(original, Number(fieldPart));
-	throw new Error(`unexpected parent node type for removal at ${jsonPath}`);
+function removeByJsonPath(parent: HjsonNode, key: string, original: string): string {
+	if (parent.isObject()) return parent.removeField(original, key);
+	if (parent.isArray()) return parent.removeElement(original, Number(key));
+	throw new Error(`unexpected parent node type for removal`);
 }
 
 function FieldIssue({ path, jsonPath }: { path: string; jsonPath: string }) {
@@ -199,17 +194,17 @@ function FieldIssue({ path, jsonPath }: { path: string; jsonPath: string }) {
 function StringField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
-	const stringValue = typeof value === "string" ? value : v.getDefault(entrySchema);
+	const stringValue = typeof value === "string" ? value : String(value);
 	const metadata = getSchemaMetadata(entrySchema);
 	const label = metadata?.name ? _t(metadata.name) : name;
 	const description = metadata?.description ? _t(metadata.description) : undefined;
 
 	function handleChange(newVal: string) {
 		if (newVal === v.getDefault(entrySchema) && !hasNullishWrapper(entrySchema)) {
-			onChange(jsonPath, (_node, original, root) => removeByJsonPath(root, original, jsonPath));
+			onChange(jsonPath, (parent, key, original) => removeByJsonPath(parent, key, original));
 			return;
 		}
-		onChange(jsonPath, (node, original) => valueNode(node, jsonPath).patchValue(original, HJSON.stringify(newVal)));
+		onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(newVal)));
 	}
 
 	return (
@@ -231,18 +226,18 @@ function StringField({ name, value, onChange, entrySchema, jsonPath, path }: Sch
 function NumberField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
-	const numValue = typeof value === "number" ? value : v.getDefault(entrySchema);
+	const numValue = typeof value === "number" ? value : String(value);
 	const metadata = getSchemaMetadata(entrySchema);
 	const label = metadata?.name ? _t(metadata.name) : name;
 	const description = metadata?.description ? _t(metadata.description) : undefined;
 
 	function handleChange(newVal: number) {
 		if (newVal === v.getDefault(entrySchema) && !hasNullishWrapper(entrySchema)) {
-			onChange(jsonPath, (_node, original, root) => removeByJsonPath(root, original, jsonPath));
+			onChange(jsonPath, (parent, key, original) => removeByJsonPath(parent, key, original));
 			return;
 		}
-		onChange(jsonPath, (node, original) =>
-			valueNode(node, jsonPath).patchValue(original, HJSON.stringify(newVal)),
+		onChange(jsonPath, (parent, key, original) =>
+			parent.objectNode(key).patchField(original, key, HJSON.stringify(newVal)),
 		);
 	}
 
@@ -273,10 +268,10 @@ function BooleanField({ name, value, onChange, entrySchema, jsonPath, path }: Sc
 
 	function handleChange(val: boolean) {
 		if (val === v.getDefault(entrySchema) && !hasNullishWrapper(entrySchema)) {
-			onChange(jsonPath, (_node, original, root) => removeByJsonPath(root, original, jsonPath));
+			onChange(jsonPath, (parent, key, original) => removeByJsonPath(parent, key, original));
 			return;
 		}
-		onChange(jsonPath, (node, original) => valueNode(node, jsonPath).patchValue(original, HJSON.stringify(val)));
+		onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(val)));
 	}
 
 	return (
@@ -319,7 +314,7 @@ function LiquidsListField({ name, value, onChange, entrySchema, jsonPath, path }
 						key={name}
 						value={stringValue}
 						onValueChange={(nextValue) =>
-							onChange(jsonPath, (node, original) => valueNode(node, jsonPath).patchValue(original, HJSON.stringify(nextValue)))
+							onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(nextValue)))
 						}
 					>
 						<SelectTrigger className="w-full">
@@ -359,7 +354,7 @@ function PickListField({ name, value, onChange, entrySchema, jsonPath, path }: S
 						key={name}
 						value={stringValue}
 						onValueChange={(nextValue) =>
-							onChange(jsonPath, (node, original) => valueNode(node, jsonPath).patchValue(original, HJSON.stringify(nextValue)))
+							onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(nextValue)))
 						}
 					>
 						<SelectTrigger className="w-full">
@@ -405,7 +400,7 @@ function ColorField({ name, value, onChange, entrySchema, jsonPath, path }: Sche
 							<ColorPicker
 								value={hexValue}
 								onChange={(val) =>
-									onChange(jsonPath, (node, original) => valueNode(node, jsonPath).patchValue(original, HJSON.stringify(val)))
+									onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(val)))
 								}
 							>
 								<ColorPickerSelection className="h-40 rounded-lg" />
@@ -444,13 +439,21 @@ function ArrayField({ path, name, value, onChange, entrySchema, jsonPath }: Sche
 	const description = metadata?.description ? _t(metadata.description) : undefined;
 
 	const handleRemove = (index: number) => {
-		onChange(jsonPath, (node, original) => arrayNode(node, jsonPath).removeElement(original, index));
+		onChange(jsonPath, (parent, key, original) => {
+			const arr = parent.get(key);
+			if (!arr.isArray()) throw new Error(`expected array at ${jsonPath}`);
+			return arr.removeElement(original, index);
+		});
 	};
 
 	const handleAdd = () => {
 		const nextItemSchema = getArrayItemSchema(entrySchema, arrayValue.length) ?? itemSchema;
 		const serialized = nextItemSchema ? HJSON.stringify(v.getDefault(nextItemSchema)) : '""';
-		onChange(jsonPath, (node, original) => arrayNode(node, jsonPath).insertElement(original, arrayValue.length, serialized));
+		onChange(jsonPath, (parent, key, original) => {
+			const arr = parent.get(key);
+			if (!arr.isArray()) throw new Error(`expected array at ${jsonPath}`);
+			return arr.insertElement(original, arrayValue.length, serialized);
+		});
 	};
 
 	return (
@@ -565,13 +568,13 @@ function ResearchField({ name, value, onChange, jsonPath, path }: SchemaRenderer
 
 	function handleChange(newParent: string, newRequirements: string[]) {
 		if (!newParent && newRequirements.length === 0) {
-			onChange(jsonPath, (_node, original, root) => removeByJsonPath(root, original, jsonPath));
+			onChange(jsonPath, (parent, key, original) => removeByJsonPath(parent, key, original));
 		} else if (newRequirements.length > 0) {
-			onChange(jsonPath, (node, original) =>
-				valueNode(node, jsonPath).patchValue(original, HJSON.stringify({ parent: newParent, requirements: newRequirements })),
+			onChange(jsonPath, (parent, key, original) =>
+				parent.objectNode(key).patchField(original, key, HJSON.stringify({ parent: newParent, requirements: newRequirements })),
 			);
 		} else {
-			onChange(jsonPath, (node, original) => valueNode(node, jsonPath).patchValue(original, HJSON.stringify(newParent)));
+			onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(newParent)));
 		}
 	}
 
@@ -783,7 +786,7 @@ function EffectField({ path, name, value, onChange, entrySchema, jsonPath }: Sch
 					<Button
 						variant="outline"
 						onClick={() =>
-							onChange(jsonPath, (node, original) => valueNode(node, jsonPath).patchValue(original, HJSON.stringify(data[0]?.name)))
+							onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(data[0]?.name)))
 						}
 					>
 						Built-In
@@ -832,16 +835,16 @@ function EffectField({ path, name, value, onChange, entrySchema, jsonPath }: Sch
 				<Button
 					variant="outline"
 					onClick={() =>
-						onChange(jsonPath, (node, original) =>
-							valueNode(node, jsonPath).patchValue(original, HJSON.stringify({ type: "ParticleEffect" })),
-						)
-					}
-				>
-					Custom
-				</Button>
-			</div>
-			<FormField>
-				<Dialog>
+							onChange(jsonPath, (parent, key, original) =>
+								parent.objectNode(key).patchField(original, key, HJSON.stringify({ type: "ParticleEffect" })),
+							)
+						}
+					>
+						Custom
+					</Button>
+				</div>
+				<FormField>
+					<Dialog>
 					<DialogTrigger asChild>
 						<Button className="w-full justify-start" variant="outline">
 							{stringValue || "None"}
@@ -856,7 +859,7 @@ function EffectField({ path, name, value, onChange, entrySchema, jsonPath }: Sch
 							type="single"
 							value={stringValue}
 							onValueChange={(v) =>
-								onChange(jsonPath, (node, original) => valueNode(node, jsonPath).patchValue(original, HJSON.stringify(v)))
+								onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(v)))
 							}
 							asChild
 						>
@@ -910,7 +913,7 @@ function SchemaArrayItemEditor({
 	path: string;
 	value: unknown;
 	itemSchema: AnySchema;
-	onChange: (jsonPath: string, updater: (node: HjsonNode, original: string, root: HjsonNode) => string) => void;
+	onChange: (jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => void;
 	jsonPath: string;
 }) {
 	const type = detectSchemaType(itemSchema);
@@ -921,8 +924,11 @@ function SchemaArrayItemEditor({
 			<Input
 				value={stringValue}
 				onChange={(e) =>
-					onChange(jsonPath, (node, original) => valueNode(node, jsonPath).patchValue(original, HJSON.stringify(e.currentTarget.value)))
-				}
+						onChange(jsonPath, (parent, key, original) => {
+							if (!parent.isArray()) throw new Error(`expected array at ${jsonPath}`);
+							return parent.patchElement(original, Number(key), HJSON.stringify(e.currentTarget.value));
+						})
+					}
 				placeholder="mod-name"
 				className="flex-1"
 			/>
