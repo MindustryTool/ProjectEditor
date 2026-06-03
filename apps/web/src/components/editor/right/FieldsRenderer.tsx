@@ -14,9 +14,9 @@ import { useFileString, useValidationStore } from "@project/core";
 import { unwrapSchema, type Research } from "@project/schema";
 import { HJSON } from "@project/hjson";
 import { HjsonNode } from "@project/hjson";
-import { ChevronsUpDown, Plus, Search, X } from "lucide-react";
+import { ChevronLeft, ChevronsUpDown, Plus, Search, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
 	resolveSchema,
 	detectSchemaType,
@@ -63,9 +63,26 @@ interface FieldsRendererProps {
 	schema: AnySchema | SchemaFn;
 }
 
+type FieldsRendererContextType = {
+	tabs: SchemaRendererProps[];
+	current: SchemaRendererProps | null;
+	enter: (tab: SchemaRendererProps) => void;
+	pop: () => void;
+};
+
+const FieldsRendererContext = React.createContext<FieldsRendererContextType>({
+	tabs: [],
+	current: null,
+	enter: () => {},
+	pop: () => {},
+});
+
+const useFieldsRenderer = () => React.useContext(FieldsRendererContext);
+
 export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 	const { data, isLoading, write } = useFileString(path);
 	const { contents } = useProjectContext();
+	const [tabs, setTabs] = useState<SchemaRendererProps[]>([]);
 
 	const onChange = useCallback(
 		(jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => {
@@ -100,6 +117,16 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 		[write],
 	);
 
+	const context = useMemo(
+		() => ({
+			tabs,
+			current: tabs[tabs.length - 1] || null,
+			enter: (tab: SchemaRendererProps) => setTabs([...tabs, tab]),
+			pop: () => setTabs(tabs.slice(0, -1)),
+		}),
+		[tabs, setTabs],
+	);
+
 	if (isLoading || data === null) {
 		return null;
 	}
@@ -116,51 +143,83 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 		return null;
 	}
 
+	if (tabs.length > 0) {
+		const lastTab = tabs[tabs.length - 1]!;
+		const { name, value, jsonPath, entrySchema, onChange } = lastTab;
+		const type = detectSchemaType(entrySchema);
+
+		const Renderer = schemaRenderers[type];
+
+		if (Renderer === undefined) {
+			return (
+				<FormControl>
+					<FormLabel>{name}</FormLabel>
+					<span key={name} className="text-yellow-400 text-sm">
+						Unknown field type {type}
+					</span>
+				</FormControl>
+			);
+		}
+
+		return (
+			<Renderer //
+				path={path}
+				name={name}
+				value={value}
+				onChange={onChange}
+				entrySchema={entrySchema}
+				jsonPath={jsonPath}
+			/>
+		);
+	}
+
 	const resolvedSchema = resolveSchema(typeof schema === "function" ? schema(node, contents) : schema, node.valueOf());
 	const entries = getSchemaEntries(resolvedSchema);
 
 	return (
 		<ErrorBoundary>
-			{entries.map(([name, entrySchema]) => {
-				const key = name + path;
-				const type = detectSchemaType(entrySchema);
+			<FieldsRendererContext.Provider value={context}>
+				{entries.map(([name, entrySchema]) => {
+					const key = name + path;
+					const type = detectSchemaType(entrySchema);
 
-				const Renderer = schemaRenderers[type];
+					const Renderer = schemaRenderers[type];
 
-				if (Renderer === undefined) {
+					if (Renderer === undefined) {
+						return (
+							<FormControl>
+								<FormLabel>{name}</FormLabel>
+								<span key={key} className="text-yellow-400 text-sm">
+									Unknown field type {type}
+								</span>
+							</FormControl>
+						);
+					}
+
+					const childNode = node.get(name);
+					const metadata = getSchemaMetadata(entrySchema);
+
+					if (metadata?.visibleWhen) {
+						const refNode = node.get(metadata.visibleWhen.field);
+						if (refNode.isMissing()) return null;
+						if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) return null;
+					}
+
+					const value = childNode.isMissing() ? v.getDefault(entrySchema) : childNode.valueOf();
+
 					return (
-						<FormControl>
-							<FormLabel>{name}</FormLabel>
-							<span key={key} className="text-yellow-400 text-sm">
-								Unknown field type {type}
-							</span>
-						</FormControl>
+						<Renderer //
+							key={key}
+							path={path}
+							name={name}
+							value={value}
+							onChange={onChange}
+							entrySchema={entrySchema}
+							jsonPath={name}
+						/>
 					);
-				}
-
-				const childNode = node.get(name);
-				const metadata = getSchemaMetadata(entrySchema);
-
-				if (metadata?.visibleWhen) {
-					const refNode = node.get(metadata.visibleWhen.field);
-					if (refNode.isMissing()) return null;
-					if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) return null;
-				}
-
-				const value = childNode.isMissing() ? v.getDefault(entrySchema) : childNode.valueOf();
-
-				return (
-					<Renderer
-						key={key}
-						path={path}
-						name={name}
-						value={value}
-						onChange={onChange}
-						entrySchema={entrySchema as AnySchema}
-						jsonPath={name}
-					/>
-				);
-			})}
+				})}
+			</FieldsRendererContext.Provider>
 		</ErrorBoundary>
 	);
 });
@@ -526,50 +585,57 @@ const ArrayField = React.memo(function ArrayField({ path, name, value, onChange,
 });
 
 const ObjectField = React.memo(function ObjectField({ path, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
+	const { pop } = useFieldsRenderer();
+
 	if (typeof value !== "object" || value === null) {
 		return null;
 	}
 
 	const entries = getSchemaEntries(resolveSchema(entrySchema, value));
 
-	const results = entries.map(([name, childSchema]) => {
-		const key = name;
-		const type = detectSchemaType(childSchema);
-		const childValue = (value as Record<string, unknown>)?.[name];
-		const metadata = getSchemaMetadata(childSchema);
+	return (
+		<div className="pl-4 border-l-2 border-border grid gap-6">
+			<Button type="button" variant="outline" onClick={() => pop()}>
+				<ChevronLeft />
+			</Button>
+			{entries.map(([name, childSchema]) => {
+				const key = name;
+				const type = detectSchemaType(childSchema);
+				const childValue = (value as Record<string, unknown>)?.[name];
+				const metadata = getSchemaMetadata(childSchema);
 
-		if (metadata?.visibleWhen && typeof value === "object" && value !== null) {
-			const refValue = (value as Record<string, unknown>)[metadata.visibleWhen.field];
-			if (refValue === undefined || refValue !== metadata.visibleWhen.value) return null;
-		}
+				if (metadata?.visibleWhen && typeof value === "object" && value !== null) {
+					const refValue = (value as Record<string, unknown>)[metadata.visibleWhen.field];
+					if (refValue === undefined || refValue !== metadata.visibleWhen.value) return null;
+				}
 
-		const Renderer = schemaRenderers[type];
+				const Renderer = schemaRenderers[type];
 
-		if (Renderer === undefined) {
-			return (
-				<FormControl key={key}>
-					<FormLabel>
-						<SchemaLabel name={name} entrySchema={childSchema as AnySchema} />
-					</FormLabel>
-					<span className="text-yellow-400 text-sm">Unknown field type {type}</span>
-				</FormControl>
-			);
-		}
+				if (Renderer === undefined) {
+					return (
+						<FormControl key={key}>
+							<FormLabel>
+								<SchemaLabel name={name} entrySchema={childSchema as AnySchema} />
+							</FormLabel>
+							<span className="text-yellow-400 text-sm">Unknown field type {type}</span>
+						</FormControl>
+					);
+				}
 
-		return (
-			<Renderer
-				key={key}
-				path={path}
-				name={name}
-				value={childValue ?? v.getDefault(childSchema)}
-				onChange={onChange}
-				entrySchema={childSchema as AnySchema}
-				jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
-			/>
-		);
-	});
-
-	return <div className="pl-4 border-l-2 border-border grid gap-6">{results}</div>;
+				return (
+					<Renderer
+						key={key}
+						path={path}
+						name={name}
+						value={childValue ?? v.getDefault(childSchema)}
+						onChange={onChange}
+						entrySchema={childSchema as AnySchema}
+						jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
+					/>
+				);
+			})}
+		</div>
+	);
 });
 
 const ResearchField = React.memo(function ResearchField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
