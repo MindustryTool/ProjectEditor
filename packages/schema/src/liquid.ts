@@ -39,6 +39,6 @@ export const LiquidHjsonSchema: SchemaFn = (value, context) =>
 		effect: v.nullish(EffectHjsonSchema(value.get("effect"), context)),
 		particleEffect: v.nullish(EffectHjsonSchema(value.get("particleEffect"), context)),
 		vaporEffect: v.nullish(EffectHjsonSchema(value.get("vaporEffect"), context)),
-		canStayOn: v.nullish(v.array(v.pipe(v.picklist(context.getLiquids().map((liquid) => liquid.name)), v.metadata({ type: "liquids" })))),
+		canStayOn: v.nullish(v.array(v.pipe(v.picklist(context.liquids.map((liquid) => liquid.name)), v.metadata({ type: "liquids" })))),
 		research: ResearchSchema(value.get("research"), context),
 	});

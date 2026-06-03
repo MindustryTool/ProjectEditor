@@ -41,15 +41,15 @@ export type Unit = {
 };
 
 export type Sprite = {
-    name: string;
-}
-
-export type ProjectContents = {
-	getItems(): Item[];
-	getBlocks(): Block[];
-	getLiquids(): Liquid[];
-	getSectors(): Sector[];
-	getStatuses(): Status[];
-	getUnits(): Unit[];
-    getSprites(): Sprite[];
+	name: string;
 };
+
+export interface ProjectContents {
+	readonly items: readonly Item[];
+	readonly blocks: readonly Block[];
+	readonly liquids: readonly Liquid[];
+	readonly sectors: readonly Sector[];
+	readonly statuses: readonly Status[];
+	readonly units: readonly Unit[];
+	readonly sprites: readonly Sprite[];
+}

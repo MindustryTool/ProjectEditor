@@ -1,7 +1,7 @@
-import type { TreeSnapshot, ValidatorRegistry } from "@project/core";
+import type { TreeSnapshot, ValidationBatchFile, ValidationResult } from "@project/core";
 import { useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { getExporter } from "@project/core";
+import { getExporter, hasDefaultValidatorMatch } from "@project/core";
 import { useProjectSession, useValidationStore } from "@project/core";
 import { cn } from "~/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "~/components/ui/dialog";
@@ -127,20 +127,26 @@ export function ExportMenu({ className }: ExportMenuProps) {
 }
 
 async function loadAndValidateAll(
-	registry: ValidatorRegistry,
 	treeSnapshot: TreeSnapshot,
-	validateFile: (path: string) => Promise<void>,
+	readFile: (path: string) => Promise<ArrayBuffer | null>,
+	validateFiles: (files: ValidationBatchFile[]) => Promise<Record<string, ValidationResult[]> | null>,
 	onProgress: (current: string, completed: number, total: number) => void,
 ) {
-	const entries = treeSnapshot.getEntries().filter((e) => e.kind === "file" && registry.getMatches(e.path).length > 0);
+	const entries = treeSnapshot.getEntries().filter((e) => e.kind === "file" && hasDefaultValidatorMatch(e.path));
 	const total = entries.length;
+	const files: ValidationBatchFile[] = [];
+	const decoder = new TextDecoder();
 
 	for (let i = 0; i < total; i++) {
 		const entry = entries[i]!;
 		onProgress(entry.path, i, total);
 
 		try {
-			await validateFile(entry.path);
+			const data = await readFile(entry.path);
+			files.push({
+				path: entry.path,
+				content: data ? decoder.decode(data) : "",
+			});
 		} catch (err) {
 			useValidationStore.getState().setResults(entry.path, [
 				{
@@ -153,6 +159,8 @@ async function loadAndValidateAll(
 			]);
 		}
 	}
+
+	return validateFiles(files);
 }
 
 function ExportDialogContent({
@@ -173,7 +181,7 @@ function ExportDialogContent({
 	const { t } = useTranslation();
 	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
 	const projectContext = useProjectSession((s) => s.projectContext);
-	const { validateFile, registry } = useValidationContext();
+	const { validateFiles } = useValidationContext();
 	const [downloadLoading, setDownloadLoading] = useState(false);
 	const [currentFile, setCurrentFile] = useState("");
 	const [validationProgress, setValidationProgress] = useState(0);
@@ -188,26 +196,33 @@ function ExportDialogContent({
 		setDownloadLoading(true);
 		setValidationProgress(0);
 		setCurrentFile("");
+		let resultsByPath: Record<string, ValidationResult[]> | null = null;
 		try {
-			await loadAndValidateAll(registry, treeSnapshot, validateFile, (path, completed, total) => {
-				currentFileRef.current = path;
-				progressRef.current = Math.round(((completed + 1) / total) * 100);
+			resultsByPath = await loadAndValidateAll(
+				treeSnapshot,
+				(path) => projectContext.fs.readFile(path),
+				validateFiles,
+				(path, completed, total) => {
+					currentFileRef.current = path;
+					progressRef.current = Math.round(((completed + 1) / total) * 100);
 
-				const now = Date.now();
-				if (now - lastUpdateRef.current > THROTTLE_MS) {
-					lastUpdateRef.current = now;
-					setCurrentFile(path);
-					setValidationProgress(progressRef.current);
-				}
-			});
+					const now = Date.now();
+					if (now - lastUpdateRef.current > THROTTLE_MS) {
+						lastUpdateRef.current = now;
+						setCurrentFile(path);
+						setValidationProgress(progressRef.current);
+					}
+				},
+			);
 		} finally {
 			setCurrentFile(currentFileRef.current);
 			setValidationProgress(100);
 			setDownloadLoading(false);
 		}
 
-		const freshResults = useValidationStore.getState().results.resultsByPath;
-		const hasErrors = Object.values(freshResults).some((results) => results.some((r) => r.severity === "error"));
+		if (resultsByPath === null) return;
+
+		const hasErrors = Object.values(resultsByPath).some((results) => results.some((r) => r.severity === "error"));
 
 		if (hasErrors) {
 			onOpenValidation();
@@ -215,7 +230,7 @@ function ExportDialogContent({
 			handleExport(filename);
 			onClose();
 		}
-	}, [projectContext, treeSnapshot, registry, validateFile, handleExport, filename, onClose, onOpenValidation]);
+	}, [projectContext, treeSnapshot, validateFiles, handleExport, filename, onClose, onOpenValidation]);
 
 	return (
 		<>

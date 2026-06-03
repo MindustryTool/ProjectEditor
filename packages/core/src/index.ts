@@ -148,8 +148,16 @@ export { createValidatorRegistry } from "./validation/registry";
 export { createValidationRunner } from "./validation/runner";
 export type { ValidationRunner } from "./validation/runner";
 export { useValidationStore } from "./validation/store";
-export { createDefaultValidators } from "./validation/validators";
+export { createDefaultValidators, hasDefaultValidatorMatch } from "./validation/validators";
 export { ValidationResults } from "./validation/types";
+export type {
+	ValidationBatchFile,
+	ValidationFilesResponse,
+	ValidationFilesRequest,
+	ValidationFileRequest,
+	ValidationFileResponse,
+	ValidationWorkerApi,
+} from "./validation/worker";
 
 // === ProjectFileSystem (moved from @project/fs) ===
 

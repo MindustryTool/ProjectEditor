@@ -134,12 +134,12 @@ The system SHALL download the ZIP using the user-typed filename (before automati
 - **THEN** the downloaded file SHALL use the filename exactly as displayed in the input (after `.zip` append)
 
 ### Requirement: Pre-export loads and validates all files
-Before exporting, the ExportMenu SHALL read all project files from the filesystem directly and validate them. Validation SHALL run when the user clicks the Download button, not when the export dialog opens.
+Before exporting, the ExportMenu SHALL read all project files from the filesystem directly and validate them through the validation worker. Validation SHALL run when the user clicks the Download button, not when the export dialog opens.
 
 #### Scenario: Export reads and validates on download click
 - **WHEN** the user clicks the Download button in the export dialog
-- **THEN** the system SHALL iterate over all project files, read each from the filesystem via `fs.readFile()`, and call `validateFile()` directly
-- **THEN** validation results SHALL be available after the files are processed
+- **THEN** the system SHALL iterate over all project files, read each from the filesystem via `fs.readFile()`, and submit them to worker-backed batch validation
+- **THEN** validation results SHALL be available after the worker finishes processing the batch
 - **WHEN** errors are found
 - **THEN** the validation error dialog SHALL open
 - **WHEN** no errors are found
@@ -152,7 +152,11 @@ Before exporting, the ExportMenu SHALL read all project files from the filesyste
 
 #### Scenario: Export shows loading indicator during download validation
 - **WHEN** files are being read and validated after the user clicks Download
-- **THEN** a loading indicator SHALL be shown on the Download button during validation
+- **THEN** a loading indicator SHALL be shown on the Download button during worker-backed validation
+
+#### Scenario: Export waits for latest batch validation response
+- **WHEN** more than one export validation batch is triggered before the first finishes
+- **THEN** only the latest batch response SHALL control whether export proceeds or error dialog opens
 
 ### Requirement: Export validation errors are clickable
 The export validation dialog SHALL display errors with clickable file paths that navigate to the errored file.
@@ -161,4 +165,3 @@ The export validation dialog SHALL display errors with clickable file paths that
 - **WHEN** the export validation dialog lists errors
 - **THEN** each error's file path SHALL be rendered as a clickable element
 - **THEN** clicking the path SHALL close the dialog and navigate to the file in the editor
-

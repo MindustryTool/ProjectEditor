@@ -27,7 +27,7 @@ export const statusBaseObjectSchema = v.object({
 	outline: v.optional(v.boolean(), true),
 });
 
-export const StatusStringSchema: SchemaFn = (_value, context) => v.picklist(context.getStatuses().map((status) => status.name));
+export const StatusStringSchema: SchemaFn = (_value, context) => v.picklist(context.statuses.map((status) => status.name));
 
 export const StatusFieldSchema: SchemaFn = (value, context) =>
 	v.union([StatusStringSchema(value, context), StatusHjsonSchema(value, context)]);
@@ -42,14 +42,14 @@ export const StatusHjsonSchema: SchemaFn = (value, context) =>
 				v.array(
 					v.pipe(
 						v.picklist(
-							context.getStatuses().map((status) => status.name),
+							context.statuses.map((status) => status.name),
 							"Not a vailid status name",
 						),
 					),
 				),
 				[],
 			),
-			opposites: v.optional(v.array(v.pipe(v.picklist(context.getStatuses().map((status) => status.name)))), []),
+			opposites: v.optional(v.array(v.pipe(v.picklist(context.statuses.map((status) => status.name)))), []),
 		}),
 		v.forward(
 			v.partialCheck(

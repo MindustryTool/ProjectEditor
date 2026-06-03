@@ -28,17 +28,17 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 	const sectors = useSectors();
 	const statuses = useStatuses();
 	const units = useUnits();
-    const sprites = useSprites();
+	const sprites = useSprites();
 
-	const contents = useMemo(
+	const contents = useMemo<ProjectContents>(
 		() => ({
-			getItems: () => items,
-			getBlocks: () => blocks,
-			getLiquids: () => liquids,
-			getSectors: () => sectors,
-			getStatuses: () => statuses,
-			getUnits: () => units,
-            getSprites: () => sprites,
+			items,
+			blocks,
+			liquids,
+			sectors,
+			statuses,
+			units,
+			sprites,
 		}),
 		[items, blocks, liquids, sectors, statuses, units, sprites],
 	);

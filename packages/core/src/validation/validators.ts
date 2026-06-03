@@ -1,4 +1,4 @@
-import type { ValidationResult, ValidatorFn } from "./types";
+import type { ValidationResult, ValidatorFn, ValidatorRegistration } from "./types";
 import { createValidatorRegistry } from "./registry";
 import { HJSON, HJSONError, HjsonObjectNode } from "@project/hjson";
 import { ItemHjsonSchema, LiquidHjsonSchema, ModHjsonSchema, SectorHjsonSchema, StatusHjsonSchema, UnitHjsonSchema } from "@project/schema";
@@ -6,55 +6,63 @@ import * as v from "valibot";
 import { findUnknownProperties } from "./utils";
 import type { SchemaFn } from "@project/schema";
 
-export function createDefaultValidators() {
-	const registry = createValidatorRegistry();
-
-	registry.register({
+const defaultValidatorRegistrations: readonly ValidatorRegistration[] = [
+	{
 		name: "hjson-syntax",
 		pattern: (path) => path.endsWith(".json") || path.endsWith(".hjson"),
 		validate: jsonSyntaxValidator,
-	});
-
-	registry.register({
+	},
+	{
 		name: "mod-meta",
 		pattern: (path) => path.endsWith("mod.hjson") || path.endsWith("mod.json"),
 		validate: createValibotValidator(ModHjsonSchema),
-	});
-
-	registry.register({
+	},
+	{
 		name: "items-hjson",
 		pattern: (path) => path.startsWith("content/item") || (path.endsWith(".json") && path.endsWith(".hjson")),
 		validate: createValibotValidator(ItemHjsonSchema),
-	});
-
-	registry.register({
+	},
+	{
 		name: "liquids-hjson",
 		pattern: (path) => path.startsWith("content/liquid") || (path.endsWith(".json") && path.endsWith(".hjson")),
 		validate: createValibotValidator(LiquidHjsonSchema),
-	});
-
-	registry.register({
+	},
+	{
 		name: "sectors-hjson",
 		pattern: (path) => path.startsWith("content/sector") || (path.endsWith(".json") && path.endsWith(".hjson")),
 		validate: createValibotValidator(SectorHjsonSchema),
-	});
-
-	registry.register({
+	},
+	{
 		name: "statuses-hjson",
 		pattern: (path) => path.startsWith("content/status") || (path.endsWith(".json") && path.endsWith(".hjson")),
 		validate: createValibotValidator(StatusHjsonSchema),
-	});
-
-    registry.register({
+	},
+	{
 		name: "units-hjson",
 		pattern: (path) => path.startsWith("content/unit") || (path.endsWith(".json") && path.endsWith(".hjson")),
 		validate: createValibotValidator(UnitHjsonSchema),
-	});
+	},
+];
+
+function matches(registration: ValidatorRegistration, path: string): boolean {
+	return typeof registration.pattern === "function" ? registration.pattern(path) : registration.pattern.test(path);
+}
+
+export function hasDefaultValidatorMatch(path: string): boolean {
+	return defaultValidatorRegistrations.some((registration) => matches(registration, path));
+}
+
+export function createDefaultValidators() {
+	const registry = createValidatorRegistry();
+
+	for (const registration of defaultValidatorRegistrations) {
+		registry.register(registration);
+	}
 
 	return registry;
 }
 
-const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
+function jsonSyntaxValidator({ path, content }: Parameters<ValidatorFn>[0]): ValidationResult[] {
 	const trimmed = content.trim();
 
 	if (!trimmed) return [];
@@ -110,7 +118,7 @@ const jsonSyntaxValidator: ValidatorFn = ({ path, content }) => {
 			},
 		];
 	}
-};
+}
 
 function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>>(
 	schema: T | SchemaFn<T>,

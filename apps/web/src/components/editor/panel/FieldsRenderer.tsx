@@ -310,7 +310,7 @@ const LiquidsListField = React.memo(function LiquidsListField({ name, value, onC
 	if ("options" in unwrappedSchema && Array.isArray(unwrappedSchema.options)) {
 		const options = unwrappedSchema.options
 			.map((v) => String(v))
-			.map((v) => context.contents.getLiquids().find((l) => l.name === v))
+			.map((v) => context.contents.liquids.find((l) => l.name === v))
 			.filter(Boolean)
 			.map((option) => option!);
 

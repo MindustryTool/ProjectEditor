@@ -1,4 +1,4 @@
-import { type ProjectContents } from "@project/types";
+import type { ProjectContents } from "@project/types";
 import type { HjsonNode } from "@project/hjson";
 import * as v from "valibot";
 
@@ -116,7 +116,7 @@ export const ResearchSchema: SchemaFn = (_value, context) =>
 						const requirement = value.requirements;
 
 						if (requirement) {
-							const items = context.getItems();
+							const items = context.items;
 							for (let i = 0; i < requirement.length; i++) {
 								const req = requirement[i]!;
 								const parts = req.split("/");
@@ -165,7 +165,7 @@ export const SoundHjsonSchema = v.pipe(
 
 export const SpriteHjsonSchema: SchemaFn = (_, context) =>
 	v.pipe(
-		v.picklist([...new Set(context.getSprites().map((s) => s.name))]),
+		v.picklist([...new Set(context.sprites.map((sprite) => sprite.name))]),
 		v.minLength(1),
 		v.maxLength(127),
 		v.metadata({
@@ -231,40 +231,33 @@ export const Interps = [
 ] as const;
 
 export function findContent(name: string, context: ProjectContents) {
-	const items = context.getItems();
-
-	const item = items.find((i) => i.name === name);
+	const item = context.items.find((entry) => entry.name === name);
 
 	if (item) {
 		return item;
 	}
 
-	const blocks = context.getBlocks();
-	const block = blocks.find((b) => b.name === name);
+	const block = context.blocks.find((entry) => entry.name === name);
 	if (block) {
 		return block;
 	}
 
-	const liquids = context.getLiquids();
-	const liquid = liquids.find((l) => l.name === name);
+	const liquid = context.liquids.find((entry) => entry.name === name);
 	if (liquid) {
 		return liquid;
 	}
 
-	const sectors = context.getSectors();
-	const sector = sectors.find((s) => s.name === name);
+	const sector = context.sectors.find((entry) => entry.name === name);
 	if (sector) {
 		return sector;
 	}
 
-	const statuses = context.getStatuses();
-	const status = statuses.find((s) => s.name === name);
+	const status = context.statuses.find((entry) => entry.name === name);
 	if (status) {
 		return status;
 	}
 
-	const units = context.getUnits();
-	const unit = units.find((u) => u.name === name);
+	const unit = context.units.find((entry) => entry.name === name);
 	if (unit) {
 		return unit;
 	}

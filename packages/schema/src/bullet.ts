@@ -72,11 +72,11 @@ function createPartArraySchema(value: Parameters<SchemaFn>[0], context: Paramete
 }
 
 function createUnitFieldSchema(_value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) {
-	return v.nullish(v.pipe(v.picklist(context.getUnits().map((unit) => unit.name)), v.metadata({ type: "units" })));
+	return v.nullish(v.pipe(v.picklist(context.units.map((unit) => unit.name)), v.metadata({ type: "units" })));
 }
 
 function createLiquidFieldSchema(_value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) {
-	return v.nullish(v.pipe(v.picklist(context.getLiquids().map((liquid) => liquid.name)), v.metadata({ type: "liquids" })));
+	return v.nullish(v.pipe(v.picklist(context.liquids.map((liquid) => liquid.name)), v.metadata({ type: "liquids" })));
 }
 
 function createBulletBaseObjectSchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) {

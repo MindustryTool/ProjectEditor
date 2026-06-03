@@ -110,8 +110,9 @@ export class ProjectFileSystem {
 	}
 
 	private async refreshTreeNow(): Promise<FileEntry[]> {
+        const startTime = Date.now();
 		const snapshot = await this.listFiles("/", { recursive: true });
-		console.log("Tree refreshed");
+		console.log(`Tree refreshed in ${Date.now() - startTime}ms`);
 		this.onTreeSnapshotChange(snapshot);
 		return snapshot;
 	}

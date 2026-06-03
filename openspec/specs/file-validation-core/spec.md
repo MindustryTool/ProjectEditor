@@ -1,19 +1,52 @@
 ## MODIFIED Requirements
 
 ### Requirement: Validation engine provides registry and runner
-The system SHALL provide a validation engine with a registry for validators and a runner that executes validators against file content.
+The system SHALL provide a validation engine with a registry for validators, a runner that executes validators against file content, and a worker adapter that executes validation through structured-clone-safe requests.
 
 #### Scenario: Register a validator
 - **WHEN** a validator function is registered with a name and a file path pattern (glob)
 - **THEN** the validator SHALL be stored in the registry and available for execution
 
 #### Scenario: Run validation on a file
-- **WHEN** a file path and content are passed to the validation runner
+- **WHEN** a file validation request containing path, content, and validation context snapshot is passed to the worker
 - **THEN** the runner SHALL match the path against all registered validators and execute matching ones, returning aggregated results
 
 #### Scenario: No validators match a file
 - **WHEN** a file path does not match any registered validator pattern
 - **THEN** the runner SHALL return an empty results array
+
+#### Scenario: Batch validation reuses same worker adapter
+- **WHEN** a batch validation request is passed to the worker
+- **THEN** the worker SHALL validate each file with same registry and snapshot-backed context and return results for all requested paths
+
+### Requirement: Validation worker uses type-safe threads.js APIs
+The system SHALL provide a validation worker implemented with `threads.js` type-safe workers so the web app can call validation methods through typed request and response contracts.
+
+#### Scenario: Worker exposes typed single-file validation
+- **WHEN** the web app creates the validation worker client
+- **THEN** it SHALL be able to call a typed `validateFile` method that returns plain validation results
+
+#### Scenario: Worker exposes typed batch validation
+- **WHEN** export preflight or other batch validation runs
+- **THEN** the web app SHALL be able to call a typed `validateFiles` method that returns plain results grouped by path
+
+### Requirement: Validation context is reconstructed from serializable snapshot
+The validation engine SHALL accept a serializable validation context snapshot and reconstruct lookup helpers used by schema validators inside the worker.
+
+#### Scenario: Snapshot provides cross-file lookup data
+- **WHEN** validation requires schema lookups for items, blocks, liquids, units, statuses, or other project content references
+- **THEN** the worker SHALL resolve those lookups from snapshot data included in the request
+
+#### Scenario: Worker boundary excludes live main-thread objects
+- **WHEN** validation work is sent to worker
+- **THEN** the request SHALL NOT include Zustand stores, filesystem handles, event bus objects, or function closures
+
+### Requirement: Validation responses are structured-clone-safe
+Validation responses returned from worker SHALL contain only structured-clone-safe data that can be consumed by existing validation UI and export flows.
+
+#### Scenario: Worker returns plain validation results
+- **WHEN** validation completes in worker
+- **THEN** each result SHALL be serialized as plain data containing severity, message metadata, optional path, optional field, and optional source range data
 
 ### Requirement: Validation results use string severity
 The system SHALL define severity levels as string values: `"error"`, `"warning"`, `"info"`, `"deprecated"`.
