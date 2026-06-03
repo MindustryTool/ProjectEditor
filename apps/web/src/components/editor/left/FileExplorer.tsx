@@ -3,7 +3,15 @@ import { Folder, FolderOpen, ChevronRight, ChevronDown, Pencil, Trash2, Plus, Mo
 import { toast } from "sonner";
 import { isDefaultPath, type TreeNode } from "@project/fs";
 import type { TreeSnapshot } from "@project/core";
-import { useCurrentProject, useProjectSession, useFileStore, isDirty, selectEntry, selectIsSaving, useValidationStore } from "@project/core";
+import {
+	useCurrentProject,
+	useProjectSession,
+	useFileStore,
+	isDirty,
+	selectEntry,
+	selectIsSaving,
+	useValidationStore,
+} from "@project/core";
 import { cn } from "~/lib/utils";
 import {
 	AlertDialog,
@@ -152,22 +160,6 @@ export function FileExplorer({ className }: FileExplorerProps) {
 			</Dialog>
 		</div>
 	);
-}
-
-function getIcon(node: TreeNode, expanded: boolean) {
-	if (node.path === "/") {
-		return null;
-	}
-
-	if (node.type === "folder") {
-		return expanded ? (
-			<FolderOpen className="h-3.5 w-3.5 shrink-0 text-amber-500" />
-		) : (
-			<Folder className="h-3.5 w-3.5 shrink-0 text-amber-500" />
-		);
-	}
-
-	return <FileIcon path={node.path} />;
 }
 
 interface TreeNodeItemProps {
@@ -360,6 +352,22 @@ function TreeNodeItem({ node, depth = 0 }: TreeNodeItemProps) {
 			)}
 		</div>
 	);
+}
+
+function getIcon(node: TreeNode, expanded: boolean) {
+	if (node.path === "/") {
+		return null;
+	}
+
+	if (node.type === "folder") {
+		return expanded ? (
+			<FolderOpen className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+		) : (
+			<Folder className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+		);
+	}
+
+	return <FileIcon path={node.path} />;
 }
 
 function buildFileTree(snapshot: TreeSnapshot, projectId: string): TreeNode[] {
