@@ -1,12 +1,12 @@
 import { apiClient } from "@project/api";
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { Effect } from "@project/api";
 
-export function useEffects(): UseQueryResult<NoInfer<Effect[]>, Error> {
+export function useEffects(): Effect[]{
 	const data = useQuery({
 		queryKey: ["effects"],
 		queryFn: () => apiClient.getEffects(),
 	});
 
-	return data;
+	return data.data || [];
 }

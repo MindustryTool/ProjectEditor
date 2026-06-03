@@ -1,12 +1,11 @@
 import * as v from "valibot";
 import { Envs, EnvSchema, MindustryHexColorSchema, SoundHjsonSchema, type SchemaFn } from "./base";
-import { AbilityHjsonSchema } from "./ability";
+import { AbilityFieldSchema } from "./ability";
 import { WeaponHjsonSchema } from "./weapon";
 import { StatusStringSchema } from "./status";
 import { EffectHjsonSchema } from "./effect";
 import { PartHjsonSchema } from "./part";
 import { EngineHjsonSchema } from "./engine";
-import { lazyArray } from "./lazy-array";
 
 const unitObjectSchema = {
 	envRequired: v.optional(EnvSchema, 0),
@@ -233,32 +232,18 @@ const unitObjectSchema = {
 	mechLegColor: v.optional(MindustryHexColorSchema),
 };
 
-export const UnitHjsonSchema: SchemaFn = (value, context) =>
+export const UnitHjsonSchema: SchemaFn = (context) =>
 	v.object({
 		...unitObjectSchema,
-
-		abilities: v.optional(
-			lazyArray((index) => AbilityHjsonSchema(value.get("abilities").get(index), context)),
-			[],
-		),
-		weapons: v.optional(
-			lazyArray((index) => WeaponHjsonSchema(value.get("weapons").get(index), context)),
-			[],
-		),
-		immunities: v.optional(
-			lazyArray((index) => StatusStringSchema(value.get("immunities").get(index), context)),
-			[],
-		),
-		fallEffect: v.optional(EffectHjsonSchema(value, context)),
-		fallEngineEffect: v.optional(EffectHjsonSchema(value, context)),
-		deathExplosionEffect: v.optional(EffectHjsonSchema(value, context)),
-		treadEffect: v.optional(EffectHjsonSchema(value, context)),
-		parts: v.optional(
-			lazyArray((index) => PartHjsonSchema(value.get("parts").get(index), context)),
-			[],
-		),
-		engines: v.optional(
-			lazyArray((index) => EngineHjsonSchema(value.get("engines").get(index), context)),
-			[],
-		),
+		abilities: v.optional(v.array(AbilityFieldSchema(context)), []),
+		weapons: v.optional(v.array(WeaponHjsonSchema(context)), []),
+		immunities: v.optional(v.array(StatusStringSchema(context)), []),
+		fallEffect: v.optional(EffectHjsonSchema(context)),
+		fallEngineEffect: v.optional(EffectHjsonSchema(context)),
+		deathExplosionEffect: v.optional(EffectHjsonSchema(context)),
+		treadEffect: v.optional(EffectHjsonSchema(context)),
+		parts: v.optional(v.array(PartHjsonSchema(context)), []),
+		engines: v.optional(v.array(EngineHjsonSchema(context)), []),
 	});
+
+export const UnitFieldSchema: SchemaFn = (context) => v.picklist(context.units.map((unit) => unit.name));

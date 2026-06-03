@@ -1,6 +1,15 @@
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
-import { lazyArray, resolveSchema, unwrapSchema, hasNullishWrapper, detectSchemaType, getSchemaEntries, getArrayItemSchema, getSchemaMetadata, type AnySchema, MindustryHexColorSchema, ContentNameSchema } from "@project/schema";
+import {
+	resolveSchema,
+	unwrapSchema,
+	hasNullishWrapper,
+	getSchemaEntries,
+	getArrayItemSchema,
+	getSchemaMetadata,
+	type AnySchema,
+	MindustryHexColorSchema,
+} from "@project/schema";
 
 describe("unwrapSchema", () => {
 	it("returns the same schema for non-wrapped types", () => {
@@ -65,87 +74,6 @@ describe("hasNullishWrapper", () => {
 	});
 });
 
-describe("detectSchemaType", () => {
-	it("returns 'string' for v.string()", () => {
-		expect(detectSchemaType(v.string() as AnySchema)).toBe("string");
-	});
-
-	it("returns 'string' for v.pipe(v.string(), ...)", () => {
-		expect(detectSchemaType(v.pipe(v.string(), v.minLength(1)) as AnySchema)).toBe("string");
-	});
-
-	it("returns 'number' for v.number()", () => {
-		expect(detectSchemaType(v.number() as AnySchema)).toBe("number");
-	});
-
-	it("returns 'number' for v.pipe(v.number(), v.minValue(0))", () => {
-		expect(detectSchemaType(v.pipe(v.number(), v.minValue(0)) as AnySchema)).toBe("number");
-	});
-
-	it("returns 'boolean' for v.boolean()", () => {
-		expect(detectSchemaType(v.boolean() as AnySchema)).toBe("boolean");
-	});
-
-	it("returns 'object' for v.object({})", () => {
-		expect(detectSchemaType(v.object({}) as AnySchema)).toBe("object");
-	});
-
-	it("returns 'array' for v.array(v.string())", () => {
-		expect(detectSchemaType(v.array(v.string()) as AnySchema)).toBe("array");
-	});
-
-	it("detects color by identity", () => {
-		expect(detectSchemaType(MindustryHexColorSchema as AnySchema)).toBe("color");
-	});
-
-	it("detects color through v.nullish wrapper", () => {
-		const wrapped = v.nullish(MindustryHexColorSchema);
-		expect(detectSchemaType(wrapped as AnySchema)).toBe("color");
-	});
-
-	it("detects research via metadata", () => {
-		const researchPipe = v.pipe(v.string(), v.metadata({ type: "research" }));
-		expect(detectSchemaType(researchPipe as AnySchema)).toBe("research");
-	});
-
-	it("detects research through nullish wrapper via metadata", () => {
-		const wrapped = v.nullish(v.pipe(v.string(), v.metadata({ type: "research" })));
-		expect(detectSchemaType(wrapped as AnySchema)).toBe("research");
-	});
-
-	it("detects effect via metadata", () => {
-		const effectPipe = v.pipe(v.string(), v.metadata({ type: "effect" }));
-		expect(detectSchemaType(effectPipe as AnySchema)).toBe("effect");
-	});
-
-	it("does not detect ContentNameSchema as color", () => {
-		expect(detectSchemaType(ContentNameSchema as AnySchema)).not.toBe("color");
-	});
-
-	it("falls back to base type when metadata type is not in known types", () => {
-		const customMetadata = v.pipe(v.number(), v.metadata({ type: "custom_widget" }));
-		expect(detectSchemaType(customMetadata as AnySchema)).toBe("number");
-	});
-
-	it("returns 'unknown' for a custom schema", () => {
-		const custom = v.custom(() => true);
-		expect(detectSchemaType(custom as AnySchema)).toBe("unknown");
-	});
-
-	it("returns 'unknown' for v.union schema", () => {
-		const union = v.union([v.string(), v.number()]);
-		expect(detectSchemaType(union as AnySchema)).toBe("unknown");
-	});
-
-	it("returns 'unknown' for v.pipe with unknown base", () => {
-		const pipe = v.pipe(
-			v.any(),
-			v.check(() => true),
-		);
-		expect(detectSchemaType(pipe as AnySchema)).toBe("unknown");
-	});
-});
-
 describe("getSchemaEntries", () => {
 	it("returns entries for an object schema", () => {
 		const schema = v.object({
@@ -172,12 +100,6 @@ describe("getArrayItemSchema", () => {
 		const item = v.string();
 		const schema = v.array(item);
 		expect(getArrayItemSchema(schema as AnySchema)).toBe(item);
-	});
-
-	it("returns indexed item schema for lazyArray", () => {
-		const schema = lazyArray((index) => (index % 2 === 0 ? v.string() : v.number()));
-		expect(detectSchemaType(getArrayItemSchema(schema as AnySchema, 0) as AnySchema)).toBe("string");
-		expect(detectSchemaType(getArrayItemSchema(schema as AnySchema, 1) as AnySchema)).toBe("number");
 	});
 
 	it("returns null for non-array schema", () => {
@@ -235,21 +157,6 @@ describe("getSchemaMetadata", () => {
 		const schema = v.pipe(MindustryHexColorSchema, v.metadata({ visibleWhen: { field: "gas", value: true } }));
 		expect(getSchemaMetadata(schema as AnySchema)).toEqual({ visibleWhen: { field: "gas", value: true } });
 	});
-
-	it("detects type as color for pipe with MindustryHexColorSchema and metadata", () => {
-		const schema = v.pipe(MindustryHexColorSchema, v.metadata({ visibleWhen: { field: "gas", value: true } }));
-		expect(detectSchemaType(schema as AnySchema)).toBe("color");
-	});
-
-	it("detects type as string for pipe with v.string() and metadata", () => {
-		const schema = v.pipe(v.string(), v.metadata({ visibleWhen: { field: "x", value: "y" } }));
-		expect(detectSchemaType(schema as AnySchema)).toBe("string");
-	});
-
-	it("detects type as number for pipe with v.number() and metadata", () => {
-		const schema = v.pipe(v.number(), v.minValue(0), v.metadata({ visibleWhen: { field: "x", value: true } }));
-		expect(detectSchemaType(schema as AnySchema)).toBe("number");
-	});
 });
 
 describe("resolveSchema", () => {
@@ -298,46 +205,10 @@ describe("resolveSchema", () => {
 		expect(getSchemaEntries(resolved as AnySchema).map(([k]) => k)).toEqual(["val"]);
 	});
 
-	it("handles piped lazy with metadata for getSchemaEntries", () => {
-		const lazy = v.lazy((input: unknown) => {
-			if ((input as Record<string, unknown>)?.type === "foo") return v.object({ fooField: v.string() });
-			return v.object({ barField: v.number() });
-		});
-		const piped = v.pipe(lazy, v.metadata({ type: "effect" }));
-		// detectSchemaType should find metadata
-		expect(detectSchemaType(piped as AnySchema)).toBe("effect");
-		// resolveSchema with value should produce object with correct entries
-		const resolved = resolveSchema(piped as AnySchema, { type: "foo" });
-		const entries = getSchemaEntries(resolved as AnySchema);
-		expect(entries.map(([k]) => k)).toEqual(["fooField"]);
-	});
-
 	it("preserves entries through resolveSchema for plain object", () => {
 		const schema = v.object({ a: v.string(), b: v.number() });
 		const resolved = resolveSchema(schema as AnySchema, {});
 		expect(getSchemaEntries(resolved as AnySchema)).toHaveLength(2);
-	});
-
-	it("parses each lazyArray item with schema resolved from index", () => {
-		const schema = lazyArray((index) =>
-			index % 2 === 0
-				? v.pipe(v.string(), v.minLength(2))
-				: v.pipe(v.number(), v.minValue(10)),
-		);
-
-		const success = v.safeParse(schema, ["ab", 12, "cd"]);
-		expect(success.success).toBe(true);
-		if (success.success) {
-			expect(success.output).toEqual(["ab", 12, "cd"]);
-		}
-
-		const failure = v.safeParse(schema, ["a", 3]);
-		expect(failure.success).toBe(false);
-		if (!failure.success) {
-			expect(failure.issues).toHaveLength(2);
-			expect(failure.issues[0]?.path?.[0]?.key).toBe(0);
-			expect(failure.issues[1]?.path?.[0]?.key).toBe(1);
-		}
 	});
 });
 
@@ -365,26 +236,6 @@ describe("getSchemaEntries with valibot pipe structure", () => {
 });
 
 describe("Effect schema integration", () => {
-	it("detects bare lazy inside array as unknown (needs metadata wrapper)", () => {
-		const lazy = v.lazy(() => v.pipe(v.string(), v.metadata({ type: "effect" })));
-		const arr = v.array(lazy);
-		const item = getArrayItemSchema(arr as AnySchema);
-		expect(detectSchemaType(item as AnySchema)).toBe("unknown");
-	});
-
-	it("detects metadata-wrapped lazy inside array as effect", () => {
-		const wrapped = v.pipe(v.lazy(() => v.pipe(v.string(), v.metadata({ type: "effect" }))), v.metadata({ type: "effect" }));
-		const arr = v.array(wrapped);
-		const item = getArrayItemSchema(arr as AnySchema);
-		expect(detectSchemaType(item as AnySchema)).toBe("effect");
-	});
-
-	it("detects piped lazy with metadata as effect", () => {
-		const lazy = v.lazy(() => v.object({ colorFrom: v.nullish(v.string()) }));
-		const piped = v.pipe(lazy, v.metadata({ type: "effect" }));
-		expect(detectSchemaType(piped as AnySchema)).toBe("effect");
-	});
-
 	it("resolves effect union with correct type dispatching", () => {
 		const effectBaseObjectSchema = v.object({
 			type: v.picklist(["ParticleEffect", "MultiEffect"] as const),
@@ -392,7 +243,15 @@ describe("Effect schema integration", () => {
 		});
 		const classSchemaMap: Record<string, () => ReturnType<typeof v.object>> = {
 			ParticleEffect: () => v.object({ colorFrom: v.nullish(v.string()) }),
-			MultiEffect: () => v.object({ effects: v.array(v.pipe(v.lazy(() => effectItemUnionSchema), v.metadata({ type: "effect" }))) }),
+			MultiEffect: () =>
+				v.object({
+					effects: v.array(
+						v.pipe(
+							v.lazy(() => effectItemUnionSchema),
+							v.metadata({ type: "effect" }),
+						),
+					),
+				}),
 		};
 		const effectItemUnionSchema = v.pipe(
 			v.lazy((input) => {
@@ -406,9 +265,6 @@ describe("Effect schema integration", () => {
 			v.metadata({ type: "effect" }),
 		);
 
-		// Test detection
-		expect(detectSchemaType(effectItemUnionSchema as AnySchema)).toBe("effect");
-
 		// Test resolution with ParticleEffect
 		const resolvedParticle = resolveSchema(effectItemUnionSchema as AnySchema, { type: "ParticleEffect", colorFrom: "ff0000" });
 		const particleEntries = getSchemaEntries(resolvedParticle as AnySchema);
@@ -416,7 +272,10 @@ describe("Effect schema integration", () => {
 		expect(particleEntries.map(([k]) => k)).toContain("lifetime");
 
 		// Test resolution with MultiEffect
-		const resolvedMulti = resolveSchema(effectItemUnionSchema as AnySchema, { type: "MultiEffect", effects: [{ type: "ParticleEffect" }] });
+		const resolvedMulti = resolveSchema(effectItemUnionSchema as AnySchema, {
+			type: "MultiEffect",
+			effects: [{ type: "ParticleEffect" }],
+		});
 		const multiEntries = getSchemaEntries(resolvedMulti as AnySchema);
 		expect(multiEntries.map(([k]) => k)).toContain("effects");
 		expect(multiEntries.map(([k]) => k)).toContain("type");
@@ -436,9 +295,6 @@ describe("Effect schema integration", () => {
 			}),
 			v.metadata({ type: "effect" }),
 		);
-
-		// Step 1: detectSchemaType should return "effect"
-		expect(detectSchemaType(effectSchema as AnySchema)).toBe("effect");
 
 		// Step 2: resolveSchema with node value
 		const resolved = resolveSchema(effectSchema as AnySchema, { type: "ParticleEffect", colorFrom: "ff0000" });

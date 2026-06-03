@@ -1,6 +1,5 @@
 import * as v from "valibot";
 import { Interps, MindustryHexColorSchema, SoundHjsonSchema, type SchemaFn } from "./base";
-import { lazyArray } from "./lazy-array";
 
 const metadata = { type: "effect" };
 
@@ -93,67 +92,60 @@ export const waveEffectObjectSchema = v.object({
 	lightInterp: v.nullish(v.picklist(Interps), "reverse"),
 });
 
-type EffectObjectSchema = v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>;
-
-type EffectSchemaFactory = (value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) => EffectObjectSchema;
-
-function createEffectFieldSchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1], key: "effect") {
-	return v.nullish(EffectHjsonSchema(value.get(key), context));
-}
-
-function createEffectArraySchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1], key: "effects") {
-	return lazyArray((index) => EffectHjsonSchema(value.get(key).get(index), context));
-}
-
-const classSchemaMap: Record<EffectClass, EffectSchemaFactory> = {
-	ParticleEffect: (_value, _context) => particleEffectObjectSchema,
-	MultiEffect: (value, context) =>
+const classSchemaMap: Record<EffectClass, SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>> = {
+	ParticleEffect: (_context) => particleEffectObjectSchema,
+	MultiEffect: (context) =>
 		v.object({
-			effects: createEffectArraySchema(value, context, "effects"),
+			effects: v.array(EffectFieldSchema(context)),
 		}),
-	ExplosionEffect: (_value, _context) => explosionEffectObjectSchema,
-	RadialEffect: (value, context) =>
+	ExplosionEffect: (_context) => explosionEffectObjectSchema,
+	RadialEffect: (context) =>
 		v.object({
-			effect: createEffectFieldSchema(value, context, "effect"),
+			effect: EffectFieldSchema(context),
 			rotationSpacing: v.nullish(v.number(), 90),
 			rotationOffset: v.nullish(v.number(), 0),
 			effectRotationOffset: v.nullish(v.number(), 0),
 			lengthOffset: v.nullish(v.number(), 0),
 			amount: v.nullish(v.number(), 4),
 		}),
-	SeqEffect: (value, context) =>
+	SeqEffect: (context) =>
 		v.object({
-			effects: createEffectArraySchema(value, context, "effects"),
+			effects: v.array(EffectFieldSchema(context)),
 		}),
-	SoundEffect: (value, context) =>
+	SoundEffect: (context) =>
 		v.object({
 			sound: v.nullish(SoundHjsonSchema),
 			minPitch: v.nullish(v.number(), 0.8),
 			maxPitch: v.nullish(v.number(), 1.2),
 			minVolume: v.nullish(v.number(), 1),
 			maxVolume: v.nullish(v.number(), 1),
-			effect: createEffectFieldSchema(value, context, "effect"),
+			effect: EffectFieldSchema(context),
 		}),
-	WaveEffect: (_value, _context) => waveEffectObjectSchema,
-	WrapEffect: (value, context) =>
+	WaveEffect: (_context) => waveEffectObjectSchema,
+	WrapEffect: (context) =>
 		v.object({
-			effect: createEffectFieldSchema(value, context, "effect"),
+			effect: EffectFieldSchema(context),
 			color: v.nullish(MindustryHexColorSchema),
 			rotation: v.nullish(v.number(), 0),
 		}),
 };
 
-export const EffectHjsonSchema: SchemaFn = (value, context) => {
-	if (value.isObject()) {
-		const type = value.get("type");
+export const EffectFieldSchema: SchemaFn = (context) => {
+	// TODO lost effect
+	return v.union([EffectHjsonSchema(context), v.picklist(context.effects.map((effect) => effect.name))]);
+};
 
-		if (type.isString() && classSchemaMap[type.valueOf() as EffectClass]) {
-			const schema = classSchemaMap[type.valueOf() as EffectClass];
-			return v.pipe(v.object({ ...effectBaseObjectSchema.entries, ...schema(value, context).entries }), v.metadata(metadata));
+export const EffectHjsonSchema: SchemaFn = (context) => {
+	return v.lazy((input) => {
+		if (input && typeof input === "object" && "type" in input) {
+			const type = input.type;
+
+			if (typeof type === "string" && classSchemaMap[type as EffectClass]) {
+				const schema = classSchemaMap[type as EffectClass];
+				return v.pipe(v.object({ ...effectBaseObjectSchema.entries, ...schema(context).entries }), v.metadata(metadata));
+			}
 		}
 
 		return v.pipe(effectBaseObjectSchema, v.metadata(metadata));
-	}
-
-	return v.pipe(v.string(), v.minLength(1), v.maxLength(127), v.metadata(metadata));
+	});
 };

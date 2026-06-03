@@ -1,5 +1,4 @@
 import type { ProjectContents } from "@project/types";
-import type { HjsonNode } from "@project/hjson";
 import * as v from "valibot";
 
 export const ContentNameSchema = v.pipe(
@@ -64,7 +63,7 @@ export const ItemRequirementSchema = v.pipe(
 	}, "Invalid item requirement, must be in the format 'item/number'"),
 );
 
-export const ResearchSchema: SchemaFn = (_value, context) =>
+export const ResearchSchema: SchemaFn = (context) =>
 	v.nullish(
 		v.pipe(
 			v.union([
@@ -163,7 +162,7 @@ export const SoundHjsonSchema = v.pipe(
 	}),
 );
 
-export const SpriteHjsonSchema: SchemaFn = (_, context) =>
+export const SpriteHjsonSchema: SchemaFn = (context) =>
 	v.pipe(
 		v.picklist([...new Set(context.sprites.map((sprite) => sprite.name))]),
 		v.minLength(1),
@@ -175,7 +174,7 @@ export const SpriteHjsonSchema: SchemaFn = (_, context) =>
 
 export type SchemaFn<
 	T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>> = v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>,
-> = (value: HjsonNode, context: ProjectContents) => T;
+> = (context: ProjectContents) => T;
 
 export const Interps = [
 	"linear",

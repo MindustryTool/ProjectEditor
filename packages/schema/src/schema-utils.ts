@@ -19,8 +19,8 @@ export const types = [
 	"unknown",
 	"picklist",
 	"liquids",
-    "select",
-    "sprite",
+	"select",
+	"sprite",
 	"never",
 ] as const;
 
@@ -35,7 +35,7 @@ export function unwrapSchema(schema: AnySchema): AnySchema {
 
 export function hasNullableWrapper(schema: AnySchema): boolean {
 	const s = schema as unknown as { type: string };
-	return ['nullable', 'nullish'].includes(s.type);
+	return ["nullable", "nullish"].includes(s.type);
 }
 
 export function hasNullishWrapper(schema: AnySchema): boolean {
@@ -50,6 +50,7 @@ function getTypeFromMetadata(schema: AnySchema): Type | null {
 	if (!s.pipe) return null;
 
 	let result: Type | null = null;
+
 	for (const action of s.pipe) {
 		if (action.type === "metadata" && action.metadata && typeof action.metadata.type === "string") {
 			const t = action.metadata.type;
@@ -64,12 +65,12 @@ function getTypeFromMetadata(schema: AnySchema): Type | null {
 	return result;
 }
 
-function getSchemaType(schema: AnySchema): Type {
+function getSchemaType(schema: AnySchema, value: unknown): Type {
 	const s = schema as unknown as { type: string; pipe?: AnySchema[] };
 
 	if (s.pipe && s.pipe.length > 0) {
 		const first: AnySchema = s.pipe[0]!;
-		return detectSchemaType(first);
+		return detectSchemaType(first, value);
 	}
 
 	if (s.type === "string") return "string";
@@ -82,16 +83,25 @@ function getSchemaType(schema: AnySchema): Type {
 
 	console.warn({ unknownType: s.type });
 
-	return "unknown";
+	return s.type as Type;
 }
 
-export function detectSchemaType(rawSchema: AnySchema): Type {
-	const unwrapped = unwrapSchema(rawSchema);
+export function detectSchemaType(rawSchema: AnySchema, value: unknown): Type {
+	const unwrapped = unwrapSchema(rawSchema) as unknown as {
+		type: string;
+		pipe?: AnySchema[] | Array<{ type: string }>;
+		getter?: (val: unknown) => AnySchema;
+		wrapped?: AnySchema;
+	} & AnySchema; 
+
+	if (unwrapped.type === "lazy" && unwrapped.getter) {
+		return detectSchemaType(unwrapped.getter(value), value);
+	}
 
 	const metadataType = getTypeFromMetadata(unwrapped);
 	if (metadataType) return metadataType;
 
-	return getSchemaType(unwrapped);
+	return getSchemaType(unwrapped, value);
 }
 
 export function resolveSchema(schema: AnySchema, value: unknown): AnySchema {

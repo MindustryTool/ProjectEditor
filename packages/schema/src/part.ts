@@ -1,7 +1,6 @@
 import * as v from "valibot";
 import { MindustryHexColorSchema, type SchemaFn } from "./base";
-import { EffectHjsonSchema } from "./effect";
-import { lazyArray } from "./lazy-array";
+import { EffectFieldSchema } from "./effect";
 
 const metadata = { type: "part" };
 
@@ -120,22 +119,9 @@ export const shapePartObjectSchema = v.object({
 	layerOffset: v.nullish(v.number(), 0),
 });
 
-type PartObjectSchema = v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>;
-
-function createPartChildrenSchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) {
-	return v.nullish(
-		lazyArray((index) => PartHjsonSchema(value.get("children").get(index), context)),
-		[],
-	);
-}
-
-function createPartEffectFieldSchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) {
-	return v.nullish(EffectHjsonSchema(value.get("effect"), context));
-}
-
-const classSchemaMap: Record<PartClass, (value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) => PartObjectSchema> = {
-	DrawPart: (_value, _context) => v.object({}),
-	RegionPart: (value, context) =>
+const classSchemaMap: Record<PartClass, SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>> = {
+	DrawPart: (_context) => v.object({}),
+	RegionPart: (context) =>
 		v.object({
 			suffix: v.nullish(v.string(), ""),
 			name: v.nullish(v.string()),
@@ -172,10 +158,10 @@ const classSchemaMap: Record<PartClass, (value: Parameters<SchemaFn>[0], context
 			mixColor: v.nullish(MindustryHexColorSchema),
 			mixColorTo: v.nullish(MindustryHexColorSchema),
 			heatColor: v.nullish(MindustryHexColorSchema),
-			children: createPartChildrenSchema(value, context),
+			children: PartHjsonSchema(context),
 			moves: v.nullish(v.array(partMoveSchema), []),
 		}),
-	EffectSpawnerPart: (value, context) =>
+	EffectSpawnerPart: (context) =>
 		v.object({
 			x: v.nullish(v.number(), 0),
 			y: v.nullish(v.number(), 0),
@@ -188,28 +174,28 @@ const classSchemaMap: Record<PartClass, (value: Parameters<SchemaFn>[0], context
 			effectInterval: v.nullish(v.number(), 0),
 			effectIntervalFrom: v.nullish(v.number(), 0),
 			effectChance: v.nullish(v.number(), 0.1),
-			effect: createPartEffectFieldSchema(value, context),
+			effect: EffectFieldSchema(context),
 			effectColor: v.nullish(MindustryHexColorSchema),
 			useProgress: v.nullish(v.boolean(), true),
 			progress: v.nullish(v.picklist(PartProgresses), "warmup"),
 		}),
-	FlarePart: (_value, _context) => flarePartObjectSchema,
-	HaloPart: (_value, _context) => haloPartObjectSchema,
-	HoverPart: (_value, _context) => hoverPartObjectSchema,
-	ShapePart: (_value, _context) => shapePartObjectSchema,
+	FlarePart: (_context) => flarePartObjectSchema,
+	HaloPart: (_context) => haloPartObjectSchema,
+	HoverPart: (_context) => hoverPartObjectSchema,
+	ShapePart: (_context) => shapePartObjectSchema,
 };
 
-export const PartHjsonSchema: SchemaFn = (value, context) => {
-	if (value.isObject()) {
-		const type = value.get("type");
+export const PartHjsonSchema: SchemaFn = (context) => {
+	return v.lazy((input) => {
+		if (input && typeof input === "object" && "type" in input) {
+			const type = input.type;
 
-		if (type.isString() && classSchemaMap[type.valueOf() as PartClass]) {
-			const schemaFn = classSchemaMap[type.valueOf() as PartClass];
-			return v.pipe(v.object({ ...drawPartBaseObjectSchema.entries, ...schemaFn(value, context).entries }), v.metadata(metadata));
+			if (type && classSchemaMap[type as PartClass]) {
+				const schemaFn = classSchemaMap[type as PartClass];
+				return v.pipe(v.object({ ...drawPartBaseObjectSchema.entries, ...schemaFn(context).entries }), v.metadata(metadata));
+			}
 		}
 
 		return v.pipe(drawPartBaseObjectSchema, v.metadata(metadata));
-	}
-
-	return v.pipe(v.string(), v.minLength(1), v.maxLength(127), v.metadata(metadata));
+	});
 };

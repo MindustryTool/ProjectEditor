@@ -1,6 +1,5 @@
 import * as v from "valibot";
 import type { SchemaFn } from "./base";
-import { lazyArray } from "./lazy-array";
 
 const metadata = { type: "shoot-pattern" };
 
@@ -58,52 +57,37 @@ export const shootSummonObjectSchema = v.object({
 	spread: v.nullish(v.number(), 0),
 });
 
-type ShootPatternObjectSchema = v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>;
-
-type ShootPatternSchemaFactory = (value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) => ShootPatternObjectSchema;
-
-function createShootPatternFieldSchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1], key: "source") {
-	return v.nullish(ShootPatternHjsonSchema(value.get(key), context));
-}
-
-function createShootPatternArraySchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1], key: "dest") {
-	return v.nullish(
-		lazyArray((index) => ShootPatternHjsonSchema(value.get(key).get(index), context)),
-		[],
-	);
-}
-
-const classSchemaMap: Record<ShootPatternType, ShootPatternSchemaFactory> = {
-	ShootAlternate: (_value, _context) => shootAlternateObjectSchema,
-	ShootBarrel: (_value, _context) => shootBarrelObjectSchema,
-	ShootHelix: (_value, _context) => shootHelixObjectSchema,
-	ShootMulti: (value, context) =>
+const classSchemaMap: Record<ShootPatternType, SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>> = {
+	ShootAlternate: (_context) => shootAlternateObjectSchema,
+	ShootBarrel: (_context) => shootBarrelObjectSchema,
+	ShootHelix: (_context) => shootHelixObjectSchema,
+	ShootMulti: (context) =>
 		v.object({
-			source: createShootPatternFieldSchema(value, context, "source"),
-			dest: createShootPatternArraySchema(value, context, "dest"),
+			source: ShootPatternHjsonSchema(context),
+			dest: v.array(ShootPatternHjsonSchema(context)),
 		}),
-	ShootSine: (_value, _context) => shootSineObjectSchema,
-	ShootSpread: (_value, _context) => shootSpreadObjectSchema,
-	ShootSummon: (_value, _context) => shootSummonObjectSchema,
+	ShootSine: (_context) => shootSineObjectSchema,
+	ShootSpread: (_context) => shootSpreadObjectSchema,
+	ShootSummon: (_context) => shootSummonObjectSchema,
 };
 
-export const ShootPatternHjsonSchema: SchemaFn = (value, context) => {
-	if (value.isObject()) {
-		const type = value.get("type");
+export const ShootPatternHjsonSchema: SchemaFn = (context) => {
+	return v.lazy((input) => {
+		if (input && typeof input === "object" && "type" in input) {
+			const type = input.type;
 
-		if (type.isString() && classSchemaMap[type.valueOf() as ShootPatternType]) {
-			const schema = classSchemaMap[type.valueOf() as ShootPatternType];
-			return v.pipe(
-				v.object({
-					...shootPatternBaseObjectSchema.entries,
-					...schema(value, context).entries,
-				}),
-				v.metadata(metadata),
-			);
+			if (typeof type === "string" && classSchemaMap[type as ShootPatternType]) {
+				const schema = classSchemaMap[type as ShootPatternType];
+				return v.pipe(
+					v.object({
+						...shootPatternBaseObjectSchema.entries,
+						...schema(context).entries,
+					}),
+					v.metadata(metadata),
+				);
+			}
 		}
 
 		return v.pipe(shootPatternBaseObjectSchema, v.metadata(metadata));
-	}
-
-	return v.never("Shoot pattern must be an object");
+	});
 };

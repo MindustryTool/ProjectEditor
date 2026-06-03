@@ -5,12 +5,10 @@ import { EffectHjsonSchema } from "./effect";
 import { PartHjsonSchema } from "./part";
 import { ShootPatternHjsonSchema } from "./shoot-pattern";
 import { BulletHjsonSchema } from "./bullet";
-import { lazyArray } from "./lazy-array";
 
 const weaponObjectSchema = {
 	name: v.optional(v.string()),
 	shots: v.optional(v.number(), 1),
-
 	display: v.optional(v.boolean(), true),
 	mirror: v.optional(v.boolean(), true),
 	flipSprite: v.optional(v.boolean(), false),
@@ -99,20 +97,13 @@ const weaponObjectSchema = {
 	shootOnDeath: v.optional(v.boolean(), false),
 };
 
-export const WeaponHjsonSchema: SchemaFn = (value, context) =>
+export const WeaponHjsonSchema: SchemaFn = (context) =>
 	v.object({
 		...weaponObjectSchema,
-		bullet: v.optional(BulletHjsonSchema(value.get("bullet"), context)),
-		ejectEffect: v.optional(EffectHjsonSchema(value.get("ejectEffect"), context)),
-
-		shoot: v.optional(ShootPatternHjsonSchema(value.get("shoot"), context)),
-
-		shootStatus: v.optional(StatusStringSchema(value.get("shootStatus"), context)),
-
-		shootOnDeathEffect: v.optional(EffectHjsonSchema(value.get("shootOnDeathEffect"), context)),
-
-		parts: v.optional(
-			lazyArray((index) => PartHjsonSchema(value.get("parts").get(index), context)),
-			[],
-		),
+		bullet: v.optional(BulletHjsonSchema(context)),
+		ejectEffect: v.optional(EffectHjsonSchema(context)),
+		shoot: v.optional(ShootPatternHjsonSchema(context)),
+		shootStatus: v.optional(StatusStringSchema(context)),
+		shootOnDeathEffect: v.optional(EffectHjsonSchema(context)),
+		parts: v.optional(PartHjsonSchema(context), []),
 	});

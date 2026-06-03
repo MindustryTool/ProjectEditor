@@ -44,6 +44,10 @@ export type Sprite = {
 	name: string;
 };
 
+export type Effect = {
+	name: string;
+};
+
 export interface ProjectContents {
 	readonly items: readonly Item[];
 	readonly blocks: readonly Block[];
@@ -52,4 +56,5 @@ export interface ProjectContents {
 	readonly statuses: readonly Status[];
 	readonly units: readonly Unit[];
 	readonly sprites: readonly Sprite[];
+	readonly effects: readonly Effect[];
 }

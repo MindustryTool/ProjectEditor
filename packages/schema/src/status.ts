@@ -1,6 +1,6 @@
 import * as v from "valibot";
 import { MindustryHexColorSchema, type SchemaFn } from "./base";
-import { EffectHjsonSchema } from "./effect";
+import { EffectFieldSchema } from "./effect";
 
 export const statusBaseObjectSchema = v.object({
 	damageMultiplier: v.optional(v.number(), 1),
@@ -27,17 +27,16 @@ export const statusBaseObjectSchema = v.object({
 	outline: v.optional(v.boolean(), true),
 });
 
-export const StatusStringSchema: SchemaFn = (_value, context) => v.picklist(context.statuses.map((status) => status.name));
+export const StatusStringSchema: SchemaFn = (context) => v.picklist(context.statuses.map((status) => status.name));
 
-export const StatusFieldSchema: SchemaFn = (value, context) =>
-	v.union([StatusStringSchema(value, context), StatusHjsonSchema(value, context)]);
+export const StatusFieldSchema: SchemaFn = (context) => v.union([StatusStringSchema(context), StatusHjsonSchema(context)]);
 
-export const StatusHjsonSchema: SchemaFn = (value, context) =>
+export const StatusHjsonSchema: SchemaFn = (context) =>
 	v.pipe(
 		v.object({
 			...statusBaseObjectSchema.entries,
-			effect: v.optional(EffectHjsonSchema(value.get("effect"), context)),
-			applyEffect: v.optional(EffectHjsonSchema(value.get("applyEffect"), context)),
+			effect: v.optional(EffectFieldSchema(context)),
+			applyEffect: v.optional(EffectFieldSchema(context)),
 			affinities: v.optional(
 				v.array(
 					v.pipe(

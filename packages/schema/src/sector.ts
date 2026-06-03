@@ -20,8 +20,8 @@ export const sectorBaseObjectSchema = v.object({
 	sector: v.nullish(v.pipe(v.number(), v.minValue(0)), 0),
 });
 
-export const SectorHjsonSchema: SchemaFn = (value, context) =>
+export const SectorHjsonSchema: SchemaFn = (context) =>
 	v.object({
 		...sectorBaseObjectSchema.entries,
-		research: ResearchSchema(value.get("research"), context),
+		research: ResearchSchema(context),
 	});

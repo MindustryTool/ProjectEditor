@@ -33,12 +33,14 @@ export const liquidBaseObjectSchema = v.object({
 	hidden: v.nullish(v.boolean(), false),
 });
 
-export const LiquidHjsonSchema: SchemaFn = (value, context) =>
+export const LiquidFieldSchema: SchemaFn = (context) => v.picklist(context.liquids.map((liquid) => liquid.name));
+
+export const LiquidHjsonSchema: SchemaFn = (context) =>
 	v.object({
 		...liquidBaseObjectSchema.entries,
-		effect: v.nullish(EffectHjsonSchema(value.get("effect"), context)),
-		particleEffect: v.nullish(EffectHjsonSchema(value.get("particleEffect"), context)),
-		vaporEffect: v.nullish(EffectHjsonSchema(value.get("vaporEffect"), context)),
+		effect: v.nullish(EffectHjsonSchema(context)),
+		particleEffect: v.nullish(EffectHjsonSchema(context)),
+		vaporEffect: v.nullish(EffectHjsonSchema(context)),
 		canStayOn: v.nullish(v.array(v.pipe(v.picklist(context.liquids.map((liquid) => liquid.name)), v.metadata({ type: "liquids" })))),
-		research: ResearchSchema(value.get("research"), context),
+		research: ResearchSchema(context),
 	});

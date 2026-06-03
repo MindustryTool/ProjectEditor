@@ -15,7 +15,7 @@ export const itemBaseObjectSchema = v.object({
 	hidden: v.nullish(v.boolean(), false),
 });
 
-export const ItemHjsonSchema: SchemaFn = (value, context) => v.object({
+export const ItemHjsonSchema: SchemaFn = (context) => v.object({
 	...itemBaseObjectSchema.entries,
-	research: ResearchSchema(value.get("research"), context),
+	research: ResearchSchema(context),
 });

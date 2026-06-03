@@ -30,9 +30,6 @@ export { AbilityHjsonSchema } from "./ability";
 
 export { BulletHjsonSchema } from "./bullet";
 
-export { lazyArray } from "./lazy-array";
-export type { LazyArraySchema } from "./lazy-array";
-
 export {
 	resolveSchema,
 	unwrapSchema,

@@ -14,7 +14,7 @@ import { useFileString, useValidationStore } from "@project/core";
 import { unwrapSchema, type Research } from "@project/schema";
 import { HJSON } from "@project/hjson";
 import { HjsonNode } from "@project/hjson";
-import { ChevronLeft, ChevronsUpDown, Plus, Search, X } from "lucide-react";
+import { ChevronsUpDown, Plus, Search, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
 import React, { useCallback, useMemo, useState } from "react";
 import {
@@ -34,8 +34,6 @@ import { useSectors } from "#/hooks/use-sectors";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import { cn, EMPTY_ARRAY } from "#/lib/utils";
 import { useEffects } from "#/hooks/use-effects";
-import { Spinner } from "#/components/ui/spinner";
-import { ErrorDisplay } from "#/components/ui/error-display";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
 import type { SchemaFn } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
@@ -77,7 +75,7 @@ const FieldsRendererContext = React.createContext<FieldsRendererContextType>({
 	pop: () => {},
 });
 
-const useFieldsRenderer = () => React.useContext(FieldsRendererContext);
+export const useFieldsRenderer = () => React.useContext(FieldsRendererContext);
 
 export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 	const { data, isLoading, write } = useFileString(path);
@@ -146,7 +144,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	if (tabs.length > 0) {
 		const lastTab = tabs[tabs.length - 1]!;
 		const { name, value, jsonPath, entrySchema, onChange } = lastTab;
-		const type = detectSchemaType(entrySchema);
+		const type = detectSchemaType(entrySchema, value);
 
 		const Renderer = schemaRenderers[type];
 
@@ -173,7 +171,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 		);
 	}
 
-	const resolvedSchema = resolveSchema(typeof schema === "function" ? schema(node, contents) : schema, node.valueOf());
+	const resolvedSchema = resolveSchema(typeof schema === "function" ? schema(contents) : schema, node.valueOf());
 	const entries = getSchemaEntries(resolvedSchema);
 
 	return (
@@ -181,7 +179,9 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 			<FieldsRendererContext.Provider value={context}>
 				{entries.map(([name, entrySchema]) => {
 					const key = name + path;
-					const type = detectSchemaType(entrySchema);
+					const childNode = node.get(name);
+					const value = childNode.isMissing() ? v.getDefault(entrySchema) : childNode.valueOf();
+					const type = detectSchemaType(entrySchema, value);
 
 					const Renderer = schemaRenderers[type];
 
@@ -196,7 +196,6 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 						);
 					}
 
-					const childNode = node.get(name);
 					const metadata = getSchemaMetadata(entrySchema);
 
 					if (metadata?.visibleWhen) {
@@ -204,8 +203,6 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 						if (refNode.isMissing()) return null;
 						if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) return null;
 					}
-
-					const value = childNode.isMissing() ? v.getDefault(entrySchema) : childNode.valueOf();
 
 					return (
 						<Renderer //
@@ -584,9 +581,7 @@ const ArrayField = React.memo(function ArrayField({ path, name, value, onChange,
 	);
 });
 
-const ObjectField = React.memo(function ObjectField({ path, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
-	const { pop } = useFieldsRenderer();
-
+const ObjectField = React.memo(function ObjectField({ name, path, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
 	if (typeof value !== "object" || value === null) {
 		return null;
 	}
@@ -595,13 +590,11 @@ const ObjectField = React.memo(function ObjectField({ path, value, onChange, ent
 
 	return (
 		<div className="pl-4 border-l-2 border-border grid gap-6">
-			<Button type="button" variant="outline" onClick={() => pop()}>
-				<ChevronLeft />
-			</Button>
+			{name}
 			{entries.map(([name, childSchema]) => {
 				const key = name;
-				const type = detectSchemaType(childSchema);
 				const childValue = (value as Record<string, unknown>)?.[name];
+				const type = detectSchemaType(childSchema, childValue);
 				const metadata = getSchemaMetadata(childSchema);
 
 				if (metadata?.visibleWhen && typeof value === "object" && value !== null) {
@@ -617,7 +610,7 @@ const ObjectField = React.memo(function ObjectField({ path, value, onChange, ent
 							<FormLabel>
 								<SchemaLabel name={name} entrySchema={childSchema as AnySchema} />
 							</FormLabel>
-							<span className="text-yellow-400 text-sm">Unknown field type {type}</span>
+							<span className="text-red-400 text-sm">Unknown field type {type}</span>
 						</FormControl>
 					);
 				}
@@ -879,7 +872,7 @@ const ResearchParentToggleGroup = React.memo(function ResearchParentToggleGroup(
 });
 
 const EffectField = React.memo(function EffectField({ path, name, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
-	const { data = [], isLoading, isError, error } = useEffects();
+	const effects = useEffects();
 	const [filter, setFilter] = useState("");
 
 	if (typeof value === "object" && value !== null) {
@@ -895,7 +888,7 @@ const EffectField = React.memo(function EffectField({ path, name, value, onChang
 						variant="outline"
 						onClick={() =>
 							onChange(jsonPath, (parent, key, original) =>
-								parent.objectNode(key).patchField(original, key, HJSON.stringify(data[0]?.name)),
+								parent.objectNode(key).patchField(original, key, HJSON.stringify(effects[0]?.name)),
 							)
 						}
 					>
@@ -984,9 +977,7 @@ const EffectField = React.memo(function EffectField({ path, name, value, onChang
 									<InputGroupInput value={filter} onChange={(event) => setFilter(event.currentTarget.value)} />
 								</InputGroup>
 								<div className="max-h-[80dvh] md:max-h-[50dvh] overflow-y-auto border p-2 rounded-md">
-									{isLoading && <Spinner />}
-									{isError && <ErrorDisplay message={error.message} />}
-									{data
+									{effects
 										.filter((i) => i.name !== stringValue && i.name.includes(filter))
 										.map((item) => (
 											<ToggleGroupItem key={item.name} value={item.name}>
@@ -1029,7 +1020,7 @@ const SchemaArrayItemEditor = React.memo(function SchemaArrayItemEditor({
 	onChange: (jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => void;
 	jsonPath: string;
 }) {
-	const type = detectSchemaType(itemSchema);
+	const type = detectSchemaType(itemSchema, value);
 
 	if (type === "string") {
 		const stringValue = typeof value === "string" ? value : v.getDefault(itemSchema);
@@ -1052,7 +1043,7 @@ const SchemaArrayItemEditor = React.memo(function SchemaArrayItemEditor({
 	const name = String(type);
 
 	if (Renderer === undefined) {
-		return <span className="text-yellow-400 text-sm">Unknown field type {name}</span>;
+		return <span className="text-red-400 text-sm">Unknown field type {name}</span>;
 	}
 
 	return <Renderer key={name} path={path} name={name} value={value} onChange={onChange} entrySchema={itemSchema} jsonPath={jsonPath} />;

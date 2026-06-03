@@ -127,7 +127,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 ): ValidatorFn {
 	return ({ path, content, context }) => {
 		const data = HJSON.parseWithCache(content);
-		const resolved = typeof schema === "function" ? schema(data, context) : schema;
+		const resolved = typeof schema === "function" ? schema(context) : schema;
 		const { success, issues } = v.safeParse(resolved, data.valueOf());
 		const problems: ValidationResult[] = [];
 

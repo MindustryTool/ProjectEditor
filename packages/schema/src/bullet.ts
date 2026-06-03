@@ -1,10 +1,11 @@
 import * as v from "valibot";
-import { Interps, MindustryHexColorSchema, SoundHjsonSchema, SpriteHjsonSchema, type SchemaFn } from "./base";
-import { EffectHjsonSchema } from "./effect";
+import { Interps, MindustryHexColorSchema, SoundHjsonSchema, type SchemaFn } from "./base";
+import { EffectFieldSchema } from "./effect";
 import { PartHjsonSchema } from "./part";
 import { ShootPatternHjsonSchema } from "./shoot-pattern";
 import { StatusFieldSchema } from "./status";
-import { lazyArray } from "./lazy-array";
+import { LiquidFieldSchema } from "./liquid";
+import { UnitFieldSchema } from "./unit";
 
 const metadata = { type: "bullet" };
 
@@ -41,45 +42,7 @@ export type BulletClass = (typeof bulletTypes)[number];
 
 type BulletObjectSchema = v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>;
 
-function createBulletFieldSchema(
-	value: Parameters<SchemaFn>[0],
-	context: Parameters<SchemaFn>[1],
-	key: "fragBullet" | "intervalBullet" | "lightningType",
-) {
-	return v.nullish(BulletHjsonSchema(value.get(key), context));
-}
-
-function createEffectFieldSchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1], key: string) {
-	return v.nullish(EffectHjsonSchema(value.get(key), context));
-}
-
-function createShootPatternFieldSchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) {
-	return v.nullish(ShootPatternHjsonSchema(value.get("shootPattern"), context));
-}
-
-function createBulletArraySchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1], key: string) {
-	return v.nullish(
-		lazyArray((index) => BulletHjsonSchema(value.get(key).get(index), context)),
-		[],
-	);
-}
-
-function createPartArraySchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) {
-	return v.nullish(
-		lazyArray((index) => PartHjsonSchema(value.get("parts").get(index), context)),
-		[],
-	);
-}
-
-function createUnitFieldSchema(_value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) {
-	return v.nullish(v.pipe(v.picklist(context.units.map((unit) => unit.name)), v.metadata({ type: "units" })));
-}
-
-function createLiquidFieldSchema(_value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) {
-	return v.nullish(v.pipe(v.picklist(context.liquids.map((liquid) => liquid.name)), v.metadata({ type: "liquids" })));
-}
-
-function createBulletBaseObjectSchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) {
+const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>> = (context) => {
 	return v.object({
 		type: v.picklist(bulletTypes),
 		lifetime: v.nullish(v.number(), 40),
@@ -104,12 +67,12 @@ function createBulletBaseObjectSchema(value: Parameters<SchemaFn>[0], context: P
 		laserAbsorb: v.nullish(v.boolean(), true),
 		optimalLifeFract: v.nullish(v.number(), 0),
 		layer: v.nullish(v.number()),
-		hitEffect: createEffectFieldSchema(value, context, "hitEffect"),
-		despawnEffect: createEffectFieldSchema(value, context, "despawnEffect"),
-		shootEffect: createEffectFieldSchema(value, context, "shootEffect"),
-		shootPattern: createShootPatternFieldSchema(value, context),
-		chargeEffect: createEffectFieldSchema(value, context, "chargeEffect"),
-		smokeEffect: createEffectFieldSchema(value, context, "smokeEffect"),
+		hitEffect: EffectFieldSchema(context),
+		despawnEffect: EffectFieldSchema(context),
+		shootEffect: EffectFieldSchema(context),
+		shootPattern: ShootPatternHjsonSchema(context),
+		chargeEffect: EffectFieldSchema(context),
+		smokeEffect: EffectFieldSchema(context),
 		shootSound: v.nullish(SoundHjsonSchema),
 		hitSound: v.nullish(SoundHjsonSchema),
 		despawnSound: v.nullish(SoundHjsonSchema),
@@ -128,7 +91,7 @@ function createBulletBaseObjectSchema(value: Parameters<SchemaFn>[0], context: P
 		scaledSplashDamage: v.nullish(v.boolean(), false),
 		knockback: v.nullish(v.number(), 0),
 		impact: v.nullish(v.boolean(), false),
-		status: StatusFieldSchema(value, context),
+		status: StatusFieldSchema(context),
 		statusDuration: v.nullish(v.number(), 480),
 		targetBlocks: v.nullish(v.boolean(), true),
 		targetMissiles: v.nullish(v.boolean(), true),
@@ -172,7 +135,7 @@ function createBulletBaseObjectSchema(value: Parameters<SchemaFn>[0], context: P
 		setDefaults: v.nullish(v.boolean(), true),
 		hitShake: v.nullish(v.number(), 0),
 		despawnShake: v.nullish(v.number(), 0),
-		fragBullet: createBulletFieldSchema(value, context, "fragBullet"),
+		fragBullet: BulletHjsonSchema(context),
 		delayFrags: v.nullish(v.boolean(), false),
 		fragRandomSpread: v.nullish(v.number(), 360),
 		fragSpread: v.nullish(v.number(), 0),
@@ -185,7 +148,7 @@ function createBulletBaseObjectSchema(value: Parameters<SchemaFn>[0], context: P
 		fragOffsetMin: v.nullish(v.number(), 1),
 		fragOffsetMax: v.nullish(v.number(), 7),
 		pierceFragCap: v.nullish(v.number(), -1),
-		intervalBullet: createBulletFieldSchema(value, context, "intervalBullet"),
+		intervalBullet: BulletHjsonSchema(context),
 		bulletInterval: v.nullish(v.number(), 20),
 		intervalBullets: v.nullish(v.number(), 1),
 		intervalRandomSpread: v.nullish(v.number(), 360),
@@ -195,22 +158,22 @@ function createBulletBaseObjectSchema(value: Parameters<SchemaFn>[0], context: P
 		underwater: v.nullish(v.boolean(), false),
 		hitColor: v.nullish(MindustryHexColorSchema),
 		healColor: v.nullish(MindustryHexColorSchema),
-		healEffect: createEffectFieldSchema(value, context, "healEffect"),
-		spawnBullets: createBulletArraySchema(value, context, "spawnBullets"),
+		healEffect: EffectFieldSchema(context),
+		spawnBullets: v.array(BulletHjsonSchema(context)),
 		showStats: v.nullish(v.boolean(), false),
 		spawnBulletRandomSpread: v.nullish(v.number(), 0),
-		spawnUnit: createUnitFieldSchema(value, context),
-		despawnUnit: createUnitFieldSchema(value, context),
+		spawnUnit: UnitFieldSchema(context),
+		despawnUnit: UnitFieldSchema(context),
 		despawnUnitChance: v.nullish(v.number(), 1),
 		despawnUnitCount: v.nullish(v.number(), 1),
 		despawnUnitRadius: v.nullish(v.number(), 0.1),
 		faceOutwards: v.nullish(v.boolean(), false),
-		parts: createPartArraySchema(value, context),
+		parts: v.array(PartHjsonSchema(context)),
 		trailColor: v.nullish(MindustryHexColorSchema),
 		trailChance: v.nullish(v.number(), -0.0001),
 		trailInterval: v.nullish(v.number(), 0),
 		trailMinVelocity: v.nullish(v.number(), 0),
-		trailEffect: createEffectFieldSchema(value, context, "trailEffect"),
+		trailEffect: EffectFieldSchema(context),
 		trailSpread: v.nullish(v.number(), 0),
 		trailParam: v.nullish(v.number(), 2),
 		trailRotation: v.nullish(v.boolean(), false),
@@ -238,14 +201,14 @@ function createBulletBaseObjectSchema(value: Parameters<SchemaFn>[0], context: P
 		puddles: v.nullish(v.number(), 0),
 		puddleRange: v.nullish(v.number(), 0),
 		puddleAmount: v.nullish(v.number(), 5),
-		puddleLiquid: createLiquidFieldSchema(value, context),
+		puddleLiquid: LiquidFieldSchema(context),
 		lightning: v.nullish(v.number(), 0),
 		lightningLength: v.nullish(v.number(), 5),
 		lightningLengthRand: v.nullish(v.number(), 0),
 		lightningDamage: v.nullish(v.number(), -1),
 		lightningCone: v.nullish(v.number(), 360),
 		lightningAngle: v.nullish(v.number(), 0),
-		lightningType: createBulletFieldSchema(value, context, "lightningType"),
+		lightningType: BulletHjsonSchema(context),
 		weaveScale: v.nullish(v.number(), 1),
 		weaveMag: v.nullish(v.number(), 0),
 		weaveRandom: v.nullish(v.boolean(), true),
@@ -263,49 +226,48 @@ function createBulletBaseObjectSchema(value: Parameters<SchemaFn>[0], context: P
 		shrinkX: v.nullish(v.number(), 0),
 		shrinkY: v.nullish(v.number(), 0.5),
 		spin: v.nullish(v.number(), 0),
-		sprite: v.nullish(SpriteHjsonSchema(value.get("sprite"), context)),
 		backSprite: v.nullish(v.string()),
 		shrinkInterp: v.nullish(v.picklist(Interps), "linear"),
 	});
-}
+};
 
 const classSchemaMap: Record<BulletClass, SchemaFn<BulletObjectSchema>> = {
-	ArtilleryBulletType: (_value, _context) =>
+	ArtilleryBulletType: (_context) =>
 		v.object({
 			trailMult: v.nullish(v.number(), 1),
 			trailSize: v.nullish(v.number(), 4),
 		}),
-	BasicBulletType: (_value, _context) => v.object({}),
-	BombBulletType: (_value, _context) => v.object({}),
-	BulletType: (_value, _context) => v.object({}),
-	ContinuousBulletType: (_value, _context) =>
+	BasicBulletType: (_context) => v.object({}),
+	BombBulletType: (_context) => v.object({}),
+	BulletType: (_context) => v.object({}),
+	ContinuousBulletType: (_context) =>
 		v.object({
 			length: v.nullish(v.number(), 220),
 			damageInterval: v.nullish(v.number(), 5),
 			continuous: v.nullish(v.boolean(), true),
 		}),
-	ContinuousFlameBulletType: (_value, _context) => v.object({}),
-	ContinuousLaserBulletType: (_value, _context) => v.object({}),
-	EmpBulletType: (value, context) =>
+	ContinuousFlameBulletType: (_context) => v.object({}),
+	ContinuousLaserBulletType: (_context) => v.object({}),
+	EmpBulletType: (context) =>
 		v.object({
 			radius: v.nullish(v.number(), 100),
 			timeIncrease: v.nullish(v.number(), 2.5),
 			timeDuration: v.nullish(v.number(), 600),
 			unitDamageScl: v.nullish(v.number(), 0.7),
-			hitPowerEffect: createEffectFieldSchema(value, context, "hitPowerEffect"),
+			hitPowerEffect: EffectFieldSchema(context),
 			hitUnits: v.nullish(v.boolean(), true),
 			powerDamageScl: v.nullish(v.number(), 2),
 			powerSclDecrease: v.nullish(v.number(), 0.2),
-			chainEffect: createEffectFieldSchema(value, context, "chainEffect"),
-			applyEffect: createEffectFieldSchema(value, context, "applyEffect"),
+			chainEffect: EffectFieldSchema(context),
+			applyEffect: EffectFieldSchema(context),
 		}),
-	EmptyBulletType: (_value, _context) => v.object({}),
-	ExplosionBulletType: (_value, _context) => v.object({}),
-	FireBulletType: (_value, _context) => v.object({}),
-	FlakBulletType: (_value, _context) => v.object({}),
-	InterceptorBulletType: (_value, _context) => v.object({}),
-	LaserBoltBulletType: (_value, _context) => v.object({}),
-	LaserBulletType: (_value, _context) =>
+	EmptyBulletType: (_context) => v.object({}),
+	ExplosionBulletType: (_context) => v.object({}),
+	FireBulletType: (_context) => v.object({}),
+	FlakBulletType: (_context) => v.object({}),
+	InterceptorBulletType: (_context) => v.object({}),
+	LaserBoltBulletType: (_context) => v.object({}),
+	LaserBulletType: (_context) =>
 		v.object({
 			length: v.nullish(v.number(), 160),
 			width: v.nullish(v.number(), 15),
@@ -314,64 +276,59 @@ const classSchemaMap: Record<BulletClass, SchemaFn<BulletObjectSchema>> = {
 			sideWidth: v.nullish(v.number(), 0.7),
 			lightningSpacing: v.nullish(v.number(), -1),
 		}),
-	LightningBulletType: (_value, _context) => v.object({}),
-	LiquidBulletType: (_value, _context) =>
+	LightningBulletType: (_context) => v.object({}),
+	LiquidBulletType: (_context) =>
 		v.object({
 			puddleSize: v.nullish(v.number(), 6),
 			orbSize: v.nullish(v.number(), 3),
 			boilTime: v.nullish(v.number(), 5),
 		}),
-	MassDriverBolt: (_value, _context) => v.object({}),
-	MissileBulletType: (_value, _context) => v.object({}),
-	MultiBulletType: (value, context) =>
+	MassDriverBolt: (_context) => v.object({}),
+	MissileBulletType: (_context) => v.object({}),
+	MultiBulletType: (context) =>
 		v.object({
-			bullets: createBulletArraySchema(value, context, "bullets"),
+			bullets: v.array(BulletHjsonSchema(context)),
 			repeat: v.nullish(v.number(), 1),
 		}),
-	PointBulletType: (_value, _context) => v.object({}),
-	PointLaserBulletType: (_value, _context) =>
+	PointBulletType: (_context) => v.object({}),
+	PointLaserBulletType: (_context) =>
 		v.object({
 			oscScl: v.nullish(v.number(), 2),
 			oscMag: v.nullish(v.number(), 0.3),
 			damageInterval: v.nullish(v.number(), 5),
 		}),
-	RailBulletType: (_value, _context) =>
+	RailBulletType: (_context) =>
 		v.object({
 			length: v.nullish(v.number(), 100),
 			pointEffectSpace: v.nullish(v.number(), 20),
 		}),
-	SapBulletType: (_value, _context) =>
+	SapBulletType: (_context) =>
 		v.object({
 			length: v.nullish(v.number(), 100),
 			sapStrength: v.nullish(v.number(), 0.5),
 			color: v.nullish(MindustryHexColorSchema),
 		}),
-	ShrapnelBulletType: (_value, _context) =>
+	ShrapnelBulletType: (_context) =>
 		v.object({
 			length: v.nullish(v.number(), 100),
 			width: v.nullish(v.number(), 20),
 			serrations: v.nullish(v.number(), 7),
 			serrationSpacing: v.nullish(v.number(), 8),
 		}),
-	SpaceLiquidBulletType: (_value, _context) => v.object({}),
+	SpaceLiquidBulletType: (_context) => v.object({}),
 };
 
-function createBulletObjectSchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) {
-	return createBulletBaseObjectSchema(value, context);
-}
+export const BulletHjsonSchema: SchemaFn = (context) => {
+	return v.lazy((input) => {
+		if (input && typeof input === "object" && "type" in input) {
+			const type = input["type"] as string;
 
-export const BulletHjsonSchema: SchemaFn = (value, context) => {
-	if (value.isObject()) {
-		const type = value.get("type");
-
-		if (type.isString() && classSchemaMap[type.valueOf() as BulletClass]) {
-			const schema = classSchemaMap[type.valueOf() as BulletClass];
-			return v.pipe(
-				v.object({ ...createBulletObjectSchema(value, context).entries, ...schema(value, context).entries }),
-				v.metadata(metadata),
-			);
+			if (classSchemaMap[type as BulletClass]) {
+				const schema = classSchemaMap[type as BulletClass];
+				return v.pipe(v.object({ ...createBulletBaseObjectSchema(context).entries, ...schema(context).entries }), v.metadata(metadata));
+			}
 		}
-	}
 
-	return v.never("Bullet value must be an object: " + value.valueOf());
+		return v.pipe(createBulletBaseObjectSchema(context), v.metadata(metadata));
+	});
 };
