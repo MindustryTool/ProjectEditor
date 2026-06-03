@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { HJSON } from "@project/hjson";
-import type { HjsonObjectNode, HjsonArrayNode, HjsonNode } from "@project/hjson";
+import type { HjsonObjectNode, HjsonArrayNode, HjsonNode, HjsonValueNode } from "@project/hjson";
 
 function parseStructured(input: string) {
 	return HJSON.parseStructured(input) as HjsonObjectNode;
@@ -664,5 +664,59 @@ name: exo`;
 		const patched = node.patchComment(text, "name", "# new");
 		const reparsed = parseStructured(patched);
 		expect((reparsed.field("name")?.value as HjsonNode).valueOf()).toBe("exo");
+	});
+});
+
+describe("HjsonValueNode.patchValue", () => {
+	it("replaces string value", () => {
+		const text = 'name: "hello"';
+		const root = parseStructured(text);
+		const valueNode = root.get("name") as HjsonValueNode;
+		const result = valueNode.patchValue(text, '"world"');
+		expect(result).toBe('name: "world"');
+	});
+
+	it("replaces numeric value", () => {
+		const text = "count: 42";
+		const root = parseStructured(text);
+		const valueNode = root.get("count") as HjsonValueNode;
+		const result = valueNode.patchValue(text, "100");
+		expect(result).toBe("count: 100");
+	});
+
+	it("replaces boolean value", () => {
+		const text = "active: true";
+		const root = parseStructured(text);
+		const valueNode = root.get("active") as HjsonValueNode;
+		const result = valueNode.patchValue(text, "false");
+		expect(result).toBe("active: false");
+	});
+
+	it("replaces string value within nested object", () => {
+		const text = 'obj: {name: "hello",}';
+		const root = parseStructured(text);
+		const obj = root.get("obj") as HjsonObjectNode;
+		const nameField = obj.field("name")!;
+		const valueNode = nameField.value as HjsonValueNode;
+		const result = valueNode.patchValue(text, '"world"');
+		expect(result).toBe('obj: {name: "world",}');
+	});
+
+	it("replaces numeric element value", () => {
+		const text = "items: [1, 2, 3]";
+		const root = parseStructured(text);
+		const arr = root.get("items") as HjsonArrayNode;
+		const el = arr.at(0)!;
+		const valueNode = el.value as HjsonValueNode;
+		const result = valueNode.patchValue(text, "42");
+		expect(result).toBe("items: [42, 2, 3]");
+	});
+
+	it("preserves surrounding fields", () => {
+		const text = "name: alpha\n  count: 42\n  active: true";
+		const root = parseStructured(text);
+		const valueNode = root.get("count") as HjsonValueNode;
+		const result = valueNode.patchValue(text, "100");
+		expect(result).toBe("name: alpha\n  count: 100\n  active: true");
 	});
 });

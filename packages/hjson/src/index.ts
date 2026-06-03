@@ -13,5 +13,8 @@ export {
   type HjsonResult,
   type Position,
   type InfoBase,
+  valueNode,
+  arrayNode,
+  objectNode,
 } from "./structured.js";
 export { Tokenizer, type Token } from "./tokenizer.js";

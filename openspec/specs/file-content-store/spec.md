@@ -7,9 +7,6 @@ The system SHALL provide a Zustand store slice within `@project/state` that cach
 - **WHEN** the store slice is initialized
 - **THEN** it SHALL expose a `fileContents` record mapping cache keys (string) to entries containing `data` (`ArrayBuffer | null | undefined`), `currentVersion` (number), `savedVersion` (number), `savedAt` (number | null), `error` (string | null), and `loading` (boolean)
 
-#### Scenario: writeBuffer sets buffer content
-- **WHEN** `writeBuffer("mod.hjson", '{"name":"test"}')` is called with text content
-- **THEN** `data` SHALL be set to the `TextEncoder.encode()` result (an `ArrayBuffer`), `currentVersion` SHALL increment by 1, `savedVersion` SHALL remain unchanged, `error` SHALL be cleared, and `loading` SHALL be set to `false`
 
 #### Scenario: markPersisted syncs savedVersion
 - **WHEN** `markPersisted("mod.hjson")` is called
@@ -143,7 +140,7 @@ The file-content-store SHALL provide a `cleanup(projectId, path)` action that ab
 - **AND** validation results for that path SHALL be cleared
 
 ### Requirement: Store provides writeBuffer action
-The file-content-store SHALL provide a `writeBuffer(projectId, path, content)` action that updates the in-memory buffer, increments `currentVersion`, and clears errors.
+The file-content-store SHALL provide a `writeBuffer(projectId, path, content)` action that updates the in-memory buffer, incrementing `currentVersion` and clearing errors.
 
 #### Scenario: writeBuffer increments version
 - **WHEN** `writeBuffer(projectId, "mod.hjson", "new content")` is called
@@ -153,6 +150,12 @@ The file-content-store SHALL provide a `writeBuffer(projectId, path, content)` a
 #### Scenario: writeBuffer clears error
 - **WHEN** `writeBuffer(projectId, "mod.hjson", "content")` is called and the file has a prior error
 - **THEN** `error` SHALL be set to `null`
+
+#### Scenario: writeBuffer accepts updater callback
+- **WHEN** `writeBuffer(projectId, "mod.hjson", (prev) => new Uint8Array([65]).buffer)` is called
+- **THEN** `prev` SHALL be the current `data` value (as `ArrayBuffer | null`)
+- **AND** the return value (`ArrayBuffer`) SHALL become the new buffer content
+- **AND** `currentVersion` SHALL increment by 1
 
 ### Requirement: Store provides markPersisted action
 The file-content-store SHALL provide a `markPersisted(projectId, path)` action that syncs `savedVersion` to `currentVersion` after a successful disk write.

@@ -37,12 +37,12 @@ When an array item value changes, the renderer SHALL use `arrayNode.patchElement
 - **AND** only the modified item SHALL be replaced in the source string
 
 ### Requirement: Array field items render using itemType
-Array item editors SHALL use the primitive field renderer specified by a configurable `itemType` property on the `Field` definition, passing each element as the appropriate `HjsonValueNode<T>`.
+Array item editors SHALL use the schema-derived renderer specified by the item schema, passing the raw element value instead of an HjsonNode.
 
 #### Scenario: String array items render as text inputs
-- **WHEN** a field has `type: "Array"` and `itemType: "String"`
-- **THEN** each item SHALL render as a text input using the `String` renderer with a `HjsonValueNode<string>`
+- **WHEN** a field has `type: "array"` with `v.string()` item schema
+- **THEN** each item SHALL render as a text input using the `String` renderer with the raw string value
 
 #### Scenario: Number array items render as number inputs
-- **WHEN** a field has `type: "Array"` and `itemType: "Int"`
-- **THEN** each item SHALL render as a number input using the `Int` renderer with a `HjsonValueNode<number>`
+- **WHEN** a field has `type: "array"` with `v.number()` item schema
+- **THEN** each item SHALL render as a number input using the `Number` renderer with the raw number value

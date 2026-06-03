@@ -599,6 +599,10 @@ export class HjsonValueNode<T = unknown> extends HjsonNode {
 	get end(): Position {
 		return this.#end;
 	}
+
+	patchValue(original: string, newValue: string): string {
+		return original.slice(0, this.#start.index) + newValue + original.slice(this.#end.index);
+	}
 }
 
 export class HjsonMissingNode extends HjsonNode {
@@ -657,6 +661,21 @@ export class HjsonMissingNode extends HjsonNode {
 	valueOf(): undefined {
 		return undefined;
 	}
+}
+
+export function valueNode(node: HjsonNode, label: string): HjsonValueNode {
+	if (!node.isValue()) throw new Error(`expected value node at ${label}`);
+	return node;
+}
+
+export function arrayNode(node: HjsonNode, label: string): HjsonArrayNode {
+	if (!node.isArray()) throw new Error(`expected array node at ${label}`);
+	return node;
+}
+
+export function objectNode(node: HjsonNode, label: string): HjsonObjectNode {
+	if (!node.isObject()) throw new Error(`expected object node at ${label}`);
+	return node;
 }
 
 export type HjsonResult<T> =

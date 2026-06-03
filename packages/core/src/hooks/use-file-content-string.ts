@@ -5,7 +5,11 @@ import { getEntry } from "@project/core";
 
 export type UseFileStringResult = UseFileResult<string>;
 
-export function useFileString(path: string): { data: string | null; isLoading: boolean; write: (content: string | ((prev: string | null) => string)) => void } {
+export function useFileString(path: string): {
+	data: string | null;
+	isLoading: boolean;
+	write: (content: string | ((prev: string | null) => string)) => void;
+} {
 	const result = useFile(path);
 	const projectId = useProjectSession((s) => s.projectContext?.project.id);
 
