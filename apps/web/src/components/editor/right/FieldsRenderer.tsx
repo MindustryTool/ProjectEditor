@@ -47,6 +47,17 @@ import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
 import { hasNullableWrapper } from "@project/schema";
 
+type SchemaRendererProps = {
+	name: string;
+	path: string;
+	value: unknown;
+	entrySchema: AnySchema;
+	jsonPath: string;
+	onChange: (jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => void;
+};
+
+type SchemaRenderer = React.ComponentType<SchemaRendererProps>;
+
 interface FieldsRendererProps {
 	path: string;
 	schema: AnySchema | SchemaFn;
@@ -153,15 +164,6 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 		</ErrorBoundary>
 	);
 });
-type SchemaRendererProps = {
-	name: string;
-	path: string;
-	value: unknown;
-	entrySchema: AnySchema;
-	jsonPath: string;
-	onChange: (jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => void;
-};
-type SchemaRenderer = React.ComponentType<SchemaRendererProps>;
 
 const SpriteField = React.memo(function SpriteField() {
 	// TODO: impl
@@ -171,6 +173,7 @@ const SpriteField = React.memo(function SpriteField() {
 function removeByJsonPath(parent: HjsonNode, key: string, original: string): string {
 	if (parent.isObject()) return parent.removeField(original, key);
 	if (parent.isArray()) return parent.removeElement(original, Number(key));
+
 	throw new Error(`unexpected parent node type for removal`);
 }
 
@@ -475,10 +478,12 @@ const ArrayField = React.memo(function ArrayField({ path, name, value, onChange,
 	return (
 		<Collapsible>
 			<FormField>
-				<CollapsibleTrigger>
-					<FormLabel>
-						<SchemaLabel name={name} entrySchema={entrySchema} />
-					</FormLabel>
+				<CollapsibleTrigger asChild>
+					<Button className="w-full" variant="outline">
+						<FormLabel>
+							<SchemaLabel name={name} entrySchema={entrySchema} />
+						</FormLabel>
+					</Button>
 				</CollapsibleTrigger>
 				<SchemaDescription entrySchema={entrySchema} />
 				<CollapsibleContent>
