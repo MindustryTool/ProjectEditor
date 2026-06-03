@@ -151,7 +151,7 @@ type SchemaRenderer = (props: {
 	replaceFieldValue?: (newRawValue: unknown) => void;
 	initializeArrayValue?: () => void;
 	entrySchema: AnySchema;
-	jsonPath?: string;
+	jsonPath: string;
 	issues: ValidationResult[];
 }) => ReactNode;
 
@@ -947,7 +947,7 @@ function SchemaArrayItemEditor({
 	itemSchema: AnySchema;
 	onChange: (v: unknown) => void;
 	original?: string;
-	jsonPath?: string;
+	jsonPath: string;
 	issues: ValidationResult[];
 }) {
 	const type = detectSchemaType(itemSchema);
