@@ -45,58 +45,17 @@ import { Separator } from "#/components/ui/separator";
 import type { Type } from "@project/schema";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 import { useTranslation } from "react-i18next";
+import { useShallow } from "zustand/react/shallow";
 
 interface FieldsRendererProps {
 	path: string;
 	schema: AnySchema | SchemaFn;
 }
 
-type PrimitiveFieldValue = string | number | boolean | null | undefined;
-
-type FieldWriteContext = {
-	parentNode: HjsonObjectNode;
-	fieldName: string;
-	original: string;
-	entrySchema: AnySchema;
-	onPatch: (newContent: string) => void;
-};
-
-function createFieldValueReplacer({ parentNode, fieldName, original, entrySchema, onPatch }: FieldWriteContext) {
-	const isNullable = hasNullishWrapper(entrySchema);
-
-	return (newRawValue: unknown) => {
-		if (v.getDefault(entrySchema) === newRawValue) {
-			const newContent = parentNode.removeField(original, fieldName);
-			onPatch(newContent);
-			return;
-		}
-
-		if (newRawValue === undefined || newRawValue === null || (typeof newRawValue === "number" && isNaN(newRawValue))) {
-			if (isNullable) {
-				const newContent = parentNode.removeField(original, fieldName);
-				onPatch(newContent);
-				return;
-			}
-			const newContent = parentNode.patchField(original, fieldName, "null");
-			onPatch(newContent);
-			return;
-		}
-
-		const serialized = HJSON.stringify(newRawValue);
-		const newContent = parentNode.patchField(original, fieldName, serialized);
-		onPatch(newContent);
-	};
-}
-
-function createPrimitiveValueHelper(context: FieldWriteContext) {
-	const replaceFieldValue = createFieldValueReplacer(context);
-	return (newRawValue: PrimitiveFieldValue) => replaceFieldValue(newRawValue);
-}
-
 export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 	const { data, isLoading, write } = useFileString(path);
 	const { contents } = useProjectContext();
-	const issues = useValidationStore((state) => state.results.resultsByPath[path] || EMPTY_ARRAY);
+	const issues = useValidationStore(useShallow((state) => state.results.resultsByPath[path] || EMPTY_ARRAY));
 
 	if (isLoading || data === null) {
 		return null;
@@ -206,6 +165,7 @@ const schemaRenderers: Record<Type, SchemaRenderer> = {
 	object: ObjectField,
 	picklist: PickListField,
 	liquids: LiquidsListField,
+	select: SelectField,
 	never: () => null,
 	unknown: ({ name, entrySchema }) => (
 		<p className="text-yellow-400 text-sm">
@@ -221,7 +181,11 @@ function FieldIssue({ issues }: { issues: ValidationResult[] }) {
 
 	return (
 		<FormMessage>
-			{issues.map((issue) => (t as (key: string, params?: Record<string, unknown>) => string)(issue.messageKey, issue.messageParams))}
+			{issues.map((issue, index) => (
+				<span key={index + (issue.field || "")}>
+					{(t as (key: string, params?: Record<string, unknown>) => string)(issue.messageKey, issue.messageParams)}
+				</span>
+			))}
 		</FormMessage>
 	);
 }
@@ -239,9 +203,9 @@ function StringField({ name, node, writePrimitiveValue, entrySchema, issues }: P
 			<FormLabel>{label}</FormLabel>
 			<FormControl>
 				{metadata?.multiline ? (
-					<Textarea value={value} onChange={(v) => writePrimitiveValue?.(v.currentTarget.value)} />
+					<Textarea key={name} value={value} onChange={(v) => writePrimitiveValue?.(v.currentTarget.value)} />
 				) : (
-					<Input value={value} onChange={(v) => writePrimitiveValue?.(v.currentTarget.value)} />
+					<Input key={name} value={value} onChange={(v) => writePrimitiveValue?.(v.currentTarget.value)} />
 				)}
 			</FormControl>
 			{description && <FormDescription>{description}</FormDescription>}
@@ -262,7 +226,7 @@ function NumberField({ name, node, writePrimitiveValue, entrySchema, issues }: P
 		<FormField>
 			<FormLabel>{label}</FormLabel>
 			<FormControl>
-				<Input value={value} onChange={(v) => writePrimitiveValue?.(v.currentTarget.valueAsNumber)} type="number" />
+				<Input key={name} value={value} onChange={(v) => writePrimitiveValue?.(v.currentTarget.valueAsNumber)} type="number" />
 			</FormControl>
 			{description && <FormDescription>{description}</FormDescription>}
 			<FieldIssue issues={issues} />
@@ -281,13 +245,17 @@ function BooleanField({ name, node, writePrimitiveValue, entrySchema, issues }: 
 	return (
 		<FormField>
 			<FormControl className="flex-row flex gap-1">
-				<Checkbox checked={checked} onCheckedChange={(value) => writePrimitiveValue?.(value === true)} />
+				<Checkbox key={name} checked={checked} onCheckedChange={(value) => writePrimitiveValue?.(value === true)} />
 				<FormLabel>{label}</FormLabel>
 			</FormControl>
 			{description && <FormDescription>{description}</FormDescription>}
 			<FieldIssue issues={issues} />
 		</FormField>
 	);
+}
+
+function SelectField({}: Parameters<SchemaRenderer>[0]) {
+	return null;
 }
 
 function LiquidsListField({ name, node, writePrimitiveValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
@@ -306,7 +274,7 @@ function LiquidsListField({ name, node, writePrimitiveValue, entrySchema, issues
 			<FormField>
 				<FormLabel>{name}</FormLabel>
 				<FormControl>
-					<Select value={value} onValueChange={(nextValue) => writePrimitiveValue?.(nextValue)}>
+					<Select key={name} value={value} onValueChange={(nextValue) => writePrimitiveValue?.(nextValue)}>
 						<SelectTrigger className="w-full">
 							<SelectValue placeholder="None (empty file)" />
 						</SelectTrigger>
@@ -340,7 +308,7 @@ function PickListField({ name, node, writePrimitiveValue, entrySchema, issues }:
 			<FormField>
 				<FormLabel>{name}</FormLabel>
 				<FormControl>
-					<Select value={value} onValueChange={(nextValue) => writePrimitiveValue?.(nextValue)}>
+					<Select key={name} value={value} onValueChange={(nextValue) => writePrimitiveValue?.(nextValue)}>
 						<SelectTrigger className="w-full">
 							<SelectValue placeholder="None (empty file)" />
 						</SelectTrigger>
@@ -1038,4 +1006,46 @@ function SchemaArrayItemEditor({
 			/>
 		</ErrorBoundary>
 	);
+}
+
+type PrimitiveFieldValue = string | number | boolean | null | undefined;
+
+type FieldWriteContext = {
+	parentNode: HjsonObjectNode;
+	fieldName: string;
+	original: string;
+	entrySchema: AnySchema;
+	onPatch: (newContent: string) => void;
+};
+
+function createFieldValueReplacer({ parentNode, fieldName, original, entrySchema, onPatch }: FieldWriteContext) {
+	const isNullable = hasNullishWrapper(entrySchema);
+
+	return (newRawValue: unknown) => {
+		if (v.getDefault(entrySchema) === newRawValue) {
+			const newContent = parentNode.removeField(original, fieldName);
+			onPatch(newContent);
+			return;
+		}
+
+		if (newRawValue === undefined || newRawValue === null || (typeof newRawValue === "number" && isNaN(newRawValue))) {
+			if (isNullable) {
+				const newContent = parentNode.removeField(original, fieldName);
+				onPatch(newContent);
+				return;
+			}
+			const newContent = parentNode.patchField(original, fieldName, "null");
+			onPatch(newContent);
+			return;
+		}
+
+		const serialized = HJSON.stringify(newRawValue);
+		const newContent = parentNode.patchField(original, fieldName, serialized);
+		onPatch(newContent);
+	};
+}
+
+function createPrimitiveValueHelper(context: FieldWriteContext) {
+	const replaceFieldValue = createFieldValueReplacer(context);
+	return (newRawValue: PrimitiveFieldValue) => replaceFieldValue(newRawValue);
 }

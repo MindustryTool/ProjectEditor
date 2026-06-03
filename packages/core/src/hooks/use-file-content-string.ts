@@ -3,7 +3,7 @@ import { useFile, type UseFileResult } from "./use-file-content";
 
 export type UseFileStringResult = UseFileResult<string>;
 
-export function useFileString(path: string): UseFileStringResult {
+export function useFileString(path: string): { data: string | null; isLoading: boolean; write: (content: string) => void } {
 	const result = useFile(path);
 
 	const data = useMemo<string | null>(() => {
@@ -30,14 +30,7 @@ export function useFileString(path: string): UseFileStringResult {
 
 	return {
 		data,
-		currentVersion: result.currentVersion,
-		savedVersion: result.savedVersion,
-		savedAt: result.savedAt,
-		error: result.error,
-		isDirty: result.isDirty,
-		isSaving: result.isSaving,
 		isLoading: result.isLoading,
-		isError: result.isError,
 		write,
 	};
 }

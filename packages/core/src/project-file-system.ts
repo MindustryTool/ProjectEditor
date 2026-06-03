@@ -49,7 +49,6 @@ export class ProjectFileSystem {
 	async writeFile(path: string, data: BufferSource): Promise<void> {
 		await this.vfs.writeFile(this.scopePath(path), data);
 		this.events.emit("file:write", { path });
-		await this.refreshTree();
 	}
 
 	async writeFiles(entries: { name: string; data: Uint8Array }[]): Promise<void> {

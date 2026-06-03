@@ -2,7 +2,7 @@ import { useBlocks } from "#/hooks/use-blocks";
 import { useItems } from "#/hooks/use-items";
 import { useLiquids } from "#/hooks/use-liquids";
 import { useSectors } from "#/hooks/use-sectors";
-import { useSprites } from "#/hooks/use-Sprites";
+import { useSprites } from "#/hooks/use-sprites";
 import { useStatuses } from "#/hooks/use-statuses";
 import { useUnits } from "#/hooks/use-units";
 import type { ProjectContents } from "@project/types";
