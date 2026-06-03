@@ -29,15 +29,15 @@ describe("unwrapSchema", () => {
 		expect(unwrapSchema(wrapped as AnySchema)).toBe(inner);
 	});
 
-	it("strips v.nullish wrapper", () => {
+	it("strips v.optional wrapper", () => {
 		const inner = v.boolean();
-		const wrapped = v.nullish(inner);
+		const wrapped = v.optional(inner);
 		expect(unwrapSchema(wrapped as AnySchema)).toBe(inner);
 	});
 
 	it("strips nested wrappers", () => {
 		const inner = v.number();
-		const wrapped = v.nullish(v.optional(v.nullable(inner)));
+		const wrapped = v.optional(v.optional(v.nullable(inner)));
 		expect(unwrapSchema(wrapped as AnySchema)).toBe(inner);
 	});
 
@@ -48,8 +48,8 @@ describe("unwrapSchema", () => {
 });
 
 describe("hasNullishWrapper", () => {
-	it("returns true for v.nullish", () => {
-		expect(hasNullishWrapper(v.nullish(v.string()) as AnySchema)).toBe(true);
+	it("returns true for v.optional", () => {
+		expect(hasNullishWrapper(v.optional(v.string()) as AnySchema)).toBe(true);
 	});
 
 	it("returns true for v.optional", () => {
@@ -132,9 +132,9 @@ describe("getSchemaMetadata", () => {
 		expect(getSchemaMetadata(v.object({}) as AnySchema)).toBeNull();
 	});
 
-	it("unwraps nullish wrapper before extracting metadata", () => {
+	it("unwraps optional wrapper before extracting metadata", () => {
 		const inner = v.pipe(v.string(), v.metadata({ visibleWhen: { field: "toggle", value: true } }));
-		const wrapped = v.nullish(inner);
+		const wrapped = v.optional(inner);
 		expect(getSchemaMetadata(wrapped as AnySchema)).toEqual({ visibleWhen: { field: "toggle", value: true } });
 	});
 
@@ -197,9 +197,9 @@ describe("resolveSchema", () => {
 		expect(getSchemaEntries(resolved as AnySchema).map(([k]) => k)).toEqual(["y"]);
 	});
 
-	it("strips nullish wrapper then resolves lazy", () => {
+	it("strips optional wrapper then resolves lazy", () => {
 		const lazy = v.lazy(() => v.object({ val: v.string() }));
-		const wrapped = v.nullish(lazy);
+		const wrapped = v.optional(lazy);
 		const resolved = resolveSchema(wrapped as AnySchema, {});
 		expect((resolved as unknown as { type: string }).type).toBe("object");
 		expect(getSchemaEntries(resolved as AnySchema).map(([k]) => k)).toEqual(["val"]);
@@ -239,10 +239,10 @@ describe("Effect schema integration", () => {
 	it("resolves effect union with correct type dispatching", () => {
 		const effectBaseObjectSchema = v.object({
 			type: v.picklist(["ParticleEffect", "MultiEffect"] as const),
-			lifetime: v.nullish(v.number(), 50),
+			lifetime: v.optional(v.number(), 50),
 		});
 		const classSchemaMap: Record<string, () => ReturnType<typeof v.object>> = {
-			ParticleEffect: () => v.object({ colorFrom: v.nullish(v.string()) }),
+			ParticleEffect: () => v.object({ colorFrom: v.optional(v.string()) }),
 			MultiEffect: () =>
 				v.object({
 					effects: v.array(
@@ -288,7 +288,7 @@ describe("Effect schema integration", () => {
 				if (typeof input === "object" && input !== null && "type" in input) {
 					const type = (input as Record<string, unknown>).type;
 					if (type === "ParticleEffect") {
-						return v.object({ type: v.string(), colorFrom: v.nullish(v.string()), colorTo: v.nullish(v.string()) });
+						return v.object({ type: v.string(), colorFrom: v.optional(v.string()), colorTo: v.optional(v.string()) });
 					}
 				}
 				return v.pipe(v.string(), v.minLength(1), v.maxLength(127));

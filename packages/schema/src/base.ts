@@ -64,16 +64,16 @@ export const ItemRequirementSchema = v.pipe(
 );
 
 export const ResearchSchema: SchemaFn = (context) =>
-	v.nullish(
+	v.optional(
 		v.pipe(
 			v.union([
 				ContentNameSchema,
 				v.object({
-					parent: v.nullish(ContentNameSchema),
-					requirements: v.nullish(v.array(ItemRequirementSchema)),
-					objectives: v.nullish(v.any()),
-					planet: v.nullish(v.string()),
-					robot: v.nullish(v.boolean()),
+					parent: v.optional(ContentNameSchema),
+					requirements: v.optional(v.array(ItemRequirementSchema)),
+					objectives: v.optional(v.any()),
+					planet: v.optional(v.string()),
+					robot: v.optional(v.boolean()),
 				}),
 			]),
 			v.metadata({

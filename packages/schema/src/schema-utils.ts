@@ -5,7 +5,7 @@ export type AnySchema =
 	| v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>
 	| v.TupleSchema<v.TupleItems, v.ErrorMessage<v.TupleIssue> | undefined>;
 
-const WRAPPER_TYPES = new Set(["optional", "nullable", "nullish", "undefinedable", "exact_optional"]);
+const WRAPPER_TYPES = new Set(["optional", "nullable", "optional", "undefinedable", "exact_optional"]);
 
 export const types = [
 	"color",
@@ -35,7 +35,7 @@ export function unwrapSchema(schema: AnySchema): AnySchema {
 
 export function hasNullableWrapper(schema: AnySchema): boolean {
 	const s = schema as unknown as { type: string };
-	return ["nullable", "nullish"].includes(s.type);
+	return ["nullable", "optional"].includes(s.type);
 }
 
 export function hasNullishWrapper(schema: AnySchema): boolean {
@@ -92,7 +92,7 @@ export function detectSchemaType(rawSchema: AnySchema, value: unknown): Type {
 		pipe?: AnySchema[] | Array<{ type: string }>;
 		getter?: (val: unknown) => AnySchema;
 		wrapped?: AnySchema;
-	} & AnySchema; 
+	} & AnySchema;
 
 	if (unwrapped.type === "lazy" && unwrapped.getter) {
 		return detectSchemaType(unwrapped.getter(value), value);

@@ -17,44 +17,44 @@ export type ShootPatternType = (typeof shootPatternTypes)[number];
 
 const shootPatternBaseObjectSchema = v.object({
 	type: v.optional(v.picklist(shootPatternTypes), shootPatternTypes[0]),
-	name: v.nullish(v.string()),
-	shots: v.nullish(v.number(), 1),
-	firstShotDelay: v.nullish(v.number(), 0),
-	shotDelay: v.nullish(v.number(), 0),
+	name: v.optional(v.string()),
+	shots: v.optional(v.number(), 1),
+	firstShotDelay: v.optional(v.number(), 0),
+	shotDelay: v.optional(v.number(), 0),
 });
 
 export const shootAlternateObjectSchema = v.object({
-	barrels: v.nullish(v.number(), 2),
-	spread: v.nullish(v.number(), 5),
-	barrelOffset: v.nullish(v.number(), 0),
-	mirror: v.nullish(v.boolean(), false),
+	barrels: v.optional(v.number(), 2),
+	spread: v.optional(v.number(), 5),
+	barrelOffset: v.optional(v.number(), 0),
+	mirror: v.optional(v.boolean(), false),
 });
 
 export const shootBarrelObjectSchema = v.object({
-	barrels: v.nullish(v.array(v.number()), [0, 0, 0]),
-	barrelOffset: v.nullish(v.number(), 0),
+	barrels: v.optional(v.array(v.number()), [0, 0, 0]),
+	barrelOffset: v.optional(v.number(), 0),
 });
 
 export const shootHelixObjectSchema = v.object({
-	scl: v.nullish(v.number(), 2),
-	mag: v.nullish(v.number(), 1.5),
-	offset: v.nullish(v.number(), Math.PI * 1.25),
+	scl: v.optional(v.number(), 2),
+	mag: v.optional(v.number(), 1.5),
+	offset: v.optional(v.number(), Math.PI * 1.25),
 });
 
 export const shootSineObjectSchema = v.object({
-	scl: v.nullish(v.number(), 4),
-	mag: v.nullish(v.number(), 20),
+	scl: v.optional(v.number(), 4),
+	mag: v.optional(v.number(), 20),
 });
 
 export const shootSpreadObjectSchema = v.object({
-	spread: v.nullish(v.number(), 5),
+	spread: v.optional(v.number(), 5),
 });
 
 export const shootSummonObjectSchema = v.object({
-	x: v.nullish(v.number(), 0),
-	y: v.nullish(v.number(), 0),
-	radius: v.nullish(v.number(), 0),
-	spread: v.nullish(v.number(), 0),
+	x: v.optional(v.number(), 0),
+	y: v.optional(v.number(), 0),
+	radius: v.optional(v.number(), 0),
+	spread: v.optional(v.number(), 0),
 });
 
 const classSchemaMap: Record<ShootPatternType, SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>> = {
