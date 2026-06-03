@@ -35,9 +35,9 @@ export const EditorRightPanel = memo(function EditorRightPanel({ path }: EditorR
 		return <StatusPanel path={path} />;
 	}
 
-    if (path.startsWith("content/units") && path.endsWith(".json")) {
-        return <UnitPanel path={path} />;
-    }
+	if (path.startsWith("content/units") && path.endsWith(".json")) {
+		return <UnitPanel path={path} />;
+	}
 
 	if (path.startsWith("content")) {
 		return null;

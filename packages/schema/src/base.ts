@@ -165,7 +165,7 @@ export const SoundHjsonSchema = v.pipe(
 
 export const SpriteHjsonSchema: SchemaFn = (_, context) =>
 	v.pipe(
-		v.picklist(context.getSprites().map((s) => s.name)),
+		v.picklist([...new Set(context.getSprites().map((s) => s.name))]),
 		v.minLength(1),
 		v.maxLength(127),
 		v.metadata({

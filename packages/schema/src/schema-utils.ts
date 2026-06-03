@@ -48,6 +48,8 @@ function getTypeFromMetadata(schema: AnySchema): Type | null {
 			const t = action.metadata.type;
 			if ((types as readonly string[]).includes(t)) {
 				result = t as Type;
+			} else {
+				console.warn(`Unkown type: ${t}`);
 			}
 		}
 	}

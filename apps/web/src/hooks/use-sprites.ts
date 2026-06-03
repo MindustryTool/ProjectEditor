@@ -11,6 +11,7 @@ export function useSprites(): ContentEntry[] {
 
 	return useMemo(() => {
 		const items: ContentEntry[] = [];
+
 		if (data) {
 			items.push(
 				...data.map((i) => ({
@@ -22,15 +23,19 @@ export function useSprites(): ContentEntry[] {
 				})),
 			);
 		}
-		items.push(
-			...projectItems.map((i) => ({
-				name: i.name.substring(0, i.name.lastIndexOf(".")),
-				type: "project" as const,
-				path: i.path,
-				contentType: "sprites",
-				getContent: async () => fs.readTextFile(i.path),
-			})),
-		);
+
+		projectItems.forEach((i) => {
+			if (i.name.endsWith(".png")) {
+				items.push({
+					name: i.name.substring(0, i.name.lastIndexOf(".")),
+					type: "project" as const,
+					path: i.path,
+					contentType: "sprites",
+					getContent: async () => fs.readTextFile(i.path),
+				});
+			}
+		});
+
 		return items;
 	}, [projectItems, data, fs]);
 }

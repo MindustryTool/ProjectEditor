@@ -51,6 +51,48 @@ interface FieldsRendererProps {
 	schema: AnySchema | SchemaFn;
 }
 
+type PrimitiveFieldValue = string | number | boolean | null | undefined;
+
+type FieldWriteContext = {
+	parentNode: HjsonObjectNode;
+	fieldName: string;
+	original: string;
+	entrySchema: AnySchema;
+	onPatch: (newContent: string) => void;
+};
+
+function createFieldValueReplacer({ parentNode, fieldName, original, entrySchema, onPatch }: FieldWriteContext) {
+	const isNullable = hasNullishWrapper(entrySchema);
+
+	return (newRawValue: unknown) => {
+		if (v.getDefault(entrySchema) === newRawValue) {
+			const newContent = parentNode.removeField(original, fieldName);
+			onPatch(newContent);
+			return;
+		}
+
+		if (newRawValue === undefined || newRawValue === null || (typeof newRawValue === "number" && isNaN(newRawValue))) {
+			if (isNullable) {
+				const newContent = parentNode.removeField(original, fieldName);
+				onPatch(newContent);
+				return;
+			}
+			const newContent = parentNode.patchField(original, fieldName, "null");
+			onPatch(newContent);
+			return;
+		}
+
+		const serialized = HJSON.stringify(newRawValue);
+		const newContent = parentNode.patchField(original, fieldName, serialized);
+		onPatch(newContent);
+	};
+}
+
+function createPrimitiveValueHelper(context: FieldWriteContext) {
+	const replaceFieldValue = createFieldValueReplacer(context);
+	return (newRawValue: PrimitiveFieldValue) => replaceFieldValue(newRawValue);
+}
+
 export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 	const { data, isLoading, write } = useFileString(path);
 	const { contents } = useProjectContext();
@@ -93,7 +135,6 @@ export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 
 		const entryIssues = issues?.filter((issue) => issue.field?.startsWith(name));
 		const childNode = node.get(name);
-		const isNullable = hasNullishWrapper(entrySchema);
 		const metadata = getSchemaMetadata(entrySchema);
 
 		if (metadata?.visibleWhen) {
@@ -102,27 +143,24 @@ export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 			if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) return null;
 		}
 
-		const patchValue = (newRawValue: unknown) => {
-			if (v.getDefault(entrySchema) === newRawValue) {
-				const newContent = node.removeField(data, name);
-				write(newContent);
-				return;
-			}
+		const fieldWriteContext = {
+			parentNode: node,
+			fieldName: name,
+			original: data,
+			entrySchema: entrySchema as AnySchema,
+			onPatch: write,
+		} satisfies FieldWriteContext;
 
-			if (newRawValue === undefined || newRawValue === null || (typeof newRawValue === "number" && isNaN(newRawValue))) {
-				if (isNullable) {
-					const newContent = node.removeField(data, name);
-					write(newContent);
-					return;
-				}
-				const newContent = node.patchField(data, name, "null");
-				write(newContent);
-				return;
-			}
-			const serialized = HJSON.stringify(newRawValue);
-			const newContent = node.patchField(data, name, serialized);
-			write(newContent);
-		};
+		const replaceFieldValue = createFieldValueReplacer(fieldWriteContext);
+		const writePrimitiveValue = createPrimitiveValueHelper(fieldWriteContext);
+		const initializeArrayValue =
+			type === "array"
+				? () => {
+						const initialValue = v.getDefault(entrySchema) ?? [];
+						const newContent = node.patchField(data, name, HJSON.stringify(initialValue));
+						write(newContent);
+					}
+				: undefined;
 
 		return (
 			<ErrorBoundary key={key}>
@@ -132,7 +170,9 @@ export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 					node={childNode}
 					original={data}
 					onPatch={write}
-					patchValue={patchValue}
+					writePrimitiveValue={writePrimitiveValue}
+					replaceFieldValue={replaceFieldValue}
+					initializeArrayValue={initializeArrayValue}
 					entrySchema={entrySchema as AnySchema}
 					jsonPath={name}
 					issues={entryIssues}
@@ -147,7 +187,9 @@ type SchemaRenderer = (props: {
 	node: HjsonNode;
 	original: string;
 	onPatch: (newContent: string) => void;
-	patchValue: (newRawValue: unknown) => void;
+	writePrimitiveValue?: (newRawValue: PrimitiveFieldValue) => void;
+	replaceFieldValue?: (newRawValue: unknown) => void;
+	initializeArrayValue?: () => void;
 	entrySchema: AnySchema;
 	jsonPath?: string;
 	issues: ValidationResult[];
@@ -184,7 +226,7 @@ function FieldIssue({ issues }: { issues: ValidationResult[] }) {
 	);
 }
 
-function StringField({ name, node, patchValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
+function StringField({ name, node, writePrimitiveValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
 	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema);
@@ -197,9 +239,9 @@ function StringField({ name, node, patchValue, entrySchema, issues }: Parameters
 			<FormLabel>{label}</FormLabel>
 			<FormControl>
 				{metadata?.multiline ? (
-					<Textarea value={value} onChange={(v) => patchValue(v.currentTarget.value)} />
+					<Textarea value={value} onChange={(v) => writePrimitiveValue?.(v.currentTarget.value)} />
 				) : (
-					<Input value={value} onChange={(v) => patchValue(v.currentTarget.value)} />
+					<Input value={value} onChange={(v) => writePrimitiveValue?.(v.currentTarget.value)} />
 				)}
 			</FormControl>
 			{description && <FormDescription>{description}</FormDescription>}
@@ -208,7 +250,7 @@ function StringField({ name, node, patchValue, entrySchema, issues }: Parameters
 	);
 }
 
-function NumberField({ name, node, patchValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
+function NumberField({ name, node, writePrimitiveValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
 	const value = node.isNumber() ? node.valueOf() : v.getDefault(entrySchema);
@@ -220,7 +262,7 @@ function NumberField({ name, node, patchValue, entrySchema, issues }: Parameters
 		<FormField>
 			<FormLabel>{label}</FormLabel>
 			<FormControl>
-				<Input value={value} onChange={(v) => patchValue(v.currentTarget.valueAsNumber)} type="number" />
+				<Input value={value} onChange={(v) => writePrimitiveValue?.(v.currentTarget.valueAsNumber)} type="number" />
 			</FormControl>
 			{description && <FormDescription>{description}</FormDescription>}
 			<FieldIssue issues={issues} />
@@ -228,7 +270,7 @@ function NumberField({ name, node, patchValue, entrySchema, issues }: Parameters
 	);
 }
 
-function BooleanField({ name, node, patchValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
+function BooleanField({ name, node, writePrimitiveValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
 	const checked = node.isBoolean() ? node.valueOf() : v.getDefault(entrySchema);
@@ -239,7 +281,7 @@ function BooleanField({ name, node, patchValue, entrySchema, issues }: Parameter
 	return (
 		<FormField>
 			<FormControl className="flex-row flex gap-1">
-				<Checkbox checked={checked} onCheckedChange={(value) => patchValue(value === true)} />
+				<Checkbox checked={checked} onCheckedChange={(value) => writePrimitiveValue?.(value === true)} />
 				<FormLabel>{label}</FormLabel>
 			</FormControl>
 			{description && <FormDescription>{description}</FormDescription>}
@@ -248,7 +290,7 @@ function BooleanField({ name, node, patchValue, entrySchema, issues }: Parameter
 	);
 }
 
-function LiquidsListField({ name, node, patchValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
+function LiquidsListField({ name, node, writePrimitiveValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
 	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "";
 	const context = useProjectContext();
 	const unwrappedSchema = unwrapSchema(entrySchema);
@@ -264,7 +306,7 @@ function LiquidsListField({ name, node, patchValue, entrySchema, issues }: Param
 			<FormField>
 				<FormLabel>{name}</FormLabel>
 				<FormControl>
-					<Select value={value} onValueChange={patchValue}>
+					<Select value={value} onValueChange={(nextValue) => writePrimitiveValue?.(nextValue)}>
 						<SelectTrigger className="w-full">
 							<SelectValue placeholder="None (empty file)" />
 						</SelectTrigger>
@@ -287,7 +329,7 @@ function LiquidsListField({ name, node, patchValue, entrySchema, issues }: Param
 	throw new Error(`Unknown option ${value}, this should not happen`);
 }
 
-function PickListField({ name, node, patchValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
+function PickListField({ name, node, writePrimitiveValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
 	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "";
 	const unwrappedSchema = unwrapSchema(entrySchema);
 
@@ -298,7 +340,7 @@ function PickListField({ name, node, patchValue, entrySchema, issues }: Paramete
 			<FormField>
 				<FormLabel>{name}</FormLabel>
 				<FormControl>
-					<Select value={value} onValueChange={patchValue}>
+					<Select value={value} onValueChange={(nextValue) => writePrimitiveValue?.(nextValue)}>
 						<SelectTrigger className="w-full">
 							<SelectValue placeholder="None (empty file)" />
 						</SelectTrigger>
@@ -321,7 +363,7 @@ function PickListField({ name, node, patchValue, entrySchema, issues }: Paramete
 	throw new Error(`Unknown option ${value}, this should not happen`);
 }
 
-function ColorField({ name, node, patchValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
+function ColorField({ name, node, writePrimitiveValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
 	let value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "333333";
 
 	value = value?.startsWith("#") ? value : "#" + value;
@@ -339,7 +381,7 @@ function ColorField({ name, node, patchValue, entrySchema, issues }: Parameters<
 							<span className="text-sm absolute left-1.5 bottom-1.5">{value}</span>
 						</PopoverTrigger>
 						<PopoverContent className="w-64 p-3" side="bottom" align="start">
-							<ColorPicker value={value} onChange={(val) => patchValue(val)}>
+							<ColorPicker value={value} onChange={(val) => writePrimitiveValue?.(val)}>
 								<ColorPickerSelection className="h-40 rounded-lg" />
 								<ColorPickerHue />
 								<ColorPickerAlpha />
@@ -354,12 +396,22 @@ function ColorField({ name, node, patchValue, entrySchema, issues }: Parameters<
 	);
 }
 
-function ArrayField({ path, name, node, original, onPatch, patchValue, entrySchema, jsonPath, issues }: Parameters<SchemaRenderer>[0]) {
+function ArrayField({
+	path,
+	name,
+	node,
+	original,
+	onPatch,
+	initializeArrayValue,
+	entrySchema,
+	jsonPath,
+	issues,
+}: Parameters<SchemaRenderer>[0]) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
 
 	if (!node.isArray()) {
-		patchValue([]);
+		initializeArrayValue?.();
 		return null;
 	}
 
@@ -449,7 +501,6 @@ function ObjectField({ name: parentName, path, node, original, onPatch, entrySch
 		const type = detectSchemaType(entrySchema);
 		const childNode = node.get(name);
 		const metadata = getSchemaMetadata(entrySchema);
-		const isNullable = hasNullishWrapper(entrySchema);
 		const entryIssues = issues.filter((issue) => issue.field?.startsWith(`${parentName}.${name}`));
 
 		if (metadata?.visibleWhen) {
@@ -458,33 +509,24 @@ function ObjectField({ name: parentName, path, node, original, onPatch, entrySch
 			if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) return null;
 		}
 
-		const patchValue = (newRawValue: unknown) => {
-			if (v.getDefault(entrySchema) === newRawValue) {
-				const newContent = node.removeField(original, name);
-				onPatch(newContent);
-				return;
-			}
+		const fieldWriteContext = {
+			parentNode: node,
+			fieldName: name,
+			original,
+			entrySchema: entrySchema as AnySchema,
+			onPatch,
+		} satisfies FieldWriteContext;
 
-			if (newRawValue === undefined || newRawValue === null || (typeof newRawValue === "number" && isNaN(newRawValue))) {
-				if (isNullable) {
-					const newContent = node.removeField(original, name);
-					onPatch(newContent);
-					return;
-				}
-				const newContent = node.patchField(original, name, "null");
-				onPatch(newContent);
-				return;
-			}
-			const serialized = HJSON.stringify(newRawValue);
-			const newContent = node.patchField(original, name, serialized);
-			onPatch(newContent);
-		};
-
-		if (metadata?.visibleWhen) {
-			const refNode = node.get(metadata.visibleWhen.field);
-			if (refNode.isMissing()) return null;
-			if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) return null;
-		}
+		const replaceFieldValue = createFieldValueReplacer(fieldWriteContext);
+		const writePrimitiveValue = createPrimitiveValueHelper(fieldWriteContext);
+		const initializeArrayValue =
+			type === "array"
+				? () => {
+						const initialValue = v.getDefault(entrySchema) ?? [];
+						const newContent = node.patchField(original, name, HJSON.stringify(initialValue));
+						onPatch(newContent);
+					}
+				: undefined;
 
 		const Renderer = schemaRenderers[type];
 
@@ -496,7 +538,9 @@ function ObjectField({ name: parentName, path, node, original, onPatch, entrySch
 					node={childNode}
 					original={original}
 					onPatch={onPatch}
-					patchValue={patchValue}
+					writePrimitiveValue={writePrimitiveValue}
+					replaceFieldValue={replaceFieldValue}
+					initializeArrayValue={initializeArrayValue}
 					entrySchema={entrySchema as AnySchema}
 					jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
 					issues={entryIssues}
@@ -508,7 +552,7 @@ function ObjectField({ name: parentName, path, node, original, onPatch, entrySch
 	return <div className="pl-4 border-l-2 border-border grid gap-6">{results}</div>;
 }
 
-function ResearchField({ name, node, original, onPatch, patchValue, issues }: Parameters<SchemaRenderer>[0]) {
+function ResearchField({ name, node, original, onPatch, replaceFieldValue, issues }: Parameters<SchemaRenderer>[0]) {
 	const items = useItems({ project: true, base: true });
 	const blocks = useBlocks();
 	const units = useUnits();
@@ -603,11 +647,11 @@ function ResearchField({ name, node, original, onPatch, patchValue, issues }: Pa
 			}
 		}
 		if (!newParent && newRequirements.length === 0) {
-			patchValue(undefined);
+			replaceFieldValue?.(undefined);
 		} else if (newRequirements.length > 0) {
-			patchValue({ parent: newParent, requirements: newRequirements });
+			replaceFieldValue?.({ parent: newParent, requirements: newRequirements });
 		} else {
-			patchValue(newParent);
+			replaceFieldValue?.(newParent);
 		}
 	}
 
@@ -795,7 +839,18 @@ function ResearchField({ name, node, original, onPatch, patchValue, issues }: Pa
 	);
 }
 
-function EffectField({ path, name, node, original, patchValue, entrySchema, onPatch, jsonPath, issues }: Parameters<SchemaRenderer>[0]) {
+function EffectField({
+	path,
+	name,
+	node,
+	original,
+	writePrimitiveValue,
+	replaceFieldValue,
+	entrySchema,
+	onPatch,
+	jsonPath,
+	issues,
+}: Parameters<SchemaRenderer>[0]) {
 	const { data = [], isLoading, isError, error } = useEffects();
 	const [filter, setFilter] = useState("");
 
@@ -804,7 +859,7 @@ function EffectField({ path, name, node, original, patchValue, entrySchema, onPa
 			<div className="grid gap-2">
 				<FormLabel>{name}</FormLabel>
 				<div className="grid grid-cols-2 gap-2">
-					<Button variant="outline" onClick={() => patchValue(data[0]?.name)}>
+					<Button variant="outline" onClick={() => replaceFieldValue?.(data[0]?.name)}>
 						Built-In
 					</Button>
 					<Button variant="outline" disabled>
@@ -825,7 +880,6 @@ function EffectField({ path, name, node, original, patchValue, entrySchema, onPa
 									path={path}
 									name={name}
 									node={node}
-									patchValue={patchValue}
 									entrySchema={entrySchema}
 									original={original}
 									onPatch={onPatch}
@@ -851,7 +905,7 @@ function EffectField({ path, name, node, original, patchValue, entrySchema, onPa
 				<Button variant="outline" disabled>
 					Built-In
 				</Button>
-				<Button variant="outline" onClick={() => patchValue({ type: "ParticleEffect" })}>
+				<Button variant="outline" onClick={() => replaceFieldValue?.({ type: "ParticleEffect" })}>
 					Custom
 				</Button>
 			</div>
@@ -867,7 +921,7 @@ function EffectField({ path, name, node, original, patchValue, entrySchema, onPa
 							<DialogTitle />
 							<DialogDescription />
 						</VisuallyHidden.Root>
-						<ToggleGroup type="single" value={value} onValueChange={(v) => patchValue(v)} asChild>
+						<ToggleGroup type="single" value={value} onValueChange={(v) => writePrimitiveValue?.(v)} asChild>
 							<div className="grid gap-2">
 								<InputGroup>
 									<InputGroupAddon>
@@ -975,7 +1029,9 @@ function SchemaArrayItemEditor({
 				node={node}
 				original={original}
 				onPatch={handleOnPatch}
-				patchValue={(v) => onChange(v)}
+				writePrimitiveValue={(v) => onChange(v)}
+				replaceFieldValue={(v) => onChange(v)}
+				initializeArrayValue={type === "array" ? () => onChange(v.getDefault(itemSchema) ?? []) : undefined}
 				entrySchema={itemSchema}
 				jsonPath={jsonPath}
 				issues={issues}
