@@ -1,10 +1,6 @@
 import type { EventBus, ProjectEventMap, ProjectInfo } from "./index.js";
 import type { VirtualFileSystem, FileEntry, FileStat, TreeNode } from "@project/fs";
-import {
-	type DefaultProjectFileTree,
-	jsonProjectTree,
-	createOPFSAdapter,
-} from "@project/fs";
+import { type DefaultProjectFileTree, jsonProjectTree, createOPFSAdapter } from "@project/fs";
 
 export type TreeSnapshotChangeCallback = (snapshot: FileEntry[]) => void;
 
@@ -115,6 +111,7 @@ export class ProjectFileSystem {
 
 	private async refreshTreeNow(): Promise<FileEntry[]> {
 		const snapshot = await this.listFiles("/", { recursive: true });
+		console.log("Tree refreshed");
 		this.onTreeSnapshotChange(snapshot);
 		return snapshot;
 	}

@@ -2,7 +2,7 @@ import { create } from "zustand";
 import type { ProjectFileSystem } from "@project/core";
 import type { EventBus, ProjectEventMap } from "@project/core";
 
-const MAX_CACHE_ENTRIES = 100;
+const MAX_CACHE_ENTRIES = 200;
 
 function cacheKey(projectId: string, path: string): string {
 	return `${projectId}::${path}`;

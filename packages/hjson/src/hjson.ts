@@ -32,6 +32,7 @@ export const HJSON = {
                 return a.time - b.time;
             });
 			cache.shift();
+            console.log(`Cache evict`);
 		}
 
         console.log(`Cache miss`);

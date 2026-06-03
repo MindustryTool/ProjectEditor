@@ -1,5 +1,5 @@
 import { Panel } from "@/components/editor/Panel";
-import { FieldsRenderer } from "#/components/editor/panel/FieldRenderer";
+import { FieldsRenderer } from "#/components/editor/panel/FieldsRenderer";
 import { SpritePicker } from "#/components/editor/panel/SpritePicker";
 import { useFileName } from "#/hooks/use-path";
 import { ItemHjsonSchema } from "@project/schema";

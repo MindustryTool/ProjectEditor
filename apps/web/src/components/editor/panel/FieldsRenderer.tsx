@@ -10,7 +10,7 @@ import { Textarea } from "#/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { useItems } from "#/hooks/use-items";
-import { useFileString, useValidationStore, type ValidationResult } from "@project/core";
+import { useFileString, useValidationStore } from "@project/core";
 import { unwrapSchema, type Research } from "@project/schema";
 import { HJSON } from "@project/hjson";
 import type { HjsonObjectNode } from "@project/hjson";
@@ -55,7 +55,6 @@ interface FieldsRendererProps {
 export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 	const { data, isLoading, write } = useFileString(path);
 	const { contents } = useProjectContext();
-	const issues = useValidationStore(useShallow((state) => state.results.resultsByPath[path] || EMPTY_ARRAY));
 
 	if (isLoading || data === null) {
 		return null;
@@ -66,7 +65,7 @@ export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 		node = HJSON.parseWithCache(data);
 	} catch (error) {
 		console.error("Error parsing JSON:", error);
-        return null;
+		return null;
 	}
 
 	if (!node.isObject()) {
@@ -93,7 +92,6 @@ export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 			);
 		}
 
-		const entryIssues = issues?.filter((issue) => issue.field?.startsWith(name));
 		const childNode = node.get(name);
 		const metadata = getSchemaMetadata(entrySchema);
 
@@ -135,7 +133,6 @@ export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 					initializeArrayValue={initializeArrayValue}
 					entrySchema={entrySchema as AnySchema}
 					jsonPath={name}
-					issues={entryIssues}
 				/>
 			</ErrorBoundary>
 		);
@@ -152,7 +149,6 @@ type SchemaRenderer = (props: {
 	initializeArrayValue?: () => void;
 	entrySchema: AnySchema;
 	jsonPath: string;
-	issues: ValidationResult[];
 }) => ReactNode;
 
 const schemaRenderers: Record<Type, SchemaRenderer> = {
@@ -167,6 +163,7 @@ const schemaRenderers: Record<Type, SchemaRenderer> = {
 	picklist: PickListField,
 	liquids: LiquidsListField,
 	select: SelectField,
+	sprite: SpriteField,
 	never: () => null,
 	unknown: ({ name, entrySchema }) => (
 		<p className="text-yellow-400 text-sm">
@@ -175,8 +172,16 @@ const schemaRenderers: Record<Type, SchemaRenderer> = {
 	),
 };
 
-function FieldIssue({ issues }: { issues: ValidationResult[] }) {
+function SpriteField() {
+	// TODO: impl
+	return null;
+}
+
+function FieldIssue({ path, jsonPath }: { path: string; jsonPath: string }) {
 	const { t } = useTranslation();
+	const issues = useValidationStore(
+		useShallow((state) => (state.results.resultsByPath[path] || EMPTY_ARRAY).filter((issue) => issue.field?.startsWith(jsonPath))),
+	);
 
 	if (issues.length === 0) return null;
 
@@ -191,7 +196,7 @@ function FieldIssue({ issues }: { issues: ValidationResult[] }) {
 	);
 }
 
-function StringField({ name, node, writePrimitiveValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
+function StringField({ name, node, writePrimitiveValue, entrySchema, jsonPath, path }: Parameters<SchemaRenderer>[0]) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
 	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema);
@@ -210,12 +215,12 @@ function StringField({ name, node, writePrimitiveValue, entrySchema, issues }: P
 				)}
 			</FormControl>
 			{description && <FormDescription>{description}</FormDescription>}
-			<FieldIssue issues={issues} />
+			<FieldIssue path={path} jsonPath={jsonPath} />
 		</FormField>
 	);
 }
 
-function NumberField({ name, node, writePrimitiveValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
+function NumberField({ name, node, writePrimitiveValue, entrySchema, jsonPath, path }: Parameters<SchemaRenderer>[0]) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
 	const value = node.isNumber() ? node.valueOf() : v.getDefault(entrySchema);
@@ -230,12 +235,12 @@ function NumberField({ name, node, writePrimitiveValue, entrySchema, issues }: P
 				<Input key={name} value={value} onChange={(v) => writePrimitiveValue?.(v.currentTarget.valueAsNumber)} type="number" />
 			</FormControl>
 			{description && <FormDescription>{description}</FormDescription>}
-			<FieldIssue issues={issues} />
+			<FieldIssue path={path} jsonPath={jsonPath} />
 		</FormField>
 	);
 }
 
-function BooleanField({ name, node, writePrimitiveValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
+function BooleanField({ name, node, writePrimitiveValue, entrySchema, jsonPath, path }: Parameters<SchemaRenderer>[0]) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
 	const checked = node.isBoolean() ? node.valueOf() : v.getDefault(entrySchema);
@@ -250,7 +255,7 @@ function BooleanField({ name, node, writePrimitiveValue, entrySchema, issues }: 
 				<FormLabel>{label}</FormLabel>
 			</FormControl>
 			{description && <FormDescription>{description}</FormDescription>}
-			<FieldIssue issues={issues} />
+			<FieldIssue path={path} jsonPath={jsonPath} />
 		</FormField>
 	);
 }
@@ -259,7 +264,7 @@ function SelectField({}: Parameters<SchemaRenderer>[0]) {
 	return null;
 }
 
-function LiquidsListField({ name, node, writePrimitiveValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
+function LiquidsListField({ name, node, writePrimitiveValue, entrySchema, jsonPath, path }: Parameters<SchemaRenderer>[0]) {
 	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "";
 	const context = useProjectContext();
 	const unwrappedSchema = unwrapSchema(entrySchema);
@@ -290,7 +295,7 @@ function LiquidsListField({ name, node, writePrimitiveValue, entrySchema, issues
 						</SelectContent>
 					</Select>
 				</FormControl>
-				<FieldIssue issues={issues} />
+				<FieldIssue path={path} jsonPath={jsonPath} />
 			</FormField>
 		);
 	}
@@ -298,7 +303,7 @@ function LiquidsListField({ name, node, writePrimitiveValue, entrySchema, issues
 	throw new Error(`Unknown option ${value}, this should not happen`);
 }
 
-function PickListField({ name, node, writePrimitiveValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
+function PickListField({ name, node, writePrimitiveValue, entrySchema, jsonPath, path }: Parameters<SchemaRenderer>[0]) {
 	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "";
 	const unwrappedSchema = unwrapSchema(entrySchema);
 
@@ -324,7 +329,7 @@ function PickListField({ name, node, writePrimitiveValue, entrySchema, issues }:
 						</SelectContent>
 					</Select>
 				</FormControl>
-				<FieldIssue issues={issues} />
+				<FieldIssue path={path} jsonPath={jsonPath} />
 			</FormField>
 		);
 	}
@@ -332,7 +337,7 @@ function PickListField({ name, node, writePrimitiveValue, entrySchema, issues }:
 	throw new Error(`Unknown option ${value}, this should not happen`);
 }
 
-function ColorField({ name, node, writePrimitiveValue, entrySchema, issues }: Parameters<SchemaRenderer>[0]) {
+function ColorField({ name, node, writePrimitiveValue, entrySchema, jsonPath, path }: Parameters<SchemaRenderer>[0]) {
 	let value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "333333";
 
 	value = value?.startsWith("#") ? value : "#" + value;
@@ -360,22 +365,12 @@ function ColorField({ name, node, writePrimitiveValue, entrySchema, issues }: Pa
 					</Popover>
 				</div>
 			</FormControl>
-			<FieldIssue issues={issues} />
+			<FieldIssue path={path} jsonPath={jsonPath} />
 		</FormField>
 	);
 }
 
-function ArrayField({
-	path,
-	name,
-	node,
-	original,
-	onPatch,
-	initializeArrayValue,
-	entrySchema,
-	jsonPath,
-	issues,
-}: Parameters<SchemaRenderer>[0]) {
+function ArrayField({ path, name, node, original, onPatch, initializeArrayValue, entrySchema, jsonPath }: Parameters<SchemaRenderer>[0]) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
 
@@ -414,51 +409,55 @@ function ArrayField({
 	};
 
 	return (
-		<FormField>
-			<FormLabel>{label}</FormLabel>
-			{description && <FormDescription>{description}</FormDescription>}
-			<FormControl>
-				<div className="flex flex-col gap-2">
-					{items.map((el, index) => {
-						const currentItemSchema = getArrayItemSchema(entrySchema, index) ?? itemSchema;
-						const currentItemType = detectSchemaType(currentItemSchema);
-						const entryJsonPath = jsonPath ? `${jsonPath}[${index}]` : `[${index}]`;
-						const entryIssues = issues.filter((issue) => issue.field?.startsWith(entryJsonPath));
+		<Collapsible>
+			<FormField>
+				<CollapsibleTrigger>
+					<FormLabel>{label}</FormLabel>
+				</CollapsibleTrigger>
+				{description && <FormDescription>{description}</FormDescription>}
+				<CollapsibleContent>
+					<FormControl>
+						<div className="flex flex-col gap-2">
+							{items.map((el, index) => {
+								const currentItemSchema = getArrayItemSchema(entrySchema, index) ?? itemSchema;
+								const currentItemType = detectSchemaType(currentItemSchema);
+								const entryJsonPath = jsonPath ? `${jsonPath}[${index}]` : `[${index}]`;
 
-						return (
-							<div key={index} className="flex flex-col gap-2 relative border p-2 rounded-md">
-								<p className="font-semibold">{index + 1}</p>
-								<SchemaArrayItemEditor
-									path={path}
-									value={el.value}
-									itemType={currentItemType}
-									itemSchema={currentItemSchema}
-									onChange={(v) => handleItemChange(index, v)}
-									original={original}
-									jsonPath={entryJsonPath}
-									issues={entryIssues}
-								/>
-								<Button
-									size="sm"
-									className="absolute top-1 right-1 text-destructive"
-									variant="ghost"
-									onClick={() => handleRemove(index)}
-								>
-									<X />
-								</Button>
-							</div>
-						);
-					})}
-					<Button type="button" variant="outline" size="sm" onClick={handleAdd}>
-						<Plus /> Add
-					</Button>
-				</div>
-			</FormControl>
-		</FormField>
+								return (
+									<div key={index} className="flex flex-col gap-2 relative border p-2 rounded-md">
+										<p className="font-semibold">{index + 1}</p>
+										<SchemaArrayItemEditor
+											path={path}
+											value={el.value}
+											itemType={currentItemType}
+											itemSchema={currentItemSchema}
+											onChange={(v) => handleItemChange(index, v)}
+											original={original}
+											jsonPath={entryJsonPath}
+										/>
+										<Button
+											size="sm"
+											className="absolute top-1 right-1 text-destructive"
+											variant="ghost"
+											onClick={() => handleRemove(index)}
+										>
+											<X />
+										</Button>
+									</div>
+								);
+							})}
+							<Button type="button" variant="outline" size="sm" onClick={handleAdd}>
+								<Plus /> Add
+							</Button>
+						</div>
+					</FormControl>
+				</CollapsibleContent>
+			</FormField>
+		</Collapsible>
 	);
 }
 
-function ObjectField({ name: parentName, path, node, original, onPatch, entrySchema, jsonPath, issues }: Parameters<SchemaRenderer>[0]) {
+function ObjectField({ path, node, original, onPatch, entrySchema, jsonPath }: Parameters<SchemaRenderer>[0]) {
 	if (!node.isObject()) {
 		return null;
 	}
@@ -470,7 +469,6 @@ function ObjectField({ name: parentName, path, node, original, onPatch, entrySch
 		const type = detectSchemaType(entrySchema);
 		const childNode = node.get(name);
 		const metadata = getSchemaMetadata(entrySchema);
-		const entryIssues = issues.filter((issue) => issue.field?.startsWith(`${parentName}.${name}`));
 
 		if (metadata?.visibleWhen) {
 			const refNode = node.get(metadata.visibleWhen.field);
@@ -512,7 +510,6 @@ function ObjectField({ name: parentName, path, node, original, onPatch, entrySch
 					initializeArrayValue={initializeArrayValue}
 					entrySchema={entrySchema as AnySchema}
 					jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
-					issues={entryIssues}
 				/>
 			</ErrorBoundary>
 		);
@@ -521,24 +518,7 @@ function ObjectField({ name: parentName, path, node, original, onPatch, entrySch
 	return <div className="pl-4 border-l-2 border-border grid gap-6">{results}</div>;
 }
 
-function ResearchField({ name, node, original, onPatch, replaceFieldValue, issues }: Parameters<SchemaRenderer>[0]) {
-	const items = useItems({ project: true, base: true });
-	const blocks = useBlocks();
-	const units = useUnits();
-	const liquids = useLiquids();
-	const sectors = useSectors();
-
-	const findContent = useCallback((name: string, entries: ContentEntry[][]) => {
-		for (const entry of entries) {
-			for (const item of entry) {
-				if (item.name === name) {
-					return item;
-				}
-			}
-		}
-		return null;
-	}, []);
-
+function ResearchField({ name, node, original, onPatch, replaceFieldValue, jsonPath, path }: Parameters<SchemaRenderer>[0]) {
 	function getCurrentValue(): Research | string | null {
 		if (node.isValue()) {
 			const val = (node as HjsonValueNode<unknown>).valueOf();
@@ -566,8 +546,6 @@ function ResearchField({ name, node, original, onPatch, replaceFieldValue, issue
 				? []
 				: (((currentValue as Record<string, unknown>)?.requirements as string[]) ?? [])
 	) as string[];
-
-	const addedReq = requirements.map((requirement: string) => requirement.split("/")[0]!);
 
 	function handleChange(newParent: string, newRequirements: string[]) {
 		if (node.isObject()) {
@@ -625,32 +603,8 @@ function ResearchField({ name, node, original, onPatch, replaceFieldValue, issue
 	}
 
 	function handleAddNewReq() {
-		const notAdded = items.find((item) => {
-			for (const requirement of requirements) {
-				if (requirement.startsWith(item.name + "/")) {
-					return false;
-				}
-			}
-			return true;
-		});
-		handleChange(parent, [...requirements, notAdded?.name + "/" + 10]);
+		handleChange(parent, [...requirements, "copper" + "/" + 10]);
 	}
-
-	function handleRemoveReq(index: number) {
-		handleChange(
-			parent,
-			requirements.filter((_: unknown, i: number) => i !== index),
-		);
-	}
-
-	function handleUpdateReq(index: number, item: string, number: number) {
-		handleChange(
-			parent,
-			requirements.map((r: string, i: number) => (i === index ? item + "/" + number : r)),
-		);
-	}
-
-	const parentEntry = findContent(parent, [items, blocks, liquids, sectors, units]);
 
 	return (
 		<>
@@ -659,13 +613,56 @@ function ResearchField({ name, node, original, onPatch, replaceFieldValue, issue
 				<FormControl>
 					<Dialog>
 						<DialogTrigger asChild>
-							{parentEntry ? (
-								<Button variant="outline" size="icon">
-									<ContentImage className="p-1" entry={parentEntry} />
-								</Button>
-							) : (
-								<Button variant="outline">{parent || "Select"}</Button>
-							)}
+							<ResearchParentTrigger parent={parent} />
+						</DialogTrigger>
+						<DialogContent className="w-sm" showCloseButton={false}>
+							<VisuallyHidden.Root>
+								<DialogTitle />
+								<DialogDescription />
+							</VisuallyHidden.Root>
+							<ResearchParentToggleGroup value={parent} onValueChange={(v) => handleChange(v, requirements)} />
+						</DialogContent>
+					</Dialog>
+				</FormControl>
+				<FieldIssue path={path} jsonPath={jsonPath} />
+				<FormControl className="grid gap-2">
+					<ResearchRequirementList requirements={requirements} onChange={(newRequirements) => handleChange(parent, newRequirements)} />
+					<Button className="w-full" variant="outline" onClick={handleAddNewReq}>
+						<Plus />
+					</Button>
+				</FormControl>
+			</FormField>
+		</>
+	);
+}
+
+function ResearchRequirementList({ requirements, onChange }: { requirements: string[]; onChange: (requirements: string[]) => void }) {
+	const items = useItems({ project: true, base: true });
+	const addedReq = requirements.map((requirement: string) => requirement.split("/")[0]!);
+
+	function handleRemoveReq(index: number) {
+		onChange(requirements.filter((_: unknown, i: number) => i !== index));
+	}
+
+	function handleUpdateReq(index: number, item: string, number: number) {
+		onChange(requirements.map((r: string, i: number) => (i === index ? item + "/" + number : r)));
+	}
+
+	return requirements.map((requirement: string, index: number) => {
+		const parts = requirement.split("/");
+		const itemName = parts[0]!;
+		const reqNumber = Number(parts[1]);
+
+		const selectedItem = items.find((i) => i.name === itemName);
+
+		return (
+			<FormField key={index}>
+				<FormControl className="flex gap-1">
+					<Dialog>
+						<DialogTrigger asChild>
+							<Button variant="outline" size="icon">
+								{selectedItem ? <ContentImage className="p-1" entry={selectedItem} /> : itemName}
+							</Button>
 						</DialogTrigger>
 						<DialogContent className="w-sm" showCloseButton={false}>
 							<VisuallyHidden.Root>
@@ -673,138 +670,130 @@ function ResearchField({ name, node, original, onPatch, replaceFieldValue, issue
 								<DialogDescription />
 							</VisuallyHidden.Root>
 							<ToggleGroup
-								className="w-full"
 								type="single"
-								value={parentEntry?.name}
-								onValueChange={(v) => handleChange(v, requirements)}
+								value={itemName}
+								onValueChange={(v) => (v ? handleUpdateReq(index, v, reqNumber) : handleRemoveReq(index))}
+								asChild
 							>
-								<Tabs className="w-full">
-									<TabsList>
-										<TabsTrigger value="item">Item</TabsTrigger>
-										<TabsTrigger value="block">Block</TabsTrigger>
-										<TabsTrigger value="liquid">Liquid</TabsTrigger>
-										<TabsTrigger value="sector">Sector</TabsTrigger>
-										<TabsTrigger value="unit">Unit</TabsTrigger>
-									</TabsList>
-									<TabsContent asChild value="item">
-										<ItemGrid>
-											{items
-												.filter((i) => i.name !== parentEntry?.name && !addedReq.includes(i.name))
-												.map((item) => (
-													<ToggleGroupItem key={item.name} value={item.name}>
-														<ContentImage entry={item} />
-													</ToggleGroupItem>
-												))}
-										</ItemGrid>
-									</TabsContent>
-									<TabsContent asChild value="block">
-										<ItemGrid>
-											{blocks
-												.filter((i) => i.name !== parentEntry?.name && !addedReq.includes(i.name))
-												.map((item) => (
-													<ToggleGroupItem key={item.name} value={item.name}>
-														<ContentImage entry={item} />
-													</ToggleGroupItem>
-												))}
-										</ItemGrid>
-									</TabsContent>
-									<TabsContent asChild value="liquid">
-										<ItemGrid>
-											{liquids
-												.filter((i) => i.name !== parentEntry?.name && !addedReq.includes(i.name))
-												.map((item) => (
-													<ToggleGroupItem key={item.name} value={item.name}>
-														<ContentImage entry={item} />
-													</ToggleGroupItem>
-												))}
-										</ItemGrid>
-									</TabsContent>
-									<TabsContent asChild value="sector">
-										<ItemGrid>
-											{sectors
-												.filter((i) => i.name !== parentEntry?.name && !addedReq.includes(i.name))
-												.map((item) => (
-													<ToggleGroupItem key={item.name} value={item.name}>
-														<ContentImage entry={item} />
-													</ToggleGroupItem>
-												))}
-										</ItemGrid>
-									</TabsContent>
-									<TabsContent asChild value="unit">
-										<ItemGrid>
-											{units
-												.filter((i) => i.name !== parentEntry?.name && !addedReq.includes(i.name))
-												.map((item) => (
-													<ToggleGroupItem key={item.name} value={item.name}>
-														<ContentImage entry={item} />
-													</ToggleGroupItem>
-												))}
-										</ItemGrid>
-									</TabsContent>
-								</Tabs>
+								<ItemGrid>
+									{items
+										.filter((i) => i.name !== itemName && !addedReq.includes(i.name))
+										.map((item) => (
+											<ToggleGroupItem key={item.name} value={item.name}>
+												<ContentImage entry={item} />
+											</ToggleGroupItem>
+										))}
+								</ItemGrid>
 							</ToggleGroup>
 						</DialogContent>
 					</Dialog>
-				</FormControl>
-				<FieldIssue issues={issues} />
-				<FormControl className="grid gap-2">
-					{requirements.map((requirement: string, index: number) => {
-						const parts = requirement.split("/");
-						const itemName = parts[0]!;
-						const reqNumber = Number(parts[1]);
-
-						const selectedItem = items.find((i) => i.name === itemName);
-
-						return (
-							<FormField key={index}>
-								<FormControl className="flex gap-1">
-									<Dialog>
-										<DialogTrigger asChild>
-											<Button variant="outline" size="icon">
-												{selectedItem ? <ContentImage className="p-1" entry={selectedItem} /> : itemName}
-											</Button>
-										</DialogTrigger>
-										<DialogContent className="w-sm" showCloseButton={false}>
-											<VisuallyHidden.Root>
-												<DialogTitle />
-												<DialogDescription />
-											</VisuallyHidden.Root>
-											<ToggleGroup
-												type="single"
-												value={itemName}
-												onValueChange={(v) => (v ? handleUpdateReq(index, v, reqNumber) : handleRemoveReq(index))}
-												asChild
-											>
-												<ItemGrid>
-													{items
-														.filter((i) => i.name !== itemName && !addedReq.includes(i.name))
-														.map((item) => (
-															<ToggleGroupItem key={item.name} value={item.name}>
-																<ContentImage entry={item} />
-															</ToggleGroupItem>
-														))}
-												</ItemGrid>
-											</ToggleGroup>
-										</DialogContent>
-									</Dialog>
-									<Input
-										type="number"
-										value={reqNumber}
-										onChange={(v) => handleUpdateReq(index, itemName, Number(v.currentTarget.valueAsNumber))}
-									/>
-									<Button className="text-destructive" variant="outline" size="icon" onClick={() => handleRemoveReq(index)}>
-										<X />
-									</Button>
-								</FormControl>
-							</FormField>
-						);
-					})}
-					<Button className="w-full" variant="outline" onClick={handleAddNewReq}>
-						<Plus />
+					<Input
+						type="number"
+						value={reqNumber}
+						onChange={(v) => handleUpdateReq(index, itemName, Number(v.currentTarget.valueAsNumber))}
+					/>
+					<Button className="text-destructive" variant="outline" size="icon" onClick={() => handleRemoveReq(index)}>
+						<X />
 					</Button>
 				</FormControl>
 			</FormField>
-		</>
+		);
+	});
+}
+
+function ResearchParentTrigger({ parent }: { parent: string }) {
+	const items = useItems({ project: true, base: true });
+	const blocks = useBlocks();
+	const units = useUnits();
+	const liquids = useLiquids();
+	const sectors = useSectors();
+
+	const findContent = useCallback((name: string, entries: ContentEntry[][]) => {
+		for (const entry of entries) {
+			for (const item of entry) {
+				if (item.name === name) {
+					return item;
+				}
+			}
+		}
+		return null;
+	}, []);
+
+	const parentEntry = findContent(parent, [items, blocks, liquids, sectors, units]);
+
+	return parentEntry ? (
+		<Button variant="outline" size="icon">
+			<ContentImage className="p-1" entry={parentEntry} />
+		</Button>
+	) : (
+		<Button variant="outline">{parent || "Select"}</Button>
+	);
+}
+
+function ResearchParentToggleGroup({ value, onValueChange }: { value: string | undefined; onValueChange: (v: string) => void }) {
+	const items = useItems({ project: true, base: true });
+	const blocks = useBlocks();
+	const units = useUnits();
+	const liquids = useLiquids();
+	const sectors = useSectors();
+
+	return (
+		<ToggleGroup className="w-full" type="single" value={value} onValueChange={onValueChange}>
+			<Tabs className="w-full">
+				<TabsList>
+					<TabsTrigger value="item">Item</TabsTrigger>
+					<TabsTrigger value="block">Block</TabsTrigger>
+					<TabsTrigger value="liquid">Liquid</TabsTrigger>
+					<TabsTrigger value="sector">Sector</TabsTrigger>
+					<TabsTrigger value="unit">Unit</TabsTrigger>
+				</TabsList>
+				<TabsContent asChild value="item">
+					<ItemGrid>
+						{items.map((item) => (
+							<ToggleGroupItem key={item.name} value={item.name}>
+								<ContentImage entry={item} />
+							</ToggleGroupItem>
+						))}
+					</ItemGrid>
+				</TabsContent>
+				<TabsContent asChild value="block">
+					<ItemGrid>
+						{blocks.map((item) => (
+							<ToggleGroupItem key={item.name} value={item.name}>
+								<ContentImage entry={item} />
+							</ToggleGroupItem>
+						))}
+					</ItemGrid>
+				</TabsContent>
+				<TabsContent asChild value="liquid">
+					<ItemGrid>
+						{liquids.map((item) => (
+							<ToggleGroupItem key={item.name} value={item.name}>
+								<ContentImage entry={item} />
+							</ToggleGroupItem>
+						))}
+					</ItemGrid>
+				</TabsContent>
+				<TabsContent asChild value="sector">
+					<ItemGrid>
+						{sectors.map((item) => (
+							<ToggleGroupItem key={item.name} value={item.name}>
+								<ContentImage entry={item} />
+							</ToggleGroupItem>
+						))}
+					</ItemGrid>
+				</TabsContent>
+				<TabsContent asChild value="unit">
+					<ItemGrid>
+						{units.map((item) => (
+							<ToggleGroupItem key={item.name} value={item.name}>
+								<ContentImage entry={item} />
+							</ToggleGroupItem>
+						))}
+					</ItemGrid>
+				</TabsContent>
+			</Tabs>
+		</ToggleGroup>
 	);
 }
 
@@ -818,7 +807,6 @@ function EffectField({
 	entrySchema,
 	onPatch,
 	jsonPath,
-	issues,
 }: Parameters<SchemaRenderer>[0]) {
 	const { data = [], isLoading, isError, error } = useEffects();
 	const [filter, setFilter] = useState("");
@@ -853,13 +841,12 @@ function EffectField({
 									original={original}
 									onPatch={onPatch}
 									jsonPath={jsonPath}
-									issues={issues}
 								/>
 								<Separator />
 							</FormControl>
 						</CollapsibleContent>
 					</FormField>
-					<FieldIssue issues={issues} />
+					<FieldIssue path={path} jsonPath={jsonPath} />
 				</Collapsible>
 			</div>
 		);
@@ -913,7 +900,7 @@ function EffectField({
 						</ToggleGroup>
 					</DialogContent>
 				</Dialog>
-				<FieldIssue issues={issues} />
+				<FieldIssue path={path} jsonPath={jsonPath} />
 			</FormField>
 		</div>
 	);
@@ -939,7 +926,6 @@ function SchemaArrayItemEditor({
 	onChange,
 	original = "",
 	jsonPath,
-	issues,
 }: {
 	path: string;
 	value: unknown;
@@ -948,7 +934,6 @@ function SchemaArrayItemEditor({
 	onChange: (v: unknown) => void;
 	original?: string;
 	jsonPath: string;
-	issues: ValidationResult[];
 }) {
 	const type = detectSchemaType(itemSchema);
 
@@ -1003,7 +988,6 @@ function SchemaArrayItemEditor({
 				initializeArrayValue={type === "array" ? () => onChange(v.getDefault(itemSchema) ?? []) : undefined}
 				entrySchema={itemSchema}
 				jsonPath={jsonPath}
-				issues={issues}
 			/>
 		</ErrorBoundary>
 	);

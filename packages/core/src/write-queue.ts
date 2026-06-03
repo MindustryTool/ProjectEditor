@@ -46,7 +46,7 @@ export class WriteQueue {
 	private scheduleFlush(): void {
 		if (this.flushing) return;
 		if (this.timer) clearTimeout(this.timer);
-		this.timer = setTimeout(() => this.flush(), 100);
+		this.timer = setTimeout(() => this.flush(), 1000);
 	}
 
 	async flush(): Promise<void> {

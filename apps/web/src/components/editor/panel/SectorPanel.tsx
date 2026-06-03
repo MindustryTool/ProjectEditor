@@ -1,5 +1,5 @@
 import { Panel } from "@/components/editor/Panel";
-import { FieldsRenderer } from "#/components/editor/panel/FieldRenderer";
+import { FieldsRenderer } from "#/components/editor/panel/FieldsRenderer";
 import { useFileName } from "#/hooks/use-path";
 import { SectorHjsonSchema } from "@project/schema";
 

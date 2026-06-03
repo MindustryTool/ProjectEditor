@@ -3,7 +3,7 @@ import { Folder, FolderOpen, ChevronRight, ChevronDown, Pencil, Trash2, Plus, Mo
 import { toast } from "sonner";
 import { isDefaultPath, type TreeNode } from "@project/fs";
 import type { TreeSnapshot } from "@project/core";
-import { useCurrentProject, useProjectSession, useFileStore, isDirty, selectEntry, selectIsSaving } from "@project/core";
+import { useCurrentProject, useProjectSession, useFileStore, isDirty, selectEntry, selectIsSaving, useValidationStore } from "@project/core";
 import { cn } from "~/lib/utils";
 import {
 	AlertDialog,
@@ -16,7 +16,6 @@ import {
 	AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import { usePath } from "#/hooks/use-path";
-import { useIssues } from "#/hooks/use-issue";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "~/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Button } from "~/components/ui/button";
@@ -26,6 +25,7 @@ import { InputGroup, InputGroupInput, InputGroupAddon } from "#/components/ui/in
 import { TemplateSelector } from "./TemplateSelector";
 import { useLocalStorage } from "usehooks-ts";
 import { FileIcon } from "#/components/editor/FileIcon";
+import { useShallow } from "zustand/react/shallow";
 
 interface FileExplorerContextValue {
 	selectedPath: string | null;
@@ -34,7 +34,6 @@ interface FileExplorerContextValue {
 	onEditingPathChange: (path: string | null) => void;
 	onDeleteRequest: (path: string) => void;
 	onCreateRequest: (path: string) => void;
-	totalIssueCount: Record<string, { error: number; warning: number }>;
 	projectId: string;
 }
 
@@ -69,8 +68,6 @@ export function FileExplorer({ className }: FileExplorerProps) {
 	const [deleteTargetPath, setDeleteTargetPath] = useState<string | null>(null);
 	const [createTargetPath, setCreateTargetPath] = useState<string | null>(null);
 
-	const totalIssueCount = useIssues();
-
 	const deleteTargetName = useMemo(() => {
 		if (!deleteTargetPath) {
 			return "";
@@ -102,7 +99,6 @@ export function FileExplorer({ className }: FileExplorerProps) {
 					onEditingPathChange: setEditingPath,
 					onDeleteRequest: setDeleteTargetPath,
 					onCreateRequest: setCreateTargetPath,
-					totalIssueCount,
 					projectId: context.project.id,
 				}}
 			>
@@ -158,109 +154,6 @@ export function FileExplorer({ className }: FileExplorerProps) {
 	);
 }
 
-const contentTypes = new Set(["item", "block", "unit", "liquid", "status", "sector", "env-block", "effect"]);
-
-function CreateFileForm({
-	targetPath,
-	context,
-	onSuccess,
-	onCancel,
-}: {
-	targetPath: string;
-	context: ReturnType<typeof useCurrentProject>;
-	onSuccess: (path: string) => void;
-	onCancel: () => void;
-}) {
-	const EXTENSION_MAP: Record<string, string> = {
-		file: "",
-		folder: "",
-		item: ".hjson",
-		block: ".hjson",
-		unit: ".hjson",
-		liquid: ".hjson",
-		status: ".hjson",
-		sector: ".hjson",
-		"env-block": ".hjson",
-		effect: ".hjson",
-	};
-
-	const [name, setName] = useState("");
-	const [type, setType] = useState("file");
-	const [error, setError] = useState("");
-
-	const isContentType = contentTypes.has(type);
-	const getTemplateContentRef = useRef<() => Promise<string>>(async () => "");
-	const handleGetTemplateContent = useCallback(async () => getTemplateContentRef.current(), []);
-	const handleSetTemplateContent = useCallback((fn: () => Promise<string>) => {
-		getTemplateContentRef.current = fn;
-	}, []);
-
-	async function handleCreate() {
-		const trimmed = name.trim();
-		if (!trimmed) {
-			setError("Name cannot be empty");
-			return;
-		}
-		setError("");
-
-		const ext = EXTENSION_MAP[type] ?? "";
-		const fullPath = `${targetPath || ""}/${trimmed}${ext}`;
-
-		try {
-			if (type === "folder") {
-				await context.fs.mkdir(fullPath);
-				onSuccess(fullPath);
-			} else {
-				const content = await handleGetTemplateContent();
-				await context.fs.writeTextFile(fullPath, content);
-				onSuccess(fullPath);
-			}
-		} catch (err) {
-			setError(err instanceof Error ? err.message : "Failed to create");
-		}
-	}
-
-	return (
-		<div className="space-y-4 h-full w-full">
-			<div className="space-y-2">
-				<Label htmlFor="name">Name</Label>
-				<InputGroup>
-					<InputGroupInput id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter name" />
-					{isContentType && <InputGroupAddon align="inline-end">{EXTENSION_MAP[type]}</InputGroupAddon>}
-				</InputGroup>
-			</div>
-			<div className="space-y-2">
-				<Label htmlFor="type">Type</Label>
-				<Select value={type} onValueChange={setType}>
-					<SelectTrigger className="w-full">
-						<SelectValue />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="file">File</SelectItem>
-						<SelectItem value="folder">Folder</SelectItem>
-						<SelectItem value="item">Item</SelectItem>
-						<SelectItem value="block">Block</SelectItem>
-						<SelectItem value="unit">Unit</SelectItem>
-						<SelectItem value="liquid">Liquid</SelectItem>
-						<SelectItem value="status">Status</SelectItem>
-						<SelectItem value="sector">Sector</SelectItem>
-						<SelectItem value="env-block">Env Block</SelectItem>
-						<SelectItem value="effect">Effect</SelectItem>
-					</SelectContent>
-				</Select>
-			</div>
-			{isContentType && <TemplateSelector type={type} name={name} onContentReady={handleSetTemplateContent} />}
-			{error && <p className="text-sm text-red-400">{error}</p>}
-			<DialogFooter>
-				<Button variant="outline" onClick={onCancel}>
-					Cancel
-				</Button>
-				<Button onClick={handleCreate}>Create</Button>
-			</DialogFooter>
-		</div>
-	);
-}
-
 function getIcon(node: TreeNode, expanded: boolean) {
 	if (node.path === "/") {
 		return null;
@@ -284,15 +177,14 @@ interface TreeNodeItemProps {
 
 function TreeNodeItem({ node, depth = 0 }: TreeNodeItemProps) {
 	const context = useCurrentProject();
-	const { selectedPath, editingPath, onSelect, onEditingPathChange, onDeleteRequest, onCreateRequest, totalIssueCount, projectId } =
-		useFileExplorer();
+	const { selectedPath, editingPath, onSelect, onEditingPathChange, onDeleteRequest, onCreateRequest, projectId } = useFileExplorer();
 	const [expanded, setExpanded] = useLocalStorage<boolean>(node.path, node.path === "/");
 	const currentPath = node.path === "/" ? "" : node.path;
 	const isSelected = selectedPath === currentPath;
 	const isFolder = node.type === "folder";
 
-	const errorCount = totalIssueCount[currentPath]?.error ?? 0;
-	const warningCount = totalIssueCount[currentPath]?.warning ?? 0;
+	const errorCount = useValidationStore(useShallow((s) => s.results.getRollup()[currentPath]?.error ?? 0));
+	const warningCount = useValidationStore(useShallow((s) => s.results.getRollup()[currentPath]?.warning ?? 0));
 
 	const bufferEntry = useFileStore(isFolder ? () => undefined : selectEntry(projectId, currentPath));
 	const isItemDirty = !isFolder && isDirty(bufferEntry);
@@ -531,4 +423,107 @@ function sortTreeNodes(nodes: TreeNode[]) {
 	for (const node of nodes) {
 		if (node.type === "folder" && node.children) sortTreeNodes(node.children);
 	}
+}
+
+const contentTypes = new Set(["item", "block", "unit", "liquid", "status", "sector", "env-block", "effect"]);
+
+function CreateFileForm({
+	targetPath,
+	context,
+	onSuccess,
+	onCancel,
+}: {
+	targetPath: string;
+	context: ReturnType<typeof useCurrentProject>;
+	onSuccess: (path: string) => void;
+	onCancel: () => void;
+}) {
+	const EXTENSION_MAP: Record<string, string> = {
+		file: "",
+		folder: "",
+		item: ".hjson",
+		block: ".hjson",
+		unit: ".hjson",
+		liquid: ".hjson",
+		status: ".hjson",
+		sector: ".hjson",
+		"env-block": ".hjson",
+		effect: ".hjson",
+	};
+
+	const [name, setName] = useState("");
+	const [type, setType] = useState("file");
+	const [error, setError] = useState("");
+
+	const isContentType = contentTypes.has(type);
+	const getTemplateContentRef = useRef<() => Promise<string>>(async () => "");
+	const handleGetTemplateContent = useCallback(async () => getTemplateContentRef.current(), []);
+	const handleSetTemplateContent = useCallback((fn: () => Promise<string>) => {
+		getTemplateContentRef.current = fn;
+	}, []);
+
+	async function handleCreate() {
+		const trimmed = name.trim();
+		if (!trimmed) {
+			setError("Name cannot be empty");
+			return;
+		}
+		setError("");
+
+		const ext = EXTENSION_MAP[type] ?? "";
+		const fullPath = `${targetPath || ""}/${trimmed}${ext}`;
+
+		try {
+			if (type === "folder") {
+				await context.fs.mkdir(fullPath);
+				onSuccess(fullPath);
+			} else {
+				const content = await handleGetTemplateContent();
+				await context.fs.writeTextFile(fullPath, content);
+				onSuccess(fullPath);
+			}
+		} catch (err) {
+			setError(err instanceof Error ? err.message : "Failed to create");
+		}
+	}
+
+	return (
+		<div className="space-y-4 h-full w-full">
+			<div className="space-y-2">
+				<Label htmlFor="name">Name</Label>
+				<InputGroup>
+					<InputGroupInput id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter name" />
+					{isContentType && <InputGroupAddon align="inline-end">{EXTENSION_MAP[type]}</InputGroupAddon>}
+				</InputGroup>
+			</div>
+			<div className="space-y-2">
+				<Label htmlFor="type">Type</Label>
+				<Select value={type} onValueChange={setType}>
+					<SelectTrigger className="w-full">
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="file">File</SelectItem>
+						<SelectItem value="folder">Folder</SelectItem>
+						<SelectItem value="item">Item</SelectItem>
+						<SelectItem value="block">Block</SelectItem>
+						<SelectItem value="unit">Unit</SelectItem>
+						<SelectItem value="liquid">Liquid</SelectItem>
+						<SelectItem value="status">Status</SelectItem>
+						<SelectItem value="sector">Sector</SelectItem>
+						<SelectItem value="env-block">Env Block</SelectItem>
+						<SelectItem value="effect">Effect</SelectItem>
+					</SelectContent>
+				</Select>
+			</div>
+			{isContentType && <TemplateSelector type={type} name={name} onContentReady={handleSetTemplateContent} />}
+			{error && <p className="text-sm text-red-400">{error}</p>}
+			<DialogFooter>
+				<Button variant="outline" onClick={onCancel}>
+					Cancel
+				</Button>
+				<Button onClick={handleCreate}>Create</Button>
+			</DialogFooter>
+		</div>
+	);
 }

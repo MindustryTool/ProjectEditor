@@ -1,12 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
-import {
-	useFileStore,
-	isDirty,
-	isError,
-	selectEntry,
-	selectIsSaving,
-	getEntry,
-} from "@project/core";
+import { useFileStore, isDirty, isError, selectEntry, selectIsSaving, getEntry } from "@project/core";
 import { useProjectSession } from "@project/core";
 import { getWriteQueue, disposeWriteQueue } from "@project/core";
 
@@ -24,17 +17,17 @@ export interface UseFileResult<T> {
 }
 
 export function useFile(path: string): UseFileResult<ArrayBuffer> {
-	const projectContext = useProjectSession((s) => s.projectContext);
-	const projectId = projectContext?.project.id;
+	const projectId = useProjectSession((s) => s.projectContext?.project.id);
+	const fs = useProjectSession((s) => s.projectContext?.fs);
+
 	const entry = useFileStore(projectId ? selectEntry(projectId, path) : () => undefined);
 	const isSaving = useFileStore(projectId ? selectIsSaving(projectId, path) : () => false);
 
 	useEffect(() => {
-		if (!projectId || !path) return;
-		if (entry !== undefined) return;
-
-		useFileStore.getState().loadFile(projectId, path, projectContext!.fs);
-	}, [path, projectId, projectContext, entry]);
+		if (projectId && fs && path && entry === undefined) {
+			useFileStore.getState().loadFile(projectId, path, fs);
+		}
+	}, [path, projectId, fs, entry]);
 
 	const previousProjectId = useRef(projectId ?? null);
 
@@ -49,7 +42,7 @@ export function useFile(path: string): UseFileResult<ArrayBuffer> {
 
 	const write = useCallback(
 		(content: ArrayBuffer | string) => {
-			if (!projectId || !projectContext) return;
+			if (!projectId || !fs) return;
 
 			const store = useFileStore.getState();
 			store.writeBuffer(projectId, path, content);
@@ -58,7 +51,8 @@ export function useFile(path: string): UseFileResult<ArrayBuffer> {
 			const version = currentEntry?.currentVersion ?? 0;
 
 			store.markSaving(projectId, path);
-			const queue = getWriteQueue(projectId, projectContext.fs);
+			const queue = getWriteQueue(projectId, fs);
+
 			queue.write(path, content).then(
 				() => {
 					const updatedEntry = getEntry(projectId, path);
@@ -74,7 +68,7 @@ export function useFile(path: string): UseFileResult<ArrayBuffer> {
 				},
 			);
 		},
-		[path, projectId, projectContext],
+		[path, projectId, fs],
 	);
 
 	return {

@@ -20,6 +20,7 @@ export const types = [
 	"picklist",
 	"liquids",
     "select",
+    "sprite",
 	"never",
 ] as const;
 

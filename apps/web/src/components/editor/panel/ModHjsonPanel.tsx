@@ -1,4 +1,4 @@
-import { FieldsRenderer } from "./FieldRenderer";
+import { FieldsRenderer } from "./FieldsRenderer";
 import { ModHjsonSchema } from "@project/schema";
 import { Panel } from "@/components/editor/Panel";
 import { useFileName } from "#/hooks/use-path";
