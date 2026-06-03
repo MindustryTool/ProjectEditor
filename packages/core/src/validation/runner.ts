@@ -23,6 +23,7 @@ export function createValidationRunner(registry: ValidatorRegistry): ValidationR
 					messageKey: err instanceof Error ? err.message : "Unknown error",
 					startLine: 1,
 					startColumn: 1,
+                    duration: Date.now() - start,
 				},
 			];
 		}
@@ -47,6 +48,7 @@ export function createValidationRunner(registry: ValidatorRegistry): ValidationR
 					startColumn: 1,
 					endLine: 1,
 					endColumn: 1,
+                    duration: Date.now() - start,
 				});
 			}
 		}

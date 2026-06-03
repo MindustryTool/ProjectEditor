@@ -44,6 +44,7 @@ function toErrorResult(path: string, err: unknown): ValidationResult[] {
 			messageKey: err instanceof Error ? err.message : "Unknown error",
 			startLine: 1,
 			startColumn: 1,
+            duration: 0,
 		},
 	];
 }
@@ -138,6 +139,7 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 			} catch (err) {
 				if (latestRequestIdByPathRef.current.get(path) !== requestId) return;
 				useValidationStore.getState().setResults(path, toErrorResult(path, err));
+				console.error(err);
 			}
 		},
 		[contents, getWorker],

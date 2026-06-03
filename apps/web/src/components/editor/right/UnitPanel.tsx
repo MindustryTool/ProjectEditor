@@ -1,14 +1,14 @@
 import { Panel } from "@/components/editor/Panel";
-import { FieldsRenderer } from "#/components/editor/panel/FieldsRenderer";
-import { SpritePicker } from "#/components/editor/panel/SpritePicker";
+import { FieldsRenderer } from "#/components/editor/right/FieldsRenderer";
+import { SpritePicker } from "#/components/editor/right/SpritePicker";
 import { useFileName } from "#/hooks/use-path";
-import { LiquidHjsonSchema } from "@project/schema";
+import { UnitHjsonSchema } from "@project/schema";
 
-interface LiquidPanelProps {
+interface UnitPanelProps {
 	path: string;
 }
 
-export function LiquidPanel({ path }: LiquidPanelProps) {
+export function UnitPanel({ path }: UnitPanelProps) {
 	const fileName = useFileName();
 
 	return (
@@ -16,7 +16,7 @@ export function LiquidPanel({ path }: LiquidPanelProps) {
 			<div className="space-y-6 h-full w-full">
 				{fileName !== null && <div className="text-lg font-bold">{fileName}</div>}
 				<SpritePicker path={path} />
-				<FieldsRenderer path={path} schema={LiquidHjsonSchema} />
+				<FieldsRenderer path={path} schema={UnitHjsonSchema} />
 			</div>
 		</Panel>
 	);

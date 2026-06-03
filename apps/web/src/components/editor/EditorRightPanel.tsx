@@ -1,10 +1,10 @@
 import { memo } from "react";
-import { ModHjsonPanel } from "./panel/ModHjsonPanel";
-import { ItemPanel } from "#/components/editor/panel/ItemPanel";
-import { LiquidPanel } from "#/components/editor/panel/LiquidPanel";
-import { SectorPanel } from "#/components/editor/panel/SectorPanel";
-import { StatusPanel } from "#/components/editor/panel/StatusPanel";
-import { UnitPanel } from "#/components/editor/panel/UnitPanel";
+import { ModHjsonPanel } from "./right/ModHjsonPanel";
+import { ItemPanel } from "#/components/editor/right/ItemPanel";
+import { LiquidPanel } from "#/components/editor/right/LiquidPanel";
+import { SectorPanel } from "#/components/editor/right/SectorPanel";
+import { StatusPanel } from "#/components/editor/right/StatusPanel";
+import { UnitPanel } from "#/components/editor/right/UnitPanel";
 
 interface EditorRightPanelProps {
 	path: string | null;

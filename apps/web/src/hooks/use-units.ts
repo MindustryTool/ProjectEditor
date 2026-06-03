@@ -1,5 +1,5 @@
 import { useBaseUnits } from "#/hooks/use-base-units";
-import { useProjectSession, useCurrentProject } from "@project/core";
+import { useProjectSession } from "@project/core";
 import { useMemo } from "react";
 import type { ContentEntry } from "./use-blocks";
 
@@ -7,7 +7,6 @@ export function useUnits(): ContentEntry[] {
 	const projectItems = useProjectSession((s) => s.treeSnapshot.units);
 
 	const { data } = useBaseUnits();
-	const { fs } = useCurrentProject();
 
 	return useMemo(() => {
 		const items: ContentEntry[] = [];
@@ -18,7 +17,6 @@ export function useUnits(): ContentEntry[] {
 					type: "base" as const,
 					path: `units/${i.name}`,
 					contentType: "units",
-					getContent: async () => "",
 				})),
 			);
 		}
@@ -28,9 +26,8 @@ export function useUnits(): ContentEntry[] {
 				type: "project" as const,
 				path: i.path,
 				contentType: "units",
-				getContent: async () => fs.readTextFile(i.path),
 			})),
 		);
 		return items;
-	}, [projectItems, data, fs]);
+	}, [projectItems, data]);
 }

@@ -24,8 +24,8 @@ export interface ValidationResult<Tkey extends string = string> {
 	fixs?: {
 		messageKey: Tkey;
 		messageParams?: Record<string, unknown>;
-		action: () => Promise<void>;
 	}[];
+    duration: number;
 }
 
 export type ValidatorFn = (params: { path: string; content: string; context: ProjectContents }) => ValidationResult[];

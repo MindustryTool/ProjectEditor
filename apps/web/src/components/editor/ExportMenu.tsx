@@ -155,6 +155,7 @@ async function loadAndValidateAll(
 					messageKey: err instanceof Error ? err.message : "Unknown error",
 					startLine: 1,
 					startColumn: 1,
+                    duration: 0,
 				},
 			]);
 		}

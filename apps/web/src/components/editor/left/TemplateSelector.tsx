@@ -90,7 +90,8 @@ function createHookSelector(useHook: () => ContentEntry[]) {
 			if (choice === NONE) return "";
 			const entry = entriesRef.current.find((e) => e.path === choice);
 			if (entry?.type === "project") {
-				return (await entry.getContent()) as string;
+				// TODO: load project file
+                return entry.path;
 			}
 			return "";
 		}, [choice]);

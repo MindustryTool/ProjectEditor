@@ -1,5 +1,5 @@
 import { useBaseItems } from "#/hooks/use-base-items";
-import { useProjectSession, useCurrentProject } from "@project/core";
+import { useProjectSession } from "@project/core";
 import { useMemo } from "react";
 import type { ContentEntry } from "./use-blocks";
 
@@ -12,7 +12,6 @@ export function useItems({ project, base }: UseItemsOptions): ContentEntry[] {
 	const projectItems = useProjectSession((s) => s.treeSnapshot.items);
 
 	const { data } = useBaseItems();
-	const { fs } = useCurrentProject();
 
 	return useMemo(() => {
 		const items: ContentEntry[] = [];
@@ -23,7 +22,6 @@ export function useItems({ project, base }: UseItemsOptions): ContentEntry[] {
 					type: "base" as const,
 					path: `items/${i.name}`,
 					contentType: "items",
-					getContent: async () => "",
 				})) || []),
 			);
 		}
@@ -35,10 +33,9 @@ export function useItems({ project, base }: UseItemsOptions): ContentEntry[] {
 					type: "project" as const,
 					path: i.path,
 					contentType: "items",
-					getContent: async () => fs.readTextFile(i.path),
 				})),
 			);
 		}
 		return items;
-	}, [projectItems, data, fs, project, base]);
+	}, [projectItems, data, project, base]);
 }

@@ -84,6 +84,7 @@ function jsonSyntaxValidator({ path, content }: Parameters<ValidatorFn>[0]): Val
 					startColumn,
 					endLine,
 					endColumn,
+                    duration: 0,
 				},
 			];
 		}
@@ -115,6 +116,7 @@ function jsonSyntaxValidator({ path, content }: Parameters<ValidatorFn>[0]): Val
 				startColumn,
 				endLine: startLine,
 				endColumn: startColumn,
+                duration: 0,
 			},
 		];
 	}
@@ -172,6 +174,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 					startColumn,
 					endLine,
 					endColumn,
+                    duration: 0,
 				});
 
 				if (issue.issues) {
@@ -204,6 +207,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 							startColumn: subStartColumn,
 							endLine: subEndLine,
 							endColumn: subEndColumn,
+                            duration: 0,
 						});
 					}
 				}
@@ -225,6 +229,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 					startColumn: field?.start.col ?? 1,
 					endLine: field?.end?.row ?? 1,
 					endColumn: field?.end?.col ?? 1,
+                    duration: 0,
 				});
 			}
 		}

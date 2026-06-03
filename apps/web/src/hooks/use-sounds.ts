@@ -1,4 +1,4 @@
-import { useProjectSession, useCurrentProject } from "@project/core";
+import { useProjectSession } from "@project/core";
 import { useMemo } from "react";
 import type { ContentEntry } from "./use-blocks";
 import { useBaseSounds } from "#/hooks/use-base-sounds";
@@ -7,7 +7,6 @@ export function useSounds(): ContentEntry[] {
 	const projectItems = useProjectSession((s) => s.treeSnapshot.sounds);
 
 	const { data } = useBaseSounds();
-	const { fs } = useCurrentProject();
 
 	return useMemo(() => {
 		const items: ContentEntry[] = [];
@@ -18,9 +17,6 @@ export function useSounds(): ContentEntry[] {
 					type: "base" as const,
 					path: `sounds/${i.name}`,
 					contentType: "sounds",
-					getContent: async () => {
-						throw new Error("Should not be called");
-					},
 				})),
 			);
 		}
@@ -30,9 +26,8 @@ export function useSounds(): ContentEntry[] {
 				type: "project" as const,
 				path: i.path,
 				contentType: "sounds",
-				getContent: async () => fs.readTextFile(i.path),
 			})),
 		);
 		return items;
-	}, [projectItems, data, fs]);
+	}, [projectItems, data]);
 }
