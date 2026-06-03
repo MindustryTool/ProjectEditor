@@ -7,7 +7,7 @@ import { ShootPatternHjsonSchema } from "./shoot-pattern";
 import { BulletHjsonSchema } from "./bullet";
 import { lazyArray } from "./lazy-array";
 
-const weaponObjectSchema = v.object({
+const weaponObjectSchema = {
 	name: v.optional(v.string()),
 	shots: v.optional(v.number(), 1),
 
@@ -97,11 +97,11 @@ const weaponObjectSchema = v.object({
 	shootStatusDuration: v.optional(v.number(), 60 * 5),
 
 	shootOnDeath: v.optional(v.boolean(), false),
-});
+};
 
 export const WeaponHjsonSchema: SchemaFn = (value, context) =>
 	v.object({
-		...weaponObjectSchema.entries,
+		...weaponObjectSchema,
 		bullet: v.optional(BulletHjsonSchema(value.get("bullet"), context)),
 		ejectEffect: v.optional(EffectHjsonSchema(value.get("ejectEffect"), context)),
 

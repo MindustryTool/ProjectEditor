@@ -8,7 +8,7 @@ import { PartHjsonSchema } from "./part";
 import { EngineHjsonSchema } from "./engine";
 import { lazyArray } from "./lazy-array";
 
-const unitObjectSchema = v.object({
+const unitObjectSchema = {
 	envRequired: v.optional(EnvSchema, 0),
 	envEnabled: v.optional(EnvSchema, Envs.terrestrial),
 	envDisabled: v.optional(EnvSchema, Envs.scorching),
@@ -231,11 +231,11 @@ const unitObjectSchema = v.object({
 	outlineColor: v.optional(MindustryHexColorSchema),
 	mineSound: v.optional(SoundHjsonSchema),
 	mechLegColor: v.optional(MindustryHexColorSchema),
-});
+};
 
 export const UnitHjsonSchema: SchemaFn = (value, context) =>
 	v.object({
-		...unitObjectSchema.entries,
+		...unitObjectSchema,
 
 		abilities: v.optional(
 			lazyArray((index) => AbilityHjsonSchema(value.get("abilities").get(index), context)),
