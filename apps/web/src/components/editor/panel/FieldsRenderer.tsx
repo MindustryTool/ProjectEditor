@@ -108,40 +108,50 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	const resolvedSchema = resolveSchema(typeof schema === "function" ? schema(node, contents) : schema, node.valueOf());
 	const entries = getSchemaEntries(resolvedSchema);
 
-	return entries.map(([name, entrySchema]) => {
-		const key = name + path;
-		const type = detectSchemaType(entrySchema);
+	return (
+		<ErrorBoundary>
+			{entries.map(([name, entrySchema]) => {
+				const key = name + path;
+				const type = detectSchemaType(entrySchema);
 
-		const Renderer = schemaRenderers[type];
+				const Renderer = schemaRenderers[type];
 
-		if (Renderer === undefined) {
-			return (
-				<FormControl>
-					<FormLabel>{name}</FormLabel>
-					<span key={key} className="text-yellow-400 text-sm">
-						Unknown field type {type}
-					</span>
-				</FormControl>
-			);
-		}
+				if (Renderer === undefined) {
+					return (
+						<FormControl>
+							<FormLabel>{name}</FormLabel>
+							<span key={key} className="text-yellow-400 text-sm">
+								Unknown field type {type}
+							</span>
+						</FormControl>
+					);
+				}
 
-		const childNode = node.get(name);
-		const metadata = getSchemaMetadata(entrySchema);
+				const childNode = node.get(name);
+				const metadata = getSchemaMetadata(entrySchema);
 
-		if (metadata?.visibleWhen) {
-			const refNode = node.get(metadata.visibleWhen.field);
-			if (refNode.isMissing()) return null;
-			if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) return null;
-		}
+				if (metadata?.visibleWhen) {
+					const refNode = node.get(metadata.visibleWhen.field);
+					if (refNode.isMissing()) return null;
+					if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) return null;
+				}
 
-		const value = childNode.isMissing() ? v.getDefault(entrySchema) : childNode.valueOf();
+				const value = childNode.isMissing() ? v.getDefault(entrySchema) : childNode.valueOf();
 
-		return (
-			<ErrorBoundary key={key}>
-				<Renderer path={path} name={name} value={value} onChange={onChange} entrySchema={entrySchema as AnySchema} jsonPath={name} />
-			</ErrorBoundary>
-		);
-	});
+				return (
+					<Renderer
+						key={key}
+						path={path}
+						name={name}
+						value={value}
+						onChange={onChange}
+						entrySchema={entrySchema as AnySchema}
+						jsonPath={name}
+					/>
+				);
+			})}
+		</ErrorBoundary>
+	);
 });
 type SchemaRendererProps = {
 	name: string;
@@ -542,16 +552,15 @@ const ObjectField = React.memo(function ObjectField({ path, value, onChange, ent
 		}
 
 		return (
-			<ErrorBoundary key={key}>
-				<Renderer
-					path={path}
-					name={name}
-					value={childValue ?? v.getDefault(childSchema)}
-					onChange={onChange}
-					entrySchema={childSchema as AnySchema}
-					jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
-				/>
-			</ErrorBoundary>
+			<Renderer
+				key={key}
+				path={path}
+				name={name}
+				value={childValue ?? v.getDefault(childSchema)}
+				onChange={onChange}
+				entrySchema={childSchema as AnySchema}
+				jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
+			/>
 		);
 	});
 
@@ -975,11 +984,7 @@ const SchemaArrayItemEditor = React.memo(function SchemaArrayItemEditor({
 		return <span className="text-yellow-400 text-sm">Unknown field type {name}</span>;
 	}
 
-	return (
-		<ErrorBoundary key={name}>
-			<Renderer path={path} name={name} value={value} onChange={onChange} entrySchema={itemSchema} jsonPath={jsonPath} />
-		</ErrorBoundary>
-	);
+	return <Renderer key={name} path={path} name={name} value={value} onChange={onChange} entrySchema={itemSchema} jsonPath={jsonPath} />;
 });
 
 const schemaRenderers: Partial<Record<Type, SchemaRenderer>> = {
