@@ -58,19 +58,31 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 
 	const onChange = useCallback(
 		(jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => {
-			write((prev: string | null) => {
-				const content = prev ?? "";
+			write((content: string | null) => {
+				if (content === null) {
+					throw new Error("Attempting to write into unloaded file");
+				}
+
 				const root = HJSON.parseWithCache(content);
 				const splitAt = Math.max(jsonPath.lastIndexOf("."), jsonPath.lastIndexOf("["));
 				if (splitAt === -1) {
 					return updater(root, jsonPath, content, root);
 				}
+
 				const parentPath = jsonPath.slice(0, splitAt);
 				const key = jsonPath.slice(splitAt + 1).replace(/]$/, "");
 				const parentInfo = root.path(parentPath);
-				if (!parentInfo) throw new Error(`parent path not found: ${parentPath}`);
+
+				if (!parentInfo) {
+					throw new Error(`parent path not found: ${parentPath}`);
+				}
+
 				const parent = parentInfo.value;
-				if (!(parent instanceof HjsonNode)) throw new Error(`expected node at ${parentPath}`);
+
+				if (!(parent instanceof HjsonNode)) {
+					throw new Error(`expected node at ${parentPath}`);
+				}
+
 				return updater(parent, key, content, root);
 			});
 		},
@@ -171,13 +183,27 @@ const FieldIssue = React.memo(function FieldIssue({ path, jsonPath }: { path: st
 	);
 });
 
-const StringField = React.memo(function StringField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
+const SchemaLabel = React.memo(function SchemaLabel({ name, entrySchema }: { name: string; entrySchema: AnySchema }) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
+	const metadata = getSchemaMetadata(entrySchema);
+
+	return <>{metadata?.name ? _t(metadata.name) : name}</>;
+});
+
+const SchemaDescription = React.memo(function SchemaDescription({ entrySchema }: { entrySchema: AnySchema }) {
+	const { t } = useTranslation();
+	const _t = t as (key: string) => string;
+	const metadata = getSchemaMetadata(entrySchema);
+
+	if (!metadata?.description) return null;
+
+	return <FormDescription>{_t(metadata.description)}</FormDescription>;
+});
+
+const StringField = React.memo(function StringField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const stringValue = typeof value === "string" ? value : String(value);
 	const metadata = getSchemaMetadata(entrySchema);
-	const label = metadata?.name ? _t(metadata.name) : name;
-	const description = metadata?.description ? _t(metadata.description) : undefined;
 
 	function handleChange(newVal: string) {
 		const isDefault = newVal === v.getDefault(entrySchema);
@@ -192,7 +218,9 @@ const StringField = React.memo(function StringField({ name, value, onChange, ent
 
 	return (
 		<FormField>
-			<FormLabel>{label}</FormLabel>
+			<FormLabel>
+				<SchemaLabel name={name} entrySchema={entrySchema} />
+			</FormLabel>
 			<FormControl>
 				{metadata?.multiline ? (
 					<Textarea key={name} value={stringValue} onChange={(v) => handleChange(v.currentTarget.value)} />
@@ -200,19 +228,14 @@ const StringField = React.memo(function StringField({ name, value, onChange, ent
 					<Input key={name} value={stringValue} onChange={(v) => handleChange(v.currentTarget.value)} />
 				)}
 			</FormControl>
-			{description && <FormDescription>{description}</FormDescription>}
+			<SchemaDescription entrySchema={entrySchema} />
 			<FieldIssue path={path} jsonPath={jsonPath} />
 		</FormField>
 	);
 });
 
 const NumberField = React.memo(function NumberField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
-	const { t } = useTranslation();
-	const _t = t as (key: string) => string;
 	const numValue = typeof value === "number" ? value : String(value);
-	const metadata = getSchemaMetadata(entrySchema);
-	const label = metadata?.name ? _t(metadata.name) : name;
-	const description = metadata?.description ? _t(metadata.description) : undefined;
 
 	function handleChange(newVal: number) {
 		const isDefault = newVal === v.getDefault(entrySchema);
@@ -228,23 +251,20 @@ const NumberField = React.memo(function NumberField({ name, value, onChange, ent
 
 	return (
 		<FormField>
-			<FormLabel>{label}</FormLabel>
+			<FormLabel>
+				<SchemaLabel name={name} entrySchema={entrySchema} />
+			</FormLabel>
 			<FormControl>
 				<Input key={name} value={numValue} onChange={(v) => handleChange(v.currentTarget.valueAsNumber)} type="number" />
 			</FormControl>
-			{description && <FormDescription>{description}</FormDescription>}
+			<SchemaDescription entrySchema={entrySchema} />
 			<FieldIssue path={path} jsonPath={jsonPath} />
 		</FormField>
 	);
 });
 
 const BooleanField = React.memo(function BooleanField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
-	const { t } = useTranslation();
-	const _t = t as (key: string) => string;
 	const checked = typeof value === "boolean" ? value : v.getDefault(entrySchema);
-	const metadata = getSchemaMetadata(entrySchema);
-	const label = metadata?.name ? _t(metadata.name) : name;
-	const description = metadata?.description ? _t(metadata.description) : undefined;
 
 	function handleChange(val: boolean) {
 		if (val === v.getDefault(entrySchema) && !hasNullishWrapper(entrySchema)) {
@@ -258,9 +278,11 @@ const BooleanField = React.memo(function BooleanField({ name, value, onChange, e
 		<FormField>
 			<FormControl className="flex-row flex gap-1">
 				<Checkbox key={name} checked={checked} onCheckedChange={(val) => handleChange(val === true)} />
-				<FormLabel>{label}</FormLabel>
+				<FormLabel>
+					<SchemaLabel name={name} entrySchema={entrySchema} />
+				</FormLabel>
 			</FormControl>
-			{description && <FormDescription>{description}</FormDescription>}
+			<SchemaDescription entrySchema={entrySchema} />
 			<FieldIssue path={path} jsonPath={jsonPath} />
 		</FormField>
 	);
@@ -284,7 +306,9 @@ const LiquidsListField = React.memo(function LiquidsListField({ name, value, onC
 
 		return (
 			<FormField>
-				<FormLabel>{name}</FormLabel>
+				<FormLabel>
+					<SchemaLabel name={name} entrySchema={entrySchema} />
+				</FormLabel>
 				<FormControl>
 					<Select
 						key={name}
@@ -309,6 +333,7 @@ const LiquidsListField = React.memo(function LiquidsListField({ name, value, onC
 						</SelectContent>
 					</Select>
 				</FormControl>
+				<SchemaDescription entrySchema={entrySchema} />
 				<FieldIssue path={path} jsonPath={jsonPath} />
 			</FormField>
 		);
@@ -326,7 +351,9 @@ const PickListField = React.memo(function PickListField({ name, value, onChange,
 
 		return (
 			<FormField>
-				<FormLabel>{name}</FormLabel>
+				<FormLabel>
+					<SchemaLabel name={name} entrySchema={entrySchema} />
+				</FormLabel>
 				<FormControl>
 					<Select
 						key={name}
@@ -351,6 +378,7 @@ const PickListField = React.memo(function PickListField({ name, value, onChange,
 						</SelectContent>
 					</Select>
 				</FormControl>
+				<SchemaDescription entrySchema={entrySchema} />
 				<FieldIssue path={path} jsonPath={jsonPath} />
 			</FormField>
 		);
@@ -366,7 +394,9 @@ const ColorField = React.memo(function ColorField({ name, value, onChange, entry
 
 	return (
 		<FormField>
-			<FormLabel>{name}</FormLabel>
+			<FormLabel>
+				<SchemaLabel name={name} entrySchema={entrySchema} />
+			</FormLabel>
 			<FormControl>
 				<div className="flex items-center gap-2">
 					<Popover>
@@ -394,15 +424,13 @@ const ColorField = React.memo(function ColorField({ name, value, onChange, entry
 					</Popover>
 				</div>
 			</FormControl>
+			<SchemaDescription entrySchema={entrySchema} />
 			<FieldIssue path={path} jsonPath={jsonPath} />
 		</FormField>
 	);
 });
 
 const ArrayField = React.memo(function ArrayField({ path, name, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
-	const { t } = useTranslation();
-	const _t = t as (key: string) => string;
-
 	const arrayValue = Array.isArray(value) ? value : undefined;
 
 	if (!arrayValue) {
@@ -415,10 +443,6 @@ const ArrayField = React.memo(function ArrayField({ path, name, value, onChange,
 	if (!itemSchema) {
 		throw new Error("Array schema must have item schema: " + entrySchema);
 	}
-
-	const metadata = getSchemaMetadata(entrySchema);
-	const label = metadata?.name ? _t(metadata.name) : name;
-	const description = metadata?.description ? _t(metadata.description) : undefined;
 
 	const handleRemove = (index: number) => {
 		onChange(jsonPath, (parent, key, original) => {
@@ -442,9 +466,11 @@ const ArrayField = React.memo(function ArrayField({ path, name, value, onChange,
 		<Collapsible>
 			<FormField>
 				<CollapsibleTrigger>
-					<FormLabel>{label}</FormLabel>
+					<FormLabel>
+						<SchemaLabel name={name} entrySchema={entrySchema} />
+					</FormLabel>
 				</CollapsibleTrigger>
-				{description && <FormDescription>{description}</FormDescription>}
+				<SchemaDescription entrySchema={entrySchema} />
 				<CollapsibleContent>
 					<FormControl>
 						<div className="flex flex-col gap-2">
@@ -507,7 +533,9 @@ const ObjectField = React.memo(function ObjectField({ path, value, onChange, ent
 		if (Renderer === undefined) {
 			return (
 				<FormControl key={key}>
-					<FormLabel>{name}</FormLabel>
+					<FormLabel>
+						<SchemaLabel name={name} entrySchema={childSchema as AnySchema} />
+					</FormLabel>
 					<span className="text-yellow-400 text-sm">Unknown field type {type}</span>
 				</FormControl>
 			);
@@ -530,7 +558,7 @@ const ObjectField = React.memo(function ObjectField({ path, value, onChange, ent
 	return <div className="pl-4 border-l-2 border-border grid gap-6">{results}</div>;
 });
 
-const ResearchField = React.memo(function ResearchField({ name, value, onChange, jsonPath, path }: SchemaRendererProps) {
+const ResearchField = React.memo(function ResearchField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const currentValue = value as Research | string | null | undefined;
 
 	const parent =
@@ -567,7 +595,9 @@ const ResearchField = React.memo(function ResearchField({ name, value, onChange,
 	return (
 		<>
 			<FormField>
-				<FormLabel>{name}</FormLabel>
+				<FormLabel>
+					<SchemaLabel name={name} entrySchema={entrySchema} />
+				</FormLabel>
 				<FormControl>
 					<Dialog>
 						<DialogTrigger asChild>
@@ -582,6 +612,7 @@ const ResearchField = React.memo(function ResearchField({ name, value, onChange,
 						</DialogContent>
 					</Dialog>
 				</FormControl>
+				<SchemaDescription entrySchema={entrySchema} />
 				<FieldIssue path={path} jsonPath={jsonPath} />
 				<FormControl className="grid gap-2">
 					<ResearchRequirementList requirements={requirements} onChange={(newRequirements) => handleChange(parent, newRequirements)} />
@@ -775,7 +806,10 @@ const EffectField = React.memo(function EffectField({ path, name, value, onChang
 		const typeValue = (value as Record<string, unknown>)?.type ?? "";
 		return (
 			<div className="grid gap-2">
-				<FormLabel>{name}</FormLabel>
+				<FormLabel>
+					<SchemaLabel name={name} entrySchema={entrySchema} />
+				</FormLabel>
+				<SchemaDescription entrySchema={entrySchema} />
 				<div className="grid grid-cols-2 gap-2">
 					<Button
 						variant="outline"
@@ -823,7 +857,10 @@ const EffectField = React.memo(function EffectField({ path, name, value, onChang
 
 	return (
 		<div className="grid gap-2">
-			<FormLabel>{name}</FormLabel>
+			<FormLabel>
+				<SchemaLabel name={name} entrySchema={entrySchema} />
+			</FormLabel>
+			<SchemaDescription entrySchema={entrySchema} />
 			<div className="grid grid-cols-2 gap-2">
 				<Button variant="outline" disabled>
 					Built-In

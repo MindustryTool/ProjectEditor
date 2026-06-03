@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Provide source-preserving HJSON formatting that normalizes valid documents while retaining comments, layout-sensitive content, and recoverably invalid source spans.
+
+## Requirements
 
 ### Requirement: Public HJSON formatter API
 The HJSON library SHALL provide a public `HJSON.format(text, options?)` API for formatting source text, and the package entry point SHALL export the formatter option types required to call it.

@@ -55,6 +55,14 @@ Each schema file SHALL extract all pure-data object schema definitions (those wi
 - **WHEN** inspecting `part.ts`
 - **THEN** `ShapePart`'s inline object schema in `classSchemaMap` SHALL be a top-level exported constant named `shapePartObjectSchema`
 
+#### Scenario: Weapon static fields use top-level constant
+- **WHEN** inspecting `weapon.ts`
+- **THEN** plain static fields such as booleans, numbers, colors, and sounds that do not depend on `value` or `context` SHALL be defined in top-level constant instead of inline inside `WeaponHjsonSchema`
+
+#### Scenario: Unit static fields use top-level constant
+- **WHEN** inspecting `unit.ts`
+- **THEN** plain static fields such as booleans, numbers, colors, and sounds that do not depend on `value` or `context` SHALL be defined in top-level constant instead of inline inside `UnitHjsonSchema`
+
 ### Requirement: Context-dependent schemas stay inline
 Factory functions that reference SchemaFn calls (EffectHjsonSchema, BulletHjsonSchema, PartHjsonSchema, ShootPatternHjsonSchema) SHALL remain inline in classSchemaMap without extraction to static constants.
 
@@ -90,12 +98,28 @@ Factory functions that reference SchemaFn calls (EffectHjsonSchema, BulletHjsonS
 - **WHEN** inspecting `part.ts`
 - **THEN** `EffectSpawnerPart` factory function SHALL remain inline because it calls `EffectHjsonSchema`
 
+#### Scenario: Weapon dynamic fields stay inside schema function
+- **WHEN** inspecting `weapon.ts`
+- **THEN** fields that call nested schema factories or use `value.get(...)`, including `bullet`, `ejectEffect`, `shoot`, `shootStatus`, `shootOnDeathEffect`, and `parts`, SHALL remain inside `WeaponHjsonSchema`
+
+#### Scenario: Unit dynamic fields stay inside schema function
+- **WHEN** inspecting `unit.ts`
+- **THEN** fields that call nested schema factories or use `value.get(...)`, including `abilities`, `weapons`, `immunities`, `fallEffect`, `fallEngineEffect`, `deathExplosionEffect`, `treadEffect`, `parts`, and `engines`, SHALL remain inside `UnitHjsonSchema`
+
 ### Requirement: Static constants merged via spread in exported SchemaFn
 Extracted static constants SHALL be merged into the exported schema function using object spread of `.entries` property, following the existing pattern in `effect.ts`.
 
 #### Scenario: Static entries spread into class schema
 - **WHEN** exported SchemaFn creates a class-specific schema
 - **THEN** it SHALL use `v.object({ ...baseSchema.entries, ...classSchema.entries })` to merge static base with class-specific entries
+
+#### Scenario: Weapon schema merges static and dynamic entries
+- **WHEN** `WeaponHjsonSchema` creates final valibot object schema
+- **THEN** it SHALL merge extracted static entries with dynamic entries using object spread on `.entries`
+
+#### Scenario: Unit schema merges static and dynamic entries
+- **WHEN** `UnitHjsonSchema` creates final valibot object schema
+- **THEN** it SHALL merge extracted static entries with dynamic entries using object spread on `.entries`
 
 ### Requirement: Runtime behavior unchanged
 The refactoring SHALL NOT change the validation behavior of any exported schema.
