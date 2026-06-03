@@ -3,15 +3,7 @@ import { Folder, FolderOpen, ChevronRight, ChevronDown, Pencil, Trash2, Plus, Mo
 import { toast } from "sonner";
 import { isDefaultPath, type TreeNode } from "@project/fs";
 import type { TreeSnapshot } from "@project/core";
-import {
-	useCurrentProject,
-	useProjectSession,
-	useFileStore,
-	isDirty,
-	selectEntry,
-	selectIsSaving,
-	useValidationStore,
-} from "@project/core";
+import { useCurrentProject, useProjectSession, useFileStore, isDirty, selectIsSaving, useValidationStore } from "@project/core";
 import { cn } from "~/lib/utils";
 import {
 	AlertDialog,
@@ -178,8 +170,7 @@ function TreeNodeItem({ node, depth = 0 }: TreeNodeItemProps) {
 	const errorCount = useValidationStore(useShallow((s) => s.results.getRollup()[currentPath]?.error ?? 0));
 	const warningCount = useValidationStore(useShallow((s) => s.results.getRollup()[currentPath]?.warning ?? 0));
 
-	const bufferEntry = useFileStore(isFolder ? () => undefined : selectEntry(projectId, currentPath));
-	const isItemDirty = !isFolder && isDirty(bufferEntry);
+	const isItemDirty = useFileStore(isFolder ? () => false : (state) => isDirty(state.getEntry(projectId, currentPath)));
 	const isItemSaving = useFileStore(isFolder ? () => false : selectIsSaving(projectId, currentPath));
 
 	const filenameClass =

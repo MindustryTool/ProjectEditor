@@ -3,7 +3,7 @@ import { Interps, MindustryHexColorSchema, SoundHjsonSchema, SpriteHjsonSchema, 
 import { EffectHjsonSchema } from "./effect";
 import { PartHjsonSchema } from "./part";
 import { ShootPatternHjsonSchema } from "./shoot-pattern";
-import { StatusHjsonSchema } from "./status";
+import { StatusFieldSchema } from "./status";
 import { lazyArray } from "./lazy-array";
 
 const metadata = { type: "bullet" };
@@ -71,10 +71,6 @@ function createPartArraySchema(value: Parameters<SchemaFn>[0], context: Paramete
 	);
 }
 
-function createStatusFieldSchema(value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) {
-	return v.nullish(StatusHjsonSchema(value.get("status"), context));
-}
-
 function createUnitFieldSchema(_value: Parameters<SchemaFn>[0], context: Parameters<SchemaFn>[1]) {
 	return v.nullish(v.pipe(v.picklist(context.getUnits().map((unit) => unit.name)), v.metadata({ type: "units" })));
 }
@@ -132,7 +128,7 @@ function createBulletBaseObjectSchema(value: Parameters<SchemaFn>[0], context: P
 		scaledSplashDamage: v.nullish(v.boolean(), false),
 		knockback: v.nullish(v.number(), 0),
 		impact: v.nullish(v.boolean(), false),
-		status: createStatusFieldSchema(value, context),
+		status: StatusFieldSchema(value, context),
 		statusDuration: v.nullish(v.number(), 480),
 		targetBlocks: v.nullish(v.boolean(), true),
 		targetMissiles: v.nullish(v.boolean(), true),

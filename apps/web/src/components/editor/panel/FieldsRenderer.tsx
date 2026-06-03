@@ -14,10 +14,10 @@ import { useFileString, useValidationStore } from "@project/core";
 import { unwrapSchema, type Research } from "@project/schema";
 import { HJSON } from "@project/hjson";
 import type { HjsonObjectNode } from "@project/hjson";
-import { HjsonNode, HjsonValueNode, HjsonArrayNode } from "@project/hjson";
+import { HjsonArrayNode } from "@project/hjson";
 import { ChevronsUpDown, Plus, Search, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
-import React, { useCallback, useMemo, useState, type ReactNode } from "react";
+import React, { useCallback, useState, type ReactNode } from "react";
 import {
 	resolveSchema,
 	detectSchemaType,
@@ -101,55 +101,43 @@ export function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 			if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) return null;
 		}
 
-		const fieldWriteContext = {
-			parentNode: node,
-			fieldName: name,
-			original: data,
-			entrySchema: entrySchema as AnySchema,
-			onPatch: write,
-		} satisfies FieldWriteContext;
-
-		const replaceFieldValue = createFieldValueReplacer(fieldWriteContext);
-		const writePrimitiveValue = createPrimitiveValueHelper(fieldWriteContext);
-		const initializeArrayValue =
-			type === "array"
-				? () => {
-						const initialValue = v.getDefault(entrySchema) ?? [];
-						const newContent = node.patchField(data, name, HJSON.stringify(initialValue));
-						write(newContent);
-					}
-				: undefined;
+		const value = childNode.isMissing() ? v.getDefault(entrySchema) : childNode.valueOf();
 
 		return (
 			<ErrorBoundary key={key}>
 				<Renderer
 					path={path}
 					name={name}
-					node={childNode}
-					original={data}
-					onPatch={write}
-					writePrimitiveValue={writePrimitiveValue}
-					replaceFieldValue={replaceFieldValue}
-					initializeArrayValue={initializeArrayValue}
+					value={value}
+					onChange={(newValue: unknown) => {
+						createFieldValueReplacer({
+							parentNode: node,
+							fieldName: name,
+							original: data,
+							entrySchema: entrySchema as AnySchema,
+							onPatch: write,
+						})(newValue);
+					}}
 					entrySchema={entrySchema as AnySchema}
 					jsonPath={name}
+					original={data}
+					onPatch={write}
 				/>
 			</ErrorBoundary>
 		);
 	});
 }
-type SchemaRenderer = (props: {
+type SchemaRendererProps = {
 	name: string;
 	path: string;
-	node: HjsonNode;
-	original: string;
-	onPatch: (newContent: string) => void;
-	writePrimitiveValue?: (newRawValue: PrimitiveFieldValue) => void;
-	replaceFieldValue?: (newRawValue: unknown) => void;
-	initializeArrayValue?: () => void;
+	value: unknown;
+	onChange?: (value: unknown) => void;
 	entrySchema: AnySchema;
 	jsonPath: string;
-}) => ReactNode;
+	original?: string;
+	onPatch?: (newContent: string) => void;
+};
+type SchemaRenderer = (props: SchemaRendererProps) => ReactNode;
 
 const schemaRenderers: Record<Type, SchemaRenderer> = {
 	string: StringField,
@@ -196,10 +184,10 @@ function FieldIssue({ path, jsonPath }: { path: string; jsonPath: string }) {
 	);
 }
 
-function StringField({ name, node, writePrimitiveValue, entrySchema, jsonPath, path }: Parameters<SchemaRenderer>[0]) {
+function StringField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
-	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema);
+	const stringValue = typeof value === "string" ? value : v.getDefault(entrySchema);
 	const metadata = getSchemaMetadata(entrySchema);
 	const label = metadata?.name ? _t(metadata.name) : name;
 	const description = metadata?.description ? _t(metadata.description) : undefined;
@@ -209,9 +197,9 @@ function StringField({ name, node, writePrimitiveValue, entrySchema, jsonPath, p
 			<FormLabel>{label}</FormLabel>
 			<FormControl>
 				{metadata?.multiline ? (
-					<Textarea key={name} value={value} onChange={(v) => writePrimitiveValue?.(v.currentTarget.value)} />
+					<Textarea key={name} value={stringValue} onChange={(v) => onChange?.(v.currentTarget.value)} />
 				) : (
-					<Input key={name} value={value} onChange={(v) => writePrimitiveValue?.(v.currentTarget.value)} />
+					<Input key={name} value={stringValue} onChange={(v) => onChange?.(v.currentTarget.value)} />
 				)}
 			</FormControl>
 			{description && <FormDescription>{description}</FormDescription>}
@@ -220,10 +208,10 @@ function StringField({ name, node, writePrimitiveValue, entrySchema, jsonPath, p
 	);
 }
 
-function NumberField({ name, node, writePrimitiveValue, entrySchema, jsonPath, path }: Parameters<SchemaRenderer>[0]) {
+function NumberField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
-	const value = node.isNumber() ? node.valueOf() : v.getDefault(entrySchema);
+	const numValue = typeof value === "number" ? value : v.getDefault(entrySchema);
 	const metadata = getSchemaMetadata(entrySchema);
 	const label = metadata?.name ? _t(metadata.name) : name;
 	const description = metadata?.description ? _t(metadata.description) : undefined;
@@ -232,7 +220,7 @@ function NumberField({ name, node, writePrimitiveValue, entrySchema, jsonPath, p
 		<FormField>
 			<FormLabel>{label}</FormLabel>
 			<FormControl>
-				<Input key={name} value={value} onChange={(v) => writePrimitiveValue?.(v.currentTarget.valueAsNumber)} type="number" />
+				<Input key={name} value={numValue} onChange={(v) => onChange?.(v.currentTarget.valueAsNumber)} type="number" />
 			</FormControl>
 			{description && <FormDescription>{description}</FormDescription>}
 			<FieldIssue path={path} jsonPath={jsonPath} />
@@ -240,10 +228,10 @@ function NumberField({ name, node, writePrimitiveValue, entrySchema, jsonPath, p
 	);
 }
 
-function BooleanField({ name, node, writePrimitiveValue, entrySchema, jsonPath, path }: Parameters<SchemaRenderer>[0]) {
+function BooleanField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
-	const checked = node.isBoolean() ? node.valueOf() : v.getDefault(entrySchema);
+	const checked = typeof value === "boolean" ? value : v.getDefault(entrySchema);
 	const metadata = getSchemaMetadata(entrySchema);
 	const label = metadata?.name ? _t(metadata.name) : name;
 	const description = metadata?.description ? _t(metadata.description) : undefined;
@@ -251,7 +239,7 @@ function BooleanField({ name, node, writePrimitiveValue, entrySchema, jsonPath, 
 	return (
 		<FormField>
 			<FormControl className="flex-row flex gap-1">
-				<Checkbox key={name} checked={checked} onCheckedChange={(value) => writePrimitiveValue?.(value === true)} />
+				<Checkbox key={name} checked={checked} onCheckedChange={(val) => onChange?.(val === true)} />
 				<FormLabel>{label}</FormLabel>
 			</FormControl>
 			{description && <FormDescription>{description}</FormDescription>}
@@ -260,12 +248,12 @@ function BooleanField({ name, node, writePrimitiveValue, entrySchema, jsonPath, 
 	);
 }
 
-function SelectField({}: Parameters<SchemaRenderer>[0]) {
+function SelectField(_props: SchemaRendererProps) {
 	return null;
 }
 
-function LiquidsListField({ name, node, writePrimitiveValue, entrySchema, jsonPath, path }: Parameters<SchemaRenderer>[0]) {
-	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "";
+function LiquidsListField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
+	const stringValue = typeof value === "string" ? value : (v.getDefault(entrySchema) ?? "") as string;
 	const context = useProjectContext();
 	const unwrappedSchema = unwrapSchema(entrySchema);
 
@@ -280,7 +268,7 @@ function LiquidsListField({ name, node, writePrimitiveValue, entrySchema, jsonPa
 			<FormField>
 				<FormLabel>{name}</FormLabel>
 				<FormControl>
-					<Select key={name} value={value} onValueChange={(nextValue) => writePrimitiveValue?.(nextValue)}>
+					<Select key={name} value={stringValue} onValueChange={(nextValue) => onChange?.(nextValue)}>
 						<SelectTrigger className="w-full">
 							<SelectValue placeholder="None (empty file)" />
 						</SelectTrigger>
@@ -303,8 +291,8 @@ function LiquidsListField({ name, node, writePrimitiveValue, entrySchema, jsonPa
 	throw new Error(`Unknown option ${value}, this should not happen`);
 }
 
-function PickListField({ name, node, writePrimitiveValue, entrySchema, jsonPath, path }: Parameters<SchemaRenderer>[0]) {
-	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "";
+function PickListField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
+	const stringValue = typeof value === "string" ? value : (v.getDefault(entrySchema) ?? "") as string;
 	const unwrappedSchema = unwrapSchema(entrySchema);
 
 	if ("options" in unwrappedSchema && Array.isArray(unwrappedSchema.options)) {
@@ -314,7 +302,7 @@ function PickListField({ name, node, writePrimitiveValue, entrySchema, jsonPath,
 			<FormField>
 				<FormLabel>{name}</FormLabel>
 				<FormControl>
-					<Select key={name} value={value} onValueChange={(nextValue) => writePrimitiveValue?.(nextValue)}>
+					<Select key={name} value={stringValue} onValueChange={(nextValue) => onChange?.(nextValue)}>
 						<SelectTrigger className="w-full">
 							<SelectValue placeholder="None (empty file)" />
 						</SelectTrigger>
@@ -337,10 +325,10 @@ function PickListField({ name, node, writePrimitiveValue, entrySchema, jsonPath,
 	throw new Error(`Unknown option ${value}, this should not happen`);
 }
 
-function ColorField({ name, node, writePrimitiveValue, entrySchema, jsonPath, path }: Parameters<SchemaRenderer>[0]) {
-	let value = node.isString() ? node.valueOf() : v.getDefault(entrySchema) || "333333";
+function ColorField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
+	let hexValue = typeof value === "string" ? value : (v.getDefault(entrySchema) ?? "333333") as string;
 
-	value = value?.startsWith("#") ? value : "#" + value;
+	hexValue = hexValue?.startsWith("#") ? hexValue : "#" + hexValue;
 
 	return (
 		<FormField>
@@ -350,12 +338,12 @@ function ColorField({ name, node, writePrimitiveValue, entrySchema, jsonPath, pa
 					<Popover>
 						<PopoverTrigger
 							className="h-16 w-full relative cursor-pointer rounded border border-border bg-transparent p-0"
-							style={{ backgroundColor: value }}
+							style={{ backgroundColor: hexValue }}
 						>
-							<span className="text-sm absolute left-1.5 bottom-1.5">{value}</span>
+							<span className="text-sm absolute left-1.5 bottom-1.5">{hexValue}</span>
 						</PopoverTrigger>
 						<PopoverContent className="w-64 p-3" side="bottom" align="start">
-							<ColorPicker value={value} onChange={(val) => writePrimitiveValue?.(val)}>
+							<ColorPicker value={hexValue} onChange={(val) => onChange?.(val)}>
 								<ColorPickerSelection className="h-40 rounded-lg" />
 								<ColorPickerHue />
 								<ColorPickerAlpha />
@@ -370,16 +358,17 @@ function ColorField({ name, node, writePrimitiveValue, entrySchema, jsonPath, pa
 	);
 }
 
-function ArrayField({ path, name, node, original, onPatch, initializeArrayValue, entrySchema, jsonPath }: Parameters<SchemaRenderer>[0]) {
+function ArrayField({ path, name, value, onChange, original, onPatch, entrySchema, jsonPath }: SchemaRendererProps) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
 
-	if (!node.isArray()) {
-		initializeArrayValue?.();
+	const arrayValue = Array.isArray(value) ? value : undefined;
+
+	if (!arrayValue) {
+		onChange?.(v.getDefault(entrySchema) ?? []);
 		return null;
 	}
 
-	const items = node.elements();
 	const itemSchema = getArrayItemSchema(entrySchema);
 
 	if (!itemSchema) {
@@ -390,21 +379,37 @@ function ArrayField({ path, name, node, original, onPatch, initializeArrayValue,
 	const label = metadata?.name ? _t(metadata.name) : name;
 	const description = metadata?.description ? _t(metadata.description) : undefined;
 
+	function getArrayNode() {
+		if (!original) return undefined;
+		const root = HJSON.parseWithCache(original);
+		const info = jsonPath ? root.path(jsonPath) : undefined;
+		return info?.value instanceof HjsonArrayNode ? info.value : undefined;
+	}
+
 	const handleRemove = (index: number) => {
-		const newContent = node.removeElement(original, index);
+		if (!onPatch || !original) return;
+		const arrNode = getArrayNode();
+		if (!arrNode) return;
+		const newContent = arrNode.removeElement(original, index);
 		onPatch(newContent);
 	};
 
 	const handleItemChange = (index: number, rawValue: unknown) => {
+		if (!onPatch || !original) return;
 		const serialized = HJSON.stringify(rawValue);
-		const newContent = node.patchElement(original, index, serialized);
+		const arrNode = getArrayNode();
+		if (!arrNode) return;
+		const newContent = arrNode.patchElement(original, index, serialized);
 		onPatch(newContent);
 	};
 
 	const handleAdd = () => {
-		const nextItemSchema = getArrayItemSchema(entrySchema, items.length) ?? itemSchema;
+		if (!onPatch || !original) return;
+		const nextItemSchema = getArrayItemSchema(entrySchema, arrayValue.length) ?? itemSchema;
 		const serialized = nextItemSchema ? HJSON.stringify(v.getDefault(nextItemSchema)) : '""';
-		const newContent = node.insertElement(original, items.length, serialized);
+		const arrNode = getArrayNode();
+		if (!arrNode) return;
+		const newContent = arrNode.insertElement(original, arrayValue.length, serialized);
 		onPatch(newContent);
 	};
 
@@ -418,9 +423,8 @@ function ArrayField({ path, name, node, original, onPatch, initializeArrayValue,
 				<CollapsibleContent>
 					<FormControl>
 						<div className="flex flex-col gap-2">
-							{items.map((el, index) => {
+							{arrayValue.map((el, index) => {
 								const currentItemSchema = getArrayItemSchema(entrySchema, index) ?? itemSchema;
-								const currentItemType = detectSchemaType(currentItemSchema);
 								const entryJsonPath = jsonPath ? `${jsonPath}[${index}]` : `[${index}]`;
 
 								return (
@@ -428,8 +432,7 @@ function ArrayField({ path, name, node, original, onPatch, initializeArrayValue,
 										<p className="font-semibold">{index + 1}</p>
 										<SchemaArrayItemEditor
 											path={path}
-											value={el.value}
-											itemType={currentItemType}
+											value={el}
 											itemSchema={currentItemSchema}
 											onChange={(v) => handleItemChange(index, v)}
 											original={original}
@@ -457,59 +460,55 @@ function ArrayField({ path, name, node, original, onPatch, initializeArrayValue,
 	);
 }
 
-function ObjectField({ path, node, original, onPatch, entrySchema, jsonPath }: Parameters<SchemaRenderer>[0]) {
-	if (!node.isObject()) {
+function ObjectField({ path, value, original, onPatch, entrySchema, jsonPath }: SchemaRendererProps) {
+	if (typeof value !== "object" || value === null) {
 		return null;
 	}
 
-	const entries = getSchemaEntries(resolveSchema(entrySchema, node.valueOf()));
+	const entries = getSchemaEntries(resolveSchema(entrySchema, value));
 
-	const results = entries.map(([name, entrySchema]) => {
+	const results = entries.map(([name, childSchema]) => {
 		const key = name;
-		const type = detectSchemaType(entrySchema);
-		const childNode = node.get(name);
-		const metadata = getSchemaMetadata(entrySchema);
+		const type = detectSchemaType(childSchema);
+		const childValue = (value as Record<string, unknown>)?.[name];
+		const metadata = getSchemaMetadata(childSchema);
 
-		if (metadata?.visibleWhen) {
-			const refNode = node.get(metadata.visibleWhen.field);
-			if (refNode.isMissing()) return null;
-			if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) return null;
+		if (metadata?.visibleWhen && typeof value === "object" && value !== null) {
+			const refValue = (value as Record<string, unknown>)[metadata.visibleWhen.field];
+			if (refValue === undefined || refValue !== metadata.visibleWhen.value) return null;
 		}
 
-		const fieldWriteContext = {
-			parentNode: node,
-			fieldName: name,
-			original,
-			entrySchema: entrySchema as AnySchema,
-			onPatch,
-		} satisfies FieldWriteContext;
-
-		const replaceFieldValue = createFieldValueReplacer(fieldWriteContext);
-		const writePrimitiveValue = createPrimitiveValueHelper(fieldWriteContext);
-		const initializeArrayValue =
-			type === "array"
-				? () => {
-						const initialValue = v.getDefault(entrySchema) ?? [];
-						const newContent = node.patchField(original, name, HJSON.stringify(initialValue));
-						onPatch(newContent);
-					}
-				: undefined;
-
 		const Renderer = schemaRenderers[type];
+
+		if (Renderer === undefined) {
+			return (
+				<FormControl key={key}>
+					<FormLabel>{name}</FormLabel>
+					<span className="text-yellow-400 text-sm">Unknown field type {type}</span>
+				</FormControl>
+			);
+		}
 
 		return (
 			<ErrorBoundary key={key}>
 				<Renderer
 					path={path}
 					name={name}
-					node={childNode}
+					value={childValue ?? v.getDefault(childSchema)}
+					onChange={(newValue: unknown) => {
+						if (!onPatch || !original) return;
+						createFieldValueReplacer({
+							parentNode: HJSON.parseWithCache(original) as HjsonObjectNode,
+							fieldName: name,
+							original,
+							entrySchema: childSchema as AnySchema,
+							onPatch,
+						})(newValue);
+					}}
+					entrySchema={childSchema as AnySchema}
+					jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
 					original={original}
 					onPatch={onPatch}
-					writePrimitiveValue={writePrimitiveValue}
-					replaceFieldValue={replaceFieldValue}
-					initializeArrayValue={initializeArrayValue}
-					entrySchema={entrySchema as AnySchema}
-					jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
 				/>
 			</ErrorBoundary>
 		);
@@ -518,19 +517,8 @@ function ObjectField({ path, node, original, onPatch, entrySchema, jsonPath }: P
 	return <div className="pl-4 border-l-2 border-border grid gap-6">{results}</div>;
 }
 
-function ResearchField({ name, node, original, onPatch, replaceFieldValue, jsonPath, path }: Parameters<SchemaRenderer>[0]) {
-	function getCurrentValue(): Research | string | null {
-		if (node.isValue()) {
-			const val = (node as HjsonValueNode<unknown>).valueOf();
-			return typeof val === "string" || (val && typeof val === "object") ? (val as Research | string) : null;
-		}
-		if (node.isObject()) {
-			return (node as HjsonObjectNode).valueOf() as unknown as Research;
-		}
-		return null;
-	}
-
-	const currentValue = getCurrentValue();
+function ResearchField({ name, value, onChange, original, onPatch, jsonPath, path }: SchemaRendererProps) {
+	const currentValue = value as Research | string | null | undefined;
 
 	const parent =
 		(!currentValue
@@ -538,7 +526,6 @@ function ResearchField({ name, node, original, onPatch, replaceFieldValue, jsonP
 			: typeof currentValue === "string"
 				? currentValue
 				: (((currentValue as Record<string, unknown>)?.parent as string) ?? "")) || "";
-
 	const requirements = (
 		!currentValue
 			? []
@@ -548,8 +535,9 @@ function ResearchField({ name, node, original, onPatch, replaceFieldValue, jsonP
 	) as string[];
 
 	function handleChange(newParent: string, newRequirements: string[]) {
-		if (node.isObject()) {
-			const researchNode = node as HjsonObjectNode;
+		const valueIsObject = typeof currentValue === "object" && currentValue !== null;
+		if (valueIsObject && original && onPatch) {
+			const researchNode = HJSON.parseWithCache(original) as HjsonObjectNode;
 			const parentChanged = newParent !== parent;
 			const reqsChanged = newRequirements.length !== requirements.length || newRequirements.some((r, i) => r !== requirements[i]);
 
@@ -594,11 +582,11 @@ function ResearchField({ name, node, original, onPatch, replaceFieldValue, jsonP
 			}
 		}
 		if (!newParent && newRequirements.length === 0) {
-			replaceFieldValue?.(undefined);
+			onChange?.(undefined);
 		} else if (newRequirements.length > 0) {
-			replaceFieldValue?.({ parent: newParent, requirements: newRequirements });
+			onChange?.({ parent: newParent, requirements: newRequirements });
 		} else {
-			replaceFieldValue?.(newParent);
+			onChange?.(newParent);
 		}
 	}
 
@@ -800,23 +788,23 @@ function ResearchParentToggleGroup({ value, onValueChange }: { value: string | u
 function EffectField({
 	path,
 	name,
-	node,
-	original,
-	writePrimitiveValue,
-	replaceFieldValue,
+	value,
+	onChange,
 	entrySchema,
 	onPatch,
+	original,
 	jsonPath,
-}: Parameters<SchemaRenderer>[0]) {
+}: SchemaRendererProps) {
 	const { data = [], isLoading, isError, error } = useEffects();
 	const [filter, setFilter] = useState("");
 
-	if (node.isObject()) {
+	if (typeof value === "object" && value !== null) {
+		const typeValue = (value as Record<string, unknown>)?.type ?? "";
 		return (
 			<div className="grid gap-2">
 				<FormLabel>{name}</FormLabel>
 				<div className="grid grid-cols-2 gap-2">
-					<Button variant="outline" onClick={() => replaceFieldValue?.(data[0]?.name)}>
+					<Button variant="outline" onClick={() => onChange?.(data[0]?.name)}>
 						Built-In
 					</Button>
 					<Button variant="outline" disabled>
@@ -827,7 +815,7 @@ function EffectField({
 					<FormField>
 						<CollapsibleTrigger asChild>
 							<Button variant="outline" className="flex items-center justify-between w-full">
-								<span>{node.get("type").asString()}</span>
+								<span>{String(typeValue)}</span>
 								<ChevronsUpDown className="size-4" />
 							</Button>
 						</CollapsibleTrigger>
@@ -836,7 +824,7 @@ function EffectField({
 								<ObjectField
 									path={path}
 									name={name}
-									node={node}
+									value={value}
 									entrySchema={entrySchema}
 									original={original}
 									onPatch={onPatch}
@@ -852,7 +840,7 @@ function EffectField({
 		);
 	}
 
-	const value = node.isString() ? node.valueOf() : v.getDefault(entrySchema);
+	const stringValue = typeof value === "string" ? value : (v.getDefault(entrySchema) ?? "") as string;
 
 	return (
 		<div className="grid gap-2">
@@ -861,7 +849,7 @@ function EffectField({
 				<Button variant="outline" disabled>
 					Built-In
 				</Button>
-				<Button variant="outline" onClick={() => replaceFieldValue?.({ type: "ParticleEffect" })}>
+				<Button variant="outline" onClick={() => onChange?.({ type: "ParticleEffect" })}>
 					Custom
 				</Button>
 			</div>
@@ -869,7 +857,7 @@ function EffectField({
 				<Dialog>
 					<DialogTrigger asChild>
 						<Button className="w-full justify-start" variant="outline">
-							{value || "None"}
+							{stringValue || "None"}
 						</Button>
 					</DialogTrigger>
 					<DialogContent className="w-sm" showCloseButton={false}>
@@ -877,7 +865,7 @@ function EffectField({
 							<DialogTitle />
 							<DialogDescription />
 						</VisuallyHidden.Root>
-						<ToggleGroup type="single" value={value} onValueChange={(v) => writePrimitiveValue?.(v)} asChild>
+						<ToggleGroup type="single" value={stringValue} onValueChange={(v) => onChange?.(v)} asChild>
 							<div className="grid gap-2">
 								<InputGroup>
 									<InputGroupAddon>
@@ -889,7 +877,7 @@ function EffectField({
 									{isLoading && <Spinner />}
 									{isError && <ErrorDisplay message={error.message} />}
 									{data
-										.filter((i) => i.name !== value && i.name.includes(filter))
+										.filter((i) => i.name !== stringValue && i.name.includes(filter))
 										.map((item) => (
 											<ToggleGroupItem key={item.name} value={item.name}>
 												{item.name}
@@ -921,15 +909,13 @@ function ItemGrid({ className, ...props }: React.ComponentProps<"div">) {
 function SchemaArrayItemEditor({
 	path,
 	value,
-	itemType,
 	itemSchema,
 	onChange,
-	original = "",
+	original,
 	jsonPath,
 }: {
 	path: string;
 	value: unknown;
-	itemType: Type | null;
 	itemSchema: AnySchema;
 	onChange: (v: unknown) => void;
 	original?: string;
@@ -937,63 +923,28 @@ function SchemaArrayItemEditor({
 }) {
 	const type = detectSchemaType(itemSchema);
 
-	const node = useMemo(
-		() =>
-			value instanceof HjsonNode
-				? value
-				: new HjsonValueNode<unknown>(value, { row: 0, col: 0, index: 0 }, { row: 0, col: 0, index: 0 }),
-		[value],
-	);
-
-	const handleOnPatch = useCallback(
-		(newContent: string) => {
-			if (!jsonPath) {
-				onChange(node.valueOf());
-				return;
-			}
-			try {
-				const root = HJSON.parseStructured(newContent);
-				const elementInfo = root.path(jsonPath);
-				if (elementInfo) {
-					const elementValue = elementInfo.value instanceof HjsonNode ? elementInfo.value.valueOf() : elementInfo.value;
-					onChange(elementValue);
-					return;
-				}
-			} catch (error) {
-				console.error("Error parsing JSON:", error);
-			}
-			onChange(node.valueOf());
-		},
-		[onChange, node, jsonPath],
-	);
-
 	if (type === "string") {
-		const stringValue = node.isString() ? node.valueOf() : v.getDefault(itemSchema);
+		const stringValue = typeof value === "string" ? value : v.getDefault(itemSchema);
 		return <Input value={stringValue} onChange={(e) => onChange(e.currentTarget.value)} placeholder="mod-name" className="flex-1" />;
 	}
 
 	const Renderer = schemaRenderers[type];
-	const name = itemType || "string";
+	const name = String(type);
 
 	return (
 		<ErrorBoundary key={name}>
 			<Renderer
 				path={path}
 				name={name}
-				node={node}
-				original={original}
-				onPatch={handleOnPatch}
-				writePrimitiveValue={(v) => onChange(v)}
-				replaceFieldValue={(v) => onChange(v)}
-				initializeArrayValue={type === "array" ? () => onChange(v.getDefault(itemSchema) ?? []) : undefined}
+				value={value}
+				onChange={(v) => onChange(v)}
 				entrySchema={itemSchema}
 				jsonPath={jsonPath}
+				original={original}
 			/>
 		</ErrorBoundary>
 	);
 }
-
-type PrimitiveFieldValue = string | number | boolean | null | undefined;
 
 type FieldWriteContext = {
 	parentNode: HjsonObjectNode;
@@ -1030,7 +981,4 @@ function createFieldValueReplacer({ parentNode, fieldName, original, entrySchema
 	};
 }
 
-function createPrimitiveValueHelper(context: FieldWriteContext) {
-	const replaceFieldValue = createFieldValueReplacer(context);
-	return (newRawValue: PrimitiveFieldValue) => replaceFieldValue(newRawValue);
-}
+

@@ -1,10 +1,13 @@
 import { useMemo, useCallback } from "react";
 import { useFile, type UseFileResult } from "./use-file-content";
+import { useProjectSession } from "@project/core";
+import { getEntry } from "@project/core";
 
 export type UseFileStringResult = UseFileResult<string>;
 
-export function useFileString(path: string): { data: string | null; isLoading: boolean; write: (content: string) => void } {
+export function useFileString(path: string): { data: string | null; isLoading: boolean; write: (content: string | ((prev: string | null) => string)) => void } {
 	const result = useFile(path);
+	const projectId = useProjectSession((s) => s.projectContext?.project.id);
 
 	const data = useMemo<string | null>(() => {
 		if (result.data === null) {
@@ -21,11 +24,19 @@ export function useFileString(path: string): { data: string | null; isLoading: b
 	const { write: resultWrite } = result;
 
 	const write = useCallback(
-		(content: string) => {
+		(contentOrUpdater: string | ((prev: string | null) => string)) => {
+			let content: string;
+			if (typeof contentOrUpdater === "function") {
+				const buffer = projectId ? getEntry(projectId, path)?.data : undefined;
+				const prev = buffer !== null && buffer !== undefined ? new TextDecoder().decode(buffer) : null;
+				content = contentOrUpdater(prev);
+			} else {
+				content = contentOrUpdater;
+			}
 			const encoded = new TextEncoder().encode(content).buffer;
 			resultWrite(encoded);
 		},
-		[resultWrite],
+		[resultWrite, projectId, path],
 	);
 
 	return {

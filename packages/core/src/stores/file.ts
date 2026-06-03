@@ -48,7 +48,7 @@ const eventUnsubs = new Map<string, () => void>();
 export interface FileStore {
 	fileContents: Record<string, FileEntry>;
 	savingPaths: string[];
-	writeBuffer: (projectId: string, path: string, content: ArrayBuffer | string) => void;
+	writeBuffer: (projectId: string, path: string, content: ArrayBuffer | string | ((prev: ArrayBuffer | null) => ArrayBuffer)) => void;
     getEntry: (projectId: string, path: string) => FileEntry | undefined;
 	markPersisted: (projectId: string, path: string) => void;
 	setBufferError: (projectId: string, path: string, error: string) => void;
@@ -95,7 +95,7 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 		const key = cacheKey(projectId, path);
 		const existing = lruMap.get(key);
 		const nextVersion = (existing?.currentVersion ?? 0) + 1;
-		const data = typeof content === "string" ? new TextEncoder().encode(content).buffer : content;
+		const data = typeof content === "function" ? content(existing?.data ?? null) : typeof content === "string" ? new TextEncoder().encode(content).buffer : content;
 
 		lruMap.set(key, {
 			data,

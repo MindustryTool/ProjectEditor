@@ -1,7 +1,7 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { useFileStore, isDirty, isError, selectEntry, selectIsSaving, getEntry } from "@project/core";
 import { useProjectSession } from "@project/core";
-import { getWriteQueue, disposeWriteQueue } from "@project/core";
+import { getWriteQueue } from "@project/core";
 
 export interface UseFileResult<T> {
 	data: T | null;
@@ -13,7 +13,7 @@ export interface UseFileResult<T> {
 	isSaving: boolean;
 	isLoading: boolean;
 	isError: boolean;
-	write: (content: T) => void;
+	write: (content: T | ((prev: T | null) => T)) => void;
 }
 
 export function useFile(path: string): UseFileResult<ArrayBuffer> {
@@ -29,23 +29,13 @@ export function useFile(path: string): UseFileResult<ArrayBuffer> {
 		}
 	}, [path, projectId, fs, entry]);
 
-	const previousProjectId = useRef(projectId ?? null);
-
-	useEffect(() => {
-		if (projectId !== previousProjectId.current) {
-			if (previousProjectId.current !== null) {
-				disposeWriteQueue(previousProjectId.current);
-			}
-			previousProjectId.current = projectId ?? null;
-		}
-	}, [projectId]);
-
 	const write = useCallback(
-		(content: ArrayBuffer | string) => {
+		(content: ArrayBuffer | string | ((prev: ArrayBuffer | null) => ArrayBuffer)) => {
 			if (!projectId || !fs) return;
 
+			const resolved = typeof content === "function" ? content(getEntry(projectId, path)?.data ?? null) : content;
 			const store = useFileStore.getState();
-			store.writeBuffer(projectId, path, content);
+			store.writeBuffer(projectId, path, resolved);
 
 			const currentEntry = getEntry(projectId, path);
 			const version = currentEntry?.currentVersion ?? 0;
@@ -53,7 +43,7 @@ export function useFile(path: string): UseFileResult<ArrayBuffer> {
 			store.markSaving(projectId, path);
 			const queue = getWriteQueue(projectId, fs);
 
-			queue.write(path, content).then(
+			queue.write(path, resolved).then(
 				() => {
 					const updatedEntry = getEntry(projectId, path);
 					if (!updatedEntry || updatedEntry.currentVersion !== version) return;

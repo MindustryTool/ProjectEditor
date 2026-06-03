@@ -27,34 +27,36 @@ export const statusBaseObjectSchema = v.object({
 	outline: v.nullish(v.boolean(), true),
 });
 
+export const StatusStringSchema: SchemaFn = (_value, context) => v.picklist(context.getStatuses().map((status) => status.name));
+
+export const StatusFieldSchema: SchemaFn = (value, context) =>
+	v.union([StatusStringSchema(value, context), StatusHjsonSchema(value, context)]);
+
 export const StatusHjsonSchema: SchemaFn = (value, context) =>
-	v.union([
-		v.pipe(
-			v.object({
-				...statusBaseObjectSchema.entries,
-				effect: v.nullish(EffectHjsonSchema(value.get("effect"), context)),
-				applyEffect: v.nullish(EffectHjsonSchema(value.get("applyEffect"), context)),
-				affinities: v.nullish(
-					v.array(
-						v.pipe(
-							v.picklist(
-								context.getStatuses().map((status) => status.name),
-								"Not a vailid status name",
-							),
+	v.pipe(
+		v.object({
+			...statusBaseObjectSchema.entries,
+			effect: v.nullish(EffectHjsonSchema(value.get("effect"), context)),
+			applyEffect: v.nullish(EffectHjsonSchema(value.get("applyEffect"), context)),
+			affinities: v.nullish(
+				v.array(
+					v.pipe(
+						v.picklist(
+							context.getStatuses().map((status) => status.name),
+							"Not a vailid status name",
 						),
 					),
-					[],
 				),
-				opposites: v.nullish(v.array(v.pipe(v.picklist(context.getStatuses().map((status) => status.name)))), []),
-			}),
-			v.forward(
-				v.partialCheck(
-					[["affinities"], ["opposites"]],
-					(input) => !input.affinities.some((a) => input.opposites.includes(a)),
-					"Affinities and opposites cannot be the same",
-				),
-				["opposites"],
+				[],
 			),
+			opposites: v.nullish(v.array(v.pipe(v.picklist(context.getStatuses().map((status) => status.name)))), []),
+		}),
+		v.forward(
+			v.partialCheck(
+				[["affinities"], ["opposites"]],
+				(input) => !input.affinities.some((a) => input.opposites.includes(a)),
+				"Affinities and opposites cannot be the same",
+			),
+			["opposites"],
 		),
-		v.picklist(context.getStatuses().map((status) => status.name)),
-	]);
+	);

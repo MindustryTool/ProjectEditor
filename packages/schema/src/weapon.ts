@@ -1,6 +1,6 @@
 import * as v from "valibot";
 import { MindustryHexColorSchema, SoundHjsonSchema, type SchemaFn } from "./base";
-import { StatusHjsonSchema } from "./status";
+import { StatusStringSchema } from "./status";
 import { EffectHjsonSchema } from "./effect";
 import { PartHjsonSchema } from "./part";
 import { ShootPatternHjsonSchema } from "./shoot-pattern";
@@ -10,7 +10,7 @@ import { lazyArray } from "./lazy-array";
 export const WeaponHjsonSchema: SchemaFn = (value, context) =>
 	v.object({
 		name: v.optional(v.string()),
-        shots: v.optional(v.number(), 1),
+		shots: v.optional(v.number(), 1),
 		bullet: v.optional(BulletHjsonSchema(value.get("bullet"), context)),
 		ejectEffect: v.optional(EffectHjsonSchema(value.get("ejectEffect"), context)),
 
@@ -99,7 +99,7 @@ export const WeaponHjsonSchema: SchemaFn = (value, context) =>
 
 		heatColor: v.optional(MindustryHexColorSchema),
 
-		shootStatus: v.optional(StatusHjsonSchema(value.get("shootStatus"), context)),
+		shootStatus: v.optional(StatusStringSchema(value.get("shootStatus"), context)),
 
 		shootStatusDuration: v.optional(v.number(), 60 * 5),
 

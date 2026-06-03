@@ -2,7 +2,7 @@ import * as v from "valibot";
 import { Envs, EnvSchema, MindustryHexColorSchema, SoundHjsonSchema, type SchemaFn } from "./base";
 import { AbilityHjsonSchema } from "./ability";
 import { WeaponHjsonSchema } from "./weapon";
-import { StatusHjsonSchema } from "./status";
+import { StatusStringSchema } from "./status";
 import { EffectHjsonSchema } from "./effect";
 import { PartHjsonSchema } from "./part";
 import { EngineHjsonSchema } from "./engine";
@@ -234,7 +234,7 @@ export const UnitHjsonSchema: SchemaFn = (value, context) =>
 			[],
 		),
 		immunities: v.optional(
-			lazyArray((index) => StatusHjsonSchema(value.get("immunities").get(index), context)),
+			lazyArray((index) => StatusStringSchema(value.get("immunities").get(index), context)),
 			[],
 		),
 		healColor: v.optional(MindustryHexColorSchema),
