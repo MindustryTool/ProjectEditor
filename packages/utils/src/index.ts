@@ -41,11 +41,11 @@ export function sanitizeFilename(name: string, options?: { maxLength?: number; f
 }
 
 export function resolveContentSprite(path: string): string | null {
-	if (!path.startsWith("content/") || !path.endsWith(".json") || path.startsWith("content/sectors")) {
+	if (!path.startsWith("content/") || (!path.endsWith(".json") && !path.endsWith(".hjson")) || path.startsWith("content/sectors")) {
 		return null;
 	}
 
-	return `${path.replace("content", "sprites").replace(".json", "")}.png`;
+	return `${path.replace("content", "sprites").replace(".json", "").replace(".hjson", "")}.png`;
 }
 
 export function filename(path: string) {

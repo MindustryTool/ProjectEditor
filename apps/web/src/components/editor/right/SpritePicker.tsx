@@ -120,7 +120,7 @@ function SpriteUploader({ path: spritePath }: { path: string }) {
 		<div className="flex flex-col items-center gap-3 py-4">
 			<File className="text-muted-foreground w-16 h-16" strokeWidth={1} />
 			<p className="text-sm text-muted-foreground">No sprite set</p>
-			<Button variant="ghost" size="icon" aria-label="Upload sprite" onClick={handleClick}>
+			<Button variant="outline" size="icon-lg" aria-label="Upload sprite" onClick={handleClick}>
 				<Upload className="w-4 h-4" />
 			</Button>
 			<input ref={inputRef} type="file" accept=".png" className="hidden" onChange={handleFileChange} />

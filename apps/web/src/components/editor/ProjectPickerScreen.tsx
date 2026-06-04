@@ -57,7 +57,6 @@ function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: s
 				});
 
 				await context.fs.writeTextFile("/README.md", "# This is an example mod");
-				await context.fs.refreshTree();
 			} catch (e) {
 				toast.error(`Failed to create project ${e}`);
 			}
