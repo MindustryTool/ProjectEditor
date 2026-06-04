@@ -34,6 +34,12 @@ export { CategorySchema } from "./category";
 export { BuildVisibilitySchema } from "./build-visibility";
 export { TeamSchema } from "./team";
 
+export { AppSettingsSchema } from "./project";
+export type { AppSettings } from "./project";
+
+export { ProjectRecordSchema } from "./project";
+export type { ProjectRecord } from "./project";
+
 export { WeaponHjsonSchema } from "./weapon";
 
 export { AbilityHjsonSchema } from "./ability";

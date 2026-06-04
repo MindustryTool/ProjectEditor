@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { ProjectPickerDialog } from "#/components/editor/ProjectPickerDialog";
 import { ProjectSettingsDialog } from "./ProjectSettingsDialog";
 import { useProjectActions } from "#/hooks/use-project-actions";
-import type { ProjectRecord } from "@project/core";
+import type { ProjectRecord } from "@project/schema";
 import type { ProjectLanguage } from "@project/core";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "#/components/ui/dialog";
 

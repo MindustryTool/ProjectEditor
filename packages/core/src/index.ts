@@ -119,7 +119,6 @@ export interface ProjectEventMap {
 
 export type * from "@project/types";
 
-export type { AppSettings, ProjectRecord } from "./stores/project";
 export type { ProjectContext, RecentFileEntry } from "./stores/session";
 export { useAppStore } from "./stores/project";
 export { useProjectSession, useCurrentProject, TreeSnapshot } from "./stores/session";

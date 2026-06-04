@@ -5,7 +5,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { useAppStore } from "@project/core";
-import type { ProjectRecord } from "@project/core";
+import type { ProjectRecord } from "@project/schema";
 import type { ProjectLanguage } from "@project/core";
 import { FolderOpen } from "lucide-react";
 import { Separator } from "#/components/ui/separator";

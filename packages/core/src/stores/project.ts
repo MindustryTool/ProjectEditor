@@ -4,28 +4,11 @@ import type { ProjectLanguage, ProjectEventMap, ProjectInfo } from "@project/cor
 import { createProjectInfo, createEventBus, importProject, ValidationResults, useValidationStore } from "@project/core";
 import { createProjectFileSystem } from "@project/core";
 import { TreeSnapshot, useProjectSession } from "./session";
-
-export interface AppSettings {
-	theme: "light" | "dark" | "system";
-	fontSize: number;
-	tabSize: number;
-	validation: {
-		validationDelayMs: number;
-	};
-}
-
-export interface ProjectRecord {
-	id: string;
-	name: string;
-	language?: string;
-	createdAt: Date;
-	updatedAt: Date;
-}
+import { type AppSettings, type ProjectRecord } from "@project/schema";
 
 export type { ProjectContext, RecentFileEntry } from "./session";
 
 interface AppState {
-	hydrated: boolean;
 	projects: Record<string, ProjectRecord>;
 	settings: AppSettings;
 	createNewProject: (name: string, language?: ProjectLanguage) => Promise<string>;
@@ -40,7 +23,6 @@ interface AppState {
 export const useAppStore = create<AppState>()(
 	persist(
 		(set, get) => ({
-			hydrated: false,
 			projects: {},
 			settings: { theme: "system" as const, fontSize: 14, tabSize: 2, validation: { validationDelayMs: 500 } },
 
@@ -143,14 +125,11 @@ export const useAppStore = create<AppState>()(
 			},
 		}),
 		{
-			name: "project-store",
+			name: "projects-store",
 			partialize: (state) => ({
 				settings: state.settings,
 				projects: state.projects,
 			}),
-			onRehydrateStorage(state) {
-				if (state) state.hydrated = true;
-			},
 		},
 	),
 );

@@ -1,7 +1,5 @@
 // Re-export shim for backward compatibility — all state APIs now live in @project/core
 export type {
-	AppSettings,
-	ProjectRecord,
 	ProjectContext,
 	RecentFileEntry,
 	FileEntry,

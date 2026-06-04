@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { deleteProjectFiles } from "@project/core";
 import { useAppStore, useProjectSession } from "@project/core";
-import type { ProjectRecord } from "@project/core";
+import type { ProjectRecord } from "@project/schema";
 import { Spinner } from "~/components/ui/spinner";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
