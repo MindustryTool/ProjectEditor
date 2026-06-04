@@ -39,5 +39,5 @@ export {
 	getSchemaEntries,
 	getArrayItemSchema,
 	getSchemaMetadata,
-} from "./schema-utils";
-export type { AnySchema, SchemaMetadata, Type } from "./schema-utils";
+} from "./utils";
+export type { AnySchema, SchemaMetadata, Type } from "./utils";
