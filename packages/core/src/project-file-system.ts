@@ -1,6 +1,7 @@
 import type { EventBus, ProjectEventMap, ProjectInfo } from "./index.js";
 import type { VirtualFileSystem, FileEntry, FileStat, TreeNode } from "@project/fs";
 import { type DefaultProjectFileTree, jsonProjectTree, createOPFSAdapter } from "@project/fs";
+import { HJSON } from "@project/hjson";
 
 export type TreeSnapshotChangeCallback = (snapshot: FileEntry[]) => void;
 
@@ -112,10 +113,10 @@ export class ProjectFileSystem {
 	private async refreshTreeNow(): Promise<FileEntry[]> {
 		const startTime = Date.now();
 		const snapshot = await this.listFiles("/", { recursive: true });
-        const duration = Date.now() - startTime;
-        if (duration > 100) {
-            console.log(`Tree refreshed in ${duration}ms`);
-        }
+		const duration = Date.now() - startTime;
+		if (duration > 100) {
+			console.log(`Tree refreshed in ${duration}ms`);
+		}
 		this.onTreeSnapshotChange(snapshot);
 		return snapshot;
 	}
@@ -198,11 +199,11 @@ export class ProjectFileSystem {
 
 	async readJsonFile<T>(path: string): Promise<T> {
 		const text = await this.readTextFile(path);
-		return JSON.parse(text) as T;
+		return HJSON.parse(text) as T;
 	}
 
 	async writeJsonFile(path: string, data: unknown): Promise<void> {
-		await this.writeTextFile(path, JSON.stringify(data, null, 2));
+		await this.writeTextFile(path, HJSON.stringify(data, null, 2));
 	}
 
 	async copyFile(source: string, destination: string): Promise<void> {

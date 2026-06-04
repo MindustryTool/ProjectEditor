@@ -7,11 +7,10 @@ import { useSprites } from "#/hooks/use-sprites";
 import { useStatuses } from "#/hooks/use-statuses";
 import { useUnits } from "#/hooks/use-units";
 import { useFileString } from "@project/core";
-import { HJSON } from "@project/hjson";
-import { ModHjsonSchema, type ModHjsonData } from "@project/schema";
+import { HJSON, HjsonObjectNode } from "@project/hjson";
+import { type ModHjsonData } from "@project/schema";
 import type { ContentEntry, ProjectContents } from "@project/types";
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react";
-import * as v from "valibot";
 
 export interface ProjectContextValue {
 	metadata: ModHjsonData;
@@ -32,18 +31,20 @@ export function useProjectContext(): ProjectContextValue {
 const readModMetadata = (json: string, hjson: string) => {
 	let object = null;
 	try {
-		object = HJSON.parse(json);
+		object = HJSON.parseWithCache(json);
+
+		if (!(object instanceof HjsonObjectNode)) {
+			throw new Error("Invalid mod.json");
+		}
 	} catch (e1) {
 		try {
-			object = HJSON.parse(hjson);
+			object = HJSON.parseWithCache(hjson);
 		} catch (e2) {
-			throw new Error("Failed to read mod.(h)json " + e2 + " " + e1);
+			console.error("Failed to read mod.(h)json " + e2 + " " + e1);
 		}
 	}
 
-	const result = v.safeParse(ModHjsonSchema, object);
-
-	let mod: ModHjsonData = {
+	const mod: ModHjsonData = {
 		author: "",
 		dependencies: [],
 		description: "",
@@ -53,8 +54,35 @@ const readModMetadata = (json: string, hjson: string) => {
 		version: "",
 	};
 
-	if (result.success) {
-		mod = result.output;
+	if (object && object instanceof HjsonObjectNode) {
+		if (object.get("name")) {
+			mod.name = object.get("name").asString()!;
+		}
+
+		if (object.get("version")) {
+			mod.version = object.get("version").asString()!;
+		}
+
+		if (object.get("author")) {
+			mod.author = object.get("author").asString()!;
+		}
+
+		const deps = object.get("dependencies");
+		if (deps && deps.isArray()) {
+			mod.dependencies = deps.valueOf() as string[];
+		}
+
+		if (object.get("description")) {
+			mod.description = object.get("description").asString()!;
+		}
+
+		if (object.get("displayName")) {
+			mod.displayName = object.get("displayName").asString()!;
+		}
+
+		if (object.get("minGameVersion")) {
+			mod.minGameVersion = object.get("minGameVersion").asString()!;
+		}
 	}
 
 	return mod;
@@ -90,19 +118,22 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 		[items, blocks, liquids, sectors, statuses, units, sprites, effects, metadata.name],
 	);
 
-	const findContent = useCallback((name: string, entries: readonly (readonly ContentEntry[])[]) => {
-		const normalizedName = name.replace(metadata.name + "-", "");
+	const findContent = useCallback(
+		(name: string, entries: readonly (readonly ContentEntry[])[]) => {
+			const normalizedName = name.replace(metadata.name + "-", "");
 
-		for (const entry of entries) {
-			for (const item of entry) {
-				if (item.name === normalizedName || item.name.replace(metadata.name + "-", "") === normalizedName) {
-					return item;
+			for (const entry of entries) {
+				for (const item of entry) {
+					if (item.name === normalizedName || item.name.replace(metadata.name + "-", "") === normalizedName) {
+						return item;
+					}
 				}
 			}
-		}
 
-		return null;
-	}, [metadata.name]);
+			return null;
+		},
+		[metadata.name],
+	);
 
 	return <ProjectContext.Provider value={{ contents, metadata, findContent }}>{children}</ProjectContext.Provider>;
 }
