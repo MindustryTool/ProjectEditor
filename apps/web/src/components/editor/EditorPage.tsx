@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Progress } from "#/components/ui/progress";
 import { usePath } from "#/hooks/use-path";
 import { useInterval } from "usehooks-ts";
+import { toast } from "sonner";
 
 export function EditorPage() {
 	const [path] = usePath();
@@ -45,6 +46,8 @@ export function EditorPage() {
 				} else {
 					navigate({ to: `/${lang}/projects`, replace: true });
 				}
+			} catch (e) {
+				toast.error(String(e));
 			} finally {
 				setLoading(100);
 				setTimeout(() => {
