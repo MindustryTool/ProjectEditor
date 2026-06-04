@@ -1,4 +1,4 @@
-import { FormControl, FormLabel } from "#/components/ui/form";
+import { FieldControl, FieldLabel } from "#/components/editor/right/field/Field";
 import { getSchemaMetadata, getSchemaEntries, resolveSchema, detectSchemaType } from "@project/schema";
 import React from "react";
 import * as v from "valibot";
@@ -32,12 +32,12 @@ export const ObjectField = React.memo(function ObjectField({ name, path, value, 
 
 				if (Renderer === undefined) {
 					return (
-						<FormControl key={key}>
-							<FormLabel>
+						<FieldControl key={key}>
+							<FieldLabel>
 								<SchemaLabel name={name} entrySchema={childSchema as AnySchema} />
-							</FormLabel>
+							</FieldLabel>
 							<span className="text-red-400 text-sm">Unknown field type {type}</span>
-						</FormControl>
+						</FieldControl>
 					);
 				}
 

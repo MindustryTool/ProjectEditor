@@ -1,9 +1,9 @@
-import { FormMessage } from "#/components/ui/form";
 import { useValidationStore } from "@project/core";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
 import { EMPTY_ARRAY } from "#/lib/utils";
+import { FieldMessage } from "#/components/editor/right/field/Field";
 
 export const FieldIssue = React.memo(function FieldIssue({ path, jsonPath }: { path: string; jsonPath: string }) {
 	const { t } = useTranslation();
@@ -14,12 +14,12 @@ export const FieldIssue = React.memo(function FieldIssue({ path, jsonPath }: { p
 	if (issues.length === 0) return null;
 
 	return (
-		<FormMessage>
+		<FieldMessage>
 			{issues.map((issue, index) => (
 				<span key={index + (issue.field || "")}>
 					{(t as (key: string, params?: Record<string, unknown>) => string)(issue.messageKey, issue.messageParams)}
 				</span>
 			))}
-		</FormMessage>
+		</FieldMessage>
 	);
 });

@@ -1,5 +1,5 @@
 import { ContentImage } from "#/components/editor/ContentImage";
-import { FormControl, FormField, FormLabel } from "#/components/ui/form";
+import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { unwrapSchema } from "@project/schema";
@@ -11,7 +11,14 @@ import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
 
-export const LiquidsListField = React.memo(function LiquidsListField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
+export const LiquidsListField = React.memo(function LiquidsListField({
+	name,
+	value,
+	onChange,
+	entrySchema,
+	jsonPath,
+	path,
+}: SchemaRendererProps) {
 	const stringValue = typeof value === "string" ? value : ((v.getDefault(entrySchema) ?? "") as string);
 	const context = useProjectContext();
 	const unwrappedSchema = unwrapSchema(entrySchema);
@@ -24,11 +31,11 @@ export const LiquidsListField = React.memo(function LiquidsListField({ name, val
 			.map((option) => option!);
 
 		return (
-			<FormField>
-				<FormLabel>
+			<Field>
+				<FieldLabel>
 					<SchemaLabel name={name} entrySchema={entrySchema} />
-				</FormLabel>
-				<FormControl>
+				</FieldLabel>
+				<FieldControl>
 					<Select
 						key={name}
 						value={stringValue}
@@ -51,10 +58,10 @@ export const LiquidsListField = React.memo(function LiquidsListField({ name, val
 							</SelectGroup>
 						</SelectContent>
 					</Select>
-				</FormControl>
+				</FieldControl>
 				<SchemaDescription entrySchema={entrySchema} />
 				<FieldIssue path={path} jsonPath={jsonPath} />
-			</FormField>
+			</Field>
 		);
 	}
 

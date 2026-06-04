@@ -1,6 +1,6 @@
 import { Button } from "#/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
-import { FormControl, FormField, FormLabel } from "#/components/ui/form";
+import { Field } from "#/components/editor/right/field";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/components/ui/collapsible";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
 import { Separator } from "#/components/ui/separator";
@@ -16,6 +16,8 @@ import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import { ObjectField } from "./ObjectField";
 import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
+import { FieldLabel } from "#/components/ui/field";
+import { FieldControl } from "#/components/editor/right/field/Field";
 
 export const EffectField = React.memo(function EffectField({ path, name, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
 	const effects = useEffects();
@@ -25,9 +27,9 @@ export const EffectField = React.memo(function EffectField({ path, name, value, 
 		const typeValue = (value as Record<string, unknown>)?.type ?? "";
 		return (
 			<div className="grid gap-2">
-				<FormLabel>
+				<FieldLabel>
 					<SchemaLabel name={name} entrySchema={entrySchema} />
-				</FormLabel>
+				</FieldLabel>
 				<SchemaDescription entrySchema={entrySchema} />
 				<div className="grid grid-cols-2 gap-2">
 					<Button
@@ -45,7 +47,7 @@ export const EffectField = React.memo(function EffectField({ path, name, value, 
 					</Button>
 				</div>
 				<Collapsible>
-					<FormField>
+					<Field>
 						<CollapsibleTrigger asChild>
 							<Button variant="outline" className="flex items-center justify-between w-full">
 								<span>{String(typeValue)}</span>
@@ -53,7 +55,7 @@ export const EffectField = React.memo(function EffectField({ path, name, value, 
 							</Button>
 						</CollapsibleTrigger>
 						<CollapsibleContent>
-							<FormControl>
+							<FieldControl>
 								<ObjectField
 									path={path}
 									name={name}
@@ -63,9 +65,9 @@ export const EffectField = React.memo(function EffectField({ path, name, value, 
 									jsonPath={jsonPath}
 								/>
 								<Separator />
-							</FormControl>
+							</FieldControl>
 						</CollapsibleContent>
-					</FormField>
+					</Field>
 					<FieldIssue path={path} jsonPath={jsonPath} />
 				</Collapsible>
 			</div>
@@ -76,9 +78,9 @@ export const EffectField = React.memo(function EffectField({ path, name, value, 
 
 	return (
 		<div className="grid gap-2">
-			<FormLabel>
+			<FieldLabel>
 				<SchemaLabel name={name} entrySchema={entrySchema} />
-			</FormLabel>
+			</FieldLabel>
 			<SchemaDescription entrySchema={entrySchema} />
 			<div className="grid grid-cols-2 gap-2">
 				<Button variant="outline" disabled>
@@ -95,7 +97,7 @@ export const EffectField = React.memo(function EffectField({ path, name, value, 
 					Custom
 				</Button>
 			</div>
-			<FormField>
+			<Field>
 				<Dialog>
 					<DialogTrigger asChild>
 						<Button className="w-full justify-between" variant="outline">
@@ -137,7 +139,7 @@ export const EffectField = React.memo(function EffectField({ path, name, value, 
 					</DialogContent>
 				</Dialog>
 				<FieldIssue path={path} jsonPath={jsonPath} />
-			</FormField>
+			</Field>
 		</div>
 	);
 });

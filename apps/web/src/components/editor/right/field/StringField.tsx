@@ -1,4 +1,4 @@
-import { FormControl, FormField, FormLabel } from "#/components/ui/form";
+import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
 import { Input } from "#/components/ui/input";
 import { Textarea } from "#/components/ui/textarea";
 import { hasNullableWrapper } from "@project/schema";
@@ -28,19 +28,19 @@ export const StringField = React.memo(function StringField({ name, value, onChan
 	}
 
 	return (
-		<FormField>
-			<FormLabel>
+		<Field>
+			<FieldLabel>
 				<SchemaLabel name={name} entrySchema={entrySchema} />
-			</FormLabel>
-			<FormControl>
+			</FieldLabel>
+			<FieldControl>
 				{metadata?.multiline ? (
 					<Textarea key={name} value={stringValue} onChange={(v) => handleChange(v.currentTarget.value)} />
 				) : (
 					<Input key={name} value={stringValue} onChange={(v) => handleChange(v.currentTarget.value)} />
 				)}
-			</FormControl>
+			</FieldControl>
 			<SchemaDescription entrySchema={entrySchema} />
 			<FieldIssue path={path} jsonPath={jsonPath} />
-		</FormField>
+		</Field>
 	);
 });

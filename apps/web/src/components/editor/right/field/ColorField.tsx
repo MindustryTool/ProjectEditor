@@ -1,4 +1,4 @@
-import { FormControl, FormField, FormLabel } from "#/components/ui/form";
+import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
 import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover";
 import { ColorPicker, ColorPickerAlpha, ColorPickerFormat, ColorPickerHue, ColorPickerSelection } from "#/components/ui/color-picker";
 import { HJSON } from "@project/hjson";
@@ -15,11 +15,11 @@ export const ColorField = React.memo(function ColorField({ name, value, onChange
 	hexValue = hexValue?.startsWith("#") ? hexValue : "#" + hexValue;
 
 	return (
-		<FormField>
-			<FormLabel>
+		<Field>
+			<FieldLabel>
 				<SchemaLabel name={name} entrySchema={entrySchema} />
-			</FormLabel>
-			<FormControl>
+			</FieldLabel>
+			<FieldControl>
 				<div className="flex items-center gap-2">
 					<Popover>
 						<PopoverTrigger
@@ -45,9 +45,9 @@ export const ColorField = React.memo(function ColorField({ name, value, onChange
 						</PopoverContent>
 					</Popover>
 				</div>
-			</FormControl>
+			</FieldControl>
 			<SchemaDescription entrySchema={entrySchema} />
 			<FieldIssue path={path} jsonPath={jsonPath} />
-		</FormField>
+		</Field>
 	);
 });

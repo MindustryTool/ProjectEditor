@@ -1,4 +1,4 @@
-import { FormControl, FormField, FormLabel } from "#/components/ui/form";
+import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
 import { Input } from "#/components/ui/input";
 import { hasNullableWrapper } from "@project/schema";
 import { HJSON } from "@project/hjson";
@@ -26,15 +26,15 @@ export const NumberField = React.memo(function NumberField({ name, value, onChan
 	}
 
 	return (
-		<FormField>
-			<FormLabel>
+		<Field>
+			<FieldLabel>
 				<SchemaLabel name={name} entrySchema={entrySchema} />
-			</FormLabel>
-			<FormControl>
+			</FieldLabel>
+			<FieldControl>
 				<Input key={name} value={numValue} onChange={(v) => handleChange(v.currentTarget.valueAsNumber)} type="number" />
-			</FormControl>
+			</FieldControl>
 			<SchemaDescription entrySchema={entrySchema} />
 			<FieldIssue path={path} jsonPath={jsonPath} />
-		</FormField>
+		</Field>
 	);
 });

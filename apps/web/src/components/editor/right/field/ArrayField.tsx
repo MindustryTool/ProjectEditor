@@ -1,5 +1,5 @@
 import { Button } from "#/components/ui/button";
-import { FormControl, FormField, FormLabel } from "#/components/ui/form";
+import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/components/ui/collapsible";
 import { getArrayItemSchema } from "@project/schema";
 import { HJSON } from "@project/hjson";
@@ -45,17 +45,17 @@ export const ArrayField = React.memo(function ArrayField({ path, name, value, on
 
 	return (
 		<Collapsible>
-			<FormField>
+			<Field>
 				<CollapsibleTrigger asChild>
 					<Button className="w-full" variant="outline">
-						<FormLabel>
+						<FieldLabel>
 							<SchemaLabel name={name} entrySchema={entrySchema} />
-						</FormLabel>
+						</FieldLabel>
 					</Button>
 				</CollapsibleTrigger>
 				<SchemaDescription entrySchema={entrySchema} />
 				<CollapsibleContent>
-					<FormControl>
+					<FieldControl>
 						<div className="flex flex-col gap-2">
 							{arrayValue.map((el, index) => {
 								const currentItemSchema = getArrayItemSchema(entrySchema, index) ?? itemSchema;
@@ -86,9 +86,9 @@ export const ArrayField = React.memo(function ArrayField({ path, name, value, on
 								<Plus /> Add
 							</Button>
 						</div>
-					</FormControl>
+					</FieldControl>
 				</CollapsibleContent>
-			</FormField>
+			</Field>
 		</Collapsible>
 	);
 });

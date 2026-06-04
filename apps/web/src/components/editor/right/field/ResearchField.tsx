@@ -1,7 +1,7 @@
 import { ContentImage } from "#/components/editor/ContentImage";
 import { Button } from "#/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
-import { FormControl, FormField, FormLabel } from "#/components/ui/form";
+import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
 import { Input } from "#/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
@@ -65,11 +65,11 @@ export const ResearchField = React.memo(function ResearchField({
 
 	return (
 		<>
-			<FormField>
-				<FormLabel>
+			<Field>
+				<FieldLabel>
 					<SchemaLabel name={name} entrySchema={entrySchema} />
-				</FormLabel>
-				<FormControl>
+				</FieldLabel>
+				<FieldControl>
 					<Dialog>
 						<ResearchParentTrigger parent={parent} />
 						<DialogContent className="w-sm" showCloseButton={false}>
@@ -80,16 +80,16 @@ export const ResearchField = React.memo(function ResearchField({
 							<ResearchParentToggleGroup value={parent} onValueChange={(v) => handleChange(v, requirements)} />
 						</DialogContent>
 					</Dialog>
-				</FormControl>
+				</FieldControl>
 				<SchemaDescription entrySchema={entrySchema} />
 				<FieldIssue path={path} jsonPath={jsonPath} />
-				<FormControl className="grid gap-2">
+				<FieldControl className="grid gap-2">
 					<ResearchRequirementList requirements={requirements} onChange={(newRequirements) => handleChange(parent, newRequirements)} />
 					<Button className="w-full" variant="outline" onClick={handleAddNewReq}>
 						<Plus />
 					</Button>
-				</FormControl>
-			</FormField>
+				</FieldControl>
+			</Field>
 		</>
 	);
 });
@@ -120,8 +120,8 @@ const ResearchRequirementList = React.memo(function ResearchRequirementList({
 		const selectedItem = items.find((i) => i.name === itemName);
 
 		return (
-			<FormField key={index}>
-				<FormControl className="flex gap-1">
+			<Field key={index}>
+				<FieldControl className="flex gap-1">
 					<Dialog>
 						<DialogTrigger asChild>
 							<Button variant="outline" size="icon">
@@ -159,8 +159,8 @@ const ResearchRequirementList = React.memo(function ResearchRequirementList({
 					<Button className="text-destructive" variant="outline" size="icon" onClick={() => handleRemoveReq(index)}>
 						<X />
 					</Button>
-				</FormControl>
-			</FormField>
+				</FieldControl>
+			</Field>
 		);
 	});
 });

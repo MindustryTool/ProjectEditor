@@ -2,7 +2,7 @@ import * as v from "valibot";
 import { MindustryHexColorSchema, ResearchSchema, type SchemaFn } from "./base";
 import { EffectFieldSchema } from "./effect";
 
-export const liquidBaseObjectSchema = v.object({
+export const liquidBaseObjectSchema = {
 	color: v.optional(MindustryHexColorSchema),
 	gas: v.optional(v.boolean(), false),
 	gasColor: v.optional(
@@ -31,13 +31,13 @@ export const liquidBaseObjectSchema = v.object({
 	boilPoint: v.optional(v.pipe(v.number())),
 	capPuddles: v.optional(v.boolean(), true),
 	hidden: v.optional(v.boolean(), false),
-});
+};
 
 export const LiquidFieldSchema: SchemaFn = (context) => v.picklist(context.liquids.map((liquid) => liquid.name));
 
 export const LiquidHjsonSchema: SchemaFn = (context) =>
 	v.object({
-		...liquidBaseObjectSchema.entries,
+		...liquidBaseObjectSchema,
 		effect: v.optional(EffectFieldSchema(context)),
 		particleEffect: v.optional(EffectFieldSchema(context)),
 		vaporEffect: v.optional(EffectFieldSchema(context)),

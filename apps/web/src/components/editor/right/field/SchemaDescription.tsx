@@ -1,4 +1,4 @@
-import { FormDescription } from "#/components/ui/form";
+import { FieldDescription } from "#/components/editor/right/field/Field";
 import { getSchemaMetadata, type AnySchema } from "@project/schema";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -10,5 +10,5 @@ export const SchemaDescription = React.memo(function SchemaDescription({ entrySc
 
 	if (!metadata?.description) return null;
 
-	return <FormDescription>{_t(metadata.description)}</FormDescription>;
+	return <FieldDescription>{_t(metadata.description)}</FieldDescription>;
 });

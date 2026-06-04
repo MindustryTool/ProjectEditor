@@ -1,4 +1,4 @@
-import { FormControl, FormField, FormLabel } from "#/components/ui/form";
+import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 import { HJSON } from "@project/hjson";
 import { unwrapSchema } from "@project/schema";
@@ -9,7 +9,14 @@ import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
 
-export const PickListField = React.memo(function PickListField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
+export const PickListField = React.memo(function PickListField({
+	name,
+	value,
+	onChange,
+	entrySchema,
+	jsonPath,
+	path,
+}: SchemaRendererProps) {
 	const stringValue = typeof value === "string" ? value : ((v.getDefault(entrySchema) ?? "") as string);
 	const unwrappedSchema = unwrapSchema(entrySchema);
 
@@ -17,11 +24,11 @@ export const PickListField = React.memo(function PickListField({ name, value, on
 		const options = unwrappedSchema.options.map((v) => String(v));
 
 		return (
-			<FormField>
-				<FormLabel>
+			<Field>
+				<FieldLabel>
 					<SchemaLabel name={name} entrySchema={entrySchema} />
-				</FormLabel>
-				<FormControl>
+				</FieldLabel>
+				<FieldControl>
 					<Select
 						key={name}
 						value={stringValue}
@@ -44,10 +51,10 @@ export const PickListField = React.memo(function PickListField({ name, value, on
 							</SelectGroup>
 						</SelectContent>
 					</Select>
-				</FormControl>
+				</FieldControl>
 				<SchemaDescription entrySchema={entrySchema} />
 				<FieldIssue path={path} jsonPath={jsonPath} />
-			</FormField>
+			</Field>
 		);
 	}
 

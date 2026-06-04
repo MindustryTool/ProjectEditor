@@ -1,4 +1,4 @@
-import { FormControl, FormField, FormLabel } from "#/components/ui/form";
+import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
 import { Checkbox } from "#/components/ui/checkbox";
 import React from "react";
 import * as v from "valibot";
@@ -22,15 +22,15 @@ export const BooleanField = React.memo(function BooleanField({ name, value, onCh
 	}
 
 	return (
-		<FormField>
-			<FormControl className="flex-row flex gap-1">
+		<Field>
+			<FieldControl className="flex-row flex gap-1">
 				<Checkbox key={name} checked={checked} onCheckedChange={(val) => handleChange(val === true)} />
-				<FormLabel>
+				<FieldLabel>
 					<SchemaLabel name={name} entrySchema={entrySchema} />
-				</FormLabel>
-			</FormControl>
+				</FieldLabel>
+			</FieldControl>
 			<SchemaDescription entrySchema={entrySchema} />
 			<FieldIssue path={path} jsonPath={jsonPath} />
-		</FormField>
+		</Field>
 	);
 });

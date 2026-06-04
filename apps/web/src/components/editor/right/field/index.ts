@@ -28,6 +28,7 @@ export { SchemaDescription } from "./SchemaDescription";
 export { FieldIssue } from "./FieldIssue";
 export { ItemGrid } from "./ItemGrid";
 export { SchemaArrayItemEditor } from "./SchemaArrayItemEditor";
+export { Field } from "./Field";
 export { removeByJsonPath } from "./util";
 
 import type { SchemaRenderer } from "#/components/editor/right/FieldsRenderer";
