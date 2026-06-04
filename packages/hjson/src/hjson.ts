@@ -56,7 +56,7 @@ export const HJSON = {
 		return format(text, options);
 	},
 
-	stringify(value: unknown, replacer?: Replacer | null, space?: Space): string {
+	stringify(value: unknown, replacer?: Replacer | null, space: Space = 2): string {
 		return stringify(value, replacer, space);
 	},
 };

@@ -10,8 +10,8 @@ export const itemBaseObjectSchema = v.object({
 	explosiveness: v.optional(v.pipe(v.number(), v.minValue(0))),
 	healthScaling: v.optional(v.pipe(v.number(), v.minValue(0))),
 	color: v.optional(MindustryHexColorSchema),
-	lowPriority: v.optional(v.boolean()),
-	buildable: v.optional(v.boolean()),
+	lowPriority: v.optional(v.boolean(), false),
+	buildable: v.optional(v.boolean(), false),
 	hidden: v.optional(v.boolean(), false),
 });
 
