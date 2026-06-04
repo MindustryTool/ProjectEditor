@@ -27,7 +27,12 @@ export const statusBaseObjectSchema = v.object({
 	outline: v.optional(v.boolean(), true),
 });
 
-export const StatusStringSchema: SchemaFn = (context) => v.picklist(context.statuses.map((status) => status.name));
+export const StatusStringSchema: SchemaFn = (context) =>
+	v.pipe(
+		v.string(),
+		v.transform((v) => v.replaceAll(context.name + "-", "")),
+		v.picklist(context.statuses.map((status) => status.name.replaceAll(context.name + "-", ""))),
+	);
 
 export const StatusFieldSchema: SchemaFn = (context) =>
 	v.lazy((input) => {
@@ -55,7 +60,7 @@ export const StatusHjsonSchema: SchemaFn = (context) =>
 				),
 				[],
 			),
-			opposites: v.optional(v.array(v.pipe(v.picklist(context.statuses.map((status) => status.name)))), []),
+			opposites: v.optional(v.array(StatusStringSchema(context)), []),
 		}),
 		v.forward(
 			v.partialCheck(

@@ -5,15 +5,10 @@ import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field
 import { Input } from "#/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
-import { useItems } from "#/hooks/use-items";
-import { useBlocks, type ContentEntry } from "#/hooks/use-blocks";
-import { useUnits } from "#/hooks/use-units";
-import { useLiquids } from "#/hooks/use-liquids";
-import { useSectors } from "#/hooks/use-sectors";
 import { HJSON } from "@project/hjson";
 import { ChevronDown, Plus, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
-import React, { useCallback } from "react";
+import React from "react";
 import { ItemGrid } from "./ItemGrid";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
@@ -21,6 +16,7 @@ import { SchemaLabel } from "./SchemaLabel";
 import { removeByJsonPath } from "./util";
 import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
 import type { Research } from "@project/schema";
+import { useProjectContext } from "#/components/editor/ProjectProvider";
 
 export const ResearchField = React.memo(function ResearchField({
 	name,
@@ -107,7 +103,10 @@ const ResearchRequirementList = React.memo(function ResearchRequirementList({
 	onChange: (requirements: string[]) => void;
 	jsonPath: string;
 }) {
-	const items = useItems({ project: true, base: true });
+	const {
+		findContent,
+		contents: { items },
+	} = useProjectContext();
 	const addedReq = requirements.map((requirement: string) => requirement.split("/")[0]!);
 
 	function handleRemoveReq(index: number) {
@@ -123,7 +122,7 @@ const ResearchRequirementList = React.memo(function ResearchRequirementList({
 		const itemName = parts[0]!;
 		const reqNumber = Number(parts[1]);
 
-		const selectedItem = items.find((i) => i.name === itemName);
+		const selectedItem = findContent(itemName, [items]);
 
 		return (
 			<Field key={index} jsonPath={jsonPath + "." + index}>
@@ -172,22 +171,8 @@ const ResearchRequirementList = React.memo(function ResearchRequirementList({
 });
 
 const ResearchParentTrigger = React.memo(function ResearchParentTrigger({ parent }: { parent: string }) {
-	const items = useItems({ project: true, base: true });
-	const blocks = useBlocks();
-	const units = useUnits();
-	const liquids = useLiquids();
-	const sectors = useSectors();
-
-	const findContent = useCallback((name: string, entries: ContentEntry[][]) => {
-		for (const entry of entries) {
-			for (const item of entry) {
-				if (item.name === name) {
-					return item;
-				}
-			}
-		}
-		return null;
-	}, []);
+	const { contents, findContent } = useProjectContext();
+	const { items, blocks, liquids, sectors, units } = contents;
 
 	const parentEntry = findContent(parent, [items, blocks, liquids, sectors, units]);
 
@@ -215,11 +200,7 @@ const ResearchParentToggleGroup = React.memo(function ResearchParentToggleGroup(
 	value: string | undefined;
 	onValueChange: (v: string) => void;
 }) {
-	const items = useItems({ project: true, base: true });
-	const blocks = useBlocks();
-	const units = useUnits();
-	const liquids = useLiquids();
-	const sectors = useSectors();
+	const { items, blocks, liquids, sectors, units } = useProjectContext().contents;
 
 	return (
 		<ToggleGroup className="w-full" type="single" value={value} onValueChange={onValueChange}>

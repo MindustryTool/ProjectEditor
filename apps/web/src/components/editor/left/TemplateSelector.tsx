@@ -11,13 +11,8 @@ import {
 } from "~/components/ui/select";
 import { Label } from "~/components/ui/label";
 import { ContentImage } from "#/components/editor/ContentImage";
-import { useItems } from "#/hooks/use-items";
-import { useBlocks } from "#/hooks/use-blocks";
-import { useUnits } from "#/hooks/use-units";
-import { useLiquids } from "#/hooks/use-liquids";
-import { useStatuses } from "#/hooks/use-statuses";
-import { useSectors } from "#/hooks/use-sectors";
-import type { ContentEntry } from "#/hooks/use-blocks";
+import type { ContentEntry } from "@project/types";
+import { useProjectContext } from "#/components/editor/ProjectProvider";
 
 const NONE = "none";
 
@@ -26,7 +21,7 @@ function EntriesDropdown({
 	value,
 	onValueChange,
 }: {
-	entries: ContentEntry[];
+	entries: readonly ContentEntry[];
 	value: string;
 	onValueChange: (v: string) => void;
 }) {
@@ -79,7 +74,7 @@ function EntriesDropdown({
 	);
 }
 
-function createHookSelector(useHook: () => ContentEntry[]) {
+function createHookSelector(useHook: () => readonly ContentEntry[]) {
 	return memo(function HookSelector({ onContentReady }: { onContentReady: (fn: () => Promise<string>) => void }) {
 		const entries = useHook();
 		const [choice, setChoice] = useState(NONE);
@@ -113,12 +108,12 @@ function createHookSelector(useHook: () => ContentEntry[]) {
 	});
 }
 
-const ItemsSelector = createHookSelector(() => useItems({ project: true, base: true }));
-const BlocksSelector = createHookSelector(useBlocks);
-const UnitsSelector = createHookSelector(useUnits);
-const LiquidsSelector = createHookSelector(useLiquids);
-const StatusesSelector = createHookSelector(useStatuses);
-const SectorsSelector = createHookSelector(useSectors);
+const ItemsSelector = createHookSelector(() => useProjectContext().contents.items);
+const BlocksSelector = createHookSelector(() => useProjectContext().contents.blocks);
+const UnitsSelector = createHookSelector(() => useProjectContext().contents.units);
+const LiquidsSelector = createHookSelector(() => useProjectContext().contents.liquids);
+const StatusesSelector = createHookSelector(() => useProjectContext().contents.statuses);
+const SectorsSelector = createHookSelector(() => useProjectContext().contents.sectors);
 
 export function TemplateSelector({
 	type,

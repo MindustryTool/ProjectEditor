@@ -211,7 +211,11 @@ const classSchemaMap: Record<AbilityClass, SchemaFn<AbilityObjectSchema>> = {
 		}),
 	SpawnDeathAbility: (context) =>
 		v.object({
-			unit: v.picklist(context.units.map((unit) => unit.name)),
+			unit: v.pipe(
+				v.string(),
+				v.transform((v) => v.replaceAll(context.name + "-", "")),
+				v.picklist(context.units.map((unit) => unit.name.replaceAll(context.name + "-", ""))),
+			),
 			amount: v.optional(v.number(), 1),
 			randAmount: v.optional(v.number(), 0),
 			spread: v.optional(v.number(), 8),
@@ -258,7 +262,11 @@ const classSchemaMap: Record<AbilityClass, SchemaFn<AbilityObjectSchema>> = {
 		}),
 	UnitSpawnAbility: (context) =>
 		v.object({
-			unit: v.picklist(context.units.map((unit) => unit.name)),
+			unit: v.pipe(
+				v.string(),
+				v.transform((v) => v.replaceAll(context.name + "-", "")),
+				v.picklist(context.units.map((unit) => unit.name.replaceAll(context.name + "-", ""))),
+			),
 			spawnTime: v.optional(v.number(), 60),
 			spawnX: v.optional(v.number(), 0),
 			spawnY: v.optional(v.number(), 0),

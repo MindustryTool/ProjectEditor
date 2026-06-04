@@ -17,7 +17,6 @@ export const HJSON = {
 
 		if (existing) {
             existing.hit++;
-            console.log(`Cache hit`);
 			return existing.node;
 		}
 
@@ -32,10 +31,8 @@ export const HJSON = {
                 return a.time - b.time;
             });
 			cache.shift();
-            console.log(`Cache evict`);
 		}
 
-        console.log(`Cache miss`);
 		return node;
 	},
 

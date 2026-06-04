@@ -5,7 +5,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/component
 import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
 import { Separator } from "#/components/ui/separator";
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
-import { useEffects } from "#/hooks/use-effects";
 import { HJSON } from "@project/hjson";
 import { VisuallyHidden } from "radix-ui";
 import { ChevronDown, ChevronsUpDown, Search } from "lucide-react";
@@ -18,9 +17,10 @@ import { ObjectField } from "./ObjectField";
 import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
 import { FieldLabel } from "#/components/ui/field";
 import { FieldControl } from "#/components/editor/right/field/Field";
+import { useProjectContext } from "#/components/editor/ProjectProvider";
 
 export const EffectField = React.memo(function EffectField({ path, name, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
-	const effects = useEffects();
+	const effects = useProjectContext().contents.effects;
 	const [filter, setFilter] = useState("");
 
 	if (typeof value === "object" && value !== null) {

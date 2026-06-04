@@ -134,7 +134,11 @@ export const EffectFieldSchema: SchemaFn = (context) => {
 	return v.pipe(
 		v.lazy((input) => {
 			if (typeof input === "string") {
-				return v.picklist(context.effects.map((effect) => effect.name));
+				return v.pipe(
+					v.string(),
+					v.transform((v) => v.replaceAll(context.name + "-", "")),
+					v.picklist(context.effects.map((effect) => effect.name.replaceAll(context.name + "-", ""))),
+				);
 			}
 
 			return EffectHjsonSchema(context);

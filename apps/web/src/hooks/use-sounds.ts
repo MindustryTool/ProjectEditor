@@ -1,6 +1,6 @@
 import { useProjectSession } from "@project/core";
 import { useMemo } from "react";
-import type { ContentEntry } from "./use-blocks";
+import type { ContentEntry } from "@project/types";
 import { useBaseSounds } from "#/hooks/use-base-sounds";
 
 export function useSounds(): ContentEntry[] {

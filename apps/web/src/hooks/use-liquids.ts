@@ -1,9 +1,10 @@
 import { useBaseLiquids } from "#/hooks/use-base-liquids";
 import { useProjectSession } from "@project/core";
 import { useMemo } from "react";
-import type { ContentEntry } from "./use-blocks";
+import type { ContentEntry } from "@project/types";
+import type { ModHjsonData } from "@project/schema";
 
-export function useLiquids(): ContentEntry[] {
+export function useLiquids(metadata: ModHjsonData): ContentEntry[] {
 	const projectItems = useProjectSession((s) => s.treeSnapshot.liquids);
 
 	const { data } = useBaseLiquids();
@@ -22,12 +23,12 @@ export function useLiquids(): ContentEntry[] {
 		}
 		items.push(
 			...projectItems.map((i) => ({
-				name: i.name.replace(".json", ""),
+				name: metadata.name + "-" + i.name.replace(".json", ""),
 				type: "project" as const,
 				path: i.path,
 				contentType: "liquids",
 			})),
 		);
 		return items;
-	}, [projectItems, data]);
+	}, [metadata.name, projectItems, data]);
 }

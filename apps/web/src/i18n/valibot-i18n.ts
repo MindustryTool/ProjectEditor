@@ -11,7 +11,6 @@ export async function loadValibotI18n(locale: string): Promise<void> {
 
 	if (locale !== "en" && VALIBOT_LOCALE_IMPORTS[locale]) {
 		await VALIBOT_LOCALE_IMPORTS[locale]();
-        console.log("Loaded locale", locale)
 	}
 
 	setGlobalConfig({ lang: locale });

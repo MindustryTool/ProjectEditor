@@ -1,7 +1,7 @@
 import { useBaseSprites } from "#/hooks/use-base-sprites";
 import { useProjectSession } from "@project/core";
 import { useMemo } from "react";
-import type { ContentEntry } from "./use-blocks";
+import type { ContentEntry } from "@project/types";
 
 export function useSprites(): ContentEntry[] {
 	const projectItems = useProjectSession((s) => s.treeSnapshot.sprites);

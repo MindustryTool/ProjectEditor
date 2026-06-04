@@ -48,6 +48,13 @@ export type Effect = {
 	name: string;
 };
 
+export type ContentEntry = {
+	name: string;
+	type: "project" | "base";
+	path: string;
+	contentType: string;
+};
+
 export interface ProjectContents {
 	readonly items: readonly Item[];
 	readonly blocks: readonly Block[];
@@ -57,4 +64,5 @@ export interface ProjectContents {
 	readonly units: readonly Unit[];
 	readonly sprites: readonly Sprite[];
 	readonly effects: readonly Effect[];
+	readonly name: string;
 }

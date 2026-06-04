@@ -9,14 +9,16 @@ import { useUnits } from "#/hooks/use-units";
 import { useFileString } from "@project/core";
 import { HJSON } from "@project/hjson";
 import { ModHjsonSchema, type ModHjsonData } from "@project/schema";
-import type { ProjectContents } from "@project/types";
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import type { ContentEntry, ProjectContents } from "@project/types";
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react";
 import * as v from "valibot";
 
 export interface ProjectContextValue {
 	metadata: ModHjsonData;
 	contents: ProjectContents;
+	findContent: (name: string, entries: readonly (readonly ContentEntry[])[]) => ContentEntry | null;
 }
+
 const ProjectContext = createContext<ProjectContextValue | null>(null);
 
 export function useProjectContext(): ProjectContextValue {
@@ -41,8 +43,6 @@ const readModMetadata = (json: string, hjson: string) => {
 
 	const result = v.safeParse(ModHjsonSchema, object);
 
-	console.log(result);
-
 	let mod: ModHjsonData = {
 		author: "",
 		dependencies: [],
@@ -61,19 +61,23 @@ const readModMetadata = (json: string, hjson: string) => {
 };
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
-	const items = useItems({ base: true, project: true });
-	const blocks = useBlocks();
-	const liquids = useLiquids();
-	const sectors = useSectors();
-	const statuses = useStatuses();
-	const units = useUnits();
-	const sprites = useSprites();
-	const effects = useEffects();
 	const { data: jsonText } = useFileString("mod.json");
 	const { data: hjsonText } = useFileString("mod.hjson");
 
+	const metadata = useMemo(() => readModMetadata(jsonText || "", hjsonText || ""), [jsonText, hjsonText]);
+
+	const items = useItems(metadata);
+	const blocks = useBlocks(metadata);
+	const liquids = useLiquids(metadata);
+	const sectors = useSectors(metadata);
+	const statuses = useStatuses(metadata);
+	const units = useUnits(metadata);
+	const effects = useEffects(metadata);
+	const sprites = useSprites();
+
 	const contents = useMemo<ProjectContents>(
 		() => ({
+			name: metadata.name,
 			items,
 			blocks,
 			liquids,
@@ -83,10 +87,22 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 			sprites,
 			effects,
 		}),
-		[items, blocks, liquids, sectors, statuses, units, sprites, effects],
+		[items, blocks, liquids, sectors, statuses, units, sprites, effects, metadata.name],
 	);
 
-	const metadata = useMemo(() => readModMetadata(jsonText || "", hjsonText || ""), [jsonText, hjsonText]);
+	const findContent = useCallback((name: string, entries: readonly (readonly ContentEntry[])[]) => {
+		const normalizedName = name.replace(metadata.name + "-", "");
 
-	return <ProjectContext.Provider value={{ contents, metadata }}>{children}</ProjectContext.Provider>;
+		for (const entry of entries) {
+			for (const item of entry) {
+				if (item.name === normalizedName || item.name.replace(metadata.name + "-", "") === normalizedName) {
+					return item;
+				}
+			}
+		}
+
+		return null;
+	}, [metadata.name]);
+
+	return <ProjectContext.Provider value={{ contents, metadata, findContent }}>{children}</ProjectContext.Provider>;
 }

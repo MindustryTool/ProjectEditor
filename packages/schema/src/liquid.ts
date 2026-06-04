@@ -33,7 +33,12 @@ export const liquidBaseObjectSchema = {
 	hidden: v.optional(v.boolean(), false),
 };
 
-export const LiquidFieldSchema: SchemaFn = (context) => v.picklist(context.liquids.map((liquid) => liquid.name));
+export const LiquidFieldSchema: SchemaFn = (context) =>
+	v.pipe(
+		v.string(),
+		v.transform((v) => v.replaceAll(context.name + "-", "")),
+		v.picklist(context.liquids.map((liquid) => liquid.name.replaceAll(context.name + "-", ""))),
+	);
 
 export const LiquidHjsonSchema: SchemaFn = (context) =>
 	v.object({
@@ -41,6 +46,6 @@ export const LiquidHjsonSchema: SchemaFn = (context) =>
 		effect: v.optional(EffectFieldSchema(context)),
 		particleEffect: v.optional(EffectFieldSchema(context)),
 		vaporEffect: v.optional(EffectFieldSchema(context)),
-		canStayOn: v.optional(v.array(v.pipe(v.picklist(context.liquids.map((liquid) => liquid.name)), v.metadata({ type: "liquids" })))),
+		canStayOn: v.optional(v.array(LiquidFieldSchema(context))),
 		research: ResearchSchema(context),
 	});

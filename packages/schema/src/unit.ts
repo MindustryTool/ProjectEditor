@@ -249,7 +249,12 @@ export const UnitHjsonSchema: SchemaFn = (context) =>
 		treadEffect: v.optional(EffectHjsonSchema(context)),
 		parts: v.optional(v.array(PartHjsonSchema(context)), []),
 		engines: v.optional(v.array(EngineHjsonSchema(context)), []),
-        research: v.optional(ResearchSchema(context)),
+		research: v.optional(ResearchSchema(context)),
 	});
 
-export const UnitFieldSchema: SchemaFn = (context) => v.picklist(context.units.map((unit) => unit.name));
+export const UnitFieldSchema: SchemaFn = (context) =>
+	v.pipe(
+		v.string(),
+		v.transform((v) => v.replaceAll(context.name + "-", "")),
+		v.picklist(context.units.map((unit) => unit.name.replaceAll(context.name + "-", ""))),
+	);

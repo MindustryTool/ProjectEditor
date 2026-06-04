@@ -1,15 +1,9 @@
 import { useBaseBlocks } from "#/hooks/use-base-blocks";
-import { useProjectSession } from "@project/core";
+import { useProjectSession, type ContentEntry } from "@project/core";
+import type { ModHjsonData } from "@project/schema";
 import { useMemo } from "react";
 
-export type ContentEntry = {
-	name: string;
-	type: "project" | "base";
-	path: string;
-	contentType: string;
-};
-
-export function useBlocks(): ContentEntry[] {
+export function useBlocks(metadata: ModHjsonData): ContentEntry[] {
 	const projectItems = useProjectSession((s) => s.treeSnapshot.blocks);
 
 	const { data } = useBaseBlocks();
@@ -28,12 +22,12 @@ export function useBlocks(): ContentEntry[] {
 		}
 		items.push(
 			...projectItems.map((i) => ({
-				name: i.name.replace(".json", ""),
+				name: metadata.name + "-" + i.name.replace(".json", ""),
 				type: "project" as const,
 				path: i.path,
 				contentType: "blocks",
 			})),
 		);
 		return items;
-	}, [projectItems, data]);
+	}, [metadata.name, projectItems, data]);
 }

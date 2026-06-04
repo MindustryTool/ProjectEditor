@@ -1,21 +1,17 @@
 import { useBaseItems } from "#/hooks/use-base-items";
 import { useProjectSession } from "@project/core";
 import { useMemo } from "react";
-import type { ContentEntry } from "./use-blocks";
+import type { ContentEntry } from "@project/types";
+import type { ModHjsonData } from "@project/schema";
 
-export type UseItemsOptions = {
-	project?: boolean;
-	base?: boolean;
-};
-
-export function useItems({ project, base }: UseItemsOptions): ContentEntry[] {
+export function useItems(metadata: ModHjsonData): ContentEntry[] {
 	const projectItems = useProjectSession((s) => s.treeSnapshot.items);
 
 	const { data } = useBaseItems();
 
 	return useMemo(() => {
 		const items: ContentEntry[] = [];
-		if (base) {
+		if (data) {
 			items.push(
 				...(data?.map((i) => ({
 					name: i.name,
@@ -26,16 +22,15 @@ export function useItems({ project, base }: UseItemsOptions): ContentEntry[] {
 			);
 		}
 
-		if (project) {
-			items.push(
-				...projectItems.map((i) => ({
-					name: i.name.replace(".json", ""),
-					type: "project" as const,
-					path: i.path,
-					contentType: "items",
-				})),
-			);
-		}
+		items.push(
+			...projectItems.map((i) => ({
+				name: metadata.name + "-" + i.name.replace(".json", ""),
+				type: "project" as const,
+				path: i.path,
+				contentType: "items",
+			})),
+		);
+
 		return items;
-	}, [projectItems, data, project, base]);
+	}, [projectItems, data, metadata.name]);
 }

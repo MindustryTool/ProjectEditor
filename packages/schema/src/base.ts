@@ -122,8 +122,8 @@ export const ResearchSchema: SchemaFn = (context) =>
 							for (let i = 0; i < requirement.length; i++) {
 								const req = requirement[i]!;
 								const parts = req.split("/");
-								const itemName = parts[0];
-								const item = items.find((i) => i.name === itemName);
+								const itemName = parts[0]!.replace(context.name + "-", "");
+								const item = items.find((i) => i.name.replaceAll(context.name + "-", "") === itemName);
 
 								if (!item) {
 									addIssue({
@@ -233,6 +233,10 @@ export const Interps = [
 ] as const;
 
 export function findContent(name: string, context: ProjectContents) {
+	name = name.startsWith(context.name) ? name : context.name + "-" + name;
+
+	console.log(name);
+
 	const item = context.items.find((entry) => entry.name === name);
 
 	if (item) {

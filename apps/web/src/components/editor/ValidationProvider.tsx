@@ -132,7 +132,6 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 				}
 
 				useValidationStore.getState().setResults(path, response.results);
-				console.log("Validated file", path);
 			} catch (err) {
 				if (latestRequestIdByPathRef.current.get(path) !== requestId) {
 					return;

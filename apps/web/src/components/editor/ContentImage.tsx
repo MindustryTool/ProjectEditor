@@ -1,6 +1,6 @@
 import { resolveContentSprite } from "@project/utils";
 import { memo } from "react";
-import type { ContentEntry } from "#/hooks/use-blocks";
+import type { ContentEntry } from "@project/types";
 import { ImageFilePreview } from "./ImageFilePreview";
 import { ContentApiImage } from "./ContentApiImage";
 

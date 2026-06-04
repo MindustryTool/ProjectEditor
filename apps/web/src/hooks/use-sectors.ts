@@ -1,9 +1,10 @@
 import { useBaseSectors } from "#/hooks/use-base-sectors";
 import { useProjectSession } from "@project/core";
 import { useMemo } from "react";
-import type { ContentEntry } from "./use-blocks";
+import type { ContentEntry } from "@project/types";
+import type { ModHjsonData } from "@project/schema";
 
-export function useSectors(): ContentEntry[] {
+export function useSectors(metadata: ModHjsonData): ContentEntry[] {
 	const projectItems = useProjectSession((s) => s.treeSnapshot.sectors);
 
 	const { data } = useBaseSectors();
@@ -22,12 +23,12 @@ export function useSectors(): ContentEntry[] {
 		}
 		items.push(
 			...projectItems.map((i) => ({
-				name: i.name.replace(".json", ""),
+				name: metadata.name + "-" + i.name.replace(".json", ""),
 				type: "project" as const,
 				path: i.path,
 				contentType: "sectors",
 			})),
 		);
 		return items;
-	}, [projectItems, data]);
+	}, [metadata.name, projectItems, data]);
 }

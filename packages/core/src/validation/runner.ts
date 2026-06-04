@@ -54,7 +54,7 @@ export function createValidationRunner(registry: ValidatorRegistry): ValidationR
 		}
 
 		const duration = Date.now() - start;
-		if (duration > 5) {
+		if (duration > 50) {
 			console.log({ task: "Validate", path, duration: `${duration.toString()}ms` });
 		}
 
