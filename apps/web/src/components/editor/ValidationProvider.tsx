@@ -13,7 +13,7 @@ import {
 import { useShallow } from "zustand/react/shallow";
 import { usePath } from "#/hooks/use-path";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
-import { spawn, Thread, type ModuleThread } from "threads";
+import type { ModuleThread } from "threads";
 
 export interface ValidationContextValue {
 	validateFile: (path: string, getContent: () => Promise<string>) => Promise<void>;
@@ -79,9 +79,11 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 	const { contents } = useProjectContext();
 
 	const getWorker = useCallback(async () => {
+		if (typeof document === "undefined") throw new Error("Worker not available on server");
 		if (workerRef.current) return workerRef.current;
 		if (workerPromiseRef.current) return workerPromiseRef.current;
 
+		const { spawn } = await import("threads");
 		const workerPromise = spawn<ValidationWorkerApi>(
 			new Worker(new URL("../../workers/validation-worker.ts", import.meta.url), { type: "module" }),
 		);
@@ -98,6 +100,8 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 	}, []);
 
 	const terminateWorker = useCallback(async () => {
+		if (typeof document === "undefined") return;
+		const { Thread } = await import("threads");
 		const pendingWorker = workerPromiseRef.current;
 		const activeWorker = workerRef.current;
 

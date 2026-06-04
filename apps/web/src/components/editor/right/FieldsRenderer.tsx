@@ -161,6 +161,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 
 		return (
 			<Renderer //
+                key={name + path}
 				path={path}
 				name={name}
 				value={value}

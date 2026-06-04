@@ -116,7 +116,7 @@ export function FileExplorer({ className }: FileExplorerProps) {
 					<AlertDialogHeader>
 						<AlertDialogTitle>Delete {deleteTargetName}?</AlertDialogTitle>
 						<AlertDialogDescription>
-							This action cannot be undone.{" "}
+							This action cannot be undone.
 							{deleteTargetPath && deleteTargetPath.split("/").length > 1 ? "All contents will be deleted." : ""}
 						</AlertDialogDescription>
 					</AlertDialogHeader>
@@ -172,6 +172,7 @@ function TreeNodeItem({ node, depth = 0 }: TreeNodeItemProps) {
 
 	const isItemDirty = useFileStore(isFolder ? () => false : (state) => isDirty(state.getEntry(projectId, currentPath)));
 	const isItemSaving = useFileStore(isFolder ? () => false : selectIsSaving(projectId, currentPath));
+	const loadFile = useFileStore((s) => s.loadFile);
 
 	const filenameClass =
 		errorCount > 0
@@ -253,7 +254,13 @@ function TreeNodeItem({ node, depth = 0 }: TreeNodeItemProps) {
 	const showActions = !isEditing;
 
 	return (
-		<div>
+		<div
+			onPointerEnter={() => {
+				if (!isFolder) {
+					loadFile(context.project.id, currentPath, context.fs);
+				}
+			}}
+		>
 			<div
 				className={cn(
 					"group flex cursor-pointer items-center gap-1 rounded py-1 text-sm hover:bg-accent",
