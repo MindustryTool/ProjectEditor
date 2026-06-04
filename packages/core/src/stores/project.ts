@@ -5,6 +5,7 @@ import { createProjectInfo, createEventBus, importProject, ValidationResults, us
 import { createProjectFileSystem } from "@project/core";
 import { TreeSnapshot, useProjectSession } from "./session";
 import { type AppSettings, type ProjectRecord } from "@project/schema";
+import { HJSON } from "@project/hjson";
 
 export type { ProjectContext, RecentFileEntry } from "./session";
 
@@ -41,11 +42,37 @@ export const useAppStore = create<AppState>()(
 						useProjectSession.setState({ treeSnapshot: new TreeSnapshot(snapshot) });
 					},
 				});
-				const hasModJson = await fs.exists("/mod.json");
-				const hasModHjson = await fs.exists("/mod.hjson");
 
-				if (!hasModJson && !hasModHjson) {
-					await fs.createFile("/mod.hjson");
+				try {
+					await fs.writeTextFile(
+						"/mod.hjson",
+						HJSON.stringify({
+							displayName: "[cyan]Example",
+							name: "example",
+							author: "[blue]Your name",
+							description: "A mod that adds in a butt load of content",
+							minGameVersion: "158",
+							version: "[#00ff00]1.0.0",
+						}),
+					);
+
+					await fs.writeTextFile(
+						"/content/items/test-item.hjson",
+						HJSON.stringify({
+							hardness: 8,
+							cost: 7,
+							charge: 0.9,
+							color: "FFF861FF",
+							research: {
+								parent: "copper",
+								requirements: ["copper/200"],
+							},
+						}),
+					);
+
+					await fs.writeTextFile("/README.md", "# This is an example mod");
+				} catch (e) {
+					console.error(e);
 				}
 
 				useValidationStore.setState({ results: new ValidationResults() });
