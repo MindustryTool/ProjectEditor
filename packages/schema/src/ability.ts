@@ -28,11 +28,11 @@ export const abilityClasses = [
 
 export type AbilityClass = (typeof abilityClasses)[number];
 
-const abilityBaseEntries = {
+const abilityBaseObjectSchema = v.object({
+	type: v.picklist(abilityClasses),
 	display: v.optional(v.boolean(), true),
 	data: v.optional(v.number(), 0),
-} as const satisfies v.ObjectEntries;
-
+});
 
 const armorPlateAbilityObjectSchema = v.object({
 	plateSuffix: v.optional(v.string(), "-armor"),
@@ -268,19 +268,18 @@ const classSchemaMap: Record<AbilityClass, SchemaFn<AbilityObjectSchema>> = {
 };
 
 export const AbilityHjsonSchema: SchemaFn = (context) => {
-	return v.pipe(
-		v.variant(
-			"type",
-			abilityClasses.map((className) =>
-				v.object({
-					type: v.literal(className),
-					...abilityBaseEntries,
-					...classSchemaMap[className](context).entries,
-				}),
-			),
-		),
-		v.metadata(metadata),
-	);
+	return v.lazy((input) => {
+		if (input && typeof input === "object" && "type" in input) {
+			const type = input.type;
+
+			if (type && classSchemaMap[type as AbilityClass]) {
+				const schemaFn = classSchemaMap[type as AbilityClass];
+				return v.pipe(v.object({ ...abilityBaseObjectSchema.entries, ...schemaFn(context).entries }), v.metadata(metadata));
+			}
+		}
+
+		return v.pipe(abilityBaseObjectSchema, v.metadata(metadata));
+	});
 };
 
 export const AbilityFieldSchema: SchemaFn = (context) => v.union([AbilityHjsonSchema(context), v.string()]);

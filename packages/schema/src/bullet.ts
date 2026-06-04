@@ -319,19 +319,16 @@ const classSchemaMap: Record<BulletClass, SchemaFn<BulletObjectSchema>> = {
 };
 
 export const BulletHjsonSchema: SchemaFn = (context) => {
-	const bulletBaseEntries = v.omit(createBulletBaseObjectSchema(context), ["type"]).entries;
+	return v.lazy((input) => {
+		if (input && typeof input === "object" && "type" in input) {
+			const type = input["type"] as string;
 
-	return v.pipe(
-		v.variant(
-			"type",
-			bulletTypes.map((className) =>
-				v.object({
-					type: v.literal(className),
-					...bulletBaseEntries,
-					...classSchemaMap[className](context).entries,
-				}),
-			),
-		),
-		v.metadata(metadata),
-	);
+			if (classSchemaMap[type as BulletClass]) {
+				const schema = classSchemaMap[type as BulletClass];
+				return v.pipe(v.object({ ...createBulletBaseObjectSchema(context).entries, ...schema(context).entries }), v.metadata(metadata));
+			}
+		}
+
+		return v.pipe(createBulletBaseObjectSchema(context), v.metadata(metadata));
+	});
 };
