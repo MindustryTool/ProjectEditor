@@ -36,19 +36,6 @@ function decodeContent(data: ArrayBuffer | null | undefined): string {
 	return new TextDecoder().decode(data);
 }
 
-function toErrorResult(path: string, err: unknown): ValidationResult[] {
-	return [
-		{
-			path,
-			severity: "error",
-			messageKey: err instanceof Error ? err.message : "Unknown error",
-			startLine: 1,
-			startColumn: 1,
-			duration: 0,
-		},
-	];
-}
-
 function cacheKey(projectId: string, path: string): string {
 	return `${projectId}::${path}`;
 }
@@ -145,13 +132,12 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 				}
 
 				useValidationStore.getState().setResults(path, response.results);
-                console.log("Validated file", path);
+				console.log("Validated file", path);
 			} catch (err) {
 				if (latestRequestIdByPathRef.current.get(path) !== requestId) {
 					return;
 				}
 
-				useValidationStore.getState().setResults(path, toErrorResult(path, err));
 				console.error(err);
 			}
 		},
@@ -183,14 +169,9 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 			} catch (err) {
 				if (latestBatchRequestIdRef.current !== requestId) return null;
 
-				const fallbackResults: Record<string, ValidationResult[]> = Object.fromEntries(
-					files.map((file) => [file.path, toErrorResult(file.path, err)]),
-				);
-				for (const [path, results] of Object.entries(fallbackResults)) {
-					useValidationStore.getState().setResults(path, results);
-				}
+				console.error(err);
 
-				return fallbackResults;
+				return {};
 			}
 		},
 		[contents, getWorker],

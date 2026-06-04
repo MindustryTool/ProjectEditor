@@ -24,7 +24,7 @@ export const PickListField = React.memo(function PickListField({
 		const options = unwrappedSchema.options.map((v) => String(v));
 
 		return (
-			<Field>
+			<Field jsonPath={jsonPath}>
 				<FieldLabel>
 					<SchemaLabel name={name} entrySchema={entrySchema} />
 				</FieldLabel>

@@ -1,7 +1,7 @@
 import { cn } from "#/lib/utils";
 
-export function Field({ className, ...props }: React.ComponentProps<"div">) {
-	return <div className={cn("space-y-2", className)} {...props} />;
+export function Field({ className, jsonPath, ...props }: React.ComponentProps<"div"> & { jsonPath: string }) {
+	return <div id={jsonPath} className={cn("space-y-2", className)} {...props} />;
 }
 
 export function FieldLabel({ className, ...props }: React.ComponentProps<"label">) {

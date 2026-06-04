@@ -26,7 +26,7 @@ export const NumberField = React.memo(function NumberField({ name, value, onChan
 	}
 
 	return (
-		<Field>
+		<Field jsonPath={jsonPath}>
 			<FieldLabel>
 				<SchemaLabel name={name} entrySchema={entrySchema} />
 			</FieldLabel>

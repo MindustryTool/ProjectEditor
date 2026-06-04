@@ -195,7 +195,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 							subEndColumn = subFieldInfo.end.col;
 						}
 
-						const field = subIssue.path?.map((p) => p.key)?.join(".") || "";
+						const field = subIssueFieldPath.join(".");
 
 						problems.push({
 							path,

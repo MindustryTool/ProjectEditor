@@ -65,7 +65,7 @@ export const ResearchField = React.memo(function ResearchField({
 
 	return (
 		<>
-			<Field>
+			<Field jsonPath={jsonPath}>
 				<FieldLabel>
 					<SchemaLabel name={name} entrySchema={entrySchema} />
 				</FieldLabel>
@@ -84,7 +84,11 @@ export const ResearchField = React.memo(function ResearchField({
 				<SchemaDescription entrySchema={entrySchema} />
 				<FieldIssue path={path} jsonPath={jsonPath} />
 				<FieldControl className="grid gap-2">
-					<ResearchRequirementList requirements={requirements} onChange={(newRequirements) => handleChange(parent, newRequirements)} />
+					<ResearchRequirementList
+						jsonPath={jsonPath}
+						requirements={requirements}
+						onChange={(newRequirements) => handleChange(parent, newRequirements)}
+					/>
 					<Button className="w-full" variant="outline" onClick={handleAddNewReq}>
 						<Plus />
 					</Button>
@@ -97,9 +101,11 @@ export const ResearchField = React.memo(function ResearchField({
 const ResearchRequirementList = React.memo(function ResearchRequirementList({
 	requirements,
 	onChange,
+	jsonPath,
 }: {
 	requirements: string[];
 	onChange: (requirements: string[]) => void;
+	jsonPath: string;
 }) {
 	const items = useItems({ project: true, base: true });
 	const addedReq = requirements.map((requirement: string) => requirement.split("/")[0]!);
@@ -120,7 +126,7 @@ const ResearchRequirementList = React.memo(function ResearchRequirementList({
 		const selectedItem = items.find((i) => i.name === itemName);
 
 		return (
-			<Field key={index}>
+			<Field key={index} jsonPath={jsonPath + "." + index}>
 				<FieldControl className="flex gap-1">
 					<Dialog>
 						<DialogTrigger asChild>

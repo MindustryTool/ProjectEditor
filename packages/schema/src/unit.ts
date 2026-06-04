@@ -7,7 +7,12 @@ import { EffectHjsonSchema } from "./effect";
 import { PartHjsonSchema } from "./part";
 import { EngineHjsonSchema } from "./engine";
 
+const unitTypes = ["flying", "mech", "legs", "naval", "payload", "missile", "tank", "hover", "tether", "crawl"] as const;
+const unitTemplates = ["ErekirUnitType", "MissileUnitType", "NeoplasmUnitType", "TankUnitType"] as const;
+
 const unitObjectSchema = {
+	type: v.optional(v.picklist(unitTypes)),
+	template: v.optional(v.picklist(unitTemplates)),
 	envRequired: v.optional(EnvSchema, 0),
 	envEnabled: v.optional(EnvSchema, Envs.terrestrial),
 	envDisabled: v.optional(EnvSchema, Envs.scorching),

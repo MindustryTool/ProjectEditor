@@ -28,7 +28,7 @@ export const StringField = React.memo(function StringField({ name, value, onChan
 	}
 
 	return (
-		<Field>
+		<Field jsonPath={jsonPath}>
 			<FieldLabel>
 				<SchemaLabel name={name} entrySchema={entrySchema} />
 			</FieldLabel>

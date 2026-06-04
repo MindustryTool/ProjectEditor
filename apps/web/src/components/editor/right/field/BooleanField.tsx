@@ -22,7 +22,7 @@ export const BooleanField = React.memo(function BooleanField({ name, value, onCh
 	}
 
 	return (
-		<Field>
+		<Field jsonPath={jsonPath}>
 			<FieldControl className="flex-row flex gap-1">
 				<Checkbox key={name} checked={checked} onCheckedChange={(val) => handleChange(val === true)} />
 				<FieldLabel>

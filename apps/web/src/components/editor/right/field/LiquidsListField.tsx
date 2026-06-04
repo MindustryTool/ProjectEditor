@@ -31,7 +31,7 @@ export const LiquidsListField = React.memo(function LiquidsListField({
 			.map((option) => option!);
 
 		return (
-			<Field>
+			<Field jsonPath={jsonPath}>
 				<FieldLabel>
 					<SchemaLabel name={name} entrySchema={entrySchema} />
 				</FieldLabel>

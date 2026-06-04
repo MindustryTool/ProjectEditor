@@ -45,7 +45,7 @@ export const ArrayField = React.memo(function ArrayField({ path, name, value, on
 
 	return (
 		<Collapsible>
-			<Field>
+			<Field jsonPath={jsonPath}>
 				<CollapsibleTrigger asChild>
 					<Button className="w-full" variant="outline">
 						<FieldLabel>

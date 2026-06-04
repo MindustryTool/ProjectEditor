@@ -8,7 +8,7 @@ import { FieldMessage } from "#/components/editor/right/field/Field";
 export const FieldIssue = React.memo(function FieldIssue({ path, jsonPath }: { path: string; jsonPath: string }) {
 	const { t } = useTranslation();
 	const issues = useValidationStore(
-		useShallow((state) => (state.results.resultsByPath[path] || EMPTY_ARRAY).filter((issue) => issue.field?.startsWith(jsonPath))),
+		useShallow((state) => (state.results.resultsByPath[path] || EMPTY_ARRAY).filter((issue) => issue.field === jsonPath)),
 	);
 
 	if (issues.length === 0) return null;

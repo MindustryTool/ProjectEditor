@@ -282,4 +282,4 @@ export const AbilityHjsonSchema: SchemaFn = (context) => {
 	});
 };
 
-export const AbilityFieldSchema: SchemaFn = (context) => v.union([v.string(), AbilityHjsonSchema(context)]);
+export const AbilityFieldSchema: SchemaFn = (context) => v.union([AbilityHjsonSchema(context), v.string()]);

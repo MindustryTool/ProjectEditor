@@ -158,7 +158,7 @@ const classSchemaMap: Record<PartClass, SchemaFn<v.ObjectSchema<v.ObjectEntries,
 			mixColor: v.optional(MindustryHexColorSchema),
 			mixColorTo: v.optional(MindustryHexColorSchema),
 			heatColor: v.optional(MindustryHexColorSchema),
-			children: PartHjsonSchema(context),
+			children: v.optional(PartHjsonSchema(context)),
 			moves: v.optional(v.array(partMoveSchema), []),
 		}),
 	EffectSpawnerPart: (context) =>
