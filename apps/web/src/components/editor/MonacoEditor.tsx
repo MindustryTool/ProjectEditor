@@ -41,10 +41,25 @@ interface ActiveColorTagState extends MindustryColorTagMatch {
 	pickerColor: string;
 }
 
+const ERROR_LENS_STYLE_ID = "el-global-styles";
+
+function ensureErrorLensStyles(): void {
+	if (document.getElementById(ERROR_LENS_STYLE_ID)) return;
+	const style = document.createElement("style");
+	style.id = ERROR_LENS_STYLE_ID;
+	style.textContent = `
+.el-bg-error{background:rgba(255,80,80,0.07)}
+.el-bg-warning{background:rgba(255,200,0,0.06)}
+`;
+	document.head.appendChild(style);
+}
+
 export function MonacoEditor({ value, onChange, language, readOnly, path }: MonacoEditorProps) {
 	const monacoRef = useRef<Monaco | null>(null);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 	const colorDecorationsRef = useRef<editor.IEditorDecorationsCollection | null>(null);
+	const errorLensDecorationsRef = useRef<editor.IEditorDecorationsCollection | null>(null);
+	const errorLensStyleRef = useRef<HTMLStyleElement | null>(null);
 	const editorDisposablesRef = useRef<IDisposable[]>([]);
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const theme = useMonacoTheme();
@@ -56,6 +71,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 
 	if (!monacoConfigured.current) {
 		configureMonaco();
+		ensureErrorLensStyles();
 		monacoConfigured.current = true;
 	}
 
@@ -67,32 +83,87 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 		if (!editorInstance || !monacoInstance) return;
 
 		const model = editorInstance.getModel();
-		if (!model) return;
+		if (!model) {
+			return;
+		}
 
 		if (!results || results.length === 0) {
 			monacoInstance.editor.setModelMarkers(model, "file-validation", []);
+			if (errorLensDecorationsRef.current) {
+				errorLensDecorationsRef.current.clear();
+			}
+			if (errorLensStyleRef.current) {
+				errorLensStyleRef.current.textContent = "";
+			}
 			return;
 		}
 
 		const markers: editor.IMarkerData[] = [];
+		const lineMessages = new Map<number, { message: string; severity: string }[]>();
 
 		for (const r of results) {
 			const monacoSeverity = r.severity === "error" ? 8 : r.severity === "warning" ? 4 : 2;
 			const endLineNumber = r.endLine ?? r.startLine;
 			const rawEndColumn = r.endColumn ?? r.startColumn;
 			const endColumn = endLineNumber === r.startLine && rawEndColumn === r.startColumn ? r.startColumn + 1 : rawEndColumn;
+			const message = (t as (key: string, params?: Record<string, unknown>) => string)(r.messageKey, r.messageParams);
 
 			markers.push({
 				severity: monacoSeverity as editor.IMarkerData["severity"],
-				message: (t as (key: string, params?: Record<string, unknown>) => string)(r.messageKey, r.messageParams),
+				message,
 				startLineNumber: r.startLine,
 				startColumn: r.startColumn,
 				endLineNumber,
 				endColumn,
 			});
+
+			const key = r.startLine;
+			if (!lineMessages.has(key)) {
+				lineMessages.set(key, []);
+			}
+			lineMessages.get(key)!.push({ message, severity: r.severity });
 		}
 
 		monacoInstance.editor.setModelMarkers(model, "file-validation", markers);
+
+		const errorDecorations: editor.IModelDeltaDecoration[] = [];
+		const modelId = model.uri.toString().replace(/[^a-zA-Z0-9]/g, "_");
+		let cssText = "";
+
+		for (const [line, msgs] of lineMessages) {
+			const isError = msgs.some((m) => m.severity === "error");
+			const combinedMsg = msgs.map((m) => m.message).join("; ");
+			const variant = isError ? "error" : "warning";
+			const msgCls = `el-msg-${modelId}-l${line}`;
+
+			errorDecorations.push({
+				range: new monacoInstance.Range(line, 1, line, model.getLineMaxColumn(line)),
+				options: {
+					isWholeLine: true,
+					className: `el-bg-${variant}`,
+					afterContentClassName: msgCls,
+				},
+			});
+
+			const color = isError ? "#ff3333" : "#e67e22";
+			const escapedMsg = combinedMsg.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+			cssText += `.${msgCls}::after{content:'  ${escapedMsg}';color:${color};font-size:0.85em;font-style:italic;white-space:nowrap;}`;
+		}
+
+		if (!errorLensDecorationsRef.current) {
+			errorLensDecorationsRef.current = editorInstance.createDecorationsCollection(errorDecorations);
+		} else {
+			errorLensDecorationsRef.current.set(errorDecorations);
+		}
+
+		let styleEl = errorLensStyleRef.current;
+		if (!styleEl) {
+			styleEl = document.createElement("style");
+			styleEl.id = `el-dynamic-${modelId}`;
+			document.head.appendChild(styleEl);
+			errorLensStyleRef.current = styleEl;
+		}
+		styleEl.textContent = cssText;
 	}, [results, t]);
 
 	useEffect(() => {
@@ -367,6 +438,14 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 		return () => {
 			editorDisposablesRef.current.forEach((disposable) => disposable.dispose());
 			editorDisposablesRef.current = [];
+			if (errorLensDecorationsRef.current) {
+				errorLensDecorationsRef.current.clear();
+				errorLensDecorationsRef.current = null;
+			}
+			if (errorLensStyleRef.current) {
+				errorLensStyleRef.current.remove();
+				errorLensStyleRef.current = null;
+			}
 		};
 	}, []);
 
