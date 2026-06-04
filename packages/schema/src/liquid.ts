@@ -47,5 +47,5 @@ export const LiquidHjsonSchema: SchemaFn = (context) =>
 		particleEffect: v.optional(EffectFieldSchema(context)),
 		vaporEffect: v.optional(EffectFieldSchema(context)),
 		canStayOn: v.optional(v.array(LiquidFieldSchema(context))),
-		research: ResearchSchema(context),
+		research: v.optional(ResearchSchema(context)),
 	});

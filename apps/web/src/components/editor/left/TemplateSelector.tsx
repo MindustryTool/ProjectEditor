@@ -31,11 +31,11 @@ function EntriesDropdown({
 	return (
 		<Select value={value} onValueChange={onValueChange}>
 			<SelectTrigger className="w-full">
-				<SelectValue placeholder="None (empty file)" />
+				<SelectValue placeholder="None" />
 			</SelectTrigger>
 			<SelectContent position="popper">
 				<SelectGroup>
-					<SelectItem value={NONE}>None (empty file)</SelectItem>
+					<SelectItem value={NONE}>None</SelectItem>
 				</SelectGroup>
 				{baseEntries.length > 0 && (
 					<>

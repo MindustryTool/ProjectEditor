@@ -39,7 +39,7 @@ export const PickListField = React.memo(function PickListField({
 						}
 					>
 						<SelectTrigger className="w-full">
-							<SelectValue placeholder="None (empty file)" />
+							<SelectValue placeholder="None" />
 						</SelectTrigger>
 						<SelectContent position="popper">
 							<SelectGroup>

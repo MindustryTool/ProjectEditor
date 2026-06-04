@@ -34,7 +34,9 @@ export function ValidationErrorList({ items, onNavigate, className }: Validation
 					>
 						{err.filePath}
 					</button>
-					<p className="text-inherit opacity-80">{(t as (key: string, params?: Record<string, unknown>) => string)(err.messageKey, err.messageParams)}</p>
+					<p className="text-inherit opacity-80 line-clamp-3 text-ellipsis">
+						{(t as (key: string, params?: Record<string, unknown>) => string)(err.messageKey, err.messageParams)}
+					</p>
 				</div>
 			))}
 		</div>

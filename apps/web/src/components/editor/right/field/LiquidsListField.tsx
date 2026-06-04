@@ -46,7 +46,7 @@ export const LiquidsListField = React.memo(function LiquidsListField({
 						}
 					>
 						<SelectTrigger className="w-full">
-							<SelectValue placeholder="None (empty file)" />
+							<SelectValue placeholder="None" />
 						</SelectTrigger>
 						<SelectContent position="popper">
 							<SelectGroup className="grid grid-cols-4">

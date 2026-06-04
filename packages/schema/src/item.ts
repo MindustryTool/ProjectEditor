@@ -18,5 +18,5 @@ export const itemBaseObjectSchema = v.object({
 export const ItemHjsonSchema: SchemaFn = (context) =>
 	v.object({
 		...itemBaseObjectSchema.entries,
-		research: ResearchSchema(context),
+		research: v.optional(ResearchSchema(context)),
 	});

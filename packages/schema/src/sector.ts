@@ -23,5 +23,5 @@ export const sectorBaseObjectSchema = v.object({
 export const SectorHjsonSchema: SchemaFn = (context) =>
 	v.object({
 		...sectorBaseObjectSchema.entries,
-		research: ResearchSchema(context),
+		research: v.optional(ResearchSchema(context)),
 	});

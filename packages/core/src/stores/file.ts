@@ -209,6 +209,7 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 	loadFile: (projectId, path, fs) => {
 		const key = cacheKey(projectId, path);
 		const prev = abortMap.get(key);
+
 		if (prev) prev.abort();
 
 		const controller = new AbortController();
@@ -223,7 +224,7 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 			savedVersion: existing?.savedVersion ?? 0,
 			savedAt: existing?.savedAt ?? null,
 			error: null,
-			loading: true,
+			loading: existing === undefined,
 		});
 
 		touchLRU(key);

@@ -64,94 +64,92 @@ export const ItemRequirementSchema = v.pipe(
 );
 
 export const ResearchSchema: SchemaFn = (context) =>
-	v.optional(
-		v.pipe(
-			v.lazy((input) => {
-				if (typeof input === "string") {
-					return ContentNameSchema;
-				}
+	v.pipe(
+		v.lazy((input) => {
+			if (typeof input === "string") {
+				return ContentNameSchema;
+			}
 
-				return v.object({
-					parent: v.optional(ContentNameSchema),
-					requirements: v.optional(v.array(ItemRequirementSchema)),
-					objectives: v.optional(v.any()),
-					planet: v.optional(v.string()),
-					robot: v.optional(v.boolean()),
-				});
-			}),
-			v.metadata({
-				type: "research",
-			}),
-			v.rawCheck(({ dataset, addIssue }) => {
-				if (dataset.typed) {
-					const value = dataset.value;
+			return v.object({
+				parent: v.optional(ContentNameSchema),
+				requirements: v.optional(v.array(ItemRequirementSchema)),
+				objectives: v.optional(v.any()),
+				planet: v.optional(v.string()),
+				robot: v.optional(v.boolean()),
+			});
+		}),
+		v.metadata({
+			type: "research",
+		}),
+		v.rawCheck(({ dataset, addIssue }) => {
+			if (dataset.typed) {
+				const value = dataset.value;
 
-					if (typeof value === "string") {
-						const content = findContent(value, context);
+				if (typeof value === "string") {
+					const content = findContent(value, context);
+
+					if (!content) {
+						addIssue({
+							message: `Content ${value} not found`,
+						});
+					}
+				} else if (typeof value === "object") {
+					const parent = value.parent;
+
+					if (parent) {
+						const content = findContent(parent, context);
 
 						if (!content) {
 							addIssue({
-								message: `Content ${value} not found`,
+								message: `Content ${parent} not found`,
+								path: [
+									{
+										type: "object",
+										key: "parent",
+										origin: "value",
+										input: value,
+										value: parent,
+									},
+								],
 							});
 						}
-					} else if (typeof value === "object") {
-						const parent = value.parent;
+					}
+					const requirement = value.requirements;
 
-						if (parent) {
-							const content = findContent(parent, context);
+					if (requirement) {
+						const items = context.items;
+						for (let i = 0; i < requirement.length; i++) {
+							const req = requirement[i]!;
+							const parts = req.split("/");
+							const itemName = parts[0]!.replace(context.name + "-", "");
+							const item = items.find((i) => i.name.replaceAll(context.name + "-", "") === itemName);
 
-							if (!content) {
+							if (!item) {
 								addIssue({
-									message: `Content ${parent} not found`,
+									message: `Item ${itemName} not found`,
 									path: [
 										{
 											type: "object",
-											key: "parent",
-											origin: "value",
+											key: "requirements",
 											input: value,
-											value: parent,
+											origin: "value",
+											value: req,
+										},
+										{
+											type: "array",
+											key: i,
+											input: requirement,
+											origin: "value",
+											value: req,
 										},
 									],
 								});
 							}
 						}
-						const requirement = value.requirements;
-
-						if (requirement) {
-							const items = context.items;
-							for (let i = 0; i < requirement.length; i++) {
-								const req = requirement[i]!;
-								const parts = req.split("/");
-								const itemName = parts[0]!.replace(context.name + "-", "");
-								const item = items.find((i) => i.name.replaceAll(context.name + "-", "") === itemName);
-
-								if (!item) {
-									addIssue({
-										message: `Item ${itemName} not found`,
-										path: [
-											{
-												type: "object",
-												key: "requirements",
-												input: value,
-												origin: "value",
-												value: req,
-											},
-											{
-												type: "array",
-												key: i,
-												input: requirement,
-												origin: "value",
-												value: req,
-											},
-										],
-									});
-								}
-							}
-						}
 					}
 				}
-			}),
-		),
+			}
+		}),
 	);
 
 export type Research = v.InferOutput<ReturnType<typeof ResearchSchema>>;
