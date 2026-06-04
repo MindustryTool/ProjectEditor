@@ -231,37 +231,39 @@ export const Interps = [
 ] as const;
 
 export function findContent(name: string, context: ProjectContents) {
-	name = name.startsWith(context.name) ? name : context.name + "-" + name;
+	name = name.replace(context.name + "-", "");
 
-	console.log(name);
+	const find = (name: string, items: readonly { name: string }[]) => {
+		return items.find((entry) => entry.name.replaceAll(context.name + "-", "") === name);
+	};
 
-	const item = context.items.find((entry) => entry.name === name);
+	const item = find(name, context.items);
 
 	if (item) {
 		return item;
 	}
 
-	const block = context.blocks.find((entry) => entry.name === name);
+	const block = find(name, context.blocks);
 	if (block) {
 		return block;
 	}
 
-	const liquid = context.liquids.find((entry) => entry.name === name);
+	const liquid = find(name, context.liquids);
 	if (liquid) {
 		return liquid;
 	}
 
-	const sector = context.sectors.find((entry) => entry.name === name);
+	const sector = find(name, context.sectors);
 	if (sector) {
 		return sector;
 	}
 
-	const status = context.statuses.find((entry) => entry.name === name);
+	const status = find(name, context.statuses);
 	if (status) {
 		return status;
 	}
 
-	const unit = context.units.find((entry) => entry.name === name);
+	const unit = find(name, context.units);
 	if (unit) {
 		return unit;
 	}

@@ -12,7 +12,7 @@ export type { ProjectContext, RecentFileEntry } from "./session";
 interface AppState {
 	projects: Record<string, ProjectRecord>;
 	settings: AppSettings;
-	createNewProject: (name: string, language?: ProjectLanguage) => Promise<string>;
+	createNewProject: (name: string, language: ProjectLanguage) => Promise<string>;
 	updateSettings: (settings: Partial<AppSettings>) => void;
 	saveProject: (record: ProjectRecord) => Promise<void>;
 	openProject: (record: ProjectRecord) => Promise<void>;
@@ -27,7 +27,7 @@ export const useAppStore = create<AppState>()(
 			projects: {},
 			settings: { theme: "system" as const, fontSize: 14, tabSize: 2, validation: { validationDelayMs: 500 } },
 
-			createNewProject: async (name: string, language?: ProjectLanguage) => {
+			createNewProject: async (name: string, language: ProjectLanguage) => {
 				const project = createProjectInfo(name, language);
 				get().saveProject({
 					id: project.id,
@@ -36,6 +36,7 @@ export const useAppStore = create<AppState>()(
 					createdAt: project.createdAt,
 					updatedAt: project.updatedAt,
 				});
+
 				const events = createEventBus<ProjectEventMap>();
 				const fs = await createProjectFileSystem(project, events, {
 					onTreeSnapshotChange: (snapshot) => {

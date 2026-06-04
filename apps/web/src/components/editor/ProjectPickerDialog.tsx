@@ -16,7 +16,7 @@ interface ProjectPickerDialogProps {
 	mode: "create" | "open" | "change";
 	trigger: ReactNode;
 	onSelectProject: (project: ProjectRecord) => Promise<void>;
-	onCreateProject: (name: string, language?: ProjectLanguage) => Promise<void>;
+	onCreateProject: (name: string, language: ProjectLanguage) => Promise<void>;
 }
 
 export function ProjectPickerDialog({ mode, trigger, onSelectProject, onCreateProject }: ProjectPickerDialogProps) {

@@ -20,27 +20,27 @@ export const EditorRightPanel = memo(function EditorRightPanel({ path }: EditorR
 		return <ModHjsonPanel path={path} />;
 	}
 
-	if (path.startsWith("content/items") && path.endsWith(".json")) {
+	if (path.startsWith("content/items") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
 		return <ItemPanel path={path} />;
 	}
 
-	if (path.startsWith("content/liquids") && path.endsWith(".json")) {
+	if (path.startsWith("content/liquids") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
 		return <LiquidPanel path={path} />;
 	}
 
-	if (path.startsWith("content/sectors") && path.endsWith(".json")) {
+	if (path.startsWith("content/sectors") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
 		return <SectorPanel path={path} />;
 	}
 
-	if (path.startsWith("content/status") && path.endsWith(".json")) {
+	if (path.startsWith("content/status") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
 		return <StatusPanel path={path} />;
 	}
 
-	if (path.startsWith("content/units") && path.endsWith(".json")) {
+	if (path.startsWith("content/units") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
 		return <UnitPanel path={path} />;
 	}
 
-    if (path.startsWith("content/blocks") && path.endsWith(".json")) {
+	if (path.startsWith("content/blocks") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
 		return <BlockPanel path={path} />;
 	}
 

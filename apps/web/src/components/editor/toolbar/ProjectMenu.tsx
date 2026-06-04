@@ -12,6 +12,7 @@ import { useProjectActions } from "#/hooks/use-project-actions";
 import type { ProjectRecord } from "@project/schema";
 import type { ProjectLanguage } from "@project/core";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "#/components/ui/dialog";
+import { usePostHog } from "@posthog/react";
 
 interface ProjectMenuProps {
 	className?: string;
@@ -28,6 +29,7 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 	const [importing, setImporting] = useState(false);
 	const [paths, setPaths] = useState<string[]>([]);
 	const listRef = useRef<HTMLDivElement>(null);
+	const posthog = usePostHog();
 
 	const navigateToProject = useCallback(
 		(id: string) => {
@@ -68,16 +70,17 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 	);
 
 	const handleCreateProject = useCallback(
-		async (name: string, language?: ProjectLanguage) => {
+		async (name: string, language: ProjectLanguage) => {
 			try {
 				const id = await createProject(name, language);
+				posthog.capture("project.created", { name, language });
 				if (id) navigateToProject(id);
 				toast.success("Project created successfully");
 			} catch (e) {
 				toast.error(`Failed to create project ${e}`);
 			}
 		},
-		[createProject, navigateToProject],
+		[createProject, navigateToProject, posthog],
 	);
 
 	const handleOpenProject = useCallback(
