@@ -1,18 +1,17 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { ProjectLanguage, ProjectEventMap, ProjectInfo } from "@project/core";
+import type { ProjectLanguage, ProjectEventMap, ProjectInfo, ProjectContext } from "@project/core";
 import { createProjectInfo, createEventBus, importProject, ValidationResults, useValidationStore } from "@project/core";
 import { createProjectFileSystem } from "@project/core";
 import { TreeSnapshot, useProjectSession } from "./session";
 import { type AppSettings, type ProjectRecord } from "@project/schema";
-import { HJSON } from "@project/hjson";
 
 export type { ProjectContext, RecentFileEntry } from "./session";
 
 interface AppState {
 	projects: Record<string, ProjectRecord>;
 	settings: AppSettings;
-	createNewProject: (name: string, language: ProjectLanguage) => Promise<string>;
+	createNewProject: (name: string, language: ProjectLanguage) => Promise<ProjectContext>;
 	updateSettings: (settings: Partial<AppSettings>) => void;
 	saveProject: (record: ProjectRecord) => Promise<void>;
 	openProject: (record: ProjectRecord) => Promise<void>;
@@ -44,43 +43,11 @@ export const useAppStore = create<AppState>()(
 					},
 				});
 
-				try {
-					await fs.writeTextFile(
-						"/mod.hjson",
-						HJSON.stringify({
-							displayName: "[cyan]Example",
-							name: "example",
-							author: "[blue]Your name",
-							description: "A mod that adds in a butt load of content",
-							minGameVersion: "158",
-							version: "[#00ff00]1.0.0",
-						}),
-					);
-
-					await fs.writeTextFile(
-						"/content/items/test-item.hjson",
-						HJSON.stringify({
-							hardness: 8,
-							cost: 7,
-							charge: 0.9,
-							color: "FFF861FF",
-							research: {
-								parent: "copper",
-								requirements: ["copper/200"],
-							},
-						}),
-					);
-
-					await fs.writeTextFile("/README.md", "# This is an example mod");
-
-					await fs.refreshTree();
-				} catch (e) {
-					console.error(e);
-				}
-
+				const context = { project, fs, events };
 				useValidationStore.setState({ results: new ValidationResults() });
-				useProjectSession.getState().setCurrentProject({ project, fs, events });
-				return project.id;
+				useProjectSession.getState().setCurrentProject(context);
+
+				return context;
 			},
 
 			openProject: async (record) => {

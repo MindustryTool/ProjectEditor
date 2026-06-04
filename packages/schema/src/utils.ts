@@ -94,12 +94,21 @@ export function detectSchemaType(rawSchema: AnySchema, value: unknown): Type {
 		wrapped?: AnySchema;
 	} & AnySchema;
 
+	let metadataType = getTypeFromMetadata(unwrapped);
+
+	if (metadataType) {
+		return metadataType;
+	}
+
 	if (unwrapped.type === "lazy" && unwrapped.getter) {
 		return detectSchemaType(unwrapped.getter(value), value);
 	}
 
-	const metadataType = getTypeFromMetadata(unwrapped);
-	if (metadataType) return metadataType;
+	metadataType = getTypeFromMetadata(unwrapped);
+
+	if (metadataType) {
+		return metadataType;
+	}
 
 	return getSchemaType(unwrapped, value);
 }

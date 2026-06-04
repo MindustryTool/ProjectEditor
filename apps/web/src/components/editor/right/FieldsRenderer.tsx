@@ -5,14 +5,7 @@ import { HJSON, HjsonNode } from "@project/hjson";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { schemaRenderers } from "./field";
 import React, { useCallback, useMemo, useState } from "react";
-import {
-	resolveSchema,
-	detectSchemaType,
-	getSchemaEntries,
-	getSchemaMetadata,
-	type AnySchema,
-	type SchemaFn,
-} from "@project/schema";
+import { resolveSchema, detectSchemaType, getSchemaEntries, getSchemaMetadata, type AnySchema, type SchemaFn } from "@project/schema";
 import * as v from "valibot";
 
 export type SchemaRendererProps = {

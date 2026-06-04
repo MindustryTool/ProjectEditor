@@ -15,16 +15,16 @@ import { Spinner } from "#/components/ui/spinner";
 import { usePostHog } from "@posthog/react";
 
 interface ProjectPickerScreenProps {
-	onProjectSelected?: (id: string) => void;
+	onProjectSelected: (id: string, path: string) => void;
 }
 
-function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: string) => void }) {
+function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: string, path: string) => void }) {
 	const { t } = useTranslation();
 	const createProject = useAppStore((s) => s.createNewProject);
 	const [name, setName] = useState("");
 	const [language, setLanguage] = useState<ProjectLanguage>("json");
 	const [nameError, setNameError] = useState("");
-    const posthog = usePostHog();
+	const posthog = usePostHog();
 
 	async function handleCreate() {
 		const trimmed = name.trim();
@@ -33,14 +33,44 @@ function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: s
 			return;
 		}
 		try {
-			const id = await createProject(trimmed, language);
-			posthog.capture("project.created", { name, language });
+			const context = await createProject(trimmed, language);
+
+			try {
+				await context.fs.writeJsonFile("/mod.hjson", {
+					displayName: "[cyan]Example",
+					name: "example",
+					author: "[blue]Your name",
+					description: "A mod that adds in a butt load of content",
+					minGameVersion: "158",
+					version: "[#00ff00]1.0.0",
+				});
+
+				await context.fs.writeJsonFile("/content/items/test-item.hjson", {
+					hardness: 8,
+					cost: 7,
+					charge: 0.9,
+					color: "FFF861FF",
+					research: {
+						parent: "copper",
+						requirements: ["copper/200"],
+					},
+				});
+
+				await context.fs.writeTextFile("/README.md", "# This is an example mod");
+				await context.fs.refreshTree();
+			} catch (e) {
+				toast.error(`Failed to create project ${e}`);
+			}
 
 			toast.success("Project created successfully");
+
 			setName("");
 			setLanguage("json");
 			setNameError("");
-			if (id) onProjectSelected(id);
+
+			onProjectSelected(context.project.id, "content/items/test-item.hjson");
+
+			posthog.capture("project.created", { name, language });
 		} catch (e) {
 			toast.error(`Failed to create project ${e}`);
 		}
@@ -83,7 +113,7 @@ function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: s
 	);
 }
 
-function ImportProjectSection({ onImported }: { onImported: (id: string) => void }) {
+function ImportProjectSection({ onProjectSelected }: { onProjectSelected: (id: string, path: string) => void }) {
 	const { t } = useTranslation();
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [importing, setImporting] = useState(false);
@@ -104,7 +134,7 @@ function ImportProjectSection({ onImported }: { onImported: (id: string) => void
 			});
 
 			toast.success(`Project imported successfully`);
-			onImported(project.id);
+			onProjectSelected(project.id, '');
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Failed to import project");
 		}
@@ -138,7 +168,7 @@ function ImportProjectSection({ onImported }: { onImported: (id: string) => void
 	);
 }
 
-function ProjectActionsSection({ onProjectSelected }: { onProjectSelected: (id: string) => void }) {
+function ProjectActionsSection({ onProjectSelected }: { onProjectSelected: (id: string, path: string) => void }) {
 	const { t } = useTranslation();
 
 	return (
@@ -157,13 +187,13 @@ function ProjectActionsSection({ onProjectSelected }: { onProjectSelected: (id: 
 				<CreateProjectSection onProjectSelected={onProjectSelected} />
 			</TabsContent>
 			<TabsContent value="import" className="m-0 p-4">
-				<ImportProjectSection onImported={onProjectSelected} />
+				<ImportProjectSection onProjectSelected={onProjectSelected} />
 			</TabsContent>
 		</Tabs>
 	);
 }
 
-function ProjectListSection({ onProjectSelected }: { onProjectSelected: (id: string) => void }) {
+function ProjectListSection({ onProjectSelected }: { onProjectSelected: (id: string, path: string) => void }) {
 	const { t } = useTranslation();
 	const projects = useAppStore((s) => s.projects);
 
@@ -180,7 +210,7 @@ function ProjectListSection({ onProjectSelected }: { onProjectSelected: (id: str
 							type="button"
 							className="w-full text-left text-xs"
 							onClick={() => {
-								onProjectSelected(project.id);
+								onProjectSelected(project.id, '');
 							}}
 						>
 							<div className="flex items-center gap-2 font-medium text-foreground">
@@ -206,7 +236,6 @@ function ProjectListSection({ onProjectSelected }: { onProjectSelected: (id: str
 
 export function ProjectPickerScreen({ onProjectSelected }: ProjectPickerScreenProps) {
 	const { t } = useTranslation();
-	const handleCreated = onProjectSelected ?? (() => {});
 
 	return (
 		<div className="flex flex-1 items-center justify-center bg-background">
@@ -215,9 +244,9 @@ export function ProjectPickerScreen({ onProjectSelected }: ProjectPickerScreenPr
 					<h1 className="text-xl font-medium text-foreground">{t("app.title")}</h1>
 					<p className="text-xs text-muted-foreground">{t("project-picker-screen.description")}</p>
 				</div>
-				<ProjectActionsSection onProjectSelected={handleCreated} />
+				<ProjectActionsSection onProjectSelected={onProjectSelected} />
 				<Separator />
-				<ProjectListSection onProjectSelected={handleCreated} />
+				<ProjectListSection onProjectSelected={onProjectSelected} />
 			</div>
 		</div>
 	);

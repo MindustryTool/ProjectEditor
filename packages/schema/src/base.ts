@@ -73,7 +73,7 @@ export const ResearchSchema: SchemaFn = (context) =>
 			return v.object({
 				parent: v.optional(ContentNameSchema),
 				requirements: v.optional(v.array(ItemRequirementSchema)),
-				objectives: v.optional(v.any()),
+				objectives: v.optional(v.object({})),
 				planet: v.optional(v.string()),
 				robot: v.optional(v.boolean()),
 			});

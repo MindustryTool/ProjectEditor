@@ -42,7 +42,7 @@ function Image({ path, className, showSize = true, fallback }: ImageFilePreviewP
 	const objectUrl = getImageUrl(data);
 
 	if (error) {
-		return <div className={cn("relative flex justify-center items-center h-full w-full", className)}>{fallback}</div>;
+		return <div className={cn("relative flex justify-center items-center h-full w-full border rounded-md", className)}>{fallback}</div>;
 	}
 
 	return (

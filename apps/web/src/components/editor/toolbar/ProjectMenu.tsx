@@ -72,9 +72,9 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 	const handleCreateProject = useCallback(
 		async (name: string, language: ProjectLanguage) => {
 			try {
-				const id = await createProject(name, language);
+				const context = await createProject(name, language);
 				posthog.capture("project.created", { name, language });
-				if (id) navigateToProject(id);
+				navigateToProject(context.project.id);
 				toast.success("Project created successfully");
 			} catch (e) {
 				toast.error(`Failed to create project ${e}`);

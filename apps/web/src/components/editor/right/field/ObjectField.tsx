@@ -19,11 +19,7 @@ export const ObjectField = React.memo(function ObjectField({ name, path, value, 
 
 	if (current === null || current.entrySchema !== entrySchema) {
 		return (
-			<Button
-				className="justify-between"
-				variant="outline"
-				onClick={() => enter({ name, path, value, onChange, entrySchema, jsonPath })}
-			>
+			<Button className="justify-between w-full" onClick={() => enter({ name, path, value, onChange, entrySchema, jsonPath })}>
 				<span className="font-semibold">{name}</span>
 				<ChevronRight />
 			</Button>
