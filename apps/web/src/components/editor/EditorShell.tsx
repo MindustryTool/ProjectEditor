@@ -18,6 +18,7 @@ import { EditorMobileLayout } from "#/components/editor/EditorMobileLayout";
 import { Fragment } from "react/jsx-runtime";
 import { ErrorBoundary } from "#/components/ui/error-boundary";
 import { ProjectProvider } from "#/components/editor/ProjectProvider";
+import { cn } from "#/lib/utils";
 
 interface EditorShellProps {
 	path: string | null;
@@ -29,7 +30,11 @@ export function EditorShell({ path }: EditorShellProps) {
 	return (
 		<ProjectProvider>
 			<ValidationProvider>
-				<div className="flex min-h-0 flex-1 flex-col bg-background text-foreground overflow-hidden h-dvh max-h-dvh">
+				<div
+					className={cn("flex min-h-0 flex-1 flex-col bg-background text-foreground overflow-hidden h-dvh max-h-dvh", {
+						"p-6": !isDesktop,
+					})}
+				>
 					{isDesktop ? (
 						<Fragment>
 							<Toolbar>

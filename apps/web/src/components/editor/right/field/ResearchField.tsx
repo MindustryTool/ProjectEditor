@@ -129,8 +129,9 @@ const ResearchRequirementList = React.memo(function ResearchRequirementList({
 				<FieldControl className="flex gap-1">
 					<Dialog>
 						<DialogTrigger asChild>
-							<Button variant="outline" size="icon">
-								{selectedItem ? <ContentImage className="p-1" entry={selectedItem} /> : itemName}
+							<Button variant="outline" className="py-1 px-2">
+								{selectedItem ? <ContentImage className="size-5" entry={selectedItem} /> : itemName}
+                                {itemName}
 							</Button>
 						</DialogTrigger>
 						<DialogContent className="w-sm" showCloseButton={false}>
@@ -179,12 +180,13 @@ const ResearchParentTrigger = React.memo(function ResearchParentTrigger({ parent
 	return (
 		<DialogTrigger asChild>
 			{parentEntry ? (
-				<Button className="w-full justify-between" variant="outline" size="icon">
-					<ContentImage className="p-1" entry={parentEntry} />
-					<ChevronDown />
+				<Button className="w-full justify-start gap-2 px-2" variant="outline" size="icon">
+					<ContentImage className="size-5" entry={parentEntry} />
+					{parent}
+					<ChevronDown className="ml-auto" />
 				</Button>
 			) : (
-				<Button className="w-full justify-between" variant="outline">
+				<Button className="w-full justify-between px-2" variant="outline">
 					<span>{parent || "Select"}</span>
 					<ChevronDown />
 				</Button>
