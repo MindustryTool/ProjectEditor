@@ -3,6 +3,7 @@ packages:
   - packages/*
   - tooling/*
 allowBuilds:
+  core-js: set this to true or false
   esbuild: true
   msw: true
   sharp: true
