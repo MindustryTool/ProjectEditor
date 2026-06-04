@@ -71,6 +71,8 @@ export const useAppStore = create<AppState>()(
 					);
 
 					await fs.writeTextFile("/README.md", "# This is an example mod");
+
+					await fs.refreshTree();
 				} catch (e) {
 					console.error(e);
 				}
