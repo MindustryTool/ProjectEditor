@@ -1,5 +1,5 @@
 import * as v from "valibot";
-import { Envs, EnvSchema, MindustryHexColorSchema, SoundHjsonSchema, type SchemaFn } from "./base";
+import { Envs, EnvSchema, MindustryHexColorSchema, ResearchSchema, SoundHjsonSchema, type SchemaFn } from "./base";
 import { AbilityFieldSchema } from "./ability";
 import { WeaponHjsonSchema } from "./weapon";
 import { StatusStringSchema } from "./status";
@@ -249,6 +249,7 @@ export const UnitHjsonSchema: SchemaFn = (context) =>
 		treadEffect: v.optional(EffectHjsonSchema(context)),
 		parts: v.optional(v.array(PartHjsonSchema(context)), []),
 		engines: v.optional(v.array(EngineHjsonSchema(context)), []),
+        research: v.optional(ResearchSchema(context)),
 	});
 
 export const UnitFieldSchema: SchemaFn = (context) => v.picklist(context.units.map((unit) => unit.name));

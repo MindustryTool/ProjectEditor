@@ -6,10 +6,15 @@ import { useSectors } from "#/hooks/use-sectors";
 import { useSprites } from "#/hooks/use-sprites";
 import { useStatuses } from "#/hooks/use-statuses";
 import { useUnits } from "#/hooks/use-units";
+import { useFileString } from "@project/core";
+import { HJSON } from "@project/hjson";
+import { ModHjsonSchema, type ModHjsonData } from "@project/schema";
 import type { ProjectContents } from "@project/types";
 import { createContext, useContext, useMemo, type ReactNode } from "react";
+import * as v from "valibot";
 
 export interface ProjectContextValue {
+	metadata: ModHjsonData;
 	contents: ProjectContents;
 }
 const ProjectContext = createContext<ProjectContextValue | null>(null);
@@ -22,6 +27,39 @@ export function useProjectContext(): ProjectContextValue {
 	return ctx;
 }
 
+const readModMetadata = (json: string, hjson: string) => {
+	let object = null;
+	try {
+		object = HJSON.parse(json);
+	} catch (e1) {
+		try {
+			object = HJSON.parse(hjson);
+		} catch (e2) {
+			throw new Error("Failed to read mod.(h)json " + e2 + " " + e1);
+		}
+	}
+
+	const result = v.safeParse(ModHjsonSchema, object);
+
+	console.log(result);
+
+	let mod: ModHjsonData = {
+		author: "",
+		dependencies: [],
+		description: "",
+		displayName: "",
+		minGameVersion: "158",
+		name: "new-mod",
+		version: "",
+	};
+
+	if (result.success) {
+		mod = result.output;
+	}
+
+	return mod;
+};
+
 export function ProjectProvider({ children }: { children: ReactNode }) {
 	const items = useItems({ base: true, project: true });
 	const blocks = useBlocks();
@@ -31,6 +69,8 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 	const units = useUnits();
 	const sprites = useSprites();
 	const effects = useEffects();
+	const { data: jsonText } = useFileString("mod.json");
+	const { data: hjsonText } = useFileString("mod.hjson");
 
 	const contents = useMemo<ProjectContents>(
 		() => ({
@@ -41,10 +81,12 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 			statuses,
 			units,
 			sprites,
-            effects,
+			effects,
 		}),
 		[items, blocks, liquids, sectors, statuses, units, sprites, effects],
 	);
 
-	return <ProjectContext.Provider value={{ contents }}>{children}</ProjectContext.Provider>;
+	const metadata = useMemo(() => readModMetadata(jsonText || "", hjsonText || ""), [jsonText, hjsonText]);
+
+	return <ProjectContext.Provider value={{ contents, metadata }}>{children}</ProjectContext.Provider>;
 }

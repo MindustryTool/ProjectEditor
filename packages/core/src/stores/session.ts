@@ -188,6 +188,10 @@ export const useProjectSession = create<ProjectSession>()(
 
 export function useCurrentProject() {
 	const state = useProjectSession((state) => state.projectContext);
-	if (state === null) throw new Error("No project project context");
+
+	if (state === null) {
+		throw new Error("No project project context");
+	}
+
 	return state;
 }

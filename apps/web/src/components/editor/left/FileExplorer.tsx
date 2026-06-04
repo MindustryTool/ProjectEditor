@@ -26,6 +26,7 @@ import { TemplateSelector } from "./TemplateSelector";
 import { useLocalStorage } from "usehooks-ts";
 import { FileIcon } from "#/components/editor/FileIcon";
 import { useShallow } from "zustand/react/shallow";
+import { useProjectContext } from "#/components/editor/ProjectProvider";
 
 interface FileExplorerContextValue {
 	selectedPath: string | null;
@@ -52,17 +53,18 @@ interface FileExplorerProps {
 export function FileExplorer({ className }: FileExplorerProps) {
 	const [path, setPath] = usePath();
 
+	const { metadata } = useProjectContext();
 	const context = useCurrentProject();
 	const treeSnapshot = useProjectSession((state) => state.treeSnapshot);
 	const projectTree = useMemo(() => {
 		const rootNode: TreeNode = {
-			name: context.project.name,
+			name: metadata.name,
 			type: "folder",
 			children: buildFileTree(treeSnapshot, context.project.id),
 			path: "/",
 		};
 		return [rootNode];
-	}, [context.project.id, context.project.name, treeSnapshot]);
+	}, [context.project.id, metadata.name, treeSnapshot]);
 
 	const [editingPath, setEditingPath] = useState<string | null>(null);
 	const [deleteTargetPath, setDeleteTargetPath] = useState<string | null>(null);

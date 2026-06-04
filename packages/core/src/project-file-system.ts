@@ -110,7 +110,7 @@ export class ProjectFileSystem {
 	}
 
 	private async refreshTreeNow(): Promise<FileEntry[]> {
-        const startTime = Date.now();
+		const startTime = Date.now();
 		const snapshot = await this.listFiles("/", { recursive: true });
 		console.log(`Tree refreshed in ${Date.now() - startTime}ms`);
 		this.onTreeSnapshotChange(snapshot);
@@ -174,9 +174,11 @@ export class ProjectFileSystem {
 		});
 	}
 
-	async readTextFile(path: string): Promise<string | null> {
+	async readTextFile(path: string): Promise<string> {
 		const bytes = await this.readFile(path);
-		if (bytes === null) return null;
+		if (bytes === null) {
+			throw new Error("File not found");
+		}
 		return new TextDecoder().decode(bytes);
 	}
 
@@ -191,9 +193,8 @@ export class ProjectFileSystem {
 		await this.refreshTree();
 	}
 
-	async readJsonFile<T>(path: string): Promise<T | null> {
+	async readJsonFile<T>(path: string): Promise<T> {
 		const text = await this.readTextFile(path);
-		if (text === null) return null;
 		return JSON.parse(text) as T;
 	}
 

@@ -21,7 +21,9 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const hasProject = useProjectSession((state) => state.projectContext !== null);
-	const { closeProject, createProject, openProjectFromRecord } = useProjectActions();
+	const { close } = useProjectActions();
+	const createProject = useAppStore((s) => s.createNewProject);
+	const open = useAppStore((s) => s.openProject);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [importing, setImporting] = useState(false);
 	const [paths, setPaths] = useState<string[]>([]);
@@ -80,19 +82,19 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 
 	const handleOpenProject = useCallback(
 		async (record: ProjectRecord) => {
-			await openProjectFromRecord(record);
+			await open(record);
 			navigateToProject(record.id);
 		},
-		[openProjectFromRecord, navigateToProject],
+		[open, navigateToProject],
 	);
 
 	const handleChangeProject = useCallback(
 		async (record: ProjectRecord) => {
-			closeProject();
-			await openProjectFromRecord(record);
+			close();
+			await open(record);
 			navigateToProject(record.id);
 		},
-		[closeProject, openProjectFromRecord, navigateToProject],
+		[close, open, navigateToProject],
 	);
 
 	useEffect(() => {
@@ -147,7 +149,7 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 							</DropdownMenuItem>
 						}
 					/>
-					<DropdownMenuItem onClick={closeProject} disabled={!hasProject}>
+					<DropdownMenuItem onClick={close} disabled={!hasProject}>
 						{t("project-menu.close-project")}
 					</DropdownMenuItem>
 				</DropdownMenuContent>

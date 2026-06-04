@@ -1,13 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import {
-	createProjectInfo,
-	createEventBus,
-	type ProjectLanguage,
-	type ProjectEventMap,
-	importProject,
-	type ProjectInfo,
-} from "@project/core";
+import type { ProjectLanguage, ProjectEventMap, ProjectInfo } from "@project/core";
+import { createProjectInfo, createEventBus, importProject, ValidationResults, useValidationStore } from "@project/core";
 import { createProjectFileSystem } from "@project/core";
 import { TreeSnapshot, useProjectSession } from "./session";
 
@@ -37,6 +31,7 @@ interface AppState {
 	createNewProject: (name: string, language?: ProjectLanguage) => Promise<string>;
 	updateSettings: (settings: Partial<AppSettings>) => void;
 	saveProject: (record: ProjectRecord) => Promise<void>;
+	openProject: (record: ProjectRecord) => Promise<void>;
 	getAllProjects: () => ProjectRecord[];
 	deleteProject: (id: string) => Promise<void>;
 	importProject: (file: ArrayBuffer, callback: (path: string) => void) => Promise<ProjectInfo>;
@@ -71,8 +66,27 @@ export const useAppStore = create<AppState>()(
 					await fs.createFile("/mod.hjson");
 				}
 
+				useValidationStore.setState({ results: new ValidationResults() });
 				useProjectSession.getState().setCurrentProject({ project, fs, events });
 				return project.id;
+			},
+
+			openProject: async (record) => {
+				const project: ProjectInfo = {
+					id: record.id,
+					name: record.name,
+					language: (record.language ?? "json") as ProjectLanguage,
+					createdAt: new Date(record.createdAt),
+					updatedAt: new Date(record.updatedAt),
+				};
+
+				const events = createEventBus<ProjectEventMap>();
+				const fs = await createProjectFileSystem(project, events, {
+					onTreeSnapshotChange: (snapshot) => useProjectSession.setState({ treeSnapshot: new TreeSnapshot(snapshot) }),
+				});
+
+				useValidationStore.setState({ results: new ValidationResults() });
+				useProjectSession.getState().setCurrentProject({ project, fs, events });
 			},
 
 			updateSettings: (settings) => {
@@ -122,6 +136,7 @@ export const useAppStore = create<AppState>()(
 
 				unsubscribe();
 
+				useValidationStore.setState({ results: new ValidationResults() });
 				useProjectSession.getState().setCurrentProject({ project, fs, events });
 
 				return project;

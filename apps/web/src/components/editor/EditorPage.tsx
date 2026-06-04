@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "@tanstack/react-router";
 import { useAppStore, useProjectSession } from "@project/core";
 import { EditorShell } from "./EditorShell";
-import { useProjectActions } from "~/hooks/use-project-actions";
 import { useTranslation } from "react-i18next";
 import { Progress } from "#/components/ui/progress";
 import { usePath } from "#/hooks/use-path";
@@ -14,7 +13,7 @@ export function EditorPage() {
 	const [loading, setLoading] = useState(0);
 	const { t } = useTranslation();
 	const navigate = useNavigate();
-	const { openProjectFromRecord } = useProjectActions();
+	const openProject = useAppStore((s) => s.openProject);
 	const { id, lang } = useParams({ from: "/$lang/projects/$id" });
 
 	const projectContext = useProjectSession((s) => s.projectContext);
@@ -41,7 +40,7 @@ export function EditorPage() {
 			try {
 				const record = useAppStore.getState().projects[id];
 				if (record) {
-					await openProjectFromRecord(record);
+					await openProject(record);
 					handleLoad(50);
 				} else {
 					navigate({ to: `/${lang}/projects`, replace: true });
@@ -55,7 +54,7 @@ export function EditorPage() {
 		};
 
 		load();
-	}, [projectContext, id, openProjectFromRecord, navigate, lang]);
+	}, [projectContext, id, openProject, navigate, lang]);
 
 	useInterval(() => {
 		if (!isLoading) {
