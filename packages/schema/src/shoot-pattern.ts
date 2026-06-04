@@ -71,23 +71,20 @@ const classSchemaMap: Record<ShootPatternType, SchemaFn<v.ObjectSchema<v.ObjectE
 	ShootSummon: (_context) => shootSummonObjectSchema,
 };
 
+const shootPatternBaseEntries = v.omit(shootPatternBaseObjectSchema, ["type"]).entries;
+
 export const ShootPatternHjsonSchema: SchemaFn = (context) => {
-	return v.lazy((input) => {
-		if (input && typeof input === "object" && "type" in input) {
-			const type = input.type;
-
-			if (typeof type === "string" && classSchemaMap[type as ShootPatternType]) {
-				const schema = classSchemaMap[type as ShootPatternType];
-				return v.pipe(
-					v.object({
-						...shootPatternBaseObjectSchema.entries,
-						...schema(context).entries,
-					}),
-					v.metadata(metadata),
-				);
-			}
-		}
-
-		return v.pipe(shootPatternBaseObjectSchema, v.metadata(metadata));
-	});
+	return v.pipe(
+		v.variant(
+			"type",
+			shootPatternTypes.map((className) =>
+				v.object({
+					type: v.literal(className),
+					...shootPatternBaseEntries,
+					...classSchemaMap[className](context).entries,
+				}),
+			),
+		),
+		v.metadata(metadata),
+	);
 };

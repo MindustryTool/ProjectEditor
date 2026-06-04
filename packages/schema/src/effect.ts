@@ -145,17 +145,20 @@ export const EffectFieldSchema: SchemaFn = (context) => {
 	);
 };
 
+const effectBaseEntries = v.omit(effectBaseObjectSchema, ["type"]).entries;
+
 export const EffectHjsonSchema: SchemaFn = (context) => {
-	return v.lazy((input) => {
-		if (input && typeof input === "object" && "type" in input) {
-			const type = input.type;
-
-			if (typeof type === "string" && classSchemaMap[type as EffectClass]) {
-				const schema = classSchemaMap[type as EffectClass];
-				return v.pipe(v.object({ ...effectBaseObjectSchema.entries, ...schema(context).entries }), v.metadata(metadata));
-			}
-		}
-
-		return v.pipe(effectBaseObjectSchema, v.metadata(metadata));
-	});
+	return v.pipe(
+		v.variant(
+			"type",
+			effectClasses.map((className) =>
+				v.object({
+					type: v.literal(className),
+					...effectBaseEntries,
+					...classSchemaMap[className](context).entries,
+				}),
+			),
+		),
+		v.metadata(metadata),
+	);
 };

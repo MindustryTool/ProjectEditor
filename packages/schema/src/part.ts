@@ -185,17 +185,20 @@ const classSchemaMap: Record<PartClass, SchemaFn<v.ObjectSchema<v.ObjectEntries,
 	ShapePart: (_context) => shapePartObjectSchema,
 };
 
+const partBaseEntries = v.omit(drawPartBaseObjectSchema, ["type"]).entries;
+
 export const PartHjsonSchema: SchemaFn = (context) => {
-	return v.lazy((input) => {
-		if (input && typeof input === "object" && "type" in input) {
-			const type = input.type;
-
-			if (type && classSchemaMap[type as PartClass]) {
-				const schemaFn = classSchemaMap[type as PartClass];
-				return v.pipe(v.object({ ...drawPartBaseObjectSchema.entries, ...schemaFn(context).entries }), v.metadata(metadata));
-			}
-		}
-
-		return v.pipe(drawPartBaseObjectSchema, v.metadata(metadata));
-	});
+	return v.pipe(
+		v.variant(
+			"type",
+			partClasses.map((className) =>
+				v.object({
+					type: v.literal(className),
+					...partBaseEntries,
+					...classSchemaMap[className](context).entries,
+				}),
+			),
+		),
+		v.metadata(metadata),
+	);
 };
