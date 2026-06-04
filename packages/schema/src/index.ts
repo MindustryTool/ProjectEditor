@@ -24,6 +24,16 @@ export { LiquidHjsonSchema } from "./liquid";
 
 export { UnitHjsonSchema } from "./unit";
 
+export { BlockHjsonSchema } from "./block";
+
+export { AttributesSchema } from "./attributes";
+export { CacheLayerSchema } from "./cache-layer";
+export { BlockGroupSchema } from "./block-group";
+export { BlockFlagSchema } from "./block-flag";
+export { CategorySchema } from "./category";
+export { BuildVisibilitySchema } from "./build-visibility";
+export { TeamSchema } from "./team";
+
 export { WeaponHjsonSchema } from "./weapon";
 
 export { AbilityHjsonSchema } from "./ability";

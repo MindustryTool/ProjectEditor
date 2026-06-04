@@ -14,7 +14,6 @@ export const ArrayField = React.memo(function ArrayField({ path, name, value, on
 	const arrayValue = Array.isArray(value) ? value : undefined;
 
 	if (!arrayValue) {
-		onChange(jsonPath, () => HJSON.stringify(v.getDefault(entrySchema) ?? []));
 		return null;
 	}
 

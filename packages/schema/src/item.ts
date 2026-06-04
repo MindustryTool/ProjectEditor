@@ -20,3 +20,10 @@ export const ItemHjsonSchema: SchemaFn = (context) =>
 		...itemBaseObjectSchema.entries,
 		research: v.optional(ResearchSchema(context)),
 	});
+
+export const ItemFieldSchema: SchemaFn = (context) =>
+	v.pipe(
+		v.string(),
+		v.transform((v) => v.replaceAll(context.name + "-", "")),
+		v.picklist(context.items.map((item) => item.name.replaceAll(context.name + "-", ""))),
+	);
