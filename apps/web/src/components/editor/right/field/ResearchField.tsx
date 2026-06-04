@@ -1,0 +1,270 @@
+import { ContentImage } from "#/components/editor/ContentImage";
+import { Button } from "#/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
+import { FormControl, FormField, FormLabel } from "#/components/ui/form";
+import { Input } from "#/components/ui/input";
+import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
+import { useItems } from "#/hooks/use-items";
+import { useBlocks, type ContentEntry } from "#/hooks/use-blocks";
+import { useUnits } from "#/hooks/use-units";
+import { useLiquids } from "#/hooks/use-liquids";
+import { useSectors } from "#/hooks/use-sectors";
+import { HJSON } from "@project/hjson";
+import { Plus, X } from "lucide-react";
+import { VisuallyHidden } from "radix-ui";
+import React, { useCallback } from "react";
+import { ItemGrid } from "./ItemGrid";
+import { FieldIssue } from "./FieldIssue";
+import { SchemaDescription } from "./SchemaDescription";
+import { SchemaLabel } from "./SchemaLabel";
+import { removeByJsonPath } from "./util";
+import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
+import type { Research } from "@project/schema";
+
+export const ResearchField = React.memo(function ResearchField({
+	name,
+	value,
+	onChange,
+	entrySchema,
+	jsonPath,
+	path,
+}: SchemaRendererProps) {
+	const currentValue = value as Research | string | null | undefined;
+
+	const parent =
+		(!currentValue
+			? ""
+			: typeof currentValue === "string"
+				? currentValue
+				: (((currentValue as Record<string, unknown>)?.parent as string) ?? "")) || "";
+
+	const requirements = (
+		!currentValue
+			? []
+			: typeof currentValue === "string"
+				? []
+				: (((currentValue as Record<string, unknown>)?.requirements as string[]) ?? [])
+	) as string[];
+
+	function handleChange(newParent: string, newRequirements: string[]) {
+		if (!newParent && newRequirements.length === 0) {
+			onChange(jsonPath, (parent, key, original) => removeByJsonPath(parent, key, original));
+		} else if (newRequirements.length > 0) {
+			onChange(jsonPath, (parent, key, original) =>
+				parent.objectNode(key).patchField(original, key, HJSON.stringify({ parent: newParent, requirements: newRequirements })),
+			);
+		} else {
+			onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(newParent)));
+		}
+	}
+
+	function handleAddNewReq() {
+		handleChange(parent, [...requirements, "copper" + "/" + 10]);
+	}
+
+	return (
+		<>
+			<FormField>
+				<FormLabel>
+					<SchemaLabel name={name} entrySchema={entrySchema} />
+				</FormLabel>
+				<FormControl>
+					<Dialog>
+						<DialogTrigger asChild>
+							<ResearchParentTrigger parent={parent} />
+						</DialogTrigger>
+						<DialogContent className="w-sm" showCloseButton={false}>
+							<VisuallyHidden.Root>
+								<DialogTitle />
+								<DialogDescription />
+							</VisuallyHidden.Root>
+							<ResearchParentToggleGroup value={parent} onValueChange={(v) => handleChange(v, requirements)} />
+						</DialogContent>
+					</Dialog>
+				</FormControl>
+				<SchemaDescription entrySchema={entrySchema} />
+				<FieldIssue path={path} jsonPath={jsonPath} />
+				<FormControl className="grid gap-2">
+					<ResearchRequirementList requirements={requirements} onChange={(newRequirements) => handleChange(parent, newRequirements)} />
+					<Button className="w-full" variant="outline" onClick={handleAddNewReq}>
+						<Plus />
+					</Button>
+				</FormControl>
+			</FormField>
+		</>
+	);
+});
+
+const ResearchRequirementList = React.memo(function ResearchRequirementList({
+	requirements,
+	onChange,
+}: {
+	requirements: string[];
+	onChange: (requirements: string[]) => void;
+}) {
+	const items = useItems({ project: true, base: true });
+	const addedReq = requirements.map((requirement: string) => requirement.split("/")[0]!);
+
+	function handleRemoveReq(index: number) {
+		onChange(requirements.filter((_: unknown, i: number) => i !== index));
+	}
+
+	function handleUpdateReq(index: number, item: string, number: number) {
+		onChange(requirements.map((r: string, i: number) => (i === index ? item + "/" + number : r)));
+	}
+
+	return requirements.map((requirement: string, index: number) => {
+		const parts = requirement.split("/");
+		const itemName = parts[0]!;
+		const reqNumber = Number(parts[1]);
+
+		const selectedItem = items.find((i) => i.name === itemName);
+
+		return (
+			<FormField key={index}>
+				<FormControl className="flex gap-1">
+					<Dialog>
+						<DialogTrigger asChild>
+							<Button variant="outline" size="icon">
+								{selectedItem ? <ContentImage className="p-1" entry={selectedItem} /> : itemName}
+							</Button>
+						</DialogTrigger>
+						<DialogContent className="w-sm" showCloseButton={false}>
+							<VisuallyHidden.Root>
+								<DialogTitle />
+								<DialogDescription />
+							</VisuallyHidden.Root>
+							<ToggleGroup
+								type="single"
+								value={itemName}
+								onValueChange={(v) => (v ? handleUpdateReq(index, v, reqNumber) : handleRemoveReq(index))}
+								asChild
+							>
+								<ItemGrid>
+									{items
+										.filter((i) => i.name !== itemName && !addedReq.includes(i.name))
+										.map((item) => (
+											<ToggleGroupItem key={item.name} value={item.name}>
+												<ContentImage entry={item} />
+											</ToggleGroupItem>
+										))}
+								</ItemGrid>
+							</ToggleGroup>
+						</DialogContent>
+					</Dialog>
+					<Input
+						type="number"
+						value={reqNumber}
+						onChange={(v) => handleUpdateReq(index, itemName, Number(v.currentTarget.valueAsNumber))}
+					/>
+					<Button className="text-destructive" variant="outline" size="icon" onClick={() => handleRemoveReq(index)}>
+						<X />
+					</Button>
+				</FormControl>
+			</FormField>
+		);
+	});
+});
+
+const ResearchParentTrigger = React.memo(function ResearchParentTrigger({ parent }: { parent: string }) {
+	const items = useItems({ project: true, base: true });
+	const blocks = useBlocks();
+	const units = useUnits();
+	const liquids = useLiquids();
+	const sectors = useSectors();
+
+	const findContent = useCallback((name: string, entries: ContentEntry[][]) => {
+		for (const entry of entries) {
+			for (const item of entry) {
+				if (item.name === name) {
+					return item;
+				}
+			}
+		}
+		return null;
+	}, []);
+
+	const parentEntry = findContent(parent, [items, blocks, liquids, sectors, units]);
+
+	return parentEntry ? (
+		<Button variant="outline" size="icon">
+			<ContentImage className="p-1" entry={parentEntry} />
+		</Button>
+	) : (
+		<Button variant="outline">{parent || "Select"}</Button>
+	);
+});
+
+const ResearchParentToggleGroup = React.memo(function ResearchParentToggleGroup({
+	value,
+	onValueChange,
+}: {
+	value: string | undefined;
+	onValueChange: (v: string) => void;
+}) {
+	const items = useItems({ project: true, base: true });
+	const blocks = useBlocks();
+	const units = useUnits();
+	const liquids = useLiquids();
+	const sectors = useSectors();
+
+	return (
+		<ToggleGroup className="w-full" type="single" value={value} onValueChange={onValueChange}>
+			<Tabs className="w-full">
+				<TabsList>
+					<TabsTrigger value="item">Item</TabsTrigger>
+					<TabsTrigger value="block">Block</TabsTrigger>
+					<TabsTrigger value="liquid">Liquid</TabsTrigger>
+					<TabsTrigger value="sector">Sector</TabsTrigger>
+					<TabsTrigger value="unit">Unit</TabsTrigger>
+				</TabsList>
+				<TabsContent asChild value="item">
+					<ItemGrid>
+						{items.map((item) => (
+							<ToggleGroupItem key={item.name} value={item.name}>
+								<ContentImage entry={item} />
+							</ToggleGroupItem>
+						))}
+					</ItemGrid>
+				</TabsContent>
+				<TabsContent asChild value="block">
+					<ItemGrid>
+						{blocks.map((item) => (
+							<ToggleGroupItem key={item.name} value={item.name}>
+								<ContentImage entry={item} />
+							</ToggleGroupItem>
+						))}
+					</ItemGrid>
+				</TabsContent>
+				<TabsContent asChild value="liquid">
+					<ItemGrid>
+						{liquids.map((item) => (
+							<ToggleGroupItem key={item.name} value={item.name}>
+								<ContentImage entry={item} />
+							</ToggleGroupItem>
+						))}
+					</ItemGrid>
+				</TabsContent>
+				<TabsContent asChild value="sector">
+					<ItemGrid>
+						{sectors.map((item) => (
+							<ToggleGroupItem key={item.name} value={item.name}>
+								<ContentImage entry={item} />
+							</ToggleGroupItem>
+						))}
+					</ItemGrid>
+				</TabsContent>
+				<TabsContent asChild value="unit">
+					<ItemGrid>
+						{units.map((item) => (
+							<ToggleGroupItem key={item.name} value={item.name}>
+								<ContentImage entry={item} />
+							</ToggleGroupItem>
+						))}
+					</ItemGrid>
+				</TabsContent>
+			</Tabs>
+		</ToggleGroup>
+	);
+});
