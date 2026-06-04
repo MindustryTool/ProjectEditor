@@ -3,7 +3,7 @@ import { FormControl, FormLabel } from "#/components/ui/form";
 import { useFileString } from "@project/core";
 import { HJSON, HjsonNode } from "@project/hjson";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
-import { schemaRenderers } from "./field/renderers";
+import { schemaRenderers } from "./field";
 import React, { useCallback, useMemo, useState } from "react";
 import {
 	resolveSchema,
