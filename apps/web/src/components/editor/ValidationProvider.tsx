@@ -44,7 +44,7 @@ function toErrorResult(path: string, err: unknown): ValidationResult[] {
 			messageKey: err instanceof Error ? err.message : "Unknown error",
 			startLine: 1,
 			startColumn: 1,
-            duration: 0,
+			duration: 0,
 		},
 	];
 }
@@ -123,7 +123,9 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 
 	const validateFile = useCallback(
 		async (path: string, getContent: () => Promise<string>) => {
-			if (!hasDefaultValidatorMatch(path)) return;
+			if (!hasDefaultValidatorMatch(path)) {
+				return;
+			}
 
 			const requestId = (latestRequestIdByPathRef.current.get(path) ?? 0) + 1;
 			latestRequestIdByPathRef.current.set(path, requestId);
@@ -138,10 +140,17 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 					contents,
 				});
 
-				if (latestRequestIdByPathRef.current.get(path) !== response.requestId) return;
+				if (latestRequestIdByPathRef.current.get(path) !== response.requestId) {
+					return;
+				}
+
 				useValidationStore.getState().setResults(path, response.results);
+                console.log("Validated file", path);
 			} catch (err) {
-				if (latestRequestIdByPathRef.current.get(path) !== requestId) return;
+				if (latestRequestIdByPathRef.current.get(path) !== requestId) {
+					return;
+				}
+
 				useValidationStore.getState().setResults(path, toErrorResult(path, err));
 				console.error(err);
 			}
@@ -189,18 +198,23 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 
 	const scheduleValidation = useCallback(
 		(path: string) => {
-			if (!hasDefaultValidatorMatch(path)) return;
+			if (!hasDefaultValidatorMatch(path)) {
+				return;
+			}
 
 			const key = cacheKey(projectId, path);
 			const timers = timersRef.current;
 			const existing = timers.get(key);
-			if (existing) clearTimeout(existing);
+
+			if (existing) {
+				clearTimeout(existing);
+			}
 
 			timers.set(
 				key,
 				setTimeout(() => {
 					timers.delete(key);
-					void validateFile(path, createDefaultContentLoader(projectId, path));
+					validateFile(path, createDefaultContentLoader(projectId, path));
 				}, validationDelayMs),
 			);
 		},

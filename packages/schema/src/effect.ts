@@ -132,7 +132,17 @@ const classSchemaMap: Record<EffectClass, SchemaFn<v.ObjectSchema<v.ObjectEntrie
 
 export const EffectFieldSchema: SchemaFn = (context) => {
 	// TODO lost effect
-	return v.union([EffectHjsonSchema(context), v.picklist(context.effects.map((effect) => effect.name))]);
+	return v.pipe(
+		v.union([EffectHjsonSchema(context), v.string()]),
+		v.metadata(metadata),
+		v.check((input) => {
+			if (typeof input === "string") {
+				return context.effects.some((effect) => effect.name === input);
+			}
+
+			return true;
+		}, "Invalid effect names"),
+	);
 };
 
 export const EffectHjsonSchema: SchemaFn = (context) => {
