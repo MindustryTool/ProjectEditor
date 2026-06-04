@@ -224,7 +224,7 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 			savedVersion: existing?.savedVersion ?? 0,
 			savedAt: existing?.savedAt ?? null,
 			error: null,
-			loading: existing === undefined,
+			loading: true,
 		});
 
 		touchLRU(key);

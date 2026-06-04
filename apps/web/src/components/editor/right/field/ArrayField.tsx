@@ -1,7 +1,6 @@
 import { Button } from "#/components/ui/button";
 import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/components/ui/collapsible";
-import { getArrayItemSchema } from "@project/schema";
+import { getArrayItemSchema, unwrapSchema } from "@project/schema";
 import { HJSON } from "@project/hjson";
 import { Plus, X } from "lucide-react";
 import React from "react";
@@ -35,60 +34,64 @@ export const ArrayField = React.memo(function ArrayField({ path, name, value, on
 
 	const handleAdd = () => {
 		const nextItemSchema = getArrayItemSchema(entrySchema, arrayValue.length) ?? itemSchema;
-		const serialized = nextItemSchema ? HJSON.stringify(v.getDefault(nextItemSchema)) : '""';
+
+		let defaultValue: unknown = v.getDefault(nextItemSchema);
+		if (defaultValue === undefined) {
+			const typeDefault = unwrapSchema(nextItemSchema);
+			if (typeDefault.type === "object") {
+				defaultValue = {};
+			} else if (typeDefault.type === "array") {
+				defaultValue = [];
+			} else {
+				defaultValue = typeDefault.type;
+			}
+		}
+
 		onChange(jsonPath, (parent, key, original) => {
 			const arr = parent.get(key);
 			if (!arr.isArray()) throw new Error(`expected array at ${jsonPath}`);
-			return arr.insertElement(original, arrayValue.length, serialized);
+			return arr.insertElement(original, arrayValue.length, HJSON.stringify(defaultValue));
 		});
 	};
 
 	return (
-		<Collapsible>
-			<Field jsonPath={jsonPath}>
-				<CollapsibleTrigger asChild>
-					<Button className="w-full" variant="outline">
-						<FieldLabel>
-							<SchemaLabel name={name} entrySchema={entrySchema} />
-						</FieldLabel>
-					</Button>
-				</CollapsibleTrigger>
-				<SchemaDescription entrySchema={entrySchema} />
-				<CollapsibleContent>
-					<FieldControl>
-						<div className="flex flex-col gap-2">
-							{arrayValue.map((el, index) => {
-								const currentItemSchema = getArrayItemSchema(entrySchema, index) ?? itemSchema;
-								const entryJsonPath = jsonPath ? `${jsonPath}[${index}]` : `[${index}]`;
+		<Field jsonPath={jsonPath}>
+			<FieldLabel>
+				<SchemaLabel name={name} entrySchema={entrySchema} />
+			</FieldLabel>
+			<SchemaDescription entrySchema={entrySchema} />
+			<FieldControl>
+				<div className="flex flex-col gap-2 border p-2 rounded-md border-dashed">
+					{arrayValue.map((el, index) => {
+						const currentItemSchema = getArrayItemSchema(entrySchema, index) ?? itemSchema;
+						const entryJsonPath = jsonPath ? `${jsonPath}[${index}]` : `[${index}]`;
 
-								return (
-									<div key={index} className="flex flex-col gap-2 relative border p-2 rounded-md">
-										<p className="font-semibold">{index + 1}</p>
-										<SchemaArrayItemEditor
-											path={path}
-											value={el}
-											itemSchema={currentItemSchema}
-											onChange={onChange}
-											jsonPath={entryJsonPath}
-										/>
-										<Button
-											size="sm"
-											className="absolute top-1 right-1 text-destructive"
-											variant="ghost"
-											onClick={() => handleRemove(index)}
-										>
-											<X />
-										</Button>
-									</div>
-								);
-							})}
-							<Button type="button" variant="outline" size="sm" onClick={handleAdd}>
-								<Plus /> Add
-							</Button>
-						</div>
-					</FieldControl>
-				</CollapsibleContent>
-			</Field>
-		</Collapsible>
+						return (
+							<div key={index} className="flex flex-col gap-2 relative border p-2 rounded-md">
+								<p className="font-semibold">{index + 1}</p>
+								<SchemaArrayItemEditor
+									path={path}
+									value={el}
+									itemSchema={currentItemSchema}
+									onChange={onChange}
+									jsonPath={entryJsonPath}
+								/>
+								<Button
+									size="sm"
+									className="absolute top-1 right-1 text-destructive"
+									variant="ghost"
+									onClick={() => handleRemove(index)}
+								>
+									<X />
+								</Button>
+							</div>
+						);
+					})}
+					<Button type="button" variant="outline" size="sm" onClick={handleAdd}>
+						<Plus /> Add
+					</Button>
+				</div>
+			</FieldControl>
+		</Field>
 	);
 });

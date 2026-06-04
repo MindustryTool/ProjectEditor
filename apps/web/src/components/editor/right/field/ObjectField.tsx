@@ -4,19 +4,41 @@ import React from "react";
 import * as v from "valibot";
 import { SchemaLabel } from "./SchemaLabel";
 import { schemaRenderers } from "./index";
-import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
+import { useFieldsRenderer, type SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
 import type { AnySchema } from "@project/schema";
+import { Button } from "#/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Separator } from "#/components/ui/separator";
 
 export const ObjectField = React.memo(function ObjectField({ name, path, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
+	const { current, enter, pop } = useFieldsRenderer();
+
 	if (typeof value !== "object" || value === null) {
 		return null;
+	}
+
+	if (current === null || current.entrySchema !== entrySchema) {
+		return (
+			<Button
+				className="justify-between"
+				variant="outline"
+				onClick={() => enter({ name, path, value, onChange, entrySchema, jsonPath })}
+			>
+				<span className="font-semibold">{name}</span>
+				<ChevronRight />
+			</Button>
+		);
 	}
 
 	const entries = getSchemaEntries(resolveSchema(entrySchema, value));
 
 	return (
-		<div className="pl-4 border-l-2 border-border grid gap-6">
-			{name}
+		<div className="border-border grid gap-6">
+			<Button className="w-full justify-start items-center" onClick={pop}>
+				<ChevronLeft />
+				<span>{current ? jsonPath : name}</span>
+			</Button>
+			<Separator />
 			{entries.map(([name, childSchema]) => {
 				const key = name;
 				const childValue = (value as Record<string, unknown>)?.[name];

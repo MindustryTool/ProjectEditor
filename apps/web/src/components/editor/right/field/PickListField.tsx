@@ -23,6 +23,11 @@ export const PickListField = React.memo(function PickListField({
 	if ("options" in unwrappedSchema && Array.isArray(unwrappedSchema.options)) {
 		const options = unwrappedSchema.options.map((v) => String(v));
 
+		if (options.length > 20) {
+			//TODO: Handle long list
+			return null;
+		}
+
 		return (
 			<Field jsonPath={jsonPath}>
 				<FieldLabel>
