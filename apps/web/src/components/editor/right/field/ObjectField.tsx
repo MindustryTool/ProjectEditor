@@ -3,7 +3,7 @@ import { getSchemaMetadata, getSchemaEntries, resolveSchema, detectSchemaType } 
 import React from "react";
 import * as v from "valibot";
 import { SchemaLabel } from "./SchemaLabel";
-import { schemaRenderers } from "./renderers";
+import { schemaRenderers } from "./index";
 import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
 import type { AnySchema } from "@project/schema";
 

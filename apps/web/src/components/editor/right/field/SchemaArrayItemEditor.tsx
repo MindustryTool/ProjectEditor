@@ -3,7 +3,7 @@ import { detectSchemaType } from "@project/schema";
 import { HJSON } from "@project/hjson";
 import React from "react";
 import * as v from "valibot";
-import { schemaRenderers } from "./renderers";
+import { schemaRenderers } from "./index";
 import type { HjsonNode } from "@project/hjson";
 import type { AnySchema } from "@project/schema";
 

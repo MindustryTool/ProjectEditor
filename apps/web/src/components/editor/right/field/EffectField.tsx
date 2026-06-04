@@ -8,7 +8,7 @@ import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { useEffects } from "#/hooks/use-effects";
 import { HJSON } from "@project/hjson";
 import { VisuallyHidden } from "radix-ui";
-import { ChevronsUpDown, Search } from "lucide-react";
+import { ChevronDown, ChevronsUpDown, Search } from "lucide-react";
 import React, { useState } from "react";
 import * as v from "valibot";
 import { FieldIssue } from "./FieldIssue";
@@ -98,8 +98,9 @@ export const EffectField = React.memo(function EffectField({ path, name, value, 
 			<FormField>
 				<Dialog>
 					<DialogTrigger asChild>
-						<Button className="w-full justify-start" variant="outline">
+						<Button className="w-full justify-between" variant="outline">
 							{stringValue || "None"}
+							<ChevronDown />
 						</Button>
 					</DialogTrigger>
 					<DialogContent className="w-sm" showCloseButton={false}>

@@ -11,7 +11,7 @@ import { useUnits } from "#/hooks/use-units";
 import { useLiquids } from "#/hooks/use-liquids";
 import { useSectors } from "#/hooks/use-sectors";
 import { HJSON } from "@project/hjson";
-import { Plus, X } from "lucide-react";
+import { ChevronDown, Plus, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
 import React, { useCallback } from "react";
 import { ItemGrid } from "./ItemGrid";
@@ -71,9 +71,7 @@ export const ResearchField = React.memo(function ResearchField({
 				</FormLabel>
 				<FormControl>
 					<Dialog>
-						<DialogTrigger asChild>
-							<ResearchParentTrigger parent={parent} />
-						</DialogTrigger>
+						<ResearchParentTrigger parent={parent} />
 						<DialogContent className="w-sm" showCloseButton={false}>
 							<VisuallyHidden.Root>
 								<DialogTitle />
@@ -187,12 +185,20 @@ const ResearchParentTrigger = React.memo(function ResearchParentTrigger({ parent
 
 	const parentEntry = findContent(parent, [items, blocks, liquids, sectors, units]);
 
-	return parentEntry ? (
-		<Button variant="outline" size="icon">
-			<ContentImage className="p-1" entry={parentEntry} />
-		</Button>
-	) : (
-		<Button variant="outline">{parent || "Select"}</Button>
+	return (
+		<DialogTrigger asChild>
+			{parentEntry ? (
+				<Button className="w-full justify-between" variant="outline" size="icon">
+					<ContentImage className="p-1" entry={parentEntry} />
+					<ChevronDown />
+				</Button>
+			) : (
+				<Button className="w-full justify-between" variant="outline">
+					<span>{parent || "Select"}</span>
+					<ChevronDown />
+				</Button>
+			)}
+		</DialogTrigger>
 	);
 });
 
