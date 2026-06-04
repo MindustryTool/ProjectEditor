@@ -1,3 +1,4 @@
+import { loadValibotI18n } from "#/i18n/valibot-i18n";
 import {
 	createDefaultValidators,
 	createValidationRunner,
@@ -34,6 +35,10 @@ const validationWorker: ValidationWorkerApi = {
 			requestId: request.requestId,
 			resultsByPath,
 		};
+	},
+
+	async setLocale(locale: string) {
+		await loadValibotI18n(locale);
 	},
 };
 

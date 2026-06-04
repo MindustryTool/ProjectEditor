@@ -1,4 +1,4 @@
-import { setGlobalConfig } from "valibot";
+import * as v from "valibot";
 
 const VALIBOT_LOCALE_IMPORTS: Record<string, () => Promise<unknown>> = {
 	vi: () => import("@valibot/i18n/vi"),
@@ -13,6 +13,7 @@ export async function loadValibotI18n(locale: string): Promise<void> {
 		await VALIBOT_LOCALE_IMPORTS[locale]();
 	}
 
-	setGlobalConfig({ lang: locale });
+	v.setGlobalConfig({ lang: locale });
 	currentLocale = locale;
+	console.log("Set locale: " + locale);
 }

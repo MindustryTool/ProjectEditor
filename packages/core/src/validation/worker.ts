@@ -33,4 +33,5 @@ export interface ValidationFilesResponse {
 export interface ValidationWorkerApi {
 	validateFile(request: ValidationFileRequest): Promise<ValidationFileResponse>;
 	validateFiles(request: ValidationFilesRequest): Promise<ValidationFilesResponse>;
+	setLocale(locale: string): Promise<void>;
 }

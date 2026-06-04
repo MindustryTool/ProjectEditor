@@ -14,6 +14,8 @@ import { useShallow } from "zustand/react/shallow";
 import { usePath } from "#/hooks/use-path";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import type { ModuleThread } from "threads";
+import { useParams } from "@tanstack/react-router";
+import { Thread, spawn } from "threads";
 
 export interface ValidationContextValue {
 	validateFile: (path: string, getContent: () => Promise<string>) => Promise<void>;
@@ -55,6 +57,7 @@ function createDefaultContentLoader(projectId: string, path: string) {
 
 export function ValidationProvider({ children }: { children: ReactNode }) {
 	const [path] = usePath();
+	const { lang } = useParams({ strict: false });
 	const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 	const workerRef = useRef<ModuleThread<ValidationWorkerApi> | null>(null);
 	const workerPromiseRef = useRef<Promise<ModuleThread<ValidationWorkerApi>> | null>(null);
@@ -66,14 +69,18 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 	const { contents } = useProjectContext();
 
 	const getWorker = useCallback(async () => {
-		if (typeof document === "undefined") throw new Error("Worker not available on server");
-		if (workerRef.current) return workerRef.current;
-		if (workerPromiseRef.current) return workerPromiseRef.current;
+		if (workerRef.current) {
+			return workerRef.current;
+		}
 
-		const { spawn } = await import("threads");
+		if (workerPromiseRef.current) {
+			return workerPromiseRef.current;
+		}
+
 		const workerPromise = spawn<ValidationWorkerApi>(
 			new Worker(new URL("../../workers/validation-worker.ts", import.meta.url), { type: "module" }),
 		);
+
 		workerPromiseRef.current = workerPromise;
 
 		try {
@@ -87,8 +94,6 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 	}, []);
 
 	const terminateWorker = useCallback(async () => {
-		if (typeof document === "undefined") return;
-		const { Thread } = await import("threads");
 		const pendingWorker = workerPromiseRef.current;
 		const activeWorker = workerRef.current;
 
@@ -120,6 +125,9 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 			try {
 				const content = await getContent();
 				const worker = await getWorker();
+				if (lang) {
+					await worker.setLocale(lang);
+				}
 				const response = await worker.validateFile({
 					requestId,
 					path,
@@ -140,7 +148,7 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 				console.error(err);
 			}
 		},
-		[contents, getWorker],
+		[contents, getWorker, lang],
 	);
 
 	const validateFiles = useCallback(
@@ -152,6 +160,9 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 
 			try {
 				const worker = await getWorker();
+				if (lang) {
+					await worker.setLocale(lang);
+				}
 				const response = await worker.validateFiles({
 					requestId,
 					files,
@@ -173,7 +184,7 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 				return {};
 			}
 		},
-		[contents, getWorker],
+		[contents, getWorker, lang],
 	);
 
 	const scheduleValidation = useCallback(
