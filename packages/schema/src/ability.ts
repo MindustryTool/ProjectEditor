@@ -282,4 +282,11 @@ export const AbilityHjsonSchema: SchemaFn = (context) => {
 	});
 };
 
-export const AbilityFieldSchema: SchemaFn = (context) => v.union([AbilityHjsonSchema(context), v.string()]);
+export const AbilityFieldSchema: SchemaFn = (context) =>
+	v.lazy((input) => {
+		if (typeof input === "string") {
+			return v.string();
+		}
+
+		return AbilityHjsonSchema(context);
+	});

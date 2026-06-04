@@ -131,17 +131,15 @@ const classSchemaMap: Record<EffectClass, SchemaFn<v.ObjectSchema<v.ObjectEntrie
 };
 
 export const EffectFieldSchema: SchemaFn = (context) => {
-	// TODO lost effect
 	return v.pipe(
-		v.union([EffectHjsonSchema(context), v.string()]),
-		v.metadata(metadata),
-		v.check((input) => {
+		v.lazy((input) => {
 			if (typeof input === "string") {
-				return context.effects.some((effect) => effect.name === input);
+				return v.picklist(context.effects.map((effect) => effect.name));
 			}
 
-			return true;
-		}, "Invalid effect names"),
+			return EffectHjsonSchema(context);
+		}),
+		v.metadata(metadata),
 	);
 };
 

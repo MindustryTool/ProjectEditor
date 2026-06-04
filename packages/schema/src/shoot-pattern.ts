@@ -4,6 +4,7 @@ import type { SchemaFn } from "./base";
 const metadata = { type: "shoot-pattern" };
 
 export const shootPatternTypes = [
+    "ShootPattern",
 	"ShootAlternate",
 	"ShootBarrel",
 	"ShootHelix",
@@ -69,6 +70,7 @@ const classSchemaMap: Record<ShootPatternType, SchemaFn<v.ObjectSchema<v.ObjectE
 	ShootSine: (_context) => shootSineObjectSchema,
 	ShootSpread: (_context) => shootSpreadObjectSchema,
 	ShootSummon: (_context) => shootSummonObjectSchema,
+    ShootPattern: (_context) => shootPatternBaseObjectSchema,
 };
 
 export const ShootPatternHjsonSchema: SchemaFn = (context) => {

@@ -66,16 +66,19 @@ export const ItemRequirementSchema = v.pipe(
 export const ResearchSchema: SchemaFn = (context) =>
 	v.optional(
 		v.pipe(
-			v.union([
-				ContentNameSchema,
-				v.object({
+			v.lazy((input) => {
+				if (typeof input === "string") {
+					return ContentNameSchema;
+				}
+
+				return v.object({
 					parent: v.optional(ContentNameSchema),
 					requirements: v.optional(v.array(ItemRequirementSchema)),
 					objectives: v.optional(v.any()),
 					planet: v.optional(v.string()),
 					robot: v.optional(v.boolean()),
-				}),
-			]),
+				});
+			}),
 			v.metadata({
 				type: "research",
 			}),

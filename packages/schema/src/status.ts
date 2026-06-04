@@ -29,7 +29,14 @@ export const statusBaseObjectSchema = v.object({
 
 export const StatusStringSchema: SchemaFn = (context) => v.picklist(context.statuses.map((status) => status.name));
 
-export const StatusFieldSchema: SchemaFn = (context) => v.union([StatusStringSchema(context), StatusHjsonSchema(context)]);
+export const StatusFieldSchema: SchemaFn = (context) =>
+	v.lazy((input) => {
+		if (typeof input === "string") {
+			return StatusStringSchema(context);
+		}
+
+		return StatusHjsonSchema(context);
+	});
 
 export const StatusHjsonSchema: SchemaFn = (context) =>
 	v.pipe(
