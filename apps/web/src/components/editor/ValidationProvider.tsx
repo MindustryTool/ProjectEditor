@@ -1,21 +1,10 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, type ReactNode } from "react";
-import {
-	hasDefaultValidatorMatch,
-	useFileStore,
-	useValidationStore,
-	useAppStore,
-	useProjectSession,
-	useCurrentProject,
-	type ValidationBatchFile,
-	type ValidationResult,
-	type ValidationWorkerApi,
-} from "@project/core";
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
+import { useValidationStore, useAppStore, useCurrentProject, type ValidationBatchFile, type ValidationResult } from "@project/core";
 import { useShallow } from "zustand/react/shallow";
 import { usePath } from "#/hooks/use-path";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
-import type { ModuleThread } from "threads";
 import { useParams } from "@tanstack/react-router";
-import { Thread, spawn } from "threads";
+import { validationService } from "#/services/validation-service";
 
 export interface ValidationContextValue {
 	validateFile: (path: string, getContent: () => Promise<string>) => Promise<void>;
@@ -32,233 +21,43 @@ export function useValidationContext(): ValidationContextValue {
 	return ctx;
 }
 
-function decodeContent(data: ArrayBuffer | null | undefined): string {
-	if (data == null) return "";
-	if (data.byteLength === 0) return "";
-	return new TextDecoder().decode(data);
-}
-
-function cacheKey(projectId: string, path: string): string {
-	return `${projectId}::${path}`;
-}
-
-function createDefaultContentLoader(projectId: string, path: string) {
-	return async () => {
-		const key = cacheKey(projectId, path);
-		const entry = useFileStore.getState().fileContents[key];
-		if (entry?.data) {
-			return decodeContent(entry.data);
-		}
-
-		const data = await useProjectSession.getState().projectContext!.fs.readTextFile(path);
-		return data ?? "";
-	};
-}
-
 export function ValidationProvider({ children }: { children: ReactNode }) {
 	const [path] = usePath();
 	const { lang } = useParams({ strict: false });
-	const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
-	const workerRef = useRef<ModuleThread<ValidationWorkerApi> | null>(null);
-	const workerPromiseRef = useRef<Promise<ModuleThread<ValidationWorkerApi>> | null>(null);
-	const latestRequestIdByPathRef = useRef<Map<string, number>>(new Map());
-	const latestBatchRequestIdRef = useRef(0);
-	const validationDelayMs = useAppStore(useShallow((s) => s.settings.validation.validationDelayMs));
 	const projectContext = useCurrentProject();
 	const projectId = projectContext.project.id;
 	const { contents } = useProjectContext();
+	const validationDelayMs = useAppStore(useShallow((s) => s.settings.validation.validationDelayMs));
 
-	const getWorker = useCallback(async () => {
-		if (workerRef.current) {
-			return workerRef.current;
-		}
+	useEffect(() => {
+		validationService.contents = contents;
+	}, [contents]);
 
-		if (workerPromiseRef.current) {
-			return workerPromiseRef.current;
-		}
+	useEffect(() => {
+		validationService.lang = lang;
+	}, [lang]);
 
-		const workerPromise = spawn<ValidationWorkerApi>(
-			new Worker(new URL("../../workers/validation-worker.ts", import.meta.url), { type: "module" }),
-		);
+	useEffect(() => {
+		validationService.validationDelayMs = validationDelayMs;
+	}, [validationDelayMs]);
 
-		workerPromiseRef.current = workerPromise;
-
-		try {
-			const worker = await workerPromise;
-			workerRef.current = worker;
-			return worker;
-		} catch (error) {
-			workerPromiseRef.current = null;
-			throw error;
-		}
+	useEffect(() => {
+		void validationService.ensureWorker();
 	}, []);
-
-	const terminateWorker = useCallback(async () => {
-		const pendingWorker = workerPromiseRef.current;
-		const activeWorker = workerRef.current;
-
-		workerRef.current = null;
-		workerPromiseRef.current = null;
-
-		if (activeWorker) {
-			await Thread.terminate(activeWorker);
-			return;
-		}
-
-		if (pendingWorker) {
-			const resolvedWorker = await pendingWorker.catch(() => null);
-			if (resolvedWorker) {
-				await Thread.terminate(resolvedWorker);
-			}
-		}
-	}, []);
-
-	const validateFile = useCallback(
-		async (path: string, getContent: () => Promise<string>) => {
-			if (!hasDefaultValidatorMatch(path)) {
-				return;
-			}
-
-			const requestId = (latestRequestIdByPathRef.current.get(path) ?? 0) + 1;
-			latestRequestIdByPathRef.current.set(path, requestId);
-
-			try {
-				const content = await getContent();
-				const worker = await getWorker();
-				if (lang) {
-					await worker.setLocale(lang);
-				}
-				const response = await worker.validateFile({
-					requestId,
-					path,
-					content,
-					contents,
-				});
-
-				if (latestRequestIdByPathRef.current.get(path) !== response.requestId) {
-					return;
-				}
-
-				useValidationStore.getState().setResults(path, response.results);
-			} catch (err) {
-				if (latestRequestIdByPathRef.current.get(path) !== requestId) {
-					return;
-				}
-
-				console.error(err);
-			}
-		},
-		[contents, getWorker, lang],
-	);
-
-	const validateFiles = useCallback(
-		async (files: ValidationBatchFile[]) => {
-			if (files.length === 0) return {};
-
-			const requestId = latestBatchRequestIdRef.current + 1;
-			latestBatchRequestIdRef.current = requestId;
-
-			try {
-				const worker = await getWorker();
-				if (lang) {
-					await worker.setLocale(lang);
-				}
-				const response = await worker.validateFiles({
-					requestId,
-					files,
-					contents,
-				});
-
-				if (latestBatchRequestIdRef.current !== response.requestId) return null;
-
-				for (const [path, results] of Object.entries(response.resultsByPath)) {
-					useValidationStore.getState().setResults(path, results);
-				}
-
-				return response.resultsByPath;
-			} catch (err) {
-				if (latestBatchRequestIdRef.current !== requestId) return null;
-
-				console.error(err);
-
-				return {};
-			}
-		},
-		[contents, getWorker, lang],
-	);
-
-	const scheduleValidation = useCallback(
-		(path: string) => {
-			if (!hasDefaultValidatorMatch(path)) {
-				return;
-			}
-
-			const key = cacheKey(projectId, path);
-			const timers = timersRef.current;
-			const existing = timers.get(key);
-
-			if (existing) {
-				clearTimeout(existing);
-			}
-
-			timers.set(
-				key,
-				setTimeout(() => {
-					timers.delete(key);
-					validateFile(path, createDefaultContentLoader(projectId, path));
-				}, validationDelayMs),
-			);
-		},
-		[projectId, validateFile, validationDelayMs],
-	);
-
-	const ctxValue = useMemo<ValidationContextValue>(
-		() => ({
-			validateFile,
-			validateFiles,
-		}),
-		[validateFile, validateFiles],
-	);
-
-	useEffect(() => {
-		void getWorker();
-		return () => {
-			void terminateWorker();
-		};
-	}, [getWorker, terminateWorker]);
-
-	useEffect(() => {
-		if (path && projectId) {
-			scheduleValidation(path);
-		}
-	}, [path, projectId, scheduleValidation]);
-
-	useEffect(() => {
-		for (const path of Object.keys(useValidationStore.getState().results.resultsByPath)) {
-			scheduleValidation(path);
-		}
-	}, [projectId, scheduleValidation]);
 
 	useEffect(() => {
 		const events = projectContext.events;
-		const timers = timersRef.current;
 
 		const unsubWrite = events.on("file:write", (event) => {
-			scheduleValidation(event.path);
+			validationService.scheduleValidation(projectId, event.path);
 		});
 
 		const unsubCreate = events.on("file:create", (event) => {
-			scheduleValidation(event.path);
+			validationService.scheduleValidation(projectId, event.path);
 		});
 
 		const unsubDelete = events.on("file:delete", (event) => {
-			const key = cacheKey(projectId, event.path);
-			const timer = timers.get(key);
-			if (timer) {
-				clearTimeout(timer);
-				timers.delete(key);
-			}
-			latestRequestIdByPathRef.current.delete(event.path);
+			validationService.cancelPending(event.path, projectId);
 			useValidationStore.getState().clearResults(event.path);
 		});
 
@@ -266,12 +65,29 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 			unsubWrite();
 			unsubCreate();
 			unsubDelete();
-			for (const [, timer] of timers) {
-				clearTimeout(timer);
-			}
-			timers.clear();
+			validationService.clearAllTimers();
 		};
-	}, [projectContext, projectId, scheduleValidation]);
+	}, [projectContext, projectId]);
+
+	useEffect(() => {
+		if (path && projectId) {
+			validationService.scheduleValidation(projectId, path);
+		}
+	}, [path, projectId]);
+
+	useEffect(() => {
+		for (const path of Object.keys(useValidationStore.getState().results.resultsByPath)) {
+			validationService.scheduleValidation(projectId, path);
+		}
+	}, [projectId]);
+
+	const ctxValue = useMemo<ValidationContextValue>(
+		() => ({
+			validateFile: validationService.validateFile,
+			validateFiles: validationService.validateFiles,
+		}),
+		[],
+	);
 
 	return <ValidationFileContext.Provider value={ctxValue}>{children}</ValidationFileContext.Provider>;
 }
