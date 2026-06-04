@@ -49,14 +49,14 @@ export interface FileStore {
 	fileContents: Record<string, FileEntry>;
 	savingPaths: string[];
 	writeBuffer: (projectId: string, path: string, content: ArrayBuffer | string | ((prev: ArrayBuffer | null) => ArrayBuffer)) => void;
-    getEntry: (projectId: string, path: string) => FileEntry | undefined;
+	getEntry: (projectId: string, path: string) => FileEntry | undefined;
 	markPersisted: (projectId: string, path: string) => void;
 	setBufferError: (projectId: string, path: string, error: string) => void;
 	markSaving: (projectId: string, path: string) => void;
 	clearSaving: (projectId: string, path: string) => void;
 	clearFile: (projectId: string, path: string) => void;
 	clearAllFiles: (projectId?: string) => void;
-	loadFile: (projectId: string, path: string, fs: ProjectFileSystem) => void;
+	loadFile: (projectId: string, path: string, fs: ProjectFileSystem, force?: boolean) => void;
 	subscribeToEvents: (projectId: string, path: string, events: EventBus<ProjectEventMap>, fs: ProjectFileSystem) => () => void;
 	cleanup: (projectId: string, path: string) => void;
 }
@@ -95,7 +95,12 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 		const key = cacheKey(projectId, path);
 		const existing = lruMap.get(key);
 		const nextVersion = (existing?.currentVersion ?? 0) + 1;
-		const data = typeof content === "function" ? content(existing?.data ?? null) : typeof content === "string" ? new TextEncoder().encode(content).buffer : content;
+		const data =
+			typeof content === "function"
+				? content(existing?.data ?? null)
+				: typeof content === "string"
+					? new TextEncoder().encode(content).buffer
+					: content;
 
 		lruMap.set(key, {
 			data,
@@ -111,7 +116,7 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 		set({ fileContents: buildFiles() });
 	},
 
-    getEntry: (projectId, path) => lruMap.get(cacheKey(projectId, path)),
+	getEntry: (projectId, path) => lruMap.get(cacheKey(projectId, path)),
 
 	markPersisted: (projectId, path) => {
 		const key = cacheKey(projectId, path);
@@ -206,16 +211,26 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 		set({ fileContents: buildFiles() });
 	},
 
-	loadFile: (projectId, path, fs) => {
+	loadFile: (projectId, path, fs, force) => {
 		const key = cacheKey(projectId, path);
-		const prev = abortMap.get(key);
+		const existing = lruMap.get(key);
 
+		if (!force) {
+			if (existing && !existing.loading && existing.error === null) {
+				touchLRU(key);
+				return;
+			}
+			if (existing && existing.loading) {
+				return;
+			}
+		}
+
+		const prev = abortMap.get(key);
 		if (prev) prev.abort();
 
 		const controller = new AbortController();
 		abortMap.set(key, controller);
 
-		const existing = lruMap.get(key);
 		const versionAtStart = existing?.currentVersion ?? 0;
 
 		lruMap.set(key, {
@@ -224,7 +239,7 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 			savedVersion: existing?.savedVersion ?? 0,
 			savedAt: existing?.savedAt ?? null,
 			error: null,
-			loading: true,
+			loading: existing === undefined,
 		});
 
 		touchLRU(key);
@@ -232,6 +247,7 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 
 		fs.readFile(path).then(
 			(data) => {
+				abortMap.delete(key);
 				if (controller.signal.aborted) return;
 				const current = lruMap.get(key);
 				if (!current || current.currentVersion !== versionAtStart) return;
@@ -249,6 +265,7 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 				set({ fileContents: buildFiles() });
 			},
 			(err: unknown) => {
+				abortMap.delete(key);
 				if (controller.signal.aborted) return;
 				const current = lruMap.get(key);
 				if (!current || current.currentVersion !== versionAtStart) return;
@@ -285,7 +302,7 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 			if (event.path !== path) return;
 			const current = lruMap.get(key);
 			if (current && current.currentVersion !== current.savedVersion) return;
-			get().loadFile(projectId, path, fs);
+			get().loadFile(projectId, path, fs, true);
 		});
 
 		const unsubDelete = events.on("file:delete", (event) => {
@@ -303,7 +320,7 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 			if (event.newPath === path) {
 				const current = lruMap.get(key);
 				if (current && current.currentVersion !== current.savedVersion) return;
-				get().loadFile(projectId, path, fs);
+				get().loadFile(projectId, path, fs, true);
 			}
 		});
 

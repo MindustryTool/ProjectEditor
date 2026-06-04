@@ -35,7 +35,7 @@ export function unwrapSchema(schema: AnySchema): AnySchema {
 
 export function hasNullableWrapper(schema: AnySchema): boolean {
 	const s = schema as unknown as { type: string };
-	return ["nullable", "optional"].includes(s.type);
+	return ["nullable", "nullish"].includes(s.type);
 }
 
 export function hasNullishWrapper(schema: AnySchema): boolean {

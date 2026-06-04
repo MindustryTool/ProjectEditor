@@ -6,7 +6,7 @@ import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import { removeByJsonPath } from "./util";
-import { hasNullishWrapper } from "@project/schema";
+import { hasNullableWrapper } from "@project/schema";
 import { HJSON } from "@project/hjson";
 import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
 
@@ -14,7 +14,7 @@ export const BooleanField = React.memo(function BooleanField({ name, value, onCh
 	const checked = typeof value === "boolean" ? value : v.getDefault(entrySchema);
 
 	function handleChange(val: boolean) {
-		if (val === v.getDefault(entrySchema) && !hasNullishWrapper(entrySchema)) {
+		if (val === v.getDefault(entrySchema) && !hasNullableWrapper(entrySchema)) {
 			onChange(jsonPath, (parent, key, original) => removeByJsonPath(parent, key, original));
 			return;
 		}

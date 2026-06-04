@@ -1,11 +1,10 @@
-import { lazy, memo, Suspense, useEffect } from "react";
+import { memo, useEffect } from "react";
 import { useFileString, useProjectSession } from "@project/core";
 import { getLanguageFromPath } from "~/lib/monaco/languageMap";
 import { RecentlyOpenedFilesBar } from "./recently-opened/RecentlyOpenedFilesBar";
 import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
 import { Spinner } from "#/components/ui/spinner";
-
-const MonacoEditor = lazy(() => import("./MonacoEditor").then((m) => ({ default: m.MonacoEditor })));
+import { MonacoEditor } from "#/components/editor/MonacoEditor";
 
 interface EditorCenterPanelProps {
 	path: string | null;
@@ -27,11 +26,7 @@ function EditorWithMonaco({ path }: { path: string }) {
 		return <div className="flex w-full h-full items-center justify-center">File not found</div>;
 	}
 
-	return (
-		<Suspense fallback={<div className="flex h-full items-center justify-center text-xs text-muted-foreground">Loading editor...</div>}>
-			<MonacoEditor path={path} value={data} onChange={write} language={language} />
-		</Suspense>
-	);
+	return <MonacoEditor path={path} value={data} onChange={write} language={language} />;
 }
 
 function EditorContent({ path }: { path: string }) {
