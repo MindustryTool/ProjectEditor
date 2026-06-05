@@ -17,7 +17,7 @@ import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Panel } from "#/components/editor/Panel";
 import { ErrorBoundary } from "#/components/ui/error-boundary";
-import { FileExplorer } from "#/components/editor/left/file-explorer";
+import { FileExplorer } from "#/components/editor/file-explorer";
 
 interface EditorMobileLayoutProps {
 	path: string | null;

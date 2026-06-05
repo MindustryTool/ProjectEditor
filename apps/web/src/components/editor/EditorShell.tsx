@@ -19,7 +19,7 @@ import { lazy } from "react";
 import { EditorLeftPanel } from "./EditorLeftPanel";
 import { EditorCenterPanel } from "./EditorCenterPanel";
 import { EditorRightPanel } from "./EditorRightPanel";
-import { FileExplorerProvider } from "./left/file-explorer/FileExplorerProvider";
+import { FileExplorerProvider } from "./file-explorer/FileExplorerProvider";
 
 const EditorMobileLayout = lazy(() =>
 	import("#/components/editor/EditorMobileLayout").then((mod) => ({ default: mod.EditorMobileLayout })),
@@ -36,46 +36,46 @@ export function EditorShell({ path }: EditorShellProps) {
 		<ProjectProvider>
 			<ValidationProvider>
 				<FileExplorerProvider>
-				<div
-					className={cn("flex min-h-0 flex-1 flex-col bg-background text-foreground overflow-hidden w-full h-dvh max-h-dvh", {
-						"p-2": !isDesktop,
-					})}
-				>
-					{isDesktop ? (
-						<Fragment>
-							<Toolbar>
-								<ProjectMenu />
-								<EditMenu />
-								<ViewMenu />
-								<ExportMenu />
-								<LocalizationMenu />
-							</Toolbar>
-							<SplitView
-								defaultLeftWidth={260}
-								defaultRightWidth={360}
-								minPanelWidth={300}
-								left={
-									<ErrorBoundary>
-										<EditorLeftPanel />
-									</ErrorBoundary>
-								}
-								center={
-									<ErrorBoundary>
-										<EditorCenterPanel path={path} />
-									</ErrorBoundary>
-								}
-								right={
-									<ErrorBoundary>
-										<EditorRightPanel path={path} />
-									</ErrorBoundary>
-								}
-							/>
-							<StatusBar left={<StatusBarLeft />} center={<StatusBarCenter />} right={<StatusBarRight />} />
-						</Fragment>
-					) : (
-						<EditorMobileLayout path={path} />
-					)}
-				</div>
+					<div
+						className={cn("flex min-h-0 flex-1 flex-col bg-background text-foreground overflow-hidden w-full h-dvh max-h-dvh", {
+							"p-2": !isDesktop,
+						})}
+					>
+						{isDesktop ? (
+							<Fragment>
+								<Toolbar>
+									<ProjectMenu />
+									<EditMenu />
+									<ViewMenu />
+									<ExportMenu />
+									<LocalizationMenu />
+								</Toolbar>
+								<SplitView
+									defaultLeftWidth={260}
+									defaultRightWidth={360}
+									minPanelWidth={300}
+									left={
+										<ErrorBoundary>
+											<EditorLeftPanel />
+										</ErrorBoundary>
+									}
+									center={
+										<ErrorBoundary>
+											<EditorCenterPanel path={path} />
+										</ErrorBoundary>
+									}
+									right={
+										<ErrorBoundary>
+											<EditorRightPanel path={path} />
+										</ErrorBoundary>
+									}
+								/>
+								<StatusBar left={<StatusBarLeft />} center={<StatusBarCenter />} right={<StatusBarRight />} />
+							</Fragment>
+						) : (
+							<EditorMobileLayout path={path} />
+						)}
+					</div>
 				</FileExplorerProvider>
 			</ValidationProvider>
 		</ProjectProvider>
