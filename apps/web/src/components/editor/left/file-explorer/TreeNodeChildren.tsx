@@ -8,12 +8,21 @@ interface TreeNodeChildrenProps {
 }
 
 export function TreeNodeChildren({ node, depth = 0 }: TreeNodeChildrenProps) {
-	const [expanded, setExpanded] = useLocalStorage<boolean>(node.path, node.path === "/");
+	const [expanded, setExpanded] = useLocalStorage<Record<string, boolean>>("file-explorer-expand", {
+		"/": true,
+	});
+
+	const isExpanded = Boolean(expanded[node.path] || false);
 
 	return (
 		<div>
-			<TreeNodeRow node={node} depth={depth} expanded={expanded} onToggle={() => setExpanded(!expanded)} />
-			{node.type === "folder" && expanded && node.children && (
+			<TreeNodeRow
+				node={node}
+				depth={depth}
+				expanded={isExpanded}
+				onToggle={() => setExpanded({ ...expanded, [node.path]: !isExpanded })}
+			/>
+			{node.type === "folder" && isExpanded && node.children && (
 				<div>
 					{node.children.map((child) => (
 						<TreeNodeChildren key={child.name} node={child} depth={depth + 1} />

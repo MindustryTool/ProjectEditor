@@ -33,7 +33,7 @@ function EditorWithMonaco({ path }: { path: string }) {
 	return (
 		<ErrorBoundary>
 			<Suspense>
-				<MonacoEditor path={path} value={data} onChange={write} language={language} />;
+				<MonacoEditor path={path} value={data} onChange={write} language={language} />
 			</Suspense>
 		</ErrorBoundary>
 	);
