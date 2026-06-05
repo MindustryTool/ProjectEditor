@@ -64,10 +64,10 @@ export const EditorRightPanel = memo(function EditorRightPanel({ path }: EditorR
 		);
 	}
 
-	if (path.startsWith("content/units") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
+	if (path.replace("sprite:", "").startsWith("content/units") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
 		return (
 			<Suspense fallback={panelFallback}>
-				<UnitPanel path={path} />
+				<UnitPanel path={path.replace("sprite:", "")} />
 			</Suspense>
 		);
 	}

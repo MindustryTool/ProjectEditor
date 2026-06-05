@@ -121,13 +121,19 @@ class ValidationService {
 
 	revalidateFiles(projectId: string) {
 		const paths = Object.keys(useValidationStore.getState().results.resultsByPath);
-        for (const path of paths) {
-            this.scheduleValidation(projectId, path);
-        }
+		for (const path of paths) {
+			this.scheduleValidation(projectId, path);
+		}
 	}
 
 	scheduleValidation(projectId: string, path: string): void {
-		if (!hasDefaultValidatorMatch(path)) return;
+		if (!hasDefaultValidatorMatch(path)) {
+			return;
+		}
+
+		if (!useProjectSession.getState().treeSnapshot.contains(path)) {
+			return;
+		}
 
 		const key = cacheKey(projectId, path);
 		const existing = this.timers.get(key);

@@ -9,6 +9,7 @@ import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import { SchemaArrayItemEditor } from "./SchemaArrayItemEditor";
 import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
+import { Separator } from "#/components/ui/separator";
 
 export const ArrayField = React.memo(function ArrayField({ path, name, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
 	const arrayValue = Array.isArray(value) ? value : undefined;
@@ -34,7 +35,7 @@ export const ArrayField = React.memo(function ArrayField({ path, name, value, on
 	const handleAdd = () => {
 		const nextItemSchema = getArrayItemSchema(entrySchema, arrayValue.length) ?? itemSchema;
 
-		let defaultValue: unknown = v.getDefault(nextItemSchema);
+		let defaultValue: unknown = v.getDefaults(nextItemSchema);
 		if (defaultValue === undefined) {
 			const typeDefault = unwrapSchema(nextItemSchema);
 			if (typeDefault.type === "object") {
@@ -67,7 +68,13 @@ export const ArrayField = React.memo(function ArrayField({ path, name, value, on
 
 						return (
 							<div key={index} className="flex flex-col gap-2 relative border p-2 rounded-md">
-								<p className="font-semibold">{index + 1}</p>
+								<div className="w-full flex items-center justify-between">
+									<p className="font-semibold">{index + 1}</p>
+									<Button size="sm" className="text-destructive" variant="ghost" onClick={() => handleRemove(index)}>
+										<X />
+									</Button>
+								</div>
+								<Separator />
 								<SchemaArrayItemEditor
 									path={path}
 									value={el}
@@ -75,14 +82,6 @@ export const ArrayField = React.memo(function ArrayField({ path, name, value, on
 									onChange={onChange}
 									jsonPath={entryJsonPath}
 								/>
-								<Button
-									size="sm"
-									className="absolute top-1 right-1 text-destructive"
-									variant="ghost"
-									onClick={() => handleRemove(index)}
-								>
-									<X />
-								</Button>
 							</div>
 						);
 					})}

@@ -7,6 +7,8 @@ import { Spinner } from "#/components/ui/spinner";
 import { useTranslation } from "react-i18next";
 import { usePath } from "#/hooks/use-path";
 import { ErrorBoundary } from "#/components/ui/error-boundary";
+import { SpriteEditor } from "#/components/editor/center/SpriteEditor";
+import { UnitHjsonSchema } from "@project/schema";
 
 const MonacoEditor = lazy(() => import("#/components/editor/monaco/MonacoEditor").then((mod) => ({ default: mod.MonacoEditor })));
 
@@ -14,7 +16,7 @@ interface EditorCenterPanelProps {
 	path: string | null;
 }
 
-function EditorWithMonaco({ path }: { path: string }) {
+function TextEditor({ path }: { path: string }) {
 	const { data, isLoading, write } = useFileString(path);
 	const language = getLanguageFromPath(path);
 
@@ -41,23 +43,27 @@ function EditorWithMonaco({ path }: { path: string }) {
 
 function EditorContent({ path }: { path: string }) {
 	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
-
-	if (path === "mod.hjson" || (path.startsWith("content") && path.endsWith(".json"))) {
-		return <EditorWithMonaco path={path} />;
-	}
-
-	if (path.endsWith(".png")) {
-		return <ImageFilePreview path={path} />;
-	}
-
-	const entry = treeSnapshot.getEntry(path);
+	const striped = path.replace("sprite:", "");
+	const entry = treeSnapshot.getEntry(striped);
 
 	if (entry === undefined) {
 		return null;
 	}
 
+	if (path === "mod.hjson" || (path.startsWith("content") && path.endsWith(".json"))) {
+		return <TextEditor path={path} />;
+	}
+
+	if (path.endsWith(".png")) {
+		return <ImageFilePreview path={path} showSize/>;
+	}
+
+	if (path.startsWith("sprite:")) {
+		return <SpriteEditor path={striped} schema={UnitHjsonSchema}/>;
+	}
+
 	if (entry.kind === "file") {
-		return <EditorWithMonaco path={path} />;
+		return <TextEditor path={path} />;
 	}
 
 	return null;

@@ -19,5 +19,5 @@ export const ContentImage = memo(function ContentImage({
 
 	if (!assetPath) return null;
 
-	return <ImageFilePreview path={assetPath} className={className} showSize={false} />;
+	return <ImageFilePreview path={assetPath} className={className} />;
 });

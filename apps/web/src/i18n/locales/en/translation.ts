@@ -28,6 +28,8 @@ export const en = {
 	"editor.loading": "Loading",
 	"editor.no-opened-file": "No file opened",
 	"editor.create-new-file": "Create New File",
+	"sprite-editor.open": "Open Sprite Editor",
+	"sprite-editor.close": "Close Sprite Editor",
 	"editor.create-new-content-dialog.create": "Create",
 	"editor.create-new-content-dialog.description": "Enter a name for the new content file.",
 	"editor.create-new-content-dialog.cancel": "Cancel",

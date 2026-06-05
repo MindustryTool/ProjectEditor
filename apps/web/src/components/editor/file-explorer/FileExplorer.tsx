@@ -5,6 +5,7 @@ import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { cn } from "~/lib/utils";
 import { buildFileTree } from "./file-tree";
 import { TreeNodeChildren } from "./TreeNodeChildren";
+import { FileSearchDialog } from "#/components/editor/file-explorer/FileSearchDialog";
 
 interface FileExplorerProps {
 	className?: string;
@@ -17,7 +18,7 @@ export function FileExplorer({ className }: FileExplorerProps) {
 
 	const projectTree = useMemo(() => {
 		const rootNode: TreeNode = {
-			name: metadata.name,
+			name: metadata.name.toUpperCase(),
 			type: "folder",
 			children: buildFileTree(treeSnapshot, context.project.id),
 			path: "/",
@@ -26,7 +27,8 @@ export function FileExplorer({ className }: FileExplorerProps) {
 	}, [context.project.id, metadata.name, treeSnapshot]);
 
 	return (
-		<div className={cn("space-y-0.5 h-full w-full", className)}>
+		<div className={cn("h-full w-full", className)}>
+			<FileSearchDialog />
 			{projectTree.map((node) => (
 				<TreeNodeChildren key={node.name} node={node} depth={0} />
 			))}

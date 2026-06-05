@@ -4,7 +4,7 @@ import { File } from "lucide-react";
 
 export function FileIcon({ path }: { path: string }) {
 	if (path.endsWith(".png")) {
-		return <ImageFilePreview path={path} showSize={false} className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4" />;
+		return <ImageFilePreview path={path} className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4" />;
 	}
 
 	if (path.endsWith(".mp3")) {
@@ -62,7 +62,6 @@ export function FileIcon({ path }: { path: string }) {
 		return (
 			<ImageFilePreview
 				path={assetPath}
-				showSize={false}
 				className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4"
 				fallback={<File />}
 			/>

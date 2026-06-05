@@ -2,7 +2,7 @@ import { cn, getImageUrl } from "#/lib/utils";
 import { useFile } from "@project/core";
 import { resolveContentSprite } from "@project/utils";
 import { File } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import React, { useState, type ReactNode } from "react";
 
 export interface ImageFilePreviewProps {
 	path: string;
@@ -11,7 +11,13 @@ export interface ImageFilePreviewProps {
 	fallback?: ReactNode;
 }
 
-export function ImageFilePreview({ path, className, showSize = true, fallback }: ImageFilePreviewProps) {
+export function ImageFilePreview({
+	path,
+	className,
+	showSize = false,
+	fallback,
+	...props
+}: ImageFilePreviewProps & React.ComponentProps<"img">) {
 	let resolvedPath: string | null = path;
 
 	if (!path.endsWith(".png")) {
@@ -27,10 +33,10 @@ export function ImageFilePreview({ path, className, showSize = true, fallback }:
 		}
 	}
 
-	return <Image path={resolvedPath} className={className} showSize={showSize} fallback={fallback} />;
+	return <Image path={resolvedPath} className={className} showSize={showSize} fallback={fallback} {...props} />;
 }
 
-function Image({ path, className, showSize = true, fallback }: ImageFilePreviewProps) {
+function Image({ path, className, showSize = false, fallback, ...props }: ImageFilePreviewProps & React.ComponentProps<"img">) {
 	const { data } = useFile(path);
 	const [size, setSize] = useState({ width: 0, height: 0 });
 	const [error, setError] = useState(false);
@@ -45,31 +51,58 @@ function Image({ path, className, showSize = true, fallback }: ImageFilePreviewP
 		return <div className={cn("relative flex justify-center items-center h-full w-full border rounded-md", className)}>{fallback}</div>;
 	}
 
+	if (showSize) {
+		return (
+			<div className={cn("relative flex justify-center items-center h-full w-full overflow-hidden", className)}>
+				<img
+					className="object-contain"
+					src={objectUrl}
+					alt={path}
+					loading="lazy"
+					onLoad={(e) => {
+						const img = e.currentTarget;
+
+						if (!showSize) {
+							return;
+						}
+
+						setSize({
+							width: img.naturalWidth,
+							height: img.naturalHeight,
+						});
+					}}
+					onError={() => setError(true)}
+					{...props}
+				/>
+				{showSize && (
+					<div className="absolute bottom-0.5 backdrop-blur-xs backdrop-brightness-75 p-0.5 right-0.5 text-xs text-muted-foreground">
+						{size.width}x{size.height}
+					</div>
+				)}
+			</div>
+		);
+	}
+
 	return (
-		<div className={cn("relative flex justify-center items-center h-full w-full overflow-hidden", className)}>
-			<img
-				src={objectUrl}
-				alt={path}
-				loading="lazy"
-				onLoad={(e) => {
-					const img = e.currentTarget;
+		<img
+			className={cn("object-contain", className)}
+			src={objectUrl}
+			alt={path}
+			loading="lazy"
+			onLoad={(e) => {
+				const img = e.currentTarget;
 
-					if (!showSize) {
-						return;
-					}
+				if (!showSize) {
+					return;
+				}
 
-					setSize({
-						width: img.naturalWidth,
-						height: img.naturalHeight,
-					});
-				}}
-				onError={() => setError(true)}
-			/>
-			{showSize && (
-				<div className="absolute bottom-0.5 backdrop-blur-xs backdrop-brightness-75 p-0.5 right-0.5 text-xs text-muted-foreground">
-					{size.width}x{size.height}
-				</div>
-			)}
-		</div>
+				setSize({
+					width: img.naturalWidth,
+					height: img.naturalHeight,
+				});
+			}}
+			onError={() => setError(true)}
+			{...props}
+		/>
 	);
 }

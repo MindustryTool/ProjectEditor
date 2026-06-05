@@ -34,6 +34,7 @@ export function RecentFileTab({ entry, isActive, isMissing, onClick, onClose }: 
 				tabIndex={-1}
 				onClick={(e) => {
 					e.stopPropagation();
+					e.preventDefault();
 					onClose(entry.path);
 				}}
 				className={cn(
