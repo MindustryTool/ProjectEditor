@@ -6,6 +6,7 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+// import { visualizer } from "rollup-plugin-visualizer";
 
 const config = defineConfig({
 	resolve: { tsconfigPaths: true },
@@ -15,6 +16,12 @@ const config = defineConfig({
 		tailwindcss(),
 		tanstackStart({ spa: { enabled: true } }),
 		viteReact(),
+		// visualizer({
+		// 	open: true,
+		// 	filename: "dist/stats.html",
+		// 	gzipSize: true,
+		// 	brotliSize: true,
+		// }),
 	],
 });
 

@@ -7,18 +7,22 @@ import { LocalizationMenu } from "./toolbar/LocalizationMenu";
 import { Toolbar } from "./Toolbar";
 import { StatusBar } from "./StatusBar";
 import { SplitView } from "./SplitView";
-import { EditorLeftPanel } from "./EditorLeftPanel";
-import { EditorCenterPanel } from "./EditorCenterPanel";
-import { EditorRightPanel } from "./EditorRightPanel";
 import { StatusBarLeft } from "./statusbar/StatusBarLeft";
 import { StatusBarCenter } from "./statusbar/StatusBarCenter";
 import { StatusBarRight } from "./statusbar/StatusBarRight";
 import { ValidationProvider } from "#/components/editor/ValidationProvider";
-import { EditorMobileLayout } from "#/components/editor/EditorMobileLayout";
 import { Fragment } from "react/jsx-runtime";
 import { ErrorBoundary } from "#/components/ui/error-boundary";
 import { ProjectProvider } from "#/components/editor/ProjectProvider";
 import { cn } from "#/lib/utils";
+import { lazy } from "react";
+import { EditorLeftPanel } from "./EditorLeftPanel";
+import { EditorCenterPanel } from "./EditorCenterPanel";
+import { EditorRightPanel } from "./EditorRightPanel";
+
+const EditorMobileLayout = lazy(() =>
+	import("#/components/editor/EditorMobileLayout").then((mod) => ({ default: mod.EditorMobileLayout })),
+);
 
 interface EditorShellProps {
 	path: string | null;

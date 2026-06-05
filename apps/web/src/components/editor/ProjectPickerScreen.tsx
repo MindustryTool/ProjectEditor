@@ -12,7 +12,6 @@ import { Separator } from "#/components/ui/separator";
 import { ProjectSettingsDialog } from "~/components/editor/toolbar/ProjectSettingsDialog";
 import { LANGUAGE_OPTIONS, LanguageBadge } from "./LanguageBadge";
 import { Spinner } from "#/components/ui/spinner";
-import { usePostHog } from "@posthog/react";
 
 interface ProjectPickerScreenProps {
 	onProjectSelected: (id: string, path: string) => void;
@@ -24,7 +23,6 @@ function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: s
 	const [name, setName] = useState("");
 	const [language, setLanguage] = useState<ProjectLanguage>("json");
 	const [nameError, setNameError] = useState("");
-	const posthog = usePostHog();
 
 	async function handleCreate() {
 		const trimmed = name.trim();
@@ -68,8 +66,6 @@ function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: s
 			setNameError("");
 
 			onProjectSelected(context.project.id, "content/items/test-item.hjson");
-
-			posthog.capture("project.created", { name, language });
 		} catch (e) {
 			toast.error(`Failed to create project ${e}`);
 		}

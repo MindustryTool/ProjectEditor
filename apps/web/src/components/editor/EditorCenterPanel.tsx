@@ -1,10 +1,11 @@
-import { memo, useEffect } from "react";
+import { lazy, memo, useEffect } from "react";
 import { useFileString, useProjectSession } from "@project/core";
 import { getLanguageFromPath } from "~/lib/monaco/languageMap";
 import { RecentlyOpenedFilesBar } from "./recently-opened/RecentlyOpenedFilesBar";
 import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
 import { Spinner } from "#/components/ui/spinner";
-import { MonacoEditor } from "#/components/editor/MonacoEditor";
+
+const MonacoEditor = lazy(() => import("#/components/editor/MonacoEditor").then((mod) => ({ default: mod.MonacoEditor })));
 
 interface EditorCenterPanelProps {
 	path: string | null;
