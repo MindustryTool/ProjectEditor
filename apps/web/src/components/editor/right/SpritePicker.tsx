@@ -65,7 +65,7 @@ function SpriteViewer({ path: spritePath }: { path: string }) {
 	}
 
 	if (!data || data.byteLength === 0) {
-		return <p className="text-sm text-muted-foreground">No sprite set</p>;
+		return <SpriteUploader path={spritePath} />;
 	}
 
 	const objectUrl = getImageUrl(data);
