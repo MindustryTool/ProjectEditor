@@ -60,18 +60,9 @@ catalogs:
     '@types/node':
       specifier: ^22.10.2
       version: 22.19.19
-    '@typescript-eslint/eslint-plugin':
-      specifier: ^8.0.0
-      version: 8.60.0
-    '@typescript-eslint/parser':
-      specifier: ^8.0.0
-      version: 8.60.0
     '@valibot/i18n':
       specifier: ^1.2.0
       version: 1.2.0
-    axios:
-      specifier: ^1.7.0
-      version: 1.16.1
     class-variance-authority:
       specifier: ^0.7.1
       version: 0.7.1
@@ -81,18 +72,6 @@ catalogs:
     color:
       specifier: ^5.0.3
       version: 5.0.3
-    eslint:
-      specifier: ^9.0.0
-      version: 9.39.4
-    eslint-plugin-react:
-      specifier: ^7.37.0
-      version: 7.37.5
-    eslint-plugin-react-hooks:
-      specifier: ^5.1.0
-      version: 5.2.0
-    fflate:
-      specifier: ^0.8.0
-      version: 0.8.3
     i18next:
       specifier: ^26.2.0
       version: 26.2.0
@@ -114,18 +93,12 @@ catalogs:
     nuqs:
       specifier: ^2.8.9
       version: 2.8.9
-    prettier:
-      specifier: ^3.5.0
-      version: 3.8.3
     radix-ui:
       specifier: ^1.4.3
       version: 1.4.3
     react-i18next:
       specifier: ^17.0.8
       version: 17.0.8
-    react-router-dom:
-      specifier: ^7.0.0
-      version: 7.15.1
     shadcn:
       specifier: ^4.8.0
       version: 4.8.0
@@ -138,15 +111,9 @@ catalogs:
     tailwindcss:
       specifier: ^4.1.18
       version: 4.3.0
-    turbo:
-      specifier: ^2.4.0
-      version: 2.9.14
     tw-animate-css:
       specifier: ^1.4.0
       version: 1.4.0
-    typescript-eslint:
-      specifier: ^8.0.0
-      version: 8.60.0
     valibot:
       specifier: ^1.4.0
       version: 1.4.0
@@ -326,7 +293,7 @@ importers:
         version: 0.52.2
       nuqs:
         specifier: 'catalog:'
-        version: 2.8.9(@tanstack/react-router@1.170.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-router-dom@7.15.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-router@7.15.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)
+        version: 2.8.9(@tanstack/react-router@1.170.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)
       posthog-js:
         specifier: ^1.379.1
         version: 1.379.1
@@ -10371,14 +10338,12 @@ snapshots:
     dependencies:
       boolbase: 1.0.0
 
-  nuqs@2.8.9(@tanstack/react-router@1.170.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-router-dom@7.15.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-router@7.15.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6):
+  nuqs@2.8.9(@tanstack/react-router@1.170.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6):
     dependencies:
       '@standard-schema/spec': 1.0.0
       react: 19.2.6
     optionalDependencies:
       '@tanstack/react-router': 1.170.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      react-router: 7.15.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      react-router-dom: 7.15.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
 
   object-assign@4.1.1: {}
 
