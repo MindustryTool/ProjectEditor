@@ -1,17 +1,8 @@
 import { spawn } from "threads";
 import type { ModuleThread } from "threads";
 import type { ProjectContents } from "@project/types";
-import type {
-	ValidationBatchFile,
-	ValidationResult,
-	ValidationWorkerApi,
-} from "@project/core";
-import {
-	hasDefaultValidatorMatch,
-	useFileStore,
-	useProjectSession,
-	useValidationStore,
-} from "@project/core";
+import type { ValidationBatchFile, ValidationResult, ValidationWorkerApi } from "@project/core";
+import { hasDefaultValidatorMatch, useFileStore, useProjectSession, useValidationStore } from "@project/core";
 
 function decodeContent(data: ArrayBuffer | null | undefined): string {
 	if (data == null) return "";
@@ -96,9 +87,7 @@ class ValidationService {
 		}
 	};
 
-	validateFiles = async (
-		files: ValidationBatchFile[],
-	): Promise<Record<string, ValidationResult[]> | null> => {
+	validateFiles = async (files: ValidationBatchFile[]): Promise<Record<string, ValidationResult[]> | null> => {
 		if (files.length === 0) return {};
 		if (!this._contents) return null;
 
@@ -129,6 +118,13 @@ class ValidationService {
 			return {};
 		}
 	};
+
+	revalidateFiles(projectId: string) {
+		const paths = Object.keys(useValidationStore.getState().results.resultsByPath);
+        for (const path of paths) {
+            this.scheduleValidation(projectId, path);
+        }
+	}
 
 	scheduleValidation(projectId: string, path: string): void {
 		if (!hasDefaultValidatorMatch(path)) return;

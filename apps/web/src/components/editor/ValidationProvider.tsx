@@ -31,7 +31,8 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 
 	useEffect(() => {
 		validationService.contents = contents;
-	}, [contents]);
+        validationService.revalidateFiles(projectId);
+	}, [contents, projectId]);
 
 	useEffect(() => {
 		validationService.lang = lang;
