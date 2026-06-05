@@ -52,10 +52,12 @@ const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.E
 		velocityScaleRandMin: v.optional(v.number(), 1),
 		velocityScaleRandMax: v.optional(v.number(), 1),
 		damage: v.optional(v.number(), 1),
-		sprite: v.pipe(
-			v.string(),
-			v.transform((v) => v.replaceAll(context.name + "-", "")),
-			v.picklist(context.sprites.map((sprite) => sprite.name.replaceAll(context.name + "-", ""))),
+		sprite: v.optional(
+			v.pipe(
+				v.string(),
+				v.transform((v) => v.replaceAll(context.name + "-", "")),
+				v.picklist(context.sprites.map((sprite) => sprite.name.replaceAll(context.name + "-", ""))),
+			),
 		),
 		hitSize: v.optional(v.number(), 4),
 		drawSize: v.optional(v.number(), 40),

@@ -1,7 +1,7 @@
 import * as v from "valibot";
 import { MindustryHexColorSchema, SoundHjsonSchema, type SchemaFn } from "./base";
 import { StatusStringSchema } from "./status";
-import { EffectHjsonSchema } from "./effect";
+import { EffectFieldSchema } from "./effect";
 import { PartHjsonSchema } from "./part";
 import { ShootPatternHjsonSchema } from "./shoot-pattern";
 import { BulletHjsonSchema } from "./bullet";
@@ -101,9 +101,9 @@ export const WeaponHjsonSchema: SchemaFn = (context) =>
 	v.object({
 		...weaponObjectSchema,
 		bullet: v.optional(BulletHjsonSchema(context)),
-		ejectEffect: v.optional(EffectHjsonSchema(context)),
+		ejectEffect: v.optional(EffectFieldSchema(context)),
 		shoot: v.optional(ShootPatternHjsonSchema(context)),
 		shootStatus: v.optional(StatusStringSchema(context)),
-		shootOnDeathEffect: v.optional(EffectHjsonSchema(context)),
+		shootOnDeathEffect: v.optional(EffectFieldSchema(context)),
 		parts: v.optional(PartHjsonSchema(context), []),
 	});
