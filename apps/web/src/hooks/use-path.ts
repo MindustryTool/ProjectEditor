@@ -1,7 +1,7 @@
 import { useQueryState } from "nuqs";
 
 export function usePath() {
-	const result = useQueryState("path", { history: "push", clearOnDefault: true });
+	const result = useQueryState("path", { history: "push",     clearOnDefault: true });
 
 	return result;
 }
