@@ -6,6 +6,5 @@
     },
     "include": [
         "src",
-        "../../apps/web/src/services/validation-service.ts"
     ]
 }
