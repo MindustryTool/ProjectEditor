@@ -26,6 +26,8 @@ export const en = {
 	"editor.mod-hjson.dependencies": "Dependencies",
 	"editor.mod-hjson.dependencies-description": "Other mods this mod depends on",
 	"editor.loading": "Loading",
+	"editor.no-opened-file": "No file opened",
+	"editor.create-new-file": "Create New File",
 	"editor.create-new-content-dialog.create": "Create",
 	"editor.create-new-content-dialog.description": "Enter a name for the new content file.",
 	"editor.create-new-content-dialog.cancel": "Cancel",

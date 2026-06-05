@@ -15,5 +15,4 @@ export async function loadValibotI18n(locale: string): Promise<void> {
 
 	v.setGlobalConfig({ lang: locale });
 	currentLocale = locale;
-	console.log("Set locale: " + locale);
 }

@@ -65,8 +65,6 @@ export function createDefaultValidators() {
 function jsonSyntaxValidator({ path, content }: Parameters<ValidatorFn>[0]): ValidationResult[] {
 	const trimmed = content.trim();
 
-	console.log(v.getGlobalConfig());
-
 	if (!trimmed) return [];
 
 	try {

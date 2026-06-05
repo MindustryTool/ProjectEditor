@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { X } from "lucide-react";
 import { useProjectSession, useCurrentProject } from "@project/core";
 import { cn } from "~/lib/utils";
@@ -12,6 +12,7 @@ export function RecentlyOpenedFilesBar() {
 	const context = useCurrentProject();
 	const projectId = context.project.id;
 
+	const projectContext = useProjectSession((s) => s.projectContext);
 	const treeSnapshot = useProjectSession((state) => state.treeSnapshot);
 	const recentFiles = useProjectSession((state) => state.recentlyOpenedFiles[projectId]) ?? EMPTY;
 	const recordFileAccess = useProjectSession((state) => state.recordFileAccess);
@@ -42,6 +43,12 @@ export function RecentlyOpenedFilesBar() {
 		},
 		[projectId, path, recentFiles, removeFromRecentFiles, setPath],
 	);
+
+	useEffect(() => {
+		if (path && projectContext && treeSnapshot.contains(path)) {
+			recordFileAccess(projectContext.project.id, path);
+		}
+	}, [path, projectContext, treeSnapshot, recordFileAccess]);
 
 	if (recentFiles.length === 0) return null;
 
