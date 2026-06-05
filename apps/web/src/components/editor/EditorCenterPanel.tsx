@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import { usePath } from "#/hooks/use-path";
 import { ErrorBoundary } from "#/components/ui/error-boundary";
 
-const MonacoEditor = lazy(() => import("#/components/editor/MonacoEditor").then((mod) => ({ default: mod.MonacoEditor })));
+const MonacoEditor = lazy(() => import("#/components/editor/monaco/MonacoEditor").then((mod) => ({ default: mod.MonacoEditor })));
 
 interface EditorCenterPanelProps {
 	path: string | null;
