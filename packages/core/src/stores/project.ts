@@ -1,10 +1,11 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import type { ProjectLanguage, ProjectEventMap, ProjectInfo, ProjectContext } from "@project/core";
 import { createProjectInfo, createEventBus, importProject, ValidationResults, useValidationStore } from "@project/core";
 import { createProjectFileSystem } from "@project/core";
 import { TreeSnapshot, useProjectSession } from "./session";
-import { type AppSettings, type ProjectRecord } from "@project/schema";
+import { AppSettingsSchema, ProjectRecordSchema, type AppSettings, type ProjectRecord } from "@project/schema";
+import * as v from "valibot";
 
 export type { ProjectContext, RecentFileEntry } from "./session";
 
@@ -24,7 +25,7 @@ export const useAppStore = create<AppState>()(
 	persist(
 		(set, get) => ({
 			projects: {},
-			settings: { theme: "system" as const, fontSize: 14, tabSize: 2, validation: { validationDelayMs: 500 } },
+			settings: { firstTime: true, theme: "system" as const, fontSize: 14, tabSize: 2, validation: { validationDelayMs: 500 } },
 
 			createNewProject: async (name: string, language: ProjectLanguage) => {
 				const project = createProjectInfo(name, language);
@@ -123,6 +124,20 @@ export const useAppStore = create<AppState>()(
 		}),
 		{
 			name: "projects-store",
+			storage: createJSONStorage(() => localStorage, {
+				reviver: (key, value) => {
+					if (key === "settings") {
+						return v.parse(AppSettingsSchema, value);
+					}
+
+					if (key === "projects") {
+                        const schema = v.fallback(v.record(v.string(), ProjectRecordSchema), {});
+						return v.parse(schema, value);
+					}
+
+					return value;
+				},
+			}),
 			partialize: (state) => ({
 				settings: state.settings,
 				projects: state.projects,

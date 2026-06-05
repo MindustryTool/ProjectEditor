@@ -1,6 +1,7 @@
 import * as v from "valibot";
 
 export const AppSettingsSchema = v.object({
+	firstTime: v.fallback(v.boolean(), true),
 	theme: v.fallback(v.picklist(["light", "dark", "system"]), "light"),
 	fontSize: v.fallback(v.number(), 14),
 	tabSize: v.fallback(v.number(), 4),

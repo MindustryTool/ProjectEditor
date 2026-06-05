@@ -30,7 +30,7 @@ interface EditorShellProps {
 }
 
 export function EditorShell({ path }: EditorShellProps) {
-	const isDesktop = useIsDesktop();
+	const [isDesktop] = useIsDesktop();
 
 	return (
 		<ProjectProvider>

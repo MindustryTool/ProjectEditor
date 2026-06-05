@@ -6,6 +6,7 @@ import { Label } from "#/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "#/components/ui/radio-group";
 import { Slider } from "#/components/ui/slider";
 import { Tabs, TabsList, TabsTrigger } from "#/components/ui/tabs";
+import { useIsDesktop } from "#/hooks/use-is-desktop";
 import { useAppStore } from "@project/core";
 import { Settings } from "lucide-react";
 
@@ -26,6 +27,7 @@ export function AppSettingsDialog() {
 	const settings = useAppStore((s) => s.settings);
 	const updateSettings = useAppStore((s) => s.updateSettings);
 	const { theme, setTheme } = useTheme();
+	const [isDesktop, setIsDesktop] = useIsDesktop();
 
 	function handleThemeChange(nextTheme: string) {
 		const value = nextTheme as AppTheme;
@@ -56,8 +58,14 @@ export function AppSettingsDialog() {
 		});
 	}
 
+	function handleUIChange(nextUI: string) {
+		setIsDesktop(nextUI === "desktop");
+	}
+
+	const ui = isDesktop ? "desktop" : "mobile";
+
 	return (
-		<Dialog>
+		<Dialog defaultOpen={settings.firstTime} onOpenChange={() => updateSettings({ firstTime: false })}>
 			<DialogTrigger asChild>
 				<Button variant="ghost" size="icon-sm" aria-label="Open app settings">
 					<Settings />
@@ -69,6 +77,27 @@ export function AppSettingsDialog() {
 					<DialogDescription>Update editor appearance and validation behavior.</DialogDescription>
 				</DialogHeader>
 				<div className="grid gap-5">
+					<section className="grid gap-3 rounded-lg border p-4">
+						<div className="grid gap-1">
+							<Label>UI</Label>
+						</div>
+						<RadioGroup value={ui} onValueChange={handleUIChange} className="grid gap-2 grid-cols-2">
+							{[
+								{ value: "mobile", label: "Mobile" },
+								{ value: "desktop", label: "Desktop" },
+							].map((option) => (
+								<Label
+									key={option.value}
+									htmlFor={`app-theme-${option.value}`}
+									className="flex items-center gap-3 rounded-md border px-3 py-2 hover:bg-accent/50"
+								>
+									<RadioGroupItem id={`app-theme-${option.value}`} value={option.value} />
+									<span>{option.label}</span>
+								</Label>
+							))}
+						</RadioGroup>
+					</section>
+
 					<section className="grid gap-3 rounded-lg border p-4">
 						<div className="grid gap-1">
 							<Label>Theme</Label>
