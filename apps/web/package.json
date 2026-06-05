@@ -9,7 +9,7 @@
         "dev": "vite dev --port 3000",
         "build": "vite build",
         "preview": "vite preview",
-        "deploy": "pnpm run build && pnpm -w run lint && pnpm -w run test && wrangler deploy",
+        "deploy": "pnpm run build && pnpm turbo run typecheck lint test && wrangler deploy",
         "cf-typegen": "wrangler types",
         "typecheck": "tsc --noEmit",
         "test": "vitest run",
