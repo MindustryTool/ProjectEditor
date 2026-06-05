@@ -15,7 +15,7 @@ i18n
 		},
 		fallbackLng: "en",
 		detection: {
-			order: ["path", "localStorage", "navigator", "htmlTag"],
+			order: ["localStorage", "navigator", "path", "htmlTag"],
 			lookupFromPathIndex: 0,
 			caches: ["localStorage"],
 		},
