@@ -48,9 +48,9 @@ function ensureErrorLensStyles(): void {
 	const style = document.createElement("style");
 	style.id = ERROR_LENS_STYLE_ID;
 	style.textContent = `
-.el-bg-error{background:rgba(255,80,80,0.07)}
-.el-bg-warning{background:rgba(255,200,0,0.06)}
-`;
+        .el-bg-error{background:rgba(255,80,80,0.07)}
+        .el-bg-warning{background:rgba(255,200,0,0.6)}
+        `;
 	document.head.appendChild(style);
 }
 

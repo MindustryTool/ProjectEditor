@@ -130,8 +130,14 @@ const ResearchRequirementList = React.memo(function ResearchRequirementList({
 					<Dialog>
 						<DialogTrigger asChild>
 							<Button variant="outline" className="py-1 px-2">
-								{selectedItem ? <ContentImage className="size-5" entry={selectedItem} /> : itemName}
-                                {itemName}
+								{selectedItem ? (
+									<span className="flex items-center gap-2">
+										<ContentImage className="size-5" entry={selectedItem} />
+										{itemName}
+									</span>
+								) : (
+									itemName
+								)}
 							</Button>
 						</DialogTrigger>
 						<DialogContent className="w-sm" showCloseButton={false}>
