@@ -36,7 +36,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 		<html lang={lang} suppressHydrationWarning>
 			<head>
 				<HeadContent />
-				<script crossOrigin="anonymous" src="//unpkg.com/react-scan/dist/auto.global.js"></script>
+				{process.env.NODE_ENV === "development" && (
+					<script crossOrigin="anonymous" src="//unpkg.com/react-scan/dist/auto.global.js"></script>
+				)}
 			</head>
 			<body className="flex min-h-screen flex-col font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)]">
 				<main className="flex flex-1 flex-col">
