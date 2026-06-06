@@ -19,11 +19,7 @@ import { Panel } from "#/components/editor/Panel";
 import { ErrorBoundary } from "#/components/ui/error-boundary";
 import { FileExplorer } from "#/components/editor/file-explorer";
 
-interface EditorMobileLayoutProps {
-	path: string | null;
-}
-
-export function EditorMobileLayout({ path }: EditorMobileLayoutProps) {
+export function EditorMobileLayout() {
 	const { t } = useTranslation();
 	const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -55,7 +51,7 @@ export function EditorMobileLayout({ path }: EditorMobileLayoutProps) {
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
 						<div className="flex flex-1 overflow-hidden bg-background w-full">
 							<ErrorBoundary>
-								<EditorCenterPanel path={path} />
+								<EditorCenterPanel />
 							</ErrorBoundary>
 						</div>
 					</div>
@@ -64,11 +60,9 @@ export function EditorMobileLayout({ path }: EditorMobileLayoutProps) {
 					{/* Same to above */}
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
 						<div className="flex flex-1 overflow-hidden bg-background w-full">
-							{path && (
-								<ErrorBoundary>
-									<EditorRightPanel path={path} />
-								</ErrorBoundary>
-							)}
+							<ErrorBoundary>
+								<EditorRightPanel />
+							</ErrorBoundary>
 						</div>
 					</div>
 				</TabsContent>

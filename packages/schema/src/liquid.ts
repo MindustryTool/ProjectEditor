@@ -23,8 +23,8 @@ export const liquidBaseObjectSchema = v.object({
 	gasColor: v.pipe(
 		v.optional(MindustryHexColorSchema),
 		metadata({
-			name: "editor.liquid.gasColor",
-			description: "editor.liquid.gasColor-description",
+			name: "editor.liquid.gas-color",
+			description: "editor.liquid.gas-color-description",
 			category: "editor.liquid.category.visual",
 			visibleWhen: {
 				field: "gas",
@@ -35,16 +35,16 @@ export const liquidBaseObjectSchema = v.object({
 	barColor: v.pipe(
 		v.optional(MindustryHexColorSchema),
 		metadata({
-			name: "editor.liquid.barColor",
-			description: "editor.liquid.barColor-description",
+			name: "editor.liquid.bar-color",
+			description: "editor.liquid.bar-color-description",
 			category: "editor.liquid.category.visual",
 		}),
 	),
 	lightColor: v.pipe(
 		v.optional(MindustryHexColorSchema),
 		metadata({
-			name: "editor.liquid.lightColor",
-			description: "editor.liquid.lightColor-description",
+			name: "editor.liquid.light-color",
+			description: "editor.liquid.light-color-description",
 			category: "editor.liquid.category.visual",
 		}),
 	),
@@ -67,8 +67,8 @@ export const liquidBaseObjectSchema = v.object({
 	heatCapacity: v.pipe(
 		v.optional(v.number()),
 		metadata({
-			name: "editor.liquid.heatCapacity",
-			description: "editor.liquid.heatCapacity-description",
+			name: "editor.liquid.heat-capacity",
+			description: "editor.liquid.heat-capacity-description",
 			category: "editor.liquid.category.physics",
 		}),
 	),
@@ -91,8 +91,8 @@ export const liquidBaseObjectSchema = v.object({
 	blockReactive: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
-			name: "editor.liquid.blockReactive",
-			description: "editor.liquid.blockReactive-description",
+			name: "editor.liquid.block-reactive",
+			description: "editor.liquid.block-reactive-description",
 			category: "editor.liquid.category.behavior",
 		}),
 	),
@@ -107,8 +107,8 @@ export const liquidBaseObjectSchema = v.object({
 	moveThroughBlocks: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "editor.liquid.moveThroughBlocks",
-			description: "editor.liquid.moveThroughBlocks-description",
+			name: "editor.liquid.move-through-blocks",
+			description: "editor.liquid.move-through-blocks-description",
 			category: "editor.liquid.category.behavior",
 		}),
 	),
@@ -123,24 +123,24 @@ export const liquidBaseObjectSchema = v.object({
 	particleSpacing: v.pipe(
 		v.optional(v.number()),
 		metadata({
-			name: "editor.liquid.particleSpacing",
-			description: "editor.liquid.particleSpacing-description",
+			name: "editor.liquid.particle-spacing",
+			description: "editor.liquid.particle-spacing-description",
 			category: "editor.liquid.category.physics",
 		}),
 	),
 	boilPoint: v.pipe(
 		v.optional(v.number()),
 		metadata({
-			name: "editor.liquid.boilPoint",
-			description: "editor.liquid.boilPoint-description",
+			name: "editor.liquid.boil-point",
+			description: "editor.liquid.boil-point-description",
 			category: "editor.liquid.category.physics",
 		}),
 	),
 	capPuddles: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
-			name: "editor.liquid.capPuddles",
-			description: "editor.liquid.capPuddles-description",
+			name: "editor.liquid.cap-puddles",
+			description: "editor.liquid.cap-puddles-description",
 			category: "editor.liquid.category.behavior",
 		}),
 	),
@@ -175,24 +175,24 @@ export const LiquidHjsonSchema: SchemaFn = (context) =>
 		particleEffect: v.pipe(
 			v.optional(EffectFieldSchema(context)),
 			metadata({
-				name: "editor.liquid.particleEffect",
-				description: "editor.liquid.particleEffect-description",
+				name: "editor.liquid.particle-effect",
+				description: "editor.liquid.particle-effect-description",
 				category: "editor.liquid.category.behavior",
 			}),
 		),
 		vaporEffect: v.pipe(
 			v.optional(EffectFieldSchema(context)),
 			metadata({
-				name: "editor.liquid.vaporEffect",
-				description: "editor.liquid.vaporEffect-description",
+				name: "editor.liquid.vapor-effect",
+				description: "editor.liquid.vapor-effect-description",
 				category: "editor.liquid.category.behavior",
 			}),
 		),
 		canStayOn: v.pipe(
 			v.optional(v.array(LiquidFieldSchema(context))),
 			metadata({
-				name: "editor.liquid.canStayOn",
-				description: "editor.liquid.canStayOn-description",
+				name: "editor.liquid.can-stay-on",
+				description: "editor.liquid.can-stay-on-description",
 				category: "editor.liquid.category.behavior",
 			}),
 		),

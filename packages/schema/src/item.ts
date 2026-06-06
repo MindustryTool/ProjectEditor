@@ -29,7 +29,7 @@ export const itemBaseObjectSchema = v.object({
 	),
 	healthScaling: v.pipe(
 		v.optional(v.pipe(v.number(), v.minValue(0))),
-		metadata({ name: "editor.item.healthScaling", description: "editor.item.healthScaling-description" }),
+		metadata({ name: "editor.item.health-scaling", description: "editor.item.health-scaling-description" }),
 	),
 	color: v.pipe(
 		v.optional(MindustryHexColorSchema),
@@ -37,7 +37,7 @@ export const itemBaseObjectSchema = v.object({
 	),
 	lowPriority: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "editor.item.lowPriority", description: "editor.item.lowPriority-description" }),
+		metadata({ name: "editor.item.low-priority", description: "editor.item.low-priority-description" }),
 	),
 	buildable: v.pipe(
 		v.optional(v.boolean(), false),

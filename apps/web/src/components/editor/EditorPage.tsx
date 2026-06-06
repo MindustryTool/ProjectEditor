@@ -4,12 +4,10 @@ import { useAppStore, useProjectSession } from "@project/core";
 import { EditorShell } from "./EditorShell";
 import { useTranslation } from "react-i18next";
 import { Progress } from "#/components/ui/progress";
-import { usePath } from "#/hooks/use-path";
 import { useInterval } from "usehooks-ts";
 import { toast } from "sonner";
 
 export function EditorPage() {
-	const [path] = usePath();
 	const [isLoading, setIsLoading] = useState(true);
 	const [loading, setLoading] = useState(0);
 	const { t } = useTranslation();
@@ -54,7 +52,7 @@ export function EditorPage() {
 				setTimeout(() => {
 					setIsLoading(false);
 				}, 1000);
-                loadingRef.current = null;
+				loadingRef.current = null;
 			}
 		};
 
@@ -88,7 +86,7 @@ export function EditorPage() {
 		return null;
 	}
 
-	return <EditorShell path={path} />;
+	return <EditorShell />;
 }
 
 function LoadingDot() {

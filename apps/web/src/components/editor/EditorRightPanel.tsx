@@ -1,5 +1,6 @@
 import { lazy, memo, Suspense } from "react";
 import { Spinner } from "#/components/ui/spinner";
+import { usePath } from "#/hooks/use-path";
 
 const ModHjsonPanel = lazy(() => import("./right/ModHjsonPanel").then((m) => ({ default: m.ModHjsonPanel })));
 const ItemPanel = lazy(() => import("./right/ItemPanel").then((m) => ({ default: m.ItemPanel })));
@@ -15,11 +16,9 @@ const panelFallback = (
 	</div>
 );
 
-interface EditorRightPanelProps {
-	path: string | null;
-}
-
-export const EditorRightPanel = memo(function EditorRightPanel({ path }: EditorRightPanelProps) {
+export const EditorRightPanel = memo(function EditorRightPanel() {
+	const [path] = usePath();
+    
 	if (path === null) {
 		return null;
 	}

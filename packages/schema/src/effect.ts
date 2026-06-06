@@ -30,34 +30,34 @@ const effectBaseObjectSchema = v.object({
 	),
 	startDelay: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "editor.effect.startDelay", description: "editor.effect.startDelay-description" }),
+		metadata({ name: "editor.effect.start-delay", description: "editor.effect.start-delay-description" }),
 	),
 	baseRotation: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "editor.effect.baseRotation", description: "editor.effect.baseRotation-description" }),
+		metadata({ name: "editor.effect.base-rotation", description: "editor.effect.base-rotation-description" }),
 	),
 	followParent: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "editor.effect.followParent", description: "editor.effect.followParent-description" }),
+		metadata({ name: "editor.effect.follow-parent", description: "editor.effect.follow-parent-description" }),
 	),
 	rotWithParent: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "editor.effect.rotWithParent", description: "editor.effect.rotWithParent-description" }),
+		metadata({ name: "editor.effect.rot-with-parent", description: "editor.effect.rot-with-parent-description" }),
 	),
 	layerDuration: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "editor.effect.layerDuration", description: "editor.effect.layerDuration-description" }),
+		metadata({ name: "editor.effect.layer-duration", description: "editor.effect.layer-duration-description" }),
 	),
 });
 
 export const particleEffectObjectSchema = v.object({
 	colorFrom: v.pipe(
 		v.optional(MindustryHexColorSchema),
-		metadata({ name: "editor.effect.colorFrom", description: "editor.effect.colorFrom-description" }),
+		metadata({ name: "editor.effect.color-from", description: "editor.effect.color-from-description" }),
 	),
 	colorTo: v.pipe(
 		v.optional(MindustryHexColorSchema),
-		metadata({ name: "editor.effect.colorTo", description: "editor.effect.colorTo-description" }),
+		metadata({ name: "editor.effect.color-to", description: "editor.effect.color-to-description" }),
 	),
 	particles: v.pipe(
 		v.optional(v.pipe(v.number(), v.minValue(1)), 6),
@@ -65,11 +65,11 @@ export const particleEffectObjectSchema = v.object({
 	),
 	randLength: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "editor.effect.randLength", description: "editor.effect.randLength-description" }),
+		metadata({ name: "editor.effect.rand-length", description: "editor.effect.rand-length-description" }),
 	),
 	casingFlip: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "editor.effect.casingFlip", description: "editor.effect.casingFlip-description" }),
+		metadata({ name: "editor.effect.casing-flip", description: "editor.effect.casing-flip-description" }),
 	),
 	cone: v.pipe(
 		v.optional(v.number(), 180),
@@ -81,7 +81,7 @@ export const particleEffectObjectSchema = v.object({
 	),
 	baseLength: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "editor.effect.baseLength", description: "editor.effect.baseLength-description" }),
+		metadata({ name: "editor.effect.base-length", description: "editor.effect.base-length-description" }),
 	),
 	interp: v.pipe(
 		v.optional(v.picklist(Interps), "linear"),
@@ -89,27 +89,27 @@ export const particleEffectObjectSchema = v.object({
 	),
 	sizeInterp: v.pipe(
 		v.optional(v.picklist(Interps), "linear"),
-		metadata({ name: "editor.effect.sizeInterp", description: "editor.effect.sizeInterp-description" }),
+		metadata({ name: "editor.effect.size-interp", description: "editor.effect.size-interp-description" }),
 	),
 	offsetX: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "editor.effect.offsetX", description: "editor.effect.offsetX-description" }),
+		metadata({ name: "editor.effect.offset-x", description: "editor.effect.offset-x-description" }),
 	),
 	offsetY: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "editor.effect.offsetY", description: "editor.effect.offsetY-description" }),
+		metadata({ name: "editor.effect.offset-y", description: "editor.effect.offset-y-description" }),
 	),
 	lightScl: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "editor.effect.lightScl", description: "editor.effect.lightScl-description" }),
+		metadata({ name: "editor.effect.light-scl", description: "editor.effect.light-scl-description" }),
 	),
 	lightOpacity: v.pipe(
 		v.optional(v.number(), 0.6),
-		metadata({ name: "editor.effect.lightOpacity", description: "editor.effect.lightOpacity-description" }),
+		metadata({ name: "editor.effect.light-opacity", description: "editor.effect.light-opacity-description" }),
 	),
 	lightColor: v.pipe(
 		v.optional(MindustryHexColorSchema),
-		metadata({ name: "editor.effect.lightColor", description: "editor.effect.lightColor-description" }),
+		metadata({ name: "editor.effect.light-color", description: "editor.effect.light-color-description" }),
 	),
 	spin: v.pipe(
 		v.optional(v.number(), 0),
@@ -117,19 +117,19 @@ export const particleEffectObjectSchema = v.object({
 	),
 	sizeFrom: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "editor.effect.sizeFrom", description: "editor.effect.sizeFrom-description" }),
+		metadata({ name: "editor.effect.size-from", description: "editor.effect.size-from-description" }),
 	),
 	sizeTo: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "editor.effect.sizeTo", description: "editor.effect.sizeTo-description" }),
+		metadata({ name: "editor.effect.size-to", description: "editor.effect.size-to-description" }),
 	),
 	sizeChangeStart: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "editor.effect.sizeChangeStart", description: "editor.effect.sizeChangeStart-description" }),
+		metadata({ name: "editor.effect.size-change-start", description: "editor.effect.size-change-start-description" }),
 	),
 	useRotation: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "editor.effect.useRotation", description: "editor.effect.useRotation-description" }),
+		metadata({ name: "editor.effect.use-rotation", description: "editor.effect.use-rotation-description" }),
 	),
 	offset: v.pipe(
 		v.optional(v.number(), 0),
@@ -145,19 +145,19 @@ export const particleEffectObjectSchema = v.object({
 	),
 	strokeFrom: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "editor.effect.strokeFrom", description: "editor.effect.strokeFrom-description", visibleWhen: { field: "line", value: true } }),
+		metadata({ name: "editor.effect.stroke-from", description: "editor.effect.stroke-from-description", visibleWhen: { field: "line", value: true } }),
 	),
 	strokeTo: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "editor.effect.strokeTo", description: "editor.effect.strokeTo-description", visibleWhen: { field: "line", value: true } }),
+		metadata({ name: "editor.effect.stroke-to", description: "editor.effect.stroke-to-description", visibleWhen: { field: "line", value: true } }),
 	),
 	lenFrom: v.pipe(
 		v.optional(v.number(), 4),
-		metadata({ name: "editor.effect.lenFrom", description: "editor.effect.lenFrom-description", visibleWhen: { field: "line", value: true } }),
+		metadata({ name: "editor.effect.len-from", description: "editor.effect.len-from-description", visibleWhen: { field: "line", value: true } }),
 	),
 	lenTo: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "editor.effect.lenTo", description: "editor.effect.lenTo-description", visibleWhen: { field: "line", value: true } }),
+		metadata({ name: "editor.effect.len-to", description: "editor.effect.len-to-description", visibleWhen: { field: "line", value: true } }),
 	),
 	cap: v.pipe(
 		v.optional(v.boolean(), true),
@@ -168,55 +168,55 @@ export const particleEffectObjectSchema = v.object({
 export const explosionEffectObjectSchema = v.object({
 	waveColor: v.pipe(
 		v.optional(MindustryHexColorSchema),
-		metadata({ name: "editor.effect.waveColor", description: "editor.effect.waveColor-description" }),
+		metadata({ name: "editor.effect.wave-color", description: "editor.effect.wave-color-description" }),
 	),
 	smokeColor: v.pipe(
 		v.optional(MindustryHexColorSchema),
-		metadata({ name: "editor.effect.smokeColor", description: "editor.effect.smokeColor-description" }),
+		metadata({ name: "editor.effect.smoke-color", description: "editor.effect.smoke-color-description" }),
 	),
 	sparkColor: v.pipe(
 		v.optional(MindustryHexColorSchema),
-		metadata({ name: "editor.effect.sparkColor", description: "editor.effect.sparkColor-description" }),
+		metadata({ name: "editor.effect.spark-color", description: "editor.effect.spark-color-description" }),
 	),
 	waveLife: v.pipe(
 		v.optional(v.number(), 6),
-		metadata({ name: "editor.effect.waveLife", description: "editor.effect.waveLife-description" }),
+		metadata({ name: "editor.effect.wave-life", description: "editor.effect.wave-life-description" }),
 	),
 	waveStroke: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "editor.effect.waveStroke", description: "editor.effect.waveStroke-description" }),
+		metadata({ name: "editor.effect.wave-stroke", description: "editor.effect.wave-stroke-description" }),
 	),
 	waveRad: v.pipe(
 		v.optional(v.number(), 15),
-		metadata({ name: "editor.effect.waveRad", description: "editor.effect.waveRad-description" }),
+		metadata({ name: "editor.effect.wave-rad", description: "editor.effect.wave-rad-description" }),
 	),
 	waveRadBase: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "editor.effect.waveRadBase", description: "editor.effect.waveRadBase-description" }),
+		metadata({ name: "editor.effect.wave-rad-base", description: "editor.effect.wave-rad-base-description" }),
 	),
 	sparkStroke: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "editor.effect.sparkStroke", description: "editor.effect.sparkStroke-description" }),
+		metadata({ name: "editor.effect.spark-stroke", description: "editor.effect.spark-stroke-description" }),
 	),
 	sparkRad: v.pipe(
 		v.optional(v.number(), 23),
-		metadata({ name: "editor.effect.sparkRad", description: "editor.effect.sparkRad-description" }),
+		metadata({ name: "editor.effect.spark-rad", description: "editor.effect.spark-rad-description" }),
 	),
 	sparkLen: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "editor.effect.sparkLen", description: "editor.effect.sparkLen-description" }),
+		metadata({ name: "editor.effect.spark-len", description: "editor.effect.spark-len-description" }),
 	),
 	smokeSize: v.pipe(
 		v.optional(v.number(), 4),
-		metadata({ name: "editor.effect.smokeSize", description: "editor.effect.smokeSize-description" }),
+		metadata({ name: "editor.effect.smoke-size", description: "editor.effect.smoke-size-description" }),
 	),
 	smokeSizeBase: v.pipe(
 		v.optional(v.number(), 0.5),
-		metadata({ name: "editor.effect.smokeSizeBase", description: "editor.effect.smokeSizeBase-description" }),
+		metadata({ name: "editor.effect.smoke-size-base", description: "editor.effect.smoke-size-base-description" }),
 	),
 	smokeRad: v.pipe(
 		v.optional(v.number(), 23),
-		metadata({ name: "editor.effect.smokeRad", description: "editor.effect.smokeRad-description" }),
+		metadata({ name: "editor.effect.smoke-rad", description: "editor.effect.smoke-rad-description" }),
 	),
 	smokes: v.pipe(
 		v.optional(v.number(), 5),
@@ -231,55 +231,55 @@ export const explosionEffectObjectSchema = v.object({
 export const waveEffectObjectSchema = v.object({
 	colorFrom: v.pipe(
 		v.optional(MindustryHexColorSchema),
-		metadata({ name: "editor.effect.waveColorFrom", description: "editor.effect.waveColorFrom-description" }),
+		metadata({ name: "editor.effect.wave-color-from", description: "editor.effect.wave-color-from-description" }),
 	),
 	colorTo: v.pipe(
 		v.optional(MindustryHexColorSchema),
-		metadata({ name: "editor.effect.waveColorTo", description: "editor.effect.waveColorTo-description" }),
+		metadata({ name: "editor.effect.wave-color-to", description: "editor.effect.wave-color-to-description" }),
 	),
 	lightColor: v.pipe(
 		v.optional(MindustryHexColorSchema),
-		metadata({ name: "editor.effect.waveLightColor", description: "editor.effect.waveLightColor-description" }),
+		metadata({ name: "editor.effect.wave-light-color", description: "editor.effect.wave-light-color-description" }),
 	),
 	sizeFrom: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "editor.effect.waveSizeFrom", description: "editor.effect.waveSizeFrom-description" }),
+		metadata({ name: "editor.effect.wave-size-from", description: "editor.effect.wave-size-from-description" }),
 	),
 	sizeTo: v.pipe(
 		v.optional(v.number(), 100),
-		metadata({ name: "editor.effect.waveSizeTo", description: "editor.effect.waveSizeTo-description" }),
+		metadata({ name: "editor.effect.wave-size-to", description: "editor.effect.wave-size-to-description" }),
 	),
 	lightScl: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "editor.effect.waveLightScl", description: "editor.effect.waveLightScl-description" }),
+		metadata({ name: "editor.effect.wave-light-scl", description: "editor.effect.wave-light-scl-description" }),
 	),
 	lightOpacity: v.pipe(
 		v.optional(v.number(), 0.8),
-		metadata({ name: "editor.effect.waveLightOpacity", description: "editor.effect.waveLightOpacity-description" }),
+		metadata({ name: "editor.effect.wave-light-opacity", description: "editor.effect.wave-light-opacity-description" }),
 	),
 	sides: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "editor.effect.waveSides", description: "editor.effect.waveSides-description" }),
+		metadata({ name: "editor.effect.wave-sides", description: "editor.effect.wave-sides-description" }),
 	),
 	rotation: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "editor.effect.waveRotation", description: "editor.effect.waveRotation-description" }),
+		metadata({ name: "editor.effect.wave-rotation", description: "editor.effect.wave-rotation-description" }),
 	),
 	strokeFrom: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "editor.effect.waveStrokeFrom", description: "editor.effect.waveStrokeFrom-description" }),
+		metadata({ name: "editor.effect.wave-stroke-from", description: "editor.effect.wave-stroke-from-description" }),
 	),
 	strokeTo: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "editor.effect.waveStrokeTo", description: "editor.effect.waveStrokeTo-description" }),
+		metadata({ name: "editor.effect.wave-stroke-to", description: "editor.effect.wave-stroke-to-description" }),
 	),
 	interp: v.pipe(
 		v.optional(v.picklist(Interps), "linear"),
-		metadata({ name: "editor.effect.waveInterp", description: "editor.effect.waveInterp-description" }),
+		metadata({ name: "editor.effect.wave-interp", description: "editor.effect.wave-interp-description" }),
 	),
 	lightInterp: v.pipe(
 		v.optional(v.picklist(Interps), "reverse"),
-		metadata({ name: "editor.effect.waveLightInterp", description: "editor.effect.waveLightInterp-description" }),
+		metadata({ name: "editor.effect.wave-light-interp", description: "editor.effect.wave-light-interp-description" }),
 	),
 });
 
@@ -289,7 +289,7 @@ const classSchemaMap: Record<EffectClass, SchemaFn<v.ObjectSchema<v.ObjectEntrie
 		v.object({
 			effects: v.pipe(
 				v.array(EffectFieldSchema(context)),
-				metadata({ name: "editor.effect.multiEffects", description: "editor.effect.multiEffects-description" }),
+				metadata({ name: "editor.effect.multi-effects", description: "editor.effect.multi-effects-description" }),
 			),
 		}),
 	ExplosionEffect: (_context) => explosionEffectObjectSchema,
@@ -297,23 +297,23 @@ const classSchemaMap: Record<EffectClass, SchemaFn<v.ObjectSchema<v.ObjectEntrie
 		v.object({
 			effect: v.pipe(
 				EffectFieldSchema(context),
-				metadata({ name: "editor.effect.radialEffect", description: "editor.effect.radialEffect-description" }),
+				metadata({ name: "editor.effect.radial-effect", description: "editor.effect.radial-effect-description" }),
 			),
 			rotationSpacing: v.pipe(
 				v.optional(v.number(), 90),
-				metadata({ name: "editor.effect.rotationSpacing", description: "editor.effect.rotationSpacing-description" }),
+				metadata({ name: "editor.effect.rotation-spacing", description: "editor.effect.rotation-spacing-description" }),
 			),
 			rotationOffset: v.pipe(
 				v.optional(v.number(), 0),
-				metadata({ name: "editor.effect.rotationOffset", description: "editor.effect.rotationOffset-description" }),
+				metadata({ name: "editor.effect.rotation-offset", description: "editor.effect.rotation-offset-description" }),
 			),
 			effectRotationOffset: v.pipe(
 				v.optional(v.number(), 0),
-				metadata({ name: "editor.effect.effectRotationOffset", description: "editor.effect.effectRotationOffset-description" }),
+				metadata({ name: "editor.effect.effect-rotation-offset", description: "editor.effect.effect-rotation-offset-description" }),
 			),
 			lengthOffset: v.pipe(
 				v.optional(v.number(), 0),
-				metadata({ name: "editor.effect.lengthOffset", description: "editor.effect.lengthOffset-description" }),
+				metadata({ name: "editor.effect.length-offset", description: "editor.effect.length-offset-description" }),
 			),
 			amount: v.pipe(
 				v.optional(v.number(), 4),
@@ -324,7 +324,7 @@ const classSchemaMap: Record<EffectClass, SchemaFn<v.ObjectSchema<v.ObjectEntrie
 		v.object({
 			effects: v.pipe(
 				v.array(EffectFieldSchema(context)),
-				metadata({ name: "editor.effect.seqEffects", description: "editor.effect.seqEffects-description" }),
+				metadata({ name: "editor.effect.seq-effects", description: "editor.effect.seq-effects-description" }),
 			),
 		}),
 	SoundEffect: (context) =>
@@ -335,23 +335,23 @@ const classSchemaMap: Record<EffectClass, SchemaFn<v.ObjectSchema<v.ObjectEntrie
 			),
 			minPitch: v.pipe(
 				v.optional(v.number(), 0.8),
-				metadata({ name: "editor.effect.minPitch", description: "editor.effect.minPitch-description" }),
+				metadata({ name: "editor.effect.min-pitch", description: "editor.effect.min-pitch-description" }),
 			),
 			maxPitch: v.pipe(
 				v.optional(v.number(), 1.2),
-				metadata({ name: "editor.effect.maxPitch", description: "editor.effect.maxPitch-description" }),
+				metadata({ name: "editor.effect.max-pitch", description: "editor.effect.max-pitch-description" }),
 			),
 			minVolume: v.pipe(
 				v.optional(v.number(), 1),
-				metadata({ name: "editor.effect.minVolume", description: "editor.effect.minVolume-description" }),
+				metadata({ name: "editor.effect.min-volume", description: "editor.effect.min-volume-description" }),
 			),
 			maxVolume: v.pipe(
 				v.optional(v.number(), 1),
-				metadata({ name: "editor.effect.maxVolume", description: "editor.effect.maxVolume-description" }),
+				metadata({ name: "editor.effect.max-volume", description: "editor.effect.max-volume-description" }),
 			),
 			effect: v.pipe(
 				EffectFieldSchema(context),
-				metadata({ name: "editor.effect.soundEffect", description: "editor.effect.soundEffect-description" }),
+				metadata({ name: "editor.effect.sound-effect", description: "editor.effect.sound-effect-description" }),
 			),
 		}),
 	WaveEffect: (_context) => waveEffectObjectSchema,
@@ -359,15 +359,15 @@ const classSchemaMap: Record<EffectClass, SchemaFn<v.ObjectSchema<v.ObjectEntrie
 		v.object({
 			effect: v.pipe(
 				EffectFieldSchema(context),
-				metadata({ name: "editor.effect.wrapEffect", description: "editor.effect.wrapEffect-description" }),
+				metadata({ name: "editor.effect.wrap-effect", description: "editor.effect.wrap-effect-description" }),
 			),
 			color: v.pipe(
 				v.optional(MindustryHexColorSchema),
-				metadata({ name: "editor.effect.wrapColor", description: "editor.effect.wrapColor-description" }),
+				metadata({ name: "editor.effect.wrap-color", description: "editor.effect.wrap-color-description" }),
 			),
 			rotation: v.pipe(
 				v.optional(v.number(), 0),
-				metadata({ name: "editor.effect.wrapRotation", description: "editor.effect.wrapRotation-description" }),
+				metadata({ name: "editor.effect.wrap-rotation", description: "editor.effect.wrap-rotation-description" }),
 			),
 		}),
 };

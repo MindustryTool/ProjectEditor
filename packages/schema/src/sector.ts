@@ -5,7 +5,7 @@ import { ResearchSchema, type SchemaFn } from "./base";
 export const sectorBaseObjectSchema = v.object({
 	captureWave: v.pipe(
 		v.optional(v.pipe(v.number(), v.integer()), 0),
-		metadata({ name: "editor.sector.captureWave" }),
+		metadata({ name: "editor.sector.capture-wave" }),
 	),
 	difficulty: v.pipe(
 		v.optional(v.pipe(v.number(), v.minValue(0), v.maxValue(10)), 0),
@@ -16,74 +16,74 @@ export const sectorBaseObjectSchema = v.object({
 	),
 	startWaveTimeMultiplier: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "editor.sector.startWaveTimeMultiplier" }),
+		metadata({ name: "editor.sector.start-wave-time-multiplier" }),
 	),
 	addStartingItems: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "editor.sector.addStartingItems" }),
+		metadata({ name: "editor.sector.add-starting-items" }),
 	),
 	noLighting: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "editor.sector.noLighting" }),
+		metadata({ name: "editor.sector.no-lighting" }),
 	),
 	isLastSector: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "editor.sector.isLastSector",
-			description: "editor.sector.isLastSector-description",
+			name: "editor.sector.is-last-sector",
+			description: "editor.sector.is-last-sector-description",
 		}),
 	),
 	requireUnlock: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
-			name: "editor.sector.requireUnlock",
-			description: "editor.sector.requireUnlock-description",
+			name: "editor.sector.require-unlock",
+			description: "editor.sector.require-unlock-description",
 		}),
 	),
 	showHidden: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "editor.sector.showHidden",
-			description: "editor.sector.showHidden-description",
+			name: "editor.sector.show-hidden",
+			description: "editor.sector.show-hidden-description",
 		}),
 	),
 	showSectorLandInfo: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "editor.sector.showSectorLandInfo" }),
+		metadata({ name: "editor.sector.show-sector-land-info" }),
 	),
 	overrideLaunchDefaults: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "editor.sector.overrideLaunchDefaults",
-			description: "editor.sector.overrideLaunchDefaults-description",
+			name: "editor.sector.override-launch-defaults",
+			description: "editor.sector.override-launch-defaults-description",
 		}),
 	),
 	allowLaunchSchematics: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "editor.sector.allowLaunchSchematics",
-			description: "editor.sector.allowLaunchSchematics-description",
+			name: "editor.sector.allow-launch-schematics",
+			description: "editor.sector.allow-launch-schematics-description",
 		}),
 	),
 	allowLaunchLoadout: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "editor.sector.allowLaunchLoadout",
-			description: "editor.sector.allowLaunchLoadout-description",
+			name: "editor.sector.allow-launch-loadout",
+			description: "editor.sector.allow-launch-loadout-description",
 		}),
 	),
 	attackAfterWaves: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "editor.sector.attackAfterWaves",
-			description: "editor.sector.attackAfterWaves-description",
+			name: "editor.sector.attack-after-waves",
+			description: "editor.sector.attack-after-waves-description",
 		}),
 	),
 	originalPosition: v.pipe(
 		v.optional(v.number(), 0),
 		metadata({
-			name: "editor.sector.originalPosition",
-			description: "editor.sector.originalPosition-description",
+			name: "editor.sector.original-position",
+			description: "editor.sector.original-position-description",
 		}),
 	),
 	planet: v.pipe(

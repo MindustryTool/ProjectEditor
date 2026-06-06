@@ -25,11 +25,7 @@ const EditorMobileLayout = lazy(() =>
 	import("#/components/editor/EditorMobileLayout").then((mod) => ({ default: mod.EditorMobileLayout })),
 );
 
-interface EditorShellProps {
-	path: string | null;
-}
-
-export function EditorShell({ path }: EditorShellProps) {
+export function EditorShell() {
 	const [isDesktop] = useIsDesktop();
 	const padding = useAppStore((state) => state.settings.padding);
 
@@ -58,19 +54,19 @@ export function EditorShell({ path }: EditorShellProps) {
 									</SplitViewLeft>
 									<SplitViewCenter>
 										<ErrorBoundary>
-											<EditorCenterPanel path={path} />
+											<EditorCenterPanel />
 										</ErrorBoundary>
 									</SplitViewCenter>
 									<SplitViewRight>
 										<ErrorBoundary>
-											<EditorRightPanel path={path} />
+											<EditorRightPanel />
 										</ErrorBoundary>
 									</SplitViewRight>
 								</SplitView>
 								<StatusBar left={<StatusBarLeft />} center={<StatusBarCenter />} right={<StatusBarRight />} />
 							</Fragment>
 						) : (
-							<EditorMobileLayout path={path} />
+							<EditorMobileLayout />
 						)}
 					</div>
 				</FileExplorerProvider>

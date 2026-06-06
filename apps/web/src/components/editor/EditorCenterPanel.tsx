@@ -12,10 +12,6 @@ import { UnitHjsonSchema } from "@project/schema";
 
 const MonacoEditor = lazy(() => import("#/components/editor/monaco/MonacoEditor").then((mod) => ({ default: mod.MonacoEditor })));
 
-interface EditorCenterPanelProps {
-	path: string | null;
-}
-
 function TextEditor({ path }: { path: string }) {
 	const { data, isLoading, write } = useFileString(path);
 	const language = getLanguageFromPath(path);
@@ -81,7 +77,9 @@ function ImageWithSize({ path }: { path: string }) {
 	);
 }
 
-export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: EditorCenterPanelProps) {
+export const EditorCenterPanel = memo(function EditorCenterPanel() {
+	const [path] = usePath();
+
 	return (
 		<div className="flex min-h-0 flex-1 flex-col overflow-hidden h-full w-full">
 			<RecentlyOpenedFilesBar />
