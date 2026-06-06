@@ -11,7 +11,6 @@ const cache = new WeakMap<ArrayBuffer, string>();
 
 const registry = new FinalizationRegistry<string>((url) => {
 	URL.revokeObjectURL(url);
-	console.log("revokeObjectURL", url);
 });
 
 export function getImageUrl(data: ArrayBuffer): string {

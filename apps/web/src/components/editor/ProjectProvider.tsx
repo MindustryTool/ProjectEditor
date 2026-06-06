@@ -10,7 +10,7 @@ import { useFileString } from "@project/core";
 import { HJSON, HjsonObjectNode } from "@project/hjson";
 import { type ModHjsonData } from "@project/schema";
 import type { ContentEntry, ProjectContents } from "@project/types";
-import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react";
 
 export interface ProjectContextValue {
 	metadata: ModHjsonData;
@@ -134,10 +134,6 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 		},
 		[metadata.name],
 	);
-
-    useEffect(() => {
-        console.log("Content changed")
-    }, [contents])
 
 	return <ProjectContext.Provider value={{ contents, metadata, findContent }}>{children}</ProjectContext.Provider>;
 }

@@ -145,7 +145,8 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 			};
 
 			for (const issue of issues) {
-				const field = issue.path?.map((p) => p.key)?.join(".") || "";
+				const field =
+					issue.path?.map((p, index) => (typeof p.key === "number" ? `[${p.key}]` : index === 0 ? p.key : "." + p.key)).join("") || "";
 
 				const fieldPath = issue.path?.map((p) => p.key as string) || [];
 				const fieldData = resolveFieldData(data, fieldPath);
@@ -179,6 +180,10 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 
 				if (issue.issues) {
 					for (const subIssue of issue.issues) {
+						const field =
+							subIssue.path
+								?.map((p, index) => (typeof p.key === "number" ? `[${p.key}]` : index === 0 ? p.key : "." + p.key))
+								.join("") || "";
 						const subIssueFieldPath = [...fieldPath, ...(subIssue.path?.map((p) => p.key as string) || [])];
 						const subFieldData = resolveFieldData(data, subIssueFieldPath);
 						const subFieldInfo = subFieldData.info();
@@ -194,8 +199,6 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 							subEndLine = subFieldInfo.end.row;
 							subEndColumn = subFieldInfo.end.col;
 						}
-
-						const field = subIssueFieldPath.join(".");
 
 						problems.push({
 							path,

@@ -17,7 +17,7 @@ export const FieldIssue = React.memo(function FieldIssue({ path, jsonPath }: { p
 		<FieldMessage>
 			{issues.map((issue, index) => (
 				<span key={index + (issue.field || "")}>
-					{(t as (key: string, params?: Record<string, unknown>) => string)(issue.messageKey, issue.messageParams)}
+					{(t as (key: string, params?: Record<string, unknown>) => string)(issue.messageKey, issue.messageParams) || issue.messageKey}
 				</span>
 			))}
 		</FieldMessage>

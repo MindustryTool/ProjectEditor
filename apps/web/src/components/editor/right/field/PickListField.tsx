@@ -30,7 +30,7 @@ export const PickListField = React.memo(function PickListField({
 	if ("options" in unwrappedSchema && Array.isArray(unwrappedSchema.options)) {
 		const options = unwrappedSchema.options.map((v) => String(v)).sort();
 
-		if (options.length > 20) {
+		if (options.length > 10) {
 			return (
 				<Field jsonPath={jsonPath}>
 					<FieldLabel>
@@ -85,6 +85,8 @@ export const PickListField = React.memo(function PickListField({
 							</ToggleGroup>
 						</DialogContent>
 					</Dialog>
+					<SchemaDescription entrySchema={entrySchema} />
+					<FieldIssue path={path} jsonPath={jsonPath} />
 				</Field>
 			);
 		}
