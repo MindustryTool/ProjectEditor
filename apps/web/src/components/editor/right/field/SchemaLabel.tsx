@@ -6,5 +6,5 @@ export const SchemaLabel = React.memo(function SchemaLabel({ name, entrySchema }
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
 
-	return <>{entrySchema?.name ? _t(entrySchema.name) : name}</>;
+	return <span className="first-letter:uppercase lowercase">{entrySchema?.name ? _t(entrySchema.name) : name}</span>;
 });

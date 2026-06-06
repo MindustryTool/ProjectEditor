@@ -9,5 +9,5 @@ export const SchemaDescription = React.memo(function SchemaDescription({ entrySc
 
 	if (!entrySchema?.description) return null;
 
-	return <FieldDescription>{_t(entrySchema.description)}</FieldDescription>;
+	return <FieldDescription className="first-letter:uppercase lowercase">{_t(entrySchema.description)}</FieldDescription>;
 });

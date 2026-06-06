@@ -3,7 +3,7 @@ import { FormControl, FormLabel } from "#/components/ui/form";
 import { useFileString } from "@project/core";
 import { HJSON, HjsonNode } from "@project/hjson";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
-import { schemaRenderers } from "./field";
+import { FieldCategory, schemaRenderers } from "./field";
 import React, { useCallback } from "react";
 import { resolveSchema, detectSchemaType, getSchemaEntries, getSchemaMetadata, type AnySchema, type SchemaFn } from "@project/schema";
 import * as v from "valibot";
@@ -82,45 +82,63 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 
 	return (
 		<ErrorBoundary>
-			{entries.map(([name, entrySchema]) => {
-				const key = name + path;
-				const childNode = node.get(name);
-				const value = childNode.isMissing() ? v.getDefaults(entrySchema) : childNode.valueOf();
-				const type = detectSchemaType(entrySchema, value);
-
-				const Renderer = schemaRenderers[type];
-
-				if (Renderer === undefined) {
-					return (
-						<FormControl>
-							<FormLabel>{name}</FormLabel>
-							<span key={key} className="text-yellow-400 text-sm">
-								Unknown field type {type}
-							</span>
-						</FormControl>
-					);
-				}
-
-				const metadata = getSchemaMetadata(entrySchema);
-
-				if (metadata?.visibleWhen) {
-					const refNode = node.get(metadata.visibleWhen.field);
-					if (refNode.isMissing()) return null;
-					if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) return null;
-				}
-
-				return (
-					<Renderer //
-						key={key}
-						path={path}
-						name={name}
-						value={value}
-						onChange={onChange}
-						entrySchema={entrySchema}
-						jsonPath={name}
-					/>
-				);
-			})}
+			{buildCategoryFields(entries, node, path, onChange)}
 		</ErrorBoundary>
 	);
 });
+
+function buildCategoryFields(
+	entries: [string, AnySchema][],
+	node: HjsonNode,
+	path: string,
+	onChange: (jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => void,
+) {
+	const elements: React.ReactNode[] = [];
+	let lastCategory: string | undefined;
+
+	for (const [name, entrySchema] of entries) {
+		const key = name + path;
+		const childNode = node.get(name);
+		const value = childNode.isMissing() ? v.getDefaults(entrySchema) : childNode.valueOf();
+		const type = detectSchemaType(entrySchema, value);
+		const metadata = getSchemaMetadata(entrySchema);
+
+		if (metadata?.visibleWhen) {
+			const refNode = node.get(metadata.visibleWhen.field);
+			if (refNode.isMissing()) continue;
+			if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) continue;
+		}
+
+		if (metadata?.category && metadata.category !== lastCategory) {
+			elements.push(<FieldCategory key={`cat-${metadata.category}`} category={metadata.category} />);
+			lastCategory = metadata.category;
+		}
+
+		const Renderer = schemaRenderers[type];
+
+		if (Renderer === undefined) {
+			elements.push(
+				<FormControl key={key}>
+					<FormLabel>{name}</FormLabel>
+					<span className="text-yellow-400 text-sm">
+						Unknown field type {type}
+					</span>
+				</FormControl>,
+			);
+		} else {
+			elements.push(
+				<Renderer
+					key={key}
+					path={path}
+					name={name}
+					value={value}
+					onChange={onChange}
+					entrySchema={entrySchema}
+					jsonPath={name}
+				/>,
+			);
+		}
+	}
+
+	return elements;
+}

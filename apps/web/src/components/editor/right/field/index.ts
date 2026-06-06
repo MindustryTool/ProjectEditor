@@ -23,6 +23,7 @@ export { PickListField } from "./PickListField";
 export { LiquidsListField } from "./LiquidsListField";
 export { SelectField } from "./SelectField";
 export { SpriteField } from "./SpriteField";
+export { FieldCategory } from "./FieldCategory";
 export { SchemaLabel } from "./SchemaLabel";
 export { SchemaDescription } from "./SchemaDescription";
 export { FieldIssue } from "./FieldIssue";

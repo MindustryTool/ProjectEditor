@@ -130,30 +130,44 @@ export function getSchemaEntries(schema: AnySchema): [string, AnySchema][] {
 	schema = unwrapSchema(schema);
 	const s = schema as unknown as { type: string; entries?: Record<string, AnySchema>; pipe?: AnySchema[] };
 
-	let entries: [string, AnySchema][];
-
 	if (s.type === "object" && s.entries) {
-		entries = Object.entries(s.entries) as [string, AnySchema][];
-	} else if (Array.isArray(s.pipe) && s.pipe.length > 0) {
-		return getSchemaEntries(s.pipe[0] as AnySchema);
-	} else {
-		return [];
+		const raw = Object.entries(s.entries) as [string, AnySchema][];
+		const catMap = new Map<string, [string, AnySchema][]>();
+		const seen = new Set<string>();
+		const result: [string, AnySchema][] = [];
+
+		for (const [key, value] of raw) {
+			const cat = getSchemaMetadata(value)?.category;
+			if (cat) {
+				let group = catMap.get(cat);
+				if (!group) {
+					group = [];
+					catMap.set(cat, group);
+				}
+				group.push([key, value]);
+			}
+		}
+
+		for (const [key, value] of raw) {
+			const cat = getSchemaMetadata(value)?.category;
+			if (cat) {
+				if (!seen.has(cat)) {
+					seen.add(cat);
+					result.push(...catMap.get(cat)!);
+				}
+			} else {
+				result.push([key, value]);
+			}
+		}
+
+		return result;
 	}
 
-	return entries.sort((a, b) => {
-		const metaA = getSchemaMetadata(a[1]);
-		const metaB = getSchemaMetadata(b[1]);
-		const catA = metaA?.category;
-		const catB = metaB?.category;
+	if (Array.isArray(s.pipe) && s.pipe.length > 0) {
+		return getSchemaEntries(s.pipe[0] as AnySchema);
+	}
 
-		if (catA && !catB) return -1;
-		if (!catA && catB) return 1;
-		if (catA && catB) {
-			if (catA < catB) return -1;
-			if (catA > catB) return 1;
-		}
-		return 0;
-	});
+	return [];
 }
 
 export function getArrayItemSchema(schema: AnySchema, index = 0): AnySchema {
