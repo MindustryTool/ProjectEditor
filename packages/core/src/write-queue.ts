@@ -50,6 +50,7 @@ export class WriteQueue {
 	}
 
 	async flush(): Promise<void> {
+		const start = Date.now();
 		if (this.flushing) return;
 		this.flushing = true;
 
@@ -78,6 +79,11 @@ export class WriteQueue {
 
 		if (this.pending.size > 0) {
 			this.scheduleFlush();
+		}
+
+		const duration = Date.now() - start;
+		if (duration > 10) {
+			console.warn(`WriteQueue flush took ${duration}ms`);
 		}
 	}
 }
