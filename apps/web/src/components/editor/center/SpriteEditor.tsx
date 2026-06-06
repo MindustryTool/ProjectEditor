@@ -141,11 +141,11 @@ function SpritePreview({ sprite }: { sprite: SpriteData }) {
 		});
 
 	return (
-		<div className="w-full border p-8 rounded-md bg-card relative" onClick={() => scrollTo(sprite.position.x.path)}>
+		<div className="w-full border p-8 rounded-md bg-card relative flex items-center justify-center" onClick={() => scrollTo(sprite.position.x.path)}>
 			<span className="absolute top-1 left-1 text-xs text-muted-foreground">
 				{sprite.name} ({size[0]}x{size[1]})
 			</span>
-			<ImageFilePreview path={sprite.path} onSize={(width, height) => setSize([width, height])} />
+			<ImageFilePreview className="object-contain" path={sprite.path} onSize={(width, height) => setSize([width, height])} />
 			<div className="absolute bottom-0.5 backdrop-blur-xs backdrop-brightness-75 p-0.5 left-0.5 text-xs text-muted-foreground">
 				x={sprite.position.x.value}, y={sprite.position.y.value}
 			</div>
