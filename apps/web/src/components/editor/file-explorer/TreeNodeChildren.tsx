@@ -1,6 +1,7 @@
 import type { TreeNode } from "@project/fs";
 import { TreeNodeRow } from "./TreeNodeRow";
 import { useExpanded } from "#/components/editor/file-explorer/use-expaned";
+import React from "react";
 
 interface TreeNodeChildrenProps {
 	node: TreeNode;
@@ -8,7 +9,7 @@ interface TreeNodeChildrenProps {
 	onContextMenu?: (path: string, rect: DOMRect) => void;
 }
 
-export function TreeNodeChildren({ node, depth = 0, onContextMenu }: TreeNodeChildrenProps) {
+export const TreeNodeChildren = React.memo(function TreeNodeChildren({ node, depth = 0, onContextMenu }: TreeNodeChildrenProps) {
 	const [expanded, setExpanded] = useExpanded();
 
 	const isExpanded = Boolean(expanded[node.path] || false);
@@ -31,4 +32,4 @@ export function TreeNodeChildren({ node, depth = 0, onContextMenu }: TreeNodeChi
 			)}
 		</div>
 	);
-}
+});

@@ -7,6 +7,7 @@ import { useShallow } from "zustand/react/shallow";
 import { useFileExplorerStore } from "./useFileExplorerState";
 import { useTreeNodeActions } from "./useTreeNodeActions";
 import { getIcon } from "./file-tree";
+import React from "react";
 
 interface TreeNodeRowProps {
 	node: TreeNode;
@@ -16,19 +17,11 @@ interface TreeNodeRowProps {
 	onContextMenu?: (path: string, rect: DOMRect) => void;
 }
 
-export function TreeNodeRow({ node, depth, expanded, onToggle, onContextMenu }: TreeNodeRowProps) {
+export const TreeNodeRow = React.memo(function TreeNodeRow({ node, depth, expanded, onToggle, onContextMenu }: TreeNodeRowProps) {
 	const context = useCurrentProject();
 	const projectId = useFileExplorerStore((s) => s.projectId);
-	const {
-		currentPath,
-		isSelected,
-		isEditing,
-		isFolder,
-		handleClick,
-		handleCreateClick,
-		handleRenameConfirm,
-		handleInputKeyDown,
-	} = useTreeNodeActions(node, onToggle);
+	const { currentPath, isSelected, isEditing, isFolder, handleClick, handleCreateClick, handleRenameConfirm, handleInputKeyDown } =
+		useTreeNodeActions(node, onToggle);
 
 	const errorCount = useValidationStore(useShallow((s) => s.results.getRollup()[currentPath]?.error ?? 0));
 	const warningCount = useValidationStore(useShallow((s) => s.results.getRollup()[currentPath]?.warning ?? 0));
@@ -142,4 +135,4 @@ export function TreeNodeRow({ node, depth, expanded, onToggle, onContextMenu }: 
 			</div>
 		</div>
 	);
-}
+});

@@ -4,7 +4,7 @@ import { useFileString } from "@project/core";
 import { HJSON, HjsonNode } from "@project/hjson";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { FieldCategory, schemaRenderers } from "./field";
-import React, { Suspense, useCallback } from "react";
+import React, { Suspense, useCallback, useEffect, useState } from "react";
 import { resolveSchema, detectSchemaType, getSchemaEntries, getSchemaMetadata, type AnySchema, type SchemaFn } from "@project/schema";
 import * as v from "valibot";
 
@@ -27,6 +27,7 @@ interface FieldsRendererProps {
 export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 	const { data, isLoading, write } = useFileString(path);
 	const { contents } = useProjectContext();
+	const [render, setRender] = useState(30);
 
 	const onChange = useCallback(
 		(jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => {
@@ -82,19 +83,32 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 
 	return (
 		<Suspense>
-			<ErrorBoundary>{buildCategoryFields(entries, node, path, onChange)}</ErrorBoundary>
+			<ErrorBoundary>
+				<Child entries={entries} node={node} path={path} onChange={onChange} render={render} setRender={setRender} />
+			</ErrorBoundary>
 		</Suspense>
 	);
 });
 
-function buildCategoryFields(
-	entries: [string, AnySchema][],
-	node: HjsonNode,
-	path: string,
-	onChange: (jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => void,
-) {
+function Child({
+	entries,
+	node,
+	path,
+	onChange,
+	render,
+	setRender,
+}: {
+	entries: [string, AnySchema][];
+	node: HjsonNode;
+	path: string;
+	onChange: (jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => void;
+	render: number;
+	setRender: (callback: (render: number) => number) => void;
+}) {
+	const endRef = React.useRef<HTMLDivElement>(null);
 	const elements: React.ReactNode[] = [];
 	let lastCategory: string | undefined;
+	let count = 0;
 
 	for (const [name, entrySchema] of entries) {
 		const key = name + path;
@@ -102,6 +116,10 @@ function buildCategoryFields(
 		const value = childNode.isMissing() ? v.getDefaults(entrySchema) : childNode.valueOf();
 		const type = detectSchemaType(entrySchema, value);
 		const metadata = getSchemaMetadata(entrySchema);
+
+		if (count > render) break;
+
+		count++;
 
 		if (metadata?.visibleWhen) {
 			const refNode = node.get(metadata.visibleWhen.field);
@@ -130,5 +148,31 @@ function buildCategoryFields(
 		}
 	}
 
-	return elements;
+	useEffect(() => {
+		const element = endRef.current;
+		if (!element) return;
+
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (entry?.isIntersecting) {
+					setRender((prev) => prev + 30);
+				}
+			},
+			{
+				root: null,
+				threshold: 0.1,
+			},
+		);
+
+		observer.observe(element);
+
+		return () => observer.disconnect();
+	}, [setRender]);
+
+	return (
+		<>
+			{elements}
+			<div className="end w-full invisible" ref={endRef}></div>
+		</>
+	);
 }
