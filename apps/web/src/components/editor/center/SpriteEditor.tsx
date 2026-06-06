@@ -16,7 +16,7 @@ export function SpriteEditor({ path, schema }: { path: string; schema: AnySchema
 	const { containerRef, dimensions } = useContainerDimensions();
 
 	return (
-		<div ref={containerRef} className="w-full h-full overflow-hidden relative flex">
+		<div ref={containerRef} className="w-full h-full overflow-hidden relative flex border rounded-md mb-1.5">
 			{dimensions.width > 0 && <SpriteCanvas path={path} schema={schema} dimensions={dimensions} />}
 		</div>
 	);
@@ -113,7 +113,7 @@ function CoordsDisplay({ x, y }: { x: number; y: number }) {
 
 function SpriteSidebar({ sprites }: { sprites: SpriteData[] }) {
 	return (
-		<div className="pl-2 border-l max-w-sm h-full flex flex-col overflow-y-auto min-w-40 gap-2">
+		<div className="p-2 border-l h-full flex flex-col overflow-y-auto min-w-40 w-full gap-2">
 			{sprites.map((sprite) => (
 				<SpritePreview key={sprite.position.x.path} sprite={sprite} />
 			))}

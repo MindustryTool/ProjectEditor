@@ -12,7 +12,7 @@ export function StatusBar({ left, center, right, className }: StatusBarProps) {
   return (
     <div
       className={cn(
-        "flex h-6 min-h-6 max-h-6 items-center justify-between border-t bg-muted px-3 text-xs text-muted-foreground",
+        "flex h-6 min-h-6 max-h-6 items-center justify-between border-t bg-card px-3 text-xs text-muted-foreground",
         className
       )}
     >

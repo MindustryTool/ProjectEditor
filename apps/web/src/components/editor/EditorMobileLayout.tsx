@@ -72,7 +72,7 @@ export function EditorMobileLayout({ path }: EditorMobileLayoutProps) {
 						</div>
 					</div>
 				</TabsContent>
-				<TabsList className="w-full justify-around rounded-none border-t bg-muted shrink-0">
+				<TabsList className="w-full justify-around rounded-none border-t bg-card shrink-0">
 					<TabsTrigger value="center" className="flex-1">
 						{t("editor.editor")}
 					</TabsTrigger>

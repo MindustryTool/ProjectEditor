@@ -116,7 +116,7 @@ function SplitViewLeft({ className, children }: { className?: string; children: 
 					width: showHandle ? leftWidth : undefined,
 					minWidth: showHandle ? minPanelWidth : undefined,
 				}}
-				className={cn("shrink-0 border-r bg-muted", !showHandle && "flex-1", className)}
+				className={cn("shrink-0 border-r bg-card", !showHandle && "flex-1", className)}
 			>
 				<Suspense>{children}</Suspense>
 			</div>
@@ -148,7 +148,7 @@ function SplitViewRight({ className, children }: { className?: string; children:
 		<div
 			data-slot="split-view-right"
 			style={{ width: rightWidth, minWidth: minPanelWidth }}
-			className={cn("shrink-0 border-l bg-muted", className)}
+			className={cn("shrink-0 border-l bg-card", className)}
 		>
 			<Suspense>{children}</Suspense>
 		</div>
@@ -165,7 +165,7 @@ function SplitViewResizeHandle({ type }: { type: "left" | "right" }) {
 			className="group flex w-1.5 shrink-0 cursor-col-resize items-center justify-center transition-colors hover:bg-accent active:bg-accent bg-background"
 			onMouseDown={startResize(type)}
 		>
-			<div className="h-8 w-0.5 rounded-full bg-muted-foreground opacity-0 transition-opacity group-hover:opacity-60" />
+			<div className="h-8 w-0.5 rounded-full bg-card-foreground opacity-0 transition-opacity group-hover:opacity-60" />
 		</div>
 	);
 }
