@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useTransition } from "react";
 import type { editor } from "monaco-editor";
 import type { Monaco } from "@monaco-editor/react";
 import { ensureInlineColorClass, parseMindustryStringTags } from "~/lib/monaco/colorTags";
@@ -12,6 +12,7 @@ interface UseColorTagDecorationsOptions {
 
 export function useColorTagDecorations({ editorRef, monacoRef, value, language }: UseColorTagDecorationsOptions) {
   const colorDecorationsRef = useRef<editor.IEditorDecorationsCollection | null>(null);
+  const [, startTransition] = useTransition();
 
   const updateColorDecorations = useCallback(() => {
     const editor = editorRef.current;
@@ -95,8 +96,10 @@ export function useColorTagDecorations({ editorRef, monacoRef, value, language }
   }, [editorRef, monacoRef]);
 
   useEffect(() => {
-    updateColorDecorations();
-  }, [updateColorDecorations, value, language]);
+    startTransition(() => {
+      updateColorDecorations();
+    });
+  }, [updateColorDecorations, value, language, startTransition]);
 
   useEffect(() => {
     return () => {

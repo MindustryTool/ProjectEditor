@@ -1,4 +1,5 @@
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
+import { debounce } from "@project/utils";
 import type { editor, IDisposable } from "monaco-editor";
 import Editor, { type BeforeMount, type OnMount, type Monaco } from "@monaco-editor/react";
 import { HJSON_LANGUAGE_ID, hjsonMonarchGrammar, hjsonLanguageConfig } from "~/lib/monaco/hjsonLanguage";
@@ -40,6 +41,13 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 	const editorDisposablesRef = useRef<IDisposable[]>([]);
 	const containerRef = useRef<HTMLDivElement | null>(null);
+	const onChangeRef = useRef(onChange);
+	onChangeRef.current = onChange;
+
+	const debouncedOnChange = useMemo(
+		() => debounce((value: string) => onChangeRef.current(value), 150),
+		[],
+	);
 	const theme = useMonacoTheme();
 	const fontSize = useAppStore((s) => s.settings.fontSize);
 	const tabSize = useAppStore((s) => s.settings.tabSize);
@@ -113,7 +121,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 				theme={theme}
 				language={language}
 				value={value}
-				onChange={(newValue) => onChange(newValue ?? "")}
+				onChange={(newValue) => debouncedOnChange(newValue ?? "")}
 				beforeMount={handleBeforeMount}
 				onMount={handleMount}
 				options={{

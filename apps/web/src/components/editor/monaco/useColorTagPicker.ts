@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import { debounce } from "@project/utils";
 import type { editor, IDisposable, IPosition } from "monaco-editor";
 import type { Monaco } from "@monaco-editor/react";
 import {
@@ -71,6 +72,14 @@ export function useColorTagPicker({ editorRef, monacoRef, readOnly, containerRef
 		[resolveActiveColorTag],
 	);
 
+	const refreshActiveColorTagRef = useRef(refreshActiveColorTag);
+	refreshActiveColorTagRef.current = refreshActiveColorTag;
+
+	const debouncedRefresh = useMemo(
+		() => debounce((position?: IPosition | null) => refreshActiveColorTagRef.current(position), 50),
+		[],
+	);
+
 	const replaceActiveColorTag = useCallback(
 		(replacement: string) => {
 			const editor = editorRef.current;
@@ -121,15 +130,15 @@ export function useColorTagPicker({ editorRef, monacoRef, readOnly, containerRef
 						clearActiveColorTag();
 						return;
 					}
-					refreshActiveColorTag(event.selection.getPosition());
+					debouncedRefresh(event.selection.getPosition());
 				}),
-				editor.onDidScrollChange(() => refreshActiveColorTag()),
-				editor.onDidLayoutChange(() => refreshActiveColorTag()),
-				editor.onMouseDown((event) => refreshActiveColorTag(event.target.position)),
+				editor.onDidScrollChange(() => debouncedRefresh()),
+				editor.onDidLayoutChange(() => debouncedRefresh()),
+				editor.onMouseDown((event) => debouncedRefresh(event.target.position)),
 				editor.onDidChangeModel(() => clearActiveColorTag()),
 			];
 		},
-		[clearActiveColorTag, refreshActiveColorTag],
+		[clearActiveColorTag, debouncedRefresh],
 	);
 
 	useEffect(() => {

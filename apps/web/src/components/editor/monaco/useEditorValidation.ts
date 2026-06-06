@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useTransition } from "react";
 import type { editor } from "monaco-editor";
 import type { Monaco } from "@monaco-editor/react";
 import { useValidationStore } from "@project/core";
@@ -15,6 +15,7 @@ export function useEditorValidation({ editorRef, monacoRef, path }: UseEditorVal
   const errorLensStyleRef = useRef<HTMLStyleElement | null>(null);
   const results = useValidationStore((s) => s.results.resultsByPath[path]);
   const { t } = useTranslation();
+  const [, startTransition] = useTransition();
 
   const updateMarkers = useCallback(() => {
     const editor = editorRef.current;
@@ -102,8 +103,10 @@ export function useEditorValidation({ editorRef, monacoRef, path }: UseEditorVal
   }, [results, t, editorRef, monacoRef]);
 
   useEffect(() => {
-    updateMarkers();
-  }, [updateMarkers]);
+    startTransition(() => {
+      updateMarkers();
+    });
+  }, [updateMarkers, startTransition]);
 
   useEffect(() => {
     return () => {
