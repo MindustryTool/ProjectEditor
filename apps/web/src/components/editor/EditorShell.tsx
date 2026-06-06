@@ -14,12 +14,12 @@ import { ValidationProvider } from "#/components/editor/ValidationProvider";
 import { Fragment } from "react/jsx-runtime";
 import { ErrorBoundary } from "#/components/ui/error-boundary";
 import { ProjectProvider } from "#/components/editor/ProjectProvider";
-import { cn } from "#/lib/utils";
 import { lazy } from "react";
 import { EditorLeftPanel } from "./EditorLeftPanel";
 import { EditorCenterPanel } from "./EditorCenterPanel";
 import { EditorRightPanel } from "./EditorRightPanel";
 import { FileExplorerProvider } from "./file-explorer/FileExplorerProvider";
+import { useAppStore } from "@project/core";
 
 const EditorMobileLayout = lazy(() =>
 	import("#/components/editor/EditorMobileLayout").then((mod) => ({ default: mod.EditorMobileLayout })),
@@ -31,15 +31,15 @@ interface EditorShellProps {
 
 export function EditorShell({ path }: EditorShellProps) {
 	const [isDesktop] = useIsDesktop();
+	const padding = useAppStore((state) => state.settings.padding);
 
 	return (
 		<ProjectProvider>
 			<ValidationProvider>
 				<FileExplorerProvider>
 					<div
-						className={cn("flex min-h-0 flex-1 flex-col bg-background text-foreground overflow-hidden w-full h-dvh max-h-dvh", {
-							"p-2": !isDesktop,
-						})}
+						className="flex min-h-0 flex-1 flex-col bg-background text-foreground overflow-hidden w-full h-dvh max-h-dvh"
+						style={{ padding }}
 					>
 						{isDesktop ? (
 							<Fragment>

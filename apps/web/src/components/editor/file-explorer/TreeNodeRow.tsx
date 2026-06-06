@@ -109,7 +109,7 @@ export function TreeNodeRow({ node, depth, expanded, onToggle }: TreeNodeRowProp
 					<div
 						className={cn(
 							"flex items-center gap-0.5 ml-auto",
-							!isSelected && "invisible group-hover:visible",
+							!isSelected && "md:invisible group-hover:visible",
 							isSelected && "visible",
 						)}
 					>

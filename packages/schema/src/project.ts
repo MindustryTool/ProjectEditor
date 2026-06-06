@@ -4,6 +4,7 @@ export const AppSettingsSchema = v.object({
 	firstTime: v.fallback(v.boolean(), true),
 	theme: v.fallback(v.picklist(["light", "dark", "system"]), "light"),
 	fontSize: v.fallback(v.number(), 14),
+    padding: v.fallback(v.number(), 8),
 	tabSize: v.fallback(v.number(), 4),
 	validation: v.object({
 		validationDelayMs: v.fallback(v.number(), 1000),

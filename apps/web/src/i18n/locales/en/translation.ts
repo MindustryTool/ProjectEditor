@@ -82,6 +82,8 @@ export const en = {
 	"app-settings.editor-section": "Editor Settings",
 	"app-settings.font-size-label": "Font Size",
 	"app-settings.font-size-description": "Editor font size.",
+	"app-settings.padding-label": "Padding",
+	"app-settings.padding-description": "Padding for editor from screen edges.",
 	"app-settings.tab-size-label": "Tab Size",
 	"app-settings.tab-size-description": "Indentation width for editor tabs.",
 	"app-settings.validation-section": "Performance & Validation",

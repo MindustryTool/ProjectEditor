@@ -13,6 +13,8 @@ import { Code2, Gauge, Layout, Monitor, Moon, Settings, Sun } from "lucide-react
 
 const FONT_SIZE_MIN = 8;
 const FONT_SIZE_MAX = 32;
+const PADDING_MIN = 0;
+const PADDING_MAX = 32;
 const TAB_SIZE_OPTIONS = [1, 2, 4, 6] as const;
 const VALIDATION_DELAY_MIN = 100;
 const VALIDATION_DELAY_MAX = 5000;
@@ -43,9 +45,7 @@ function SectionCard({
 		<section className="grid gap-4 rounded-lg border p-4">
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-2">
-					<div className="flex h-6 items-center justify-center rounded-md text-muted-foreground">
-						{icon}
-					</div>
+					<div className="flex h-6 items-center justify-center rounded-md text-muted-foreground">{icon}</div>
 					<h3 className="text-sm font-semibold">{title}</h3>
 				</div>
 				{rightContent}
@@ -78,6 +78,10 @@ export function AppSettingsDialog() {
 		handleFontSizeChange(nextFontSize);
 	}
 
+	function handlePaddingChange(nextPadding: number) {
+		updateSettings({ padding: clamp(nextPadding, PADDING_MIN, PADDING_MAX) });
+	}
+
 	function handleTabSizeChange(nextTabSize: string) {
 		updateSettings({ tabSize: Number(nextTabSize) });
 	}
@@ -97,6 +101,7 @@ export function AppSettingsDialog() {
 
 	const ui = isDesktop ? "desktop" : "mobile";
 	const fontSizePct = getSliderPercentage(settings.fontSize, FONT_SIZE_MIN, FONT_SIZE_MAX);
+	const paddingPct = getSliderPercentage(settings.padding, PADDING_MIN, PADDING_MAX);
 	const delayPct = getSliderPercentage(settings.validation.validationDelayMs, VALIDATION_DELAY_MIN, VALIDATION_DELAY_MAX);
 
 	return (
@@ -216,7 +221,39 @@ export function AppSettingsDialog() {
 										</span>
 									</div>
 								</div>
-								<p className="text-xs text-muted-foreground">{FONT_SIZE_MIN}-{FONT_SIZE_MAX} px</p>
+								<p className="text-xs text-muted-foreground">
+									{FONT_SIZE_MIN}-{FONT_SIZE_MAX} px
+								</p>
+							</div>
+							<div className="grid gap-2">
+								<div className="grid gap-1">
+									<Label htmlFor="padding-input">{t("app-settings.padding-label")}</Label>
+									<p className="text-sm text-muted-foreground">{t("app-settings.padding-description")}</p>
+								</div>
+								<div className="relative pt-1">
+									<div className="flex items-center gap-2">
+										<div className="relative flex-1">
+											<Slider
+												value={[settings.padding]}
+												min={PADDING_MIN}
+												max={PADDING_MAX}
+												step={1}
+												onValueChange={([value]) => value && handlePaddingChange(value)}
+											/>
+											<div
+												className="pointer-events-none absolute -top-1 z-10 -translate-y-1/2"
+												style={{ left: `${paddingPct}%`, transform: "translateX(-50%) translateY(-50%)" }}
+											>
+												<span className="whitespace-nowrap rounded bg-muted px-1.5 py-0.5 text-[11px] font-medium text-foreground">
+													{settings.padding} px
+												</span>
+											</div>
+										</div>
+									</div>
+								</div>
+								<p className="text-xs text-muted-foreground">
+									{PADDING_MIN}-{PADDING_MAX} px
+								</p>
 							</div>
 							<div className="grid gap-2">
 								<Label className="text-xs font-medium">{t("app-settings.tab-size-label")}</Label>
@@ -246,9 +283,7 @@ export function AppSettingsDialog() {
 					<SectionCard
 						icon={<Gauge className="size-3.5" />}
 						title={t("app-settings.validation-section")}
-						rightContent={
-							<span className="text-sm font-medium">{settings.validation.validationDelayMs} ms</span>
-						}
+						rightContent={<span className="text-sm font-medium">{settings.validation.validationDelayMs} ms</span>}
 					>
 						<div className="grid gap-2">
 							<p className="text-sm text-muted-foreground">
