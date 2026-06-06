@@ -1,14 +1,13 @@
 import { FieldDescription } from "#/components/editor/right/field/Field";
-import { getSchemaMetadata, type AnySchema } from "@project/schema";
+import type { SchemaMetadata } from "@project/schema";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-export const SchemaDescription = React.memo(function SchemaDescription({ entrySchema }: { entrySchema: AnySchema }) {
+export const SchemaDescription = React.memo(function SchemaDescription({ entrySchema }: { entrySchema: SchemaMetadata | null }) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
-	const metadata = getSchemaMetadata(entrySchema);
 
-	if (!metadata?.description) return null;
+	if (!entrySchema?.description) return null;
 
-	return <FieldDescription>{_t(metadata.description)}</FieldDescription>;
+	return <FieldDescription>{_t(entrySchema.description)}</FieldDescription>;
 });

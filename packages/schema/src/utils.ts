@@ -45,25 +45,14 @@ export function hasNullishWrapper(schema: AnySchema): boolean {
 }
 
 function getTypeFromMetadata(schema: AnySchema): Type | null {
-	const unwrapped = unwrapSchema(schema);
-	const s = unwrapped as unknown as { type: string; pipe?: Array<{ type: string; metadata: Record<string, unknown> }> };
-
-	if (!s.pipe) return null;
-
-	let result: Type | null = null;
-
-	for (const action of s.pipe) {
-		if (action.type === "metadata" && action.metadata && typeof action.metadata.type === "string") {
-			const t = action.metadata.type;
-			if ((types as readonly string[]).includes(t)) {
-				result = t as Type;
-			} else {
-				console.warn(`Unkown type: ${t}`);
-			}
-		}
+	const meta = getSchemaMetadata(schema);
+	if (!meta?.type) return null;
+	const t = meta.type;
+	if ((types as readonly string[]).includes(t)) {
+		return t as Type;
 	}
-
-	return result;
+	console.warn(`Unknown type: ${t}`);
+	return null;
 }
 
 function getSchemaType(schema: AnySchema, value: unknown): Type {
@@ -141,18 +130,33 @@ export function getSchemaEntries(schema: AnySchema): [string, AnySchema][] {
 	schema = unwrapSchema(schema);
 	const s = schema as unknown as { type: string; entries?: Record<string, AnySchema>; pipe?: AnySchema[] };
 
+	let entries: [string, AnySchema][];
+
 	if (s.type === "object" && s.entries) {
-		return Object.entries(s.entries) as [string, AnySchema][];
-	}
-
-	if (Array.isArray(s.pipe) && s.pipe.length > 0) {
+		entries = Object.entries(s.entries) as [string, AnySchema][];
+	} else if (Array.isArray(s.pipe) && s.pipe.length > 0) {
 		return getSchemaEntries(s.pipe[0] as AnySchema);
+	} else {
+		return [];
 	}
 
-	return [];
+	return entries.sort((a, b) => {
+		const metaA = getSchemaMetadata(a[1]);
+		const metaB = getSchemaMetadata(b[1]);
+		const catA = metaA?.category;
+		const catB = metaB?.category;
+
+		if (catA && !catB) return -1;
+		if (!catA && catB) return 1;
+		if (catA && catB) {
+			if (catA < catB) return -1;
+			if (catA > catB) return 1;
+		}
+		return 0;
+	});
 }
 
-export function getArrayItemSchema(schema: AnySchema, index = 0): AnySchema | null {
+export function getArrayItemSchema(schema: AnySchema, index = 0): AnySchema {
 	const s = unwrapSchema(schema) as unknown as { type: string; item?: AnySchema; getter?: (index: number) => AnySchema };
 
 	if (s.type === "array") {
@@ -164,7 +168,7 @@ export function getArrayItemSchema(schema: AnySchema, index = 0): AnySchema | nu
 		}
 	}
 
-	return null;
+	throw new Error("Array schema must have item or getter");
 }
 
 export type SchemaMetadata = {
@@ -184,15 +188,51 @@ export function metadata<T>(meta: SchemaMetadata): v.MetadataAction<T, SchemaMet
 }
 
 export function getSchemaMetadata(schema: AnySchema): SchemaMetadata | null {
+	let result: SchemaMetadata | null = null;
+
+	const raw = schema as unknown as { pipe?: Array<{ type: string; metadata: SchemaMetadata }> };
+	if (raw.pipe) {
+		const first = raw.pipe[0] as unknown as { pipe?: unknown[] } | undefined;
+		if (first?.pipe) {
+			result = getSchemaMetadata(first as unknown as AnySchema);
+		}
+		for (const action of raw.pipe) {
+			if (action.type === "metadata" && action.metadata) {
+				if (result === null) {
+					result = { ...action.metadata };
+				} else {
+					Object.assign(result, action.metadata);
+				}
+			}
+		}
+		if (result) return result;
+	}
+
 	const unwrapped = unwrapSchema(schema);
 	const s = unwrapped as unknown as { type: string; pipe?: Array<{ type: string; metadata: SchemaMetadata }> };
 
-	if (!s.pipe) return null;
+	if (!s.pipe) return result;
 
-	let result: SchemaMetadata | null = null;
+	const first = s.pipe[0] as unknown as { pipe?: unknown[] } | undefined;
+    
+	if (first?.pipe) {
+		const nested = getSchemaMetadata(first as unknown as AnySchema);
+		if (nested) {
+			if (result === null) {
+				result = { ...nested };
+			} else {
+				result = Object.assign({}, nested, result);
+			}
+		}
+	}
+
 	for (const action of s.pipe) {
 		if (action.type === "metadata" && action.metadata) {
-			result = action.metadata;
+			if (result === null) {
+				result = { ...action.metadata };
+			} else {
+				Object.assign(result, action.metadata);
+			}
 		}
 	}
 
@@ -266,11 +306,9 @@ export function collectSpriteData(
 		}
 
 		if (Array.isArray(value)) {
+			if ((currentSchema as unknown as { type: string }).type !== "array") return;
 			for (let i = 0; i < value.length; i++) {
-				const itemSchema = getArrayItemSchema(currentSchema, i);
-				if (!itemSchema) continue;
-
-				visit(value[i], itemSchema, `${currentPath}[${i}]`);
+				visit(value[i], getArrayItemSchema(currentSchema, i), `${currentPath}[${i}]`);
 			}
 		}
 	}

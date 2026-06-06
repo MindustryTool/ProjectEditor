@@ -2,7 +2,7 @@ import { ContentImage } from "#/components/editor/ContentImage";
 import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
-import { unwrapSchema } from "@project/schema";
+import { getSchemaMetadata, unwrapSchema } from "@project/schema";
 import { HJSON } from "@project/hjson";
 import React from "react";
 import * as v from "valibot";
@@ -33,7 +33,7 @@ export const LiquidsListField = React.memo(function LiquidsListField({
 		return (
 			<Field jsonPath={jsonPath}>
 				<FieldLabel>
-					<SchemaLabel name={name} entrySchema={entrySchema} />
+					<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
 				</FieldLabel>
 				<FieldControl>
 					<Select
@@ -59,7 +59,7 @@ export const LiquidsListField = React.memo(function LiquidsListField({
 						</SelectContent>
 					</Select>
 				</FieldControl>
-				<SchemaDescription entrySchema={entrySchema} />
+				<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
 				<FieldIssue path={path} jsonPath={jsonPath} />
 			</Field>
 		);

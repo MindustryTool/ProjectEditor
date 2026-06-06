@@ -17,6 +17,7 @@ import { ObjectField } from "./ObjectField";
 import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
 import { FieldLabel } from "#/components/ui/field";
 import { FieldControl } from "#/components/editor/right/field/Field";
+import { getSchemaMetadata } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 
 export const EffectField = React.memo(function EffectField({ path, name, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
@@ -28,9 +29,9 @@ export const EffectField = React.memo(function EffectField({ path, name, value, 
 		return (
 			<div className="grid gap-2">
 				<FieldLabel>
-					<SchemaLabel name={name} entrySchema={entrySchema} />
+					<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
 				</FieldLabel>
-				<SchemaDescription entrySchema={entrySchema} />
+				<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
 				<div className="grid grid-cols-2 gap-2">
 					<Button
 						variant="outline"
@@ -79,9 +80,9 @@ export const EffectField = React.memo(function EffectField({ path, name, value, 
 	return (
 		<div className="grid gap-2">
 			<FieldLabel>
-				<SchemaLabel name={name} entrySchema={entrySchema} />
+				<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
 			</FieldLabel>
-			<SchemaDescription entrySchema={entrySchema} />
+			<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
 			<div className="grid grid-cols-2 gap-2">
 				<Button variant="outline" disabled>
 					Built-In

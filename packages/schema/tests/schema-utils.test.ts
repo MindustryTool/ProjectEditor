@@ -10,7 +10,9 @@ import {
 	type AnySchema,
 	MindustryHexColorSchema,
     metadata,
+	UnitHjsonSchema,
 } from "@project/schema";
+import type { ProjectContents } from "@project/types";
 
 describe("unwrapSchema", () => {
 	it("returns the same schema for non-wrapped types", () => {
@@ -103,12 +105,12 @@ describe("getArrayItemSchema", () => {
 		expect(getArrayItemSchema(schema as AnySchema)).toBe(item);
 	});
 
-	it("returns null for non-array schema", () => {
-		expect(getArrayItemSchema(v.string() as AnySchema)).toBeNull();
+	it("throws for non-array schema", () => {
+		expect(() => getArrayItemSchema(v.string() as AnySchema)).toThrow("Array schema must have item or getter");
 	});
 
-	it("returns null for object schema", () => {
-		expect(getArrayItemSchema(v.object({}) as AnySchema)).toBeNull();
+	it("throws for object schema", () => {
+		expect(() => getArrayItemSchema(v.object({}) as AnySchema)).toThrow("Array schema must have item or getter");
 	});
 });
 
@@ -156,7 +158,173 @@ describe("getSchemaMetadata", () => {
 
 	it("returns metadata from pipe with color base schema", () => {
 		const schema = v.pipe(MindustryHexColorSchema, metadata({ visibleWhen: { field: "gas", value: true } }));
-		expect(getSchemaMetadata(schema as AnySchema)).toEqual({ visibleWhen: { field: "gas", value: true } });
+		expect(getSchemaMetadata(schema as AnySchema)).toEqual({ type: "color", visibleWhen: { field: "gas", value: true } });
+	});
+
+	it("getSchemaMetadata with getSchemaEntries returns metadata for each entry", () => {
+		const schema = v.object({
+			a: v.pipe(v.string(), metadata({ category: "cat1", name: "Field A" })),
+			b: v.pipe(v.number(), metadata({ category: "cat2", name: "Field B" })),
+			c: v.string(),
+		});
+		const entries = getSchemaEntries(schema as AnySchema);
+		expect(getSchemaMetadata(entries[0]![1] as AnySchema)).toEqual({ category: "cat1", name: "Field A" });
+		expect(getSchemaMetadata(entries[1]![1] as AnySchema)).toEqual({ category: "cat2", name: "Field B" });
+		expect(getSchemaMetadata(entries[2]![1] as AnySchema)).toBeNull();
+	});
+
+	it("getSchemaMetadata works identically with and without unwrapSchema on non-wrapped schemas", () => {
+		const schema = v.pipe(v.string(), metadata({ name: "test" }));
+		const unwrapped = unwrapSchema(schema as AnySchema);
+		expect(getSchemaMetadata(schema as AnySchema)).toEqual(getSchemaMetadata(unwrapped as AnySchema));
+	});
+
+	it("getSchemaMetadata differs with and without unwrapSchema on wrapped schemas", () => {
+		const inner = v.pipe(v.string(), metadata({ name: "wrapped" }));
+		const wrapped = v.optional(inner);
+		expect(getSchemaMetadata(wrapped as AnySchema)).toEqual({ name: "wrapped" });
+		expect(getSchemaMetadata(wrapped as AnySchema)).toEqual(getSchemaMetadata(unwrapSchema(wrapped as AnySchema) as AnySchema));
+	});
+
+	it("getSchemaMetadata works with v.pipe(v.optional(x), metadata()) pattern used in unit.ts", () => {
+		const schema = v.pipe(
+			v.optional(v.number(), 1.1),
+			metadata({ name: "editor.unit.speed", description: "editor.unit.speed-description" }),
+		);
+		expect(getSchemaMetadata(schema as AnySchema)).toEqual({
+			name: "editor.unit.speed",
+			description: "editor.unit.speed-description",
+		});
+	});
+
+	it("getSchemaMetadata works with v.pipe(v.optional(v.boolean()), metadata()) pattern", () => {
+		const schema = v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.unit.flying", description: "editor.unit.flying-description" }),
+		);
+		expect(getSchemaMetadata(schema as AnySchema)).toEqual({
+			name: "editor.unit.flying",
+			description: "editor.unit.flying-description",
+		});
+	});
+
+	it("unwrapSchema still strips v.pipe(v.optional(x), metadata()) to reach inner type", () => {
+		const schema = v.pipe(
+			v.optional(v.number()),
+			metadata({ name: "test" }),
+		);
+		const unwrapped = unwrapSchema(schema as AnySchema);
+		expect((unwrapped as unknown as { type: string }).type).toBe("number");
+	});
+
+	it("unwrapSchema still strips plain v.optional()", () => {
+		const inner = v.number();
+		const wrapped = v.optional(inner);
+		expect(unwrapSchema(wrapped as AnySchema)).toBe(inner);
+	});
+
+	it("UnitHjsonSchema entries have detectable metadata", () => {
+		const mockContext: ProjectContents = {
+			name: "test",
+			items: [],
+			blocks: [],
+			liquids: [],
+			sectors: [],
+			statuses: [],
+			units: [],
+			sprites: [],
+			effects: [],
+		};
+		const schema = UnitHjsonSchema(mockContext);
+		const entries = getSchemaEntries(schema as AnySchema);
+		const speedEntry = entries.find(([k]) => k === "speed");
+		expect(speedEntry).toBeDefined();
+		const meta = getSchemaMetadata(speedEntry![1] as AnySchema);
+		expect(meta).toEqual({
+			name: "editor.unit.speed",
+			description: "editor.unit.speed-description",
+		});
+	});
+
+	it("getSchemaMetadata merges multiple metadata actions in the same pipe", () => {
+		const schema = v.pipe(
+			v.string(),
+			metadata({ name: "test-name", description: "test-desc" }),
+			metadata({ visibleWhen: { field: "x", value: true } }),
+		);
+		expect(getSchemaMetadata(schema as AnySchema)).toEqual({
+			name: "test-name",
+			description: "test-desc",
+			visibleWhen: { field: "x", value: true },
+		});
+	});
+
+	it("getSchemaMetadata merges metadata from nested pipes", () => {
+		const inner = v.pipe(
+			v.string(),
+			metadata({ name: "inner-name", description: "inner-desc" }),
+		);
+		const schema = v.pipe(
+			inner,
+			metadata({ visibleWhen: { field: "x", value: true } }),
+		);
+		expect(getSchemaMetadata(schema as AnySchema)).toEqual({
+			name: "inner-name",
+			description: "inner-desc",
+			visibleWhen: { field: "x", value: true },
+		});
+	});
+
+	it("getSchemaMetadata nested pipe outer overrides inner on conflict", () => {
+		const inner = v.pipe(
+			v.string(),
+			metadata({ name: "inner-name", description: "inner-desc" }),
+		);
+		const schema = v.pipe(
+			inner,
+			metadata({ name: "outer-name" }),
+		);
+		expect(getSchemaMetadata(schema as AnySchema)).toEqual({
+			name: "outer-name",
+			description: "inner-desc",
+		});
+	});
+
+	it("getTypeFromMetadata extracts type from merged metadata", () => {
+		const inner = v.pipe(
+			v.string(),
+			metadata({ name: "inner" }),
+		);
+		const schema = v.pipe(
+			inner,
+			metadata({ type: "effect" }),
+		);
+		const meta = getSchemaMetadata(schema as AnySchema);
+		expect(meta).toEqual({ name: "inner", type: "effect" });
+	});
+
+	it("getSchemaEntries sort respects categories when used with getSchemaMetadata", () => {
+		const schema = v.object({
+			zField: v.pipe(v.string(), metadata({ category: "advanced" })),
+			aField: v.pipe(v.string(), metadata({ category: "general" })),
+			mField: v.pipe(v.string(), metadata({ category: "advanced" })),
+			plainField: v.string(),
+		});
+		const entries = getSchemaEntries(schema as AnySchema);
+		const categories = entries.map(([, s]) => getSchemaMetadata(s as AnySchema)?.category);
+		const advIndices = categories
+			.map((c, i) => (c === "advanced" ? i : -1))
+			.filter((i) => i >= 0);
+		const genIndices = categories
+			.map((c, i) => (c === "general" ? i : -1))
+			.filter((i) => i >= 0);
+		const plainIndices = categories
+			.map((c, i) => (c === undefined ? i : -1))
+			.filter((i) => i >= 0);
+
+		expect(advIndices[0]!).toBeLessThan(advIndices[1]!);
+		expect(advIndices[0]!).toBeLessThan(genIndices[0]!);
+		expect(genIndices[0]!).toBeLessThan(plainIndices[0]!);
 	});
 });
 

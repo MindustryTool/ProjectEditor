@@ -227,7 +227,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 					path,
 					severity: "warning",
 					messageKey: "validation.content.unknown-field",
-					messageParams: { error: `Unknown field ${path}` },
+					messageParams: { error: path },
 					startLine: field?.start.row ?? 1,
 					startColumn: field?.start.col ?? 1,
 					endLine: field?.end?.row ?? 1,

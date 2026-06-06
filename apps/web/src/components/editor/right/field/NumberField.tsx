@@ -9,6 +9,7 @@ import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import { removeByJsonPath } from "./util";
 import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
+import { getSchemaMetadata } from "@project/schema";
 
 export const NumberField = React.memo(function NumberField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const numValue = typeof value === "number" ? value : String(value);
@@ -28,12 +29,12 @@ export const NumberField = React.memo(function NumberField({ name, value, onChan
 	return (
 		<Field jsonPath={jsonPath}>
 			<FieldLabel>
-				<SchemaLabel name={name} entrySchema={entrySchema} />
+				<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
 			</FieldLabel>
 			<FieldControl>
 				<Input key={name} value={numValue} onChange={(v) => handleChange(v.currentTarget.valueAsNumber)} type="number" />
 			</FieldControl>
-			<SchemaDescription entrySchema={entrySchema} />
+			<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
 			<FieldIssue path={path} jsonPath={jsonPath} />
 		</Field>
 	);

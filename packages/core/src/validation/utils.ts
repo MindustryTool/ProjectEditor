@@ -89,8 +89,7 @@ export function findUnknownProperties(schema: AnySchema, value: unknown, path = 
 		}
 
 		for (let i = 0; i < value.length; i++) {
-			const itemSchema = getArrayItemSchema(schema as unknown as AnySchema, i) ?? (schema.item as AnySchema);
-			unknown.push(...findUnknownProperties(itemSchema, value[i], `${path}[${i}]`));
+			unknown.push(...findUnknownProperties(getArrayItemSchema(schema as unknown as AnySchema, i), value[i], `${path}[${i}]`));
 		}
 
 		return unknown;

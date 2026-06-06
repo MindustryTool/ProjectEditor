@@ -21,7 +21,7 @@ export const ObjectField = React.memo(function ObjectField({ name, path, value, 
 		<Collapsible>
 			<CollapsibleTrigger asChild>
 				<Button className="flex justify-between items-center w-full">
-					<SchemaLabel name={name} entrySchema={entrySchema} />
+					<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
 					<ChevronDown className="size-5 mr-1" />
 				</Button>
 			</CollapsibleTrigger>
@@ -44,7 +44,7 @@ export const ObjectField = React.memo(function ObjectField({ name, path, value, 
 							return (
 								<FieldControl key={key}>
 									<FieldLabel>
-										<SchemaLabel name={name} entrySchema={childSchema as AnySchema} />
+										<SchemaLabel name={name} entrySchema={getSchemaMetadata(childSchema as AnySchema)} />
 									</FieldLabel>
 									<span className="text-red-400 text-sm">Unknown field type {type}</span>
 								</FieldControl>

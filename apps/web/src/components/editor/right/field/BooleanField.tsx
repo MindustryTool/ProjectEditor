@@ -6,7 +6,7 @@ import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import { removeByJsonPath } from "./util";
-import { hasNullableWrapper } from "@project/schema";
+import { getSchemaMetadata, hasNullableWrapper } from "@project/schema";
 import { HJSON } from "@project/hjson";
 import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
 
@@ -26,10 +26,10 @@ export const BooleanField = React.memo(function BooleanField({ name, value, onCh
 			<FieldControl className="flex-row flex gap-1">
 				<Checkbox key={name} checked={checked} onCheckedChange={(val) => handleChange(val === true)} />
 				<FieldLabel>
-					<SchemaLabel name={name} entrySchema={entrySchema} />
+					<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
 				</FieldLabel>
 			</FieldControl>
-			<SchemaDescription entrySchema={entrySchema} />
+			<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
 			<FieldIssue path={path} jsonPath={jsonPath} />
 		</Field>
 	);

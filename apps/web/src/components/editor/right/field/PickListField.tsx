@@ -1,7 +1,7 @@
 import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 import { HJSON } from "@project/hjson";
-import { unwrapSchema } from "@project/schema";
+import { getSchemaMetadata, unwrapSchema } from "@project/schema";
 import React, { useState } from "react";
 import * as v from "valibot";
 import { FieldIssue } from "./FieldIssue";
@@ -34,7 +34,7 @@ export const PickListField = React.memo(function PickListField({
 			return (
 				<Field jsonPath={jsonPath}>
 					<FieldLabel>
-						<SchemaLabel name={name} entrySchema={entrySchema} />
+						<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
 					</FieldLabel>
 					<Dialog>
 						<DialogTrigger asChild>
@@ -46,8 +46,8 @@ export const PickListField = React.memo(function PickListField({
 						<DialogContent>
 							<DialogTitle>
 								<FieldLabel>
-									<SchemaLabel name={name} entrySchema={entrySchema} />
-								</FieldLabel>
+								<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
+							</FieldLabel>
 							</DialogTitle>
 							<VisuallyHidden.Root>
 								<DialogDescription />
@@ -85,7 +85,7 @@ export const PickListField = React.memo(function PickListField({
 							</ToggleGroup>
 						</DialogContent>
 					</Dialog>
-					<SchemaDescription entrySchema={entrySchema} />
+					<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
 					<FieldIssue path={path} jsonPath={jsonPath} />
 				</Field>
 			);
@@ -94,7 +94,7 @@ export const PickListField = React.memo(function PickListField({
 		return (
 			<Field jsonPath={jsonPath}>
 				<FieldLabel>
-					<SchemaLabel name={name} entrySchema={entrySchema} />
+					<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
 				</FieldLabel>
 				<FieldControl>
 					<Select
@@ -120,7 +120,7 @@ export const PickListField = React.memo(function PickListField({
 						</SelectContent>
 					</Select>
 				</FieldControl>
-				<SchemaDescription entrySchema={entrySchema} />
+				<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
 				<FieldIssue path={path} jsonPath={jsonPath} />
 			</Field>
 		);

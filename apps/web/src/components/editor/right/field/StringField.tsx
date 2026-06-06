@@ -30,7 +30,7 @@ export const StringField = React.memo(function StringField({ name, value, onChan
 	return (
 		<Field jsonPath={jsonPath}>
 			<FieldLabel>
-				<SchemaLabel name={name} entrySchema={entrySchema} />
+				<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
 			</FieldLabel>
 			<FieldControl>
 				{metadata?.multiline ? (
@@ -39,7 +39,7 @@ export const StringField = React.memo(function StringField({ name, value, onChan
 					<Input key={name} value={stringValue} onChange={(v) => handleChange(v.currentTarget.value)} />
 				)}
 			</FieldControl>
-			<SchemaDescription entrySchema={entrySchema} />
+			<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
 			<FieldIssue path={path} jsonPath={jsonPath} />
 		</Field>
 	);

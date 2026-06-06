@@ -1,6 +1,6 @@
 import { Button } from "#/components/ui/button";
 import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
-import { getArrayItemSchema, unwrapSchema } from "@project/schema";
+import { getArrayItemSchema, getSchemaMetadata, unwrapSchema } from "@project/schema";
 import { HJSON } from "@project/hjson";
 import { Plus, X } from "lucide-react";
 import React from "react";
@@ -18,12 +18,6 @@ export const ArrayField = React.memo(function ArrayField({ path, name, value, on
 		return null;
 	}
 
-	const itemSchema = getArrayItemSchema(entrySchema);
-
-	if (!itemSchema) {
-		throw new Error("Array schema must have item schema: " + entrySchema);
-	}
-
 	const handleRemove = (index: number) => {
 		onChange(jsonPath, (parent, key, original) => {
 			const arr = parent.get(key);
@@ -33,7 +27,7 @@ export const ArrayField = React.memo(function ArrayField({ path, name, value, on
 	};
 
 	const handleAdd = () => {
-		const nextItemSchema = getArrayItemSchema(entrySchema, arrayValue.length) ?? itemSchema;
+		const nextItemSchema = getArrayItemSchema(entrySchema, arrayValue.length);
 
 		let defaultValue: unknown = v.getDefaults(nextItemSchema);
 		if (defaultValue === undefined) {
@@ -57,13 +51,13 @@ export const ArrayField = React.memo(function ArrayField({ path, name, value, on
 	return (
 		<Field jsonPath={jsonPath}>
 			<FieldLabel>
-				<SchemaLabel name={name} entrySchema={entrySchema} />
+				<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
 			</FieldLabel>
-			<SchemaDescription entrySchema={entrySchema} />
+			<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
 			<FieldControl>
 				<div className="flex flex-col gap-2 border p-2 rounded-md border-dashed">
 					{arrayValue.map((el, index) => {
-						const currentItemSchema = getArrayItemSchema(entrySchema, index) ?? itemSchema;
+						const currentItemSchema = getArrayItemSchema(entrySchema, index);
 						const entryJsonPath = jsonPath ? `${jsonPath}[${index}]` : `[${index}]`;
 
 						return (

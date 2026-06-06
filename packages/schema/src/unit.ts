@@ -91,15 +91,27 @@ const unitObjectSchema = {
 	),
 	circleTargetRadius: v.pipe(
 		v.optional(v.number(), 80),
-		metadata({ name: "editor.unit.circle-target-radius", description: "editor.unit.circle-target-radius-description" }),
+		metadata({
+			name: "editor.unit.circle-target-radius",
+			description: "editor.unit.circle-target-radius-description",
+			visibleWhen: { field: "circleTarget", value: true },
+		}),
 	),
 	crashDamageMultiplier: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "editor.unit.crash-damage-multiplier", description: "editor.unit.crash-damage-multiplier-description" }),
+		metadata({
+			name: "editor.unit.crash-damage-multiplier",
+			description: "editor.unit.crash-damage-multiplier-description",
+			visibleWhen: { field: "flying", value: true },
+		}),
 	),
 	wreckHealthMultiplier: v.pipe(
 		v.optional(v.number(), 0.25),
-		metadata({ name: "editor.unit.wreck-health-multiplier", description: "editor.unit.wreck-health-multiplier-description" }),
+		metadata({
+			name: "editor.unit.wreck-health-multiplier",
+			description: "editor.unit.wreck-health-multiplier-description",
+			visibleWhen: { field: "flying", value: true },
+		}),
 	),
 	dpsEstimate: v.pipe(
 		v.optional(v.number(), -1),
@@ -111,7 +123,11 @@ const unitObjectSchema = {
 	),
 	drownTimeMultiplier: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "editor.unit.drown-time-multiplier", description: "editor.unit.drown-time-multiplier-description" }),
+		metadata({
+			name: "editor.unit.drown-time-multiplier",
+			description: "editor.unit.drown-time-multiplier-description",
+			visibleWhen: { field: "canDrown", value: true },
+		}),
 	),
 	strafePenalty: v.pipe(
 		v.optional(v.number(), 0.5),
@@ -124,11 +140,19 @@ const unitObjectSchema = {
 
 	groundLayer: v.pipe(
 		v.optional(v.number()),
-		metadata({ name: "editor.unit.ground-layer", description: "editor.unit.ground-layer-description" }),
+		metadata({
+			name: "editor.unit.ground-layer",
+			description: "editor.unit.ground-layer-description",
+			visibleWhen: { field: "flying", value: false },
+		}),
 	),
 	flyingLayer: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "editor.unit.flying-layer", description: "editor.unit.flying-layer-description" }),
+		metadata({
+			name: "editor.unit.flying-layer",
+			description: "editor.unit.flying-layer-description",
+			visibleWhen: { field: "flying", value: true },
+		}),
 	),
 	payloadCapacity: v.pipe(
 		v.optional(v.number(), 8),
@@ -153,7 +177,11 @@ const unitObjectSchema = {
 	),
 	shadowElevation: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "editor.unit.shadow-elevation", description: "editor.unit.shadow-elevation-description" }),
+		metadata({
+			name: "editor.unit.shadow-elevation",
+			description: "editor.unit.shadow-elevation-description",
+			visibleWhen: { field: "flying", value: false },
+		}),
 	),
 	shadowElevationScl: v.pipe(
 		v.optional(v.number(), 1),
@@ -194,11 +222,19 @@ const unitObjectSchema = {
 
 	waveTrailX: v.pipe(
 		v.optional(v.number(), 4),
-		metadata({ name: "editor.unit.wave-trail-x", description: "editor.unit.wave-trail-x-description" }),
+		metadata({
+			name: "editor.unit.wave-trail-x",
+			description: "editor.unit.wave-trail-x-description",
+			visibleWhen: { field: "naval", value: true },
+		}),
 	),
 	waveTrailY: v.pipe(
 		v.optional(v.number(), -3),
-		metadata({ name: "editor.unit.wave-trail-y", description: "editor.unit.wave-trail-y-description" }),
+		metadata({
+			name: "editor.unit.wave-trail-y",
+			description: "editor.unit.wave-trail-y-description",
+			visibleWhen: { field: "naval", value: true },
+		}),
 	),
 	trailScl: v.pipe(
 		v.optional(v.number(), 1),
@@ -210,7 +246,14 @@ const unitObjectSchema = {
 		metadata({ name: "editor.unit.is-enemy", description: "editor.unit.is-enemy-description" }),
 	),
 	flying: v.pipe(v.optional(v.boolean(), false), metadata({ name: "editor.unit.flying", description: "editor.unit.flying-description" })),
-	wobble: v.pipe(v.optional(v.boolean(), true), metadata({ name: "editor.unit.wobble", description: "editor.unit.wobble-description" })),
+	wobble: v.pipe(
+		v.optional(v.boolean(), true),
+		metadata({
+			name: "editor.unit.wobble",
+			description: "editor.unit.wobble-description",
+			visibleWhen: { field: "flying", value: true },
+		}),
+	),
 	targetAir: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({ name: "editor.unit.target-air", description: "editor.unit.target-air-description" }),
@@ -289,7 +332,11 @@ const unitObjectSchema = {
 	),
 	canDrown: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "editor.unit.can-drown", description: "editor.unit.can-drown-description" }),
+		metadata({
+			name: "editor.unit.can-drown",
+			description: "editor.unit.can-drown-description",
+			visibleWhen: { field: "flying", value: false },
+		}),
 	),
 	useUnitCap: v.pipe(
 		v.optional(v.boolean(), true),
@@ -362,7 +409,11 @@ const unitObjectSchema = {
 	),
 	internalGenerateSprites: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "editor.unit.internal-generate-sprites", description: "editor.unit.internal-generate-sprites-description" }),
+		metadata({
+			name: "editor.unit.internal-generate-sprites",
+			description: "editor.unit.internal-generate-sprites-description",
+			visibleWhen: { field: "internal", value: true },
+		}),
 	),
 	bounded: v.pipe(
 		v.optional(v.boolean(), true),
@@ -437,7 +488,11 @@ const unitObjectSchema = {
 	),
 	wreckSoundVolume: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "editor.unit.wreck-sound-volume", description: "editor.unit.wreck-sound-volume-description" }),
+		metadata({
+			name: "editor.unit.wreck-sound-volume",
+			description: "editor.unit.wreck-sound-volume-description",
+			visibleWhen: { field: "createWreck", value: true },
+		}),
 	),
 	loopSoundVolume: v.pipe(
 		v.optional(v.number(), 0.5),
@@ -498,7 +553,11 @@ const unitObjectSchema = {
 
 	outlineRadius: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "editor.unit.outline-radius", description: "editor.unit.outline-radius-description" }),
+		metadata({
+			name: "editor.unit.outline-radius",
+			description: "editor.unit.outline-radius-description",
+			visibleWhen: { field: "outlines", value: true },
+		}),
 	),
 	outlines: v.pipe(
 		v.optional(v.boolean(), true),
@@ -734,7 +793,11 @@ const unitObjectSchema = {
 
 	healColor: v.pipe(
 		v.optional(MindustryHexColorSchema),
-		metadata({ name: "editor.unit.heal-color", description: "editor.unit.heal-color-description" }),
+		metadata({
+			name: "editor.unit.heal-color",
+			description: "editor.unit.heal-color-description",
+			visibleWhen: { field: "healFlash", value: true },
+		}),
 	),
 	lightColor: v.pipe(
 		v.optional(MindustryHexColorSchema),
@@ -751,7 +814,11 @@ const unitObjectSchema = {
 	),
 	wreckSound: v.pipe(
 		v.optional(SoundHjsonSchema),
-		metadata({ name: "editor.unit.wreck-sound", description: "editor.unit.wreck-sound-description" }),
+		metadata({
+			name: "editor.unit.wreck-sound",
+			description: "editor.unit.wreck-sound-description",
+			visibleWhen: { field: "createWreck", value: true },
+		}),
 	),
 	loopSound: v.pipe(
 		v.optional(SoundHjsonSchema),
@@ -784,7 +851,11 @@ const unitObjectSchema = {
 	),
 	outlineColor: v.pipe(
 		v.optional(MindustryHexColorSchema),
-		metadata({ name: "editor.unit.outline-color", description: "editor.unit.outline-color-description" }),
+		metadata({
+			name: "editor.unit.outline-color",
+			description: "editor.unit.outline-color-description",
+			visibleWhen: { field: "outlines", value: true },
+		}),
 	),
 	mineSound: v.pipe(
 		v.optional(SoundHjsonSchema),
@@ -793,6 +864,53 @@ const unitObjectSchema = {
 	mechLegColor: v.pipe(
 		v.optional(MindustryHexColorSchema),
 		metadata({ name: "editor.unit.mech-leg-color", description: "editor.unit.mech-leg-color-description" }),
+	),
+
+	aiController: v.pipe(
+		v.optional(v.unknown()),
+		metadata({ name: "editor.unit.ai-controller", description: "editor.unit.ai-controller-description" }),
+	),
+	controller: v.pipe(
+		v.optional(v.unknown()),
+		metadata({ name: "editor.unit.controller", description: "editor.unit.controller-description" }),
+	),
+	constructor: v.pipe(
+		v.optional(v.unknown()),
+		metadata({ name: "editor.unit.constructor", description: "editor.unit.constructor-description" }),
+	),
+	pathCost: v.pipe(v.optional(v.unknown()), metadata({ name: "editor.unit.path-cost", description: "editor.unit.path-cost-description" })),
+	sample: v.pipe(v.optional(v.unknown()), metadata({ name: "editor.unit.sample", description: "editor.unit.sample-description" })),
+	targetFlags: v.pipe(
+		v.optional(v.array(v.unknown())),
+		metadata({ name: "editor.unit.target-flags", description: "editor.unit.target-flags-description" }),
+	),
+	commands: v.pipe(
+		v.optional(v.array(v.unknown())),
+		metadata({ name: "editor.unit.commands", description: "editor.unit.commands-description" }),
+	),
+	defaultCommand: v.pipe(
+		v.optional(v.unknown()),
+		metadata({ name: "editor.unit.default-command", description: "editor.unit.default-command-description" }),
+	),
+	stances: v.pipe(
+		v.optional(v.array(v.unknown())),
+		metadata({ name: "editor.unit.stances", description: "editor.unit.stances-description" }),
+	),
+	mineItems: v.pipe(
+		v.optional(v.array(v.unknown())),
+		metadata({ name: "editor.unit.mine-items", description: "editor.unit.mine-items-description" }),
+	),
+	treadRects: v.pipe(
+		v.optional(v.array(v.unknown())),
+		metadata({ name: "editor.unit.tread-rects", description: "editor.unit.tread-rects-description" }),
+	),
+	segmentUnit: v.pipe(
+		v.optional(v.unknown()),
+		metadata({ name: "editor.unit.segment-unit", description: "editor.unit.segment-unit-description" }),
+	),
+	segmentEndUnit: v.pipe(
+		v.optional(v.unknown()),
+		metadata({ name: "editor.unit.segment-end-unit", description: "editor.unit.segment-end-unit-description" }),
 	),
 };
 
@@ -813,11 +931,19 @@ export const UnitHjsonSchema: SchemaFn = (context) =>
 		),
 		fallEffect: v.pipe(
 			v.optional(EffectHjsonSchema(context)),
-			metadata({ name: "editor.unit.fall-effect", description: "editor.unit.fall-effect-description" }),
+			metadata({
+				name: "editor.unit.fall-effect",
+				description: "editor.unit.fall-effect-description",
+				visibleWhen: { field: "flying", value: true },
+			}),
 		),
 		fallEngineEffect: v.pipe(
 			v.optional(EffectHjsonSchema(context)),
-			metadata({ name: "editor.unit.fall-engine-effect", description: "editor.unit.fall-engine-effect-description" }),
+			metadata({
+				name: "editor.unit.fall-engine-effect",
+				description: "editor.unit.fall-engine-effect-description",
+				visibleWhen: { field: "flying", value: true },
+			}),
 		),
 		deathExplosionEffect: v.pipe(
 			v.optional(EffectHjsonSchema(context)),

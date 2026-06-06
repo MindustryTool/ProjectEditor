@@ -16,6 +16,7 @@ import { SchemaLabel } from "./SchemaLabel";
 import { removeByJsonPath } from "./util";
 import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
 import type { Research } from "@project/schema";
+import { getSchemaMetadata } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 
 export const ResearchField = React.memo(function ResearchField({
@@ -63,7 +64,7 @@ export const ResearchField = React.memo(function ResearchField({
 		<>
 			<Field jsonPath={jsonPath}>
 				<FieldLabel>
-					<SchemaLabel name={name} entrySchema={entrySchema} />
+					<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
 				</FieldLabel>
 				<FieldControl>
 					<Dialog>
@@ -77,7 +78,7 @@ export const ResearchField = React.memo(function ResearchField({
 						</DialogContent>
 					</Dialog>
 				</FieldControl>
-				<SchemaDescription entrySchema={entrySchema} />
+				<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
 				<FieldIssue path={path} jsonPath={jsonPath} />
 				<FieldControl className="grid gap-2">
 					<ResearchRequirementList
