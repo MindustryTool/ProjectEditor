@@ -25,7 +25,7 @@ export const useAppStore = create<AppState>()(
 	persist(
 		(set, get) => ({
 			projects: {},
-			settings: { firstTime: true, theme: "system" as const, fontSize: 14, tabSize: 2, validation: { validationDelayMs: 500 } },
+			settings: { firstTime: true, theme: "system" as const, fontSize: 14, tabSize: 2, padding: 0,  validation: { validationDelayMs: 500 } },
 
 			createNewProject: async (name: string, language: ProjectLanguage) => {
 				const project = createProjectInfo(name, language);
