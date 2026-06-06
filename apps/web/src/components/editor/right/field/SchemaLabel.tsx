@@ -5,5 +5,9 @@ import { useTranslation } from "react-i18next";
 export const SchemaLabel = React.memo(function SchemaLabel({ name, metadata }: { name: string; metadata: SchemaMetadata | null }) {
 	const { t } = useTranslation();
 
-	return <span className="first-letter:uppercase lowercase">{metadata?.name ? (t as (key: string) => string)(metadata.name) : name}</span>;
+	return metadata?.name ? (
+		<span className="first-letter:uppercase lowercase">{(t as (key: string) => string)(metadata.name)}</span>
+	) : (
+		<span>{name}</span>
+	);
 });

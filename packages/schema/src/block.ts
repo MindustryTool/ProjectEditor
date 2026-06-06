@@ -186,81 +186,71 @@ const powerGeneratorObjectSchema = v.object({
 	powerProduction: v.pipe(
 		v.optional(v.number(), 0),
 		metadata({
-			name: "powerProduction",
-			type: "number",
-			description: "editor.block-power-generator.power-production",
-			category: "power",
+			name: "editor.block-power-generator.power-production",
+			description: "editor.block-power-generator.power-production-description",
 		}),
 	),
 	generationType: v.pipe(
 		v.optional(v.string(), "basePowerGeneration"),
-		metadata({ name: "generationType", type: "string", description: "editor.block-power-generator.generation-type", category: "power" }),
+		metadata({
+			name: "editor.block-power-generator.generation-type",
+			description: "editor.block-power-generator.generation-type-description",
+		}),
 	),
 	explosionRadius: v.pipe(
 		v.optional(v.number(), 12),
 		metadata({
-			name: "explosionRadius",
-			type: "number",
-			description: "editor.block-power-generator.explosion-radius",
-			category: "combat",
+			name: "editor.block-power-generator.explosion-radius",
+			description: "editor.block-power-generator.explosion-radius-description",
 		}),
 	),
 	explosionDamage: v.pipe(
 		v.optional(v.number(), 0),
 		metadata({
-			name: "explosionDamage",
-			type: "number",
-			description: "editor.block-power-generator.explosion-damage",
-			category: "combat",
+			name: "editor.block-power-generator.explosion-damage",
+			description: "editor.block-power-generator.explosion-damage-description",
 		}),
 	),
 	explosionPuddles: v.pipe(
 		v.optional(v.number(), 10),
 		metadata({
-			name: "explosionPuddles",
-			type: "number",
-			description: "editor.block-power-generator.explosion-puddles",
-			category: "combat",
+			name: "editor.block-power-generator.explosion-puddles",
+			description: "editor.block-power-generator.explosion-puddles-description",
 		}),
 	),
 	explosionPuddleRange: v.pipe(
 		v.optional(v.number(), 16),
 		metadata({
-			name: "explosionPuddleRange",
-			type: "number",
-			description: "editor.block-power-generator.explosion-puddle-range",
-			category: "combat",
+			name: "editor.block-power-generator.explosion-puddle-range",
+			description: "editor.block-power-generator.explosion-puddle-range-description",
 		}),
 	),
 	explosionPuddleAmount: v.pipe(
 		v.optional(v.number(), 100),
 		metadata({
-			name: "explosionPuddleAmount",
-			type: "number",
-			description: "editor.block-power-generator.explosion-puddle-amount",
-			category: "combat",
+			name: "editor.block-power-generator.explosion-puddle-amount",
+			description: "editor.block-power-generator.explosion-puddle-amount-description",
 		}),
 	),
 	explosionMinWarmup: v.pipe(
 		v.optional(v.number(), 0),
 		metadata({
-			name: "explosionMinWarmup",
-			type: "number",
-			description: "editor.block-power-generator.explosion-min-warmup",
-			category: "combat",
+			name: "editor.block-power-generator.explosion-min-warmup",
+			description: "editor.block-power-generator.explosion-min-warmup-description",
 		}),
 	),
 	explosionShake: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "explosionShake", type: "number", description: "editor.block-power-generator.explosion-shake", category: "combat" }),
+		metadata({
+			name: "editor.block-power-generator.explosion-shake",
+			description: "editor.block-power-generator.explosion-shake-description",
+		}),
 	),
 	explosionShakeDuration: v.pipe(
 		v.optional(v.number(), 6),
 		metadata({
-			name: "explosionShakeDuration",
-			type: "number",
-			description: "editor.block-power-generator.explosion-shake-duration",
-			category: "combat",
+			name: "editor.block-power-generator.explosion-shake-duration",
+			description: "editor.block-power-generator.explosion-shake-duration-description",
 		}),
 	),
 });
@@ -268,55 +258,51 @@ const powerGeneratorObjectSchema = v.object({
 const consumeGeneratorObjectSchema = v.object({
 	itemDuration: v.pipe(
 		v.optional(v.number(), 120),
-		metadata({ name: "itemDuration", type: "number", description: "editor.block-consume-generator.item-duration", category: "items" }),
+		metadata({
+			name: "editor.block-consume-generator.item-duration",
+			description: "editor.block-consume-generator.item-duration-description",
+		}),
 	),
 	warmupSpeed: v.pipe(
 		v.optional(v.number(), 0.05),
-		metadata({ name: "warmupSpeed", type: "number", description: "editor.block-consume-generator.warmup-speed", category: "power" }),
+		metadata({
+			name: "editor.block-consume-generator.warmup-speed",
+			description: "editor.block-consume-generator.warmup-speed-description",
+		}),
 	),
 	effectChance: v.pipe(
 		v.optional(v.number(), 0.01),
 		metadata({
-			name: "effectChance",
-			type: "number",
-			description: "editor.block-consume-generator.effect-chance",
-			category: "rendering",
+			name: "editor.block-consume-generator.effect-chance",
+			description: "editor.block-consume-generator.effect-chance-description",
 		}),
 	),
 	generateEffectRange: v.pipe(
 		v.optional(v.number(), 3),
 		metadata({
-			name: "generateEffectRange",
-			type: "number",
-			description: "editor.block-consume-generator.generate-effect-range",
-			category: "rendering",
+			name: "editor.block-consume-generator.generate-effect-range",
+			description: "editor.block-consume-generator.generate-effect-range-description",
 		}),
 	),
 	baseLightRadius: v.pipe(
 		v.optional(v.number(), 65),
 		metadata({
-			name: "baseLightRadius",
-			type: "number",
-			description: "editor.block-consume-generator.base-light-radius",
-			category: "rendering",
+			name: "editor.block-consume-generator.base-light-radius",
+			description: "editor.block-consume-generator.base-light-radius-description",
 		}),
 	),
 	explodeOnFull: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "explodeOnFull",
-			type: "boolean",
-			description: "editor.block-consume-generator.explode-on-full",
-			category: "combat",
+			name: "editor.block-consume-generator.explode-on-full",
+			description: "editor.block-consume-generator.explode-on-full-description",
 		}),
 	),
 	itemDurationMultipliers: v.pipe(
 		v.optional(v.record(v.string(), v.number())),
 		metadata({
-			name: "itemDurationMultipliers",
-			type: "object",
-			description: "editor.block-consume-generator.item-duration-multipliers",
-			category: "items",
+			name: "editor.block-consume-generator.item-duration-multipliers",
+			description: "editor.block-consume-generator.item-duration-multipliers-description",
 		}),
 	),
 });
@@ -324,11 +310,17 @@ const consumeGeneratorObjectSchema = v.object({
 const heaterGeneratorObjectSchema = v.object({
 	heatOutput: v.pipe(
 		v.optional(v.number(), 10),
-		metadata({ name: "heatOutput", type: "number", description: "editor.block-heater-generator.heat-output", category: "power" }),
+		metadata({
+			name: "editor.block-heater-generator.heat-output",
+			description: "editor.block-heater-generator.heat-output-description",
+		}),
 	),
 	warmupRate: v.pipe(
 		v.optional(v.number(), 0.15),
-		metadata({ name: "warmupRate", type: "number", description: "editor.block-heater-generator.warmup-rate", category: "power" }),
+		metadata({
+			name: "editor.block-heater-generator.warmup-rate",
+			description: "editor.block-heater-generator.warmup-rate-description",
+		}),
 	),
 });
 
@@ -336,218 +328,292 @@ const thermalGeneratorObjectSchema = v.object({
 	effectChance: v.pipe(
 		v.optional(v.number(), 0.05),
 		metadata({
-			name: "effectChance",
-			type: "number",
-			description: "editor.block-thermal-generator.effect-chance",
-			category: "rendering",
+			name: "editor.block-thermal-generator.effect-chance",
+			description: "editor.block-thermal-generator.effect-chance-description",
 		}),
 	),
 	minEfficiency: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "minEfficiency", type: "number", description: "editor.block-thermal-generator.min-efficiency", category: "power" }),
+		metadata({
+			name: "editor.block-thermal-generator.min-efficiency",
+			description: "editor.block-thermal-generator.min-efficiency-description",
+		}),
 	),
 	displayEfficiencyScale: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
-			name: "displayEfficiencyScale",
-			type: "number",
-			description: "editor.block-thermal-generator.display-efficiency-scale",
-			category: "power",
+			name: "editor.block-thermal-generator.display-efficiency-scale",
+			description: "editor.block-thermal-generator.display-efficiency-scale-description",
 		}),
 	),
 	displayEfficiency: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
-			name: "displayEfficiency",
-			type: "boolean",
-			description: "editor.block-thermal-generator.display-efficiency",
-			category: "power",
+			name: "editor.block-thermal-generator.display-efficiency",
+			description: "editor.block-thermal-generator.display-efficiency-description",
 		}),
 	),
 	attribute: v.pipe(
 		v.optional(v.string(), "heat"),
-		metadata({ name: "attribute", type: "string", description: "editor.block-thermal-generator.attribute", category: "power" }),
+		metadata({
+			name: "editor.block-thermal-generator.attribute",
+			description: "editor.block-thermal-generator.attribute-description",
+		}),
 	),
 });
 
 const nuclearReactorObjectSchema = v.object({
 	itemDuration: v.pipe(
 		v.optional(v.number(), 120),
-		metadata({ name: "itemDuration", type: "number", description: "editor.block-nuclear-reactor.item-duration", category: "items" }),
+		metadata({
+			name: "editor.block-nuclear-reactor.item-duration",
+			description: "editor.block-nuclear-reactor.item-duration-description",
+		}),
 	),
 	heating: v.pipe(
 		v.optional(v.number(), 0.01),
-		metadata({ name: "heating", type: "number", description: "editor.block-nuclear-reactor.heating", category: "power" }),
+		metadata({
+			name: "editor.block-nuclear-reactor.heating",
+			description: "editor.block-nuclear-reactor.heating-description",
+		}),
 	),
 	heatOutput: v.pipe(
 		v.optional(v.number(), 15),
-		metadata({ name: "heatOutput", type: "number", description: "editor.block-nuclear-reactor.heat-output", category: "power" }),
+		metadata({
+			name: "editor.block-nuclear-reactor.heat-output",
+			description: "editor.block-nuclear-reactor.heat-output-description",
+		}),
 	),
 	heatWarmupRate: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "heatWarmupRate", type: "number", description: "editor.block-nuclear-reactor.heat-warmup-rate", category: "power" }),
+		metadata({
+			name: "editor.block-nuclear-reactor.heat-warmup-rate",
+			description: "editor.block-nuclear-reactor.heat-warmup-rate-description",
+		}),
 	),
 	ambientCooldownTime: v.pipe(
 		v.optional(v.number(), 1200),
 		metadata({
-			name: "ambientCooldownTime",
-			type: "number",
-			description: "editor.block-nuclear-reactor.ambient-cooldown-time",
-			category: "power",
+			name: "editor.block-nuclear-reactor.ambient-cooldown-time",
+			description: "editor.block-nuclear-reactor.ambient-cooldown-time-description",
 		}),
 	),
 	smokeThreshold: v.pipe(
 		v.optional(v.number(), 0.3),
 		metadata({
-			name: "smokeThreshold",
-			type: "number",
-			description: "editor.block-nuclear-reactor.smoke-threshold",
-			category: "rendering",
+			name: "editor.block-nuclear-reactor.smoke-threshold",
+			description: "editor.block-nuclear-reactor.smoke-threshold-description",
 		}),
 	),
 	flashThreshold: v.pipe(
 		v.optional(v.number(), 0.46),
 		metadata({
-			name: "flashThreshold",
-			type: "number",
-			description: "editor.block-nuclear-reactor.flash-threshold",
-			category: "rendering",
+			name: "editor.block-nuclear-reactor.flash-threshold",
+			description: "editor.block-nuclear-reactor.flash-threshold-description",
 		}),
 	),
 	coolantPower: v.pipe(
 		v.optional(v.number(), 0.5),
-		metadata({ name: "coolantPower", type: "number", description: "editor.block-nuclear-reactor.coolant-power", category: "power" }),
+		metadata({
+			name: "editor.block-nuclear-reactor.coolant-power",
+			description: "editor.block-nuclear-reactor.coolant-power-description",
+		}),
 	),
 	fuelItem: v.pipe(
 		v.optional(v.string()),
-		metadata({ name: "fuelItem", type: "string", description: "editor.block-nuclear-reactor.fuel-item", category: "items" }),
+		metadata({
+			name: "editor.block-nuclear-reactor.fuel-item",
+			description: "editor.block-nuclear-reactor.fuel-item-description",
+		}),
 	),
 });
 
 const impactReactorObjectSchema = v.object({
 	warmupSpeed: v.pipe(
 		v.optional(v.number(), 0.001),
-		metadata({ name: "warmupSpeed", type: "number", description: "editor.block-impact-reactor.warmup-speed", category: "power" }),
+		metadata({
+			name: "editor.block-impact-reactor.warmup-speed",
+			description: "editor.block-impact-reactor.warmup-speed-description",
+		}),
 	),
 	itemDuration: v.pipe(
 		v.optional(v.number(), 60),
-		metadata({ name: "itemDuration", type: "number", description: "editor.block-impact-reactor.item-duration", category: "items" }),
+		metadata({
+			name: "editor.block-impact-reactor.item-duration",
+			description: "editor.block-impact-reactor.item-duration-description",
+		}),
 	),
 });
 
 const variableReactorObjectSchema = v.object({
 	maxHeat: v.pipe(
 		v.optional(v.number(), 100),
-		metadata({ name: "maxHeat", type: "number", description: "editor.block-variable-reactor.max-heat", category: "power" }),
+		metadata({
+			name: "editor.block-variable-reactor.max-heat",
+			description: "editor.block-variable-reactor.max-heat-description",
+		}),
 	),
 	warmupSpeed: v.pipe(
 		v.optional(v.number(), 0.1),
-		metadata({ name: "warmupSpeed", type: "number", description: "editor.block-variable-reactor.warmup-speed", category: "power" }),
+		metadata({
+			name: "editor.block-variable-reactor.warmup-speed",
+			description: "editor.block-variable-reactor.warmup-speed-description",
+		}),
 	),
 	unstableSpeed: v.pipe(
 		v.optional(v.number(), 1 / 180),
-		metadata({ name: "unstableSpeed", type: "number", description: "editor.block-variable-reactor.unstable-speed", category: "combat" }),
+		metadata({
+			name: "editor.block-variable-reactor.unstable-speed",
+			description: "editor.block-variable-reactor.unstable-speed-description",
+		}),
 	),
 	effectChance: v.pipe(
 		v.optional(v.number(), 0.05),
-		metadata({ name: "effectChance", type: "number", description: "editor.block-variable-reactor.effect-chance", category: "rendering" }),
+		metadata({
+			name: "editor.block-variable-reactor.effect-chance",
+			description: "editor.block-variable-reactor.effect-chance-description",
+		}),
 	),
 	flashThreshold: v.pipe(
 		v.optional(v.number(), 0.01),
 		metadata({
-			name: "flashThreshold",
-			type: "number",
-			description: "editor.block-variable-reactor.flash-threshold",
-			category: "rendering",
+			name: "editor.block-variable-reactor.flash-threshold",
+			description: "editor.block-variable-reactor.flash-threshold-description",
 		}),
 	),
 	flashAlpha: v.pipe(
 		v.optional(v.number(), 0.4),
-		metadata({ name: "flashAlpha", type: "number", description: "editor.block-variable-reactor.flash-alpha", category: "rendering" }),
+		metadata({
+			name: "editor.block-variable-reactor.flash-alpha",
+			description: "editor.block-variable-reactor.flash-alpha-description",
+		}),
 	),
 	flashSpeed: v.pipe(
 		v.optional(v.number(), 7),
-		metadata({ name: "flashSpeed", type: "number", description: "editor.block-variable-reactor.flash-speed", category: "rendering" }),
+		metadata({
+			name: "editor.block-variable-reactor.flash-speed",
+			description: "editor.block-variable-reactor.flash-speed-description",
+		}),
 	),
 });
 
 const lightBlockObjectSchema = v.object({
 	brightness: v.pipe(
 		v.optional(v.number(), 0.9),
-		metadata({ name: "brightness", type: "number", description: "editor.block-light-block.brightness", category: "rendering" }),
+		metadata({
+			name: "editor.block-light-block.brightness",
+			description: "editor.block-light-block.brightness-description",
+		}),
 	),
 	radius: v.pipe(
 		v.optional(v.number(), 200),
-		metadata({ name: "radius", type: "number", description: "editor.block-light-block.radius", category: "rendering" }),
+		metadata({
+			name: "editor.block-light-block.radius",
+			description: "editor.block-light-block.radius-description",
+		}),
 	),
 });
 
 const powerNodeObjectSchema = v.object({
 	laserRange: v.pipe(
 		v.optional(v.number(), 6),
-		metadata({ name: "laserRange", type: "number", description: "editor.block-power-node.laser-range", category: "distribution" }),
+		metadata({
+			name: "editor.block-power-node.laser-range",
+			description: "editor.block-power-node.laser-range-description",
+		}),
 	),
 	maxNodes: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "maxNodes", type: "number", description: "editor.block-power-node.max-nodes", category: "distribution" }),
+		metadata({
+			name: "editor.block-power-node.max-nodes",
+			description: "editor.block-power-node.max-nodes-description",
+		}),
 	),
 	autolink: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "autolink", type: "boolean", description: "editor.block-power-node.autolink", category: "config" }),
+		metadata({
+			name: "editor.block-power-node.autolink",
+			description: "editor.block-power-node.autolink-description",
+		}),
 	),
 	drawRange: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "drawRange", type: "boolean", description: "editor.block-power-node.draw-range", category: "rendering" }),
+		metadata({
+			name: "editor.block-power-node.draw-range",
+			description: "editor.block-power-node.draw-range-description",
+		}),
 	),
 	sameBlockConnection: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "sameBlockConnection",
-			type: "boolean",
-			description: "editor.block-power-node.same-block-connection",
-			category: "config",
+			name: "editor.block-power-node.same-block-connection",
+			description: "editor.block-power-node.same-block-connection-description",
 		}),
 	),
 	laserScale: v.pipe(
 		v.optional(v.number(), 0.25),
-		metadata({ name: "laserScale", type: "number", description: "editor.block-power-node.laser-scale", category: "rendering" }),
+		metadata({
+			name: "editor.block-power-node.laser-scale",
+			description: "editor.block-power-node.laser-scale-description",
+		}),
 	),
 });
 
 const longPowerNodeObjectSchema = v.object({
 	glowScl: v.pipe(
 		v.optional(v.number(), 16),
-		metadata({ name: "glowScl", type: "number", description: "editor.block-long-power-node.glow-scl", category: "rendering" }),
+		metadata({
+			name: "editor.block-long-power-node.glow-scl",
+			description: "editor.block-long-power-node.glow-scl-description",
+		}),
 	),
 	glowMag: v.pipe(
 		v.optional(v.number(), 0.6),
-		metadata({ name: "glowMag", type: "number", description: "editor.block-long-power-node.glow-mag", category: "rendering" }),
+		metadata({
+			name: "editor.block-long-power-node.glow-mag",
+			description: "editor.block-long-power-node.glow-mag-description",
+		}),
 	),
 });
 
 const beamNodeObjectSchema = v.object({
 	range: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "range", type: "number", description: "editor.block-beam-node.range", category: "distribution" }),
+		metadata({
+			name: "editor.block-beam-node.range",
+			description: "editor.block-beam-node.range-description",
+		}),
 	),
 	pulseScl: v.pipe(
 		v.optional(v.number(), 7),
-		metadata({ name: "pulseScl", type: "number", description: "editor.block-beam-node.pulse-scl", category: "rendering" }),
+		metadata({
+			name: "editor.block-beam-node.pulse-scl",
+			description: "editor.block-beam-node.pulse-scl-description",
+		}),
 	),
 	pulseMag: v.pipe(
 		v.optional(v.number(), 0.05),
-		metadata({ name: "pulseMag", type: "number", description: "editor.block-beam-node.pulse-mag", category: "rendering" }),
+		metadata({
+			name: "editor.block-beam-node.pulse-mag",
+			description: "editor.block-beam-node.pulse-mag-description",
+		}),
 	),
 	laserWidth: v.pipe(
 		v.optional(v.number(), 0.4),
-		metadata({ name: "laserWidth", type: "number", description: "editor.block-beam-node.laser-width", category: "rendering" }),
+		metadata({
+			name: "editor.block-beam-node.laser-width",
+			description: "editor.block-beam-node.laser-width-description",
+		}),
 	),
 });
 
 const powerSourceObjectSchema = v.object({
 	powerProduction: v.pipe(
 		v.optional(v.number(), 10000),
-		metadata({ name: "powerProduction", type: "number", description: "editor.block-power-source.power-production", category: "power" }),
+		metadata({
+			name: "editor.block-power-source.power-production",
+			description: "editor.block-power-source.power-production-description",
+		}),
 	),
 });
 
@@ -555,69 +621,82 @@ const powerSourceObjectSchema = v.object({
 const storageBlockObjectSchema = v.object({
 	coreMerge: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "coreMerge", type: "boolean", description: "editor.block-storage-block.core-merge", category: "items" }),
+		metadata({
+			name: "editor.block-storage-block.core-merge",
+			description: "editor.block-storage-block.core-merge-description",
+		}),
 	),
 });
 
 const coreBlockObjectSchema = v.object({
 	thrusterLength: v.pipe(
 		v.optional(v.number(), 3.5),
-		metadata({ name: "thrusterLength", type: "number", description: "editor.block-core-block.thruster-length", category: "rendering" }),
+		metadata({
+			name: "editor.block-core-block.thruster-length",
+			description: "editor.block-core-block.thruster-length-description",
+		}),
 	),
 	thrusterOffset: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "thrusterOffset", type: "number", description: "editor.block-core-block.thruster-offset", category: "rendering" }),
+		metadata({
+			name: "editor.block-core-block.thruster-offset",
+			description: "editor.block-core-block.thruster-offset-description",
+		}),
 	),
 	isFirstTier: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "isFirstTier", type: "boolean", description: "editor.block-core-block.is-first-tier", category: "structure" }),
+		metadata({
+			name: "editor.block-core-block.is-first-tier",
+			description: "editor.block-core-block.is-first-tier-description",
+		}),
 	),
 	allowSpawn: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "allowSpawn", type: "boolean", description: "editor.block-core-block.allow-spawn", category: "misc" }),
+		metadata({
+			name: "editor.block-core-block.allow-spawn",
+			description: "editor.block-core-block.allow-spawn-description",
+		}),
 	),
 	requiresCoreZone: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "requiresCoreZone",
-			type: "boolean",
-			description: "editor.block-core-block.requires-core-zone",
-			category: "placement",
+			name: "editor.block-core-block.requires-core-zone",
+			description: "editor.block-core-block.requires-core-zone-description",
 		}),
 	),
 	incinerateNonBuildable: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "incinerateNonBuildable",
-			type: "boolean",
-			description: "editor.block-core-block.incinerate-non-buildable",
-			category: "items",
+			name: "editor.block-core-block.incinerate-non-buildable",
+			description: "editor.block-core-block.incinerate-non-buildable-description",
 		}),
 	),
 	landDuration: v.pipe(
 		v.optional(v.number(), 160),
-		metadata({ name: "landDuration", type: "number", description: "editor.block-core-block.land-duration", category: "misc" }),
+		metadata({
+			name: "editor.block-core-block.land-duration",
+			description: "editor.block-core-block.land-duration-description",
+		}),
 	),
 	launchSoundVolume: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
-			name: "launchSoundVolume",
-			type: "number",
-			description: "editor.block-core-block.launch-sound-volume",
-			category: "audio",
+			name: "editor.block-core-block.launch-sound-volume",
+			description: "editor.block-core-block.launch-sound-volume-description",
 		}),
 	),
 	landSoundVolume: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "landSoundVolume", type: "number", description: "editor.block-core-block.land-sound-volume", category: "audio" }),
+		metadata({
+			name: "editor.block-core-block.land-sound-volume",
+			description: "editor.block-core-block.land-sound-volume-description",
+		}),
 	),
 	captureInvicibility: v.pipe(
 		v.optional(v.number(), 900),
 		metadata({
-			name: "captureInvicibility",
-			type: "number",
-			description: "editor.block-core-block.capture-invicibility",
-			category: "combat",
+			name: "editor.block-core-block.capture-invicibility",
+			description: "editor.block-core-block.capture-invicibility-description",
 		}),
 	),
 });
@@ -625,11 +704,17 @@ const coreBlockObjectSchema = v.object({
 const unloaderObjectSchema = v.object({
 	speed: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "speed", type: "number", description: "editor.block-unloader.speed", category: "config" }),
+		metadata({
+			name: "editor.block-unloader.speed",
+			description: "editor.block-unloader.speed-description",
+		}),
 	),
 	allowCoreUnload: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "allowCoreUnload", type: "boolean", description: "editor.block-unloader.allow-core-unload", category: "config" }),
+		metadata({
+			name: "editor.block-unloader.allow-core-unload",
+			description: "editor.block-unloader.allow-core-unload-description",
+		}),
 	),
 });
 
@@ -637,68 +722,99 @@ const unloaderObjectSchema = v.object({
 const liquidRouterObjectSchema = v.object({
 	liquidPadding: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "liquidPadding", type: "number", description: "editor.block-liquid-router.liquid-padding", category: "liquids" }),
+		metadata({
+			name: "editor.block-liquid-router.liquid-padding",
+			description: "editor.block-liquid-router.liquid-padding-description",
+		}),
 	),
 });
 
 const conduitObjectSchema = v.object({
 	padCorners: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "padCorners", type: "boolean", description: "editor.block-conduit.pad-corners", category: "rendering" }),
+		metadata({
+			name: "editor.block-conduit.pad-corners",
+			description: "editor.block-conduit.pad-corners-description",
+		}),
 	),
 	leaks: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "leaks", type: "boolean", description: "editor.block-conduit.leaks", category: "liquids" }),
+		metadata({
+			name: "editor.block-conduit.leaks",
+			description: "editor.block-conduit.leaks-description",
+		}),
 	),
 });
 
 const pumpObjectSchema = v.object({
 	pumpAmount: v.pipe(
 		v.optional(v.number(), 0.2),
-		metadata({ name: "pumpAmount", type: "number", description: "editor.block-pump.pump-amount", category: "liquids" }),
+		metadata({
+			name: "editor.block-pump.pump-amount",
+			description: "editor.block-pump.pump-amount-description",
+		}),
 	),
 	consumeTime: v.pipe(
 		v.optional(v.number(), 300),
-		metadata({ name: "consumeTime", type: "number", description: "editor.block-pump.consume-time", category: "production" }),
+		metadata({
+			name: "editor.block-pump.consume-time",
+			description: "editor.block-pump.consume-time-description",
+		}),
 	),
 	warmupSpeed: v.pipe(
 		v.optional(v.number(), 0.019),
-		metadata({ name: "warmupSpeed", type: "number", description: "editor.block-pump.warmup-speed", category: "production" }),
+		metadata({
+			name: "editor.block-pump.warmup-speed",
+			description: "editor.block-pump.warmup-speed-description",
+		}),
 	),
 });
 
 const solidPumpObjectSchema = v.object({
 	result: v.pipe(
 		v.optional(v.string(), "water"),
-		metadata({ name: "result", type: "string", description: "editor.block-solid-pump.result", category: "liquids" }),
+		metadata({
+			name: "editor.block-solid-pump.result",
+			description: "editor.block-solid-pump.result-description",
+		}),
 	),
 	updateEffectChance: v.pipe(
 		v.optional(v.number(), 0.02),
 		metadata({
-			name: "updateEffectChance",
-			type: "number",
-			description: "editor.block-solid-pump.update-effect-chance",
-			category: "rendering",
+			name: "editor.block-solid-pump.update-effect-chance",
+			description: "editor.block-solid-pump.update-effect-chance-description",
 		}),
 	),
 	rotateSpeed: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "rotateSpeed", type: "number", description: "editor.block-solid-pump.rotate-speed", category: "rendering" }),
+		metadata({
+			name: "editor.block-solid-pump.rotate-speed",
+			description: "editor.block-solid-pump.rotate-speed-description",
+		}),
 	),
 	baseEfficiency: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "baseEfficiency", type: "number", description: "editor.block-solid-pump.base-efficiency", category: "production" }),
+		metadata({
+			name: "editor.block-solid-pump.base-efficiency",
+			description: "editor.block-solid-pump.base-efficiency-description",
+		}),
 	),
 	attribute: v.pipe(
 		v.optional(v.string()),
-		metadata({ name: "attribute", type: "string", description: "editor.block-solid-pump.attribute", category: "production" }),
+		metadata({
+			name: "editor.block-solid-pump.attribute",
+			description: "editor.block-solid-pump.attribute-description",
+		}),
 	),
 });
 
 const frackerObjectSchema = v.object({
 	itemUseTime: v.pipe(
 		v.optional(v.number(), 100),
-		metadata({ name: "itemUseTime", type: "number", description: "editor.block-fracker.item-use-time", category: "production" }),
+		metadata({
+			name: "editor.block-fracker.item-use-time",
+			description: "editor.block-fracker.item-use-time-description",
+		}),
 	),
 });
 
@@ -706,146 +822,162 @@ const frackerObjectSchema = v.object({
 const genericCrafterObjectSchema = v.object({
 	outputItem: v.pipe(
 		v.optional(v.string()),
-		metadata({ name: "outputItem", type: "string", description: "editor.block-generic-crafter.output-item", category: "items" }),
+		metadata({
+			name: "editor.block-generic-crafter.output-item",
+			description: "editor.block-generic-crafter.output-item-description",
+		}),
 	),
 	outputItems: v.pipe(
 		v.optional(v.array(v.string())),
-		metadata({ name: "outputItems", type: "array", description: "editor.block-generic-crafter.output-items", category: "items" }),
+		metadata({
+			name: "editor.block-generic-crafter.output-items",
+			description: "editor.block-generic-crafter.output-items-description",
+		}),
 	),
 	outputLiquid: v.pipe(
 		v.optional(v.string()),
-		metadata({ name: "outputLiquid", type: "string", description: "editor.block-generic-crafter.output-liquid", category: "liquids" }),
+		metadata({
+			name: "editor.block-generic-crafter.output-liquid",
+			description: "editor.block-generic-crafter.output-liquid-description",
+		}),
 	),
 	outputLiquids: v.pipe(
 		v.optional(v.array(v.string())),
-		metadata({ name: "outputLiquids", type: "array", description: "editor.block-generic-crafter.output-liquids", category: "liquids" }),
+		metadata({
+			name: "editor.block-generic-crafter.output-liquids",
+			description: "editor.block-generic-crafter.output-liquids-description",
+		}),
 	),
 	liquidOutputDirections: v.pipe(
 		v.optional(v.array(v.number()), [-1]),
 		metadata({
-			name: "liquidOutputDirections",
-			type: "array",
-			description: "editor.block-generic-crafter.liquid-output-directions",
-			category: "liquids",
+			name: "editor.block-generic-crafter.liquid-output-directions",
+			description: "editor.block-generic-crafter.liquid-output-directions-description",
 		}),
 	),
 	dumpExtraLiquid: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
-			name: "dumpExtraLiquid",
-			type: "boolean",
-			description: "editor.block-generic-crafter.dump-extra-liquid",
-			category: "liquids",
+			name: "editor.block-generic-crafter.dump-extra-liquid",
+			description: "editor.block-generic-crafter.dump-extra-liquid-description",
 		}),
 	),
 	ignoreLiquidFullness: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "ignoreLiquidFullness",
-			type: "boolean",
-			description: "editor.block-generic-crafter.ignore-liquid-fullness",
-			category: "liquids",
+			name: "editor.block-generic-crafter.ignore-liquid-fullness",
+			description: "editor.block-generic-crafter.ignore-liquid-fullness-description",
 		}),
 	),
 	craftTime: v.pipe(
 		v.optional(v.number(), 80),
-		metadata({ name: "craftTime", type: "number", description: "editor.block-generic-crafter.craft-time", category: "production" }),
+		metadata({
+			name: "editor.block-generic-crafter.craft-time",
+			description: "editor.block-generic-crafter.craft-time-description",
+		}),
 	),
 	updateEffectChance: v.pipe(
 		v.optional(v.number(), 0.04),
 		metadata({
-			name: "updateEffectChance",
-			type: "number",
-			description: "editor.block-generic-crafter.update-effect-chance",
-			category: "rendering",
+			name: "editor.block-generic-crafter.update-effect-chance",
+			description: "editor.block-generic-crafter.update-effect-chance-description",
 		}),
 	),
 	updateEffectSpread: v.pipe(
 		v.optional(v.number(), 4),
 		metadata({
-			name: "updateEffectSpread",
-			type: "number",
-			description: "editor.block-generic-crafter.update-effect-spread",
-			category: "rendering",
+			name: "editor.block-generic-crafter.update-effect-spread",
+			description: "editor.block-generic-crafter.update-effect-spread-description",
 		}),
 	),
 	warmupSpeed: v.pipe(
 		v.optional(v.number(), 0.019),
-		metadata({ name: "warmupSpeed", type: "number", description: "editor.block-generic-crafter.warmup-speed", category: "production" }),
+		metadata({
+			name: "editor.block-generic-crafter.warmup-speed",
+			description: "editor.block-generic-crafter.warmup-speed-description",
+		}),
 	),
 });
 
 const heatCrafterObjectSchema = v.object({
 	heatRequirement: v.pipe(
 		v.optional(v.number(), 10),
-		metadata({ name: "heatRequirement", type: "number", description: "editor.block-heat-crafter.heat-requirement", category: "power" }),
+		metadata({
+			name: "editor.block-heat-crafter.heat-requirement",
+			description: "editor.block-heat-crafter.heat-requirement-description",
+		}),
 	),
 	overheatScale: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "overheatScale", type: "number", description: "editor.block-heat-crafter.overheat-scale", category: "power" }),
+		metadata({
+			name: "editor.block-heat-crafter.overheat-scale",
+			description: "editor.block-heat-crafter.overheat-scale-description",
+		}),
 	),
 	maxEfficiency: v.pipe(
 		v.optional(v.number(), 4),
-		metadata({ name: "maxEfficiency", type: "number", description: "editor.block-heat-crafter.max-efficiency", category: "production" }),
+		metadata({
+			name: "editor.block-heat-crafter.max-efficiency",
+			description: "editor.block-heat-crafter.max-efficiency-description",
+		}),
 	),
 });
 
 const attributeCrafterObjectSchema = v.object({
 	attribute: v.pipe(
 		v.optional(v.string(), "heat"),
-		metadata({ name: "attribute", type: "string", description: "editor.block-attribute-crafter.attribute", category: "production" }),
+		metadata({
+			name: "editor.block-attribute-crafter.attribute",
+			description: "editor.block-attribute-crafter.attribute-description",
+		}),
 	),
 	baseEfficiency: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
-			name: "baseEfficiency",
-			type: "number",
-			description: "editor.block-attribute-crafter.base-efficiency",
-			category: "production",
+			name: "editor.block-attribute-crafter.base-efficiency",
+			description: "editor.block-attribute-crafter.base-efficiency-description",
 		}),
 	),
 	boostScale: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "boostScale", type: "number", description: "editor.block-attribute-crafter.boost-scale", category: "production" }),
+		metadata({
+			name: "editor.block-attribute-crafter.boost-scale",
+			description: "editor.block-attribute-crafter.boost-scale-description",
+		}),
 	),
 	maxBoost: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "maxBoost", type: "number", description: "editor.block-attribute-crafter.max-boost", category: "production" }),
+		metadata({
+			name: "editor.block-attribute-crafter.max-boost",
+			description: "editor.block-attribute-crafter.max-boost-description",
+		}),
 	),
 	minEfficiency: v.pipe(
 		v.optional(v.number(), -1),
 		metadata({
-			name: "minEfficiency",
-			type: "number",
-			description: "editor.block-attribute-crafter.min-efficiency",
-			category: "production",
+			name: "editor.block-attribute-crafter.min-efficiency",
+			description: "editor.block-attribute-crafter.min-efficiency-description",
 		}),
 	),
 	displayEfficiencyScale: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
-			name: "displayEfficiencyScale",
-			type: "number",
-			description: "editor.block-attribute-crafter.display-efficiency-scale",
-			category: "production",
+			name: "editor.block-attribute-crafter.display-efficiency-scale",
+			description: "editor.block-attribute-crafter.display-efficiency-scale-description",
 		}),
 	),
 	displayEfficiency: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
-			name: "displayEfficiency",
-			type: "boolean",
-			description: "editor.block-attribute-crafter.display-efficiency",
-			category: "production",
+			name: "editor.block-attribute-crafter.display-efficiency",
+			description: "editor.block-attribute-crafter.display-efficiency-description",
 		}),
 	),
 	scaleLiquidConsumption: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "scaleLiquidConsumption",
-			type: "boolean",
-			description: "editor.block-attribute-crafter.scale-liquid-consumption",
-			category: "liquids",
+			name: "editor.block-attribute-crafter.scale-liquid-consumption",
+			description: "editor.block-attribute-crafter.scale-liquid-consumption-description",
 		}),
 	),
 });
@@ -853,124 +985,176 @@ const attributeCrafterObjectSchema = v.object({
 const separatorObjectSchema = v.object({
 	results: v.pipe(
 		v.optional(v.array(v.string())),
-		metadata({ name: "results", type: "array", description: "editor.block-separator.results", category: "items" }),
+		metadata({
+			name: "editor.block-separator.results",
+			description: "editor.block-separator.results-description",
+		}),
 	),
 	craftTime: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "craftTime", type: "number", description: "editor.block-separator.craft-time", category: "production" }),
+		metadata({
+			name: "editor.block-separator.craft-time",
+			description: "editor.block-separator.craft-time-description",
+		}),
 	),
 });
 
 const drillObjectSchema = v.object({
 	tier: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "tier", type: "number", description: "editor.block-drill.tier", category: "production" }),
+		metadata({
+			name: "editor.block-drill.tier",
+			description: "editor.block-drill.tier-description",
+		}),
 	),
 	drillTime: v.pipe(
 		v.optional(v.number(), 300),
-		metadata({ name: "drillTime", type: "number", description: "editor.block-drill.drill-time", category: "production" }),
+		metadata({
+			name: "editor.block-drill.drill-time",
+			description: "editor.block-drill.drill-time-description",
+		}),
 	),
 	hardnessDrillMultiplier: v.pipe(
 		v.optional(v.number(), 50),
 		metadata({
-			name: "hardnessDrillMultiplier",
-			type: "number",
-			description: "editor.block-drill.hardness-drill-multiplier",
-			category: "production",
+			name: "editor.block-drill.hardness-drill-multiplier",
+			description: "editor.block-drill.hardness-drill-multiplier-description",
 		}),
 	),
 	liquidBoostIntensity: v.pipe(
 		v.optional(v.number(), 1.6),
 		metadata({
-			name: "liquidBoostIntensity",
-			type: "number",
-			description: "editor.block-drill.liquid-boost-intensity",
-			category: "liquids",
+			name: "editor.block-drill.liquid-boost-intensity",
+			description: "editor.block-drill.liquid-boost-intensity-description",
 		}),
 	),
 	warmupSpeed: v.pipe(
 		v.optional(v.number(), 0.015),
-		metadata({ name: "warmupSpeed", type: "number", description: "editor.block-drill.warmup-speed", category: "production" }),
+		metadata({
+			name: "editor.block-drill.warmup-speed",
+			description: "editor.block-drill.warmup-speed-description",
+		}),
 	),
 	blockedItem: v.pipe(
 		v.optional(v.string()),
-		metadata({ name: "blockedItem", type: "string", description: "editor.block-drill.blocked-item", category: "items" }),
+		metadata({
+			name: "editor.block-drill.blocked-item",
+			description: "editor.block-drill.blocked-item-description",
+		}),
 	),
 	blockedItems: v.pipe(
 		v.optional(v.array(v.string())),
-		metadata({ name: "blockedItems", type: "array", description: "editor.block-drill.blocked-items", category: "items" }),
+		metadata({
+			name: "editor.block-drill.blocked-items",
+			description: "editor.block-drill.blocked-items-description",
+		}),
 	),
 	drawMineItem: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "drawMineItem", type: "boolean", description: "editor.block-drill.draw-mine-item", category: "rendering" }),
+		metadata({
+			name: "editor.block-drill.draw-mine-item",
+			description: "editor.block-drill.draw-mine-item-description",
+		}),
 	),
 	drillEffectRnd: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "drillEffectRnd", type: "number", description: "editor.block-drill.drill-effect-rnd", category: "rendering" }),
+		metadata({
+			name: "editor.block-drill.drill-effect-rnd",
+			description: "editor.block-drill.drill-effect-rnd-description",
+		}),
 	),
 	drillEffectChance: v.pipe(
 		v.optional(v.number(), 0.02),
-		metadata({ name: "drillEffectChance", type: "number", description: "editor.block-drill.drill-effect-chance", category: "rendering" }),
+		metadata({
+			name: "editor.block-drill.drill-effect-chance",
+			description: "editor.block-drill.drill-effect-chance-description",
+		}),
 	),
 	rotateSpeed: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "rotateSpeed", type: "number", description: "editor.block-drill.rotate-speed", category: "rendering" }),
+		metadata({
+			name: "editor.block-drill.rotate-speed",
+			description: "editor.block-drill.rotate-speed-description",
+		}),
 	),
 	updateEffectChance: v.pipe(
 		v.optional(v.number(), 0.02),
 		metadata({
-			name: "updateEffectChance",
-			type: "number",
-			description: "editor.block-drill.update-effect-chance",
-			category: "rendering",
+			name: "editor.block-drill.update-effect-chance",
+			description: "editor.block-drill.update-effect-chance-description",
 		}),
 	),
 	drillMultipliers: v.pipe(
 		v.optional(v.record(v.string(), v.number())),
-		metadata({ name: "drillMultipliers", type: "object", description: "editor.block-drill.drill-multipliers", category: "production" }),
+		metadata({
+			name: "editor.block-drill.drill-multipliers",
+			description: "editor.block-drill.drill-multipliers-description",
+		}),
 	),
 	drawRim: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "drawRim", type: "boolean", description: "editor.block-drill.draw-rim", category: "rendering" }),
+		metadata({
+			name: "editor.block-drill.draw-rim",
+			description: "editor.block-drill.draw-rim-description",
+		}),
 	),
 	drawSpinSprite: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "drawSpinSprite", type: "boolean", description: "editor.block-drill.draw-spin-sprite", category: "rendering" }),
+		metadata({
+			name: "editor.block-drill.draw-spin-sprite",
+			description: "editor.block-drill.draw-spin-sprite-description",
+		}),
 	),
 });
 
 const burstDrillObjectSchema = v.object({
 	shake: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "shake", type: "number", description: "editor.block-burst-drill.shake", category: "rendering" }),
+		metadata({
+			name: "editor.block-burst-drill.shake",
+			description: "editor.block-burst-drill.shake-description",
+		}),
 	),
 	invertedTime: v.pipe(
 		v.optional(v.number(), 200),
-		metadata({ name: "invertedTime", type: "number", description: "editor.block-burst-drill.inverted-time", category: "production" }),
+		metadata({
+			name: "editor.block-burst-drill.inverted-time",
+			description: "editor.block-burst-drill.inverted-time-description",
+		}),
 	),
 	arrowSpacing: v.pipe(
 		v.optional(v.number(), 4),
-		metadata({ name: "arrowSpacing", type: "number", description: "editor.block-burst-drill.arrow-spacing", category: "rendering" }),
+		metadata({
+			name: "editor.block-burst-drill.arrow-spacing",
+			description: "editor.block-burst-drill.arrow-spacing-description",
+		}),
 	),
 	arrowOffset: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "arrowOffset", type: "number", description: "editor.block-burst-drill.arrow-offset", category: "rendering" }),
+		metadata({
+			name: "editor.block-burst-drill.arrow-offset",
+			description: "editor.block-burst-drill.arrow-offset-description",
+		}),
 	),
 	arrows: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "arrows", type: "number", description: "editor.block-burst-drill.arrows", category: "rendering" }),
+		metadata({
+			name: "editor.block-burst-drill.arrows",
+			description: "editor.block-burst-drill.arrows-description",
+		}),
 	),
 	drillSoundVolume: v.pipe(
 		v.optional(v.number(), 0.6),
-		metadata({ name: "drillSoundVolume", type: "number", description: "editor.block-burst-drill.drill-sound-volume", category: "audio" }),
+		metadata({
+			name: "editor.block-burst-drill.drill-sound-volume",
+			description: "editor.block-burst-drill.drill-sound-volume-description",
+		}),
 	),
 	drillSoundPitchRand: v.pipe(
 		v.optional(v.number(), 0.1),
 		metadata({
-			name: "drillSoundPitchRand",
-			type: "number",
-			description: "editor.block-burst-drill.drill-sound-pitch-rand",
-			category: "audio",
+			name: "editor.block-burst-drill.drill-sound-pitch-rand",
+			description: "editor.block-burst-drill.drill-sound-pitch-rand-description",
 		}),
 	),
 });
@@ -978,152 +1162,201 @@ const burstDrillObjectSchema = v.object({
 const beamDrillObjectSchema = v.object({
 	drillTime: v.pipe(
 		v.optional(v.number(), 200),
-		metadata({ name: "drillTime", type: "number", description: "editor.block-beam-drill.drill-time", category: "production" }),
+		metadata({
+			name: "editor.block-beam-drill.drill-time",
+			description: "editor.block-beam-drill.drill-time-description",
+		}),
 	),
 	range: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "range", type: "number", description: "editor.block-beam-drill.range", category: "production" }),
+		metadata({
+			name: "editor.block-beam-drill.range",
+			description: "editor.block-beam-drill.range-description",
+		}),
 	),
 	tier: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "tier", type: "number", description: "editor.block-beam-drill.tier", category: "production" }),
+		metadata({
+			name: "editor.block-beam-drill.tier",
+			description: "editor.block-beam-drill.tier-description",
+		}),
 	),
 	laserWidth: v.pipe(
 		v.optional(v.number(), 0.65),
-		metadata({ name: "laserWidth", type: "number", description: "editor.block-beam-drill.laser-width", category: "rendering" }),
+		metadata({
+			name: "editor.block-beam-drill.laser-width",
+			description: "editor.block-beam-drill.laser-width-description",
+		}),
 	),
 	optionalBoostIntensity: v.pipe(
 		v.optional(v.number(), 2.5),
 		metadata({
-			name: "optionalBoostIntensity",
-			type: "number",
-			description: "editor.block-beam-drill.optional-boost-intensity",
-			category: "production",
+			name: "editor.block-beam-drill.optional-boost-intensity",
+			description: "editor.block-beam-drill.optional-boost-intensity-description",
 		}),
 	),
 	drillMultipliers: v.pipe(
 		v.optional(v.record(v.string(), v.number())),
 		metadata({
-			name: "drillMultipliers",
-			type: "object",
-			description: "editor.block-beam-drill.drill-multipliers",
-			category: "production",
+			name: "editor.block-beam-drill.drill-multipliers",
+			description: "editor.block-beam-drill.drill-multipliers-description",
 		}),
 	),
 	blockedItem: v.pipe(
 		v.optional(v.string()),
-		metadata({ name: "blockedItem", type: "string", description: "editor.block-beam-drill.blocked-item", category: "items" }),
+		metadata({
+			name: "editor.block-beam-drill.blocked-item",
+			description: "editor.block-beam-drill.blocked-item-description",
+		}),
 	),
 	blockedItems: v.pipe(
 		v.optional(v.array(v.string())),
-		metadata({ name: "blockedItems", type: "array", description: "editor.block-beam-drill.blocked-items", category: "items" }),
+		metadata({
+			name: "editor.block-beam-drill.blocked-items",
+			description: "editor.block-beam-drill.blocked-items-description",
+		}),
 	),
 	glowIntensity: v.pipe(
 		v.optional(v.number(), 0.2),
-		metadata({ name: "glowIntensity", type: "number", description: "editor.block-beam-drill.glow-intensity", category: "rendering" }),
+		metadata({
+			name: "editor.block-beam-drill.glow-intensity",
+			description: "editor.block-beam-drill.glow-intensity-description",
+		}),
 	),
 	pulseIntensity: v.pipe(
 		v.optional(v.number(), 0.07),
-		metadata({ name: "pulseIntensity", type: "number", description: "editor.block-beam-drill.pulse-intensity", category: "rendering" }),
+		metadata({
+			name: "editor.block-beam-drill.pulse-intensity",
+			description: "editor.block-beam-drill.pulse-intensity-description",
+		}),
 	),
 	glowScl: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "glowScl", type: "number", description: "editor.block-beam-drill.glow-scl", category: "rendering" }),
+		metadata({
+			name: "editor.block-beam-drill.glow-scl",
+			description: "editor.block-beam-drill.glow-scl-description",
+		}),
 	),
 	sparks: v.pipe(
 		v.optional(v.number(), 7),
-		metadata({ name: "sparks", type: "number", description: "editor.block-beam-drill.sparks", category: "rendering" }),
+		metadata({
+			name: "editor.block-beam-drill.sparks",
+			description: "editor.block-beam-drill.sparks-description",
+		}),
 	),
 	sparkRange: v.pipe(
 		v.optional(v.number(), 10),
-		metadata({ name: "sparkRange", type: "number", description: "editor.block-beam-drill.spark-range", category: "rendering" }),
+		metadata({
+			name: "editor.block-beam-drill.spark-range",
+			description: "editor.block-beam-drill.spark-range-description",
+		}),
 	),
 	sparkLife: v.pipe(
 		v.optional(v.number(), 27),
-		metadata({ name: "sparkLife", type: "number", description: "editor.block-beam-drill.spark-life", category: "rendering" }),
+		metadata({
+			name: "editor.block-beam-drill.spark-life",
+			description: "editor.block-beam-drill.spark-life-description",
+		}),
 	),
 	sparkRecurrence: v.pipe(
 		v.optional(v.number(), 4),
-		metadata({ name: "sparkRecurrence", type: "number", description: "editor.block-beam-drill.spark-recurrence", category: "rendering" }),
+		metadata({
+			name: "editor.block-beam-drill.spark-recurrence",
+			description: "editor.block-beam-drill.spark-recurrence-description",
+		}),
 	),
 	sparkSpread: v.pipe(
 		v.optional(v.number(), 45),
-		metadata({ name: "sparkSpread", type: "number", description: "editor.block-beam-drill.spark-spread", category: "rendering" }),
+		metadata({
+			name: "editor.block-beam-drill.spark-spread",
+			description: "editor.block-beam-drill.spark-spread-description",
+		}),
 	),
 	sparkSize: v.pipe(
 		v.optional(v.number(), 3.5),
-		metadata({ name: "sparkSize", type: "number", description: "editor.block-beam-drill.spark-size", category: "rendering" }),
+		metadata({
+			name: "editor.block-beam-drill.spark-size",
+			description: "editor.block-beam-drill.spark-size-description",
+		}),
 	),
 	heatPulse: v.pipe(
 		v.optional(v.number(), 0.3),
-		metadata({ name: "heatPulse", type: "number", description: "editor.block-beam-drill.heat-pulse", category: "rendering" }),
+		metadata({
+			name: "editor.block-beam-drill.heat-pulse",
+			description: "editor.block-beam-drill.heat-pulse-description",
+		}),
 	),
 	heatPulseScl: v.pipe(
 		v.optional(v.number(), 7),
-		metadata({ name: "heatPulseScl", type: "number", description: "editor.block-beam-drill.heat-pulse-scl", category: "rendering" }),
+		metadata({
+			name: "editor.block-beam-drill.heat-pulse-scl",
+			description: "editor.block-beam-drill.heat-pulse-scl-description",
+		}),
 	),
 });
 
 const wallCrafterObjectSchema = v.object({
 	drillTime: v.pipe(
 		v.optional(v.number(), 150),
-		metadata({ name: "drillTime", type: "number", description: "editor.block-wall-crafter.drill-time", category: "production" }),
+		metadata({
+			name: "editor.block-wall-crafter.drill-time",
+			description: "editor.block-wall-crafter.drill-time-description",
+		}),
 	),
 	liquidBoostIntensity: v.pipe(
 		v.optional(v.number(), 1.6),
 		metadata({
-			name: "liquidBoostIntensity",
-			type: "number",
-			description: "editor.block-wall-crafter.liquid-boost-intensity",
-			category: "liquids",
+			name: "editor.block-wall-crafter.liquid-boost-intensity",
+			description: "editor.block-wall-crafter.liquid-boost-intensity-description",
 		}),
 	),
 	updateEffectChance: v.pipe(
 		v.optional(v.number(), 0.02),
 		metadata({
-			name: "updateEffectChance",
-			type: "number",
-			description: "editor.block-wall-crafter.update-effect-chance",
-			category: "rendering",
+			name: "editor.block-wall-crafter.update-effect-chance",
+			description: "editor.block-wall-crafter.update-effect-chance-description",
 		}),
 	),
 	rotateSpeed: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "rotateSpeed", type: "number", description: "editor.block-wall-crafter.rotate-speed", category: "rendering" }),
+		metadata({
+			name: "editor.block-wall-crafter.rotate-speed",
+			description: "editor.block-wall-crafter.rotate-speed-description",
+		}),
 	),
 	attribute: v.pipe(
 		v.optional(v.string(), "sand"),
-		metadata({ name: "attribute", type: "string", description: "editor.block-wall-crafter.attribute", category: "production" }),
+		metadata({
+			name: "editor.block-wall-crafter.attribute",
+			description: "editor.block-wall-crafter.attribute-description",
+		}),
 	),
 	output: v.pipe(
 		v.optional(v.string(), "sand"),
-		metadata({ name: "output", type: "string", description: "editor.block-wall-crafter.output", category: "items" }),
+		metadata({
+			name: "editor.block-wall-crafter.output",
+			description: "editor.block-wall-crafter.output-description",
+		}),
 	),
 	boostItemUseTime: v.pipe(
 		v.optional(v.number(), 120),
 		metadata({
-			name: "boostItemUseTime",
-			type: "number",
-			description: "editor.block-wall-crafter.boost-item-use-time",
-			category: "production",
+			name: "editor.block-wall-crafter.boost-item-use-time",
+			description: "editor.block-wall-crafter.boost-item-use-time-description",
 		}),
 	),
 	itemBoostIntensity: v.pipe(
 		v.optional(v.number(), 1.6),
 		metadata({
-			name: "itemBoostIntensity",
-			type: "number",
-			description: "editor.block-wall-crafter.item-boost-intensity",
-			category: "production",
+			name: "editor.block-wall-crafter.item-boost-intensity",
+			description: "editor.block-wall-crafter.item-boost-intensity-description",
 		}),
 	),
 	hasLiquidBooster: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "hasLiquidBooster",
-			type: "boolean",
-			description: "editor.block-wall-crafter.has-liquid-booster",
-			category: "liquids",
+			name: "editor.block-wall-crafter.has-liquid-booster",
+			description: "editor.block-wall-crafter.has-liquid-booster-description",
 		}),
 	),
 });
@@ -1131,18 +1364,27 @@ const wallCrafterObjectSchema = v.object({
 const itemIncineratorObjectSchema = v.object({
 	effectChance: v.pipe(
 		v.optional(v.number(), 0.2),
-		metadata({ name: "effectChance", type: "number", description: "editor.block-item-incinerator.effect-chance", category: "rendering" }),
+		metadata({
+			name: "editor.block-item-incinerator.effect-chance",
+			description: "editor.block-item-incinerator.effect-chance-description",
+		}),
 	),
 });
 
 const heatProducerObjectSchema = v.object({
 	heatOutput: v.pipe(
 		v.optional(v.number(), 10),
-		metadata({ name: "heatOutput", type: "number", description: "editor.block-heat-producer.heat-output", category: "power" }),
+		metadata({
+			name: "editor.block-heat-producer.heat-output",
+			description: "editor.block-heat-producer.heat-output-description",
+		}),
 	),
 	warmupRate: v.pipe(
 		v.optional(v.number(), 0.15),
-		metadata({ name: "warmupRate", type: "number", description: "editor.block-heat-producer.warmup-rate", category: "power" }),
+		metadata({
+			name: "editor.block-heat-producer.warmup-rate",
+			description: "editor.block-heat-producer.warmup-rate-description",
+		}),
 	),
 });
 
@@ -1150,285 +1392,407 @@ const heatProducerObjectSchema = v.object({
 const wallObjectSchema = v.object({
 	lightningChance: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "lightningChance", type: "number", description: "editor.block-wall.lightning-chance", category: "combat" }),
+		metadata({
+			name: "editor.block-wall.lightning-chance",
+			description: "editor.block-wall.lightning-chance-description",
+		}),
 	),
 	lightningDamage: v.pipe(
 		v.optional(v.number(), 20),
-		metadata({ name: "lightningDamage", type: "number", description: "editor.block-wall.lightning-damage", category: "combat" }),
+		metadata({
+			name: "editor.block-wall.lightning-damage",
+			description: "editor.block-wall.lightning-damage-description",
+		}),
 	),
 	lightningLength: v.pipe(
 		v.optional(v.number(), 17),
-		metadata({ name: "lightningLength", type: "number", description: "editor.block-wall.lightning-length", category: "combat" }),
+		metadata({
+			name: "editor.block-wall.lightning-length",
+			description: "editor.block-wall.lightning-length-description",
+		}),
 	),
 	chanceDeflect: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "chanceDeflect", type: "number", description: "editor.block-wall.chance-deflect", category: "combat" }),
+		metadata({
+			name: "editor.block-wall.chance-deflect",
+			description: "editor.block-wall.chance-deflect-description",
+		}),
 	),
 	flashHit: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "flashHit", type: "boolean", description: "editor.block-wall.flash-hit", category: "combat" }),
+		metadata({
+			name: "editor.block-wall.flash-hit",
+			description: "editor.block-wall.flash-hit-description",
+		}),
 	),
 });
 
 const shieldWallObjectSchema = v.object({
 	shieldHealth: v.pipe(
 		v.optional(v.number(), 900),
-		metadata({ name: "shieldHealth", type: "number", description: "editor.block-shield-wall.shield-health", category: "combat" }),
+		metadata({
+			name: "editor.block-shield-wall.shield-health",
+			description: "editor.block-shield-wall.shield-health-description",
+		}),
 	),
 	breakCooldown: v.pipe(
 		v.optional(v.number(), 600),
-		metadata({ name: "breakCooldown", type: "number", description: "editor.block-shield-wall.break-cooldown", category: "combat" }),
+		metadata({
+			name: "editor.block-shield-wall.break-cooldown",
+			description: "editor.block-shield-wall.break-cooldown-description",
+		}),
 	),
 	regenSpeed: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "regenSpeed", type: "number", description: "editor.block-shield-wall.regen-speed", category: "combat" }),
+		metadata({
+			name: "editor.block-shield-wall.regen-speed",
+			description: "editor.block-shield-wall.regen-speed-description",
+		}),
 	),
 	glowMag: v.pipe(
 		v.optional(v.number(), 0.6),
-		metadata({ name: "glowMag", type: "number", description: "editor.block-shield-wall.glow-mag", category: "combat" }),
+		metadata({
+			name: "editor.block-shield-wall.glow-mag",
+			description: "editor.block-shield-wall.glow-mag-description",
+		}),
 	),
 	glowScl: v.pipe(
 		v.optional(v.number(), 8),
-		metadata({ name: "glowScl", type: "number", description: "editor.block-shield-wall.glow-scl", category: "combat" }),
+		metadata({
+			name: "editor.block-shield-wall.glow-scl",
+			description: "editor.block-shield-wall.glow-scl-description",
+		}),
 	),
 });
 
 const doorObjectSchema = v.object({
 	chainEffect: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "chainEffect", type: "boolean", description: "editor.block-door.chain-effect", category: "combat" }),
+		metadata({
+			name: "editor.block-door.chain-effect",
+			description: "editor.block-door.chain-effect-description",
+		}),
 	),
 });
 
 const autoDoorObjectSchema = v.object({
 	checkInterval: v.pipe(
 		v.optional(v.number(), 20),
-		metadata({ name: "checkInterval", type: "number", description: "editor.block-auto-door.check-interval", category: "combat" }),
+		metadata({
+			name: "editor.block-auto-door.check-interval",
+			description: "editor.block-auto-door.check-interval-description",
+		}),
 	),
 	triggerMargin: v.pipe(
 		v.optional(v.number(), 12),
-		metadata({ name: "triggerMargin", type: "number", description: "editor.block-auto-door.trigger-margin", category: "combat" }),
+		metadata({
+			name: "editor.block-auto-door.trigger-margin",
+			description: "editor.block-auto-door.trigger-margin-description",
+		}),
 	),
 });
 
 const shockwaveTowerObjectSchema = v.object({
 	range: v.pipe(
 		v.optional(v.number(), 110),
-		metadata({ name: "range", type: "number", description: "editor.block-shockwave-tower.range", category: "combat" }),
+		metadata({
+			name: "editor.block-shockwave-tower.range",
+			description: "editor.block-shockwave-tower.range-description",
+		}),
 	),
 	reload: v.pipe(
 		v.optional(v.number(), 90),
-		metadata({ name: "reload", type: "number", description: "editor.block-shockwave-tower.reload", category: "combat" }),
+		metadata({
+			name: "editor.block-shockwave-tower.reload",
+			description: "editor.block-shockwave-tower.reload-description",
+		}),
 	),
 	bulletDamage: v.pipe(
 		v.optional(v.number(), 160),
-		metadata({ name: "bulletDamage", type: "number", description: "editor.block-shockwave-tower.bullet-damage", category: "combat" }),
+		metadata({
+			name: "editor.block-shockwave-tower.bullet-damage",
+			description: "editor.block-shockwave-tower.bullet-damage-description",
+		}),
 	),
 	falloffCount: v.pipe(
 		v.optional(v.number(), 20),
-		metadata({ name: "falloffCount", type: "number", description: "editor.block-shockwave-tower.falloff-count", category: "combat" }),
+		metadata({
+			name: "editor.block-shockwave-tower.falloff-count",
+			description: "editor.block-shockwave-tower.falloff-count-description",
+		}),
 	),
 	shake: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "shake", type: "number", description: "editor.block-shockwave-tower.shake", category: "combat" }),
+		metadata({
+			name: "editor.block-shockwave-tower.shake",
+			description: "editor.block-shockwave-tower.shake-description",
+		}),
 	),
 	checkInterval: v.pipe(
 		v.optional(v.number(), 8),
-		metadata({ name: "checkInterval", type: "number", description: "editor.block-shockwave-tower.check-interval", category: "combat" }),
+		metadata({
+			name: "editor.block-shockwave-tower.check-interval",
+			description: "editor.block-shockwave-tower.check-interval-description",
+		}),
 	),
 	cooldownMultiplier: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
-			name: "cooldownMultiplier",
-			type: "number",
-			description: "editor.block-shockwave-tower.cooldown-multiplier",
-			category: "combat",
+			name: "editor.block-shockwave-tower.cooldown-multiplier",
+			description: "editor.block-shockwave-tower.cooldown-multiplier-description",
 		}),
 	),
 	shapeRotateSpeed: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
-			name: "shapeRotateSpeed",
-			type: "number",
-			description: "editor.block-shockwave-tower.shape-rotate-speed",
-			category: "combat",
+			name: "editor.block-shockwave-tower.shape-rotate-speed",
+			description: "editor.block-shockwave-tower.shape-rotate-speed-description",
 		}),
 	),
 	shapeRadius: v.pipe(
 		v.optional(v.number(), 6),
-		metadata({ name: "shapeRadius", type: "number", description: "editor.block-shockwave-tower.shape-radius", category: "combat" }),
+		metadata({
+			name: "editor.block-shockwave-tower.shape-radius",
+			description: "editor.block-shockwave-tower.shape-radius-description",
+		}),
 	),
 	shapeSides: v.pipe(
 		v.optional(v.number(), 4),
-		metadata({ name: "shapeSides", type: "number", description: "editor.block-shockwave-tower.shape-sides", category: "combat" }),
+		metadata({
+			name: "editor.block-shockwave-tower.shape-sides",
+			description: "editor.block-shockwave-tower.shape-sides-description",
+		}),
 	),
 });
 
 const shockMineObjectSchema = v.object({
 	cooldown: v.pipe(
 		v.optional(v.number(), 80),
-		metadata({ name: "cooldown", type: "number", description: "editor.block-shock-mine.cooldown", category: "combat" }),
+		metadata({
+			name: "editor.block-shock-mine.cooldown",
+			description: "editor.block-shock-mine.cooldown-description",
+		}),
 	),
 	tileDamage: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "tileDamage", type: "number", description: "editor.block-shock-mine.tile-damage", category: "combat" }),
+		metadata({
+			name: "editor.block-shock-mine.tile-damage",
+			description: "editor.block-shock-mine.tile-damage-description",
+		}),
 	),
 	damage: v.pipe(
 		v.optional(v.number(), 13),
-		metadata({ name: "damage", type: "number", description: "editor.block-shock-mine.damage", category: "combat" }),
+		metadata({
+			name: "editor.block-shock-mine.damage",
+			description: "editor.block-shock-mine.damage-description",
+		}),
 	),
 	length: v.pipe(
 		v.optional(v.number(), 10),
-		metadata({ name: "length", type: "number", description: "editor.block-shock-mine.length", category: "combat" }),
+		metadata({
+			name: "editor.block-shock-mine.length",
+			description: "editor.block-shock-mine.length-description",
+		}),
 	),
 	tendrils: v.pipe(
 		v.optional(v.number(), 6),
-		metadata({ name: "tendrils", type: "number", description: "editor.block-shock-mine.tendrils", category: "combat" }),
+		metadata({
+			name: "editor.block-shock-mine.tendrils",
+			description: "editor.block-shock-mine.tendrils-description",
+		}),
 	),
 	shots: v.pipe(
 		v.optional(v.number(), 6),
-		metadata({ name: "shots", type: "number", description: "editor.block-shock-mine.shots", category: "combat" }),
+		metadata({
+			name: "editor.block-shock-mine.shots",
+			description: "editor.block-shock-mine.shots-description",
+		}),
 	),
 	inaccuracy: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "inaccuracy", type: "number", description: "editor.block-shock-mine.inaccuracy", category: "combat" }),
+		metadata({
+			name: "editor.block-shock-mine.inaccuracy",
+			description: "editor.block-shock-mine.inaccuracy-description",
+		}),
 	),
 	teamAlpha: v.pipe(
 		v.optional(v.number(), 0.3),
-		metadata({ name: "teamAlpha", type: "number", description: "editor.block-shock-mine.team-alpha", category: "combat" }),
+		metadata({
+			name: "editor.block-shock-mine.team-alpha",
+			description: "editor.block-shock-mine.team-alpha-description",
+		}),
 	),
 });
 
 const regenProjectorObjectSchema = v.object({
 	range: v.pipe(
 		v.optional(v.number(), 14),
-		metadata({ name: "range", type: "number", description: "editor.block-regen-projector.range", category: "combat" }),
+		metadata({
+			name: "editor.block-regen-projector.range",
+			description: "editor.block-regen-projector.range-description",
+		}),
 	),
 	healPercent: v.pipe(
 		v.optional(v.number(), 0.2),
-		metadata({ name: "healPercent", type: "number", description: "editor.block-regen-projector.heal-percent", category: "combat" }),
+		metadata({
+			name: "editor.block-regen-projector.heal-percent",
+			description: "editor.block-regen-projector.heal-percent-description",
+		}),
 	),
 	optionalMultiplier: v.pipe(
 		v.optional(v.number(), 2),
 		metadata({
-			name: "optionalMultiplier",
-			type: "number",
-			description: "editor.block-regen-projector.optional-multiplier",
-			category: "combat",
+			name: "editor.block-regen-projector.optional-multiplier",
+			description: "editor.block-regen-projector.optional-multiplier-description",
 		}),
 	),
 	optionalUseTime: v.pipe(
 		v.optional(v.number(), 480),
 		metadata({
-			name: "optionalUseTime",
-			type: "number",
-			description: "editor.block-regen-projector.optional-use-time",
-			category: "combat",
+			name: "editor.block-regen-projector.optional-use-time",
+			description: "editor.block-regen-projector.optional-use-time-description",
 		}),
 	),
 	effectChance: v.pipe(
 		v.optional(v.number(), 0.003),
-		metadata({ name: "effectChance", type: "number", description: "editor.block-regen-projector.effect-chance", category: "combat" }),
+		metadata({
+			name: "editor.block-regen-projector.effect-chance",
+			description: "editor.block-regen-projector.effect-chance-description",
+		}),
 	),
 });
 
 const radarObjectSchema = v.object({
 	discoveryTime: v.pipe(
 		v.optional(v.number(), 600),
-		metadata({ name: "discoveryTime", type: "number", description: "editor.block-radar.discovery-time", category: "combat" }),
+		metadata({
+			name: "editor.block-radar.discovery-time",
+			description: "editor.block-radar.discovery-time-description",
+		}),
 	),
 	rotateSpeed: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "rotateSpeed", type: "number", description: "editor.block-radar.rotate-speed", category: "combat" }),
+		metadata({
+			name: "editor.block-radar.rotate-speed",
+			description: "editor.block-radar.rotate-speed-description",
+		}),
 	),
 	glowScl: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "glowScl", type: "number", description: "editor.block-radar.glow-scl", category: "combat" }),
+		metadata({
+			name: "editor.block-radar.glow-scl",
+			description: "editor.block-radar.glow-scl-description",
+		}),
 	),
 	glowMag: v.pipe(
 		v.optional(v.number(), 0.6),
-		metadata({ name: "glowMag", type: "number", description: "editor.block-radar.glow-mag", category: "combat" }),
+		metadata({
+			name: "editor.block-radar.glow-mag",
+			description: "editor.block-radar.glow-mag-description",
+		}),
 	),
 });
 
 const overdriveProjectorObjectSchema = v.object({
 	reload: v.pipe(
 		v.optional(v.number(), 60),
-		metadata({ name: "reload", type: "number", description: "editor.block-overdrive-projector.reload", category: "combat" }),
+		metadata({
+			name: "editor.block-overdrive-projector.reload",
+			description: "editor.block-overdrive-projector.reload-description",
+		}),
 	),
 	range: v.pipe(
 		v.optional(v.number(), 80),
-		metadata({ name: "range", type: "number", description: "editor.block-overdrive-projector.range", category: "combat" }),
+		metadata({
+			name: "editor.block-overdrive-projector.range",
+			description: "editor.block-overdrive-projector.range-description",
+		}),
 	),
 	speedBoost: v.pipe(
 		v.optional(v.number(), 1.5),
-		metadata({ name: "speedBoost", type: "number", description: "editor.block-overdrive-projector.speed-boost", category: "combat" }),
+		metadata({
+			name: "editor.block-overdrive-projector.speed-boost",
+			description: "editor.block-overdrive-projector.speed-boost-description",
+		}),
 	),
 	speedBoostPhase: v.pipe(
 		v.optional(v.number(), 0.75),
 		metadata({
-			name: "speedBoostPhase",
-			type: "number",
-			description: "editor.block-overdrive-projector.speed-boost-phase",
-			category: "combat",
+			name: "editor.block-overdrive-projector.speed-boost-phase",
+			description: "editor.block-overdrive-projector.speed-boost-phase-description",
 		}),
 	),
 	useTime: v.pipe(
 		v.optional(v.number(), 400),
-		metadata({ name: "useTime", type: "number", description: "editor.block-overdrive-projector.use-time", category: "combat" }),
+		metadata({
+			name: "editor.block-overdrive-projector.use-time",
+			description: "editor.block-overdrive-projector.use-time-description",
+		}),
 	),
 	phaseRangeBoost: v.pipe(
 		v.optional(v.number(), 20),
 		metadata({
-			name: "phaseRangeBoost",
-			type: "number",
-			description: "editor.block-overdrive-projector.phase-range-boost",
-			category: "combat",
+			name: "editor.block-overdrive-projector.phase-range-boost",
+			description: "editor.block-overdrive-projector.phase-range-boost-description",
 		}),
 	),
 	hasBoost: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "hasBoost", type: "boolean", description: "editor.block-overdrive-projector.has-boost", category: "combat" }),
+		metadata({
+			name: "editor.block-overdrive-projector.has-boost",
+			description: "editor.block-overdrive-projector.has-boost-description",
+		}),
 	),
 });
 
 const mendProjectorObjectSchema = v.object({
 	reload: v.pipe(
 		v.optional(v.number(), 250),
-		metadata({ name: "reload", type: "number", description: "editor.block-mend-projector.reload", category: "combat" }),
+		metadata({
+			name: "editor.block-mend-projector.reload",
+			description: "editor.block-mend-projector.reload-description",
+		}),
 	),
 	range: v.pipe(
 		v.optional(v.number(), 60),
-		metadata({ name: "range", type: "number", description: "editor.block-mend-projector.range", category: "combat" }),
+		metadata({
+			name: "editor.block-mend-projector.range",
+			description: "editor.block-mend-projector.range-description",
+		}),
 	),
 	healPercent: v.pipe(
 		v.optional(v.number(), 12),
-		metadata({ name: "healPercent", type: "number", description: "editor.block-mend-projector.heal-percent", category: "combat" }),
+		metadata({
+			name: "editor.block-mend-projector.heal-percent",
+			description: "editor.block-mend-projector.heal-percent-description",
+		}),
 	),
 	phaseBoost: v.pipe(
 		v.optional(v.number(), 12),
-		metadata({ name: "phaseBoost", type: "number", description: "editor.block-mend-projector.phase-boost", category: "combat" }),
+		metadata({
+			name: "editor.block-mend-projector.phase-boost",
+			description: "editor.block-mend-projector.phase-boost-description",
+		}),
 	),
 	phaseRangeBoost: v.pipe(
 		v.optional(v.number(), 50),
 		metadata({
-			name: "phaseRangeBoost",
-			type: "number",
-			description: "editor.block-mend-projector.phase-range-boost",
-			category: "combat",
+			name: "editor.block-mend-projector.phase-range-boost",
+			description: "editor.block-mend-projector.phase-range-boost-description",
 		}),
 	),
 	useTime: v.pipe(
 		v.optional(v.number(), 400),
-		metadata({ name: "useTime", type: "number", description: "editor.block-mend-projector.use-time", category: "combat" }),
+		metadata({
+			name: "editor.block-mend-projector.use-time",
+			description: "editor.block-mend-projector.use-time-description",
+		}),
 	),
 	mendSoundVolume: v.pipe(
 		v.optional(v.number(), 0.5),
 		metadata({
-			name: "mendSoundVolume",
-			type: "number",
-			description: "editor.block-mend-projector.mend-sound-volume",
-			category: "combat",
+			name: "editor.block-mend-projector.mend-sound-volume",
+			description: "editor.block-mend-projector.mend-sound-volume-description",
 		}),
 	),
 });
@@ -1436,93 +1800,100 @@ const mendProjectorObjectSchema = v.object({
 const forceProjectorObjectSchema = v.object({
 	phaseUseTime: v.pipe(
 		v.optional(v.number(), 350),
-		metadata({ name: "phaseUseTime", type: "number", description: "editor.block-force-projector.phase-use-time", category: "combat" }),
+		metadata({
+			name: "editor.block-force-projector.phase-use-time",
+			description: "editor.block-force-projector.phase-use-time-description",
+		}),
 	),
 	phaseRadiusBoost: v.pipe(
 		v.optional(v.number(), 80),
 		metadata({
-			name: "phaseRadiusBoost",
-			type: "number",
-			description: "editor.block-force-projector.phase-radius-boost",
-			category: "combat",
+			name: "editor.block-force-projector.phase-radius-boost",
+			description: "editor.block-force-projector.phase-radius-boost-description",
 		}),
 	),
 	phaseShieldBoost: v.pipe(
 		v.optional(v.number(), 400),
 		metadata({
-			name: "phaseShieldBoost",
-			type: "number",
-			description: "editor.block-force-projector.phase-shield-boost",
-			category: "combat",
+			name: "editor.block-force-projector.phase-shield-boost",
+			description: "editor.block-force-projector.phase-shield-boost-description",
 		}),
 	),
 	radius: v.pipe(
 		v.optional(v.number(), 101.7),
-		metadata({ name: "radius", type: "number", description: "editor.block-force-projector.radius", category: "combat" }),
+		metadata({
+			name: "editor.block-force-projector.radius",
+			description: "editor.block-force-projector.radius-description",
+		}),
 	),
 	sides: v.pipe(
 		v.optional(v.number(), 6),
-		metadata({ name: "sides", type: "number", description: "editor.block-force-projector.sides", category: "combat" }),
+		metadata({
+			name: "editor.block-force-projector.sides",
+			description: "editor.block-force-projector.sides-description",
+		}),
 	),
 	shieldRotation: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "shieldRotation", type: "number", description: "editor.block-force-projector.shield-rotation", category: "combat" }),
+		metadata({
+			name: "editor.block-force-projector.shield-rotation",
+			description: "editor.block-force-projector.shield-rotation-description",
+		}),
 	),
 	shieldHealth: v.pipe(
 		v.optional(v.number(), 700),
-		metadata({ name: "shieldHealth", type: "number", description: "editor.block-force-projector.shield-health", category: "combat" }),
+		metadata({
+			name: "editor.block-force-projector.shield-health",
+			description: "editor.block-force-projector.shield-health-description",
+		}),
 	),
 	cooldownNormal: v.pipe(
 		v.optional(v.number(), 1.75),
-		metadata({ name: "cooldownNormal", type: "number", description: "editor.block-force-projector.cooldown-normal", category: "combat" }),
+		metadata({
+			name: "editor.block-force-projector.cooldown-normal",
+			description: "editor.block-force-projector.cooldown-normal-description",
+		}),
 	),
 	cooldownLiquid: v.pipe(
 		v.optional(v.number(), 1.5),
-		metadata({ name: "cooldownLiquid", type: "number", description: "editor.block-force-projector.cooldown-liquid", category: "combat" }),
+		metadata({
+			name: "editor.block-force-projector.cooldown-liquid",
+			description: "editor.block-force-projector.cooldown-liquid-description",
+		}),
 	),
 	cooldownBrokenBase: v.pipe(
 		v.optional(v.number(), 0.35),
 		metadata({
-			name: "cooldownBrokenBase",
-			type: "number",
-			description: "editor.block-force-projector.cooldown-broken-base",
-			category: "combat",
+			name: "editor.block-force-projector.cooldown-broken-base",
+			description: "editor.block-force-projector.cooldown-broken-base-description",
 		}),
 	),
 	coolantConsumption: v.pipe(
 		v.optional(v.number(), 0.1),
 		metadata({
-			name: "coolantConsumption",
-			type: "number",
-			description: "editor.block-force-projector.coolant-consumption",
-			category: "combat",
+			name: "editor.block-force-projector.coolant-consumption",
+			description: "editor.block-force-projector.coolant-consumption-description",
 		}),
 	),
 	consumeCoolant: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
-			name: "consumeCoolant",
-			type: "boolean",
-			description: "editor.block-force-projector.consume-coolant",
-			category: "combat",
+			name: "editor.block-force-projector.consume-coolant",
+			description: "editor.block-force-projector.consume-coolant-description",
 		}),
 	),
 	crashDamageMultiplier: v.pipe(
 		v.optional(v.number(), 2),
 		metadata({
-			name: "crashDamageMultiplier",
-			type: "number",
-			description: "editor.block-force-projector.crash-damage-multiplier",
-			category: "combat",
+			name: "editor.block-force-projector.crash-damage-multiplier",
+			description: "editor.block-force-projector.crash-damage-multiplier-description",
 		}),
 	),
 	hitSoundVolume: v.pipe(
 		v.optional(v.number(), 0.12),
 		metadata({
-			name: "hitSoundVolume",
-			type: "number",
-			description: "editor.block-force-projector.hit-sound-volume",
-			category: "combat",
+			name: "editor.block-force-projector.hit-sound-volume",
+			description: "editor.block-force-projector.hit-sound-volume-description",
 		}),
 	),
 });
@@ -1530,62 +1901,69 @@ const forceProjectorObjectSchema = v.object({
 const directionalForceProjectorObjectSchema = v.object({
 	width: v.pipe(
 		v.optional(v.number(), 30),
-		metadata({ name: "width", type: "number", description: "editor.block-directional-force-projector.width", category: "combat" }),
+		metadata({
+			name: "editor.block-directional-force-projector.width",
+			description: "editor.block-directional-force-projector.width-description",
+		}),
 	),
 	shieldHealth: v.pipe(
 		v.optional(v.number(), 3000),
 		metadata({
-			name: "shieldHealth",
-			type: "number",
-			description: "editor.block-directional-force-projector.shield-health",
-			category: "combat",
+			name: "editor.block-directional-force-projector.shield-health",
+			description: "editor.block-directional-force-projector.shield-health-description",
 		}),
 	),
 	cooldownNormal: v.pipe(
 		v.optional(v.number(), 1.75),
 		metadata({
-			name: "cooldownNormal",
-			type: "number",
-			description: "editor.block-directional-force-projector.cooldown-normal",
-			category: "combat",
+			name: "editor.block-directional-force-projector.cooldown-normal",
+			description: "editor.block-directional-force-projector.cooldown-normal-description",
 		}),
 	),
 	cooldownLiquid: v.pipe(
 		v.optional(v.number(), 1.5),
 		metadata({
-			name: "cooldownLiquid",
-			type: "number",
-			description: "editor.block-directional-force-projector.cooldown-liquid",
-			category: "combat",
+			name: "editor.block-directional-force-projector.cooldown-liquid",
+			description: "editor.block-directional-force-projector.cooldown-liquid-description",
 		}),
 	),
 	cooldownBrokenBase: v.pipe(
 		v.optional(v.number(), 0.35),
 		metadata({
-			name: "cooldownBrokenBase",
-			type: "number",
-			description: "editor.block-directional-force-projector.cooldown-broken-base",
-			category: "combat",
+			name: "editor.block-directional-force-projector.cooldown-broken-base",
+			description: "editor.block-directional-force-projector.cooldown-broken-base-description",
 		}),
 	),
 	length: v.pipe(
 		v.optional(v.number(), 40),
-		metadata({ name: "length", type: "number", description: "editor.block-directional-force-projector.length", category: "combat" }),
+		metadata({
+			name: "editor.block-directional-force-projector.length",
+			description: "editor.block-directional-force-projector.length-description",
+		}),
 	),
 	padSize: v.pipe(
 		v.optional(v.number(), 40),
-		metadata({ name: "padSize", type: "number", description: "editor.block-directional-force-projector.pad-size", category: "combat" }),
+		metadata({
+			name: "editor.block-directional-force-projector.pad-size",
+			description: "editor.block-directional-force-projector.pad-size-description",
+		}),
 	),
 });
 
 const baseShieldObjectSchema = v.object({
 	radius: v.pipe(
 		v.optional(v.number(), 200),
-		metadata({ name: "radius", type: "number", description: "editor.block-base-shield.radius", category: "combat" }),
+		metadata({
+			name: "editor.block-base-shield.radius",
+			description: "editor.block-base-shield.radius-description",
+		}),
 	),
 	sides: v.pipe(
 		v.optional(v.number(), 24),
-		metadata({ name: "sides", type: "number", description: "editor.block-base-shield.sides", category: "combat" }),
+		metadata({
+			name: "editor.block-base-shield.sides",
+			description: "editor.block-base-shield.sides-description",
+		}),
 	),
 });
 
@@ -1593,50 +1971,51 @@ const baseShieldObjectSchema = v.object({
 const baseTurretObjectSchema = v.object({
 	range: v.pipe(
 		v.optional(v.number(), 80),
-		metadata({ name: "range", type: "number", description: "editor.block-base-turret.range", category: "combat" }),
+		metadata({
+			name: "editor.block-base-turret.range",
+			description: "editor.block-base-turret.range-description",
+		}),
 	),
 	placeOverlapMargin: v.pipe(
 		v.optional(v.number(), 56),
 		metadata({
-			name: "placeOverlapMargin",
-			type: "number",
-			description: "editor.block-base-turret.place-overlap-margin",
-			category: "combat",
+			name: "editor.block-base-turret.place-overlap-margin",
+			description: "editor.block-base-turret.place-overlap-margin-description",
 		}),
 	),
 	rotateSpeed: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "rotateSpeed", type: "number", description: "editor.block-base-turret.rotate-speed", category: "combat" }),
+		metadata({
+			name: "editor.block-base-turret.rotate-speed",
+			description: "editor.block-base-turret.rotate-speed-description",
+		}),
 	),
 	fogRadiusMultiplier: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
-			name: "fogRadiusMultiplier",
-			type: "number",
-			description: "editor.block-base-turret.fog-radius-multiplier",
-			category: "combat",
+			name: "editor.block-base-turret.fog-radius-multiplier",
+			description: "editor.block-base-turret.fog-radius-multiplier-description",
 		}),
 	),
 	disableOverlapCheck: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "disableOverlapCheck",
-			type: "boolean",
-			description: "editor.block-base-turret.disable-overlap-check",
-			category: "combat",
+			name: "editor.block-base-turret.disable-overlap-check",
+			description: "editor.block-base-turret.disable-overlap-check-description",
 		}),
 	),
 	activationTime: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "activationTime", type: "number", description: "editor.block-base-turret.activation-time", category: "combat" }),
+		metadata({
+			name: "editor.block-base-turret.activation-time",
+			description: "editor.block-base-turret.activation-time-description",
+		}),
 	),
 	coolantMultiplier: v.pipe(
 		v.optional(v.number(), 5),
 		metadata({
-			name: "coolantMultiplier",
-			type: "number",
-			description: "editor.block-base-turret.coolant-multiplier",
-			category: "combat",
+			name: "editor.block-base-turret.coolant-multiplier",
+			description: "editor.block-base-turret.coolant-multiplier-description",
 		}),
 	),
 });
@@ -1644,247 +2023,378 @@ const baseTurretObjectSchema = v.object({
 const reloadTurretObjectSchema = v.object({
 	reload: v.pipe(
 		v.optional(v.number(), 10),
-		metadata({ name: "reload", type: "number", description: "editor.block-reload-turret.reload", category: "combat" }),
+		metadata({
+			name: "editor.block-reload-turret.reload",
+			description: "editor.block-reload-turret.reload-description",
+		}),
 	),
 });
 
 const turretObjectSchema = v.object({
 	targetInterval: v.pipe(
 		v.optional(v.number(), 20),
-		metadata({ name: "targetInterval", type: "number", description: "editor.block-turret.target-interval", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.target-interval",
+			description: "editor.block-turret.target-interval-description",
+		}),
 	),
 	newTargetInterval: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "newTargetInterval", type: "number", description: "editor.block-turret.new-target-interval", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.new-target-interval",
+			description: "editor.block-turret.new-target-interval-description",
+		}),
 	),
 	maxAmmo: v.pipe(
 		v.optional(v.number(), 30),
-		metadata({ name: "maxAmmo", type: "number", description: "editor.block-turret.max-ammo", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.max-ammo",
+			description: "editor.block-turret.max-ammo-description",
+		}),
 	),
 	ammoPerShot: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "ammoPerShot", type: "number", description: "editor.block-turret.ammo-per-shot", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.ammo-per-shot",
+			description: "editor.block-turret.ammo-per-shot-description",
+		}),
 	),
 	consumeAmmoOnce: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "consumeAmmoOnce", type: "boolean", description: "editor.block-turret.consume-ammo-once", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.consume-ammo-once",
+			description: "editor.block-turret.consume-ammo-once-description",
+		}),
 	),
 	heatRequirement: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "heatRequirement", type: "number", description: "editor.block-turret.heat-requirement", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.heat-requirement",
+			description: "editor.block-turret.heat-requirement-description",
+		}),
 	),
 	maxHeatEfficiency: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "maxHeatEfficiency", type: "number", description: "editor.block-turret.max-heat-efficiency", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.max-heat-efficiency",
+			description: "editor.block-turret.max-heat-efficiency-description",
+		}),
 	),
 	inaccuracy: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "inaccuracy", type: "number", description: "editor.block-turret.inaccuracy", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.inaccuracy",
+			description: "editor.block-turret.inaccuracy-description",
+		}),
 	),
 	velocityRnd: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "velocityRnd", type: "number", description: "editor.block-turret.velocity-rnd", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.velocity-rnd",
+			description: "editor.block-turret.velocity-rnd-description",
+		}),
 	),
 	scaleLifetimeOffset: v.pipe(
 		v.optional(v.number(), 0),
 		metadata({
-			name: "scaleLifetimeOffset",
-			type: "number",
-			description: "editor.block-turret.scale-lifetime-offset",
-			category: "combat",
+			name: "editor.block-turret.scale-lifetime-offset",
+			description: "editor.block-turret.scale-lifetime-offset-description",
 		}),
 	),
 	shootCone: v.pipe(
 		v.optional(v.number(), 8),
-		metadata({ name: "shootCone", type: "number", description: "editor.block-turret.shoot-cone", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.shoot-cone",
+			description: "editor.block-turret.shoot-cone-description",
+		}),
 	),
 	shootX: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "shootX", type: "number", description: "editor.block-turret.shoot-x", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.shoot-x",
+			description: "editor.block-turret.shoot-x-description",
+		}),
 	),
 	shootY: v.pipe(
 		v.optional(v.number()),
-		metadata({ name: "shootY", type: "number", description: "editor.block-turret.shoot-y", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.shoot-y",
+			description: "editor.block-turret.shoot-y-description",
+		}),
 	),
 	xRand: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "xRand", type: "number", description: "editor.block-turret.x-rand", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.x-rand",
+			description: "editor.block-turret.x-rand-description",
+		}),
 	),
 	drawMinRange: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "drawMinRange", type: "boolean", description: "editor.block-turret.draw-min-range", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.draw-min-range",
+			description: "editor.block-turret.draw-min-range-description",
+		}),
 	),
 	trackingRange: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "trackingRange", type: "number", description: "editor.block-turret.tracking-range", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.tracking-range",
+			description: "editor.block-turret.tracking-range-description",
+		}),
 	),
 	minRange: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "minRange", type: "number", description: "editor.block-turret.min-range", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.min-range",
+			description: "editor.block-turret.min-range-description",
+		}),
 	),
 	minWarmup: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "minWarmup", type: "number", description: "editor.block-turret.min-warmup", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.min-warmup",
+			description: "editor.block-turret.min-warmup-description",
+		}),
 	),
 	accurateDelay: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "accurateDelay", type: "boolean", description: "editor.block-turret.accurate-delay", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.accurate-delay",
+			description: "editor.block-turret.accurate-delay-description",
+		}),
 	),
 	moveWhileCharging: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "moveWhileCharging", type: "boolean", description: "editor.block-turret.move-while-charging", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.move-while-charging",
+			description: "editor.block-turret.move-while-charging-description",
+		}),
 	),
 	reloadWhileCharging: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
-			name: "reloadWhileCharging",
-			type: "boolean",
-			description: "editor.block-turret.reload-while-charging",
-			category: "combat",
+			name: "editor.block-turret.reload-while-charging",
+			description: "editor.block-turret.reload-while-charging-description",
 		}),
 	),
 	warmupMaintainTime: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "warmupMaintainTime", type: "number", description: "editor.block-turret.warmup-maintain-time", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.warmup-maintain-time",
+			description: "editor.block-turret.warmup-maintain-time-description",
+		}),
 	),
 	targetAir: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "targetAir", type: "boolean", description: "editor.block-turret.target-air", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.target-air",
+			description: "editor.block-turret.target-air-description",
+		}),
 	),
 	targetGround: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "targetGround", type: "boolean", description: "editor.block-turret.target-ground", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.target-ground",
+			description: "editor.block-turret.target-ground-description",
+		}),
 	),
 	targetBlocks: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "targetBlocks", type: "boolean", description: "editor.block-turret.target-blocks", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.target-blocks",
+			description: "editor.block-turret.target-blocks-description",
+		}),
 	),
 	targetHealing: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "targetHealing", type: "boolean", description: "editor.block-turret.target-healing", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.target-healing",
+			description: "editor.block-turret.target-healing-description",
+		}),
 	),
 	playerControllable: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "playerControllable", type: "boolean", description: "editor.block-turret.player-controllable", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.player-controllable",
+			description: "editor.block-turret.player-controllable-description",
+		}),
 	),
 	displayAmmoMultiplier: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
-			name: "displayAmmoMultiplier",
-			type: "boolean",
-			description: "editor.block-turret.display-ammo-multiplier",
-			category: "combat",
+			name: "editor.block-turret.display-ammo-multiplier",
+			description: "editor.block-turret.display-ammo-multiplier-description",
 		}),
 	),
 	targetUnderBlocks: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "targetUnderBlocks", type: "boolean", description: "editor.block-turret.target-under-blocks", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.target-under-blocks",
+			description: "editor.block-turret.target-under-blocks-description",
+		}),
 	),
 	alwaysShooting: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "alwaysShooting", type: "boolean", description: "editor.block-turret.always-shooting", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.always-shooting",
+			description: "editor.block-turret.always-shooting-description",
+		}),
 	),
 	predictTarget: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "predictTarget", type: "boolean", description: "editor.block-turret.predict-target", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.predict-target",
+			description: "editor.block-turret.predict-target-description",
+		}),
 	),
 	shootSoundVolume: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "shootSoundVolume", type: "number", description: "editor.block-turret.shoot-sound-volume", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.shoot-sound-volume",
+			description: "editor.block-turret.shoot-sound-volume-description",
+		}),
 	),
 	loopSoundVolume: v.pipe(
 		v.optional(v.number(), 0.5),
-		metadata({ name: "loopSoundVolume", type: "number", description: "editor.block-turret.loop-sound-volume", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.loop-sound-volume",
+			description: "editor.block-turret.loop-sound-volume-description",
+		}),
 	),
 	soundPitchMin: v.pipe(
 		v.optional(v.number(), 0.9),
-		metadata({ name: "soundPitchMin", type: "number", description: "editor.block-turret.sound-pitch-min", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.sound-pitch-min",
+			description: "editor.block-turret.sound-pitch-min-description",
+		}),
 	),
 	soundPitchMax: v.pipe(
 		v.optional(v.number(), 1.1),
-		metadata({ name: "soundPitchMax", type: "number", description: "editor.block-turret.sound-pitch-max", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.sound-pitch-max",
+			description: "editor.block-turret.sound-pitch-max-description",
+		}),
 	),
 	ammoEjectBack: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "ammoEjectBack", type: "number", description: "editor.block-turret.ammo-eject-back", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.ammo-eject-back",
+			description: "editor.block-turret.ammo-eject-back-description",
+		}),
 	),
 	shootWarmupSpeed: v.pipe(
 		v.optional(v.number(), 0.1),
-		metadata({ name: "shootWarmupSpeed", type: "number", description: "editor.block-turret.shoot-warmup-speed", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.shoot-warmup-speed",
+			description: "editor.block-turret.shoot-warmup-speed-description",
+		}),
 	),
 	linearWarmup: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "linearWarmup", type: "boolean", description: "editor.block-turret.linear-warmup", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.linear-warmup",
+			description: "editor.block-turret.linear-warmup-description",
+		}),
 	),
 	recoil: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "recoil", type: "number", description: "editor.block-turret.recoil", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.recoil",
+			description: "editor.block-turret.recoil-description",
+		}),
 	),
 	recoils: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "recoils", type: "number", description: "editor.block-turret.recoils", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.recoils",
+			description: "editor.block-turret.recoils-description",
+		}),
 	),
 	recoilTime: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "recoilTime", type: "number", description: "editor.block-turret.recoil-time", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.recoil-time",
+			description: "editor.block-turret.recoil-time-description",
+		}),
 	),
 	recoilPow: v.pipe(
 		v.optional(v.number(), 1.8),
-		metadata({ name: "recoilPow", type: "number", description: "editor.block-turret.recoil-pow", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.recoil-pow",
+			description: "editor.block-turret.recoil-pow-description",
+		}),
 	),
 	cooldownTime: v.pipe(
 		v.optional(v.number(), 20),
-		metadata({ name: "cooldownTime", type: "number", description: "editor.block-turret.cooldown-time", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.cooldown-time",
+			description: "editor.block-turret.cooldown-time-description",
+		}),
 	),
 	elevation: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "elevation", type: "number", description: "editor.block-turret.elevation", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.elevation",
+			description: "editor.block-turret.elevation-description",
+		}),
 	),
 	shake: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "shake", type: "number", description: "editor.block-turret.shake", category: "combat" }),
+		metadata({
+			name: "editor.block-turret.shake",
+			description: "editor.block-turret.shake-description",
+		}),
 	),
 });
 
 const powerTurretObjectSchema = v.object({
 	shootType: v.pipe(
 		v.optional(v.string()),
-		metadata({ name: "shootType", type: "bullet", description: "editor.block-power-turret.shoot-type", category: "combat" }),
+		metadata({
+			name: "editor.block-power-turret.shoot-type",
+			description: "editor.block-power-turret.shoot-type-description",
+		}),
 	),
 });
 
 const laserTurretObjectSchema = v.object({
 	firingMoveFract: v.pipe(
 		v.optional(v.number(), 0.25),
-		metadata({ name: "firingMoveFract", type: "number", description: "editor.block-laser-turret.firing-move-fract", category: "combat" }),
+		metadata({
+			name: "editor.block-laser-turret.firing-move-fract",
+			description: "editor.block-laser-turret.firing-move-fract-description",
+		}),
 	),
 	shootDuration: v.pipe(
 		v.optional(v.number(), 100),
-		metadata({ name: "shootDuration", type: "number", description: "editor.block-laser-turret.shoot-duration", category: "combat" }),
+		metadata({
+			name: "editor.block-laser-turret.shoot-duration",
+			description: "editor.block-laser-turret.shoot-duration-description",
+		}),
 	),
 });
 
 const continuousTurretObjectSchema = v.object({
 	shootType: v.pipe(
 		v.optional(v.string()),
-		metadata({ name: "shootType", type: "bullet", description: "editor.block-continuous-turret.shoot-type", category: "combat" }),
+		metadata({
+			name: "editor.block-continuous-turret.shoot-type",
+			description: "editor.block-continuous-turret.shoot-type-description",
+		}),
 	),
 	aimChangeSpeed: v.pipe(
 		v.optional(v.number()),
 		metadata({
-			name: "aimChangeSpeed",
-			type: "number",
-			description: "editor.block-continuous-turret.aim-change-speed",
-			category: "combat",
+			name: "editor.block-continuous-turret.aim-change-speed",
+			description: "editor.block-continuous-turret.aim-change-speed-description",
 		}),
 	),
 	scaleDamageEfficiency: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "scaleDamageEfficiency",
-			type: "boolean",
-			description: "editor.block-continuous-turret.scale-damage-efficiency",
-			category: "combat",
+			name: "editor.block-continuous-turret.scale-damage-efficiency",
+			description: "editor.block-continuous-turret.scale-damage-efficiency-description",
 		}),
 	),
 });
@@ -1893,10 +2403,8 @@ const continuousLiquidTurretObjectSchema = v.object({
 	liquidConsumed: v.pipe(
 		v.optional(v.number(), 1 / 60),
 		metadata({
-			name: "liquidConsumed",
-			type: "number",
-			description: "editor.block-continuous-liquid-turret.liquid-consumed",
-			category: "combat",
+			name: "editor.block-continuous-liquid-turret.liquid-consumed",
+			description: "editor.block-continuous-liquid-turret.liquid-consumed-description",
 		}),
 	),
 });
@@ -1905,89 +2413,109 @@ const pointDefenseTurretObjectSchema = v.object({
 	retargetTime: v.pipe(
 		v.optional(v.number(), 5),
 		metadata({
-			name: "retargetTime",
-			type: "number",
-			description: "editor.block-point-defense-turret.retarget-time",
-			category: "combat",
+			name: "editor.block-point-defense-turret.retarget-time",
+			description: "editor.block-point-defense-turret.retarget-time-description",
 		}),
 	),
 	shootCone: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "shootCone", type: "number", description: "editor.block-point-defense-turret.shoot-cone", category: "combat" }),
+		metadata({
+			name: "editor.block-point-defense-turret.shoot-cone",
+			description: "editor.block-point-defense-turret.shoot-cone-description",
+		}),
 	),
 	bulletDamage: v.pipe(
 		v.optional(v.number(), 10),
 		metadata({
-			name: "bulletDamage",
-			type: "number",
-			description: "editor.block-point-defense-turret.bullet-damage",
-			category: "combat",
+			name: "editor.block-point-defense-turret.bullet-damage",
+			description: "editor.block-point-defense-turret.bullet-damage-description",
 		}),
 	),
 	shootLength: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "shootLength", type: "number", description: "editor.block-point-defense-turret.shoot-length", category: "combat" }),
+		metadata({
+			name: "editor.block-point-defense-turret.shoot-length",
+			description: "editor.block-point-defense-turret.shoot-length-description",
+		}),
 	),
 });
 
 const tractorBeamTurretObjectSchema = v.object({
 	retargetTime: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "retargetTime", type: "number", description: "editor.block-tractor-beam-turret.retarget-time", category: "combat" }),
+		metadata({
+			name: "editor.block-tractor-beam-turret.retarget-time",
+			description: "editor.block-tractor-beam-turret.retarget-time-description",
+		}),
 	),
 	shootCone: v.pipe(
 		v.optional(v.number(), 6),
-		metadata({ name: "shootCone", type: "number", description: "editor.block-tractor-beam-turret.shoot-cone", category: "combat" }),
+		metadata({
+			name: "editor.block-tractor-beam-turret.shoot-cone",
+			description: "editor.block-tractor-beam-turret.shoot-cone-description",
+		}),
 	),
 	shootLength: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "shootLength", type: "number", description: "editor.block-tractor-beam-turret.shoot-length", category: "combat" }),
+		metadata({
+			name: "editor.block-tractor-beam-turret.shoot-length",
+			description: "editor.block-tractor-beam-turret.shoot-length-description",
+		}),
 	),
 	laserWidth: v.pipe(
 		v.optional(v.number(), 0.6),
-		metadata({ name: "laserWidth", type: "number", description: "editor.block-tractor-beam-turret.laser-width", category: "combat" }),
+		metadata({
+			name: "editor.block-tractor-beam-turret.laser-width",
+			description: "editor.block-tractor-beam-turret.laser-width-description",
+		}),
 	),
 	force: v.pipe(
 		v.optional(v.number(), 0.3),
-		metadata({ name: "force", type: "number", description: "editor.block-tractor-beam-turret.force", category: "combat" }),
+		metadata({
+			name: "editor.block-tractor-beam-turret.force",
+			description: "editor.block-tractor-beam-turret.force-description",
+		}),
 	),
 	scaledForce: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "scaledForce", type: "number", description: "editor.block-tractor-beam-turret.scaled-force", category: "combat" }),
+		metadata({
+			name: "editor.block-tractor-beam-turret.scaled-force",
+			description: "editor.block-tractor-beam-turret.scaled-force-description",
+		}),
 	),
 	damage: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "damage", type: "number", description: "editor.block-tractor-beam-turret.damage", category: "combat" }),
+		metadata({
+			name: "editor.block-tractor-beam-turret.damage",
+			description: "editor.block-tractor-beam-turret.damage-description",
+		}),
 	),
 	targetAir: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "targetAir", type: "boolean", description: "editor.block-tractor-beam-turret.target-air", category: "combat" }),
+		metadata({
+			name: "editor.block-tractor-beam-turret.target-air",
+			description: "editor.block-tractor-beam-turret.target-air-description",
+		}),
 	),
 	targetGround: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "targetGround",
-			type: "boolean",
-			description: "editor.block-tractor-beam-turret.target-ground",
-			category: "combat",
+			name: "editor.block-tractor-beam-turret.target-ground",
+			description: "editor.block-tractor-beam-turret.target-ground-description",
 		}),
 	),
 	statusDuration: v.pipe(
 		v.optional(v.number(), 300),
 		metadata({
-			name: "statusDuration",
-			type: "number",
-			description: "editor.block-tractor-beam-turret.status-duration",
-			category: "combat",
+			name: "editor.block-tractor-beam-turret.status-duration",
+			description: "editor.block-tractor-beam-turret.status-duration-description",
 		}),
 	),
 	shootSoundVolume: v.pipe(
 		v.optional(v.number(), 0.9),
 		metadata({
-			name: "shootSoundVolume",
-			type: "number",
-			description: "editor.block-tractor-beam-turret.shoot-sound-volume",
-			category: "combat",
+			name: "editor.block-tractor-beam-turret.shoot-sound-volume",
+			description: "editor.block-tractor-beam-turret.shoot-sound-volume-description",
 		}),
 	),
 });
@@ -1995,19 +2523,31 @@ const tractorBeamTurretObjectSchema = v.object({
 const buildTurretObjectSchema = v.object({
 	targetInterval: v.pipe(
 		v.optional(v.number(), 15),
-		metadata({ name: "targetInterval", type: "number", description: "editor.block-build-turret.target-interval", category: "combat" }),
+		metadata({
+			name: "editor.block-build-turret.target-interval",
+			description: "editor.block-build-turret.target-interval-description",
+		}),
 	),
 	buildSpeed: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "buildSpeed", type: "number", description: "editor.block-build-turret.build-speed", category: "combat" }),
+		metadata({
+			name: "editor.block-build-turret.build-speed",
+			description: "editor.block-build-turret.build-speed-description",
+		}),
 	),
 	buildBeamOffset: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "buildBeamOffset", type: "number", description: "editor.block-build-turret.build-beam-offset", category: "combat" }),
+		metadata({
+			name: "editor.block-build-turret.build-beam-offset",
+			description: "editor.block-build-turret.build-beam-offset-description",
+		}),
 	),
 	elevation: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "elevation", type: "number", description: "editor.block-build-turret.elevation", category: "combat" }),
+		metadata({
+			name: "editor.block-build-turret.elevation",
+			description: "editor.block-build-turret.elevation-description",
+		}),
 	),
 });
 
@@ -2015,155 +2555,219 @@ const buildTurretObjectSchema = v.object({
 const conveyorObjectSchema = v.object({
 	speed: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "speed", type: "number", description: "editor.block-conveyor.speed", category: "distribution" }),
+		metadata({
+			name: "editor.block-conveyor.speed",
+			description: "editor.block-conveyor.speed-description",
+		}),
 	),
 	displayedSpeed: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "displayedSpeed", type: "number", description: "editor.block-conveyor.displayed-speed", category: "distribution" }),
+		metadata({
+			name: "editor.block-conveyor.displayed-speed",
+			description: "editor.block-conveyor.displayed-speed-description",
+		}),
 	),
 	pushUnits: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "pushUnits", type: "boolean", description: "editor.block-conveyor.push-units", category: "distribution" }),
+		metadata({
+			name: "editor.block-conveyor.push-units",
+			description: "editor.block-conveyor.push-units-description",
+		}),
 	),
 });
 
 const stackConveyorObjectSchema = v.object({
 	glowAlpha: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "glowAlpha", type: "number", description: "editor.block-stack-conveyor.glow-alpha", category: "distribution" }),
+		metadata({
+			name: "editor.block-stack-conveyor.glow-alpha",
+			description: "editor.block-stack-conveyor.glow-alpha-description",
+		}),
 	),
 	baseEfficiency: v.pipe(
 		v.optional(v.number(), 0),
 		metadata({
-			name: "baseEfficiency",
-			type: "number",
-			description: "editor.block-stack-conveyor.base-efficiency",
-			category: "distribution",
+			name: "editor.block-stack-conveyor.base-efficiency",
+			description: "editor.block-stack-conveyor.base-efficiency-description",
 		}),
 	),
 	speed: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "speed", type: "number", description: "editor.block-stack-conveyor.speed", category: "distribution" }),
+		metadata({
+			name: "editor.block-stack-conveyor.speed",
+			description: "editor.block-stack-conveyor.speed-description",
+		}),
 	),
 	outputRouter: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
-			name: "outputRouter",
-			type: "boolean",
-			description: "editor.block-stack-conveyor.output-router",
-			category: "distribution",
+			name: "editor.block-stack-conveyor.output-router",
+			description: "editor.block-stack-conveyor.output-router-description",
 		}),
 	),
 	recharge: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "recharge", type: "number", description: "editor.block-stack-conveyor.recharge", category: "distribution" }),
+		metadata({
+			name: "editor.block-stack-conveyor.recharge",
+			description: "editor.block-stack-conveyor.recharge-description",
+		}),
 	),
 });
 
 const routerObjectSchema = v.object({
 	speed: v.pipe(
 		v.optional(v.number(), 8),
-		metadata({ name: "speed", type: "number", description: "editor.block-router.speed", category: "distribution" }),
+		metadata({
+			name: "editor.block-router.speed",
+			description: "editor.block-router.speed-description",
+		}),
 	),
 });
 
 const junctionObjectSchema = v.object({
 	speed: v.pipe(
 		v.optional(v.number(), 26),
-		metadata({ name: "speed", type: "number", description: "editor.block-junction.speed", category: "distribution" }),
+		metadata({
+			name: "editor.block-junction.speed",
+			description: "editor.block-junction.speed-description",
+		}),
 	),
 	capacity: v.pipe(
 		v.optional(v.number(), 6),
-		metadata({ name: "capacity", type: "number", description: "editor.block-junction.capacity", category: "distribution" }),
+		metadata({
+			name: "editor.block-junction.capacity",
+			description: "editor.block-junction.capacity-description",
+		}),
 	),
 	displayedSpeed: v.pipe(
 		v.optional(v.number(), 13),
-		metadata({ name: "displayedSpeed", type: "number", description: "editor.block-junction.displayed-speed", category: "distribution" }),
+		metadata({
+			name: "editor.block-junction.displayed-speed",
+			description: "editor.block-junction.displayed-speed-description",
+		}),
 	),
 });
 
 const sorterObjectSchema = v.object({
 	invert: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "invert", type: "boolean", description: "editor.block-sorter.invert", category: "distribution" }),
+		metadata({
+			name: "editor.block-sorter.invert",
+			description: "editor.block-sorter.invert-description",
+		}),
 	),
 });
 
 const overflowGateObjectSchema = v.object({
 	speed: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "speed", type: "number", description: "editor.block-overflow-gate.speed", category: "distribution" }),
+		metadata({
+			name: "editor.block-overflow-gate.speed",
+			description: "editor.block-overflow-gate.speed-description",
+		}),
 	),
 	invert: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "invert", type: "boolean", description: "editor.block-overflow-gate.invert", category: "distribution" }),
+		metadata({
+			name: "editor.block-overflow-gate.invert",
+			description: "editor.block-overflow-gate.invert-description",
+		}),
 	),
 });
 
 const itemBridgeObjectSchema = v.object({
 	range: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "range", type: "number", description: "editor.block-item-bridge.range", category: "distribution" }),
+		metadata({
+			name: "editor.block-item-bridge.range",
+			description: "editor.block-item-bridge.range-description",
+		}),
 	),
 	transportTime: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "transportTime", type: "number", description: "editor.block-item-bridge.transport-time", category: "distribution" }),
+		metadata({
+			name: "editor.block-item-bridge.transport-time",
+			description: "editor.block-item-bridge.transport-time-description",
+		}),
 	),
 	fadeIn: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "fadeIn", type: "boolean", description: "editor.block-item-bridge.fade-in", category: "distribution" }),
+		metadata({
+			name: "editor.block-item-bridge.fade-in",
+			description: "editor.block-item-bridge.fade-in-description",
+		}),
 	),
 	moveArrows: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "moveArrows", type: "boolean", description: "editor.block-item-bridge.move-arrows", category: "distribution" }),
+		metadata({
+			name: "editor.block-item-bridge.move-arrows",
+			description: "editor.block-item-bridge.move-arrows-description",
+		}),
 	),
 	pulse: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "pulse", type: "boolean", description: "editor.block-item-bridge.pulse", category: "distribution" }),
+		metadata({
+			name: "editor.block-item-bridge.pulse",
+			description: "editor.block-item-bridge.pulse-description",
+		}),
 	),
 	arrowSpacing: v.pipe(
 		v.optional(v.number(), 4),
-		metadata({ name: "arrowSpacing", type: "number", description: "editor.block-item-bridge.arrow-spacing", category: "distribution" }),
+		metadata({
+			name: "editor.block-item-bridge.arrow-spacing",
+			description: "editor.block-item-bridge.arrow-spacing-description",
+		}),
 	),
 	arrowOffset: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "arrowOffset", type: "number", description: "editor.block-item-bridge.arrow-offset", category: "distribution" }),
+		metadata({
+			name: "editor.block-item-bridge.arrow-offset",
+			description: "editor.block-item-bridge.arrow-offset-description",
+		}),
 	),
 	arrowPeriod: v.pipe(
 		v.optional(v.number(), 0.4),
-		metadata({ name: "arrowPeriod", type: "number", description: "editor.block-item-bridge.arrow-period", category: "distribution" }),
+		metadata({
+			name: "editor.block-item-bridge.arrow-period",
+			description: "editor.block-item-bridge.arrow-period-description",
+		}),
 	),
 	arrowTimeScl: v.pipe(
 		v.optional(v.number(), 6.2),
-		metadata({ name: "arrowTimeScl", type: "number", description: "editor.block-item-bridge.arrow-time-scl", category: "distribution" }),
+		metadata({
+			name: "editor.block-item-bridge.arrow-time-scl",
+			description: "editor.block-item-bridge.arrow-time-scl-description",
+		}),
 	),
 	bridgeWidth: v.pipe(
 		v.optional(v.number(), 6.5),
-		metadata({ name: "bridgeWidth", type: "number", description: "editor.block-item-bridge.bridge-width", category: "distribution" }),
+		metadata({
+			name: "editor.block-item-bridge.bridge-width",
+			description: "editor.block-item-bridge.bridge-width-description",
+		}),
 	),
 });
 
 const bufferedItemBridgeObjectSchema = v.object({
 	speed: v.pipe(
 		v.optional(v.number(), 40),
-		metadata({ name: "speed", type: "number", description: "editor.block-buffered-item-bridge.speed", category: "distribution" }),
+		metadata({
+			name: "editor.block-buffered-item-bridge.speed",
+			description: "editor.block-buffered-item-bridge.speed-description",
+		}),
 	),
 	bufferCapacity: v.pipe(
 		v.optional(v.number(), 50),
 		metadata({
-			name: "bufferCapacity",
-			type: "number",
-			description: "editor.block-buffered-item-bridge.buffer-capacity",
-			category: "distribution",
+			name: "editor.block-buffered-item-bridge.buffer-capacity",
+			description: "editor.block-buffered-item-bridge.buffer-capacity-description",
 		}),
 	),
 	displayedSpeed: v.pipe(
 		v.optional(v.number(), 11),
 		metadata({
-			name: "displayedSpeed",
-			type: "number",
-			description: "editor.block-buffered-item-bridge.displayed-speed",
-			category: "distribution",
+			name: "editor.block-buffered-item-bridge.displayed-speed",
+			description: "editor.block-buffered-item-bridge.displayed-speed-description",
 		}),
 	),
 });
@@ -2171,22 +2775,26 @@ const bufferedItemBridgeObjectSchema = v.object({
 const directionBridgeObjectSchema = v.object({
 	range: v.pipe(
 		v.optional(v.number(), 4),
-		metadata({ name: "range", type: "number", description: "editor.block-direction-bridge.range", category: "distribution" }),
+		metadata({
+			name: "editor.block-direction-bridge.range",
+			description: "editor.block-direction-bridge.range-description",
+		}),
 	),
 });
 
 const directionLiquidBridgeObjectSchema = v.object({
 	speed: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "speed", type: "number", description: "editor.block-direction-liquid-bridge.speed", category: "distribution" }),
+		metadata({
+			name: "editor.block-direction-liquid-bridge.speed",
+			description: "editor.block-direction-liquid-bridge.speed-description",
+		}),
 	),
 	liquidPadding: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
-			name: "liquidPadding",
-			type: "number",
-			description: "editor.block-direction-liquid-bridge.liquid-padding",
-			category: "distribution",
+			name: "editor.block-direction-liquid-bridge.liquid-padding",
+			description: "editor.block-direction-liquid-bridge.liquid-padding-description",
 		}),
 	),
 });
@@ -2194,18 +2802,27 @@ const directionLiquidBridgeObjectSchema = v.object({
 const ductObjectSchema = v.object({
 	speed: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "speed", type: "number", description: "editor.block-duct.speed", category: "distribution" }),
+		metadata({
+			name: "editor.block-duct.speed",
+			description: "editor.block-duct.speed-description",
+		}),
 	),
 	armored: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "armored", type: "boolean", description: "editor.block-duct.armored", category: "distribution" }),
+		metadata({
+			name: "editor.block-duct.armored",
+			description: "editor.block-duct.armored-description",
+		}),
 	),
 });
 
 const ductRouterObjectSchema = v.object({
 	speed: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "speed", type: "number", description: "editor.block-duct-router.speed", category: "distribution" }),
+		metadata({
+			name: "editor.block-duct-router.speed",
+			description: "editor.block-duct-router.speed-description",
+		}),
 	),
 });
 
@@ -2213,108 +2830,142 @@ const stackRouterObjectSchema = v.object({
 	baseEfficiency: v.pipe(
 		v.optional(v.number(), 0),
 		metadata({
-			name: "baseEfficiency",
-			type: "number",
-			description: "editor.block-stack-router.base-efficiency",
-			category: "distribution",
+			name: "editor.block-stack-router.base-efficiency",
+			description: "editor.block-stack-router.base-efficiency-description",
 		}),
 	),
 	glowAlpha: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "glowAlpha", type: "number", description: "editor.block-stack-router.glow-alpha", category: "distribution" }),
+		metadata({
+			name: "editor.block-stack-router.glow-alpha",
+			description: "editor.block-stack-router.glow-alpha-description",
+		}),
 	),
 });
 
 const ductJunctionObjectSchema = v.object({
 	speed: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "speed", type: "number", description: "editor.block-duct-junction.speed", category: "distribution" }),
+		metadata({
+			name: "editor.block-duct-junction.speed",
+			description: "editor.block-duct-junction.speed-description",
+		}),
 	),
 });
 
 const overflowDuctObjectSchema = v.object({
 	speed: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "speed", type: "number", description: "editor.block-overflow-duct.speed", category: "distribution" }),
+		metadata({
+			name: "editor.block-overflow-duct.speed",
+			description: "editor.block-overflow-duct.speed-description",
+		}),
 	),
 	invert: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "invert", type: "boolean", description: "editor.block-overflow-duct.invert", category: "distribution" }),
+		metadata({
+			name: "editor.block-overflow-duct.invert",
+			description: "editor.block-overflow-duct.invert-description",
+		}),
 	),
 });
 
 const ductBridgeObjectSchema = v.object({
 	speed: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "speed", type: "number", description: "editor.block-duct-bridge.speed", category: "distribution" }),
+		metadata({
+			name: "editor.block-duct-bridge.speed",
+			description: "editor.block-duct-bridge.speed-description",
+		}),
 	),
 });
 
 const massDriverObjectSchema = v.object({
 	range: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "range", type: "number", description: "editor.block-mass-driver.range", category: "distribution" }),
+		metadata({
+			name: "editor.block-mass-driver.range",
+			description: "editor.block-mass-driver.range-description",
+		}),
 	),
 	rotateSpeed: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "rotateSpeed", type: "number", description: "editor.block-mass-driver.rotate-speed", category: "distribution" }),
+		metadata({
+			name: "editor.block-mass-driver.rotate-speed",
+			description: "editor.block-mass-driver.rotate-speed-description",
+		}),
 	),
 	translation: v.pipe(
 		v.optional(v.number(), 7),
-		metadata({ name: "translation", type: "number", description: "editor.block-mass-driver.translation", category: "distribution" }),
+		metadata({
+			name: "editor.block-mass-driver.translation",
+			description: "editor.block-mass-driver.translation-description",
+		}),
 	),
 	minDistribute: v.pipe(
 		v.optional(v.number(), 10),
-		metadata({ name: "minDistribute", type: "number", description: "editor.block-mass-driver.min-distribute", category: "distribution" }),
+		metadata({
+			name: "editor.block-mass-driver.min-distribute",
+			description: "editor.block-mass-driver.min-distribute-description",
+		}),
 	),
 	knockback: v.pipe(
 		v.optional(v.number(), 4),
-		metadata({ name: "knockback", type: "number", description: "editor.block-mass-driver.knockback", category: "distribution" }),
+		metadata({
+			name: "editor.block-mass-driver.knockback",
+			description: "editor.block-mass-driver.knockback-description",
+		}),
 	),
 	reload: v.pipe(
 		v.optional(v.number(), 100),
-		metadata({ name: "reload", type: "number", description: "editor.block-mass-driver.reload", category: "distribution" }),
+		metadata({
+			name: "editor.block-mass-driver.reload",
+			description: "editor.block-mass-driver.reload-description",
+		}),
 	),
 	bulletSpeed: v.pipe(
 		v.optional(v.number(), 5.5),
-		metadata({ name: "bulletSpeed", type: "number", description: "editor.block-mass-driver.bullet-speed", category: "distribution" }),
+		metadata({
+			name: "editor.block-mass-driver.bullet-speed",
+			description: "editor.block-mass-driver.bullet-speed-description",
+		}),
 	),
 	bulletLifetime: v.pipe(
 		v.optional(v.number(), 200),
 		metadata({
-			name: "bulletLifetime",
-			type: "number",
-			description: "editor.block-mass-driver.bullet-lifetime",
-			category: "distribution",
+			name: "editor.block-mass-driver.bullet-lifetime",
+			description: "editor.block-mass-driver.bullet-lifetime-description",
 		}),
 	),
 	shootSoundVolume: v.pipe(
 		v.optional(v.number(), 0.5),
 		metadata({
-			name: "shootSoundVolume",
-			type: "number",
-			description: "editor.block-mass-driver.shoot-sound-volume",
-			category: "distribution",
+			name: "editor.block-mass-driver.shoot-sound-volume",
+			description: "editor.block-mass-driver.shoot-sound-volume-description",
 		}),
 	),
 	shake: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "shake", type: "number", description: "editor.block-mass-driver.shake", category: "distribution" }),
+		metadata({
+			name: "editor.block-mass-driver.shake",
+			description: "editor.block-mass-driver.shake-description",
+		}),
 	),
 });
 
 const directionalUnloaderObjectSchema = v.object({
 	speed: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "speed", type: "number", description: "editor.block-directional-unloader.speed", category: "distribution" }),
+		metadata({
+			name: "editor.block-directional-unloader.speed",
+			description: "editor.block-directional-unloader.speed-description",
+		}),
 	),
 	allowCoreUnload: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "allowCoreUnload",
-			type: "boolean",
-			description: "editor.block-directional-unloader.allow-core-unload",
-			category: "distribution",
+			name: "editor.block-directional-unloader.allow-core-unload",
+			description: "editor.block-directional-unloader.allow-core-unload-description",
 		}),
 	),
 });
@@ -2323,15 +2974,16 @@ const directionalUnloaderObjectSchema = v.object({
 const payloadBlockObjectSchema = v.object({
 	payloadSpeed: v.pipe(
 		v.optional(v.number(), 0.7),
-		metadata({ name: "payloadSpeed", type: "number", description: "editor.block-payload-block.payload-speed", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-block.payload-speed",
+			description: "editor.block-payload-block.payload-speed-description",
+		}),
 	),
 	payloadRotateSpeed: v.pipe(
 		v.optional(v.number(), 5),
 		metadata({
-			name: "payloadRotateSpeed",
-			type: "number",
-			description: "editor.block-payload-block.payload-rotate-speed",
-			category: "payload",
+			name: "editor.block-payload-block.payload-rotate-speed",
+			description: "editor.block-payload-block.payload-rotate-speed-description",
 		}),
 	),
 });
@@ -2339,26 +2991,41 @@ const payloadBlockObjectSchema = v.object({
 const payloadConveyorObjectSchema = v.object({
 	moveTime: v.pipe(
 		v.optional(v.number(), 45),
-		metadata({ name: "moveTime", type: "number", description: "editor.block-payload-conveyor.move-time", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-conveyor.move-time",
+			description: "editor.block-payload-conveyor.move-time-description",
+		}),
 	),
 	moveForce: v.pipe(
 		v.optional(v.number(), 201),
-		metadata({ name: "moveForce", type: "number", description: "editor.block-payload-conveyor.move-force", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-conveyor.move-force",
+			description: "editor.block-payload-conveyor.move-force-description",
+		}),
 	),
 	payloadLimit: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "payloadLimit", type: "number", description: "editor.block-payload-conveyor.payload-limit", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-conveyor.payload-limit",
+			description: "editor.block-payload-conveyor.payload-limit-description",
+		}),
 	),
 	pushUnits: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "pushUnits", type: "boolean", description: "editor.block-payload-conveyor.push-units", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-conveyor.push-units",
+			description: "editor.block-payload-conveyor.push-units-description",
+		}),
 	),
 });
 
 const payloadRouterObjectSchema = v.object({
 	invert: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "invert", type: "boolean", description: "editor.block-payload-router.invert", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-router.invert",
+			description: "editor.block-payload-router.invert-description",
+		}),
 	),
 });
 
@@ -2367,113 +3034,148 @@ const payloadVoidObjectSchema = v.object({});
 const payloadMassDriverObjectSchema = v.object({
 	range: v.pipe(
 		v.optional(v.number(), 100),
-		metadata({ name: "range", type: "number", description: "editor.block-payload-mass-driver.range", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-mass-driver.range",
+			description: "editor.block-payload-mass-driver.range-description",
+		}),
 	),
 	rotateSpeed: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "rotateSpeed", type: "number", description: "editor.block-payload-mass-driver.rotate-speed", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-mass-driver.rotate-speed",
+			description: "editor.block-payload-mass-driver.rotate-speed-description",
+		}),
 	),
 	length: v.pipe(
 		v.optional(v.number(), 11.125),
-		metadata({ name: "length", type: "number", description: "editor.block-payload-mass-driver.length", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-mass-driver.length",
+			description: "editor.block-payload-mass-driver.length-description",
+		}),
 	),
 	knockback: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "knockback", type: "number", description: "editor.block-payload-mass-driver.knockback", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-mass-driver.knockback",
+			description: "editor.block-payload-mass-driver.knockback-description",
+		}),
 	),
 	reload: v.pipe(
 		v.optional(v.number(), 30),
-		metadata({ name: "reload", type: "number", description: "editor.block-payload-mass-driver.reload", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-mass-driver.reload",
+			description: "editor.block-payload-mass-driver.reload-description",
+		}),
 	),
 	chargeTime: v.pipe(
 		v.optional(v.number(), 100),
-		metadata({ name: "chargeTime", type: "number", description: "editor.block-payload-mass-driver.charge-time", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-mass-driver.charge-time",
+			description: "editor.block-payload-mass-driver.charge-time-description",
+		}),
 	),
 	maxPayloadSize: v.pipe(
 		v.optional(v.number(), 3),
 		metadata({
-			name: "maxPayloadSize",
-			type: "number",
-			description: "editor.block-payload-mass-driver.max-payload-size",
-			category: "payload",
+			name: "editor.block-payload-mass-driver.max-payload-size",
+			description: "editor.block-payload-mass-driver.max-payload-size-description",
 		}),
 	),
 	grabWidth: v.pipe(
 		v.optional(v.number(), 8),
-		metadata({ name: "grabWidth", type: "number", description: "editor.block-payload-mass-driver.grab-width", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-mass-driver.grab-width",
+			description: "editor.block-payload-mass-driver.grab-width-description",
+		}),
 	),
 	grabHeight: v.pipe(
 		v.optional(v.number(), 2.75),
-		metadata({ name: "grabHeight", type: "number", description: "editor.block-payload-mass-driver.grab-height", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-mass-driver.grab-height",
+			description: "editor.block-payload-mass-driver.grab-height-description",
+		}),
 	),
 	shootSoundVolume: v.pipe(
 		v.optional(v.number(), 0.7),
 		metadata({
-			name: "shootSoundVolume",
-			type: "number",
-			description: "editor.block-payload-mass-driver.shoot-sound-volume",
-			category: "payload",
+			name: "editor.block-payload-mass-driver.shoot-sound-volume",
+			description: "editor.block-payload-mass-driver.shoot-sound-volume-description",
 		}),
 	),
 	shake: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "shake", type: "number", description: "editor.block-payload-mass-driver.shake", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-mass-driver.shake",
+			description: "editor.block-payload-mass-driver.shake-description",
+		}),
 	),
 });
 
 const payloadLoaderObjectSchema = v.object({
 	loadTime: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "loadTime", type: "number", description: "editor.block-payload-loader.load-time", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-loader.load-time",
+			description: "editor.block-payload-loader.load-time-description",
+		}),
 	),
 	itemsLoaded: v.pipe(
 		v.optional(v.number(), 8),
-		metadata({ name: "itemsLoaded", type: "number", description: "editor.block-payload-loader.items-loaded", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-loader.items-loaded",
+			description: "editor.block-payload-loader.items-loaded-description",
+		}),
 	),
 	liquidsLoaded: v.pipe(
 		v.optional(v.number(), 40),
-		metadata({ name: "liquidsLoaded", type: "number", description: "editor.block-payload-loader.liquids-loaded", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-loader.liquids-loaded",
+			description: "editor.block-payload-loader.liquids-loaded-description",
+		}),
 	),
 	maxBlockSize: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "maxBlockSize", type: "number", description: "editor.block-payload-loader.max-block-size", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-loader.max-block-size",
+			description: "editor.block-payload-loader.max-block-size-description",
+		}),
 	),
 	maxPowerConsumption: v.pipe(
 		v.optional(v.number(), 40),
 		metadata({
-			name: "maxPowerConsumption",
-			type: "number",
-			description: "editor.block-payload-loader.max-power-consumption",
-			category: "payload",
+			name: "editor.block-payload-loader.max-power-consumption",
+			description: "editor.block-payload-loader.max-power-consumption-description",
 		}),
 	),
 	loadPowerDynamic: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
-			name: "loadPowerDynamic",
-			type: "boolean",
-			description: "editor.block-payload-loader.load-power-dynamic",
-			category: "payload",
+			name: "editor.block-payload-loader.load-power-dynamic",
+			description: "editor.block-payload-loader.load-power-dynamic-description",
 		}),
 	),
 	basePowerUse: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "basePowerUse", type: "number", description: "editor.block-payload-loader.base-power-use", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-loader.base-power-use",
+			description: "editor.block-payload-loader.base-power-use-description",
+		}),
 	),
 });
 
 const payloadUnloaderObjectSchema = v.object({
 	offloadSpeed: v.pipe(
 		v.optional(v.number(), 4),
-		metadata({ name: "offloadSpeed", type: "number", description: "editor.block-payload-unloader.offload-speed", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-unloader.offload-speed",
+			description: "editor.block-payload-unloader.offload-speed-description",
+		}),
 	),
 	maxPowerUnload: v.pipe(
 		v.optional(v.number(), 80),
 		metadata({
-			name: "maxPowerUnload",
-			type: "number",
-			description: "editor.block-payload-unloader.max-power-unload",
-			category: "payload",
+			name: "editor.block-payload-unloader.max-power-unload",
+			description: "editor.block-payload-unloader.max-power-unload-description",
 		}),
 	),
 });
@@ -2482,49 +3184,60 @@ const payloadDeconstructorObjectSchema = v.object({
 	maxPayloadSize: v.pipe(
 		v.optional(v.number(), 4),
 		metadata({
-			name: "maxPayloadSize",
-			type: "number",
-			description: "editor.block-payload-deconstructor.max-payload-size",
-			category: "payload",
+			name: "editor.block-payload-deconstructor.max-payload-size",
+			description: "editor.block-payload-deconstructor.max-payload-size-description",
 		}),
 	),
 	deconstructSpeed: v.pipe(
 		v.optional(v.number(), 2.5),
 		metadata({
-			name: "deconstructSpeed",
-			type: "number",
-			description: "editor.block-payload-deconstructor.deconstruct-speed",
-			category: "payload",
+			name: "editor.block-payload-deconstructor.deconstruct-speed",
+			description: "editor.block-payload-deconstructor.deconstruct-speed-description",
 		}),
 	),
 	dumpRate: v.pipe(
 		v.optional(v.number(), 4),
-		metadata({ name: "dumpRate", type: "number", description: "editor.block-payload-deconstructor.dump-rate", category: "payload" }),
+		metadata({
+			name: "editor.block-payload-deconstructor.dump-rate",
+			description: "editor.block-payload-deconstructor.dump-rate-description",
+		}),
 	),
 });
 
 const blockProducerObjectSchema = v.object({
 	buildSpeed: v.pipe(
 		v.optional(v.number(), 0.4),
-		metadata({ name: "buildSpeed", type: "number", description: "editor.block-block-producer.build-speed", category: "payload" }),
+		metadata({
+			name: "editor.block-block-producer.build-speed",
+			description: "editor.block-block-producer.build-speed-description",
+		}),
 	),
 });
 
 const constructorObjectSchema = v.object({
 	minBlockSize: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "minBlockSize", type: "number", description: "editor.block-constructor.min-block-size", category: "payload" }),
+		metadata({
+			name: "editor.block-constructor.min-block-size",
+			description: "editor.block-constructor.min-block-size-description",
+		}),
 	),
 	maxBlockSize: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "maxBlockSize", type: "number", description: "editor.block-constructor.max-block-size", category: "payload" }),
+		metadata({
+			name: "editor.block-constructor.max-block-size",
+			description: "editor.block-constructor.max-block-size-description",
+		}),
 	),
 });
 
 const singleBlockProducerObjectSchema = v.object({
 	result: v.pipe(
 		v.optional(v.string()),
-		metadata({ name: "result", type: "string", description: "editor.block-single-block-producer.result", category: "payload" }),
+		metadata({
+			name: "editor.block-single-block-producer.result",
+			description: "editor.block-single-block-producer.result-description",
+		}),
 	),
 });
 
@@ -2532,15 +3245,16 @@ const singleBlockProducerObjectSchema = v.object({
 const unitFactoryObjectSchema = v.object({
 	capacities: v.pipe(
 		v.optional(v.array(v.number()), []),
-		metadata({ name: "capacities", type: "array", description: "editor.block-unit-factory.capacities", category: "units" }),
+		metadata({
+			name: "editor.block-unit-factory.capacities",
+			description: "editor.block-unit-factory.capacities-description",
+		}),
 	),
 	createSoundVolume: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
-			name: "createSoundVolume",
-			type: "number",
-			description: "editor.block-unit-factory.create-sound-volume",
-			category: "units",
+			name: "editor.block-unit-factory.create-sound-volume",
+			description: "editor.block-unit-factory.create-sound-volume-description",
 		}),
 	),
 });
@@ -2548,19 +3262,23 @@ const unitFactoryObjectSchema = v.object({
 const reconstructorObjectSchema = v.object({
 	constructTime: v.pipe(
 		v.optional(v.number(), 120),
-		metadata({ name: "constructTime", type: "number", description: "editor.block-reconstructor.construct-time", category: "units" }),
+		metadata({
+			name: "editor.block-reconstructor.construct-time",
+			description: "editor.block-reconstructor.construct-time-description",
+		}),
 	),
 	capacities: v.pipe(
 		v.optional(v.array(v.number()), []),
-		metadata({ name: "capacities", type: "array", description: "editor.block-reconstructor.capacities", category: "units" }),
+		metadata({
+			name: "editor.block-reconstructor.capacities",
+			description: "editor.block-reconstructor.capacities-description",
+		}),
 	),
 	createSoundVolume: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
-			name: "createSoundVolume",
-			type: "number",
-			description: "editor.block-reconstructor.create-sound-volume",
-			category: "units",
+			name: "editor.block-reconstructor.create-sound-volume",
+			description: "editor.block-reconstructor.create-sound-volume-description",
 		}),
 	),
 });
@@ -2568,39 +3286,47 @@ const reconstructorObjectSchema = v.object({
 const unitAssemblerModuleObjectSchema = v.object({
 	tier: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "tier", type: "number", description: "editor.block-unit-assembler-module.tier", category: "units" }),
+		metadata({
+			name: "editor.block-unit-assembler-module.tier",
+			description: "editor.block-unit-assembler-module.tier-description",
+		}),
 	),
 });
 
 const unitAssemblerObjectSchema = v.object({
 	areaSize: v.pipe(
 		v.optional(v.number(), 11),
-		metadata({ name: "areaSize", type: "number", description: "editor.block-unit-assembler.area-size", category: "units" }),
+		metadata({
+			name: "editor.block-unit-assembler.area-size",
+			description: "editor.block-unit-assembler.area-size-description",
+		}),
 	),
 	dronesCreated: v.pipe(
 		v.optional(v.number(), 4),
-		metadata({ name: "dronesCreated", type: "number", description: "editor.block-unit-assembler.drones-created", category: "units" }),
+		metadata({
+			name: "editor.block-unit-assembler.drones-created",
+			description: "editor.block-unit-assembler.drones-created-description",
+		}),
 	),
 	droneConstructTime: v.pipe(
 		v.optional(v.number(), 240),
 		metadata({
-			name: "droneConstructTime",
-			type: "number",
-			description: "editor.block-unit-assembler.drone-construct-time",
-			category: "units",
+			name: "editor.block-unit-assembler.drone-construct-time",
+			description: "editor.block-unit-assembler.drone-construct-time-description",
 		}),
 	),
 	capacities: v.pipe(
 		v.optional(v.array(v.number()), []),
-		metadata({ name: "capacities", type: "array", description: "editor.block-unit-assembler.capacities", category: "units" }),
+		metadata({
+			name: "editor.block-unit-assembler.capacities",
+			description: "editor.block-unit-assembler.capacities-description",
+		}),
 	),
 	createSoundVolume: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
-			name: "createSoundVolume",
-			type: "number",
-			description: "editor.block-unit-assembler.create-sound-volume",
-			category: "units",
+			name: "editor.block-unit-assembler.create-sound-volume",
+			description: "editor.block-unit-assembler.create-sound-volume-description",
 		}),
 	),
 });
@@ -2609,10 +3335,8 @@ const unitCargoUnloadPointObjectSchema = v.object({
 	staleTimeDuration: v.pipe(
 		v.optional(v.number(), 360),
 		metadata({
-			name: "staleTimeDuration",
-			type: "number",
-			description: "editor.block-unit-cargo-unload-point.stale-time-duration",
-			category: "units",
+			name: "editor.block-unit-cargo-unload-point.stale-time-duration",
+			description: "editor.block-unit-cargo-unload-point.stale-time-duration-description",
 		}),
 	),
 });
@@ -2620,27 +3344,37 @@ const unitCargoUnloadPointObjectSchema = v.object({
 const unitCargoLoaderObjectSchema = v.object({
 	unitBuildTime: v.pipe(
 		v.optional(v.number(), 480),
-		metadata({ name: "unitBuildTime", type: "number", description: "editor.block-unit-cargo-loader.unit-build-time", category: "units" }),
+		metadata({
+			name: "editor.block-unit-cargo-loader.unit-build-time",
+			description: "editor.block-unit-cargo-loader.unit-build-time-description",
+		}),
 	),
 	polyStroke: v.pipe(
 		v.optional(v.number(), 1.8),
-		metadata({ name: "polyStroke", type: "number", description: "editor.block-unit-cargo-loader.poly-stroke", category: "units" }),
+		metadata({
+			name: "editor.block-unit-cargo-loader.poly-stroke",
+			description: "editor.block-unit-cargo-loader.poly-stroke-description",
+		}),
 	),
 	polyRadius: v.pipe(
 		v.optional(v.number(), 8),
-		metadata({ name: "polyRadius", type: "number", description: "editor.block-unit-cargo-loader.poly-radius", category: "units" }),
+		metadata({
+			name: "editor.block-unit-cargo-loader.poly-radius",
+			description: "editor.block-unit-cargo-loader.poly-radius-description",
+		}),
 	),
 	polySides: v.pipe(
 		v.optional(v.number(), 6),
-		metadata({ name: "polySides", type: "number", description: "editor.block-unit-cargo-loader.poly-sides", category: "units" }),
+		metadata({
+			name: "editor.block-unit-cargo-loader.poly-sides",
+			description: "editor.block-unit-cargo-loader.poly-sides-description",
+		}),
 	),
 	polyRotateSpeed: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
-			name: "polyRotateSpeed",
-			type: "number",
-			description: "editor.block-unit-cargo-loader.poly-rotate-speed",
-			category: "units",
+			name: "editor.block-unit-cargo-loader.poly-rotate-speed",
+			description: "editor.block-unit-cargo-loader.poly-rotate-speed-description",
 		}),
 	),
 });
@@ -2648,47 +3382,72 @@ const unitCargoLoaderObjectSchema = v.object({
 const repairTurretObjectSchema = v.object({
 	repairRadius: v.pipe(
 		v.optional(v.number(), 50),
-		metadata({ name: "repairRadius", type: "number", description: "editor.block-repair-turret.repair-radius", category: "units" }),
+		metadata({
+			name: "editor.block-repair-turret.repair-radius",
+			description: "editor.block-repair-turret.repair-radius-description",
+		}),
 	),
 	repairSpeed: v.pipe(
 		v.optional(v.number(), 0.3),
-		metadata({ name: "repairSpeed", type: "number", description: "editor.block-repair-turret.repair-speed", category: "units" }),
+		metadata({
+			name: "editor.block-repair-turret.repair-speed",
+			description: "editor.block-repair-turret.repair-speed-description",
+		}),
 	),
 	powerUse: v.pipe(
 		v.optional(v.number()),
-		metadata({ name: "powerUse", type: "number", description: "editor.block-repair-turret.power-use", category: "units" }),
+		metadata({
+			name: "editor.block-repair-turret.power-use",
+			description: "editor.block-repair-turret.power-use-description",
+		}),
 	),
 	length: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "length", type: "number", description: "editor.block-repair-turret.length", category: "units" }),
+		metadata({
+			name: "editor.block-repair-turret.length",
+			description: "editor.block-repair-turret.length-description",
+		}),
 	),
 	beamWidth: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "beamWidth", type: "number", description: "editor.block-repair-turret.beam-width", category: "units" }),
+		metadata({
+			name: "editor.block-repair-turret.beam-width",
+			description: "editor.block-repair-turret.beam-width-description",
+		}),
 	),
 	pulseRadius: v.pipe(
 		v.optional(v.number(), 6),
-		metadata({ name: "pulseRadius", type: "number", description: "editor.block-repair-turret.pulse-radius", category: "units" }),
+		metadata({
+			name: "editor.block-repair-turret.pulse-radius",
+			description: "editor.block-repair-turret.pulse-radius-description",
+		}),
 	),
 	pulseStroke: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "pulseStroke", type: "number", description: "editor.block-repair-turret.pulse-stroke", category: "units" }),
+		metadata({
+			name: "editor.block-repair-turret.pulse-stroke",
+			description: "editor.block-repair-turret.pulse-stroke-description",
+		}),
 	),
 	acceptCoolant: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "acceptCoolant", type: "boolean", description: "editor.block-repair-turret.accept-coolant", category: "units" }),
+		metadata({
+			name: "editor.block-repair-turret.accept-coolant",
+			description: "editor.block-repair-turret.accept-coolant-description",
+		}),
 	),
 	coolantUse: v.pipe(
 		v.optional(v.number(), 0.5),
-		metadata({ name: "coolantUse", type: "number", description: "editor.block-repair-turret.coolant-use", category: "units" }),
+		metadata({
+			name: "editor.block-repair-turret.coolant-use",
+			description: "editor.block-repair-turret.coolant-use-description",
+		}),
 	),
 	coolantMultiplier: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
-			name: "coolantMultiplier",
-			type: "number",
-			description: "editor.block-repair-turret.coolant-multiplier",
-			category: "units",
+			name: "editor.block-repair-turret.coolant-multiplier",
+			description: "editor.block-repair-turret.coolant-multiplier-description",
 		}),
 	),
 });
@@ -2696,59 +3455,90 @@ const repairTurretObjectSchema = v.object({
 const repairTowerObjectSchema = v.object({
 	range: v.pipe(
 		v.optional(v.number(), 80),
-		metadata({ name: "range", type: "number", description: "editor.block-repair-tower.range", category: "units" }),
+		metadata({
+			name: "editor.block-repair-tower.range",
+			description: "editor.block-repair-tower.range-description",
+		}),
 	),
 	circleSpeed: v.pipe(
 		v.optional(v.number(), 120),
-		metadata({ name: "circleSpeed", type: "number", description: "editor.block-repair-tower.circle-speed", category: "units" }),
+		metadata({
+			name: "editor.block-repair-tower.circle-speed",
+			description: "editor.block-repair-tower.circle-speed-description",
+		}),
 	),
 	circleStroke: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "circleStroke", type: "number", description: "editor.block-repair-tower.circle-stroke", category: "units" }),
+		metadata({
+			name: "editor.block-repair-tower.circle-stroke",
+			description: "editor.block-repair-tower.circle-stroke-description",
+		}),
 	),
 	squareRad: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "squareRad", type: "number", description: "editor.block-repair-tower.square-rad", category: "units" }),
+		metadata({
+			name: "editor.block-repair-tower.square-rad",
+			description: "editor.block-repair-tower.square-rad-description",
+		}),
 	),
 	squareSpinScl: v.pipe(
 		v.optional(v.number(), 0.8),
-		metadata({ name: "squareSpinScl", type: "number", description: "editor.block-repair-tower.square-spin-scl", category: "units" }),
+		metadata({
+			name: "editor.block-repair-tower.square-spin-scl",
+			description: "editor.block-repair-tower.square-spin-scl-description",
+		}),
 	),
 	glowMag: v.pipe(
 		v.optional(v.number(), 0.5),
-		metadata({ name: "glowMag", type: "number", description: "editor.block-repair-tower.glow-mag", category: "units" }),
+		metadata({
+			name: "editor.block-repair-tower.glow-mag",
+			description: "editor.block-repair-tower.glow-mag-description",
+		}),
 	),
 	glowScl: v.pipe(
 		v.optional(v.number(), 8),
-		metadata({ name: "glowScl", type: "number", description: "editor.block-repair-tower.glow-scl", category: "units" }),
+		metadata({
+			name: "editor.block-repair-tower.glow-scl",
+			description: "editor.block-repair-tower.glow-scl-description",
+		}),
 	),
 	healAmount: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "healAmount", type: "number", description: "editor.block-repair-tower.heal-amount", category: "units" }),
+		metadata({
+			name: "editor.block-repair-tower.heal-amount",
+			description: "editor.block-repair-tower.heal-amount-description",
+		}),
 	),
 });
 
 const droneCenterObjectSchema = v.object({
 	unitsSpawned: v.pipe(
 		v.optional(v.number(), 4),
-		metadata({ name: "unitsSpawned", type: "number", description: "editor.block-drone-center.units-spawned", category: "units" }),
+		metadata({
+			name: "editor.block-drone-center.units-spawned",
+			description: "editor.block-drone-center.units-spawned-description",
+		}),
 	),
 	droneConstructTime: v.pipe(
 		v.optional(v.number(), 180),
 		metadata({
-			name: "droneConstructTime",
-			type: "number",
-			description: "editor.block-drone-center.drone-construct-time",
-			category: "units",
+			name: "editor.block-drone-center.drone-construct-time",
+			description: "editor.block-drone-center.drone-construct-time-description",
 		}),
 	),
 	statusDuration: v.pipe(
 		v.optional(v.number(), 120),
-		metadata({ name: "statusDuration", type: "number", description: "editor.block-drone-center.status-duration", category: "units" }),
+		metadata({
+			name: "editor.block-drone-center.status-duration",
+			description: "editor.block-drone-center.status-duration-description",
+		}),
 	),
 	droneRange: v.pipe(
 		v.optional(v.number(), 50),
-		metadata({ name: "droneRange", type: "number", description: "editor.block-drone-center.drone-range", category: "units" }),
+		metadata({
+			name: "editor.block-drone-center.drone-range",
+			description: "editor.block-drone-center.drone-range-description",
+		}),
 	),
 });
 
@@ -2757,48 +3547,54 @@ const logicBlockObjectSchema = v.object({
 	maxInstructionScale: v.pipe(
 		v.optional(v.number(), 5),
 		metadata({
-			name: "maxInstructionScale",
-			type: "number",
-			description: "editor.block-logic-block.max-instruction-scale",
-			category: "logic",
+			name: "editor.block-logic-block.max-instruction-scale",
+			description: "editor.block-logic-block.max-instruction-scale-description",
 		}),
 	),
 	instructionsPerTick: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
-			name: "instructionsPerTick",
-			type: "number",
-			description: "editor.block-logic-block.instructions-per-tick",
-			category: "logic",
+			name: "editor.block-logic-block.instructions-per-tick",
+			description: "editor.block-logic-block.instructions-per-tick-description",
 		}),
 	),
 	maxInstructionsPerTick: v.pipe(
 		v.optional(v.number(), 40),
 		metadata({
-			name: "maxInstructionsPerTick",
-			type: "number",
-			description: "editor.block-logic-block.max-instructions-per-tick",
-			category: "logic",
+			name: "editor.block-logic-block.max-instructions-per-tick",
+			description: "editor.block-logic-block.max-instructions-per-tick-description",
 		}),
 	),
 	range: v.pipe(
 		v.optional(v.number(), 80),
-		metadata({ name: "range", type: "number", description: "editor.block-logic-block.range", category: "logic" }),
+		metadata({
+			name: "editor.block-logic-block.range",
+			description: "editor.block-logic-block.range-description",
+		}),
 	),
 });
 
 const logicDisplayObjectSchema = v.object({
 	maxSides: v.pipe(
 		v.optional(v.number(), 25),
-		metadata({ name: "maxSides", type: "number", description: "editor.block-logic-display.max-sides", category: "logic" }),
+		metadata({
+			name: "editor.block-logic-display.max-sides",
+			description: "editor.block-logic-display.max-sides-description",
+		}),
 	),
 	displaySize: v.pipe(
 		v.optional(v.number(), 64),
-		metadata({ name: "displaySize", type: "number", description: "editor.block-logic-display.display-size", category: "logic" }),
+		metadata({
+			name: "editor.block-logic-display.display-size",
+			description: "editor.block-logic-display.display-size-description",
+		}),
 	),
 	scaleFactor: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "scaleFactor", type: "number", description: "editor.block-logic-display.scale-factor", category: "logic" }),
+		metadata({
+			name: "editor.block-logic-display.scale-factor",
+			description: "editor.block-logic-display.scale-factor-description",
+		}),
 	),
 });
 
@@ -2806,52 +3602,74 @@ const tileableLogicDisplayObjectSchema = v.object({
 	maxDisplayDimensions: v.pipe(
 		v.optional(v.number(), 16),
 		metadata({
-			name: "maxDisplayDimensions",
-			type: "number",
-			description: "editor.block-tileable-logic-display.max-display-dimensions",
-			category: "logic",
+			name: "editor.block-tileable-logic-display.max-display-dimensions",
+			description: "editor.block-tileable-logic-display.max-display-dimensions-description",
 		}),
 	),
 	frameSize: v.pipe(
 		v.optional(v.number(), 6),
-		metadata({ name: "frameSize", type: "number", description: "editor.block-tileable-logic-display.frame-size", category: "logic" }),
+		metadata({
+			name: "editor.block-tileable-logic-display.frame-size",
+			description: "editor.block-tileable-logic-display.frame-size-description",
+		}),
 	),
 });
 
 const messageBlockObjectSchema = v.object({
 	maxTextLength: v.pipe(
 		v.optional(v.number(), 400),
-		metadata({ name: "maxTextLength", type: "number", description: "editor.block-message-block.max-text-length", category: "logic" }),
+		metadata({
+			name: "editor.block-message-block.max-text-length",
+			description: "editor.block-message-block.max-text-length-description",
+		}),
 	),
 	maxNewlines: v.pipe(
 		v.optional(v.number(), 24),
-		metadata({ name: "maxNewlines", type: "number", description: "editor.block-message-block.max-newlines", category: "logic" }),
+		metadata({
+			name: "editor.block-message-block.max-newlines",
+			description: "editor.block-message-block.max-newlines-description",
+		}),
 	),
 });
 
 const memoryBlockObjectSchema = v.object({
 	memoryCapacity: v.pipe(
 		v.optional(v.number(), 32),
-		metadata({ name: "memoryCapacity", type: "number", description: "editor.block-memory-block.memory-capacity", category: "logic" }),
+		metadata({
+			name: "editor.block-memory-block.memory-capacity",
+			description: "editor.block-memory-block.memory-capacity-description",
+		}),
 	),
 });
 
 const canvasBlockObjectSchema = v.object({
 	padding: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "padding", type: "number", description: "editor.block-canvas-block.padding", category: "logic" }),
+		metadata({
+			name: "editor.block-canvas-block.padding",
+			description: "editor.block-canvas-block.padding-description",
+		}),
 	),
 	canvasSize: v.pipe(
 		v.optional(v.number(), 8),
-		metadata({ name: "canvasSize", type: "number", description: "editor.block-canvas-block.canvas-size", category: "logic" }),
+		metadata({
+			name: "editor.block-canvas-block.canvas-size",
+			description: "editor.block-canvas-block.canvas-size-description",
+		}),
 	),
 	palette: v.pipe(
 		v.optional(v.array(v.number())),
-		metadata({ name: "palette", type: "array", description: "editor.block-canvas-block.palette", category: "logic" }),
+		metadata({
+			name: "editor.block-canvas-block.palette",
+			description: "editor.block-canvas-block.palette-description",
+		}),
 	),
 	bitsPerPixel: v.pipe(
 		v.optional(v.number()),
-		metadata({ name: "bitsPerPixel", type: "number", description: "editor.block-canvas-block.bits-per-pixel", category: "logic" }),
+		metadata({
+			name: "editor.block-canvas-block.bits-per-pixel",
+			description: "editor.block-canvas-block.bits-per-pixel-description",
+		}),
 	),
 });
 
@@ -2859,11 +3677,17 @@ const canvasBlockObjectSchema = v.object({
 const heatConductorObjectSchema = v.object({
 	visualMaxHeat: v.pipe(
 		v.optional(v.number(), 15),
-		metadata({ name: "visualMaxHeat", type: "number", description: "editor.block-heat-conductor.visual-max-heat", category: "heat" }),
+		metadata({
+			name: "editor.block-heat-conductor.visual-max-heat",
+			description: "editor.block-heat-conductor.visual-max-heat-description",
+		}),
 	),
 	splitHeat: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "splitHeat", type: "boolean", description: "editor.block-heat-conductor.split-heat", category: "heat" }),
+		metadata({
+			name: "editor.block-heat-conductor.split-heat",
+			description: "editor.block-heat-conductor.split-heat-description",
+		}),
 	),
 });
 
@@ -2871,135 +3695,199 @@ const heatConductorObjectSchema = v.object({
 const floorObjectSchema = v.object({
 	edge: v.pipe(
 		v.optional(v.string(), "stone"),
-		metadata({ name: "edge", type: "string", description: "editor.block-floor.edge", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.edge",
+			description: "editor.block-floor.edge-description",
+		}),
 	),
 	speedMultiplier: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "speedMultiplier", type: "number", description: "editor.block-floor.speed-multiplier", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.speed-multiplier",
+			description: "editor.block-floor.speed-multiplier-description",
+		}),
 	),
 	dragMultiplier: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "dragMultiplier", type: "number", description: "editor.block-floor.drag-multiplier", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.drag-multiplier",
+			description: "editor.block-floor.drag-multiplier-description",
+		}),
 	),
 	damageTaken: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "damageTaken", type: "number", description: "editor.block-floor.damage-taken", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.damage-taken",
+			description: "editor.block-floor.damage-taken-description",
+		}),
 	),
 	drownTime: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "drownTime", type: "number", description: "editor.block-floor.drown-time", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.drown-time",
+			description: "editor.block-floor.drown-time-description",
+		}),
 	),
 	walkSoundVolume: v.pipe(
 		v.optional(v.number(), 0.1),
-		metadata({ name: "walkSoundVolume", type: "number", description: "editor.block-floor.walk-sound-volume", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.walk-sound-volume",
+			description: "editor.block-floor.walk-sound-volume-description",
+		}),
 	),
 	walkSoundPitchMin: v.pipe(
 		v.optional(v.number(), 0.8),
 		metadata({
-			name: "walkSoundPitchMin",
-			type: "number",
-			description: "editor.block-floor.walk-sound-pitch-min",
-			category: "environment",
+			name: "editor.block-floor.walk-sound-pitch-min",
+			description: "editor.block-floor.walk-sound-pitch-min-description",
 		}),
 	),
 	walkSoundPitchMax: v.pipe(
 		v.optional(v.number(), 1.2),
 		metadata({
-			name: "walkSoundPitchMax",
-			type: "number",
-			description: "editor.block-floor.walk-sound-pitch-max",
-			category: "environment",
+			name: "editor.block-floor.walk-sound-pitch-max",
+			description: "editor.block-floor.walk-sound-pitch-max-description",
 		}),
 	),
 	statusDuration: v.pipe(
 		v.optional(v.number(), 60),
-		metadata({ name: "statusDuration", type: "number", description: "editor.block-floor.status-duration", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.status-duration",
+			description: "editor.block-floor.status-duration-description",
+		}),
 	),
 	isLiquid: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "isLiquid", type: "boolean", description: "editor.block-floor.is-liquid", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.is-liquid",
+			description: "editor.block-floor.is-liquid-description",
+		}),
 	),
 	overlayAlpha: v.pipe(
 		v.optional(v.number(), 0.65),
-		metadata({ name: "overlayAlpha", type: "number", description: "editor.block-floor.overlay-alpha", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.overlay-alpha",
+			description: "editor.block-floor.overlay-alpha-description",
+		}),
 	),
 	supportsOverlay: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "supportsOverlay", type: "boolean", description: "editor.block-floor.supports-overlay", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.supports-overlay",
+			description: "editor.block-floor.supports-overlay-description",
+		}),
 	),
 	shallow: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "shallow", type: "boolean", description: "editor.block-floor.shallow", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.shallow",
+			description: "editor.block-floor.shallow-description",
+		}),
 	),
 	oreDefault: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "oreDefault", type: "boolean", description: "editor.block-floor.ore-default", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.ore-default",
+			description: "editor.block-floor.ore-default-description",
+		}),
 	),
 	oreScale: v.pipe(
 		v.optional(v.number(), 24),
-		metadata({ name: "oreScale", type: "number", description: "editor.block-floor.ore-scale", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.ore-scale",
+			description: "editor.block-floor.ore-scale-description",
+		}),
 	),
 	oreThreshold: v.pipe(
 		v.optional(v.number(), 0.828),
-		metadata({ name: "oreThreshold", type: "number", description: "editor.block-floor.ore-threshold", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.ore-threshold",
+			description: "editor.block-floor.ore-threshold-description",
+		}),
 	),
 	canShadow: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "canShadow", type: "boolean", description: "editor.block-floor.can-shadow", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.can-shadow",
+			description: "editor.block-floor.can-shadow-description",
+		}),
 	),
 	forceDrawLight: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "forceDrawLight", type: "boolean", description: "editor.block-floor.force-draw-light", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.force-draw-light",
+			description: "editor.block-floor.force-draw-light-description",
+		}),
 	),
 	needsSurface: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "needsSurface", type: "boolean", description: "editor.block-floor.needs-surface", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.needs-surface",
+			description: "editor.block-floor.needs-surface-description",
+		}),
 	),
 	allowCorePlacement: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "allowCorePlacement",
-			type: "boolean",
-			description: "editor.block-floor.allow-core-placement",
-			category: "environment",
+			name: "editor.block-floor.allow-core-placement",
+			description: "editor.block-floor.allow-core-placement-description",
 		}),
 	),
 	wallOre: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "wallOre", type: "boolean", description: "editor.block-floor.wall-ore", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.wall-ore",
+			description: "editor.block-floor.wall-ore-description",
+		}),
 	),
 	blendId: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "blendId", type: "number", description: "editor.block-floor.blend-id", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.blend-id",
+			description: "editor.block-floor.blend-id-description",
+		}),
 	),
 	tilingVariants: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "tilingVariants", type: "number", description: "editor.block-floor.tiling-variants", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.tiling-variants",
+			description: "editor.block-floor.tiling-variants-description",
+		}),
 	),
 	autotile: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "autotile", type: "boolean", description: "editor.block-floor.autotile", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.autotile",
+			description: "editor.block-floor.autotile-description",
+		}),
 	),
 	autotileMidVariants: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
-			name: "autotileMidVariants",
-			type: "number",
-			description: "editor.block-floor.autotile-mid-variants",
-			category: "environment",
+			name: "editor.block-floor.autotile-mid-variants",
+			description: "editor.block-floor.autotile-mid-variants-description",
 		}),
 	),
 	autotileVariants: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "autotileVariants", type: "number", description: "editor.block-floor.autotile-variants", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.autotile-variants",
+			description: "editor.block-floor.autotile-variants-description",
+		}),
 	),
 	drawEdgeIn: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "drawEdgeIn", type: "boolean", description: "editor.block-floor.draw-edge-in", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.draw-edge-in",
+			description: "editor.block-floor.draw-edge-in-description",
+		}),
 	),
 	drawEdgeOut: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "drawEdgeOut", type: "boolean", description: "editor.block-floor.draw-edge-out", category: "environment" }),
+		metadata({
+			name: "editor.block-floor.draw-edge-out",
+			description: "editor.block-floor.draw-edge-out-description",
+		}),
 	),
 });
 
@@ -3008,37 +3896,58 @@ const coloredFloorObjectSchema = v.object({});
 const treeBlockObjectSchema = v.object({
 	shadowOffset: v.pipe(
 		v.optional(v.number(), -4),
-		metadata({ name: "shadowOffset", type: "number", description: "editor.block-tree-block.shadow-offset", category: "environment" }),
+		metadata({
+			name: "editor.block-tree-block.shadow-offset",
+			description: "editor.block-tree-block.shadow-offset-description",
+		}),
 	),
 });
 
 const tallBlockObjectSchema = v.object({
 	shadowOffset: v.pipe(
 		v.optional(v.number(), -3),
-		metadata({ name: "shadowOffset", type: "number", description: "editor.block-tall-block.shadow-offset", category: "environment" }),
+		metadata({
+			name: "editor.block-tall-block.shadow-offset",
+			description: "editor.block-tall-block.shadow-offset-description",
+		}),
 	),
 	layer: v.pipe(
 		v.optional(v.number()),
-		metadata({ name: "layer", type: "number", description: "editor.block-tall-block.layer", category: "environment" }),
+		metadata({
+			name: "editor.block-tall-block.layer",
+			description: "editor.block-tall-block.layer-description",
+		}),
 	),
 	shadowLayer: v.pipe(
 		v.optional(v.number()),
-		metadata({ name: "shadowLayer", type: "number", description: "editor.block-tall-block.shadow-layer", category: "environment" }),
+		metadata({
+			name: "editor.block-tall-block.shadow-layer",
+			description: "editor.block-tall-block.shadow-layer-description",
+		}),
 	),
 	rotationRand: v.pipe(
 		v.optional(v.number(), 20),
-		metadata({ name: "rotationRand", type: "number", description: "editor.block-tall-block.rotation-rand", category: "environment" }),
+		metadata({
+			name: "editor.block-tall-block.rotation-rand",
+			description: "editor.block-tall-block.rotation-rand-description",
+		}),
 	),
 	shadowAlpha: v.pipe(
 		v.optional(v.number(), 0.6),
-		metadata({ name: "shadowAlpha", type: "number", description: "editor.block-tall-block.shadow-alpha", category: "environment" }),
+		metadata({
+			name: "editor.block-tall-block.shadow-alpha",
+			description: "editor.block-tall-block.shadow-alpha-description",
+		}),
 	),
 });
 
 const cliffObjectSchema = v.object({
 	size: v.pipe(
 		v.optional(v.number(), 11),
-		metadata({ name: "size", type: "number", description: "editor.block-cliff.size", category: "environment" }),
+		metadata({
+			name: "editor.block-cliff.size",
+			description: "editor.block-cliff.size-description",
+		}),
 	),
 });
 
@@ -3046,78 +3955,89 @@ const cliffObjectSchema = v.object({
 const launchPadObjectSchema = v.object({
 	launchTime: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "launchTime", type: "number", description: "editor.block-launch-pad.launch-time", category: "campaign" }),
+		metadata({
+			name: "editor.block-launch-pad.launch-time",
+			description: "editor.block-launch-pad.launch-time-description",
+		}),
 	),
 	launchSoundPitchRand: v.pipe(
 		v.optional(v.number(), 0.1),
 		metadata({
-			name: "launchSoundPitchRand",
-			type: "number",
-			description: "editor.block-launch-pad.launch-sound-pitch-rand",
-			category: "campaign",
+			name: "editor.block-launch-pad.launch-sound-pitch-rand",
+			description: "editor.block-launch-pad.launch-sound-pitch-rand-description",
 		}),
 	),
 	acceptMultipleItems: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "acceptMultipleItems",
-			type: "boolean",
-			description: "editor.block-launch-pad.accept-multiple-items",
-			category: "campaign",
+			name: "editor.block-launch-pad.accept-multiple-items",
+			description: "editor.block-launch-pad.accept-multiple-items-description",
 		}),
 	),
 	lightStep: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "lightStep", type: "number", description: "editor.block-launch-pad.light-step", category: "campaign" }),
+		metadata({
+			name: "editor.block-launch-pad.light-step",
+			description: "editor.block-launch-pad.light-step-description",
+		}),
 	),
 	lightSteps: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "lightSteps", type: "number", description: "editor.block-launch-pad.light-steps", category: "campaign" }),
+		metadata({
+			name: "editor.block-launch-pad.light-steps",
+			description: "editor.block-launch-pad.light-steps-description",
+		}),
 	),
 	liquidPad: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "liquidPad", type: "number", description: "editor.block-launch-pad.liquid-pad", category: "campaign" }),
+		metadata({
+			name: "editor.block-launch-pad.liquid-pad",
+			description: "editor.block-launch-pad.liquid-pad-description",
+		}),
 	),
 });
 
 const landingPadObjectSchema = v.object({
 	arrivalDuration: v.pipe(
 		v.optional(v.number(), 150),
-		metadata({ name: "arrivalDuration", type: "number", description: "editor.block-landing-pad.arrival-duration", category: "campaign" }),
+		metadata({
+			name: "editor.block-landing-pad.arrival-duration",
+			description: "editor.block-landing-pad.arrival-duration-description",
+		}),
 	),
 	cooldownTime: v.pipe(
 		v.optional(v.number(), 150),
-		metadata({ name: "cooldownTime", type: "number", description: "editor.block-landing-pad.cooldown-time", category: "campaign" }),
+		metadata({
+			name: "editor.block-landing-pad.cooldown-time",
+			description: "editor.block-landing-pad.cooldown-time-description",
+		}),
 	),
 	consumeLiquidAmount: v.pipe(
 		v.optional(v.number(), 100),
 		metadata({
-			name: "consumeLiquidAmount",
-			type: "number",
-			description: "editor.block-landing-pad.consume-liquid-amount",
-			category: "campaign",
+			name: "editor.block-landing-pad.consume-liquid-amount",
+			description: "editor.block-landing-pad.consume-liquid-amount-description",
 		}),
 	),
 	coolingEffectChance: v.pipe(
 		v.optional(v.number(), 0.2),
 		metadata({
-			name: "coolingEffectChance",
-			type: "number",
-			description: "editor.block-landing-pad.cooling-effect-chance",
-			category: "campaign",
+			name: "editor.block-landing-pad.cooling-effect-chance",
+			description: "editor.block-landing-pad.cooling-effect-chance-description",
 		}),
 	),
 	liquidPad: v.pipe(
 		v.optional(v.number(), 2),
-		metadata({ name: "liquidPad", type: "number", description: "editor.block-landing-pad.liquid-pad", category: "campaign" }),
+		metadata({
+			name: "editor.block-landing-pad.liquid-pad",
+			description: "editor.block-landing-pad.liquid-pad-description",
+		}),
 	),
 	landSoundVolume: v.pipe(
 		v.optional(v.number(), 0.75),
 		metadata({
-			name: "landSoundVolume",
-			type: "number",
-			description: "editor.block-landing-pad.land-sound-volume",
-			category: "campaign",
+			name: "editor.block-landing-pad.land-sound-volume",
+			description: "editor.block-landing-pad.land-sound-volume-description",
 		}),
 	),
 });
@@ -3126,118 +4046,162 @@ const acceleratorObjectSchema = v.object({
 	lightningSoundVolume: v.pipe(
 		v.optional(v.number(), 0.85),
 		metadata({
-			name: "lightningSoundVolume",
-			type: "number",
-			description: "editor.block-accelerator.lightning-sound-volume",
-			category: "campaign",
+			name: "editor.block-accelerator.lightning-sound-volume",
+			description: "editor.block-accelerator.lightning-sound-volume-description",
 		}),
 	),
 	launchDuration: v.pipe(
 		v.optional(v.number(), 120),
-		metadata({ name: "launchDuration", type: "number", description: "editor.block-accelerator.launch-duration", category: "campaign" }),
+		metadata({
+			name: "editor.block-accelerator.launch-duration",
+			description: "editor.block-accelerator.launch-duration-description",
+		}),
 	),
 	chargeDuration: v.pipe(
 		v.optional(v.number(), 220),
-		metadata({ name: "chargeDuration", type: "number", description: "editor.block-accelerator.charge-duration", category: "campaign" }),
+		metadata({
+			name: "editor.block-accelerator.charge-duration",
+			description: "editor.block-accelerator.charge-duration-description",
+		}),
 	),
 	buildDuration: v.pipe(
 		v.optional(v.number(), 120),
-		metadata({ name: "buildDuration", type: "number", description: "editor.block-accelerator.build-duration", category: "campaign" }),
+		metadata({
+			name: "editor.block-accelerator.build-duration",
+			description: "editor.block-accelerator.build-duration-description",
+		}),
 	),
 	landZoomFrom: v.pipe(
 		v.optional(v.number(), 0.02),
-		metadata({ name: "landZoomFrom", type: "number", description: "editor.block-accelerator.land-zoom-from", category: "campaign" }),
+		metadata({
+			name: "editor.block-accelerator.land-zoom-from",
+			description: "editor.block-accelerator.land-zoom-from-description",
+		}),
 	),
 	landZoomTo: v.pipe(
 		v.optional(v.number(), 4),
-		metadata({ name: "landZoomTo", type: "number", description: "editor.block-accelerator.land-zoom-to", category: "campaign" }),
+		metadata({
+			name: "editor.block-accelerator.land-zoom-to",
+			description: "editor.block-accelerator.land-zoom-to-description",
+		}),
 	),
 	chargeZoomTo: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "chargeZoomTo", type: "number", description: "editor.block-accelerator.charge-zoom-to", category: "campaign" }),
+		metadata({
+			name: "editor.block-accelerator.charge-zoom-to",
+			description: "editor.block-accelerator.charge-zoom-to-description",
+		}),
 	),
 	chargeRings: v.pipe(
 		v.optional(v.number(), 4),
-		metadata({ name: "chargeRings", type: "number", description: "editor.block-accelerator.charge-rings", category: "campaign" }),
+		metadata({
+			name: "editor.block-accelerator.charge-rings",
+			description: "editor.block-accelerator.charge-rings-description",
+		}),
 	),
 	ringRadBase: v.pipe(
 		v.optional(v.number(), 60),
-		metadata({ name: "ringRadBase", type: "number", description: "editor.block-accelerator.ring-rad-base", category: "campaign" }),
+		metadata({
+			name: "editor.block-accelerator.ring-rad-base",
+			description: "editor.block-accelerator.ring-rad-base-description",
+		}),
 	),
 	ringRadSpacing: v.pipe(
 		v.optional(v.number(), 25),
-		metadata({ name: "ringRadSpacing", type: "number", description: "editor.block-accelerator.ring-rad-spacing", category: "campaign" }),
+		metadata({
+			name: "editor.block-accelerator.ring-rad-spacing",
+			description: "editor.block-accelerator.ring-rad-spacing-description",
+		}),
 	),
 	ringRadPow: v.pipe(
 		v.optional(v.number(), 1.6),
-		metadata({ name: "ringRadPow", type: "number", description: "editor.block-accelerator.ring-rad-pow", category: "campaign" }),
+		metadata({
+			name: "editor.block-accelerator.ring-rad-pow",
+			description: "editor.block-accelerator.ring-rad-pow-description",
+		}),
 	),
 	ringStroke: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "ringStroke", type: "number", description: "editor.block-accelerator.ring-stroke", category: "campaign" }),
+		metadata({
+			name: "editor.block-accelerator.ring-stroke",
+			description: "editor.block-accelerator.ring-stroke-description",
+		}),
 	),
 	ringSpeedup: v.pipe(
 		v.optional(v.number(), 1.4),
-		metadata({ name: "ringSpeedup", type: "number", description: "editor.block-accelerator.ring-speedup", category: "campaign" }),
+		metadata({
+			name: "editor.block-accelerator.ring-speedup",
+			description: "editor.block-accelerator.ring-speedup-description",
+		}),
 	),
 	chargeRingMerge: v.pipe(
 		v.optional(v.number(), 2),
 		metadata({
-			name: "chargeRingMerge",
-			type: "number",
-			description: "editor.block-accelerator.charge-ring-merge",
-			category: "campaign",
+			name: "editor.block-accelerator.charge-ring-merge",
+			description: "editor.block-accelerator.charge-ring-merge-description",
 		}),
 	),
 	ringArrowRad: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "ringArrowRad", type: "number", description: "editor.block-accelerator.ring-arrow-rad", category: "campaign" }),
+		metadata({
+			name: "editor.block-accelerator.ring-arrow-rad",
+			description: "editor.block-accelerator.ring-arrow-rad-description",
+		}),
 	),
 	ringHandleTilt: v.pipe(
 		v.optional(v.number(), 0.8),
-		metadata({ name: "ringHandleTilt", type: "number", description: "editor.block-accelerator.ring-handle-tilt", category: "campaign" }),
+		metadata({
+			name: "editor.block-accelerator.ring-handle-tilt",
+			description: "editor.block-accelerator.ring-handle-tilt-description",
+		}),
 	),
 	ringHandleLen: v.pipe(
 		v.optional(v.number(), 30),
-		metadata({ name: "ringHandleLen", type: "number", description: "editor.block-accelerator.ring-handle-len", category: "campaign" }),
+		metadata({
+			name: "editor.block-accelerator.ring-handle-len",
+			description: "editor.block-accelerator.ring-handle-len-description",
+		}),
 	),
 	launchLightning: v.pipe(
 		v.optional(v.number(), 20),
-		metadata({ name: "launchLightning", type: "number", description: "editor.block-accelerator.launch-lightning", category: "campaign" }),
+		metadata({
+			name: "editor.block-accelerator.launch-lightning",
+			description: "editor.block-accelerator.launch-lightning-description",
+		}),
 	),
 	lightningDamage: v.pipe(
 		v.optional(v.number(), 40),
-		metadata({ name: "lightningDamage", type: "number", description: "editor.block-accelerator.lightning-damage", category: "campaign" }),
+		metadata({
+			name: "editor.block-accelerator.lightning-damage",
+			description: "editor.block-accelerator.lightning-damage-description",
+		}),
 	),
 	lightningOffset: v.pipe(
 		v.optional(v.number(), 24),
-		metadata({ name: "lightningOffset", type: "number", description: "editor.block-accelerator.lightning-offset", category: "campaign" }),
+		metadata({
+			name: "editor.block-accelerator.lightning-offset",
+			description: "editor.block-accelerator.lightning-offset-description",
+		}),
 	),
 	lightningLengthMin: v.pipe(
 		v.optional(v.number(), 5),
 		metadata({
-			name: "lightningLengthMin",
-			type: "number",
-			description: "editor.block-accelerator.lightning-length-min",
-			category: "campaign",
+			name: "editor.block-accelerator.lightning-length-min",
+			description: "editor.block-accelerator.lightning-length-min-description",
 		}),
 	),
 	lightningLengthMax: v.pipe(
 		v.optional(v.number(), 25),
 		metadata({
-			name: "lightningLengthMax",
-			type: "number",
-			description: "editor.block-accelerator.lightning-length-max",
-			category: "campaign",
+			name: "editor.block-accelerator.lightning-length-max",
+			description: "editor.block-accelerator.lightning-length-max-description",
 		}),
 	),
 	lightningLaunchChance: v.pipe(
 		v.optional(v.number(), 0.8),
 		metadata({
-			name: "lightningLaunchChance",
-			type: "number",
-			description: "editor.block-accelerator.lightning-launch-chance",
-			category: "campaign",
+			name: "editor.block-accelerator.lightning-launch-chance",
+			description: "editor.block-accelerator.lightning-launch-chance-description",
 		}),
 	),
 });
@@ -3246,7 +4210,10 @@ const acceleratorObjectSchema = v.object({
 const itemSourceObjectSchema = v.object({
 	itemsPerSecond: v.pipe(
 		v.optional(v.number(), 100),
-		metadata({ name: "itemsPerSecond", type: "number", description: "editor.block-item-source.items-per-second", category: "sandbox" }),
+		metadata({
+			name: "editor.block-item-source.items-per-second",
+			description: "editor.block-item-source.items-per-second-description",
+		}),
 	),
 });
 
@@ -3318,7 +4285,7 @@ const classSchemaMap: Record<BlockType, SchemaFn<v.ObjectSchema<v.ObjectEntries,
 	Turret: (_context) => turretObjectSchema,
 	PowerTurret: (_context) => powerTurretObjectSchema,
 	LaserTurret: (_context) => laserTurretObjectSchema,
-	ItemTurret: (_context) => v.object({}),
+	ItemTurret: (_context) => baseTurretObjectSchema,
 	LiquidTurret: (_context) => v.object({}),
 	ContinuousTurret: (_context) => continuousTurretObjectSchema,
 	ContinuousLiquidTurret: (_context) => continuousLiquidTurretObjectSchema,
@@ -3408,813 +4375,1050 @@ const classSchemaMap: Record<BlockType, SchemaFn<v.ObjectSchema<v.ObjectEntries,
 };
 
 export const blockObjectSchema = {
-	type: v.pipe(v.optional(v.picklist(blockTypes)), metadata({ name: "type", type: "picklist" })),
-	template: v.pipe(v.optional(v.string()), metadata({ name: "template", type: "string" })),
-
+	type: v.pipe(v.optional(v.picklist(blockTypes))),
 	// Items
 	hasItems: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "hasItems", type: "boolean", description: "editor.block.has-items", category: "items" }),
+		metadata({ name: "editor.block.has-items", description: "editor.block.has-items-description" }),
 	),
 	hasLiquids: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "hasLiquids", type: "boolean", description: "editor.block.has-liquids", category: "liquids" }),
+		metadata({
+			name: "editor.block.has-liquids",
+			description: "editor.block.has-liquids-description",
+		}),
 	),
 	hasPower: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "hasPower", type: "boolean", description: "editor.block.has-power", category: "power" }),
+		metadata({ name: "editor.block.has-power", description: "editor.block.has-power-description" }),
 	),
 	outputsLiquid: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "outputsLiquid", type: "boolean", description: "editor.block.outputs-liquid", category: "liquids" }),
+		metadata({
+			name: "editor.block.outputs-liquid",
+			description: "editor.block.outputs-liquid-description",
+		}),
 	),
 	consumesPower: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "consumesPower", type: "boolean", description: "editor.block.consumes-power", category: "power" }),
+		metadata({
+			name: "editor.block.consumes-power",
+			description: "editor.block.consumes-power-description",
+		}),
 	),
 	outputsPower: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "outputsPower", type: "boolean", description: "editor.block.outputs-power", category: "power" }),
+		metadata({
+			name: "editor.block.outputs-power",
+			description: "editor.block.outputs-power-description",
+		}),
 	),
 	connectedPower: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "connectedPower", type: "boolean", description: "editor.block.connected-power", category: "power" }),
+		metadata({
+			name: "editor.block.connected-power",
+			description: "editor.block.connected-power-description",
+		}),
 	),
 	conductivePower: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "conductivePower", type: "boolean", description: "editor.block.conductive-power", category: "power" }),
+		metadata({
+			name: "editor.block.conductive-power",
+			description: "editor.block.conductive-power-description",
+		}),
 	),
 	outputsPayload: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "outputsPayload", type: "boolean", description: "editor.block.outputs-payload", category: "payload" }),
+		metadata({
+			name: "editor.block.outputs-payload",
+			description: "editor.block.outputs-payload-description",
+		}),
 	),
 	acceptsUnitPayloads: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "acceptsUnitPayloads", type: "boolean", description: "editor.block.accepts-unit-payloads", category: "payload" }),
+		metadata({
+			name: "editor.block.accepts-unit-payloads",
+			description: "editor.block.accepts-unit-payloads-description",
+		}),
 	),
 	acceptsPayload: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "acceptsPayload", type: "boolean", description: "editor.block.accepts-payload", category: "payload" }),
+		metadata({
+			name: "editor.block.accepts-payload",
+			description: "editor.block.accepts-payload-description",
+		}),
 	),
 	acceptsItems: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "acceptsItems", type: "boolean", description: "editor.block.accepts-items", category: "items" }),
+		metadata({
+			name: "editor.block.accepts-items",
+			description: "editor.block.accepts-items-description",
+		}),
 	),
-
 	itemCapacity: v.pipe(
 		v.optional(v.number(), 10),
 		metadata({
-			name: "itemCapacity",
-			type: "number",
-			description: "editor.block.item-capacity",
-			category: "items",
+			name: "editor.block.item-capacity",
+			description: "editor.block.item-capacity-description",
 			visibleWhen: { field: "hasItems", value: true },
 		}),
 	),
 	liquidCapacity: v.pipe(
 		v.optional(v.number(), -1),
 		metadata({
-			name: "liquidCapacity",
-			type: "number",
-			description: "editor.block.liquid-capacity",
-			category: "liquids",
+			name: "editor.block.liquid-capacity",
+			description: "editor.block.liquid-capacity-description",
 			visibleWhen: { field: "hasLiquids", value: true },
 		}),
 	),
 	liquidPressure: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
-			name: "liquidPressure",
-			type: "number",
-			description: "editor.block.liquid-pressure",
-			category: "liquids",
+			name: "editor.block.liquid-pressure",
+			description: "editor.block.liquid-pressure-description",
 			visibleWhen: { field: "hasLiquids", value: true },
 		}),
 	),
 	separateItemCapacity: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "separateItemCapacity",
-			type: "boolean",
-			description: "editor.block.separate-item-capacity",
-			category: "items",
+			name: "editor.block.separate-item-capacity",
+			description: "editor.block.separate-item-capacity-description",
 			visibleWhen: { field: "hasItems", value: true },
 		}),
 	),
-
 	alwaysAllowDeposit: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "alwaysAllowDeposit", type: "boolean", description: "editor.block.always-allow-deposit", category: "items" }),
+		metadata({
+			name: "editor.block.always-allow-deposit",
+			description: "editor.block.always-allow-deposit-description",
+		}),
 	),
 	depositCooldown: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "depositCooldown", type: "number", description: "editor.block.deposit-cooldown", category: "items" }),
+		metadata({
+			name: "editor.block.deposit-cooldown",
+			description: "editor.block.deposit-cooldown-description",
+		}),
 	),
 	displayFlow: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "displayFlow", type: "boolean", description: "editor.block.display-flow", category: "rendering" }),
+		metadata({
+			name: "editor.block.display-flow",
+			description: "editor.block.display-flow-description",
+		}),
 	),
 	unloadable: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "unloadable", type: "boolean", description: "editor.block.unloadable", category: "items" }),
+		metadata({ name: "editor.block.unloadable", description: "editor.block.unloadable-description" }),
 	),
 	allowResupply: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "allowResupply", type: "boolean", description: "editor.block.allow-resupply", category: "items" }),
+		metadata({
+			name: "editor.block.allow-resupply",
+			description: "editor.block.allow-resupply-description",
+		}),
 	),
-
 	// Placement & Size
-	size: v.pipe(
-		v.optional(v.number(), 1),
-		metadata({ name: "size", type: "number", description: "editor.block.size", category: "placement" }),
-	),
-	offset: v.pipe(
-		v.optional(v.number(), 0),
-		metadata({ name: "offset", type: "number", description: "editor.block.offset", category: "placement" }),
-	),
+	size: v.pipe(v.optional(v.number(), 1), metadata({ name: "editor.block.size", description: "editor.block.size-description" })),
+	offset: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.block.offset", description: "editor.block.offset-description" })),
 	sizeOffset: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "sizeOffset", type: "number", description: "editor.block.size-offset", category: "placement" }),
+		metadata({
+			name: "editor.block.size-offset",
+			description: "editor.block.size-offset-description",
+		}),
 	),
 	rotate: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "rotate", type: "boolean", description: "editor.block.rotate", category: "placement" }),
+		metadata({ name: "editor.block.rotate", description: "editor.block.rotate-description" }),
 	),
 	rotateDraw: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
-			name: "rotateDraw",
-			type: "boolean",
-			description: "editor.block.rotate-draw",
-			category: "rendering",
+			name: "editor.block.rotate-draw",
+			description: "editor.block.rotate-draw-description",
 			visibleWhen: { field: "rotate", value: true },
 		}),
 	),
 	rotateDrawEditor: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
-			name: "rotateDrawEditor",
-			type: "boolean",
-			description: "editor.block.rotate-draw-editor",
-			category: "rendering",
+			name: "editor.block.rotate-draw-editor",
+			description: "editor.block.rotate-draw-editor-description",
 			visibleWhen: { field: "rotate", value: true },
 		}),
 	),
 	visualRotationOffset: v.pipe(
 		v.optional(v.number(), 0),
 		metadata({
-			name: "visualRotationOffset",
-			type: "number",
-			description: "editor.block.visual-rotation-offset",
-			category: "rendering",
+			name: "editor.block.visual-rotation-offset",
+			description: "editor.block.visual-rotation-offset-description",
 			visibleWhen: { field: "rotate", value: true },
 		}),
 	),
 	lockRotation: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "lockRotation", type: "boolean", description: "editor.block.lock-rotation", category: "placement" }),
+		metadata({
+			name: "editor.block.lock-rotation",
+			description: "editor.block.lock-rotation-description",
+		}),
 	),
 	ignoreLineRotation: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "ignoreLineRotation", type: "boolean", description: "editor.block.ignore-line-rotation", category: "placement" }),
+		metadata({
+			name: "editor.block.ignore-line-rotation",
+			description: "editor.block.ignore-line-rotation-description",
+		}),
 	),
 	invertFlip: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "invertFlip", type: "boolean", description: "editor.block.invert-flip", category: "placement" }),
+		metadata({
+			name: "editor.block.invert-flip",
+			description: "editor.block.invert-flip-description",
+		}),
 	),
 	variants: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "variants", type: "number", description: "editor.block.variants", category: "rendering" }),
+		metadata({ name: "editor.block.variants", description: "editor.block.variants-description" }),
 	),
 	drawArrow: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "drawArrow", type: "boolean", description: "editor.block.draw-arrow", category: "rendering" }),
+		metadata({
+			name: "editor.block.draw-arrow",
+			description: "editor.block.draw-arrow-description",
+		}),
 	),
 	drawTeamOverlay: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "drawTeamOverlay", type: "boolean", description: "editor.block.draw-team-overlay", category: "rendering" }),
+		metadata({
+			name: "editor.block.draw-team-overlay",
+			description: "editor.block.draw-team-overlay-description",
+		}),
 	),
 	drawCracks: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "drawCracks", type: "boolean", description: "editor.block.draw-cracks", category: "rendering" }),
+		metadata({
+			name: "editor.block.draw-cracks",
+			description: "editor.block.draw-cracks-description",
+		}),
 	),
 	drawDisabled: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "drawDisabled", type: "boolean", description: "editor.block.draw-disabled", category: "rendering" }),
+		metadata({
+			name: "editor.block.draw-disabled",
+			description: "editor.block.draw-disabled-description",
+		}),
 	),
 	drawLiquidLight: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "drawLiquidLight", type: "boolean", description: "editor.block.draw-liquid-light", category: "rendering" }),
+		metadata({
+			name: "editor.block.draw-liquid-light",
+			description: "editor.block.draw-liquid-light-description",
+		}),
 	),
 	enableDrawStatus: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "enableDrawStatus", type: "boolean", description: "editor.block.enable-draw-status", category: "rendering" }),
+		metadata({
+			name: "editor.block.enable-draw-status",
+			description: "editor.block.enable-draw-status-description",
+		}),
 	),
 	squareSprite: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "squareSprite", type: "boolean", description: "editor.block.square-sprite", category: "rendering" }),
+		metadata({
+			name: "editor.block.square-sprite",
+			description: "editor.block.square-sprite-description",
+		}),
 	),
 	fillsTile: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "fillsTile", type: "boolean", description: "editor.block.fills-tile", category: "rendering" }),
+		metadata({
+			name: "editor.block.fills-tile",
+			description: "editor.block.fills-tile-description",
+		}),
 	),
 	hasShadow: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "hasShadow", type: "boolean", description: "editor.block.has-shadow", category: "rendering" }),
+		metadata({
+			name: "editor.block.has-shadow",
+			description: "editor.block.has-shadow-description",
+		}),
 	),
 	customShadow: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "customShadow", type: "boolean", description: "editor.block.custom-shadow", category: "rendering" }),
+		metadata({
+			name: "editor.block.custom-shadow",
+			description: "editor.block.custom-shadow-description",
+		}),
 	),
 	outlineIcon: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "outlineIcon", type: "boolean", description: "editor.block.outline-icon", category: "rendering" }),
+		metadata({
+			name: "editor.block.outline-icon",
+			description: "editor.block.outline-icon-description",
+		}),
 	),
 	outlineRadius: v.pipe(
 		v.optional(v.number(), 4),
-		metadata({ name: "outlineRadius", type: "number", description: "editor.block.outline-radius", category: "rendering" }),
+		metadata({
+			name: "editor.block.outline-radius",
+			description: "editor.block.outline-radius-description",
+		}),
 	),
 	outlinedIcon: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "outlinedIcon", type: "number", description: "editor.block.outlined-icon", category: "rendering" }),
+		metadata({
+			name: "editor.block.outlined-icon",
+			description: "editor.block.outlined-icon-description",
+		}),
 	),
-	albedo: v.pipe(
-		v.optional(v.number(), 0),
-		metadata({ name: "albedo", type: "number", description: "editor.block.albedo", category: "rendering" }),
-	),
+	albedo: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.block.albedo", description: "editor.block.albedo-description" })),
 	emitLight: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "emitLight", type: "boolean", description: "editor.block.emit-light", category: "rendering" }),
+		metadata({
+			name: "editor.block.emit-light",
+			description: "editor.block.emit-light-description",
+		}),
 	),
 	obstructsLight: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
-			name: "obstructsLight",
-			type: "boolean",
-			description: "editor.block.obstructs-light",
-			category: "rendering",
+			name: "editor.block.obstructs-light",
+			description: "editor.block.obstructs-light-description",
 			visibleWhen: { field: "emitLight", value: true },
 		}),
 	),
 	lightRadius: v.pipe(
 		v.optional(v.number(), 60),
 		metadata({
-			name: "lightRadius",
-			type: "number",
-			description: "editor.block.light-radius",
-			category: "rendering",
+			name: "editor.block.light-radius",
+			description: "editor.block.light-radius-description",
 			visibleWhen: { field: "emitLight", value: true },
 		}),
 	),
 	lightClipSize: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "lightClipSize", type: "number", description: "editor.block.light-clip-size", category: "rendering" }),
+		metadata({
+			name: "editor.block.light-clip-size",
+			description: "editor.block.light-clip-size-description",
+		}),
 	),
 	forceDark: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "forceDark", type: "boolean", description: "editor.block.force-dark", category: "rendering" }),
+		metadata({
+			name: "editor.block.force-dark",
+			description: "editor.block.force-dark-description",
+		}),
 	),
 	useColor: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "useColor", type: "boolean", description: "editor.block.use-color", category: "rendering" }),
+		metadata({
+			name: "editor.block.use-color",
+			description: "editor.block.use-color-description",
+		}),
 	),
 	hasColor: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "hasColor", type: "boolean", description: "editor.block.has-color", category: "rendering" }),
+		metadata({
+			name: "editor.block.has-color",
+			description: "editor.block.has-color-description",
+		}),
 	),
-
 	// Placement
 	placeablePlayer: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "placeablePlayer", type: "boolean", description: "editor.block.placeable-player", category: "placement" }),
+		metadata({
+			name: "editor.block.placeable-player",
+			description: "editor.block.placeable-player-description",
+		}),
 	),
 	placeableOn: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "placeableOn", type: "boolean", description: "editor.block.placeable-on", category: "placement" }),
+		metadata({
+			name: "editor.block.placeable-on",
+			description: "editor.block.placeable-on-description",
+		}),
 	),
 	placeableLiquid: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "placeableLiquid", type: "boolean", description: "editor.block.placeable-liquid", category: "placement" }),
+		metadata({
+			name: "editor.block.placeable-liquid",
+			description: "editor.block.placeable-liquid-description",
+		}),
 	),
 	requiresWater: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "requiresWater", type: "boolean", description: "editor.block.requires-water", category: "placement" }),
+		metadata({
+			name: "editor.block.requires-water",
+			description: "editor.block.requires-water-description",
+		}),
 	),
 	floating: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "floating", type: "boolean", description: "editor.block.floating", category: "placement" }),
+		metadata({ name: "editor.block.floating", description: "editor.block.floating-description" }),
 	),
 	conveyorPlacement: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "conveyorPlacement", type: "boolean", description: "editor.block.conveyor-placement", category: "placement" }),
+		metadata({
+			name: "editor.block.conveyor-placement",
+			description: "editor.block.conveyor-placement-description",
+		}),
 	),
 	allowDiagonal: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "allowDiagonal", type: "boolean", description: "editor.block.allow-diagonal", category: "placement" }),
+		metadata({
+			name: "editor.block.allow-diagonal",
+			description: "editor.block.allow-diagonal-description",
+		}),
 	),
 	swapDiagonalPlacement: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "swapDiagonalPlacement",
-			type: "boolean",
-			description: "editor.block.swap-diagonal-placement",
-			category: "placement",
+			name: "editor.block.swap-diagonal-placement",
+			description: "editor.block.swap-diagonal-placement-description",
 		}),
 	),
 	allowRectanglePlacement: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "allowRectanglePlacement",
-			type: "boolean",
-			description: "editor.block.allow-rectangle-placement",
-			category: "placement",
+			name: "editor.block.allow-rectangle-placement",
+			description: "editor.block.allow-rectangle-placement-description",
 		}),
 	),
 	noSideBlend: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "noSideBlend", type: "boolean", description: "editor.block.no-side-blend", category: "rendering" }),
+		metadata({
+			name: "editor.block.no-side-blend",
+			description: "editor.block.no-side-blend-description",
+		}),
 	),
 	outputFacing: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "outputFacing", type: "boolean", description: "editor.block.output-facing", category: "placement" }),
+		metadata({
+			name: "editor.block.output-facing",
+			description: "editor.block.output-facing-description",
+		}),
 	),
-
 	// Health & Durability
-	health: v.pipe(
-		v.optional(v.number(), -1),
-		metadata({ name: "health", type: "number", description: "editor.block.health", category: "health" }),
-	),
+	health: v.pipe(v.optional(v.number(), -1), metadata({ name: "editor.block.health", description: "editor.block.health-description" })),
 	scaledHealth: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "scaledHealth", type: "number", description: "editor.block.scaled-health", category: "health" }),
+		metadata({
+			name: "editor.block.scaled-health",
+			description: "editor.block.scaled-health-description",
+		}),
 	),
-	armor: v.pipe(
-		v.optional(v.number(), 0),
-		metadata({ name: "armor", type: "number", description: "editor.block.armor", category: "health" }),
-	),
+	armor: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.block.armor", description: "editor.block.armor-description" })),
 	saveData: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "saveData", type: "boolean", description: "editor.block.save-data", category: "health" }),
+		metadata({ name: "editor.block.save-data", description: "editor.block.save-data-description" }),
 	),
 	destructible: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "destructible", type: "boolean", description: "editor.block.destructible", category: "health" }),
+		metadata({
+			name: "editor.block.destructible",
+			description: "editor.block.destructible-description",
+		}),
 	),
 	breakable: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "breakable", type: "boolean", description: "editor.block.breakable", category: "health" }),
+		metadata({ name: "editor.block.breakable", description: "editor.block.breakable-description" }),
 	),
 	rebuildable: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "rebuildable", type: "boolean", description: "editor.block.rebuildable", category: "health" }),
+		metadata({
+			name: "editor.block.rebuildable",
+			description: "editor.block.rebuildable-description",
+		}),
 	),
 	crushDamageMultiplier: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "crushDamageMultiplier", type: "number", description: "editor.block.crush-damage-multiplier", category: "health" }),
+		metadata({
+			name: "editor.block.crush-damage-multiplier",
+			description: "editor.block.crush-damage-multiplier-description",
+		}),
 	),
 	crushFragile: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "crushFragile", type: "boolean", description: "editor.block.crush-fragile", category: "health" }),
+		metadata({
+			name: "editor.block.crush-fragile",
+			description: "editor.block.crush-fragile-description",
+		}),
 	),
 	destroyBulletSameTeam: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "destroyBulletSameTeam",
-			type: "boolean",
-			description: "editor.block.destroy-bullet-same-team",
-			category: "health",
+			name: "editor.block.destroy-bullet-same-team",
+			description: "editor.block.destroy-bullet-same-team-description",
 		}),
 	),
-
 	// Physics
-	solid: v.pipe(
-		v.optional(v.boolean(), false),
-		metadata({ name: "solid", type: "boolean", description: "editor.block.solid", category: "physics" }),
-	),
+	solid: v.pipe(v.optional(v.boolean(), false), metadata({ name: "editor.block.solid", description: "editor.block.solid-description" })),
 	solidifes: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "solidifes", type: "boolean", description: "editor.block.solidifes", category: "physics" }),
+		metadata({ name: "editor.block.solidifes", description: "editor.block.solidifes-description" }),
 	),
 	teamPassable: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "teamPassable", type: "boolean", description: "editor.block.team-passable", category: "physics" }),
+		metadata({
+			name: "editor.block.team-passable",
+			description: "editor.block.team-passable-description",
+		}),
 	),
 	underBullets: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "underBullets", type: "boolean", description: "editor.block.under-bullets", category: "physics" }),
+		metadata({
+			name: "editor.block.under-bullets",
+			description: "editor.block.under-bullets-description",
+		}),
 	),
-
 	// Update & Config
 	update: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "update", type: "boolean", description: "editor.block.update", category: "config" }),
+		metadata({ name: "editor.block.update", description: "editor.block.update-description" }),
 	),
 	updateInUnits: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
-			name: "updateInUnits",
-			type: "boolean",
-			description: "editor.block.update-in-units",
-			category: "config",
+			name: "editor.block.update-in-units",
+			description: "editor.block.update-in-units-description",
 			visibleWhen: { field: "update", value: true },
 		}),
 	),
 	alwaysUpdateInUnits: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "alwaysUpdateInUnits",
-			type: "boolean",
-			description: "editor.block.always-update-in-units",
-			category: "config",
+			name: "editor.block.always-update-in-units",
+			description: "editor.block.always-update-in-units-description",
 			visibleWhen: { field: "update", value: true },
 		}),
 	),
 	noUpdateDisabled: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "noUpdateDisabled",
-			type: "boolean",
-			description: "editor.block.no-update-disabled",
-			category: "config",
+			name: "editor.block.no-update-disabled",
+			description: "editor.block.no-update-disabled-description",
 			visibleWhen: { field: "update", value: true },
 		}),
 	),
 	configurable: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "configurable",
-			type: "boolean",
-			description: "editor.block.configurable",
-			category: "config",
+			name: "editor.block.configurable",
+			description: "editor.block.configurable-description",
 			visibleWhen: { field: "update", value: true },
 		}),
 	),
 	configureSound: v.pipe(
 		v.optional(SoundHjsonSchema),
 		metadata({
-			name: "configureSound",
-			type: "string",
-			description: "editor.block.configure-sound",
-			category: "audio",
+			name: "editor.block.configure-sound",
+			description: "editor.block.configure-sound-description",
 			visibleWhen: { field: "configurable", value: true },
 		}),
 	),
 	saveConfig: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "saveConfig",
-			type: "boolean",
-			description: "editor.block.save-config",
-			category: "config",
+			name: "editor.block.save-config",
+			description: "editor.block.save-config-description",
 			visibleWhen: { field: "configurable", value: true },
 		}),
 	),
 	copyConfig: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
-			name: "copyConfig",
-			type: "boolean",
-			description: "editor.block.copy-config",
-			category: "config",
+			name: "editor.block.copy-config",
+			description: "editor.block.copy-config-description",
 			visibleWhen: { field: "configurable", value: true },
 		}),
 	),
 	clearOnDoubleTap: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "clearOnDoubleTap",
-			type: "boolean",
-			description: "editor.block.clear-on-double-tap",
-			category: "config",
+			name: "editor.block.clear-on-double-tap",
+			description: "editor.block.clear-on-double-tap-description",
 			visibleWhen: { field: "configurable", value: true },
 		}),
 	),
 	consumesTap: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "consumesTap", type: "boolean", description: "editor.block.consumes-tap", category: "config" }),
+		metadata({
+			name: "editor.block.consumes-tap",
+			description: "editor.block.consumes-tap-description",
+		}),
 	),
 	ignoreResizeConfig: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "ignoreResizeConfig", type: "boolean", description: "editor.block.ignore-resize-config", category: "config" }),
+		metadata({
+			name: "editor.block.ignore-resize-config",
+			description: "editor.block.ignore-resize-config-description",
+		}),
 	),
 	commandable: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "commandable", type: "boolean", description: "editor.block.commandable", category: "config" }),
+		metadata({
+			name: "editor.block.commandable",
+			description: "editor.block.commandable-description",
+		}),
 	),
 	allowConfigInventory: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "allowConfigInventory", type: "boolean", description: "editor.block.allow-config-inventory", category: "config" }),
+		metadata({
+			name: "editor.block.allow-config-inventory",
+			description: "editor.block.allow-config-inventory-description",
+		}),
 	),
 	logicConfigurable: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "logicConfigurable", type: "boolean", description: "editor.block.logic-configurable", category: "config" }),
+		metadata({
+			name: "editor.block.logic-configurable",
+			description: "editor.block.logic-configurable-description",
+		}),
 	),
 	selectionRows: v.pipe(
 		v.optional(v.number(), 5),
-		metadata({ name: "selectionRows", type: "number", description: "editor.block.selection-rows", category: "config" }),
+		metadata({
+			name: "editor.block.selection-rows",
+			description: "editor.block.selection-rows-description",
+		}),
 	),
 	selectionColumns: v.pipe(
 		v.optional(v.number(), 4),
-		metadata({ name: "selectionColumns", type: "number", description: "editor.block.selection-columns", category: "config" }),
+		metadata({
+			name: "editor.block.selection-columns",
+			description: "editor.block.selection-columns-description",
+		}),
 	),
 	delayLandingConfig: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "delayLandingConfig", type: "boolean", description: "editor.block.delay-landing-config", category: "config" }),
+		metadata({
+			name: "editor.block.delay-landing-config",
+			description: "editor.block.delay-landing-config-description",
+		}),
 	),
 	selectScroll: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "selectScroll", type: "number", description: "editor.block.select-scroll", category: "config" }),
+		metadata({
+			name: "editor.block.select-scroll",
+			description: "editor.block.select-scroll-description",
+		}),
 	),
-
 	// Environment
 	envRequired: v.pipe(
 		v.optional(EnvSchema, 0),
-		metadata({ name: "envRequired", type: "number", description: "editor.block.env-required", category: "environment" }),
+		metadata({
+			name: "editor.block.env-required",
+			description: "editor.block.env-required-description",
+		}),
 	),
 	envEnabled: v.pipe(
 		v.optional(EnvSchema, Envs.terrestrial),
-		metadata({ name: "envEnabled", type: "number", description: "editor.block.env-enabled", category: "environment" }),
+		metadata({
+			name: "editor.block.env-enabled",
+			description: "editor.block.env-enabled-description",
+		}),
 	),
 	envDisabled: v.pipe(
 		v.optional(EnvSchema, 0),
-		metadata({ name: "envDisabled", type: "number", description: "editor.block.env-disabled", category: "environment" }),
+		metadata({
+			name: "editor.block.env-disabled",
+			description: "editor.block.env-disabled-description",
+		}),
 	),
-
 	// Network
-	sync: v.pipe(
-		v.optional(v.boolean(), false),
-		metadata({ name: "sync", type: "boolean", description: "editor.block.sync", category: "config" }),
-	),
-
+	sync: v.pipe(v.optional(v.boolean(), false), metadata({ name: "editor.block.sync", description: "editor.block.sync-description" })),
 	// Combat & Targeting
 	attacks: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "attacks", type: "boolean", description: "editor.block.attacks", category: "combat" }),
+		metadata({ name: "editor.block.attacks", description: "editor.block.attacks-description" }),
 	),
 	targetable: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "targetable", type: "boolean", description: "editor.block.targetable", category: "combat" }),
+		metadata({
+			name: "editor.block.targetable",
+			description: "editor.block.targetable-description",
+		}),
 	),
 	suppressable: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "suppressable", type: "boolean", description: "editor.block.suppressable", category: "combat" }),
+		metadata({
+			name: "editor.block.suppressable",
+			description: "editor.block.suppressable-description",
+		}),
 	),
 	canOverdrive: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "canOverdrive", type: "boolean", description: "editor.block.can-overdrive", category: "power" }),
+		metadata({
+			name: "editor.block.can-overdrive",
+			description: "editor.block.can-overdrive-description",
+		}),
 	),
 	absorbLasers: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "absorbLasers", type: "boolean", description: "editor.block.absorb-lasers", category: "physics" }),
+		metadata({
+			name: "editor.block.absorb-lasers",
+			description: "editor.block.absorb-lasers-description",
+		}),
 	),
 	insulated: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "insulated", type: "boolean", description: "editor.block.insulated", category: "physics" }),
+		metadata({ name: "editor.block.insulated", description: "editor.block.insulated-description" }),
 	),
-
 	// Building
 	buildVisibility: v.pipe(
 		v.optional(BuildVisibilitySchema, "hidden"),
-		metadata({ name: "buildVisibility", type: "picklist", description: "editor.block.build-visibility", category: "building" }),
+		metadata({
+			name: "editor.block.build-visibility",
+			description: "editor.block.build-visibility-description",
+		}),
 	),
 	category: v.pipe(
 		v.optional(CategorySchema, "distribution"),
-		metadata({ name: "category", type: "picklist", description: "editor.block.category", category: "building" }),
+		metadata({ name: "editor.block.category", description: "editor.block.category-description" }),
 	),
 	buildTime: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "buildTime", type: "number", description: "editor.block.build-time", category: "building" }),
+		metadata({
+			name: "editor.block.build-time",
+			description: "editor.block.build-time-description",
+		}),
 	),
 	buildCostMultiplier: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "buildCostMultiplier", type: "number", description: "editor.block.build-cost-multiplier", category: "building" }),
+		metadata({
+			name: "editor.block.build-cost-multiplier",
+			description: "editor.block.build-cost-multiplier-description",
+		}),
 	),
 	deconstructThreshold: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "deconstructThreshold", type: "number", description: "editor.block.deconstruct-threshold", category: "building" }),
+		metadata({
+			name: "editor.block.deconstruct-threshold",
+			description: "editor.block.deconstruct-threshold-description",
+		}),
 	),
 	instantDeconstruct: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "instantDeconstruct", type: "boolean", description: "editor.block.instant-deconstruct", category: "building" }),
+		metadata({
+			name: "editor.block.instant-deconstruct",
+			description: "editor.block.instant-deconstruct-description",
+		}),
 	),
 	instantBuild: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "instantBuild", type: "boolean", description: "editor.block.instant-build", category: "building" }),
+		metadata({
+			name: "editor.block.instant-build",
+			description: "editor.block.instant-build-description",
+		}),
 	),
 	ignoreBuildDarkness: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "ignoreBuildDarkness", type: "boolean", description: "editor.block.ignore-build-darkness", category: "building" }),
+		metadata({
+			name: "editor.block.ignore-build-darkness",
+			description: "editor.block.ignore-build-darkness-description",
+		}),
 	),
 	schematicPriority: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "schematicPriority", type: "number", description: "editor.block.schematic-priority", category: "building" }),
+		metadata({
+			name: "editor.block.schematic-priority",
+			description: "editor.block.schematic-priority-description",
+		}),
 	),
 	researchCostMultiplier: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
-			name: "researchCostMultiplier",
-			type: "number",
-			description: "editor.block.research-cost-multiplier",
-			category: "building",
+			name: "editor.block.research-cost-multiplier",
+			description: "editor.block.research-cost-multiplier-description",
 		}),
 	),
-
 	// Explosion
 	baseExplosiveness: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "baseExplosiveness", type: "number", description: "editor.block.base-explosiveness", category: "health" }),
+		metadata({
+			name: "editor.block.base-explosiveness",
+			description: "editor.block.base-explosiveness-description",
+		}),
 	),
 	explosivenessScale: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "explosivenessScale", type: "number", description: "editor.block.explosiveness-scale", category: "health" }),
+		metadata({
+			name: "editor.block.explosiveness-scale",
+			description: "editor.block.explosiveness-scale-description",
+		}),
 	),
 	flammabilityScale: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "flammabilityScale", type: "number", description: "editor.block.flammability-scale", category: "health" }),
+		metadata({
+			name: "editor.block.flammability-scale",
+			description: "editor.block.flammability-scale-description",
+		}),
 	),
 	baseShake: v.pipe(
 		v.optional(v.number(), 3),
-		metadata({ name: "baseShake", type: "number", description: "editor.block.base-shake", category: "health" }),
+		metadata({ name: "editor.block.base-shake", description: "editor.block.base-shake-description" }),
 	),
 	createRubble: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "createRubble", type: "boolean", description: "editor.block.create-rubble", category: "health" }),
+		metadata({
+			name: "editor.block.create-rubble",
+			description: "editor.block.create-rubble-description",
+		}),
 	),
-
 	// Misc Stats
 	clipSize: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "clipSize", type: "number", description: "editor.block.clip-size", category: "rendering" }),
+		metadata({
+			name: "editor.block.clip-size",
+			description: "editor.block.clip-size-description",
+		}),
 	),
-	timers: v.pipe(
-		v.optional(v.number(), 0),
-		metadata({ name: "timers", type: "number", description: "editor.block.timers", category: "combat" }),
-	),
+	timers: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.block.timers", description: "editor.block.timers-description" })),
 	fogRadius: v.pipe(
 		v.optional(v.number(), -1),
-		metadata({ name: "fogRadius", type: "number", description: "editor.block.fog-radius", category: "rendering" }),
+		metadata({
+			name: "editor.block.fog-radius",
+			description: "editor.block.fog-radius-description",
+		}),
 	),
-	dumpTime: v.pipe(v.optional(v.number(), 5), metadata({ name: "dumpTime", type: "number" })),
+	dumpTime: v.pipe(v.optional(v.number(), 5), metadata({ name: "editor.block.dump-time" })),
 	placeOverlapRange: v.pipe(
 		v.optional(v.number(), 50),
-		metadata({ name: "placeOverlapRange", type: "number", description: "editor.block.place-overlap-range", category: "combat" }),
+		metadata({
+			name: "editor.block.place-overlap-range",
+			description: "editor.block.place-overlap-range-description",
+		}),
 	),
 	unitCapModifier: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "unitCapModifier", type: "number", description: "editor.block.unit-cap-modifier", category: "combat" }),
+		metadata({
+			name: "editor.block.unit-cap-modifier",
+			description: "editor.block.unit-cap-modifier-description",
+		}),
 	),
 	priority: v.pipe(
 		v.optional(v.number(), 0),
-		metadata({ name: "priority", type: "number", description: "editor.block.priority", category: "combat" }),
+		metadata({ name: "editor.block.priority", description: "editor.block.priority-description" }),
 	),
 	isDuct: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "isDuct", type: "boolean", description: "editor.block.is-duct", category: "physics" }),
+		metadata({ name: "editor.block.is-duct", description: "editor.block.is-duct-description" }),
 	),
 	deconstructDropAllLiquid: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
-			name: "deconstructDropAllLiquid",
-			type: "boolean",
-			description: "editor.block.deconstruct-drop-all-liquid",
-			category: "liquids",
+			name: "editor.block.deconstruct-drop-all-liquid",
+			description: "editor.block.deconstruct-drop-all-liquid-description",
 			visibleWhen: { field: "hasLiquids", value: true },
 		}),
 	),
 	playerUnmineable: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "playerUnmineable", type: "boolean", description: "editor.block.player-unmineable", category: "items" }),
+		metadata({
+			name: "editor.block.player-unmineable",
+			description: "editor.block.player-unmineable-description",
+		}),
 	),
-
 	// Audio
 	placePitchChange: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "placePitchChange", type: "boolean", description: "editor.block.place-pitch-change", category: "audio" }),
+		metadata({
+			name: "editor.block.place-pitch-change",
+			description: "editor.block.place-pitch-change-description",
+		}),
 	),
 	breakPitchChange: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "breakPitchChange", type: "boolean", description: "editor.block.break-pitch-change", category: "audio" }),
+		metadata({
+			name: "editor.block.break-pitch-change",
+			description: "editor.block.break-pitch-change-description",
+		}),
 	),
 	destroySoundVolume: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "destroySoundVolume", type: "number", description: "editor.block.destroy-sound-volume", category: "audio" }),
+		metadata({
+			name: "editor.block.destroy-sound-volume",
+			description: "editor.block.destroy-sound-volume-description",
+		}),
 	),
 	destroyPitchMin: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "destroyPitchMin", type: "number", description: "editor.block.destroy-pitch-min", category: "audio" }),
+		metadata({
+			name: "editor.block.destroy-pitch-min",
+			description: "editor.block.destroy-pitch-min-description",
+		}),
 	),
 	destroyPitchMax: v.pipe(
 		v.optional(v.number(), 1),
-		metadata({ name: "destroyPitchMax", type: "number", description: "editor.block.destroy-pitch-max", category: "audio" }),
+		metadata({
+			name: "editor.block.destroy-pitch-max",
+			description: "editor.block.destroy-pitch-max-description",
+		}),
 	),
 	ambientSoundVolume: v.pipe(
 		v.optional(v.number(), 0.05),
-		metadata({ name: "ambientSoundVolume", type: "number", description: "editor.block.ambient-sound-volume", category: "audio" }),
+		metadata({
+			name: "editor.block.ambient-sound-volume",
+			description: "editor.block.ambient-sound-volume-description",
+		}),
 	),
-
 	// Editor & Misc
 	editorConfigurable: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "editorConfigurable", type: "boolean", description: "editor.block.editor-configurable", category: "config" }),
+		metadata({
+			name: "editor.block.editor-configurable",
+			description: "editor.block.editor-configurable-description",
+		}),
 	),
 	inEditor: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "inEditor", type: "boolean", description: "editor.block.in-editor", category: "rendering" }),
+		metadata({
+			name: "editor.block.in-editor",
+			description: "editor.block.in-editor-description",
+		}),
 	),
 	privileged: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "privileged", type: "boolean", description: "editor.block.privileged", category: "building" }),
+		metadata({
+			name: "editor.block.privileged",
+			description: "editor.block.privileged-description",
+		}),
 	),
 	autoResetEnabled: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "autoResetEnabled", type: "boolean", description: "editor.block.auto-reset-enabled", category: "config" }),
+		metadata({
+			name: "editor.block.auto-reset-enabled",
+			description: "editor.block.auto-reset-enabled-description",
+		}),
 	),
 	canPickup: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "canPickup", type: "boolean", description: "editor.block.can-pickup", category: "payload" }),
+		metadata({
+			name: "editor.block.can-pickup",
+			description: "editor.block.can-pickup-description",
+		}),
 	),
 	instantTransfer: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "instantTransfer", type: "boolean", description: "editor.block.instant-transfer", category: "items" }),
+		metadata({
+			name: "editor.block.instant-transfer",
+			description: "editor.block.instant-transfer-description",
+		}),
 	),
 	quickRotate: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "quickRotate", type: "boolean", description: "editor.block.quick-rotate", category: "placement" }),
+		metadata({
+			name: "editor.block.quick-rotate",
+			description: "editor.block.quick-rotate-description",
+		}),
 	),
 	allowDerelictRepair: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "allowDerelictRepair", type: "boolean", description: "editor.block.allow-derelict-repair", category: "building" }),
+		metadata({
+			name: "editor.block.allow-derelict-repair",
+			description: "editor.block.allow-derelict-repair-description",
+		}),
 	),
 	forceTeam: v.pipe(
 		v.optional(TeamSchema),
-		metadata({ name: "forceTeam", type: "unknown", description: "editor.block.force-team", category: "building" }),
+		metadata({
+			name: "editor.block.force-team",
+			description: "editor.block.force-team-description",
+		}),
 	),
 	alwaysReplace: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "alwaysReplace", type: "boolean", description: "editor.block.always-replace", category: "placement" }),
+		metadata({
+			name: "editor.block.always-replace",
+			description: "editor.block.always-replace-description",
+		}),
 	),
 	replaceable: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "replaceable", type: "boolean", description: "editor.block.replaceable", category: "placement" }),
+		metadata({
+			name: "editor.block.replaceable",
+			description: "editor.block.replaceable-description",
+		}),
 	),
 	unitMoveBreakable: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "unitMoveBreakable", type: "boolean", description: "editor.block.unit-move-breakable", category: "physics" }),
+		metadata({
+			name: "editor.block.unit-move-breakable",
+			description: "editor.block.unit-move-breakable-description",
+		}),
 	),
-
 	// Visual Systems
 	cacheLayer: v.pipe(
 		v.optional(CacheLayerSchema, "normal"),
-		metadata({ name: "cacheLayer", type: "picklist", description: "editor.block.cache-layer", category: "rendering" }),
+		metadata({
+			name: "editor.block.cache-layer",
+			description: "editor.block.cache-layer-description",
+		}),
 	),
 	group: v.pipe(
 		v.optional(BlockGroupSchema, "none"),
-		metadata({ name: "group", type: "picklist", description: "editor.block.group", category: "misc" }),
+		metadata({ name: "editor.block.group", description: "editor.block.group-description" }),
 	),
 	flags: v.pipe(
 		v.optional(v.array(BlockFlagSchema), []),
-		metadata({ name: "flags", type: "array", description: "editor.block.flags", category: "combat" }),
+		metadata({ name: "editor.block.flags", description: "editor.block.flags-description" }),
 	),
-
 	attributes: v.pipe(
 		v.optional(AttributesSchema),
-		metadata({ name: "attributes", type: "object", description: "editor.block.attributes", category: "misc" }),
+		metadata({ name: "editor.block.attributes", description: "editor.block.attributes-description" }),
 	),
-
 	// Colors
 	outlineColor: v.pipe(
 		v.optional(MindustryHexColorSchema),
-		metadata({ name: "outlineColor", type: "color", description: "editor.block.outline-color", category: "rendering" }),
+		metadata({
+			name: "editor.block.outline-color",
+			description: "editor.block.outline-color-description",
+		}),
 	),
 	lightColor: v.pipe(
 		v.optional(MindustryHexColorSchema),
-		metadata({ name: "lightColor", type: "color", description: "editor.block.light-color", category: "rendering" }),
+		metadata({
+			name: "editor.block.light-color",
+			description: "editor.block.light-color-description",
+		}),
 	),
 	mapColor: v.pipe(
 		v.optional(MindustryHexColorSchema),
-		metadata({ name: "mapColor", type: "color", description: "editor.block.map-color", category: "rendering" }),
+		metadata({ name: "editor.block.map-color", description: "editor.block.map-color-description" }),
 	),
-
 	// Sound refs
 	placeSound: v.pipe(
 		v.optional(SoundHjsonSchema),
-		metadata({ name: "placeSound", type: "string", description: "editor.block.place-sound", category: "audio" }),
+		metadata({
+			name: "editor.block.place-sound",
+			description: "editor.block.place-sound-description",
+		}),
 	),
 	breakSound: v.pipe(
 		v.optional(SoundHjsonSchema),
-		metadata({ name: "breakSound", type: "string", description: "editor.block.break-sound", category: "audio" }),
+		metadata({
+			name: "editor.block.break-sound",
+			description: "editor.block.break-sound-description",
+		}),
 	),
 	destroySound: v.pipe(
 		v.optional(SoundHjsonSchema),
-		metadata({ name: "destroySound", type: "string", description: "editor.block.destroy-sound", category: "audio" }),
+		metadata({
+			name: "editor.block.destroy-sound",
+			description: "editor.block.destroy-sound-description",
+		}),
 	),
 	ambientSound: v.pipe(
 		v.optional(SoundHjsonSchema),
-		metadata({ name: "ambientSound", type: "string", description: "editor.block.ambient-sound", category: "audio" }),
+		metadata({
+			name: "editor.block.ambient-sound",
+			description: "editor.block.ambient-sound-description",
+		}),
 	),
-
-	regionRotated1: v.pipe(v.optional(v.number(), -1), metadata({ name: "regionRotated1", type: "number" })),
-	regionRotated2: v.pipe(v.optional(v.number(), -1), metadata({ name: "regionRotated2", type: "number" })),
+	regionRotated1: v.pipe(v.optional(v.number(), -1), metadata({ name: "editor.block.region-rotated1" })),
+	regionRotated2: v.pipe(v.optional(v.number(), -1), metadata({ name: "editor.block.region-rotated2" })),
 };
 
 export const BlockFieldSchema: SchemaFn = CachedSchema((context) => {

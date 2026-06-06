@@ -1,7 +1,15 @@
 import type { ValidationResult, ValidatorFn, ValidatorRegistration } from "./types";
 import { createValidatorRegistry } from "./registry";
 import { HJSON, HJSONError, HjsonObjectNode } from "@project/hjson";
-import { ItemHjsonSchema, LiquidHjsonSchema, ModHjsonSchema, SectorHjsonSchema, StatusHjsonSchema, UnitHjsonSchema } from "@project/schema";
+import {
+	BlockHjsonSchema,
+	ItemHjsonSchema,
+	LiquidHjsonSchema,
+	ModHjsonSchema,
+	SectorHjsonSchema,
+	StatusHjsonSchema,
+	UnitHjsonSchema,
+} from "@project/schema";
 import * as v from "valibot";
 import { findUnknownProperties } from "./utils";
 import type { SchemaFn } from "@project/schema";
@@ -41,6 +49,11 @@ const defaultValidatorRegistrations: readonly ValidatorRegistration[] = [
 		name: "units-hjson",
 		pattern: (path) => path.startsWith("content/unit") || (path.endsWith(".json") && path.endsWith(".hjson")),
 		validate: createValibotValidator(UnitHjsonSchema),
+	},
+	{
+		name: "blocks-hjson",
+		pattern: (path) => path.startsWith("content/block") || (path.endsWith(".json") && path.endsWith(".hjson")),
+		validate: createValibotValidator(BlockHjsonSchema),
 	},
 ];
 

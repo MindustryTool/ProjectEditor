@@ -4,7 +4,7 @@ import { metadata } from "./utils";
 
 export const ContentNameSchema = v.pipe(
 	v.string(),
-	v.regex(/^[a-z][a-zA-Z0-9-]*$/, "Must be lowercase letters, digits, hyphens"),
+	v.regex(/^[a-zA-Z0-9-]*$/, "Must be lowercase letters, digits, hyphens"),
 	v.minLength(2),
 	v.maxLength(127),
 );
