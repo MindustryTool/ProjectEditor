@@ -1,18 +1,49 @@
 import * as v from "valibot";
 import { MindustryHexColorSchema, ResearchSchema, type SchemaFn } from "./base";
+import { metadata } from "./utils";
 
 export const itemBaseObjectSchema = v.object({
-	hardness: v.optional(v.pipe(v.number(), v.minValue(0), v.integer())),
-	cost: v.optional(v.pipe(v.number(), v.minValue(0))),
-	charge: v.optional(v.pipe(v.number(), v.minValue(0))),
-	radioactivity: v.optional(v.pipe(v.number(), v.minValue(0))),
-	flammability: v.optional(v.pipe(v.number(), v.minValue(0))),
-	explosiveness: v.optional(v.pipe(v.number(), v.minValue(0))),
-	healthScaling: v.optional(v.pipe(v.number(), v.minValue(0))),
-	color: v.optional(MindustryHexColorSchema),
-	lowPriority: v.optional(v.boolean(), false),
-	buildable: v.optional(v.boolean(), false),
-	hidden: v.optional(v.boolean(), false),
+	hardness: v.pipe(
+		v.optional(v.pipe(v.number(), v.minValue(0), v.integer())),
+		metadata({ name: "editor.item.hardness", description: "editor.item.hardness-description" }),
+	),
+	cost: v.pipe(
+		v.optional(v.pipe(v.number(), v.minValue(0))),
+		metadata({ name: "editor.item.cost", description: "editor.item.cost-description" }),
+	),
+	charge: v.pipe(
+		v.optional(v.pipe(v.number(), v.minValue(0))),
+		metadata({ name: "editor.item.charge", description: "editor.item.charge-description" }),
+	),
+	radioactivity: v.pipe(
+		v.optional(v.pipe(v.number(), v.minValue(0))),
+		metadata({ name: "editor.item.radioactivity", description: "editor.item.radioactivity-description" }),
+	),
+	flammability: v.pipe(
+		v.optional(v.pipe(v.number(), v.minValue(0))),
+		metadata({ name: "editor.item.flammability", description: "editor.item.flammability-description" }),
+	),
+	explosiveness: v.pipe(
+		v.optional(v.pipe(v.number(), v.minValue(0))),
+		metadata({ name: "editor.item.explosiveness", description: "editor.item.explosiveness-description" }),
+	),
+	healthScaling: v.pipe(
+		v.optional(v.pipe(v.number(), v.minValue(0))),
+		metadata({ name: "editor.item.healthScaling", description: "editor.item.healthScaling-description" }),
+	),
+	color: v.pipe(
+		v.optional(MindustryHexColorSchema),
+		metadata({ name: "editor.item.color", description: "editor.item.color-description" }),
+	),
+	lowPriority: v.pipe(
+		v.optional(v.boolean(), false),
+		metadata({ name: "editor.item.lowPriority", description: "editor.item.lowPriority-description" }),
+	),
+	buildable: v.pipe(
+		v.optional(v.boolean(), false),
+		metadata({ name: "editor.item.buildable", description: "editor.item.buildable-description" }),
+	),
+	hidden: v.pipe(v.optional(v.boolean(), false), metadata({ name: "editor.item.hidden", description: "editor.item.hidden-description" })),
 });
 
 export const ItemHjsonSchema: SchemaFn = (context) =>
