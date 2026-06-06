@@ -1,4 +1,4 @@
-import { lazy, memo, Suspense } from "react";
+import { lazy, memo, Suspense, useState } from "react";
 import { useFileString, useProjectSession } from "@project/core";
 import { getLanguageFromPath } from "~/lib/monaco/languageMap";
 import { RecentlyOpenedFilesBar } from "./recently-opened/RecentlyOpenedFilesBar";
@@ -55,11 +55,11 @@ function EditorContent({ path }: { path: string }) {
 	}
 
 	if (path.endsWith(".png")) {
-		return <ImageFilePreview path={path} showSize/>;
+		return <ImageWithSize path={path} />;
 	}
 
 	if (path.startsWith("sprite:")) {
-		return <SpriteEditor path={striped} schema={UnitHjsonSchema}/>;
+		return <SpriteEditor path={striped} schema={UnitHjsonSchema} />;
 	}
 
 	if (entry.kind === "file") {
@@ -67,6 +67,18 @@ function EditorContent({ path }: { path: string }) {
 	}
 
 	return null;
+}
+
+function ImageWithSize({ path }: { path: string }) {
+	const [size, setSize] = useState([0, 0]);
+	return (
+		<div className="relative flex justify-center items-center h-full w-full overflow-hidden">
+			<ImageFilePreview path={path} onSize={(width, height) => setSize([width, height])} />
+			<div className="absolute bottom-0.5 backdrop-blur-xs backdrop-brightness-75 p-0.5 right-0.5 text-xs text-muted-foreground">
+				{size[0]}x{size[1]}
+			</div>
+		</div>
+	);
 }
 
 export const EditorCenterPanel = memo(function EditorCenterPanel({ path }: EditorCenterPanelProps) {

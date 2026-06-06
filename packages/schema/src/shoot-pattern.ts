@@ -1,5 +1,5 @@
 import * as v from "valibot";
-import type { SchemaFn } from "./base";
+import { CachedSchema, type SchemaFn } from "./base";
 
 const metadata = { type: "shoot-pattern" };
 
@@ -73,7 +73,7 @@ const classSchemaMap: Record<ShootPatternType, SchemaFn<v.ObjectSchema<v.ObjectE
     ShootPattern: (_context) => shootPatternBaseObjectSchema,
 };
 
-export const ShootPatternHjsonSchema: SchemaFn = (context) => {
+export const ShootPatternHjsonSchema: SchemaFn = CachedSchema((context) => {
 	return v.lazy((input) => {
 		if (input && typeof input === "object" && "type" in input) {
 			const type = input.type;
@@ -92,4 +92,4 @@ export const ShootPatternHjsonSchema: SchemaFn = (context) => {
 
 		return v.pipe(shootPatternBaseObjectSchema, v.metadata(metadata));
 	});
-};
+});

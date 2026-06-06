@@ -40,7 +40,7 @@ export const useAppStore = create<AppState>()(
 				const events = createEventBus<ProjectEventMap>();
 				const fs = await createProjectFileSystem(project, events, {
 					onTreeSnapshotChange: (snapshot) => {
-						useProjectSession.setState({ treeSnapshot: new TreeSnapshot(snapshot) });
+						useProjectSession.setState((prev) => ({ treeSnapshot: new TreeSnapshot(snapshot, prev.treeSnapshot) }));
 					},
 				});
 
@@ -62,7 +62,8 @@ export const useAppStore = create<AppState>()(
 
 				const events = createEventBus<ProjectEventMap>();
 				const fs = await createProjectFileSystem(project, events, {
-					onTreeSnapshotChange: (snapshot) => useProjectSession.setState({ treeSnapshot: new TreeSnapshot(snapshot) }),
+					onTreeSnapshotChange: (snapshot) =>
+						useProjectSession.setState((prev) => ({ treeSnapshot: new TreeSnapshot(snapshot, prev.treeSnapshot) })),
 				});
 
 				useValidationStore.setState({ results: new ValidationResults() });
@@ -105,7 +106,8 @@ export const useAppStore = create<AppState>()(
 
 				const events = createEventBus<ProjectEventMap>();
 				const fs = await createProjectFileSystem(project, events, {
-					onTreeSnapshotChange: (snapshot) => useProjectSession.setState({ treeSnapshot: new TreeSnapshot(snapshot) }),
+					onTreeSnapshotChange: (snapshot) =>
+						useProjectSession.setState((prev) => ({ treeSnapshot: new TreeSnapshot(snapshot, prev.treeSnapshot) })),
 				});
 
 				const unsubscribe = events.on("file:write", (event) => {
@@ -131,7 +133,7 @@ export const useAppStore = create<AppState>()(
 					}
 
 					if (key === "projects") {
-                        const schema = v.fallback(v.record(v.string(), ProjectRecordSchema), {});
+						const schema = v.fallback(v.record(v.string(), ProjectRecordSchema), {});
 						return v.parse(schema, value);
 					}
 

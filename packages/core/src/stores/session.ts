@@ -47,7 +47,10 @@ export class TreeSnapshot {
 	readonly sounds: FileEntry[];
 	readonly sprites: FileEntry[];
 
-	constructor(private readonly entries: FileEntry[]) {
+	constructor(
+		private readonly entries: FileEntry[],
+		private readonly old?: TreeSnapshot,
+	) {
 		const items: FileEntry[] = [];
 		const blocks: FileEntry[] = [];
 		const liquids: FileEntry[] = [];
@@ -82,14 +85,72 @@ export class TreeSnapshot {
 			}
 		}
 
-		this.items = items;
-		this.blocks = blocks;
-		this.liquids = liquids;
-		this.sectors = sectors;
-		this.statuses = statuses;
-		this.units = units;
-		this.sounds = sounds;
-		this.sprites = sprites;
+		function compare<T>(target: T[], source: T[]) {
+			if (target.length !== source.length) return false;
+			for (let i = 0; i < target.length; i++) {
+				if (target[i] !== source[i]) return false;
+			}
+			return true;
+		}
+
+		if (this.old) {
+			if (compare(items, this.old.items)) {
+				this.items = this.old.items;
+			} else {
+				this.items = items;
+			}
+
+			if (compare(blocks, this.old.blocks)) {
+				this.blocks = this.old.blocks;
+			} else {
+				this.blocks = blocks;
+			}
+
+			if (compare(liquids, this.old.liquids)) {
+				this.liquids = this.old.liquids;
+			} else {
+				this.liquids = liquids;
+			}
+
+			if (compare(sectors, this.old.sectors)) {
+				this.sectors = this.old.sectors;
+			} else {
+				this.sectors = sectors;
+			}
+
+			if (compare(statuses, this.old.statuses)) {
+				this.statuses = this.old.statuses;
+			} else {
+				this.statuses = statuses;
+			}
+
+			if (compare(units, this.old.units)) {
+				this.units = this.old.units;
+			} else {
+				this.units = units;
+			}
+
+			if (compare(sounds, this.old.sounds)) {
+				this.sounds = this.old.sounds;
+			} else {
+				this.sounds = sounds;
+			}
+
+			if (compare(sprites, this.old.sprites)) {
+				this.sprites = this.old.sprites;
+			} else {
+				this.sprites = sprites;
+			}
+		} else {
+			this.items = items;
+			this.blocks = blocks;
+			this.liquids = liquids;
+			this.sectors = sectors;
+			this.statuses = statuses;
+			this.units = units;
+			this.sounds = sounds;
+			this.sprites = sprites;
+		}
 	}
 
 	getEntries() {

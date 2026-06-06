@@ -6,18 +6,12 @@ import React, { useState, type ReactNode } from "react";
 
 export interface ImageFilePreviewProps {
 	path: string;
-	showSize?: boolean;
 	className?: string;
 	fallback?: ReactNode;
+	onSize?: (width: number, height: number) => void;
 }
 
-export function ImageFilePreview({
-	path,
-	className,
-	showSize = false,
-	fallback,
-	...props
-}: ImageFilePreviewProps & React.ComponentProps<"img">) {
+export function ImageFilePreview({ path, className, onSize, fallback, ...props }: ImageFilePreviewProps & React.ComponentProps<"img">) {
 	let resolvedPath: string | null = path;
 
 	if (!path.endsWith(".png")) {
@@ -33,12 +27,11 @@ export function ImageFilePreview({
 		}
 	}
 
-	return <Image path={resolvedPath} className={className} showSize={showSize} fallback={fallback} {...props} />;
+	return <Image path={resolvedPath} className={className} onSize={onSize} fallback={fallback} {...props} />;
 }
 
-function Image({ path, className, showSize = false, fallback, ...props }: ImageFilePreviewProps & React.ComponentProps<"img">) {
+function Image({ path, className, onSize, fallback, ...props }: ImageFilePreviewProps & React.ComponentProps<"img">) {
 	const { data } = useFile(path);
-	const [size, setSize] = useState({ width: 0, height: 0 });
 	const [error, setError] = useState(false);
 
 	if (data === null) {
@@ -51,38 +44,6 @@ function Image({ path, className, showSize = false, fallback, ...props }: ImageF
 		return <div className={cn("relative flex justify-center items-center h-full w-full border rounded-md", className)}>{fallback}</div>;
 	}
 
-	if (showSize) {
-		return (
-			<div className={cn("relative flex justify-center items-center h-full w-full overflow-hidden", className)}>
-				<img
-					className="object-contain"
-					src={objectUrl}
-					alt={path}
-					loading="lazy"
-					onLoad={(e) => {
-						const img = e.currentTarget;
-
-						if (!showSize) {
-							return;
-						}
-
-						setSize({
-							width: img.naturalWidth,
-							height: img.naturalHeight,
-						});
-					}}
-					onError={() => setError(true)}
-					{...props}
-				/>
-				{showSize && (
-					<div className="absolute bottom-0.5 backdrop-blur-xs backdrop-brightness-75 p-0.5 right-0.5 text-xs text-muted-foreground">
-						{size.width}x{size.height}
-					</div>
-				)}
-			</div>
-		);
-	}
-
 	return (
 		<img
 			className={cn("object-contain", className)}
@@ -92,14 +53,7 @@ function Image({ path, className, showSize = false, fallback, ...props }: ImageF
 			onLoad={(e) => {
 				const img = e.currentTarget;
 
-				if (!showSize) {
-					return;
-				}
-
-				setSize({
-					width: img.naturalWidth,
-					height: img.naturalHeight,
-				});
+				onSize?.(img.naturalWidth, img.naturalHeight);
 			}}
 			onError={() => setError(true)}
 			{...props}

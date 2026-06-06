@@ -1,5 +1,14 @@
 import * as v from "valibot";
-import { EnvSchema, Envs, ItemRequirementSchema, MindustryHexColorSchema, ResearchSchema, SoundHjsonSchema, type SchemaFn } from "./base";
+import {
+	CachedSchema,
+	EnvSchema,
+	Envs,
+	ItemRequirementSchema,
+	MindustryHexColorSchema,
+	ResearchSchema,
+	SoundHjsonSchema,
+	type SchemaFn,
+} from "./base";
 import { EffectFieldSchema } from "./effect";
 import { ItemFieldSchema } from "./item";
 import { LiquidFieldSchema } from "./liquid";
@@ -1380,14 +1389,15 @@ export const blockObjectSchema = {
 	regionRotated2: v.optional(v.number(), -1),
 };
 
-export const BlockFieldSchema: SchemaFn = (context) =>
-	v.pipe(
+export const BlockFieldSchema: SchemaFn = CachedSchema((context) => {
+	return v.pipe(
 		v.string(),
 		v.transform((v) => v.replaceAll(context.name + "-", "")),
 		v.picklist(context.blocks.map((block) => block.name.replaceAll(context.name + "-", ""))),
 	);
+});
 
-export const BlockHjsonSchema: SchemaFn = (context) => {
+export const BlockHjsonSchema: SchemaFn = CachedSchema((context) => {
 	return v.lazy((input) => {
 		const variantEntries: v.ObjectEntries = {};
 
@@ -1418,4 +1428,4 @@ export const BlockHjsonSchema: SchemaFn = (context) => {
 			v.metadata(metadata),
 		);
 	});
-};
+});

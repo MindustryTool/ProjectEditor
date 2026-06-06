@@ -1,5 +1,5 @@
 import * as v from "valibot";
-import { Interps, MindustryHexColorSchema, SoundHjsonSchema, type SchemaFn } from "./base";
+import { CachedSchema, Interps, MindustryHexColorSchema, SoundHjsonSchema, type SchemaFn } from "./base";
 
 const metadata = { type: "effect" };
 
@@ -130,7 +130,7 @@ const classSchemaMap: Record<EffectClass, SchemaFn<v.ObjectSchema<v.ObjectEntrie
 		}),
 };
 
-export const EffectFieldSchema: SchemaFn = (context) => {
+export const EffectFieldSchema: SchemaFn = CachedSchema((context) => {
 	return v.pipe(
 		v.lazy((input) => {
 			if (typeof input === "string") {
@@ -145,9 +145,9 @@ export const EffectFieldSchema: SchemaFn = (context) => {
 		}),
 		v.metadata(metadata),
 	);
-};
+});
 
-export const EffectHjsonSchema: SchemaFn = (context) => {
+export const EffectHjsonSchema: SchemaFn = CachedSchema((context) => {
 	return v.lazy((input) => {
 		if (input && typeof input === "object" && "type" in input) {
 			const type = input.type;
@@ -160,4 +160,4 @@ export const EffectHjsonSchema: SchemaFn = (context) => {
 
 		return v.pipe(effectBaseObjectSchema, v.metadata(metadata));
 	});
-};
+});

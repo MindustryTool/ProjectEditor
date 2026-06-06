@@ -3,6 +3,7 @@ import { HJSON, type HjsonObjectNode } from "@project/hjson";
 import { getArrayItemSchema, getSchemaEntries, resolveSchema, type AnySchema } from "@project/schema";
 
 export type SpriteData = {
+    name: string,
 	path: string;
 	mirror: boolean;
 	position: {
@@ -38,6 +39,7 @@ export function collectSpriteData(treeSnapshot: TreeSnapshot, node: HjsonObjectN
 
 			if (hasName && hasX && hasY && fileEntry) {
 				result.push({
+                    name: obj.name as string,
 					path: fileEntry.path,
 					mirror,
 					position: {

@@ -1,5 +1,5 @@
 import * as v from "valibot";
-import { MindustryHexColorSchema, type SchemaFn } from "./base";
+import { CachedSchema, MindustryHexColorSchema, type SchemaFn } from "./base";
 import { EffectFieldSchema } from "./effect";
 
 export const statusBaseObjectSchema = v.object({
@@ -27,12 +27,13 @@ export const statusBaseObjectSchema = v.object({
 	outline: v.optional(v.boolean(), true),
 });
 
-export const StatusStringSchema: SchemaFn = (context) =>
+export const StatusStringSchema: SchemaFn = CachedSchema((context) =>
 	v.pipe(
 		v.string(),
 		v.transform((v) => v.replaceAll(context.name + "-", "")),
 		v.picklist(context.statuses.map((status) => status.name.replaceAll(context.name + "-", ""))),
-	);
+	),
+);
 
 export const StatusFieldSchema: SchemaFn = (context) =>
 	v.lazy((input) => {
@@ -43,7 +44,7 @@ export const StatusFieldSchema: SchemaFn = (context) =>
 		return StatusHjsonSchema(context);
 	});
 
-export const StatusHjsonSchema: SchemaFn = (context) =>
+export const StatusHjsonSchema: SchemaFn = CachedSchema((context) =>
 	v.pipe(
 		v.object({
 			...statusBaseObjectSchema.entries,
@@ -70,4 +71,5 @@ export const StatusHjsonSchema: SchemaFn = (context) =>
 			),
 			["opposites"],
 		),
-	);
+	),
+);

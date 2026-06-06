@@ -13,6 +13,7 @@ export class ProjectFileSystem {
 	private projectRoot: string;
 	private onTreeSnapshotChange: TreeSnapshotChangeCallback;
 	private refreshTreeTimer: ReturnType<typeof setTimeout> | null = null;
+	private files: FileEntry[] = [];
 	readonly defaultProjectTree: DefaultProjectFileTree;
 
 	constructor(
@@ -46,7 +47,15 @@ export class ProjectFileSystem {
 	async writeFile(path: string, data: BufferSource): Promise<void> {
 		await this.vfs.writeFile(this.scopePath(path), data);
 		this.events.emit("file:write", { path });
-		await this.refreshTree();
+		if (this.files.length === 0) {
+			await this.refreshTreeNow();
+		}
+
+		const file = this.files.find((f) => f.path === path);
+		if (!file) {
+			this.files.push({ path, kind: "file", name: path.split("/").pop() || "" });
+			this.onTreeSnapshotChange(this.files);
+		}
 	}
 
 	async writeFiles(entries: { name: string; data: Uint8Array }[]): Promise<void> {
@@ -118,6 +127,7 @@ export class ProjectFileSystem {
 		if (duration > 100) {
 			console.log(`Tree refreshed in ${duration}ms`);
 		}
+		this.files = snapshot;
 		this.onTreeSnapshotChange(snapshot);
 		return snapshot;
 	}

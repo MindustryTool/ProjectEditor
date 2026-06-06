@@ -7,7 +7,7 @@ import { useFileString, useProjectSession } from "@project/core";
 import { HJSON } from "@project/hjson";
 import { type AnySchema, type SchemaFn } from "@project/schema";
 import { resolveContentSprite } from "@project/utils";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Layer, Stage } from "react-konva";
 import { collectSpriteData, updateSpritePosition, type SpriteData } from "#/components/editor/center/sprite-utils";
 import { SpriteImage } from "./SpriteImage";
@@ -115,8 +115,22 @@ function SpriteSidebar({ sprites }: { sprites: SpriteData[] }) {
 	return (
 		<div className="pl-2 border-l max-w-sm h-full flex flex-col overflow-y-auto min-w-40 gap-2">
 			{sprites.map((sprite) => (
-				<ImageFilePreview showSize key={sprite.position.x.path} className="w-full border p-2 rounded-md bg-card" path={sprite.path} />
+				<SpritePreview key={sprite.position.x.path} sprite={sprite} />
 			))}
+		</div>
+	);
+}
+
+function SpritePreview({ sprite }: { sprite: SpriteData }) {
+	const [size, setSize] = useState([0, 0]);
+
+	return (
+		<div className="w-full border p-8 rounded-md bg-card relative">
+			<span className="absolute top-1 left-1 text-xs text-muted-foreground">{sprite.name}</span>
+			<ImageFilePreview path={sprite.path} onSize={(width, height) => setSize([width, height])} />
+			<div className="absolute bottom-0.5 backdrop-blur-xs backdrop-brightness-75 p-0.5 right-0.5 text-xs text-muted-foreground">
+				{size[0]}x{size[1]}
+			</div>
 		</div>
 	);
 }

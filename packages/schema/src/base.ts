@@ -63,8 +63,8 @@ export const ItemRequirementSchema = v.pipe(
 	}, "Invalid item requirement, must be in the format 'item/number'"),
 );
 
-export const ResearchSchema: SchemaFn = (context) =>
-	v.pipe(
+export const ResearchSchema: SchemaFn = CachedSchema((context) => {
+	return v.pipe(
 		v.lazy((input) => {
 			if (typeof input === "string") {
 				return ContentNameSchema;
@@ -151,6 +151,7 @@ export const ResearchSchema: SchemaFn = (context) =>
 			}
 		}),
 	);
+});
 
 export type Research = v.InferOutput<ReturnType<typeof ResearchSchema>>;
 
@@ -163,7 +164,7 @@ export const SoundHjsonSchema = v.pipe(
 	}),
 );
 
-export const SpriteHjsonSchema: SchemaFn = (context) =>
+export const SpriteHjsonSchema: SchemaFn = CachedSchema((context) =>
 	v.pipe(
 		v.picklist([...new Set(context.sprites.map((sprite) => sprite.name))]),
 		v.minLength(1),
@@ -171,11 +172,28 @@ export const SpriteHjsonSchema: SchemaFn = (context) =>
 		v.metadata({
 			type: "sprite",
 		}),
-	);
+	),
+);
 
 export type SchemaFn<
 	T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>> = v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>,
 > = (context: ProjectContents) => T;
+
+export function CachedSchema<T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>>(schemaFn: SchemaFn<T>): SchemaFn<T> {
+	let cacheValue: T | null = null;
+	let cacheKey: ProjectContents | null = null;
+
+	return (context) => {
+		if (cacheKey === context && cacheValue) {
+			return cacheValue;
+		}
+
+		const result = schemaFn(context);
+		cacheValue = result;
+		cacheKey = context;
+		return result;
+	};
+}
 
 export const Interps = [
 	"linear",

@@ -1,5 +1,5 @@
 import * as v from "valibot";
-import { MindustryHexColorSchema, type SchemaFn } from "./base";
+import { CachedSchema, MindustryHexColorSchema, type SchemaFn } from "./base";
 import { EffectFieldSchema } from "./effect";
 
 const metadata = { type: "part" };
@@ -185,7 +185,7 @@ const classSchemaMap: Record<PartClass, SchemaFn<v.ObjectSchema<v.ObjectEntries,
 	ShapePart: (_context) => shapePartObjectSchema,
 };
 
-export const PartHjsonSchema: SchemaFn = (context) => {
+export const PartHjsonSchema: SchemaFn = CachedSchema((context) => {
 	return v.lazy((input) => {
 		if (input && typeof input === "object" && "type" in input) {
 			const type = input.type;
@@ -198,4 +198,4 @@ export const PartHjsonSchema: SchemaFn = (context) => {
 
 		return v.pipe(drawPartBaseObjectSchema, v.metadata(metadata));
 	});
-};
+});
