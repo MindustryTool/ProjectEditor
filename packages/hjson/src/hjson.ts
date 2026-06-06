@@ -13,10 +13,18 @@ const cache: { content: string; node: HjsonNode; hit: number; time: number }[] =
 
 export const HJSON = {
 	parseWithCache(content: string) {
-		const existing = cache.find((item) => item.content === content);
+		let existing = undefined;
+
+		for (let i = cache.length - 1; i >= 0; i--) {
+			const item = cache[i]!;
+			if (item.content === content) {
+				existing = item;
+				break;
+			}
+		}
 
 		if (existing) {
-            existing.hit++;
+			existing.hit++;
 			return existing.node;
 		}
 
@@ -25,11 +33,11 @@ export const HJSON = {
 
 		if (cache.length > 100) {
 			cache.sort((a, b) => {
-                if (a.hit !== b.hit) {
-                    return b.hit - a.hit;
-                }
-                return a.time - b.time;
-            });
+				if (a.hit !== b.hit) {
+					return b.hit - a.hit;
+				}
+				return a.time - b.time;
+			});
 			cache.shift();
 		}
 
