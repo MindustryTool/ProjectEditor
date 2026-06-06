@@ -115,7 +115,7 @@ export function AppSettingsDialog() {
 				<DialogHeader>
 					<DialogTitle>{t("app-settings.dialog-title")}</DialogTitle>
 				</DialogHeader>
-				<div className="grid gap-5">
+				<div className="grid gap-5 max-h-[70dvh] overflow-y-auto">
 					<SectionCard icon={<Layout className="size-3.5" />} title={t("app-settings.interface-section")}>
 						<div className="grid gap-3">
 							<div className="grid gap-2">
