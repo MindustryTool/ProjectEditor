@@ -106,7 +106,7 @@ function SpriteCanvas({
 function CoordsDisplay({ x, y }: { x: number; y: number }) {
 	return (
 		<div className="absolute top-1 left-1 text-muted-foreground text-xs">
-			{Math.round(x)}x{Math.round(y)}
+			x={Math.round(x)}, y={Math.round(y)}
 		</div>
 	);
 }
@@ -124,12 +124,30 @@ function SpriteSidebar({ sprites }: { sprites: SpriteData[] }) {
 function SpritePreview({ sprite }: { sprite: SpriteData }) {
 	const [size, setSize] = useState([0, 0]);
 
+	const scrollTo = (id: string) =>
+		requestAnimationFrame(() => {
+			let current = "";
+			for (const segment of id.split(".")) {
+				current += segment;
+				const element = document.getElementById(current);
+				if (element) {
+					element.scrollIntoView({
+						behavior: "smooth",
+					});
+                    element.focus()
+				}
+				current += ".";
+			}
+		});
+
 	return (
-		<div className="w-full border p-8 rounded-md bg-card relative">
-			<span className="absolute top-1 left-1 text-xs text-muted-foreground">{sprite.name}</span>
+		<div className="w-full border p-8 rounded-md bg-card relative" onClick={() => scrollTo(sprite.position.x.path)}>
+			<span className="absolute top-1 left-1 text-xs text-muted-foreground">
+				{sprite.name} ({size[0]}x{size[1]})
+			</span>
 			<ImageFilePreview path={sprite.path} onSize={(width, height) => setSize([width, height])} />
-			<div className="absolute bottom-0.5 backdrop-blur-xs backdrop-brightness-75 p-0.5 right-0.5 text-xs text-muted-foreground">
-				{size[0]}x{size[1]}
+			<div className="absolute bottom-0.5 backdrop-blur-xs backdrop-brightness-75 p-0.5 left-0.5 text-xs text-muted-foreground">
+				x={sprite.position.x.value}, y={sprite.position.y.value}
 			</div>
 		</div>
 	);

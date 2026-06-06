@@ -37,7 +37,8 @@ export function useCanvasInteraction() {
 
 	const handleDragEnd = useCallback((e: Konva.KonvaEventObject<DragEvent>) => {
 		posRef.current = { x: e.target.x(), y: e.target.y() };
+		forceRender((n) => n + 1);
 	}, []);
 
-	return { stageRef, scaleRef, posRef, handleWheel, handleDragEnd };
+	return { stageRef, scaleRef, posRef, handleWheel, handleDragEnd, forceRender };
 }
