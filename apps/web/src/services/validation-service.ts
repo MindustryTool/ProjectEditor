@@ -145,7 +145,13 @@ class ValidationService {
 			key,
 			setTimeout(() => {
 				this.timers.delete(key);
-				this.validateFile(path, () => this.defaultContentLoader(projectId, path));
+				const startTime = Date.now();
+				this.validateFile(path, () => this.defaultContentLoader(projectId, path)).then(() => {
+					const duration = Date.now() - startTime;
+					if (duration > 10) {
+						console.log(`Validation ${path} took ${duration}ms`);
+					}
+				});
 			}, this._validationDelayMs),
 		);
 	}
