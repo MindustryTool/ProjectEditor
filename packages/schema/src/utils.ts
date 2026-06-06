@@ -1,3 +1,4 @@
+import type { HjsonObjectNode } from "@project/hjson";
 import * as v from "valibot";
 
 export type AnySchema =
@@ -139,12 +140,15 @@ export function resolveSchema(schema: AnySchema, value: unknown): AnySchema {
 export function getSchemaEntries(schema: AnySchema): [string, AnySchema][] {
 	schema = unwrapSchema(schema);
 	const s = schema as unknown as { type: string; entries?: Record<string, AnySchema>; pipe?: AnySchema[] };
+
 	if (s.type === "object" && s.entries) {
 		return Object.entries(s.entries) as [string, AnySchema][];
 	}
+
 	if (Array.isArray(s.pipe) && s.pipe.length > 0) {
 		return getSchemaEntries(s.pipe[0] as AnySchema);
 	}
+
 	return [];
 }
 
@@ -169,7 +173,6 @@ export type SchemaMetadata = {
 	description?: string;
 	category?: string;
 	multiline?: boolean;
-	order?: number;
 	visibleWhen?: {
 		field: string;
 		value: unknown;
@@ -192,6 +195,87 @@ export function getSchemaMetadata(schema: AnySchema): SchemaMetadata | null {
 			result = action.metadata;
 		}
 	}
+
+	return result;
+}
+
+export type SpriteData = {
+	name: string;
+	path: string;
+	mirror: boolean;
+	position: {
+		x: {
+			value: number;
+			path: string;
+		};
+		y: {
+			value: number;
+			path: string;
+		};
+	};
+};
+
+export function collectSpriteData(
+	findFileWithName: (filename: string) => string | undefined,
+	node: HjsonObjectNode,
+	schema: AnySchema,
+): SpriteData[] {
+	const result: SpriteData[] = [];
+
+	function visit(value: unknown, currentSchema: AnySchema, currentPath: string) {
+		currentSchema = resolveSchema(currentSchema, value);
+
+		if (value && typeof value === "object" && !Array.isArray(value)) {
+			const entries = getSchemaEntries(currentSchema);
+
+			const obj = value as Record<string, unknown>;
+
+			const hasName = typeof obj.name === "string";
+			const hasX = typeof obj.x === "number";
+			const hasY = typeof obj.y === "number";
+			const filename = obj.name + ".png";
+			const mirror = obj.mirror === true;
+
+			const filePath = findFileWithName(filename);
+
+			if (hasName && hasX && hasY && filePath) {
+				result.push({
+					name: obj.name as string,
+					path: filePath,
+					mirror,
+					position: {
+						x: {
+							value: obj.x as number,
+							path: currentPath ? `${currentPath}.x` : "x",
+						},
+						y: {
+							value: obj.y as number,
+							path: currentPath ? `${currentPath}.y` : "y",
+						},
+					},
+				});
+			}
+
+			for (const [key, childSchema] of entries) {
+				if (!(key in obj)) continue;
+
+				visit(obj[key], childSchema, currentPath ? `${currentPath}.${key}` : key);
+			}
+
+			return;
+		}
+
+		if (Array.isArray(value)) {
+			for (let i = 0; i < value.length; i++) {
+				const itemSchema = getArrayItemSchema(currentSchema, i);
+				if (!itemSchema) continue;
+
+				visit(value[i], itemSchema, `${currentPath}[${i}]`);
+			}
+		}
+	}
+
+	visit(node.valueOf(), schema, "");
 
 	return result;
 }

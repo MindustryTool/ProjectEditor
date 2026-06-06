@@ -5,11 +5,11 @@ import { Spinner } from "#/components/ui/spinner";
 import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
 import { useFileString, useProjectSession } from "@project/core";
 import { HJSON } from "@project/hjson";
-import { type AnySchema, type SchemaFn } from "@project/schema";
+import { collectSpriteData, type AnySchema, type SchemaFn, type SpriteData } from "@project/schema";
 import { resolveContentSprite } from "@project/utils";
 import { useMemo, useState } from "react";
 import { Layer, Stage } from "react-konva";
-import { collectSpriteData, updateSpritePosition, type SpriteData } from "#/components/editor/center/sprite-utils";
+import { updateSpritePosition } from "#/components/editor/center/sprite-utils";
 import { SpriteImage } from "./SpriteImage";
 
 export function SpriteEditor({ path, schema }: { path: string; schema: AnySchema | SchemaFn }) {
@@ -44,7 +44,14 @@ function SpriteCanvas({
 			const node = HJSON.parseWithCache(data);
 			if (!node.isObject()) return { sprites: [], error: "Not an object" };
 			const resolvedSchema = typeof schema === "function" ? schema(contents) : schema;
-			return { sprites: collectSpriteData(treeSnapshot, node, resolvedSchema), error: null };
+			return {
+				sprites: collectSpriteData(
+					(filename) => treeSnapshot.getEntries().find((item) => item.name === filename)?.path,
+					node,
+					resolvedSchema,
+				),
+				error: null,
+			};
 		} catch (e) {
 			console.error(e);
 			return { sprites: [], error: String(e) };
@@ -134,14 +141,17 @@ function SpritePreview({ sprite }: { sprite: SpriteData }) {
 					element.scrollIntoView({
 						behavior: "smooth",
 					});
-                    element.focus()
+					element.focus();
 				}
 				current += ".";
 			}
 		});
 
 	return (
-		<div className="w-full border p-8 rounded-md bg-card relative flex items-center justify-center" onClick={() => scrollTo(sprite.position.x.path)}>
+		<div
+			className="w-full border p-8 rounded-md bg-card relative flex items-center justify-center"
+			onClick={() => scrollTo(sprite.position.x.path)}
+		>
 			<span className="absolute top-1 left-1 text-xs text-muted-foreground">
 				{sprite.name} ({size[0]}x{size[1]})
 			</span>

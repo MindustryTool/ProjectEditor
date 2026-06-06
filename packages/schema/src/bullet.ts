@@ -6,8 +6,7 @@ import { ShootPatternHjsonSchema } from "./shoot-pattern";
 import { StatusFieldSchema } from "./status";
 import { LiquidFieldSchema } from "./liquid";
 import { UnitFieldSchema } from "./unit";
-
-const metadata = { type: "bullet" };
+import { metadata } from "./utils";
 
 export const bulletTypes = [
 	"ArtilleryBulletType",
@@ -331,10 +330,13 @@ export const BulletHjsonSchema: SchemaFn = CachedSchema((context) => {
 
 			if (classSchemaMap[type as BulletClass]) {
 				const schema = classSchemaMap[type as BulletClass];
-				return v.pipe(v.object({ ...createBulletBaseObjectSchema(context).entries, ...schema(context).entries }), metadata(metadata));
+				return v.pipe(
+					v.object({ ...createBulletBaseObjectSchema(context).entries, ...schema(context).entries }),
+					metadata({ type: "bullet" }),
+				);
 			}
 		}
 
-		return v.pipe(createBulletBaseObjectSchema(context), metadata(metadata));
+		return v.pipe(createBulletBaseObjectSchema(context), metadata({ type: "bullet" }));
 	});
 });

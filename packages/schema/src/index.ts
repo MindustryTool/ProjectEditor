@@ -56,5 +56,7 @@ export {
 	getArrayItemSchema,
 	getSchemaMetadata,
 	metadata,
+	collectSpriteData,
+    type SpriteData,
 } from "./utils";
 export type { AnySchema, SchemaMetadata, Type } from "./utils";
