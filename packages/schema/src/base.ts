@@ -1,5 +1,6 @@
 import type { ProjectContents } from "@project/types";
 import * as v from "valibot";
+import { metadata } from "./utils";
 
 export const ContentNameSchema = v.pipe(
 	v.string(),
@@ -11,7 +12,7 @@ export const ContentNameSchema = v.pipe(
 export const MindustryHexColorSchema = v.pipe(
 	v.string(),
 	v.regex(/^[#]{0,1}(?:[0-9a-fA-F]{1,8})$/, "Must be a valid hex color"),
-	v.metadata({
+	metadata({
 		type: "color",
 	}),
 );
@@ -31,7 +32,7 @@ export const Envs = {
 
 export const EnvValues = Object.values(Envs);
 
-export const EnvSchema = v.pipe(v.number(), v.picklist(EnvValues), v.metadata({ type: "env" }));
+export const EnvSchema = v.pipe(v.number(), v.picklist(EnvValues), metadata({ type: "env" }));
 
 export const ItemRequirementSchema = v.pipe(
 	v.string(),
@@ -78,7 +79,7 @@ export const ResearchSchema: SchemaFn = CachedSchema((context) => {
 				robot: v.optional(v.boolean()),
 			});
 		}),
-		v.metadata({
+		metadata({
 			type: "research",
 		}),
 		v.rawCheck(({ dataset, addIssue }) => {
@@ -159,7 +160,7 @@ export const SoundHjsonSchema = v.pipe(
 	v.string(),
 	v.minLength(1),
 	v.maxLength(127),
-	v.metadata({
+	metadata({
 		type: "sound",
 	}),
 );
@@ -169,7 +170,7 @@ export const SpriteHjsonSchema: SchemaFn = CachedSchema((context) =>
 		v.picklist([...new Set(context.sprites.map((sprite) => sprite.name))]),
 		v.minLength(1),
 		v.maxLength(127),
-		v.metadata({
+		metadata({
 			type: "sprite",
 		}),
 	),

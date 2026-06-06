@@ -55,5 +55,6 @@ export {
 	getSchemaEntries,
 	getArrayItemSchema,
 	getSchemaMetadata,
+	metadata,
 } from "./utils";
 export type { AnySchema, SchemaMetadata, Type } from "./utils";

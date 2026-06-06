@@ -1,10 +1,10 @@
 import * as v from "valibot";
 import { CachedSchema, type SchemaFn } from "./base";
 
-const metadata = { type: "shoot-pattern" };
+import { metadata } from "./utils";
 
 export const shootPatternTypes = [
-    "ShootPattern",
+	"ShootPattern",
 	"ShootAlternate",
 	"ShootBarrel",
 	"ShootHelix",
@@ -70,7 +70,7 @@ const classSchemaMap: Record<ShootPatternType, SchemaFn<v.ObjectSchema<v.ObjectE
 	ShootSine: (_context) => shootSineObjectSchema,
 	ShootSpread: (_context) => shootSpreadObjectSchema,
 	ShootSummon: (_context) => shootSummonObjectSchema,
-    ShootPattern: (_context) => shootPatternBaseObjectSchema,
+	ShootPattern: (_context) => shootPatternBaseObjectSchema,
 };
 
 export const ShootPatternHjsonSchema: SchemaFn = CachedSchema((context) => {
@@ -85,11 +85,11 @@ export const ShootPatternHjsonSchema: SchemaFn = CachedSchema((context) => {
 						...shootPatternBaseObjectSchema.entries,
 						...schema(context).entries,
 					}),
-					v.metadata(metadata),
+					metadata({ type: "shoot-pattern" }),
 				);
 			}
 		}
 
-		return v.pipe(shootPatternBaseObjectSchema, v.metadata(metadata));
+		return v.pipe(shootPatternBaseObjectSchema, metadata({ type: "shoot-pattern" }));
 	});
 });

@@ -20,8 +20,7 @@ import { BlockFlagSchema } from "./block-flag";
 import { CategorySchema } from "./category";
 import { BuildVisibilitySchema } from "./build-visibility";
 import { TeamSchema } from "./team";
-
-const metadata = { type: "block" };
+import { metadata } from "./utils";
 
 export const blockTypes = [
 	// Power
@@ -1425,7 +1424,7 @@ export const BlockHjsonSchema: SchemaFn = CachedSchema((context) => {
 				research: v.optional(ResearchSchema(context)),
 				...blockObjectSchema,
 			}),
-			v.metadata(metadata),
+			metadata({ type: "block" }),
 		);
 	});
 });

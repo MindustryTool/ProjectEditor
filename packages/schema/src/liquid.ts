@@ -1,6 +1,7 @@
 import * as v from "valibot";
 import { MindustryHexColorSchema, ResearchSchema, type SchemaFn } from "./base";
 import { EffectFieldSchema } from "./effect";
+import { metadata } from "./utils";
 
 export const liquidBaseObjectSchema = {
 	color: v.optional(MindustryHexColorSchema),
@@ -8,7 +9,7 @@ export const liquidBaseObjectSchema = {
 	gasColor: v.optional(
 		v.pipe(
 			MindustryHexColorSchema,
-			v.metadata({
+			metadata({
 				visibleWhen: {
 					field: "gas",
 					value: true,

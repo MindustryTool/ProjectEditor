@@ -331,10 +331,10 @@ export const BulletHjsonSchema: SchemaFn = CachedSchema((context) => {
 
 			if (classSchemaMap[type as BulletClass]) {
 				const schema = classSchemaMap[type as BulletClass];
-				return v.pipe(v.object({ ...createBulletBaseObjectSchema(context).entries, ...schema(context).entries }), v.metadata(metadata));
+				return v.pipe(v.object({ ...createBulletBaseObjectSchema(context).entries, ...schema(context).entries }), metadata(metadata));
 			}
 		}
 
-		return v.pipe(createBulletBaseObjectSchema(context), v.metadata(metadata));
+		return v.pipe(createBulletBaseObjectSchema(context), metadata(metadata));
 	});
 });

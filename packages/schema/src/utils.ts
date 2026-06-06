@@ -1,4 +1,4 @@
-import type * as v from "valibot";
+import * as v from "valibot";
 
 export type AnySchema =
 	| v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>
@@ -163,14 +163,21 @@ export function getArrayItemSchema(schema: AnySchema, index = 0): AnySchema | nu
 	return null;
 }
 
-export interface SchemaMetadata {
+export type SchemaMetadata = {
+	type?: string;
+	name?: string;
+	description?: string;
+	category?: string;
+	multiline?: boolean;
+	order?: number;
 	visibleWhen?: {
 		field: string;
 		value: unknown;
 	};
-	name?: string;
-	description?: string;
-	multiline?: boolean;
+};
+
+export function metadata<T>(meta: SchemaMetadata): v.MetadataAction<T, SchemaMetadata> {
+	return v.metadata(meta);
 }
 
 export function getSchemaMetadata(schema: AnySchema): SchemaMetadata | null {

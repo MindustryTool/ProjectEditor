@@ -4,8 +4,7 @@ import { EffectFieldSchema } from "./effect";
 import { StatusFieldSchema } from "./status";
 import { LiquidFieldSchema } from "./liquid";
 import { BulletHjsonSchema } from "./bullet";
-
-const metadata = { type: "ability" };
+import { metadata } from "./utils";
 
 export const abilityClasses = [
 	"ArmorPlateAbility",
@@ -282,11 +281,11 @@ export const AbilityHjsonSchema: SchemaFn = CachedSchema((context) => {
 
 			if (type && classSchemaMap[type as AbilityClass]) {
 				const schemaFn = classSchemaMap[type as AbilityClass];
-				return v.pipe(v.object({ ...abilityBaseObjectSchema.entries, ...schemaFn(context).entries }), v.metadata(metadata));
+				return v.pipe(v.object({ ...abilityBaseObjectSchema.entries, ...schemaFn(context).entries }), metadata({ type: "ability" }));
 			}
 		}
 
-		return v.pipe(abilityBaseObjectSchema, v.metadata(metadata));
+		return v.pipe(abilityBaseObjectSchema, metadata({ type: "ability" }));
 	});
 });
 

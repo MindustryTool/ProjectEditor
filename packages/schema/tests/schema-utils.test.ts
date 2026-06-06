@@ -9,6 +9,7 @@ import {
 	getSchemaMetadata,
 	type AnySchema,
 	MindustryHexColorSchema,
+    metadata,
 } from "@project/schema";
 
 describe("unwrapSchema", () => {
@@ -112,8 +113,8 @@ describe("getArrayItemSchema", () => {
 });
 
 describe("getSchemaMetadata", () => {
-	it("returns metadata from pipe with v.metadata()", () => {
-		const schema = v.pipe(v.string(), v.metadata({ visibleWhen: { field: "x", value: true } }));
+	it("returns metadata from pipe with metadata()", () => {
+		const schema = v.pipe(v.string(), metadata({ visibleWhen: { field: "x", value: true } }));
 		expect(getSchemaMetadata(schema as AnySchema)).toEqual({ visibleWhen: { field: "x", value: true } });
 	});
 
@@ -133,13 +134,13 @@ describe("getSchemaMetadata", () => {
 	});
 
 	it("unwraps optional wrapper before extracting metadata", () => {
-		const inner = v.pipe(v.string(), v.metadata({ visibleWhen: { field: "toggle", value: true } }));
+		const inner = v.pipe(v.string(), metadata({ visibleWhen: { field: "toggle", value: true } }));
 		const wrapped = v.optional(inner);
 		expect(getSchemaMetadata(wrapped as AnySchema)).toEqual({ visibleWhen: { field: "toggle", value: true } });
 	});
 
 	it("unwraps optional wrapper before extracting metadata", () => {
-		const inner = v.pipe(v.number(), v.metadata({ visibleWhen: { field: "flag", value: 1 } }));
+		const inner = v.pipe(v.number(), metadata({ visibleWhen: { field: "flag", value: 1 } }));
 		const wrapped = v.optional(inner);
 		expect(getSchemaMetadata(wrapped as AnySchema)).toEqual({ visibleWhen: { field: "flag", value: 1 } });
 	});
@@ -147,14 +148,14 @@ describe("getSchemaMetadata", () => {
 	it("returns last metadata when multiple metadata actions exist", () => {
 		const schema = v.pipe(
 			v.string(),
-			v.metadata({ visibleWhen: { field: "first", value: 1 } }),
-			v.metadata({ visibleWhen: { field: "last", value: 2 } }),
+			metadata({ visibleWhen: { field: "first", value: 1 } }),
+			metadata({ visibleWhen: { field: "last", value: 2 } }),
 		);
 		expect(getSchemaMetadata(schema as AnySchema)).toEqual({ visibleWhen: { field: "last", value: 2 } });
 	});
 
 	it("returns metadata from pipe with color base schema", () => {
-		const schema = v.pipe(MindustryHexColorSchema, v.metadata({ visibleWhen: { field: "gas", value: true } }));
+		const schema = v.pipe(MindustryHexColorSchema, metadata({ visibleWhen: { field: "gas", value: true } }));
 		expect(getSchemaMetadata(schema as AnySchema)).toEqual({ visibleWhen: { field: "gas", value: true } });
 	});
 });
@@ -167,7 +168,7 @@ describe("resolveSchema", () => {
 
 	it("returns inner schema for v.pipe(object, metadata)", () => {
 		const inner = v.object({ x: v.string() });
-		const piped = v.pipe(inner, v.metadata({ type: "test" }));
+		const piped = v.pipe(inner, metadata({ type: "test" }));
 		const resolved = resolveSchema(piped as AnySchema, {});
 		expect(resolved).not.toBe(piped);
 		expect((resolved as unknown as { entries: Record<string, unknown> }).entries).toBeDefined();
@@ -192,7 +193,7 @@ describe("resolveSchema", () => {
 			if ((input as Record<string, unknown>)?.x) return v.object({ y: v.string() });
 			return v.object({ z: v.number() });
 		});
-		const piped = v.pipe(inner, v.metadata({ type: "effect" }));
+		const piped = v.pipe(inner, metadata({ type: "effect" }));
 		const resolved = resolveSchema(piped as AnySchema, { x: true });
 		expect(getSchemaEntries(resolved as AnySchema).map(([k]) => k)).toEqual(["y"]);
 	});
@@ -215,20 +216,20 @@ describe("resolveSchema", () => {
 describe("getSchemaEntries with valibot pipe structure", () => {
 	it("extracts entries from v.pipe(object, metadata)", () => {
 		const inner = v.object({ name: v.string() });
-		const piped = v.pipe(inner, v.metadata({ type: "test" }));
+		const piped = v.pipe(inner, metadata({ type: "test" }));
 		const entries = getSchemaEntries(piped as AnySchema);
 		expect(entries).toHaveLength(1);
 		expect(entries[0]![0]).toBe("name");
 	});
 
 	it("extracts entries from v.pipe(string, metadata) - returns none", () => {
-		const piped = v.pipe(v.string(), v.metadata({ type: "effect" }));
+		const piped = v.pipe(v.string(), metadata({ type: "effect" }));
 		expect(getSchemaEntries(piped as AnySchema)).toEqual([]);
 	});
 
 	it("extracts entries from piped lazy after resolveSchema", () => {
 		const lazy = v.lazy(() => v.object({ x: v.string() }));
-		const piped = v.pipe(lazy, v.metadata({ type: "effect" }));
+		const piped = v.pipe(lazy, metadata({ type: "effect" }));
 		const resolved = resolveSchema(piped as AnySchema, {});
 		const entries = getSchemaEntries(resolved as AnySchema);
 		expect(entries.map(([k]) => k)).toEqual(["x"]);
@@ -248,7 +249,7 @@ describe("Effect schema integration", () => {
 					effects: v.array(
 						v.pipe(
 							v.lazy(() => effectItemUnionSchema),
-							v.metadata({ type: "effect" }),
+							metadata({ type: "effect" }),
 						),
 					),
 				}),
@@ -262,7 +263,7 @@ describe("Effect schema integration", () => {
 				}
 				return v.pipe(v.string(), v.minLength(1), v.maxLength(127));
 			}),
-			v.metadata({ type: "effect" }),
+			metadata({ type: "effect" }),
 		);
 
 		// Test resolution with ParticleEffect
@@ -293,7 +294,7 @@ describe("Effect schema integration", () => {
 				}
 				return v.pipe(v.string(), v.minLength(1), v.maxLength(127));
 			}),
-			v.metadata({ type: "effect" }),
+			metadata({ type: "effect" }),
 		);
 
 		// Step 2: resolveSchema with node value

@@ -1,7 +1,6 @@
 import * as v from "valibot";
 import { CachedSchema, Interps, MindustryHexColorSchema, SoundHjsonSchema, type SchemaFn } from "./base";
-
-const metadata = { type: "effect" };
+import { metadata } from "./utils";
 
 export const effectClasses = [
 	"ParticleEffect",
@@ -143,7 +142,7 @@ export const EffectFieldSchema: SchemaFn = CachedSchema((context) => {
 
 			return EffectHjsonSchema(context);
 		}),
-		v.metadata(metadata),
+		metadata({ type: "effect" }),
 	);
 });
 
@@ -154,10 +153,10 @@ export const EffectHjsonSchema: SchemaFn = CachedSchema((context) => {
 
 			if (typeof type === "string" && classSchemaMap[type as EffectClass]) {
 				const schema = classSchemaMap[type as EffectClass];
-				return v.pipe(v.object({ ...effectBaseObjectSchema.entries, ...schema(context).entries }), v.metadata(metadata));
+				return v.pipe(v.object({ ...effectBaseObjectSchema.entries, ...schema(context).entries }), metadata({ type: "effect" }));
 			}
 		}
 
-		return v.pipe(effectBaseObjectSchema, v.metadata(metadata));
+		return v.pipe(effectBaseObjectSchema, metadata({ type: "effect" }));
 	});
 });

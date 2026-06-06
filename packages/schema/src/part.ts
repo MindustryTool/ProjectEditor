@@ -1,8 +1,7 @@
 import * as v from "valibot";
 import { CachedSchema, MindustryHexColorSchema, type SchemaFn } from "./base";
 import { EffectFieldSchema } from "./effect";
-
-const metadata = { type: "part" };
+import { metadata } from "./utils";
 
 export const partClasses = ["RegionPart", "DrawPart", "EffectSpawnerPart", "FlarePart", "HaloPart", "HoverPart", "ShapePart"] as const;
 
@@ -192,10 +191,10 @@ export const PartHjsonSchema: SchemaFn = CachedSchema((context) => {
 
 			if (type && classSchemaMap[type as PartClass]) {
 				const schemaFn = classSchemaMap[type as PartClass];
-				return v.pipe(v.object({ ...drawPartBaseObjectSchema.entries, ...schemaFn(context).entries }), v.metadata(metadata));
+				return v.pipe(v.object({ ...drawPartBaseObjectSchema.entries, ...schemaFn(context).entries }), metadata({ type: "part" }));
 			}
 		}
 
-		return v.pipe(drawPartBaseObjectSchema, v.metadata(metadata));
+		return v.pipe(drawPartBaseObjectSchema, metadata({ type: "part" }));
 	});
 });
