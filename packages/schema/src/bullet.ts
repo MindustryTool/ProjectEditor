@@ -44,195 +44,744 @@ type BulletObjectSchema = v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.Objec
 const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>> = (context) => {
 	return v.object({
 		type: v.picklist(bulletTypes),
-		lifetime: v.optional(v.number(), 40),
-		lifeScaleRandMin: v.optional(v.number(), 1),
-		lifeScaleRandMax: v.optional(v.number(), 1),
-		speed: v.optional(v.number(), 1),
-		velocityScaleRandMin: v.optional(v.number(), 1),
-		velocityScaleRandMax: v.optional(v.number(), 1),
-		damage: v.optional(v.number(), 1),
-		sprite: v.optional(
-			v.pipe(
-				v.string(),
-				v.transform((v) => v.replaceAll(context.name + "-", "")),
-				v.picklist(context.sprites.map((sprite) => sprite.name.replaceAll(context.name + "-", ""))),
-			),
+		lifetime: v.pipe(
+			v.optional(v.number(), 40),
+			metadata({ name: "editor.bullet.lifetime", description: "editor.bullet.lifetime-description", category: "editor.bullet.category.core-stats" }),
 		),
-		hitSize: v.optional(v.number(), 4),
-		drawSize: v.optional(v.number(), 40),
-		angleOffset: v.optional(v.number(), 0),
-		randomAngleOffset: v.optional(v.number(), 0),
-		drag: v.optional(v.number(), 0),
-		accel: v.optional(v.number(), 0),
-		pierce: v.optional(v.boolean(), false),
-		pierceBuilding: v.optional(v.boolean(), false),
-		pierceCap: v.optional(v.number(), -1),
-		pierceDamageFactor: v.optional(v.number(), 0),
-		maxDamageFraction: v.optional(v.number(), -1),
-		removeAfterPierce: v.optional(v.boolean(), true),
-		laserAbsorb: v.optional(v.boolean(), true),
-		optimalLifeFract: v.optional(v.number(), 0),
-		layer: v.optional(v.number()),
-		hitEffect: v.optional(EffectFieldSchema(context)),
-		despawnEffect: v.optional(EffectFieldSchema(context)),
-		shootEffect: v.optional(EffectFieldSchema(context)),
-		shootPattern: v.optional(ShootPatternHjsonSchema(context)),
-		chargeEffect: v.optional(EffectFieldSchema(context)),
-		smokeEffect: v.optional(EffectFieldSchema(context)),
-		shootSound: v.optional(SoundHjsonSchema),
-		hitSound: v.optional(SoundHjsonSchema),
-		despawnSound: v.optional(SoundHjsonSchema),
-		hitSoundPitch: v.optional(v.number(), 1),
-		hitSoundPitchRange: v.optional(v.number(), 0.1),
-		hitSoundVolume: v.optional(v.number(), 1),
-		inaccuracy: v.optional(v.number(), 0),
-		ammoMultiplier: v.optional(v.number(), 2),
-		reloadMultiplier: v.optional(v.number(), 1),
-		buildingDamageMultiplier: v.optional(v.number(), 1),
-		shieldDamageMultiplier: v.optional(v.number(), 1),
-		recoil: v.optional(v.number(), 0),
-		killShooter: v.optional(v.boolean(), false),
-		instantDisappear: v.optional(v.boolean(), false),
-		splashDamage: v.optional(v.number(), 0),
-		scaledSplashDamage: v.optional(v.boolean(), false),
-		knockback: v.optional(v.number(), 0),
-		impact: v.optional(v.boolean(), false),
-		status: v.optional(StatusFieldSchema(context)),
-		statusDuration: v.optional(v.number(), 480),
-		targetBlocks: v.optional(v.boolean(), true),
-		targetMissiles: v.optional(v.boolean(), true),
-		collidesTiles: v.optional(v.boolean(), true),
-		collidesTeam: v.optional(v.boolean(), false),
-		collidesAir: v.optional(v.boolean(), true),
-		collidesGround: v.optional(v.boolean(), true),
-		collides: v.optional(v.boolean(), true),
-		collideFloor: v.optional(v.boolean(), false),
-		collideTerrain: v.optional(v.boolean(), false),
-		keepVelocity: v.optional(v.boolean(), true),
-		scaleKeepVelocity: v.optional(v.boolean(), false),
-		scaleLife: v.optional(v.boolean(), false),
-		hittable: v.optional(v.boolean(), true),
-		reflectable: v.optional(v.boolean(), true),
-		absorbable: v.optional(v.boolean(), true),
-		ignoreSpawnAngle: v.optional(v.boolean(), false),
-		createChance: v.optional(v.number(), 1),
-		maxRange: v.optional(v.number(), -1),
-		rangeOverride: v.optional(v.number(), -1),
-		rangeChange: v.optional(v.number(), 0),
-		extraRangeMargin: v.optional(v.number(), 0),
-		range: v.optional(v.number(), 0),
-		minRangeChange: v.optional(v.number(), 0),
-		healPercent: v.optional(v.number(), 0),
-		healAmount: v.optional(v.number(), 0),
-		healSound: v.optional(SoundHjsonSchema),
-		healSoundVolume: v.optional(v.number(), 0.9),
-		lifesteal: v.optional(v.number(), 0),
-		makeFire: v.optional(v.boolean(), false),
-		hitUnder: v.optional(v.boolean(), false),
-		despawnHit: v.optional(v.boolean(), false),
-		fragOnHit: v.optional(v.boolean(), true),
-		fragOnDespawn: v.optional(v.boolean(), true),
-		fragOnAbsorb: v.optional(v.boolean(), true),
-		pierceArmor: v.optional(v.boolean(), false),
-		armorMultiplier: v.optional(v.number(), 1),
-		blockArmorMultiplier: v.optional(v.number(), 1),
-		sticky: v.optional(v.boolean(), false),
-		stickyExtraLifetime: v.optional(v.number(), 0),
-		setDefaults: v.optional(v.boolean(), true),
-		hitShake: v.optional(v.number(), 0),
-		despawnShake: v.optional(v.number(), 0),
-		fragBullet: v.optional(BulletHjsonSchema(context)),
-		delayFrags: v.optional(v.boolean(), false),
-		fragRandomSpread: v.optional(v.number(), 360),
-		fragSpread: v.optional(v.number(), 0),
-		fragAngle: v.optional(v.number(), 0),
-		fragBullets: v.optional(v.number(), 9),
-		fragVelocityMin: v.optional(v.number(), 0.2),
-		fragVelocityMax: v.optional(v.number(), 1),
-		fragLifeMin: v.optional(v.number(), 1),
-		fragLifeMax: v.optional(v.number(), 1),
-		fragOffsetMin: v.optional(v.number(), 1),
-		fragOffsetMax: v.optional(v.number(), 7),
-		pierceFragCap: v.optional(v.number(), -1),
-		intervalBullet: v.optional(BulletHjsonSchema(context)),
-		bulletInterval: v.optional(v.number(), 20),
-		intervalBullets: v.optional(v.number(), 1),
-		intervalRandomSpread: v.optional(v.number(), 360),
-		intervalSpread: v.optional(v.number(), 0),
-		intervalAngle: v.optional(v.number(), 0),
-		intervalDelay: v.optional(v.number(), -1),
-		underwater: v.optional(v.boolean(), false),
-		hitColor: v.optional(MindustryHexColorSchema),
-		healColor: v.optional(MindustryHexColorSchema),
-		healEffect: v.optional(EffectFieldSchema(context)),
-		spawnBullets: v.optional(v.array(BulletHjsonSchema(context)), []),
-		showStats: v.optional(v.boolean(), false),
-		spawnBulletRandomSpread: v.optional(v.number(), 0),
-		spawnUnit: v.optional(UnitFieldSchema(context)),
-		despawnUnit: v.optional(UnitFieldSchema(context)),
-		despawnUnitChance: v.optional(v.number(), 1),
-		despawnUnitCount: v.optional(v.number(), 1),
-		despawnUnitRadius: v.optional(v.number(), 0.1),
-		faceOutwards: v.optional(v.boolean(), false),
-		parts: v.optional(v.array(PartHjsonSchema(context)), []),
-		trailColor: v.optional(MindustryHexColorSchema),
-		trailChance: v.optional(v.number(), -0.0001),
-		trailInterval: v.optional(v.number(), 0),
-		trailMinVelocity: v.optional(v.number(), 0),
-		trailEffect: v.optional(EffectFieldSchema(context)),
-		trailSpread: v.optional(v.number(), 0),
-		trailParam: v.optional(v.number(), 2),
-		trailRotation: v.optional(v.boolean(), false),
-		trailInterp: v.optional(v.picklist(Interps), "one"),
-		trailLength: v.optional(v.number(), -1),
-		trailWidth: v.optional(v.number(), 2),
-		circleShooter: v.optional(v.boolean(), false),
-		circleShooterRadius: v.optional(v.number(), 13),
-		circleShooterRadiusSmooth: v.optional(v.number(), 10),
-		circleShooterRotateSpeed: v.optional(v.number(), 0.3),
-		splashDamageRadius: v.optional(v.number(), -1),
-		splashDamagePierce: v.optional(v.boolean(), false),
-		incendAmount: v.optional(v.number(), 0),
-		incendSpread: v.optional(v.number(), 8),
-		incendChance: v.optional(v.number(), 1),
-		homingPower: v.optional(v.number(), 0),
-		homingRange: v.optional(v.number(), 50),
-		homingDelay: v.optional(v.number(), -1),
-		followAimSpeed: v.optional(v.number(), 0),
-		suppressionRange: v.optional(v.number(), -1),
-		suppressionDuration: v.optional(v.number(), 480),
-		suppressionEffectChance: v.optional(v.number(), 50),
-		suppressColor: v.optional(MindustryHexColorSchema),
-		lightningColor: v.optional(MindustryHexColorSchema),
-		puddles: v.optional(v.number(), 0),
-		puddleRange: v.optional(v.number(), 0),
-		puddleAmount: v.optional(v.number(), 5),
-		puddleLiquid: v.optional(LiquidFieldSchema(context)),
-		lightning: v.optional(v.number(), 0),
-		lightningLength: v.optional(v.number(), 5),
-		lightningLengthRand: v.optional(v.number(), 0),
-		lightningDamage: v.optional(v.number(), -1),
-		lightningCone: v.optional(v.number(), 360),
-		lightningAngle: v.optional(v.number(), 0),
-		lightningType: v.optional(BulletHjsonSchema(context)),
-		weaveScale: v.optional(v.number(), 1),
-		weaveMag: v.optional(v.number(), 0),
-		weaveRandom: v.optional(v.boolean(), true),
-		rotateSpeed: v.optional(v.number(), 0),
-		displayAmmoMultiplier: v.optional(v.boolean(), true),
-		statLiquidConsumed: v.optional(v.number(), 0),
-		lightRadius: v.optional(v.number(), -1),
-		lightOpacity: v.optional(v.number(), 0.3),
-		lightColor: v.optional(MindustryHexColorSchema),
-		backColor: v.optional(MindustryHexColorSchema),
-		frontColor: v.optional(MindustryHexColorSchema),
-		width: v.optional(v.number(), 5),
-		height: v.optional(v.number(), 7),
-		shrinkX: v.optional(v.number(), 0),
-		shrinkY: v.optional(v.number(), 0.5),
-		spin: v.optional(v.number(), 0),
-		backSprite: v.optional(v.string()),
-		shrinkInterp: v.optional(v.picklist(Interps), "linear"),
+		lifeScaleRandMin: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.life-scale-rand-min", description: "editor.bullet.life-scale-rand-min-description", category: "editor.bullet.category.behavior" }),
+		),
+		lifeScaleRandMax: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.life-scale-rand-max", description: "editor.bullet.life-scale-rand-max-description", category: "editor.bullet.category.behavior" }),
+		),
+		speed: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.speed", description: "editor.bullet.speed-description", category: "editor.bullet.category.core-stats" }),
+		),
+		velocityScaleRandMin: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.velocity-scale-rand-min", description: "editor.bullet.velocity-scale-rand-min-description", category: "editor.bullet.category.behavior" }),
+		),
+		velocityScaleRandMax: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.velocity-scale-rand-max", description: "editor.bullet.velocity-scale-rand-max-description", category: "editor.bullet.category.behavior" }),
+		),
+		damage: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.damage", description: "editor.bullet.damage-description", category: "editor.bullet.category.core-stats" }),
+		),
+		sprite: v.pipe(
+			v.optional(
+				v.pipe(
+					v.string(),
+					v.transform((v) => v.replaceAll(context.name + "-", "")),
+					v.picklist(context.sprites.map((sprite) => sprite.name.replaceAll(context.name + "-", ""))),
+				),
+			),
+			metadata({ name: "editor.bullet.sprite", description: "editor.bullet.sprite-description", category: "editor.bullet.category.visuals" }),
+		),
+		hitSize: v.pipe(
+			v.optional(v.number(), 4),
+			metadata({ name: "editor.bullet.hit-size", description: "editor.bullet.hit-size-description", category: "editor.bullet.category.core-stats" }),
+		),
+		drawSize: v.pipe(
+			v.optional(v.number(), 40),
+			metadata({ name: "editor.bullet.draw-size", description: "editor.bullet.draw-size-description", category: "editor.bullet.category.core-stats" }),
+		),
+		angleOffset: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.angle-offset", description: "editor.bullet.angle-offset-description", category: "editor.bullet.category.physics" }),
+		),
+		randomAngleOffset: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.random-angle-offset", description: "editor.bullet.random-angle-offset-description", category: "editor.bullet.category.physics" }),
+		),
+		drag: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.drag", description: "editor.bullet.drag-description", category: "editor.bullet.category.physics" }),
+		),
+		accel: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.accel", description: "editor.bullet.accel-description", category: "editor.bullet.category.physics" }),
+		),
+		pierce: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.pierce", description: "editor.bullet.pierce-description", category: "editor.bullet.category.collision-piercing" }),
+		),
+		pierceBuilding: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.pierce-building", description: "editor.bullet.pierce-building-description", category: "editor.bullet.category.collision-piercing" }),
+		),
+		pierceCap: v.pipe(
+			v.optional(v.number(), -1),
+			metadata({ name: "editor.bullet.pierce-cap", description: "editor.bullet.pierce-cap-description", category: "editor.bullet.category.collision-piercing", visibleWhen: { field: "pierce", value: true } }),
+		),
+		pierceDamageFactor: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.pierce-damage-factor", description: "editor.bullet.pierce-damage-factor-description", category: "editor.bullet.category.damage", visibleWhen: { field: "pierce", value: true } }),
+		),
+		maxDamageFraction: v.pipe(
+			v.optional(v.number(), -1),
+			metadata({ name: "editor.bullet.max-damage-fraction", description: "editor.bullet.max-damage-fraction-description", category: "editor.bullet.category.core-stats" }),
+		),
+		removeAfterPierce: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({ name: "editor.bullet.remove-after-pierce", description: "editor.bullet.remove-after-pierce-description", category: "editor.bullet.category.collision-piercing", visibleWhen: { field: "pierce", value: true } }),
+		),
+		laserAbsorb: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({ name: "editor.bullet.laser-absorb", description: "editor.bullet.laser-absorb-description", category: "editor.bullet.category.collision-piercing", visibleWhen: { field: "pierce", value: true } }),
+		),
+		optimalLifeFract: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.optimal-life-fract", description: "editor.bullet.optimal-life-fract-description", category: "editor.bullet.category.core-stats" }),
+		),
+		layer: v.pipe(
+			v.optional(v.number()),
+			metadata({ name: "editor.bullet.layer", description: "editor.bullet.layer-description", category: "editor.bullet.category.visuals" }),
+		),
+		hitEffect: v.pipe(
+			v.optional(EffectFieldSchema(context)),
+			metadata({ name: "editor.bullet.hit-effect", description: "editor.bullet.hit-effect-description", category: "editor.bullet.category.visuals" }),
+		),
+		despawnEffect: v.pipe(
+			v.optional(EffectFieldSchema(context)),
+			metadata({ name: "editor.bullet.despawn-effect", description: "editor.bullet.despawn-effect-description", category: "editor.bullet.category.visuals" }),
+		),
+		shootEffect: v.pipe(
+			v.optional(EffectFieldSchema(context)),
+			metadata({ name: "editor.bullet.shoot-effect", description: "editor.bullet.shoot-effect-description", category: "editor.bullet.category.visuals" }),
+		),
+		shootPattern: v.pipe(
+			v.optional(ShootPatternHjsonSchema(context)),
+			metadata({ name: "editor.bullet.shoot-pattern", description: "editor.bullet.shoot-pattern-description", category: "editor.bullet.category.visuals" }),
+		),
+		chargeEffect: v.pipe(
+			v.optional(EffectFieldSchema(context)),
+			metadata({ name: "editor.bullet.charge-effect", description: "editor.bullet.charge-effect-description", category: "editor.bullet.category.visuals" }),
+		),
+		smokeEffect: v.pipe(
+			v.optional(EffectFieldSchema(context)),
+			metadata({ name: "editor.bullet.smoke-effect", description: "editor.bullet.smoke-effect-description", category: "editor.bullet.category.visuals" }),
+		),
+		shootSound: v.pipe(
+			v.optional(SoundHjsonSchema),
+			metadata({ name: "editor.bullet.shoot-sound", description: "editor.bullet.shoot-sound-description", category: "editor.bullet.category.audio" }),
+		),
+		hitSound: v.pipe(
+			v.optional(SoundHjsonSchema),
+			metadata({ name: "editor.bullet.hit-sound", description: "editor.bullet.hit-sound-description", category: "editor.bullet.category.audio" }),
+		),
+		despawnSound: v.pipe(
+			v.optional(SoundHjsonSchema),
+			metadata({ name: "editor.bullet.despawn-sound", description: "editor.bullet.despawn-sound-description", category: "editor.bullet.category.audio" }),
+		),
+		hitSoundPitch: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.hit-sound-pitch", description: "editor.bullet.hit-sound-pitch-description", category: "editor.bullet.category.audio" }),
+		),
+		hitSoundPitchRange: v.pipe(
+			v.optional(v.number(), 0.1),
+			metadata({ name: "editor.bullet.hit-sound-pitch-range", description: "editor.bullet.hit-sound-pitch-range-description", category: "editor.bullet.category.audio" }),
+		),
+		hitSoundVolume: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.hit-sound-volume", description: "editor.bullet.hit-sound-volume-description", category: "editor.bullet.category.audio" }),
+		),
+		inaccuracy: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.inaccuracy", description: "editor.bullet.inaccuracy-description", category: "editor.bullet.category.targeting" }),
+		),
+		ammoMultiplier: v.pipe(
+			v.optional(v.number(), 2),
+			metadata({ name: "editor.bullet.ammo-multiplier", description: "editor.bullet.ammo-multiplier-description", category: "editor.bullet.category.turret" }),
+		),
+		reloadMultiplier: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.reload-multiplier", description: "editor.bullet.reload-multiplier-description", category: "editor.bullet.category.turret" }),
+		),
+		buildingDamageMultiplier: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.building-damage-multiplier", description: "editor.bullet.building-damage-multiplier-description", category: "editor.bullet.category.damage" }),
+		),
+		shieldDamageMultiplier: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.shield-damage-multiplier", description: "editor.bullet.shield-damage-multiplier-description", category: "editor.bullet.category.damage" }),
+		),
+		recoil: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.recoil", description: "editor.bullet.recoil-description", category: "editor.bullet.category.turret" }),
+		),
+		killShooter: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.kill-shooter", description: "editor.bullet.kill-shooter-description", category: "editor.bullet.category.behavior" }),
+		),
+		instantDisappear: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.instant-disappear", description: "editor.bullet.instant-disappear-description", category: "editor.bullet.category.behavior" }),
+		),
+		splashDamage: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.splash-damage", description: "editor.bullet.splash-damage-description", category: "editor.bullet.category.damage" }),
+		),
+		scaledSplashDamage: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.scaled-splash-damage", description: "editor.bullet.scaled-splash-damage-description", category: "editor.bullet.category.damage" }),
+		),
+		knockback: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.knockback", description: "editor.bullet.knockback-description", category: "editor.bullet.category.physics" }),
+		),
+		impact: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.impact", description: "editor.bullet.impact-description", category: "editor.bullet.category.physics" }),
+		),
+		status: v.pipe(
+			v.optional(StatusFieldSchema(context)),
+			metadata({ name: "editor.bullet.status", description: "editor.bullet.status-description", category: "editor.bullet.category.healing-status" }),
+		),
+		statusDuration: v.pipe(
+			v.optional(v.number(), 480),
+			metadata({ name: "editor.bullet.status-duration", description: "editor.bullet.status-duration-description", category: "editor.bullet.category.healing-status" }),
+		),
+		targetBlocks: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({ name: "editor.bullet.target-blocks", description: "editor.bullet.target-blocks-description", category: "editor.bullet.category.targeting" }),
+		),
+		targetMissiles: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({ name: "editor.bullet.target-missiles", description: "editor.bullet.target-missiles-description", category: "editor.bullet.category.targeting" }),
+		),
+		collidesTiles: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({ name: "editor.bullet.collides-tiles", description: "editor.bullet.collides-tiles-description", category: "editor.bullet.category.collision-piercing", visibleWhen: { field: "collides", value: true } }),
+		),
+		collidesTeam: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.collides-team", description: "editor.bullet.collides-team-description", category: "editor.bullet.category.collision-piercing", visibleWhen: { field: "collides", value: true } }),
+		),
+		collidesAir: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({ name: "editor.bullet.collides-air", description: "editor.bullet.collides-air-description", category: "editor.bullet.category.collision-piercing", visibleWhen: { field: "collides", value: true } }),
+		),
+		collidesGround: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({ name: "editor.bullet.collides-ground", description: "editor.bullet.collides-ground-description", category: "editor.bullet.category.collision-piercing", visibleWhen: { field: "collides", value: true } }),
+		),
+		collides: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({ name: "editor.bullet.collides", description: "editor.bullet.collides-description", category: "editor.bullet.category.collision-piercing" }),
+		),
+		collideFloor: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.collide-floor", description: "editor.bullet.collide-floor-description", category: "editor.bullet.category.collision-piercing", visibleWhen: { field: "collides", value: true } }),
+		),
+		collideTerrain: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.collide-terrain", description: "editor.bullet.collide-terrain-description", category: "editor.bullet.category.collision-piercing", visibleWhen: { field: "collides", value: true } }),
+		),
+		keepVelocity: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({ name: "editor.bullet.keep-velocity", description: "editor.bullet.keep-velocity-description", category: "editor.bullet.category.physics" }),
+		),
+		scaleKeepVelocity: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.scale-keep-velocity", description: "editor.bullet.scale-keep-velocity-description", category: "editor.bullet.category.physics", visibleWhen: { field: "keepVelocity", value: true } }),
+		),
+		scaleLife: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.scale-life", description: "editor.bullet.scale-life-description", category: "editor.bullet.category.targeting" }),
+		),
+		hittable: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({ name: "editor.bullet.hittable", description: "editor.bullet.hittable-description", category: "editor.bullet.category.collision-piercing" }),
+		),
+		reflectable: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({ name: "editor.bullet.reflectable", description: "editor.bullet.reflectable-description", category: "editor.bullet.category.collision-piercing" }),
+		),
+		absorbable: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({ name: "editor.bullet.absorbable", description: "editor.bullet.absorbable-description", category: "editor.bullet.category.collision-piercing" }),
+		),
+		ignoreSpawnAngle: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.ignore-spawn-angle", description: "editor.bullet.ignore-spawn-angle-description", category: "editor.bullet.category.behavior" }),
+		),
+		createChance: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.create-chance", description: "editor.bullet.create-chance-description", category: "editor.bullet.category.behavior" }),
+		),
+		maxRange: v.pipe(
+			v.optional(v.number(), -1),
+			metadata({ name: "editor.bullet.max-range", description: "editor.bullet.max-range-description", category: "editor.bullet.category.targeting" }),
+		),
+		rangeOverride: v.pipe(
+			v.optional(v.number(), -1),
+			metadata({ name: "editor.bullet.range-override", description: "editor.bullet.range-override-description", category: "editor.bullet.category.targeting" }),
+		),
+		rangeChange: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.range-change", description: "editor.bullet.range-change-description", category: "editor.bullet.category.targeting" }),
+		),
+		extraRangeMargin: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.extra-range-margin", description: "editor.bullet.extra-range-margin-description", category: "editor.bullet.category.targeting" }),
+		),
+		range: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.range", description: "editor.bullet.range-description", category: "editor.bullet.category.core-stats" }),
+		),
+		minRangeChange: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.min-range-change", description: "editor.bullet.min-range-change-description", category: "editor.bullet.category.targeting" }),
+		),
+		healPercent: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.heal-percent", description: "editor.bullet.heal-percent-description", category: "editor.bullet.category.healing-status" }),
+		),
+		healAmount: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.heal-amount", description: "editor.bullet.heal-amount-description", category: "editor.bullet.category.healing-status" }),
+		),
+		healSound: v.pipe(
+			v.optional(SoundHjsonSchema),
+			metadata({ name: "editor.bullet.heal-sound", description: "editor.bullet.heal-sound-description", category: "editor.bullet.category.audio" }),
+		),
+		healSoundVolume: v.pipe(
+			v.optional(v.number(), 0.9),
+			metadata({ name: "editor.bullet.heal-sound-volume", description: "editor.bullet.heal-sound-volume-description", category: "editor.bullet.category.audio" }),
+		),
+		lifesteal: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.lifesteal", description: "editor.bullet.lifesteal-description", category: "editor.bullet.category.healing-status" }),
+		),
+		makeFire: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.make-fire", description: "editor.bullet.make-fire-description", category: "editor.bullet.category.lightning-fire-puddles" }),
+		),
+		hitUnder: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.hit-under", description: "editor.bullet.hit-under-description", category: "editor.bullet.category.behavior" }),
+		),
+		despawnHit: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.despawn-hit", description: "editor.bullet.despawn-hit-description", category: "editor.bullet.category.behavior" }),
+		),
+		fragOnHit: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({ name: "editor.bullet.frag-on-hit", description: "editor.bullet.frag-on-hit-description", category: "editor.bullet.category.fragmentation" }),
+		),
+		fragOnDespawn: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({ name: "editor.bullet.frag-on-despawn", description: "editor.bullet.frag-on-despawn-description", category: "editor.bullet.category.fragmentation" }),
+		),
+		fragOnAbsorb: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({ name: "editor.bullet.frag-on-absorb", description: "editor.bullet.frag-on-absorb-description", category: "editor.bullet.category.fragmentation", visibleWhen: { field: "absorbable", value: true } }),
+		),
+		pierceArmor: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.pierce-armor", description: "editor.bullet.pierce-armor-description", category: "editor.bullet.category.collision-piercing" }),
+		),
+		armorMultiplier: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.armor-multiplier", description: "editor.bullet.armor-multiplier-description", category: "editor.bullet.category.collision-piercing" }),
+		),
+		blockArmorMultiplier: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.block-armor-multiplier", description: "editor.bullet.block-armor-multiplier-description", category: "editor.bullet.category.collision-piercing" }),
+		),
+		sticky: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.sticky", description: "editor.bullet.sticky-description", category: "editor.bullet.category.healing-status" }),
+		),
+		stickyExtraLifetime: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.sticky-extra-lifetime", description: "editor.bullet.sticky-extra-lifetime-description", category: "editor.bullet.category.healing-status", visibleWhen: { field: "sticky", value: true } }),
+		),
+		setDefaults: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({ name: "editor.bullet.set-defaults", description: "editor.bullet.set-defaults-description", category: "editor.bullet.category.behavior" }),
+		),
+		hitShake: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.hit-shake", description: "editor.bullet.hit-shake-description", category: "editor.bullet.category.visuals" }),
+		),
+		despawnShake: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.despawn-shake", description: "editor.bullet.despawn-shake-description", category: "editor.bullet.category.visuals" }),
+		),
+		fragBullet: v.pipe(
+			v.optional(BulletHjsonSchema(context)),
+			metadata({ name: "editor.bullet.frag-bullet", description: "editor.bullet.frag-bullet-description", category: "editor.bullet.category.fragmentation" }),
+		),
+		delayFrags: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.delay-frags", description: "editor.bullet.delay-frags-description", category: "editor.bullet.category.fragmentation" }),
+		),
+		fragRandomSpread: v.pipe(
+			v.optional(v.number(), 360),
+			metadata({ name: "editor.bullet.frag-random-spread", description: "editor.bullet.frag-random-spread-description", category: "editor.bullet.category.fragmentation" }),
+		),
+		fragSpread: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.frag-spread", description: "editor.bullet.frag-spread-description", category: "editor.bullet.category.fragmentation" }),
+		),
+		fragAngle: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.frag-angle", description: "editor.bullet.frag-angle-description", category: "editor.bullet.category.fragmentation" }),
+		),
+		fragBullets: v.pipe(
+			v.optional(v.number(), 9),
+			metadata({ name: "editor.bullet.frag-bullets", description: "editor.bullet.frag-bullets-description", category: "editor.bullet.category.fragmentation" }),
+		),
+		fragVelocityMin: v.pipe(
+			v.optional(v.number(), 0.2),
+			metadata({ name: "editor.bullet.frag-velocity-min", description: "editor.bullet.frag-velocity-min-description", category: "editor.bullet.category.fragmentation" }),
+		),
+		fragVelocityMax: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.frag-velocity-max", description: "editor.bullet.frag-velocity-max-description", category: "editor.bullet.category.fragmentation" }),
+		),
+		fragLifeMin: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.frag-life-min", description: "editor.bullet.frag-life-min-description", category: "editor.bullet.category.fragmentation" }),
+		),
+		fragLifeMax: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.frag-life-max", description: "editor.bullet.frag-life-max-description", category: "editor.bullet.category.fragmentation" }),
+		),
+		fragOffsetMin: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.frag-offset-min", description: "editor.bullet.frag-offset-min-description", category: "editor.bullet.category.fragmentation" }),
+		),
+		fragOffsetMax: v.pipe(
+			v.optional(v.number(), 7),
+			metadata({ name: "editor.bullet.frag-offset-max", description: "editor.bullet.frag-offset-max-description", category: "editor.bullet.category.fragmentation" }),
+		),
+		pierceFragCap: v.pipe(
+			v.optional(v.number(), -1),
+			metadata({ name: "editor.bullet.pierce-frag-cap", description: "editor.bullet.pierce-frag-cap-description", category: "editor.bullet.category.collision-piercing", visibleWhen: { field: "pierce", value: true } }),
+		),
+		intervalBullet: v.pipe(
+			v.optional(BulletHjsonSchema(context)),
+			metadata({ name: "editor.bullet.interval-bullet", description: "editor.bullet.interval-bullet-description", category: "editor.bullet.category.interval" }),
+		),
+		bulletInterval: v.pipe(
+			v.optional(v.number(), 20),
+			metadata({ name: "editor.bullet.bullet-interval", description: "editor.bullet.bullet-interval-description", category: "editor.bullet.category.interval" }),
+		),
+		intervalBullets: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.interval-bullets", description: "editor.bullet.interval-bullets-description", category: "editor.bullet.category.interval" }),
+		),
+		intervalRandomSpread: v.pipe(
+			v.optional(v.number(), 360),
+			metadata({ name: "editor.bullet.interval-random-spread", description: "editor.bullet.interval-random-spread-description", category: "editor.bullet.category.interval" }),
+		),
+		intervalSpread: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.interval-spread", description: "editor.bullet.interval-spread-description", category: "editor.bullet.category.interval" }),
+		),
+		intervalAngle: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.interval-angle", description: "editor.bullet.interval-angle-description", category: "editor.bullet.category.interval" }),
+		),
+		intervalDelay: v.pipe(
+			v.optional(v.number(), -1),
+			metadata({ name: "editor.bullet.interval-delay", description: "editor.bullet.interval-delay-description", category: "editor.bullet.category.interval" }),
+		),
+		underwater: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.underwater", description: "editor.bullet.underwater-description", category: "editor.bullet.category.visuals" }),
+		),
+		hitColor: v.pipe(
+			v.optional(MindustryHexColorSchema),
+			metadata({ name: "editor.bullet.hit-color", description: "editor.bullet.hit-color-description", category: "editor.bullet.category.visuals" }),
+		),
+		healColor: v.pipe(
+			v.optional(MindustryHexColorSchema),
+			metadata({ name: "editor.bullet.heal-color", description: "editor.bullet.heal-color-description", category: "editor.bullet.category.visuals" }),
+		),
+		healEffect: v.pipe(
+			v.optional(EffectFieldSchema(context)),
+			metadata({ name: "editor.bullet.heal-effect", description: "editor.bullet.heal-effect-description", category: "editor.bullet.category.visuals" }),
+		),
+		spawnBullets: v.pipe(
+			v.optional(v.array(BulletHjsonSchema(context)), []),
+			metadata({ name: "editor.bullet.spawn-bullets", description: "editor.bullet.spawn-bullets-description", category: "editor.bullet.category.spawn-parts" }),
+		),
+		showStats: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.show-stats", description: "editor.bullet.show-stats-description", category: "editor.bullet.category.spawn-parts" }),
+		),
+		spawnBulletRandomSpread: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.spawn-bullet-random-spread", description: "editor.bullet.spawn-bullet-random-spread-description", category: "editor.bullet.category.spawn-parts" }),
+		),
+		spawnUnit: v.pipe(
+			v.optional(UnitFieldSchema(context)),
+			metadata({ name: "editor.bullet.spawn-unit", description: "editor.bullet.spawn-unit-description", category: "editor.bullet.category.spawn-parts" }),
+		),
+		despawnUnit: v.pipe(
+			v.optional(UnitFieldSchema(context)),
+			metadata({ name: "editor.bullet.despawn-unit", description: "editor.bullet.despawn-unit-description", category: "editor.bullet.category.spawn-parts" }),
+		),
+		despawnUnitChance: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.despawn-unit-chance", description: "editor.bullet.despawn-unit-chance-description", category: "editor.bullet.category.spawn-parts" }),
+		),
+		despawnUnitCount: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.despawn-unit-count", description: "editor.bullet.despawn-unit-count-description", category: "editor.bullet.category.spawn-parts" }),
+		),
+		despawnUnitRadius: v.pipe(
+			v.optional(v.number(), 0.1),
+			metadata({ name: "editor.bullet.despawn-unit-radius", description: "editor.bullet.despawn-unit-radius-description", category: "editor.bullet.category.spawn-parts" }),
+		),
+		faceOutwards: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.face-outwards", description: "editor.bullet.face-outwards-description", category: "editor.bullet.category.spawn-parts" }),
+		),
+		parts: v.pipe(
+			v.optional(v.array(PartHjsonSchema(context)), []),
+			metadata({ name: "editor.bullet.parts", description: "editor.bullet.parts-description", category: "editor.bullet.category.visuals" }),
+		),
+		trailColor: v.pipe(
+			v.optional(MindustryHexColorSchema),
+			metadata({ name: "editor.bullet.trail-color", description: "editor.bullet.trail-color-description", category: "editor.bullet.category.visuals" }),
+		),
+		trailChance: v.pipe(
+			v.optional(v.number(), -0.0001),
+			metadata({ name: "editor.bullet.trail-chance", description: "editor.bullet.trail-chance-description", category: "editor.bullet.category.visuals" }),
+		),
+		trailInterval: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.trail-interval", description: "editor.bullet.trail-interval-description", category: "editor.bullet.category.visuals" }),
+		),
+		trailMinVelocity: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.trail-min-velocity", description: "editor.bullet.trail-min-velocity-description", category: "editor.bullet.category.visuals" }),
+		),
+		trailEffect: v.pipe(
+			v.optional(EffectFieldSchema(context)),
+			metadata({ name: "editor.bullet.trail-effect", description: "editor.bullet.trail-effect-description", category: "editor.bullet.category.visuals" }),
+		),
+		trailSpread: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.trail-spread", description: "editor.bullet.trail-spread-description", category: "editor.bullet.category.visuals" }),
+		),
+		trailParam: v.pipe(
+			v.optional(v.number(), 2),
+			metadata({ name: "editor.bullet.trail-param", description: "editor.bullet.trail-param-description", category: "editor.bullet.category.visuals" }),
+		),
+		trailRotation: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.trail-rotation", description: "editor.bullet.trail-rotation-description", category: "editor.bullet.category.visuals" }),
+		),
+		trailInterp: v.pipe(
+			v.optional(v.picklist(Interps), "one"),
+			metadata({ name: "editor.bullet.trail-interp", description: "editor.bullet.trail-interp-description", category: "editor.bullet.category.visuals" }),
+		),
+		trailLength: v.pipe(
+			v.optional(v.number(), -1),
+			metadata({ name: "editor.bullet.trail-length", description: "editor.bullet.trail-length-description", category: "editor.bullet.category.visuals" }),
+		),
+		trailWidth: v.pipe(
+			v.optional(v.number(), 2),
+			metadata({ name: "editor.bullet.trail-width", description: "editor.bullet.trail-width-description", category: "editor.bullet.category.visuals" }),
+		),
+		circleShooter: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.circle-shooter", description: "editor.bullet.circle-shooter-description", category: "editor.bullet.category.targeting" }),
+		),
+		circleShooterRadius: v.pipe(
+			v.optional(v.number(), 13),
+			metadata({ name: "editor.bullet.circle-shooter-radius", description: "editor.bullet.circle-shooter-radius-description", category: "editor.bullet.category.targeting", visibleWhen: { field: "circleShooter", value: true } }),
+		),
+		circleShooterRadiusSmooth: v.pipe(
+			v.optional(v.number(), 10),
+			metadata({ name: "editor.bullet.circle-shooter-radius-smooth", description: "editor.bullet.circle-shooter-radius-smooth-description", category: "editor.bullet.category.targeting", visibleWhen: { field: "circleShooter", value: true } }),
+		),
+		circleShooterRotateSpeed: v.pipe(
+			v.optional(v.number(), 0.3),
+			metadata({ name: "editor.bullet.circle-shooter-rotate-speed", description: "editor.bullet.circle-shooter-rotate-speed-description", category: "editor.bullet.category.targeting", visibleWhen: { field: "circleShooter", value: true } }),
+		),
+		splashDamageRadius: v.pipe(
+			v.optional(v.number(), -1),
+			metadata({ name: "editor.bullet.splash-damage-radius", description: "editor.bullet.splash-damage-radius-description", category: "editor.bullet.category.damage" }),
+		),
+		splashDamagePierce: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({ name: "editor.bullet.splash-damage-pierce", description: "editor.bullet.splash-damage-pierce-description", category: "editor.bullet.category.damage" }),
+		),
+		incendAmount: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.incend-amount", description: "editor.bullet.incend-amount-description", category: "editor.bullet.category.lightning-fire-puddles" }),
+		),
+		incendSpread: v.pipe(
+			v.optional(v.number(), 8),
+			metadata({ name: "editor.bullet.incend-spread", description: "editor.bullet.incend-spread-description", category: "editor.bullet.category.lightning-fire-puddles" }),
+		),
+		incendChance: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.incend-chance", description: "editor.bullet.incend-chance-description", category: "editor.bullet.category.lightning-fire-puddles" }),
+		),
+		homingPower: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.homing-power", description: "editor.bullet.homing-power-description", category: "editor.bullet.category.targeting" }),
+		),
+		homingRange: v.pipe(
+			v.optional(v.number(), 50),
+			metadata({ name: "editor.bullet.homing-range", description: "editor.bullet.homing-range-description", category: "editor.bullet.category.targeting" }),
+		),
+		homingDelay: v.pipe(
+			v.optional(v.number(), -1),
+			metadata({ name: "editor.bullet.homing-delay", description: "editor.bullet.homing-delay-description", category: "editor.bullet.category.targeting" }),
+		),
+		followAimSpeed: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.follow-aim-speed", description: "editor.bullet.follow-aim-speed-description", category: "editor.bullet.category.targeting" }),
+		),
+		suppressionRange: v.pipe(
+			v.optional(v.number(), -1),
+			metadata({ name: "editor.bullet.suppression-range", description: "editor.bullet.suppression-range-description", category: "editor.bullet.category.healing-status" }),
+		),
+		suppressionDuration: v.pipe(
+			v.optional(v.number(), 480),
+			metadata({ name: "editor.bullet.suppression-duration", description: "editor.bullet.suppression-duration-description", category: "editor.bullet.category.healing-status" }),
+		),
+		suppressionEffectChance: v.pipe(
+			v.optional(v.number(), 50),
+			metadata({ name: "editor.bullet.suppression-effect-chance", description: "editor.bullet.suppression-effect-chance-description", category: "editor.bullet.category.healing-status" }),
+		),
+		suppressColor: v.pipe(
+			v.optional(MindustryHexColorSchema),
+			metadata({ name: "editor.bullet.suppress-color", description: "editor.bullet.suppress-color-description", category: "editor.bullet.category.healing-status" }),
+		),
+		lightningColor: v.pipe(
+			v.optional(MindustryHexColorSchema),
+			metadata({ name: "editor.bullet.lightning-color", description: "editor.bullet.lightning-color-description", category: "editor.bullet.category.lightning-fire-puddles" }),
+		),
+		puddles: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.puddles", description: "editor.bullet.puddles-description", category: "editor.bullet.category.lightning-fire-puddles" }),
+		),
+		puddleRange: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.puddle-range", description: "editor.bullet.puddle-range-description", category: "editor.bullet.category.lightning-fire-puddles" }),
+		),
+		puddleAmount: v.pipe(
+			v.optional(v.number(), 5),
+			metadata({ name: "editor.bullet.puddle-amount", description: "editor.bullet.puddle-amount-description", category: "editor.bullet.category.lightning-fire-puddles" }),
+		),
+		puddleLiquid: v.pipe(
+			v.optional(LiquidFieldSchema(context)),
+			metadata({ name: "editor.bullet.puddle-liquid", description: "editor.bullet.puddle-liquid-description", category: "editor.bullet.category.lightning-fire-puddles" }),
+		),
+		lightning: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.lightning", description: "editor.bullet.lightning-description", category: "editor.bullet.category.lightning-fire-puddles" }),
+		),
+		lightningLength: v.pipe(
+			v.optional(v.number(), 5),
+			metadata({ name: "editor.bullet.lightning-length", description: "editor.bullet.lightning-length-description", category: "editor.bullet.category.lightning-fire-puddles" }),
+		),
+		lightningLengthRand: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.lightning-length-rand", description: "editor.bullet.lightning-length-rand-description", category: "editor.bullet.category.lightning-fire-puddles" }),
+		),
+		lightningDamage: v.pipe(
+			v.optional(v.number(), -1),
+			metadata({ name: "editor.bullet.lightning-damage", description: "editor.bullet.lightning-damage-description", category: "editor.bullet.category.lightning-fire-puddles" }),
+		),
+		lightningCone: v.pipe(
+			v.optional(v.number(), 360),
+			metadata({ name: "editor.bullet.lightning-cone", description: "editor.bullet.lightning-cone-description", category: "editor.bullet.category.lightning-fire-puddles" }),
+		),
+		lightningAngle: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.lightning-angle", description: "editor.bullet.lightning-angle-description", category: "editor.bullet.category.lightning-fire-puddles" }),
+		),
+		lightningType: v.pipe(
+			v.optional(BulletHjsonSchema(context)),
+			metadata({ name: "editor.bullet.lightning-type", description: "editor.bullet.lightning-type-description", category: "editor.bullet.category.lightning-fire-puddles" }),
+		),
+		weaveScale: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({ name: "editor.bullet.weave-scale", description: "editor.bullet.weave-scale-description", category: "editor.bullet.category.targeting" }),
+		),
+		weaveMag: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.weave-mag", description: "editor.bullet.weave-mag-description", category: "editor.bullet.category.targeting" }),
+		),
+		weaveRandom: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({ name: "editor.bullet.weave-random", description: "editor.bullet.weave-random-description", category: "editor.bullet.category.targeting" }),
+		),
+		rotateSpeed: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.rotate-speed", description: "editor.bullet.rotate-speed-description", category: "editor.bullet.category.physics" }),
+		),
+		displayAmmoMultiplier: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({ name: "editor.bullet.display-ammo-multiplier", description: "editor.bullet.display-ammo-multiplier-description", category: "editor.bullet.category.turret" }),
+		),
+		statLiquidConsumed: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.stat-liquid-consumed", description: "editor.bullet.stat-liquid-consumed-description", category: "editor.bullet.category.behavior" }),
+		),
+		lightRadius: v.pipe(
+			v.optional(v.number(), -1),
+			metadata({ name: "editor.bullet.light-radius", description: "editor.bullet.light-radius-description", category: "editor.bullet.category.visuals" }),
+		),
+		lightOpacity: v.pipe(
+			v.optional(v.number(), 0.3),
+			metadata({ name: "editor.bullet.light-opacity", description: "editor.bullet.light-opacity-description", category: "editor.bullet.category.visuals" }),
+		),
+		lightColor: v.pipe(
+			v.optional(MindustryHexColorSchema),
+			metadata({ name: "editor.bullet.light-color", description: "editor.bullet.light-color-description", category: "editor.bullet.category.visuals" }),
+		),
+		backColor: v.pipe(
+			v.optional(MindustryHexColorSchema),
+			metadata({ name: "editor.bullet.back-color", description: "editor.bullet.back-color-description", category: "editor.bullet.category.visuals" }),
+		),
+		frontColor: v.pipe(
+			v.optional(MindustryHexColorSchema),
+			metadata({ name: "editor.bullet.front-color", description: "editor.bullet.front-color-description", category: "editor.bullet.category.visuals" }),
+		),
+		width: v.pipe(
+			v.optional(v.number(), 5),
+			metadata({ name: "editor.bullet.width", description: "editor.bullet.width-description", category: "editor.bullet.category.visuals" }),
+		),
+		height: v.pipe(
+			v.optional(v.number(), 7),
+			metadata({ name: "editor.bullet.height", description: "editor.bullet.height-description", category: "editor.bullet.category.visuals" }),
+		),
+		shrinkX: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.shrink-x", description: "editor.bullet.shrink-x-description", category: "editor.bullet.category.visuals" }),
+		),
+		shrinkY: v.pipe(
+			v.optional(v.number(), 0.5),
+			metadata({ name: "editor.bullet.shrink-y", description: "editor.bullet.shrink-y-description", category: "editor.bullet.category.visuals" }),
+		),
+		spin: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({ name: "editor.bullet.spin", description: "editor.bullet.spin-description", category: "editor.bullet.category.visuals" }),
+		),
+		backSprite: v.pipe(
+			v.optional(v.string()),
+			metadata({ name: "editor.bullet.back-sprite", description: "editor.bullet.back-sprite-description", category: "editor.bullet.category.visuals" }),
+		),
+		shrinkInterp: v.pipe(
+			v.optional(v.picklist(Interps), "linear"),
+			metadata({ name: "editor.bullet.shrink-interp", description: "editor.bullet.shrink-interp-description", category: "editor.bullet.category.visuals" }),
+		),
 	});
 };
 
