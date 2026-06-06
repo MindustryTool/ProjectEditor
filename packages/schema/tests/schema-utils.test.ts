@@ -243,6 +243,7 @@ describe("getSchemaMetadata", () => {
 		expect(meta).toEqual({
 			name: "editor.unit.speed",
 			description: "editor.unit.speed-description",
+			category: "editor.unit.category.movement-physics",
 		});
 	});
 
