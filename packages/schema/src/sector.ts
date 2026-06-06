@@ -1,5 +1,6 @@
 import * as v from "valibot";
-import { metadata, ResearchSchema, type SchemaFn } from "./base";
+import { metadata } from "./utils";
+import { ResearchSchema, type SchemaFn } from "./base";
 
 export const sectorBaseObjectSchema = v.object({
 	captureWave: v.pipe(
