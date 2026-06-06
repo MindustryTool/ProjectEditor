@@ -1,4 +1,4 @@
-﻿export const vi = {
+﻿export default {
 	"app.title": "Project Editor",
 	"nav.home": "Trang chủ",
 	"nav.about": "Giới thiệu",

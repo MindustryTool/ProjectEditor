@@ -17,45 +17,81 @@ export const shootPatternTypes = [
 export type ShootPatternType = (typeof shootPatternTypes)[number];
 
 const shootPatternBaseObjectSchema = v.object({
-	type: v.optional(v.picklist(shootPatternTypes), shootPatternTypes[0]),
-	name: v.optional(v.string()),
-	shots: v.optional(v.number(), 1),
-	firstShotDelay: v.optional(v.number(), 0),
-	shotDelay: v.optional(v.number(), 0),
+	type: v.pipe(v.optional(v.picklist(shootPatternTypes), shootPatternTypes[0]), metadata({ name: "editor.shoot-pattern.type" })),
+	name: v.pipe(v.optional(v.string()), metadata({ name: "editor.shoot-pattern.name" })),
+	shots: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({ name: "editor.shoot-pattern.shots", description: "editor.shoot-pattern.shots-description" }),
+	),
+	firstShotDelay: v.pipe(
+		v.optional(v.number(), 0),
+		metadata({ name: "editor.shoot-pattern.first-shot-delay", description: "editor.shoot-pattern.first-shot-delay-description" }),
+	),
+	shotDelay: v.pipe(
+		v.optional(v.number(), 0),
+		metadata({ name: "editor.shoot-pattern.shot-delay", description: "editor.shoot-pattern.shot-delay-description" }),
+	),
 });
 
 export const shootAlternateObjectSchema = v.object({
-	barrels: v.optional(v.number(), 2),
-	spread: v.optional(v.number(), 5),
-	barrelOffset: v.optional(v.number(), 0),
-	mirror: v.optional(v.boolean(), false),
+	barrels: v.pipe(
+		v.optional(v.number(), 2),
+		metadata({ name: "editor.shoot-pattern.barrels", description: "editor.shoot-pattern.barrels-description" }),
+	),
+	spread: v.pipe(
+		v.optional(v.number(), 5),
+		metadata({ name: "editor.shoot-pattern.spread", description: "editor.shoot-pattern.spread-description" }),
+	),
+	barrelOffset: v.pipe(
+		v.optional(v.number(), 0),
+		metadata({ name: "editor.shoot-pattern.barrel-offset", description: "editor.shoot-pattern.barrel-offset-description" }),
+	),
+	mirror: v.pipe(
+		v.optional(v.boolean(), false),
+		metadata({ name: "editor.shoot-pattern.mirror", description: "editor.shoot-pattern.mirror-description" }),
+	),
 });
 
 export const shootBarrelObjectSchema = v.object({
-	barrels: v.optional(v.array(v.number()), [0, 0, 0]),
-	barrelOffset: v.optional(v.number(), 0),
+	barrels: v.pipe(
+		v.optional(v.array(v.number()), [0, 0, 0]),
+		metadata({ name: "editor.shoot-pattern.barrels", description: "editor.shoot-pattern.barrels-description" }),
+	),
+	barrelOffset: v.pipe(
+		v.optional(v.number(), 0),
+		metadata({ name: "editor.shoot-pattern.barrel-offset", description: "editor.shoot-pattern.barrel-offset-description" }),
+	),
 });
 
 export const shootHelixObjectSchema = v.object({
-	scl: v.optional(v.number(), 2),
-	mag: v.optional(v.number(), 1.5),
-	offset: v.optional(v.number(), Math.PI * 1.25),
+	scl: v.pipe(v.optional(v.number(), 2), metadata({ name: "editor.shoot-pattern.scl" })),
+	mag: v.pipe(v.optional(v.number(), 1.5), metadata({ name: "editor.shoot-pattern.mag" })),
+	offset: v.pipe(v.optional(v.number(), Math.PI * 1.25), metadata({ name: "editor.shoot-pattern.offset" })),
 });
 
 export const shootSineObjectSchema = v.object({
-	scl: v.optional(v.number(), 4),
-	mag: v.optional(v.number(), 20),
+	scl: v.pipe(
+		v.optional(v.number(), 4),
+		metadata({ name: "editor.shoot-pattern.scl", description: "editor.shoot-pattern.scl-description" }),
+	),
+	mag: v.pipe(
+		v.optional(v.number(), 20),
+		metadata({ name: "editor.shoot-pattern.mag", description: "editor.shoot-pattern.mag-description" }),
+	),
 });
 
 export const shootSpreadObjectSchema = v.object({
-	spread: v.optional(v.number(), 5),
+	spread: v.pipe(
+		v.optional(v.number(), 5),
+		metadata({ name: "editor.shoot-pattern.spread", description: "editor.shoot-pattern.spread-description" }),
+	),
 });
 
 export const shootSummonObjectSchema = v.object({
-	x: v.optional(v.number(), 0),
-	y: v.optional(v.number(), 0),
-	radius: v.optional(v.number(), 0),
-	spread: v.optional(v.number(), 0),
+	x: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.shoot-pattern.x" })),
+	y: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.shoot-pattern.y" })),
+	radius: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.shoot-pattern.radius" })),
+	spread: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.shoot-pattern.spread" })),
 });
 
 const classSchemaMap: Record<ShootPatternType, SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>> = {
