@@ -47,10 +47,6 @@ export class ProjectFileSystem {
 	async writeFile(path: string, data: BufferSource): Promise<void> {
 		await this.vfs.writeFile(this.scopePath(path), data);
 		this.events.emit("file:write", { path });
-		if (this.files.length === 0) {
-			await this.refreshTreeNow();
-		}
-
 		const file = this.files.find((f) => f.path === path);
 		if (!file) {
 			this.files.push({ path, kind: "file", name: path.split("/").pop() || "" });
@@ -83,7 +79,7 @@ export class ProjectFileSystem {
 			}
 		}
 
-		await this.refreshTree(true);
+		await this.refreshTree();
 	}
 
 	async delete(path: string): Promise<void> {
@@ -102,21 +98,17 @@ export class ProjectFileSystem {
 		return (await this.vfs.readdir(this.scopePath(path))).map((f) => ({ ...f, path: this.unscopePath(f.path) }));
 	}
 
-	async refreshTree(force?: boolean): Promise<FileEntry[]> {
+	async refreshTree(): Promise<FileEntry[]> {
 		if (this.refreshTreeTimer !== null) {
 			clearTimeout(this.refreshTreeTimer);
 			this.refreshTreeTimer = null;
-		}
-
-		if (force) {
-			return this.refreshTreeNow();
 		}
 
 		return new Promise((resolve) => {
 			this.refreshTreeTimer = setTimeout(async () => {
 				this.refreshTreeTimer = null;
 				resolve(await this.refreshTreeNow());
-			}, 50);
+			}, 150);
 		});
 	}
 
@@ -124,11 +116,11 @@ export class ProjectFileSystem {
 		const startTime = Date.now();
 		const snapshot = await this.listFiles("/", { recursive: true });
 		const duration = Date.now() - startTime;
+		this.files = snapshot;
+		this.onTreeSnapshotChange(snapshot);
 		if (duration > 100) {
 			console.log(`Tree refreshed in ${duration}ms`);
 		}
-		this.files = snapshot;
-		this.onTreeSnapshotChange(snapshot);
 		return snapshot;
 	}
 

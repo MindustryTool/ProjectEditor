@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "@tanstack/react-router";
 import { useAppStore, useProjectSession } from "@project/core";
 import { EditorShell } from "./EditorShell";
@@ -16,6 +16,7 @@ export function EditorPage() {
 	const navigate = useNavigate();
 	const openProject = useAppStore((s) => s.openProject);
 	const { id, lang } = useParams({ from: "/$lang/projects/$id" });
+	const loadingRef = useRef<Promise<void>>(null);
 
 	const projectContext = useProjectSession((s) => s.projectContext);
 
@@ -53,11 +54,16 @@ export function EditorPage() {
 				setTimeout(() => {
 					setIsLoading(false);
 				}, 1000);
+                loadingRef.current = null;
 			}
 		};
 
-		load();
-	}, [projectContext, id, openProject, navigate, lang]);
+		if (loadingRef.current !== null) {
+			return;
+		}
+
+		loadingRef.current = load();
+	}, [projectContext, id, openProject, navigate, lang, isLoading]);
 
 	useInterval(() => {
 		if (!isLoading) {

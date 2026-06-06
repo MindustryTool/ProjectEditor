@@ -48,11 +48,19 @@ export function useColorTagPicker({ editorRef, monacoRef, readOnly, containerRef
 			const match = findEditableColorTagAtColumn(line, currentPosition.column);
 			if (!match) return null;
 
+			const start = Date.now();
+
 			const anchor = editor.getScrolledVisiblePosition({
 				lineNumber: currentPosition.lineNumber,
 				column: match.endColumn,
 			});
 			if (!anchor) return null;
+
+			const duration = Date.now() - start;
+			
+            if (duration > 10) {
+				console.warn(`resolveActiveColorTag took ${duration}ms`);
+			}
 
 			return {
 				...match,
@@ -67,7 +75,12 @@ export function useColorTagPicker({ editorRef, monacoRef, readOnly, containerRef
 
 	const refreshActiveColorTag = useCallback(
 		(position?: IPosition | null) => {
+            const start = Date.now();
 			setActiveColorTag(resolveActiveColorTag(position));
+			const duration = Date.now() - start;
+			if (duration > 10) {
+				console.warn(`refreshActiveColorTag took ${duration}ms`);
+			}
 		},
 		[resolveActiveColorTag],
 	);
@@ -75,13 +88,11 @@ export function useColorTagPicker({ editorRef, monacoRef, readOnly, containerRef
 	const refreshActiveColorTagRef = useRef(refreshActiveColorTag);
 	refreshActiveColorTagRef.current = refreshActiveColorTag;
 
-	const debouncedRefresh = useMemo(
-		() => debounce((position?: IPosition | null) => refreshActiveColorTagRef.current(position), 50),
-		[],
-	);
+	const debouncedRefresh = useMemo(() => debounce((position?: IPosition | null) => refreshActiveColorTagRef.current(position), 50), []);
 
 	const replaceActiveColorTag = useCallback(
 		(replacement: string) => {
+            const start = Date.now();
 			const editor = editorRef.current;
 			const monaco = monacoRef.current;
 			const activeTag = activeColorTag;
@@ -100,6 +111,10 @@ export function useColorTagPicker({ editorRef, monacoRef, readOnly, containerRef
 			editor.setPosition(nextPosition);
 			editor.focus();
 			refreshActiveColorTag(nextPosition);
+			const duration = Date.now() - start;
+			if (duration > 10) {
+				console.warn(`replaceActiveColorTag took ${duration}ms`);
+			}
 		},
 		[activeColorTag, readOnly, editorRef, monacoRef, refreshActiveColorTag],
 	);

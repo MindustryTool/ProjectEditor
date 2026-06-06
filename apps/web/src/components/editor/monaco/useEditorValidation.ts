@@ -5,117 +5,124 @@ import { useValidationStore } from "@project/core";
 import { useTranslation } from "react-i18next";
 
 interface UseEditorValidationOptions {
-  editorRef: React.MutableRefObject<editor.IStandaloneCodeEditor | null>;
-  monacoRef: React.MutableRefObject<Monaco | null>;
-  path: string;
+	editorRef: React.MutableRefObject<editor.IStandaloneCodeEditor | null>;
+	monacoRef: React.MutableRefObject<Monaco | null>;
+	path: string;
 }
 
 export function useEditorValidation({ editorRef, monacoRef, path }: UseEditorValidationOptions) {
-  const errorLensDecorationsRef = useRef<editor.IEditorDecorationsCollection | null>(null);
-  const errorLensStyleRef = useRef<HTMLStyleElement | null>(null);
-  const results = useValidationStore((s) => s.results.resultsByPath[path]);
-  const { t } = useTranslation();
-  const [, startTransition] = useTransition();
+	const errorLensDecorationsRef = useRef<editor.IEditorDecorationsCollection | null>(null);
+	const errorLensStyleRef = useRef<HTMLStyleElement | null>(null);
+	const results = useValidationStore((s) => s.results.resultsByPath[path]);
+	const { t } = useTranslation();
+	const [, startTransition] = useTransition();
 
-  const updateMarkers = useCallback(() => {
-    const editor = editorRef.current;
-    const monaco = monacoRef.current;
-    if (!editor || !monaco) return;
+	const updateMarkers = useCallback(() => {
+		const start = Date.now();
 
-    const model = editor.getModel();
-    if (!model) return;
+		const editor = editorRef.current;
+		const monaco = monacoRef.current;
+		if (!editor || !monaco) return;
 
-    if (!results || results.length === 0) {
-      monaco.editor.setModelMarkers(model, "file-validation", []);
-      errorLensDecorationsRef.current?.clear();
-      if (errorLensStyleRef.current) {
-        errorLensStyleRef.current.textContent = "";
-      }
-      return;
-    }
+		const model = editor.getModel();
+		if (!model) return;
 
-    const markers: editor.IMarkerData[] = [];
-    const lineMessages = new Map<number, { message: string; severity: string }[]>();
+		if (!results || results.length === 0) {
+			monaco.editor.setModelMarkers(model, "file-validation", []);
+			errorLensDecorationsRef.current?.clear();
+			if (errorLensStyleRef.current) {
+				errorLensStyleRef.current.textContent = "";
+			}
+			return;
+		}
 
-    for (const r of results) {
-      const monacoSeverity = r.severity === "error" ? 8 : r.severity === "warning" ? 4 : 2;
-      const endLineNumber = r.endLine ?? r.startLine;
-      const rawEndColumn = r.endColumn ?? r.startColumn;
-      const endColumn = endLineNumber === r.startLine && rawEndColumn === r.startColumn ? r.startColumn + 1 : rawEndColumn;
-      const message = (t as (key: string, params?: Record<string, unknown>) => string)(r.messageKey, r.messageParams);
+		const markers: editor.IMarkerData[] = [];
+		const lineMessages = new Map<number, { message: string; severity: string }[]>();
 
-      markers.push({
-        severity: monacoSeverity as editor.IMarkerData["severity"],
-        message,
-        startLineNumber: r.startLine,
-        startColumn: r.startColumn,
-        endLineNumber,
-        endColumn,
-      });
+		for (const r of results) {
+			const monacoSeverity = r.severity === "error" ? 8 : r.severity === "warning" ? 4 : 2;
+			const endLineNumber = r.endLine ?? r.startLine;
+			const rawEndColumn = r.endColumn ?? r.startColumn;
+			const endColumn = endLineNumber === r.startLine && rawEndColumn === r.startColumn ? r.startColumn + 1 : rawEndColumn;
+			const message = (t as (key: string, params?: Record<string, unknown>) => string)(r.messageKey, r.messageParams);
 
-      const key = r.startLine;
-      if (!lineMessages.has(key)) {
-        lineMessages.set(key, []);
-      }
-      lineMessages.get(key)!.push({ message, severity: r.severity });
-    }
+			markers.push({
+				severity: monacoSeverity as editor.IMarkerData["severity"],
+				message,
+				startLineNumber: r.startLine,
+				startColumn: r.startColumn,
+				endLineNumber,
+				endColumn,
+			});
 
-    monaco.editor.setModelMarkers(model, "file-validation", markers);
+			const key = r.startLine;
+			if (!lineMessages.has(key)) {
+				lineMessages.set(key, []);
+			}
+			lineMessages.get(key)!.push({ message, severity: r.severity });
+		}
 
-    const errorDecorations: editor.IModelDeltaDecoration[] = [];
-    const modelId = model.uri.toString().replace(/[^a-zA-Z0-9]/g, "_");
-    let cssText = "";
+		monaco.editor.setModelMarkers(model, "file-validation", markers);
 
-    for (const [line, msgs] of lineMessages) {
-      const isError = msgs.some((m) => m.severity === "error");
-      const combinedMsg = msgs.map((m) => m.message).join("; ");
-      const variant = isError ? "error" : "warning";
-      const msgCls = `el-msg-${modelId}-l${line}`;
+		const errorDecorations: editor.IModelDeltaDecoration[] = [];
+		const modelId = model.uri.toString().replace(/[^a-zA-Z0-9]/g, "_");
+		let cssText = "";
 
-      errorDecorations.push({
-        range: new monaco.Range(line, 1, line, model.getLineMaxColumn(line)),
-        options: {
-          isWholeLine: true,
-          className: `el-bg-${variant}`,
-          afterContentClassName: msgCls,
-        },
-      });
+		for (const [line, msgs] of lineMessages) {
+			const isError = msgs.some((m) => m.severity === "error");
+			const combinedMsg = msgs.map((m) => m.message).join("; ");
+			const variant = isError ? "error" : "warning";
+			const msgCls = `el-msg-${modelId}-l${line}`;
 
-      const color = isError ? "#ff3333" : "#e67e22";
-      const escapedMsg = combinedMsg.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
-      cssText += `.${msgCls}::after{content:'  ${escapedMsg}';color:${color};font-size:0.85em;font-style:italic;white-space:nowrap;}`;
-    }
+			errorDecorations.push({
+				range: new monaco.Range(line, 1, line, model.getLineMaxColumn(line)),
+				options: {
+					isWholeLine: true,
+					className: `el-bg-${variant}`,
+					afterContentClassName: msgCls,
+				},
+			});
 
-    if (!errorLensDecorationsRef.current) {
-      errorLensDecorationsRef.current = editor.createDecorationsCollection(errorDecorations);
-    } else {
-      errorLensDecorationsRef.current.set(errorDecorations);
-    }
+			const color = isError ? "#ff3333" : "#e67e22";
+			const escapedMsg = combinedMsg.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+			cssText += `.${msgCls}::after{content:'  ${escapedMsg}';color:${color};font-size:0.85em;font-style:italic;white-space:nowrap;}`;
+		}
 
-    let styleEl = errorLensStyleRef.current;
-    if (!styleEl) {
-      styleEl = document.createElement("style");
-      styleEl.id = `el-dynamic-${modelId}`;
-      document.head.appendChild(styleEl);
-      errorLensStyleRef.current = styleEl;
-    }
-    styleEl.textContent = cssText;
-  }, [results, t, editorRef, monacoRef]);
+		if (!errorLensDecorationsRef.current) {
+			errorLensDecorationsRef.current = editor.createDecorationsCollection(errorDecorations);
+		} else {
+			errorLensDecorationsRef.current.set(errorDecorations);
+		}
 
-  useEffect(() => {
-    startTransition(() => {
-      updateMarkers();
-    });
-  }, [updateMarkers, startTransition]);
+		let styleEl = errorLensStyleRef.current;
+		if (!styleEl) {
+			styleEl = document.createElement("style");
+			styleEl.id = `el-dynamic-${modelId}`;
+			document.head.appendChild(styleEl);
+			errorLensStyleRef.current = styleEl;
+		}
+		styleEl.textContent = cssText;
 
-  useEffect(() => {
-    return () => {
-      errorLensDecorationsRef.current?.clear();
-      errorLensDecorationsRef.current = null;
-      errorLensStyleRef.current?.remove();
-      errorLensStyleRef.current = null;
-    };
-  }, []);
+		const duration = Date.now() - start;
+		if (duration > 10) {
+			console.warn(`updateMarkers took ${duration}ms`);
+		}
+	}, [results, t, editorRef, monacoRef]);
 
-  return { updateMarkers };
+	useEffect(() => {
+		startTransition(() => {
+			updateMarkers();
+		});
+	}, [updateMarkers, startTransition]);
+
+	useEffect(() => {
+		return () => {
+			errorLensDecorationsRef.current?.clear();
+			errorLensDecorationsRef.current = null;
+			errorLensStyleRef.current?.remove();
+			errorLensStyleRef.current = null;
+		};
+	}, []);
+
+	return { updateMarkers };
 }
