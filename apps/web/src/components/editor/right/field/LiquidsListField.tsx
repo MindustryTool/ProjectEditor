@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { getSchemaMetadata, unwrapSchema } from "@project/schema";
 import { HJSON } from "@project/hjson";
-import React from "react";
+import React, { useMemo } from "react";
 import * as v from "valibot";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
@@ -22,7 +22,7 @@ export const LiquidsListField = React.memo(function LiquidsListField({
 	const stringValue = typeof value === "string" ? value : ((v.getDefault(entrySchema) ?? "") as string);
 	const context = useProjectContext();
 	const unwrappedSchema = unwrapSchema(entrySchema);
-	const metadata = getSchemaMetadata(entrySchema);
+	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
 	if ("options" in unwrappedSchema && Array.isArray(unwrappedSchema.options)) {
 		const options = unwrappedSchema.options

@@ -1,12 +1,15 @@
 import { toast } from "sonner";
 import type { TreeNode } from "@project/fs";
 import { useCurrentProject } from "@project/core";
-import { useFileExplorerUi, useFileExplorerActions } from "./useFileExplorerState";
+import { useFileExplorerStore } from "./useFileExplorerState";
+import { usePath } from "#/hooks/use-path";
 
 export function useTreeNodeActions(node: TreeNode, onToggle?: () => void) {
 	const context = useCurrentProject();
-	const { selectedPath, editingPath } = useFileExplorerUi();
-	const { onSelect, onEditingPathChange, onDeleteRequest, onCreateRequest } = useFileExplorerActions();
+	const [selectedPath, setPath] = usePath();
+	const editingPath = useFileExplorerStore((s) => s.editingPath);
+	const setEditingPath = useFileExplorerStore((s) => s.setEditingPath);
+	const setCreateTargetPath = useFileExplorerStore((s) => s.setCreateTargetPath);
 
 	const currentPath = node.path === "/" ? "" : node.path;
 	const isSelected = selectedPath === currentPath;
@@ -17,29 +20,19 @@ export function useTreeNodeActions(node: TreeNode, onToggle?: () => void) {
 		if (isFolder) {
 			onToggle?.();
 		} else {
-			onSelect(currentPath);
+			setPath(currentPath);
 		}
 	}
 
 	function handleCreateClick(e: React.MouseEvent) {
 		e.stopPropagation();
-		onCreateRequest(currentPath);
-	}
-
-	function handleRenameClick(e: React.MouseEvent) {
-		e.stopPropagation();
-		onEditingPathChange(currentPath);
-	}
-
-	function handleDeleteClick(e: React.MouseEvent) {
-		e.stopPropagation();
-		onDeleteRequest(currentPath);
+		setCreateTargetPath(currentPath);
 	}
 
 	function handleRenameConfirm(newName: string) {
 		const newNameTrimmed = newName.trim();
 		if (!newNameTrimmed || newNameTrimmed === node.name) {
-			onEditingPathChange(null);
+			setEditingPath(null);
 			return;
 		}
 
@@ -49,12 +42,12 @@ export function useTreeNodeActions(node: TreeNode, onToggle?: () => void) {
 		context.fs
 			.rename(currentPath, newPath)
 			.then(() => {
-				if (selectedPath === currentPath) onSelect(newPath);
+				if (selectedPath === currentPath) setPath(newPath);
 			})
 			.catch((err) => {
 				toast.error(`Rename failed: ${err instanceof Error ? err.message : "Unknown error"}`);
 			});
-		onEditingPathChange(null);
+		setEditingPath(null);
 	}
 
 	function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -63,7 +56,7 @@ export function useTreeNodeActions(node: TreeNode, onToggle?: () => void) {
 			handleRenameConfirm(e.currentTarget.value);
 		} else if (e.key === "Escape") {
 			e.preventDefault();
-			onEditingPathChange(null);
+			setEditingPath(null);
 		}
 	}
 
@@ -74,8 +67,6 @@ export function useTreeNodeActions(node: TreeNode, onToggle?: () => void) {
 		isFolder,
 		handleClick,
 		handleCreateClick,
-		handleRenameClick,
-		handleDeleteClick,
 		handleRenameConfirm,
 		handleInputKeyDown,
 	};

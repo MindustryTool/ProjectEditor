@@ -3,7 +3,7 @@ import { Input } from "#/components/ui/input";
 import { Textarea } from "#/components/ui/textarea";
 import { hasNullableWrapper } from "@project/schema";
 import { HJSON } from "@project/hjson";
-import React from "react";
+import React, { useMemo } from "react";
 import * as v from "valibot";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
@@ -14,9 +14,10 @@ import type { SchemaRendererProps } from "#/components/editor/right/FieldsRender
 
 export const StringField = React.memo(function StringField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const stringValue = typeof value === "string" ? value : String(value);
-	const metadata = getSchemaMetadata(entrySchema);
-
-	function handleChange(newVal: string) {
+	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
+	
+	function handleChange(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+		const newVal = event.currentTarget.value;
 		const isDefault = newVal === v.getDefault(entrySchema);
 		const isNullable = hasNullableWrapper(entrySchema);
 
@@ -34,9 +35,9 @@ export const StringField = React.memo(function StringField({ name, value, onChan
 			</FieldLabel>
 			<FieldControl>
 				{metadata?.multiline ? (
-					<Textarea key={name} value={stringValue} onChange={(v) => handleChange(v.currentTarget.value)} />
+					<Textarea key={name} value={stringValue} onChange={handleChange} />
 				) : (
-					<Input key={name} value={stringValue} onChange={(v) => handleChange(v.currentTarget.value)} />
+					<Input key={name} value={stringValue} onChange={handleChange} />
 				)}
 			</FieldControl>
 			<SchemaDescription metadata={metadata} />

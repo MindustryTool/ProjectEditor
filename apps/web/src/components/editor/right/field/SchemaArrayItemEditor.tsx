@@ -1,5 +1,5 @@
 import { detectSchemaType } from "@project/schema";
-import React from "react";
+import React, { useMemo } from "react";
 import { schemaRenderers } from "./index";
 import type { HjsonNode } from "@project/hjson";
 import type { AnySchema } from "@project/schema";
@@ -19,7 +19,7 @@ export const SchemaArrayItemEditor = React.memo(function SchemaArrayItemEditor({
 	onChange,
 	jsonPath,
 }: SchemaArrayItemEditorProps) {
-	const type = detectSchemaType(itemSchema, value);
+	const type = useMemo(() => detectSchemaType(itemSchema, value), [itemSchema, value]);
 
 	const Renderer = schemaRenderers[type];
 

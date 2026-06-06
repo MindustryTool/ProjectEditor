@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import { HJSON } from "@project/hjson";
 import { ChevronDown, Plus, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
-import React from "react";
+import React, { useMemo } from "react";
 import { ItemGrid } from "./ItemGrid";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
@@ -60,7 +60,7 @@ export const ResearchField = React.memo(function ResearchField({
 		handleChange(parent, [...requirements, "copper" + "/" + 10]);
 	}
 
-    const metadata = getSchemaMetadata(entrySchema);
+    const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
 	return (
 		<>

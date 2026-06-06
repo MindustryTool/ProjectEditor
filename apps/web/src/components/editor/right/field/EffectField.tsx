@@ -8,7 +8,7 @@ import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { HJSON } from "@project/hjson";
 import { VisuallyHidden } from "radix-ui";
 import { ChevronDown, ChevronsUpDown, Search } from "lucide-react";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import * as v from "valibot";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
@@ -21,7 +21,7 @@ import { getSchemaMetadata } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 
 export const EffectField = React.memo(function EffectField({ path, name, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
-	const metadata = getSchemaMetadata(entrySchema);
+	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 	const effects = useProjectContext().contents.effects;
 
 	if (typeof value === "object" && value !== null) {

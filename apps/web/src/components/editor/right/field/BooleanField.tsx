@@ -1,6 +1,6 @@
 import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
 import { Checkbox } from "#/components/ui/checkbox";
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import * as v from "valibot";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
@@ -12,20 +12,23 @@ import type { SchemaRendererProps } from "#/components/editor/right/FieldsRender
 
 export const BooleanField = React.memo(function BooleanField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const checked = typeof value === "boolean" ? value : v.getDefault(entrySchema);
-	const metadata = getSchemaMetadata(entrySchema);
-	
-	function handleChange(val: boolean) {
-		if (val === v.getDefault(entrySchema) && !hasNullableWrapper(entrySchema)) {
-			onChange(jsonPath, (parent, key, original) => removeByJsonPath(parent, key, original));
-			return;
-		}
-		onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(val)));
-	}
+	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
+
+	const handleChange = useCallback(
+		(val: boolean) => {
+			if (val === v.getDefault(entrySchema) && !hasNullableWrapper(entrySchema)) {
+				onChange(jsonPath, (parent, key, original) => removeByJsonPath(parent, key, original));
+				return;
+			}
+			onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(val)));
+		},
+		[onChange, jsonPath, entrySchema],
+	);
 
 	return (
 		<Field jsonPath={jsonPath}>
 			<FieldControl className="flex-row flex gap-1">
-				<Checkbox key={name} checked={checked} onCheckedChange={(val) => handleChange(val === true)} />
+				<Checkbox key={name} checked={checked} onCheckedChange={handleChange} />
 				<FieldLabel>
 					<SchemaLabel name={name} metadata={metadata} />
 				</FieldLabel>

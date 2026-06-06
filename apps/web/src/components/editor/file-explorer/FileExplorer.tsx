@@ -1,11 +1,20 @@
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Pencil, Trash2 } from "lucide-react";
 import type { TreeNode } from "@project/fs";
 import { useCurrentProject, useProjectSession } from "@project/core";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { cn } from "~/lib/utils";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from "~/components/ui/dropdown-menu";
 import { buildFileTree } from "./file-tree";
 import { TreeNodeChildren } from "./TreeNodeChildren";
 import { FileSearchDialog } from "#/components/editor/file-explorer/FileSearchDialog";
+import { useFileExplorerStore } from "./useFileExplorerState";
+
+interface ContextMenuState {
+	path: string;
+	x: number;
+	y: number;
+}
 
 interface FileExplorerProps {
 	className?: string;
@@ -15,6 +24,19 @@ export function FileExplorer({ className }: FileExplorerProps) {
 	const { metadata } = useProjectContext();
 	const context = useCurrentProject();
 	const treeSnapshot = useProjectSession((state) => state.treeSnapshot);
+	const setEditingPath = useFileExplorerStore((s) => s.setEditingPath);
+	const setDeleteTargetPath = useFileExplorerStore((s) => s.setDeleteTargetPath);
+
+	const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (!contextMenu || !containerRef.current) return;
+		const el = containerRef.current;
+		const onScroll = () => setContextMenu(null);
+		el.addEventListener("scroll", onScroll, { passive: true });
+		return () => el.removeEventListener("scroll", onScroll);
+	}, [contextMenu]);
 
 	const projectTree = useMemo(() => {
 		const rootNode: TreeNode = {
@@ -26,12 +48,44 @@ export function FileExplorer({ className }: FileExplorerProps) {
 		return [rootNode];
 	}, [context.project.id, metadata.name, treeSnapshot]);
 
+	const handleContextMenu = useCallback((path: string, rect: DOMRect) => {
+		setContextMenu({ path, x: rect.right, y: rect.top });
+	}, []);
+
 	return (
-		<div className={cn("h-full w-full", className)}>
+		<div ref={containerRef} className={cn("h-full w-full overflow-y-auto", className)}>
 			<FileSearchDialog />
 			{projectTree.map((node) => (
-				<TreeNodeChildren key={node.name} node={node} depth={0} />
+				<TreeNodeChildren key={node.name} node={node} depth={0} onContextMenu={handleContextMenu} />
 			))}
+			{contextMenu && (
+				<DropdownMenu open onOpenChange={(open) => { if (!open) setContextMenu(null); }}>
+					<DropdownMenuContent
+						side="right"
+						sideOffset={0}
+						style={{ position: "fixed", left: contextMenu.x, top: contextMenu.y }}
+					>
+						<DropdownMenuItem
+							onClick={() => {
+								setEditingPath(contextMenu.path);
+								setContextMenu(null);
+							}}
+						>
+							<Pencil className="size-3" />
+							Rename
+						</DropdownMenuItem>
+						<DropdownMenuItem
+							onClick={() => {
+								setDeleteTargetPath(contextMenu.path);
+								setContextMenu(null);
+							}}
+						>
+							<Trash2 className="size-3" />
+							Delete
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
+			)}
 		</div>
 	);
 }

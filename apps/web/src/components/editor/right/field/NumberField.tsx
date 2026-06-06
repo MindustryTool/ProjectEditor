@@ -2,7 +2,7 @@ import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field
 import { Input } from "#/components/ui/input";
 import { hasNullableWrapper } from "@project/schema";
 import { HJSON } from "@project/hjson";
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import * as v from "valibot";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
@@ -13,19 +13,23 @@ import { getSchemaMetadata } from "@project/schema";
 
 export const NumberField = React.memo(function NumberField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const numValue = typeof value === "number" ? value : String(value);
-	const metadata = getSchemaMetadata(entrySchema);
+	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
-	function handleChange(newVal: number) {
-		const isDefault = newVal === v.getDefault(entrySchema);
-		const isNullable = hasNullableWrapper(entrySchema);
+	const handleChange = useCallback(
+		(event: React.ChangeEvent<HTMLInputElement>) => {
+			const newVal = event.currentTarget.valueAsNumber;
+			const isDefault = newVal === v.getDefault(entrySchema);
+			const isNullable = hasNullableWrapper(entrySchema);
 
-		if (Number.isNaN(newVal) || (isDefault && !isNullable)) {
-			onChange(jsonPath, (parent, key, original) => removeByJsonPath(parent, key, original));
-			return;
-		}
+			if (Number.isNaN(newVal) || (isDefault && !isNullable)) {
+				onChange(jsonPath, (parent, key, original) => removeByJsonPath(parent, key, original));
+				return;
+			}
 
-		onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(newVal)));
-	}
+			onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(newVal)));
+		},
+		[onChange, jsonPath, entrySchema],
+	);
 
 	return (
 		<Field jsonPath={jsonPath}>
@@ -33,7 +37,7 @@ export const NumberField = React.memo(function NumberField({ name, value, onChan
 				<SchemaLabel name={name} metadata={metadata} />
 			</FieldLabel>
 			<FieldControl>
-				<Input key={name} value={numValue} onChange={(v) => handleChange(v.currentTarget.valueAsNumber)} type="number" />
+				<Input key={name} value={numValue} onChange={handleChange} type="number" />
 			</FieldControl>
 			<SchemaDescription metadata={metadata} />
 			<FieldIssue path={path} jsonPath={jsonPath} />

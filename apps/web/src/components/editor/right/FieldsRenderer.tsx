@@ -4,7 +4,7 @@ import { useFileString } from "@project/core";
 import { HJSON, HjsonNode } from "@project/hjson";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { FieldCategory, schemaRenderers } from "./field";
-import React, { useCallback } from "react";
+import React, { Suspense, useCallback } from "react";
 import { resolveSchema, detectSchemaType, getSchemaEntries, getSchemaMetadata, type AnySchema, type SchemaFn } from "@project/schema";
 import * as v from "valibot";
 
@@ -81,9 +81,9 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	const entries = getSchemaEntries(resolvedSchema);
 
 	return (
-		<ErrorBoundary>
-			{buildCategoryFields(entries, node, path, onChange)}
-		</ErrorBoundary>
+		<Suspense>
+			<ErrorBoundary>{buildCategoryFields(entries, node, path, onChange)}</ErrorBoundary>
+		</Suspense>
 	);
 });
 
@@ -120,22 +120,12 @@ function buildCategoryFields(
 			elements.push(
 				<FormControl key={key}>
 					<FormLabel>{name}</FormLabel>
-					<span className="text-yellow-400 text-sm">
-						Unknown field type {type}
-					</span>
+					<span className="text-yellow-400 text-sm">Unknown field type {type}</span>
 				</FormControl>,
 			);
 		} else {
 			elements.push(
-				<Renderer
-					key={key}
-					path={path}
-					name={name}
-					value={value}
-					onChange={onChange}
-					entrySchema={entrySchema}
-					jsonPath={name}
-				/>,
+				<Renderer key={key} path={path} name={name} value={value} onChange={onChange} entrySchema={entrySchema} jsonPath={name} />,
 			);
 		}
 	}

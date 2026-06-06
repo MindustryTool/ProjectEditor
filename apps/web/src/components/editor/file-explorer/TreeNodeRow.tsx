@@ -1,11 +1,10 @@
 import { useRef, useEffect } from "react";
-import { Pencil, Trash2, Plus, MoreHorizontal, ChevronRight, ChevronDown } from "lucide-react";
+import { Plus, MoreHorizontal, ChevronRight, ChevronDown } from "lucide-react";
 import { cn } from "~/lib/utils";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "~/components/ui/dropdown-menu";
 import { isDefaultPath, type TreeNode } from "@project/fs";
-import { useFileStore, isDirty, selectIsSaving, useValidationStore, useCurrentProject } from "@project/core";
+import { useFileStore, isDirty, selectEntry, selectIsSaving, useValidationStore, useCurrentProject } from "@project/core";
 import { useShallow } from "zustand/react/shallow";
-import { useFileExplorerActions } from "./useFileExplorerState";
+import { useFileExplorerStore } from "./useFileExplorerState";
 import { useTreeNodeActions } from "./useTreeNodeActions";
 import { getIcon } from "./file-tree";
 
@@ -14,11 +13,12 @@ interface TreeNodeRowProps {
 	depth: number;
 	expanded: boolean;
 	onToggle: () => void;
+	onContextMenu?: (path: string, rect: DOMRect) => void;
 }
 
-export function TreeNodeRow({ node, depth, expanded, onToggle }: TreeNodeRowProps) {
+export function TreeNodeRow({ node, depth, expanded, onToggle, onContextMenu }: TreeNodeRowProps) {
 	const context = useCurrentProject();
-	const { projectId } = useFileExplorerActions();
+	const projectId = useFileExplorerStore((s) => s.projectId);
 	const {
 		currentPath,
 		isSelected,
@@ -26,8 +26,6 @@ export function TreeNodeRow({ node, depth, expanded, onToggle }: TreeNodeRowProp
 		isFolder,
 		handleClick,
 		handleCreateClick,
-		handleRenameClick,
-		handleDeleteClick,
 		handleRenameConfirm,
 		handleInputKeyDown,
 	} = useTreeNodeActions(node, onToggle);
@@ -35,8 +33,9 @@ export function TreeNodeRow({ node, depth, expanded, onToggle }: TreeNodeRowProp
 	const errorCount = useValidationStore(useShallow((s) => s.results.getRollup()[currentPath]?.error ?? 0));
 	const warningCount = useValidationStore(useShallow((s) => s.results.getRollup()[currentPath]?.warning ?? 0));
 
-	const isItemDirty = useFileStore(isFolder ? () => false : (state) => isDirty(state.getEntry(projectId, currentPath)));
-	const isItemSaving = useFileStore(isFolder ? () => false : selectIsSaving(projectId, currentPath));
+	const fileEntry = useFileStore(useShallow(selectEntry(projectId, currentPath)));
+	const isItemDirty = fileEntry ? isDirty(fileEntry) : false;
+	const isItemSaving = useFileStore(useShallow(selectIsSaving(projectId, currentPath)));
 	const loadFile = useFileStore((s) => s.loadFile);
 
 	const filenameClass =
@@ -57,6 +56,11 @@ export function TreeNodeRow({ node, depth, expanded, onToggle }: TreeNodeRowProp
 			inputRef.current.select();
 		}
 	}, [isEditing]);
+
+	function handleMoreClick(e: React.MouseEvent<HTMLButtonElement>) {
+		e.stopPropagation();
+		onContextMenu?.(currentPath, e.currentTarget.getBoundingClientRect());
+	}
 
 	return (
 		<div
@@ -123,23 +127,13 @@ export function TreeNodeRow({ node, depth, expanded, onToggle }: TreeNodeRowProp
 							</button>
 						)}
 						{!isRoot && !isDefault && (
-							<DropdownMenu>
-								<DropdownMenuTrigger asChild>
-									<button className="flex size-6 items-center justify-center rounded hover:bg-accent" title="More actions">
-										<MoreHorizontal className="size-3 text-muted-foreground" />
-									</button>
-								</DropdownMenuTrigger>
-								<DropdownMenuContent align="end">
-									<DropdownMenuItem onClick={handleRenameClick}>
-										<Pencil className="size-3" />
-										Rename
-									</DropdownMenuItem>
-									<DropdownMenuItem onClick={handleDeleteClick}>
-										<Trash2 className="size-3" />
-										Delete
-									</DropdownMenuItem>
-								</DropdownMenuContent>
-							</DropdownMenu>
+							<button
+								onClick={handleMoreClick}
+								className="flex size-6 items-center justify-center rounded hover:bg-accent"
+								title="More actions"
+							>
+								<MoreHorizontal className="size-3 text-muted-foreground" />
+							</button>
 						)}
 					</div>
 				)}

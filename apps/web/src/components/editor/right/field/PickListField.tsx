@@ -2,7 +2,7 @@ import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 import { HJSON } from "@project/hjson";
 import { getSchemaMetadata, unwrapSchema } from "@project/schema";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import * as v from "valibot";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
@@ -25,7 +25,7 @@ export const PickListField = React.memo(function PickListField({
 }: SchemaRendererProps) {
 	const stringValue = typeof value === "string" ? value : ((v.getDefault(entrySchema) ?? "") as string);
 	const unwrappedSchema = unwrapSchema(entrySchema);
-	const metadata = getSchemaMetadata(entrySchema);
+	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
 	const [filter, setFilter] = useState("");
 

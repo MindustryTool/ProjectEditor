@@ -33,11 +33,11 @@ function TextEditor({ path }: { path: string }) {
 	}
 
 	return (
-		<ErrorBoundary>
-			<Suspense>
+		<Suspense>
+			<ErrorBoundary>
 				<MonacoEditor path={path} value={data} onChange={write} language={language} />
-			</Suspense>
-		</ErrorBoundary>
+			</ErrorBoundary>
+		</Suspense>
 	);
 }
 
