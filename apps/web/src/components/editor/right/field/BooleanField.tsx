@@ -12,7 +12,8 @@ import type { SchemaRendererProps } from "#/components/editor/right/FieldsRender
 
 export const BooleanField = React.memo(function BooleanField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const checked = typeof value === "boolean" ? value : v.getDefault(entrySchema);
-
+	const metadata = getSchemaMetadata(entrySchema);
+	
 	function handleChange(val: boolean) {
 		if (val === v.getDefault(entrySchema) && !hasNullableWrapper(entrySchema)) {
 			onChange(jsonPath, (parent, key, original) => removeByJsonPath(parent, key, original));
@@ -26,10 +27,10 @@ export const BooleanField = React.memo(function BooleanField({ name, value, onCh
 			<FieldControl className="flex-row flex gap-1">
 				<Checkbox key={name} checked={checked} onCheckedChange={(val) => handleChange(val === true)} />
 				<FieldLabel>
-					<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
+					<SchemaLabel name={name} metadata={metadata} />
 				</FieldLabel>
 			</FieldControl>
-			<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
+			<SchemaDescription metadata={metadata} />
 			<FieldIssue path={path} jsonPath={jsonPath} />
 		</Field>
 	);

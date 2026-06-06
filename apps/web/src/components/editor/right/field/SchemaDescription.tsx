@@ -3,11 +3,11 @@ import type { SchemaMetadata } from "@project/schema";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-export const SchemaDescription = React.memo(function SchemaDescription({ entrySchema }: { entrySchema: SchemaMetadata | null }) {
+export const SchemaDescription = React.memo(function SchemaDescription({ metadata }: { metadata: SchemaMetadata | null }) {
 	const { t } = useTranslation();
 	const _t = t as (key: string) => string;
 
-	if (!entrySchema?.description) return null;
+	if (!metadata?.description) return null;
 
-	return <FieldDescription className="first-letter:uppercase lowercase">{_t(entrySchema.description)}</FieldDescription>;
+	return <FieldDescription className="first-letter:uppercase lowercase">{_t(metadata.description)}</FieldDescription>;
 });

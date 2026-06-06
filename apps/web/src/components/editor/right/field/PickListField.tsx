@@ -25,6 +25,8 @@ export const PickListField = React.memo(function PickListField({
 }: SchemaRendererProps) {
 	const stringValue = typeof value === "string" ? value : ((v.getDefault(entrySchema) ?? "") as string);
 	const unwrappedSchema = unwrapSchema(entrySchema);
+	const metadata = getSchemaMetadata(entrySchema);
+
 	const [filter, setFilter] = useState("");
 
 	if ("options" in unwrappedSchema && Array.isArray(unwrappedSchema.options)) {
@@ -34,7 +36,7 @@ export const PickListField = React.memo(function PickListField({
 			return (
 				<Field jsonPath={jsonPath}>
 					<FieldLabel>
-						<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
+						<SchemaLabel name={name} metadata={metadata} />
 					</FieldLabel>
 					<Dialog>
 						<DialogTrigger asChild>
@@ -46,8 +48,8 @@ export const PickListField = React.memo(function PickListField({
 						<DialogContent>
 							<DialogTitle>
 								<FieldLabel>
-								<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
-							</FieldLabel>
+									<SchemaLabel name={name} metadata={metadata} />
+								</FieldLabel>
 							</DialogTitle>
 							<VisuallyHidden.Root>
 								<DialogDescription />
@@ -85,7 +87,7 @@ export const PickListField = React.memo(function PickListField({
 							</ToggleGroup>
 						</DialogContent>
 					</Dialog>
-					<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
+					<SchemaDescription metadata={metadata} />
 					<FieldIssue path={path} jsonPath={jsonPath} />
 				</Field>
 			);
@@ -94,7 +96,7 @@ export const PickListField = React.memo(function PickListField({
 		return (
 			<Field jsonPath={jsonPath}>
 				<FieldLabel>
-					<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
+					<SchemaLabel name={name} metadata={metadata} />
 				</FieldLabel>
 				<FieldControl>
 					<Select
@@ -120,7 +122,7 @@ export const PickListField = React.memo(function PickListField({
 						</SelectContent>
 					</Select>
 				</FieldControl>
-				<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
+				<SchemaDescription metadata={metadata} />
 				<FieldIssue path={path} jsonPath={jsonPath} />
 			</Field>
 		);

@@ -13,6 +13,7 @@ import { getSchemaMetadata } from "@project/schema";
 
 export const NumberField = React.memo(function NumberField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const numValue = typeof value === "number" ? value : String(value);
+	const metadata = getSchemaMetadata(entrySchema);
 
 	function handleChange(newVal: number) {
 		const isDefault = newVal === v.getDefault(entrySchema);
@@ -29,12 +30,12 @@ export const NumberField = React.memo(function NumberField({ name, value, onChan
 	return (
 		<Field jsonPath={jsonPath}>
 			<FieldLabel>
-				<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
+				<SchemaLabel name={name} metadata={metadata} />
 			</FieldLabel>
 			<FieldControl>
 				<Input key={name} value={numValue} onChange={(v) => handleChange(v.currentTarget.valueAsNumber)} type="number" />
 			</FieldControl>
-			<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
+			<SchemaDescription metadata={metadata} />
 			<FieldIssue path={path} jsonPath={jsonPath} />
 		</Field>
 	);

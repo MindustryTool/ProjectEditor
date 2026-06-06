@@ -23,15 +23,16 @@ import { useProjectContext } from "#/components/editor/ProjectProvider";
 export const EffectField = React.memo(function EffectField({ path, name, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
 	const effects = useProjectContext().contents.effects;
 	const [filter, setFilter] = useState("");
+	const metadata = getSchemaMetadata(entrySchema);
 
 	if (typeof value === "object" && value !== null) {
 		const typeValue = (value as Record<string, unknown>)?.type ?? "";
 		return (
 			<div className="grid gap-2">
 				<FieldLabel>
-					<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
+					<SchemaLabel name={name} metadata={metadata} />
 				</FieldLabel>
-				<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
+				<SchemaDescription metadata={metadata} />
 				<div className="grid grid-cols-2 gap-2">
 					<Button
 						variant="outline"
@@ -80,9 +81,9 @@ export const EffectField = React.memo(function EffectField({ path, name, value, 
 	return (
 		<div className="grid gap-2">
 			<FieldLabel>
-				<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
+				<SchemaLabel name={name} metadata={metadata} />
 			</FieldLabel>
-			<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
+			<SchemaDescription metadata={metadata} />
 			<div className="grid grid-cols-2 gap-2">
 				<Button variant="outline" disabled>
 					Built-In

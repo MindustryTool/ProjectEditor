@@ -13,6 +13,7 @@ import { Separator } from "#/components/ui/separator";
 
 export const ArrayField = React.memo(function ArrayField({ path, name, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
 	const arrayValue = Array.isArray(value) ? value : undefined;
+	const metadata = getSchemaMetadata(entrySchema);
 
 	if (!arrayValue) {
 		return null;
@@ -51,9 +52,9 @@ export const ArrayField = React.memo(function ArrayField({ path, name, value, on
 	return (
 		<Field jsonPath={jsonPath}>
 			<FieldLabel>
-				<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
+				<SchemaLabel name={name} metadata={metadata} />
 			</FieldLabel>
-			<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
+			<SchemaDescription metadata={metadata} />
 			<FieldControl>
 				<div className="flex flex-col gap-2 border p-2 rounded-md border-dashed">
 					{arrayValue.map((el, index) => {

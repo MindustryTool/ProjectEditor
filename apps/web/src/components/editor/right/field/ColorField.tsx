@@ -12,13 +12,14 @@ import { getSchemaMetadata } from "@project/schema";
 
 export const ColorField = React.memo(function ColorField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	let hexValue = typeof value === "string" ? value : ((v.getDefault(entrySchema) ?? "333333") as string);
+	const metadata = getSchemaMetadata(entrySchema);
 
 	hexValue = hexValue?.startsWith("#") ? hexValue : "#" + hexValue;
 
 	return (
 		<Field jsonPath={jsonPath}>
 			<FieldLabel>
-				<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
+				<SchemaLabel name={name} metadata={metadata} />
 			</FieldLabel>
 			<FieldControl>
 				<div className="flex items-center gap-2">
@@ -47,7 +48,7 @@ export const ColorField = React.memo(function ColorField({ name, value, onChange
 					</Popover>
 				</div>
 			</FieldControl>
-			<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
+			<SchemaDescription metadata={metadata} />
 			<FieldIssue path={path} jsonPath={jsonPath} />
 		</Field>
 	);

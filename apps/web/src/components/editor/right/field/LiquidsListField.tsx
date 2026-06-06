@@ -22,6 +22,7 @@ export const LiquidsListField = React.memo(function LiquidsListField({
 	const stringValue = typeof value === "string" ? value : ((v.getDefault(entrySchema) ?? "") as string);
 	const context = useProjectContext();
 	const unwrappedSchema = unwrapSchema(entrySchema);
+	const metadata = getSchemaMetadata(entrySchema);
 
 	if ("options" in unwrappedSchema && Array.isArray(unwrappedSchema.options)) {
 		const options = unwrappedSchema.options
@@ -33,7 +34,7 @@ export const LiquidsListField = React.memo(function LiquidsListField({
 		return (
 			<Field jsonPath={jsonPath}>
 				<FieldLabel>
-					<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
+					<SchemaLabel name={name} metadata={metadata} />
 				</FieldLabel>
 				<FieldControl>
 					<Select
@@ -59,7 +60,7 @@ export const LiquidsListField = React.memo(function LiquidsListField({
 						</SelectContent>
 					</Select>
 				</FieldControl>
-				<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
+				<SchemaDescription metadata={metadata} />
 				<FieldIssue path={path} jsonPath={jsonPath} />
 			</Field>
 		);

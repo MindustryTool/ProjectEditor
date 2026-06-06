@@ -60,11 +60,13 @@ export const ResearchField = React.memo(function ResearchField({
 		handleChange(parent, [...requirements, "copper" + "/" + 10]);
 	}
 
+    const metadata = getSchemaMetadata(entrySchema);
+
 	return (
 		<>
 			<Field jsonPath={jsonPath}>
 				<FieldLabel>
-					<SchemaLabel name={name} entrySchema={getSchemaMetadata(entrySchema)} />
+					<SchemaLabel name={name} metadata={metadata} />
 				</FieldLabel>
 				<FieldControl>
 					<Dialog>
@@ -78,7 +80,7 @@ export const ResearchField = React.memo(function ResearchField({
 						</DialogContent>
 					</Dialog>
 				</FieldControl>
-				<SchemaDescription entrySchema={getSchemaMetadata(entrySchema)} />
+				<SchemaDescription metadata={metadata} />
 				<FieldIssue path={path} jsonPath={jsonPath} />
 				<FieldControl className="grid gap-2">
 					<ResearchRequirementList
