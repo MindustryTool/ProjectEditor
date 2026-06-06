@@ -1,4 +1,3 @@
-import { FieldDescription } from "#/components/editor/right/field/Field";
 import type { SchemaMetadata } from "@project/schema";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -8,6 +7,5 @@ export const SchemaDescription = React.memo(function SchemaDescription({ metadat
 	const _t = t as (key: string) => string;
 
 	if (!metadata?.description) return null;
-
-	return <FieldDescription className="first-letter:uppercase lowercase">{_t(metadata.description)}</FieldDescription>;
+	return <p className="first-letter:uppercase lowercase text-xs text-muted-foreground">{_t(metadata.description)}</p>;
 });

@@ -21,12 +21,12 @@ import { getSchemaMetadata } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 
 export const EffectField = React.memo(function EffectField({ path, name, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
-	const effects = useProjectContext().contents.effects;
-	const [filter, setFilter] = useState("");
 	const metadata = getSchemaMetadata(entrySchema);
+	const effects = useProjectContext().contents.effects;
 
 	if (typeof value === "object" && value !== null) {
 		const typeValue = (value as Record<string, unknown>)?.type ?? "";
+
 		return (
 			<div className="grid gap-2">
 				<FieldLabel>
@@ -112,32 +112,7 @@ export const EffectField = React.memo(function EffectField({ path, name, value, 
 							<DialogTitle />
 							<DialogDescription />
 						</VisuallyHidden.Root>
-						<ToggleGroup
-							type="single"
-							value={stringValue}
-							onValueChange={(v) =>
-								onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(v)))
-							}
-							asChild
-						>
-							<div className="grid gap-2">
-								<InputGroup>
-									<InputGroupAddon>
-										<Search />
-									</InputGroupAddon>
-									<InputGroupInput value={filter} onChange={(event) => setFilter(event.currentTarget.value)} />
-								</InputGroup>
-								<div className="max-h-[80dvh] md:max-h-[50dvh] overflow-y-auto border p-2 rounded-md">
-									{effects
-										.filter((i) => i.name !== stringValue && i.name.includes(filter))
-										.map((item) => (
-											<ToggleGroupItem key={item.name} value={item.name}>
-												{item.name}
-											</ToggleGroupItem>
-										))}
-								</div>
-							</div>
-						</ToggleGroup>
+						<EffectDialogContent value={stringValue} jsonPath={jsonPath} onChange={onChange} />
 					</DialogContent>
 				</Dialog>
 				<FieldIssue path={path} jsonPath={jsonPath} />
@@ -145,3 +120,45 @@ export const EffectField = React.memo(function EffectField({ path, name, value, 
 		</div>
 	);
 });
+
+function EffectDialogContent({
+	value,
+	onChange,
+	jsonPath,
+}: {
+	value: string;
+	jsonPath: string;
+	onChange: Parameters<typeof EffectField>[0]["onChange"];
+}) {
+	const [filter, setFilter] = useState("");
+	const effects = useProjectContext().contents.effects;
+
+	return (
+		<ToggleGroup
+			type="single"
+			value={value}
+			onValueChange={(v) =>
+				onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(v)))
+			}
+			asChild
+		>
+			<div className="grid gap-2">
+				<InputGroup>
+					<InputGroupAddon>
+						<Search />
+					</InputGroupAddon>
+					<InputGroupInput value={filter} onChange={(event) => setFilter(event.currentTarget.value)} />
+				</InputGroup>
+				<div className="max-h-[80dvh] md:max-h-[50dvh] overflow-y-auto border p-2 rounded-md">
+					{effects
+						.filter((i) => i.name !== value && i.name.includes(filter))
+						.map((item) => (
+							<ToggleGroupItem key={item.name} value={item.name}>
+								{item.name}
+							</ToggleGroupItem>
+						))}
+				</div>
+			</div>
+		</ToggleGroup>
+	);
+}
