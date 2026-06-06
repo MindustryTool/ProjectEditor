@@ -6,7 +6,7 @@ import { ExportMenu } from "./ExportMenu";
 import { LocalizationMenu } from "./toolbar/LocalizationMenu";
 import { Toolbar } from "./Toolbar";
 import { StatusBar } from "./StatusBar";
-import { SplitView } from "./SplitView";
+import { SplitView, SplitViewLeft, SplitViewCenter, SplitViewRight } from "~/components/ui/SplitView";
 import { StatusBarLeft } from "./statusbar/StatusBarLeft";
 import { StatusBarCenter } from "./statusbar/StatusBarCenter";
 import { StatusBarRight } from "./statusbar/StatusBarRight";
@@ -50,26 +50,23 @@ export function EditorShell({ path }: EditorShellProps) {
 									<ExportMenu />
 									<LocalizationMenu />
 								</Toolbar>
-								<SplitView
-									defaultLeftWidth={260}
-									defaultRightWidth={360}
-									minPanelWidth={300}
-									left={
+								<SplitView defaultLeftWidth={260} defaultRightWidth={360} minPanelWidth={300}>
+									<SplitViewLeft>
 										<ErrorBoundary>
 											<EditorLeftPanel />
 										</ErrorBoundary>
-									}
-									center={
+									</SplitViewLeft>
+									<SplitViewCenter>
 										<ErrorBoundary>
 											<EditorCenterPanel path={path} />
 										</ErrorBoundary>
-									}
-									right={
+									</SplitViewCenter>
+									<SplitViewRight>
 										<ErrorBoundary>
 											<EditorRightPanel path={path} />
 										</ErrorBoundary>
-									}
-								/>
+									</SplitViewRight>
+								</SplitView>
 								<StatusBar left={<StatusBarLeft />} center={<StatusBarCenter />} right={<StatusBarRight />} />
 							</Fragment>
 						) : (

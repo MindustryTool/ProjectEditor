@@ -36,7 +36,7 @@ function SpriteCanvas({
 	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
 	const baseSprite = useMemo(() => resolveContentSprite(path), [path]);
 
-	const { stageRef, posRef, scaleRef, handleWheel, handleDragEnd } = useCanvasInteraction();
+	const { stageRef, posRef, scaleRef, handleWheel, handleDragEnd } = useCanvasInteraction(dimensions.width, dimensions.height);
 
 	const { sprites, error } = useMemo(() => {
 		if (!data) return { sprites: [] as SpriteData[], error: "No data" as string | null };
