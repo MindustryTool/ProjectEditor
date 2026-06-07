@@ -34,6 +34,10 @@ function isUnquotedStringChar(ch: string): boolean {
 	return "+./".includes(ch);
 }
 
+function isUnquotedStringBody(ch: string): boolean {
+	return isIdentPart(ch) || "+./".includes(ch);
+}
+
 export class Tokenizer {
 	private input: string;
 	private pos: number;
@@ -385,6 +389,15 @@ export class Tokenizer {
 			const savedPos = this.pos;
 			const numStr = this.readNumber();
 			if (numStr.length > 0 && numStr !== "-" && numStr !== "+") {
+				if (this.pos < this.input.length && isUnquotedStringBody(this.input[this.pos]!)) {
+					this.pos = startIdx;
+					this.row = startRow;
+					this.col = startCol;
+					const value = this.readUnquotedString();
+					if (value.length > 0) {
+						return token("string", value, startRow, startCol, startIdx, this.pos);
+					}
+				}
 				return token("number", numStr, startRow, startCol, startIdx, this.pos);
 			}
 			this.pos = savedPos;
@@ -447,6 +460,15 @@ export class Tokenizer {
 			const savedPos = this.pos;
 			const numStr = this.readNumber();
 			if (numStr.length > 0 && numStr !== ".") {
+				if (this.pos < this.input.length && isUnquotedStringBody(this.input[this.pos]!)) {
+					this.pos = startIdx;
+					this.row = startRow;
+					this.col = startCol;
+					const value = this.readUnquotedString();
+					if (value.length > 0) {
+						return token("string", value, startRow, startCol, startIdx, this.pos);
+					}
+				}
 				return token("number", numStr, startRow, startCol, startIdx, this.pos);
 			}
 			this.pos = savedPos;

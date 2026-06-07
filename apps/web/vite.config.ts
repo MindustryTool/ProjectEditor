@@ -10,6 +10,13 @@ import tailwindcss from "@tailwindcss/vite";
 
 const config = defineConfig({
 	resolve: { tsconfigPaths: true },
+	build: {
+		rolldownOptions: {
+			output: {
+				codeSplitting: true,
+			},
+		},
+	},
 	plugins: [
 		cloudflare({ viteEnvironment: { name: "ssr" } }),
 		devtools(),

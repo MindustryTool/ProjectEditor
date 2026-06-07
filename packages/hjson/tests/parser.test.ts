@@ -79,6 +79,11 @@ describe("Parser", () => {
       const result = parse("key: val\nnum: 42");
       expect(result).toEqual({ key: "val", num: 42 });
     });
+
+    it('parses root-level with digit-prefixed unquoted string value: type: Duct\\nname: 4.4.1-duct', () => {
+      const result = parse("type: Duct\nname: 4.4.1-duct");
+      expect(result).toEqual({ type: "Duct", name: "4.4.1-duct" });
+    });
   });
 
   describe("nested objects", () => {
@@ -143,8 +148,9 @@ describe("Parser", () => {
       expect(() => parse('{key: "unclosed}')).toThrow(HJSONError);
     });
 
-    it("throws on invalid number", () => {
-      expect(() => parse("{n: 12.34.56}")).toThrow(HJSONError);
+    it("parses multi-dot value as unquoted string instead of throwing", () => {
+      const result = parse("{n: 12.34.56}");
+      expect(result).toEqual({ n: "12.34.56" });
     });
   });
 

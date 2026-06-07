@@ -1,35 +1,48 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import LanguageDetector from "i18next-browser-languagedetector";
 import resourcesToBackend from "i18next-resources-to-backend";
 
-export async function initI18n() {
-	await i18n
-		.use(LanguageDetector)
+let initPromise: Promise<void> | null = null;
+
+export function initI18n() {
+	if (i18n.isInitialized) {
+		return Promise.resolve();
+	}
+
+	if (initPromise) {
+		return initPromise;
+	}
+
+	try {
+		new Error("initI18n");
+	} catch (error) {
+		console.error(error);
+	}
+
+	initPromise = i18n
 		.use(initReactI18next)
 		.use(
-			resourcesToBackend((language: string) => {
-				if (language === "en") {
-					return import(`./locales/en/translation`);
+			resourcesToBackend((lng: string) => {
+				switch (lng) {
+					case "en":
+						return import("./locales/en/translation");
+					case "vi":
+						return import("./locales/vi/translation");
+					default:
+						throw new Error(`Unsupported language: ${lng}`);
 				}
-				if (language === "vi") {
-					return import(`./locales/vi/translation`);
-				}
-
-				throw new Error(`Language ${language} not supported`);
 			}),
 		)
 		.init({
+			lng: "en",
 			fallbackLng: "en",
-			detection: {
-				order: ["localStorage", "navigator", "path", "htmlTag"],
-				lookupFromPathIndex: 0,
-				caches: ["localStorage"],
-			},
 			interpolation: {
 				escapeValue: false,
 			},
-		});
+		})
+		.then(() => {});
+
+	return initPromise;
 }
 
 export default i18n;

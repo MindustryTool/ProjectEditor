@@ -123,6 +123,24 @@ describe("Tokenizer", () => {
       expect(toks[0]!.type).toBe("string");
       expect(toks[0]!.value).toBe("hello world");
     });
+
+    it('reads digit-prefixed unquoted string: 4.4.1-duct', () => {
+      const toks = tokens("4.4.1-duct");
+      expect(toks[0]!.type).toBe("string");
+      expect(toks[0]!.value).toBe("4.4.1-duct");
+    });
+
+    it('reads digit-prefixed unquoted string: 12.34.56', () => {
+      const toks = tokens("12.34.56");
+      expect(toks[0]!.type).toBe("string");
+      expect(toks[0]!.value).toBe("12.34.56");
+    });
+
+    it('reads digit-prefixed unquoted string: 123abc', () => {
+      const toks = tokens("123abc");
+      expect(toks[0]!.type).toBe("string");
+      expect(toks[0]!.value).toBe("123abc");
+    });
   });
 
   describe("numbers", () => {

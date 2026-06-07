@@ -3,7 +3,7 @@ import { isSupportedLocale, setLocale } from "#/lib/locales";
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/$lang")({
-	loader: async ({ params }) => {
+	beforeLoad: async ({ params }) => {
 		if (!isSupportedLocale(params.lang)) {
 			throw redirect({ href: "/en", replace: true });
 		}
