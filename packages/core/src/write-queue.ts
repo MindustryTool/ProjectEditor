@@ -82,7 +82,7 @@ export class WriteQueue {
 		}
 
 		const duration = Date.now() - start;
-		if (duration > 10) {
+		if (duration > 50) {
 			console.warn(`WriteQueue flush took ${duration}ms`);
 		}
 	}

@@ -1,11 +1,13 @@
 import { initI18n } from "#/i18n/i18n";
-import { isSupportedLocale, setLocale } from "#/lib/locales";
+import { getDetectedLocale, isSupportedLocale, setLocale } from "#/lib/locales";
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/$lang")({
-	beforeLoad: async ({ params }) => {
+	loader: async ({ params, location }) => {
+        console.warn("loader", params.lang);
 		if (!isSupportedLocale(params.lang)) {
-			throw redirect({ href: "/en", replace: true });
+			const detected = getDetectedLocale();
+			throw redirect({ href: `/${detected}${location.pathname}`, replace: true });
 		}
 
 		await initI18n();
