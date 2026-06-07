@@ -32,6 +32,7 @@ const queryClient = new QueryClient();
 
 function RootDocument({ children }: { children: React.ReactNode }) {
 	const lang = i18n.language?.startsWith("vi") ? "vi" : "en";
+
 	return (
 		<html lang={lang} suppressHydrationWarning>
 			<head>
