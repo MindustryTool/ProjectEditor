@@ -27,32 +27,32 @@ const defaultValidatorRegistrations: readonly ValidatorRegistration[] = [
 	},
 	{
 		name: "items-hjson",
-		pattern: (path) => path.startsWith("content/item") || (path.endsWith(".json") && path.endsWith(".hjson")),
+		pattern: (path) => path.startsWith("content/item") && (path.endsWith(".json") || path.endsWith(".hjson")),
 		validate: createValibotValidator(ItemHjsonSchema),
 	},
 	{
 		name: "liquids-hjson",
-		pattern: (path) => path.startsWith("content/liquid") || (path.endsWith(".json") && path.endsWith(".hjson")),
+		pattern: (path) => path.startsWith("content/liquid") && (path.endsWith(".json") || path.endsWith(".hjson")),
 		validate: createValibotValidator(LiquidHjsonSchema),
 	},
 	{
 		name: "sectors-hjson",
-		pattern: (path) => path.startsWith("content/sector") || (path.endsWith(".json") && path.endsWith(".hjson")),
+		pattern: (path) => path.startsWith("content/sector") && (path.endsWith(".json") || path.endsWith(".hjson")),
 		validate: createValibotValidator(SectorHjsonSchema),
 	},
 	{
 		name: "statuses-hjson",
-		pattern: (path) => path.startsWith("content/status") || (path.endsWith(".json") && path.endsWith(".hjson")),
+		pattern: (path) => path.startsWith("content/status") && (path.endsWith(".json") || path.endsWith(".hjson")),
 		validate: createValibotValidator(StatusHjsonSchema),
 	},
 	{
 		name: "units-hjson",
-		pattern: (path) => path.startsWith("content/unit") || (path.endsWith(".json") && path.endsWith(".hjson")),
+		pattern: (path) => path.startsWith("content/unit") && (path.endsWith(".json") || path.endsWith(".hjson")),
 		validate: createValibotValidator(UnitHjsonSchema),
 	},
 	{
 		name: "blocks-hjson",
-		pattern: (path) => path.startsWith("content/block") || (path.endsWith(".json") && path.endsWith(".hjson")),
+		pattern: (path) => path.startsWith("content/block") && (path.endsWith(".json") || path.endsWith(".hjson")),
 		validate: createValibotValidator(BlockHjsonSchema),
 	},
 ];
