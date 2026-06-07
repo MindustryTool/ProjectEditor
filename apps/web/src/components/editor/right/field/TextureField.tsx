@@ -35,7 +35,6 @@ export function TextureField({ name, path, entrySchema, jsonPath }: SchemaRender
 		<Field jsonPath={jsonPath} metadata={metadata}>
 			<FieldLabel>
 				<SchemaLabel name={name} metadata={metadata} />
-				{spritePath}
 			</FieldLabel>
 			<FieldControl>{exists ? <SpriteViewer path={spritePath} /> : <SpriteUploader path={spritePath} />}</FieldControl>
 			<SchemaDescription metadata={metadata} />
