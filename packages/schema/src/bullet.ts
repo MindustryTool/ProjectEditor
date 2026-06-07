@@ -11,6 +11,7 @@ import { StatusFieldSchema } from "./status";
 import { LiquidFieldSchema } from "./liquid";
 import { UnitFieldSchema } from "./unit";
 import { metadata } from "./utils";
+import { classSchema } from "./class";
 
 export const bulletTypes = [
 	"ArtilleryBulletType",
@@ -47,7 +48,7 @@ type BulletObjectSchema = v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.Objec
 
 const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>> = (context) => {
 	return v.object({
-		type: v.optional(v.picklist(bulletTypes), "BasicBulletType"),
+		type: classSchema(bulletTypes, "BasicBulletType"),
 		lifetime: v.pipe(
 			v.optional(v.number(), 40),
 			metadata({

@@ -6,6 +6,7 @@ import { ItemStackSchema } from "./item-stack";
 import { LiquidStackSchema } from "./liquid-stack";
 import { LiquidFieldSchema } from "./liquid";
 import { metadata } from "./utils";
+import { classSchema } from "./class";
 
 export const consumeTypes = [
 	"Consume",
@@ -35,7 +36,7 @@ export const consumeTypes = [
 ] as const;
 
 const consumeSchema = v.object({
-	type: v.optional(v.picklist(consumeTypes), "Consume"),
+	type: classSchema(consumeTypes, "Consume"),
 	/** If true, this consumer will not influence consumer validity. */
 	optional: v.optional(v.boolean(), false),
 	/** If true, this consumer will be displayed as a boost input. */

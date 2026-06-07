@@ -5,6 +5,7 @@ import { MindustryHexColorSchema } from "./mindustry-hex-color";
 import { SoundHjsonSchema } from "./sound";
 import type { SchemaFn } from "./utils";
 import { metadata } from "./utils";
+import { classSchema } from "./class";
 
 export const effectClasses = [
 	"ParticleEffect",
@@ -20,7 +21,10 @@ export const effectClasses = [
 export type EffectClass = (typeof effectClasses)[number];
 
 const effectBaseObjectSchema = v.object({
-	type: v.pipe(v.picklist(effectClasses), metadata({ name: "editor.effect.type", description: "editor.effect.type-description" })),
+	type: v.pipe(
+		classSchema(effectClasses, "ParticleEffect"),
+		metadata({ name: "editor.effect.type", description: "editor.effect.type-description" }),
+	),
 	lifetime: v.pipe(
 		v.optional(v.pipe(v.number(), v.minValue(1)), 50),
 		metadata({ name: "editor.effect.lifetime", description: "editor.effect.lifetime-description" }),

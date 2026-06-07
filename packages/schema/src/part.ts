@@ -4,6 +4,7 @@ import { MindustryHexColorSchema } from "./mindustry-hex-color";
 import type { SchemaFn } from "./utils";
 import { EffectFieldSchema } from "./effect";
 import { metadata } from "./utils";
+import { classSchema } from "./class";
 
 export const partClasses = ["RegionPart", "DrawPart", "EffectSpawnerPart", "FlarePart", "HaloPart", "HoverPart", "ShapePart"] as const;
 
@@ -23,7 +24,7 @@ const partMoveSchema = v.object({
 });
 
 const drawPartBaseObjectSchema = v.object({
-	type: v.pipe(v.optional(v.picklist(partClasses)), metadata({ name: "editor.part.type" })),
+	type: v.pipe(classSchema(partClasses, "RegionPart"), metadata({ name: "editor.part.type" })),
 	under: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({ name: "editor.part.under", description: "editor.part.under-description", category: "editor.part.category.behavior" }),

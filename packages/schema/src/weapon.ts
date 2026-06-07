@@ -7,15 +7,16 @@ import { EffectFieldSchema } from "./effect";
 import { PartHjsonSchema } from "./part";
 import { ShootPatternHjsonSchema } from "./shoot-pattern";
 import { BulletHjsonSchema } from "./bullet";
-import { fixed } from "./utils";
+import { fixed, metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
+import { classSchema } from "./class";
 
 const weaponTypes = ["Weapon", "BuildWeapon", "MineWeapon", "PointDefenseBulletWeapon", "PointDefenseWeapon", "RepairBeamWeapon"] as const;
 
 type WeaponType = (typeof weaponTypes)[number];
 
 const weaponObjectSchema = {
-	type: v.optional(v.picklist(weaponTypes), "Weapon"),
+	type: v.pipe(classSchema(weaponTypes, "Weapon"), metadata({ name: "editor.weapon.type" })),
 	name: v.optional(v.string()),
 	shots: v.optional(v.number(), 1),
 	display: v.optional(v.boolean(), true),

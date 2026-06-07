@@ -9,6 +9,7 @@ import { StatusFieldSchema } from "./status";
 import { LiquidFieldSchema } from "./liquid";
 import { BulletHjsonSchema } from "./bullet";
 import { metadata } from "./utils";
+import { classSchema } from "./class";
 
 export const abilityClasses = [
 	"ArmorPlateAbility",
@@ -33,7 +34,8 @@ export const abilityClasses = [
 export type AbilityClass = (typeof abilityClasses)[number];
 
 const abilityBaseObjectSchema = v.object({
-	type: v.optional(v.picklist(abilityClasses), "Ability"),
+	type: classSchema(abilityClasses, "Ability"),
+
 	display: v.optional(v.boolean(), true),
 	data: v.optional(v.number(), 0),
 });

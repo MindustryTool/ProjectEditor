@@ -25,9 +25,11 @@ import { ContentFieldSchema } from "./content";
 import { Envs, EnvSchema } from "./envs";
 import type { ProjectContents } from "@project/types";
 import { ShootPatternHjsonSchema } from "./shoot-pattern";
+import { classSchema } from "./class";
 
 export const blockTypes = [
 	// Power
+	"Block",
 	"PowerBlock",
 	"PowerDistributor",
 	"PowerGenerator",
@@ -192,7 +194,7 @@ export const blockTypes = [
 export type BlockType = (typeof blockTypes)[number];
 
 export const blockObjectSchema = {
-	type: v.pipe(v.optional(v.picklist(blockTypes))),
+	type: classSchema(blockTypes, "Block"),
 	shadowTexture: TextureFieldSchema("@-shadow"),
 	teamTexture: TextureFieldSchema("@-team"),
 	// Items
@@ -5519,6 +5521,7 @@ const overlayFloorObjectSchema = v.object({
 
 const classSchemaMap: Record<BlockType, SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>> = {
 	// Power
+	Block: () => v.object({}),
 	PowerBlock: () => powerBlockObjectSchema,
 	PowerDistributor: () => powerDistributorObjectSchema,
 	PowerGenerator: () => powerGeneratorObjectSchema,

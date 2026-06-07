@@ -3,6 +3,7 @@ import { CachedSchema } from "./utils";
 import type { SchemaFn } from "./utils";
 
 import { metadata } from "./utils";
+import { classSchema } from "./class";
 
 export const shootPatternTypes = [
 	"ShootPattern",
@@ -18,7 +19,7 @@ export const shootPatternTypes = [
 export type ShootPatternType = (typeof shootPatternTypes)[number];
 
 const shootPatternBaseObjectSchema = v.object({
-	type: v.pipe(v.optional(v.picklist(shootPatternTypes), shootPatternTypes[0]), metadata({ name: "editor.shoot-pattern.type" })),
+	type: v.pipe(classSchema(shootPatternTypes, "ShootPattern"), metadata({ name: "editor.shoot-pattern.type" })),
 	name: v.pipe(v.optional(v.string()), metadata({ name: "editor.shoot-pattern.name" })),
 	shots: v.pipe(
 		v.optional(v.number(), 1),
