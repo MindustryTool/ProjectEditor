@@ -193,6 +193,8 @@ export type BlockType = (typeof blockTypes)[number];
 
 export const blockObjectSchema = {
 	type: v.pipe(v.optional(v.picklist(blockTypes))),
+    shadowTexture: TextureFieldSchema("@-shadow"),
+    teamTexture: TextureFieldSchema("@-team"),
 	// Items
 	hasItems: v.pipe(
 		v.optional(v.boolean(), false),
@@ -1525,6 +1527,7 @@ const impactReactorObjectSchema = v.object({
 });
 
 const variableReactorObjectSchema = v.object({
+    lightsTexture: TextureFieldSchema("@-lights"),
 	...powerGeneratorObjectSchema.entries,
 	maxHeat: v.pipe(
 		v.optional(v.number(), 100),
@@ -1665,6 +1668,8 @@ const longPowerNodeObjectSchema =
 	});
 
 const beamNodeObjectSchema = v.object({
+    beamTexture: TextureFieldSchema("@-beam", 'power-beam'),
+    beamEndTexture: TextureFieldSchema("@-beam-end", 'power-beam-end'),
 	...powerBlockObjectSchema.entries,
 	range: v.pipe(
 		v.optional(v.number(), 5),
@@ -1826,6 +1831,9 @@ const liquidRouterObjectSchema = v.object({
 });
 
 const conduitObjectSchema = v.object({
+    topTextures: ArrayTextureSchema('@-top-#', 5),
+    bottomTextures: ArrayTextureSchema('@-bottom-#', 5),
+    capTexture: TextureFieldSchema("@-cap"),
 	padCorners: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
@@ -2104,6 +2112,11 @@ const separatorObjectSchema = v.object({
 });
 
 const drillObjectSchema = v.object({
+      rimTexture: TextureFieldSchema("@-rim"),
+    rotatorRegion: TextureFieldSchema("@-rotator"),
+    topRegion: TextureFieldSchema("@-top"),
+    bottomRegion: TextureFieldSchema("@-bottom"),
+    itemRegion: TextureFieldSchema("@-item",'drill-item-@size'),
 	tier: v.pipe(
 		v.optional(v.number(), 0),
 		metadata({
@@ -2554,6 +2567,7 @@ const wallObjectSchema = v.object({
 });
 
 const staticWallObjectSchema = v.object({
+    largeTexture: TextureFieldSchema("@-large"),
 	autotile: v.optional(v.boolean(), false),
 	autotileMidVariants: v.optional(v.pipe(v.number(), v.integer()), 1),
 });
@@ -2612,6 +2626,7 @@ const shieldWallObjectSchema =
 	});
 
 const doorObjectSchema = v.object({
+    openTexture: TextureFieldSchema("@-open"),
 	...wallObjectSchema.entries,
 	chainEffect: v.pipe(
 		v.optional(v.boolean(), false),
@@ -2643,6 +2658,7 @@ const autoDoorObjectSchema =
 	});
 
 const shockwaveTowerObjectSchema = v.object({
+    heatTexture: TextureFieldSchema("@-heat"),
 	range: v.pipe(
 		v.optional(v.number(), 110),
 		metadata({
@@ -3586,6 +3602,7 @@ const continuousLiquidTurretObjectSchema = v.object({
 });
 
 const pointDefenseTurretObjectSchema = v.object({
+    baseTexture: TextureFieldSchema("@-base"),
 	...reloadTurretObjectSchema.entries,
 	retargetTime: v.pipe(
 		v.optional(v.number(), 5),
@@ -3618,6 +3635,10 @@ const pointDefenseTurretObjectSchema = v.object({
 });
 
 const tractorBeamTurretObjectSchema = v.object({
+    baseTexture: TextureFieldSchema("@-base"),
+    laserTexture: TextureFieldSchema("@-laser"),
+    laserStartTexture: TextureFieldSchema("@-laser-start"),
+    laserEndTexture: TextureFieldSchema("@-laser-end"),
 	...baseTurretObjectSchema.entries,
 	retargetTime: v.pipe(
 		v.optional(v.number(), 5),
@@ -3839,6 +3860,7 @@ const junctionObjectSchema = v.object({
 });
 
 const sorterObjectSchema = v.object({
+    crossTexture: TextureFieldSchema("@-cross", 'cross-full'),
 	invert: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
@@ -3866,6 +3888,9 @@ const overflowGateObjectSchema = v.object({
 });
 
 const itemBridgeObjectSchema = v.object({
+    endTexture: TextureFieldSchema("@-end"),
+    bridgeTexture: TextureFieldSchema("@-bridge"),
+    arrowTexture: TextureFieldSchema("@-arrow"),
 	range: v.pipe(
 		v.optional(v.number(), 0),
 		metadata({
@@ -3964,7 +3989,11 @@ const bufferedItemBridgeObjectSchema = v.object({
 });
 
 const directionBridgeObjectSchema = v.object({
-	range: v.pipe(
+    bridgeTexture: TextureFieldSchema("@-bridge"),
+    bridgeBottomTexture: TextureFieldSchema("@-bridge-bottom"),
+    bridgeLiquidTexture: TextureFieldSchema("@-bridge-liquid"),
+    arrowTexture: TextureFieldSchema("@-arrow"),
+   	range: v.pipe(
 		v.optional(v.number(), 4),
 		metadata({
 			name: "editor.block-direction-bridge.range",
@@ -3994,6 +4023,8 @@ const directionLiquidBridgeObjectSchema =
 	});
 
 const ductObjectSchema = v.object({
+    topTexture: ArrayTextureSchema("@-top-#", 5),
+    bottomTexture: ArrayTextureSchema("@-bottom-#", 5),
 	speed: v.pipe(
 		v.optional(v.number(), 5),
 		metadata({
@@ -4011,6 +4042,7 @@ const ductObjectSchema = v.object({
 });
 
 const ductRouterObjectSchema = v.object({
+    topTexture: TextureFieldSchema("@-top"),
 	speed: v.pipe(
 		v.optional(v.number(), 5),
 		metadata({
@@ -4041,6 +4073,8 @@ const stackRouterObjectSchema =
 	});
 
 const ductJunctionObjectSchema = v.object({
+    topTexture: TextureFieldSchema("@-top"),
+    bottomTexture: TextureFieldSchema("@-bottom"),
 	speed: v.pipe(
 		v.optional(v.number(), 5),
 		metadata({
@@ -4051,6 +4085,7 @@ const ductJunctionObjectSchema = v.object({
 });
 
 const overflowDuctObjectSchema = v.object({
+    topTexture: TextureFieldSchema("@-top"),
 	speed: v.pipe(
 		v.optional(v.number(), 5),
 		metadata({
@@ -4152,6 +4187,9 @@ const massDriverObjectSchema = v.object({
 });
 
 const directionalUnloaderObjectSchema = v.object({
+    centerTexture: TextureFieldSchema("@-center", 'unloader-center'),
+    topTexture: TextureFieldSchema("@-top"),
+    arrowTexture: TextureFieldSchema("@-arrow"),
 	speed: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
@@ -4222,6 +4260,7 @@ const payloadConveyorObjectSchema =
 
 const payloadRouterObjectSchema = 
 	v.object({
+        overTexture: TextureFieldSchema("@-over"),
 		...payloadConveyorObjectSchema.entries,
 		invert: v.pipe(
 			v.optional(v.boolean(), false),
@@ -4235,6 +4274,10 @@ const payloadRouterObjectSchema =
 const payloadVoidObjectSchema = v.object({ ...payloadBlockObjectSchema.entries });
 
 const payloadMassDriverObjectSchema = v.object({
+    baseTexture: TextureFieldSchema("@-base"),
+    capTexture: TextureFieldSchema("@-cap"),
+    leftTexture: TextureFieldSchema("@-left"),
+    rightTexture: TextureFieldSchema("@-right"),
 	...payloadBlockObjectSchema.entries,
 	range: v.pipe(
 		v.optional(v.number(), 100),
@@ -4681,6 +4724,7 @@ const repairTurretObjectSchema =
 	});
 
 const repairTowerObjectSchema = v.object({
+    glowTexture: TextureFieldSchema("@-glow"),
 	range: v.pipe(
 		v.optional(v.number(), 80),
 		metadata({
@@ -5727,7 +5771,9 @@ const classSchemaMap: Record<BlockType, SchemaFn<v.ObjectSchema<v.ObjectEntries,
 	// Sandbox
 	ItemSource: () => itemSourceObjectSchema,
 	ItemVoid: () => v.object({}),
-	LiquidSource: () => v.object({}),
+	LiquidSource: () => v.object({
+        crossTexture: TextureFieldSchema("@-cross"),
+    }),
 	LiquidVoid: () => v.object({}),
 	ShallowLiquid: (context) =>
 		v.object({
