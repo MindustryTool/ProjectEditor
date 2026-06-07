@@ -43,7 +43,7 @@ export function ValidationErrorList({ items, onNavigate, className }: Validation
 		<div className={cn("max-h-[80dvh] overflow-y-auto flex flex-col gap-1", className)} onScroll={handleScroll}>
 			{items.map((err, i) =>
 				i >= render ? null : (
-					<div key={i} className={cn("flex gap-2 flex-col rounded p-1.5 text-xs", severityClass[err.severity] ?? "")}>
+					<div key={i} className={cn("flex gap-1 flex-col rounded p-1.5 text-xs", severityClass[err.severity] ?? "")}>
 						<button
 							type="button"
 							className="shrink-0 font-medium underline-offset-2 hover:underline cursor-pointer text-left text-sm"

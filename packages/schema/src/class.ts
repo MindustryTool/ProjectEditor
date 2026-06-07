@@ -22,11 +22,16 @@ export class ClassMap<K extends string> {
 	constructor(private readonly map: Record<K, SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>>) {}
 
 	get(object: unknown, context: ProjectContents) {
-        const result: v.ObjectEntries = {};
+		const result: v.ObjectEntries = {};
 		if (object && typeof object === "object" && "type" in object && typeof object.type === "string") {
 			const key = (object.type.slice(0, 1).toUpperCase() + object.type.slice(1)) as K;
-
-            Object.assign(result, this.map[key](context).entries);
+			try {
+				if (this.map[key]) {
+					Object.assign(result, this.map[key](context).entries);
+				}
+			} catch {
+				console.error(this.map[key]);
+			}
 		}
 
 		return result;
