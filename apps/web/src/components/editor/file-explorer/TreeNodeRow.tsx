@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import { Plus, MoreHorizontal, ChevronRight, ChevronDown } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { isDefaultPath, type TreeNode } from "@project/fs";
@@ -51,10 +51,10 @@ export const TreeNodeRow = React.memo(function TreeNodeRow({ node, depth, expand
 		}
 	}, [isEditing]);
 
-	function handleMoreClick(e: React.MouseEvent<HTMLButtonElement>) {
+	const handleMoreClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
 		e.stopPropagation();
 		onContextMenu?.(currentPath, e.currentTarget.getBoundingClientRect());
-	}
+	}, [currentPath, onContextMenu]);
 
 	return (
 		<div
@@ -101,7 +101,7 @@ export const TreeNodeRow = React.memo(function TreeNodeRow({ node, depth, expand
 						onClick={(e) => e.stopPropagation()}
 					/>
 				) : (
-					<span className={cn("flex-1 truncate", filenameClass)}>{node.name === "" ? RootName() : node.name}</span>
+					<span className={cn("flex-1 truncate", filenameClass)}>{isRoot ? RootName() : node.name}</span>
 				)}
 				{showActions && (isFolder || !isDefault) && (
 					<div

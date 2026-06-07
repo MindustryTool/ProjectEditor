@@ -16,7 +16,7 @@ const registry = new FinalizationRegistry<string>((url) => {
 export function getImageUrl(data: ArrayBuffer): string {
 	let url = cache.get(data);
 
-	if (!url) {
+	if (url === undefined) {
 		url = URL.createObjectURL(new Blob([data], { type: "image/png" }));
 
 		cache.set(data, url);

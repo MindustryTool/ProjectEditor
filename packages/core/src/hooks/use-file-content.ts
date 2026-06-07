@@ -1,8 +1,9 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 import { useFileStore, isDirty, isError, selectEntry, selectIsSaving, getEntry } from "@project/core";
 import { useProjectSession } from "@project/core";
 import { getWriteQueue } from "@project/core";
-import { useShallow } from "zustand/shallow";
+import { useStoreWithEqualityFn } from "zustand/traditional";
+import { shallow } from "zustand/shallow";
 
 export interface UseFileResult<T> {
 	data: T | null;
@@ -21,8 +22,8 @@ export function useFile(path: string): UseFileResult<ArrayBuffer> {
 	const projectId = useProjectSession((s) => s.projectContext?.project.id);
 	const fs = useProjectSession((s) => s.projectContext?.fs);
 
-	const entry = useFileStore(useShallow(projectId ? selectEntry(projectId, path) : () => undefined));
-	const isSaving = useFileStore(useShallow(projectId ? selectIsSaving(projectId, path) : () => false));
+	const entry = useStoreWithEqualityFn(useFileStore, projectId ? selectEntry(projectId, path) : () => undefined, shallow);
+	const isSaving = useStoreWithEqualityFn(useFileStore, projectId ? selectIsSaving(projectId, path) : () => false, shallow);
 
 	useEffect(() => {
 		if (projectId && fs && path && entry === undefined) {
@@ -62,16 +63,28 @@ export function useFile(path: string): UseFileResult<ArrayBuffer> {
 		[path, projectId, fs],
 	);
 
-	return {
-		data: entry?.data ?? null,
-		currentVersion: entry?.currentVersion ?? 0,
-		savedVersion: entry?.savedVersion ?? 0,
-		savedAt: entry?.savedAt ?? null,
-		error: entry?.error ?? null,
-		isDirty: isDirty(entry),
-		isSaving,
-		isLoading: entry?.loading ?? false,
-		isError: isError(entry),
-		write,
-	};
+	const data = entry?.data ?? null;
+	const currentVersion = entry?.currentVersion ?? 0;
+	const savedVersion = entry?.savedVersion ?? 0;
+	const savedAt = entry?.savedAt ?? null;
+	const error = entry?.error ?? null;
+	const _isDirty = isDirty(entry);
+	const isLoading = entry?.loading ?? false;
+	const _isError = isError(entry);
+
+	return useMemo(
+		() => ({
+			data,
+			currentVersion,
+			savedVersion,
+			savedAt,
+			error,
+			isDirty: _isDirty,
+			isSaving,
+			isLoading,
+			isError: _isError,
+			write,
+		}),
+		[_isDirty, _isError, currentVersion, data, error, isLoading, isSaving, savedAt, savedVersion, write],
+	);
 }

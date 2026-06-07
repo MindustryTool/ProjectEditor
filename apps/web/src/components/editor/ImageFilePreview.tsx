@@ -2,7 +2,7 @@ import { cn, getImageUrl } from "#/lib/utils";
 import { useFile } from "@project/core";
 import { resolveContentSprite } from "@project/utils";
 import { File } from "lucide-react";
-import React, { useState, type ReactNode } from "react";
+import React, { useMemo, useState, type ReactNode } from "react";
 
 export interface ImageFilePreviewProps {
 	path: string;
@@ -11,7 +11,13 @@ export interface ImageFilePreviewProps {
 	onSize?: (width: number, height: number) => void;
 }
 
-export function ImageFilePreview({ path, className, onSize, fallback, ...props }: ImageFilePreviewProps & React.ComponentProps<"img">) {
+export const ImageFilePreview = React.memo(function ImageFilePreview({
+	path,
+	className,
+	onSize,
+	fallback,
+	...props
+}: ImageFilePreviewProps & React.ComponentProps<"img">) {
 	let resolvedPath: string | null = path;
 
 	if (!path.endsWith(".png")) {
@@ -28,17 +34,24 @@ export function ImageFilePreview({ path, className, onSize, fallback, ...props }
 	}
 
 	return <Image path={resolvedPath} className={className} onSize={onSize} fallback={fallback} {...props} />;
-}
+});
 
-function Image({ path, className, onSize, fallback, ...props }: ImageFilePreviewProps & React.ComponentProps<"img">) {
-	const { data } = useFile(path);
+const Image = React.memo(function Image({
+	path,
+	className,
+	onSize,
+	fallback,
+	...props
+}: ImageFilePreviewProps & React.ComponentProps<"img">) {
+	const result = useFile(path);
+	const data = result.data;
 	const [error, setError] = useState(false);
 
-	if (data === null) {
+	const objectUrl = useMemo(() => (data ? getImageUrl(data) : null), [data]);
+
+	if (objectUrl === null) {
 		return <div className={cn("relative flex justify-center items-center h-full w-full", className)}>{fallback}</div>;
 	}
-
-	const objectUrl = getImageUrl(data);
 
 	if (error) {
 		return <div className={cn("relative flex justify-center items-center h-full w-full border rounded-md", className)}>{fallback}</div>;
@@ -59,4 +72,4 @@ function Image({ path, className, onSize, fallback, ...props }: ImageFilePreview
 			{...props}
 		/>
 	);
-}
+});

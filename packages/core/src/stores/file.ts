@@ -2,7 +2,7 @@ import { create } from "zustand";
 import type { ProjectFileSystem } from "@project/core";
 import type { EventBus, ProjectEventMap } from "@project/core";
 
-const MAX_CACHE_ENTRIES = 200;
+const MAX_CACHE_ENTRIES = 10000;
 
 function cacheKey(projectId: string, path: string): string {
 	return `${projectId}::${path}`;
@@ -73,6 +73,7 @@ function enforceLRULimit() {
 		const oldest = lruMap.keys().next();
 		if (oldest.done) break;
 		lruMap.delete(oldest.value);
+        console.warn("Deleted due to LRU limit", oldest.value);
 	}
 }
 

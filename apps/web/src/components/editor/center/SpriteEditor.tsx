@@ -7,7 +7,7 @@ import { useFileString, useProjectSession } from "@project/core";
 import { HJSON } from "@project/hjson";
 import { collectSpriteData, type AnySchema, type SchemaFn, type SpriteData } from "@project/schema";
 import { resolveContentSprite } from "@project/utils";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Layer, Stage } from "react-konva";
 import { updateSpritePosition } from "#/components/editor/center/sprite-utils";
 import { SpriteImage } from "./SpriteImage";
@@ -130,6 +130,7 @@ function SpriteSidebar({ sprites }: { sprites: SpriteData[] }) {
 
 function SpritePreview({ sprite }: { sprite: SpriteData }) {
 	const [size, setSize] = useState([0, 0]);
+	const handleSize = useCallback((width: number, height: number) => setSize([width, height]), []);
 
 	const scrollTo = (id: string) =>
 		requestAnimationFrame(() => {
@@ -155,7 +156,7 @@ function SpritePreview({ sprite }: { sprite: SpriteData }) {
 			<span className="absolute top-1 left-1 text-xs text-muted-foreground">
 				{sprite.name} ({size[0]}x{size[1]})
 			</span>
-			<ImageFilePreview className="object-contain" path={sprite.path} onSize={(width, height) => setSize([width, height])} />
+			<ImageFilePreview className="object-contain" path={sprite.path} onSize={handleSize} />
 			<div className="absolute bottom-0.5 backdrop-blur-xs backdrop-brightness-75 p-0.5 left-0.5 text-xs text-muted-foreground">
 				x={sprite.position.x.value}, y={sprite.position.y.value}
 			</div>

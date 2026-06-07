@@ -24,14 +24,16 @@ export function initI18n() {
 	initPromise = i18n
 		.use(initReactI18next)
 		.use(
-			resourcesToBackend(async(language: string) => {
-				 const loader = translations[`./locales/${language}/translation.ts`];
+			resourcesToBackend(async (language: string) => {
+				const loader = translations[`./locales/${language}/translation.ts`];
 
-					if (!loader) {
-						throw new Error(`Unsupported language: ${language}`);
-					}
+				if (!loader) {
+					throw new Error(`Unsupported language: ${language}`);
+				}
 
-					return await loader();
+				const result = await loader();
+
+				return (result as { default: Record<string, string> }).default;
 			}),
 		)
 		.init({
