@@ -130,8 +130,8 @@ export const TreeNodeRow = React.memo(function TreeNodeRow({ node, depth, expand
 						)}
 					</div>
 				)}
-				{!isFolder && isItemSaving && <span className="h-2 w-2 shrink-0 rounded-full bg-amber-400" />}
-				{!isFolder && !isItemSaving && isItemDirty && <span className="h-2 w-2 shrink-0 rounded-full bg-white" />}
+				{!isFolder && isItemSaving && <span className="h-2 w-2 shrink-0 rounded-full bg-white mr-2" />}
+				{!isFolder && !isItemSaving && isItemDirty && <span className="h-2 w-2 shrink-0 rounded-full bg-amber-400 mr-2" />}
 			</div>
 		</div>
 	);
