@@ -2,6 +2,7 @@ import * as v from "valibot";
 import { MindustryHexColorSchema, ResearchSchema, type SchemaFn } from "./base";
 import { EffectFieldSchema } from "./effect";
 import { metadata } from "./utils";
+import type { ProjectContents } from "@project/types";
 
 export const liquidBaseObjectSchema = v.object({
 	gas: v.pipe(
@@ -154,7 +155,7 @@ export const liquidBaseObjectSchema = v.object({
 	),
 });
 
-export const LiquidFieldSchema: SchemaFn = (context) =>
+export const LiquidFieldSchema = (context: ProjectContents) =>
 	v.pipe(
 		v.string(),
 		v.transform((v) => v.replaceAll(context.name + "-", "")),

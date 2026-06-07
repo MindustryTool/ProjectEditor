@@ -1,6 +1,7 @@
 import * as v from "valibot";
 import {
 	CachedSchema,
+	ContentFieldSchema,
 	EnvSchema,
 	Envs,
 	ItemRequirementSchema,
@@ -68,6 +69,8 @@ export const blockTypes = [
 	"ItemIncinerator",
 	"Incinerator",
 	"HeatProducer",
+    "BlockProducer",
+    "SingleBlockProducer",
 	// Defense
 	"Wall",
 	"Thruster",
@@ -128,9 +131,7 @@ export const blockTypes = [
 	"PayloadLoader",
 	"PayloadUnloader",
 	"PayloadDeconstructor",
-	"BlockProducer",
 	"Constructor",
-	"SingleBlockProducer",
 	// Unit
 	"UnitBlock",
 	"UnitFactory",
@@ -157,9 +158,12 @@ export const blockTypes = [
 	"OverlayFloor",
 	"OreBlock",
 	"ColoredFloor",
+	"CharacterOverlay",
 	"EmptyFloor",
 	"AirBlock",
 	"Prop",
+	"SeaBush",
+	"Seaweed",
 	"StaticWall",
 	"TiledWall",
 	"StaticTree",
@@ -177,12 +181,27 @@ export const blockTypes = [
 	"ItemVoid",
 	"LiquidSource",
 	"LiquidVoid",
+	"ShallowLiquid",
+	"SteamVent",
+	"TiledFloor",
 ] as const;
 
 export type BlockType = (typeof blockTypes)[number];
 
+const liquidBlockObjectSchema = v.object({
+    
+});
+
+const powerBlockObjectSchema = v.object({});
+
+
+const powerDistributorObjectSchema = v.object({
+	...powerBlockObjectSchema.entries,
+});
+
 // Power variant schemas
 const powerGeneratorObjectSchema = v.object({
+    ...powerDistributorObjectSchema.entries,
 	powerProduction: v.pipe(
 		v.optional(v.number(), 0),
 		metadata({
@@ -256,6 +275,7 @@ const powerGeneratorObjectSchema = v.object({
 });
 
 const consumeGeneratorObjectSchema = v.object({
+    ...powerGeneratorObjectSchema.entries,
 	itemDuration: v.pipe(
 		v.optional(v.number(), 120),
 		metadata({
@@ -308,6 +328,7 @@ const consumeGeneratorObjectSchema = v.object({
 });
 
 const heaterGeneratorObjectSchema = v.object({
+    ...powerGeneratorObjectSchema.entries,
 	heatOutput: v.pipe(
 		v.optional(v.number(), 10),
 		metadata({
@@ -325,6 +346,7 @@ const heaterGeneratorObjectSchema = v.object({
 });
 
 const thermalGeneratorObjectSchema = v.object({
+    ...powerGeneratorObjectSchema.entries,
 	effectChance: v.pipe(
 		v.optional(v.number(), 0.05),
 		metadata({
@@ -363,6 +385,7 @@ const thermalGeneratorObjectSchema = v.object({
 });
 
 const nuclearReactorObjectSchema = v.object({
+    ...powerGeneratorObjectSchema.entries,
 	itemDuration: v.pipe(
 		v.optional(v.number(), 120),
 		metadata({
@@ -429,6 +452,7 @@ const nuclearReactorObjectSchema = v.object({
 });
 
 const impactReactorObjectSchema = v.object({
+    ...powerGeneratorObjectSchema.entries,
 	warmupSpeed: v.pipe(
 		v.optional(v.number(), 0.001),
 		metadata({
@@ -446,6 +470,7 @@ const impactReactorObjectSchema = v.object({
 });
 
 const variableReactorObjectSchema = v.object({
+    ...powerGeneratorObjectSchema.entries,
 	maxHeat: v.pipe(
 		v.optional(v.number(), 100),
 		metadata({
@@ -515,6 +540,7 @@ const lightBlockObjectSchema = v.object({
 });
 
 const powerNodeObjectSchema = v.object({
+    ...powerBlockObjectSchema.entries,
 	laserRange: v.pipe(
 		v.optional(v.number(), 6),
 		metadata({
@@ -560,6 +586,7 @@ const powerNodeObjectSchema = v.object({
 });
 
 const longPowerNodeObjectSchema = v.object({
+    ...powerNodeObjectSchema.entries,
 	glowScl: v.pipe(
 		v.optional(v.number(), 16),
 		metadata({
@@ -577,6 +604,7 @@ const longPowerNodeObjectSchema = v.object({
 });
 
 const beamNodeObjectSchema = v.object({
+	...powerBlockObjectSchema.entries,
 	range: v.pipe(
 		v.optional(v.number(), 5),
 		metadata({
@@ -608,6 +636,7 @@ const beamNodeObjectSchema = v.object({
 });
 
 const powerSourceObjectSchema = v.object({
+    ...powerBlockObjectSchema.entries,
 	powerProduction: v.pipe(
 		v.optional(v.number(), 10000),
 		metadata({
@@ -629,6 +658,7 @@ const storageBlockObjectSchema = v.object({
 });
 
 const coreBlockObjectSchema = v.object({
+    ...storageBlockObjectSchema.entries,
 	thrusterLength: v.pipe(
 		v.optional(v.number(), 3.5),
 		metadata({
@@ -747,6 +777,7 @@ const conduitObjectSchema = v.object({
 });
 
 const pumpObjectSchema = v.object({
+    ...liquidBlockObjectSchema.entries,
 	pumpAmount: v.pipe(
 		v.optional(v.number(), 0.2),
 		metadata({
@@ -771,6 +802,7 @@ const pumpObjectSchema = v.object({
 });
 
 const solidPumpObjectSchema = v.object({
+    ...pumpObjectSchema.entries,
 	result: v.pipe(
 		v.optional(v.string(), "water"),
 		metadata({
@@ -809,6 +841,7 @@ const solidPumpObjectSchema = v.object({
 });
 
 const frackerObjectSchema = v.object({
+    ...solidPumpObjectSchema.entries,
 	itemUseTime: v.pipe(
 		v.optional(v.number(), 100),
 		metadata({
@@ -900,6 +933,7 @@ const genericCrafterObjectSchema = v.object({
 });
 
 const heatCrafterObjectSchema = v.object({
+    ...genericCrafterObjectSchema.entries,
 	heatRequirement: v.pipe(
 		v.optional(v.number(), 10),
 		metadata({
@@ -924,6 +958,7 @@ const heatCrafterObjectSchema = v.object({
 });
 
 const attributeCrafterObjectSchema = v.object({
+    ...genericCrafterObjectSchema.entries,
 	attribute: v.pipe(
 		v.optional(v.string(), "heat"),
 		metadata({
@@ -1108,6 +1143,7 @@ const drillObjectSchema = v.object({
 });
 
 const burstDrillObjectSchema = v.object({
+    ...drillObjectSchema.entries,
 	shake: v.pipe(
 		v.optional(v.number(), 2),
 		metadata({
@@ -1372,6 +1408,7 @@ const itemIncineratorObjectSchema = v.object({
 });
 
 const heatProducerObjectSchema = v.object({
+	...genericCrafterObjectSchema.entries,
 	heatOutput: v.pipe(
 		v.optional(v.number(), 10),
 		metadata({
@@ -1427,7 +1464,25 @@ const wallObjectSchema = v.object({
 	),
 });
 
+const staticWallObjectSchema = v.object({
+	autotile: v.optional(v.boolean(), false),
+	autotileMidVariants: v.optional(v.pipe(v.number(), v.integer()), 1),
+});
+
+const coloredWallObjectSchema = v.object({
+	...staticWallObjectSchema.entries,
+	color: v.pipe(
+		MindustryHexColorSchema,
+		metadata({
+			name: "editor.block-wall.color",
+			description: "editor.block-wall.color-description",
+			category: "editor.block-wall.category.visual",
+		}),
+	),
+});
+
 const shieldWallObjectSchema = v.object({
+	...wallObjectSchema.entries,
 	shieldHealth: v.pipe(
 		v.optional(v.number(), 900),
 		metadata({
@@ -1466,6 +1521,7 @@ const shieldWallObjectSchema = v.object({
 });
 
 const doorObjectSchema = v.object({
+	...wallObjectSchema.entries,
 	chainEffect: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
@@ -1476,6 +1532,7 @@ const doorObjectSchema = v.object({
 });
 
 const autoDoorObjectSchema = v.object({
+	...wallObjectSchema.entries,
 	checkInterval: v.pipe(
 		v.optional(v.number(), 20),
 		metadata({
@@ -2021,6 +2078,7 @@ const baseTurretObjectSchema = v.object({
 });
 
 const reloadTurretObjectSchema = v.object({
+	...baseTurretObjectSchema.entries,
 	reload: v.pipe(
 		v.optional(v.number(), 10),
 		metadata({
@@ -2031,6 +2089,7 @@ const reloadTurretObjectSchema = v.object({
 });
 
 const turretObjectSchema = v.object({
+	...reloadTurretObjectSchema.entries,
 	targetInterval: v.pipe(
 		v.optional(v.number(), 20),
 		metadata({
@@ -2349,6 +2408,7 @@ const turretObjectSchema = v.object({
 });
 
 const powerTurretObjectSchema = v.object({
+	...turretObjectSchema.entries,
 	shootType: v.pipe(
 		v.optional(v.string()),
 		metadata({
@@ -2359,6 +2419,7 @@ const powerTurretObjectSchema = v.object({
 });
 
 const laserTurretObjectSchema = v.object({
+	...powerTurretObjectSchema.entries,
 	firingMoveFract: v.pipe(
 		v.optional(v.number(), 0.25),
 		metadata({
@@ -2376,6 +2437,7 @@ const laserTurretObjectSchema = v.object({
 });
 
 const continuousTurretObjectSchema = v.object({
+	...turretObjectSchema.entries,
 	shootType: v.pipe(
 		v.optional(v.string()),
 		metadata({
@@ -2400,6 +2462,7 @@ const continuousTurretObjectSchema = v.object({
 });
 
 const continuousLiquidTurretObjectSchema = v.object({
+	...continuousTurretObjectSchema.entries,
 	liquidConsumed: v.pipe(
 		v.optional(v.number(), 1 / 60),
 		metadata({
@@ -2410,6 +2473,7 @@ const continuousLiquidTurretObjectSchema = v.object({
 });
 
 const pointDefenseTurretObjectSchema = v.object({
+	...reloadTurretObjectSchema.entries,
 	retargetTime: v.pipe(
 		v.optional(v.number(), 5),
 		metadata({
@@ -2441,6 +2505,7 @@ const pointDefenseTurretObjectSchema = v.object({
 });
 
 const tractorBeamTurretObjectSchema = v.object({
+	...baseTurretObjectSchema.entries,
 	retargetTime: v.pipe(
 		v.optional(v.number(), 5),
 		metadata({
@@ -2521,6 +2586,7 @@ const tractorBeamTurretObjectSchema = v.object({
 });
 
 const buildTurretObjectSchema = v.object({
+	...baseTurretObjectSchema.entries,
 	targetInterval: v.pipe(
 		v.optional(v.number(), 15),
 		metadata({
@@ -2749,6 +2815,7 @@ const itemBridgeObjectSchema = v.object({
 });
 
 const bufferedItemBridgeObjectSchema = v.object({
+	...itemBridgeObjectSchema.entries,
 	speed: v.pipe(
 		v.optional(v.number(), 40),
 		metadata({
@@ -2783,6 +2850,7 @@ const directionBridgeObjectSchema = v.object({
 });
 
 const directionLiquidBridgeObjectSchema = v.object({
+	...directionBridgeObjectSchema.entries,
 	speed: v.pipe(
 		v.optional(v.number(), 5),
 		metadata({
@@ -2827,6 +2895,7 @@ const ductRouterObjectSchema = v.object({
 });
 
 const stackRouterObjectSchema = v.object({
+	...ductRouterObjectSchema.entries,
 	baseEfficiency: v.pipe(
 		v.optional(v.number(), 0),
 		metadata({
@@ -2871,6 +2940,7 @@ const overflowDuctObjectSchema = v.object({
 });
 
 const ductBridgeObjectSchema = v.object({
+	...directionBridgeObjectSchema.entries,
 	speed: v.pipe(
 		v.optional(v.number(), 5),
 		metadata({
@@ -3020,6 +3090,7 @@ const payloadConveyorObjectSchema = v.object({
 });
 
 const payloadRouterObjectSchema = v.object({
+	...payloadConveyorObjectSchema.entries,
 	invert: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
@@ -3029,9 +3100,10 @@ const payloadRouterObjectSchema = v.object({
 	),
 });
 
-const payloadVoidObjectSchema = v.object({});
+const payloadVoidObjectSchema = v.object({ ...payloadBlockObjectSchema.entries });
 
 const payloadMassDriverObjectSchema = v.object({
+	...payloadBlockObjectSchema.entries,
 	range: v.pipe(
 		v.optional(v.number(), 100),
 		metadata({
@@ -3112,6 +3184,7 @@ const payloadMassDriverObjectSchema = v.object({
 });
 
 const payloadLoaderObjectSchema = v.object({
+	...payloadBlockObjectSchema.entries,
 	loadTime: v.pipe(
 		v.optional(v.number(), 2),
 		metadata({
@@ -3164,6 +3237,7 @@ const payloadLoaderObjectSchema = v.object({
 });
 
 const payloadUnloaderObjectSchema = v.object({
+	...payloadLoaderObjectSchema.entries,
 	offloadSpeed: v.pipe(
 		v.optional(v.number(), 4),
 		metadata({
@@ -3181,6 +3255,7 @@ const payloadUnloaderObjectSchema = v.object({
 });
 
 const payloadDeconstructorObjectSchema = v.object({
+	...payloadBlockObjectSchema.entries,
 	maxPayloadSize: v.pipe(
 		v.optional(v.number(), 4),
 		metadata({
@@ -3205,6 +3280,7 @@ const payloadDeconstructorObjectSchema = v.object({
 });
 
 const blockProducerObjectSchema = v.object({
+	...payloadBlockObjectSchema.entries,
 	buildSpeed: v.pipe(
 		v.optional(v.number(), 0.4),
 		metadata({
@@ -3214,7 +3290,13 @@ const blockProducerObjectSchema = v.object({
 	),
 });
 
+const unitBlockObjectSchema = v.object({
+	...payloadBlockObjectSchema.entries,
+});
+
+
 const constructorObjectSchema = v.object({
+	...blockProducerObjectSchema.entries,
 	minBlockSize: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
@@ -3232,6 +3314,7 @@ const constructorObjectSchema = v.object({
 });
 
 const singleBlockProducerObjectSchema = v.object({
+    ...blockProducerObjectSchema.entries,
 	result: v.pipe(
 		v.optional(v.string()),
 		metadata({
@@ -3243,6 +3326,7 @@ const singleBlockProducerObjectSchema = v.object({
 
 // Unit variant schemas
 const unitFactoryObjectSchema = v.object({
+    ...unitBlockObjectSchema.entries,
 	capacities: v.pipe(
 		v.optional(v.array(v.number()), []),
 		metadata({
@@ -3260,6 +3344,7 @@ const unitFactoryObjectSchema = v.object({
 });
 
 const reconstructorObjectSchema = v.object({
+    ...unitBlockObjectSchema.entries,
 	constructTime: v.pipe(
 		v.optional(v.number(), 120),
 		metadata({
@@ -3284,6 +3369,7 @@ const reconstructorObjectSchema = v.object({
 });
 
 const unitAssemblerModuleObjectSchema = v.object({
+    ...payloadBlockObjectSchema.entries,
 	tier: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
@@ -3294,6 +3380,7 @@ const unitAssemblerModuleObjectSchema = v.object({
 });
 
 const unitAssemblerObjectSchema = v.object({
+    ...payloadBlockObjectSchema.entries,
 	areaSize: v.pipe(
 		v.optional(v.number(), 11),
 		metadata({
@@ -3599,6 +3686,7 @@ const logicDisplayObjectSchema = v.object({
 });
 
 const tileableLogicDisplayObjectSchema = v.object({
+	...logicDisplayObjectSchema.entries,
 	maxDisplayDimensions: v.pipe(
 		v.optional(v.number(), 16),
 		metadata({
@@ -3891,7 +3979,9 @@ const floorObjectSchema = v.object({
 	),
 });
 
-const coloredFloorObjectSchema = v.object({});
+const coloredFloorObjectSchema = v.object({
+	...floorObjectSchema.entries,
+});
 
 const treeBlockObjectSchema = v.object({
 	shadowOffset: v.pipe(
@@ -4217,10 +4307,22 @@ const itemSourceObjectSchema = v.object({
 	),
 });
 
+const overlayFloorObjectSchema = v.object({
+	...floorObjectSchema.entries,
+	color: v.pipe(
+		v.optional(MindustryHexColorSchema),
+		metadata({
+			name: "editor.block-overlay-floor.color",
+			description: "editor.block-overlay-floor.color-description",
+			category: "editor.block-overlay-floor.category.visual",
+		}),
+	),
+});
+
 const classSchemaMap: Record<BlockType, SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>> = {
 	// Power
-	PowerBlock: (_context) => v.object({}),
-	PowerDistributor: (_context) => v.object({}),
+	PowerBlock: (_context) => powerBlockObjectSchema,
+	PowerDistributor: (_context) => powerDistributorObjectSchema,
 	PowerGenerator: (_context) => powerGeneratorObjectSchema,
 	ConsumeGenerator: (_context) => consumeGeneratorObjectSchema,
 	HeaterGenerator: (_context) => heaterGeneratorObjectSchema,
@@ -4229,13 +4331,16 @@ const classSchemaMap: Record<BlockType, SchemaFn<v.ObjectSchema<v.ObjectEntries,
 	NuclearReactor: (_context) => nuclearReactorObjectSchema,
 	ImpactReactor: (_context) => impactReactorObjectSchema,
 	VariableReactor: (_context) => variableReactorObjectSchema,
-	Battery: (_context) => v.object({}),
+	Battery: (_context) =>
+		v.object({
+			...powerDistributorObjectSchema.entries,
+		}),
 	PowerNode: (_context) => powerNodeObjectSchema,
 	LongPowerNode: (_context) => longPowerNodeObjectSchema,
 	BeamNode: (_context) => beamNodeObjectSchema,
 	PowerDiode: (_context) => v.object({}),
 	LightBlock: (_context) => lightBlockObjectSchema,
-	PowerVoid: (_context) => v.object({}),
+	PowerVoid: (_context) => v.object({...powerBlockObjectSchema.entries}),
 	PowerSource: (_context) => powerSourceObjectSchema,
 	// Storage
 	StorageBlock: (_context) => storageBlockObjectSchema,
@@ -4246,8 +4351,14 @@ const classSchemaMap: Record<BlockType, SchemaFn<v.ObjectSchema<v.ObjectEntries,
 	LiquidRouter: (_context) => liquidRouterObjectSchema,
 	LiquidJunction: (_context) => v.object({}),
 	Conduit: (_context) => conduitObjectSchema,
-	ArmoredConduit: (_context) => v.object({}),
-	LiquidBridge: (_context) => v.object({}),
+	ArmoredConduit: (_context) =>
+		v.object({
+			...conduitObjectSchema.entries,
+		}),
+	LiquidBridge: (_context) =>
+		v.object({
+			...itemBridgeObjectSchema.entries,
+		}),
 	Pump: (_context) => pumpObjectSchema,
 	SolidPump: (_context) => solidPumpObjectSchema,
 	Fracker: (_context) => frackerObjectSchema,
@@ -4265,7 +4376,10 @@ const classSchemaMap: Record<BlockType, SchemaFn<v.ObjectSchema<v.ObjectEntries,
 	HeatProducer: (_context) => heatProducerObjectSchema,
 	// Defense
 	Wall: (_context) => wallObjectSchema,
-	Thruster: (_context) => v.object({}),
+	Thruster: (_context) =>
+		v.object({
+			...wallObjectSchema.entries,
+		}),
 	ShieldWall: (_context) => shieldWallObjectSchema,
 	Door: (_context) => doorObjectSchema,
 	AutoDoor: (_context) => autoDoorObjectSchema,
@@ -4285,17 +4399,30 @@ const classSchemaMap: Record<BlockType, SchemaFn<v.ObjectSchema<v.ObjectEntries,
 	Turret: (_context) => turretObjectSchema,
 	PowerTurret: (_context) => powerTurretObjectSchema,
 	LaserTurret: (_context) => laserTurretObjectSchema,
-	ItemTurret: (_context) => baseTurretObjectSchema,
-	LiquidTurret: (_context) => v.object({}),
+	ItemTurret: (context) =>
+		v.object({ ammoTypes: v.record(ItemFieldSchema(context), BulletHjsonSchema(context)), ...turretObjectSchema.entries }),
+	LiquidTurret: (context) =>
+		v.object({
+			ammoTypes: v.record(LiquidFieldSchema(context), BulletHjsonSchema(context)),
+			extinguish: v.optional(v.boolean(), true),
+			...turretObjectSchema.entries,
+		}),
 	ContinuousTurret: (_context) => continuousTurretObjectSchema,
 	ContinuousLiquidTurret: (_context) => continuousLiquidTurretObjectSchema,
-	PayloadAmmoTurret: (_context) => v.object({}),
+	PayloadAmmoTurret: (context) =>
+		v.object({
+			ammoTypes: v.record(ContentFieldSchema(context), BulletHjsonSchema(context)),
+			...turretObjectSchema.entries,
+		}),
 	PointDefenseTurret: (_context) => pointDefenseTurretObjectSchema,
 	TractorBeamTurret: (_context) => tractorBeamTurretObjectSchema,
 	BuildTurret: (_context) => buildTurretObjectSchema,
 	// Distribution
 	Conveyor: (_context) => conveyorObjectSchema,
-	ArmoredConveyor: (_context) => v.object({}),
+	ArmoredConveyor: (_context) =>
+		v.object({
+			...conveyorObjectSchema.entries,
+		}),
 	StackConveyor: (_context) => stackConveyorObjectSchema,
 	Router: (_context) => routerObjectSchema,
 	Junction: (_context) => junctionObjectSchema,
@@ -4318,7 +4445,10 @@ const classSchemaMap: Record<BlockType, SchemaFn<v.ObjectSchema<v.ObjectEntries,
 	PayloadConveyor: (_context) => payloadConveyorObjectSchema,
 	PayloadRouter: (_context) => payloadRouterObjectSchema,
 	PayloadVoid: (_context) => payloadVoidObjectSchema,
-	PayloadSource: (_context) => v.object({}),
+	PayloadSource: (_context) =>
+		v.object({
+			...payloadBlockObjectSchema.entries,
+		}),
 	PayloadMassDriver: (_context) => payloadMassDriverObjectSchema,
 	PayloadLoader: (_context) => payloadLoaderObjectSchema,
 	PayloadUnloader: (_context) => payloadUnloaderObjectSchema,
@@ -4327,7 +4457,7 @@ const classSchemaMap: Record<BlockType, SchemaFn<v.ObjectSchema<v.ObjectEntries,
 	Constructor: (_context) => constructorObjectSchema,
 	SingleBlockProducer: (_context) => singleBlockProducerObjectSchema,
 	// Unit
-	UnitBlock: (_context) => v.object({}),
+	UnitBlock: (_context) => unitBlockObjectSchema,
 	UnitFactory: (_context) => unitFactoryObjectSchema,
 	Reconstructor: (_context) => reconstructorObjectSchema,
 	UnitAssemblerModule: (_context) => unitAssemblerModuleObjectSchema,
@@ -4349,16 +4479,52 @@ const classSchemaMap: Record<BlockType, SchemaFn<v.ObjectSchema<v.ObjectEntries,
 	HeatConductor: (_context) => heatConductorObjectSchema,
 	// Environment
 	Floor: (_context) => floorObjectSchema,
-	OverlayFloor: (_context) => v.object({}),
-	OreBlock: (_context) => v.object({}),
+	OverlayFloor: (_context) => overlayFloorObjectSchema,
+	OreBlock: (_context) =>
+		v.object({
+			...overlayFloorObjectSchema.entries,
+		}),
 	ColoredFloor: (_context) => coloredFloorObjectSchema,
+	CharacterOverlay: (_context) =>
+		v.object({
+			...overlayFloorObjectSchema.entries,
+			color: v.pipe(
+				MindustryHexColorSchema,
+				metadata({
+					name: "editor.block-character-overlay.color",
+					description: "editor.block-character-overlay.color-description",
+					category: "editor.block-character-overlay.category.visual",
+				}),
+			),
+		}),
 	EmptyFloor: (_context) => v.object({}),
-	AirBlock: (_context) => v.object({}),
+	AirBlock: (_context) => v.object({ ...floorObjectSchema.entries }),
 	Prop: (_context) => v.object({}),
-	StaticWall: (_context) => v.object({}),
-	TiledWall: (_context) => v.object({}),
-	StaticTree: (_context) => v.object({}),
-	ColoredWall: (_context) => coloredFloorObjectSchema,
+	SeaBush: (_context) =>
+		v.object({
+			lobesMin: v.optional(v.number(), 7),
+			lobesMax: v.optional(v.number(), 7),
+			botAngle: v.optional(v.number(), 60),
+			origin: v.optional(v.number(), 0.1),
+			sclMin: v.optional(v.number(), 30),
+			sclMax: v.optional(v.number(), 50),
+			magMin: v.optional(v.number(), 5),
+			magMax: v.optional(v.number(), 15),
+			timeRange: v.optional(v.number(), 40),
+			spread: v.optional(v.number(), 0),
+		}),
+	Seaweed: (_context) => v.object({}),
+	StaticWall: (_context) => staticWallObjectSchema,
+	TiledWall: (_context) =>
+		v.object({
+			...staticWallObjectSchema.entries,
+			maxSize: v.optional(v.pipe(v.number(), v.integer()), 3),
+		}),
+	StaticTree: (_context) =>
+		v.object({
+			...staticWallObjectSchema.entries,
+		}),
+	ColoredWall: (_context) => coloredWallObjectSchema,
 	TreeBlock: (_context) => treeBlockObjectSchema,
 	TallBlock: (_context) => tallBlockObjectSchema,
 	RemoveWall: (_context) => v.object({}),
@@ -4372,6 +4538,26 @@ const classSchemaMap: Record<BlockType, SchemaFn<v.ObjectSchema<v.ObjectEntries,
 	ItemVoid: (_context) => v.object({}),
 	LiquidSource: (_context) => v.object({}),
 	LiquidVoid: (_context) => v.object({}),
+	ShallowLiquid: (context) =>
+		v.object({
+			...floorObjectSchema.entries,
+			liquidBase: v.nullish(BlockFieldSchema(context)),
+			floorBase: v.nullish(BlockFieldSchema(context)),
+			liquidOpacity: v.optional(v.number(), 0.35),
+		}),
+	SteamVent: (context) =>
+		v.object({
+			...floorObjectSchema.entries,
+			parent: v.nullish(BlockFieldSchema(context)),
+			effect: v.nullish(EffectFieldSchema(context)),
+			effectSpacing: v.optional(v.number(), 15),
+			effectColor: v.optional(MindustryHexColorSchema),
+		}),
+	TiledFloor: (_context) =>
+		v.object({
+			...floorObjectSchema.entries,
+			maxSize: v.optional(v.pipe(v.number(), v.integer()), 3),
+		}),
 };
 
 export const blockObjectSchema = {

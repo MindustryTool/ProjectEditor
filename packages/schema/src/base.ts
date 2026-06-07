@@ -34,6 +34,13 @@ export const EnvValues = Object.values(Envs);
 
 export const EnvSchema = v.pipe(v.number(), v.picklist(EnvValues), metadata({ type: "env" }));
 
+export const ContentFieldSchema = CachedSchema((context: ProjectContents) =>
+	v.pipe(
+		v.string(),
+		v.transform((v) => v.replaceAll(context.name + "-", "")),
+		v.picklist(context.items.map((item) => item.name.replaceAll(context.name + "-", ""))),
+	));
+
 export const ItemRequirementSchema = v.pipe(
 	v.string(),
 	v.check((value) => {

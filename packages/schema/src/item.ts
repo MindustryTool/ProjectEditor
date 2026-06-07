@@ -1,6 +1,7 @@
 import * as v from "valibot";
 import { MindustryHexColorSchema, ResearchSchema, type SchemaFn } from "./base";
 import { metadata } from "./utils";
+import type { ProjectContents } from "@project/types";
 
 export const itemBaseObjectSchema = v.object({
 	hardness: v.pipe(
@@ -52,9 +53,10 @@ export const ItemHjsonSchema: SchemaFn = (context) =>
 		research: v.optional(ResearchSchema(context)),
 	});
 
-export const ItemFieldSchema: SchemaFn = (context) =>
-	v.pipe(
+export function ItemFieldSchema(context: ProjectContents) {
+	return v.pipe(
 		v.string(),
 		v.transform((v) => v.replaceAll(context.name + "-", "")),
 		v.picklist(context.items.map((item) => item.name.replaceAll(context.name + "-", ""))),
 	);
+}
