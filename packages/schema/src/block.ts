@@ -26,6 +26,7 @@ import type { ProjectContents } from "@project/types";
 import { ShootPatternHjsonSchema } from "./shoot-pattern";
 import { ClassMap, classSchema } from "./class";
 import { ItemStackSchema } from "./item-stack";
+import { LiquidStackSchema } from "./liquid-stack";
 
 export const blockTypes = [
 	// Power
@@ -1923,30 +1924,30 @@ const frackerObjectSchema = v.object({
 });
 
 // Production variant schemas
-const genericCrafterObjectSchema = v.object({
+const genericCrafterObjectSchema = (context: ProjectContents) => v.object({
 	outputItem: v.pipe(
-		v.optional(v.string()),
+		v.optional(ItemStackSchema(context)),
 		metadata({
 			name: "editor.block-generic-crafter.output-item",
 			description: "editor.block-generic-crafter.output-item-description",
 		}),
 	),
 	outputItems: v.pipe(
-		v.optional(v.array(v.string())),
+		v.optional(v.array(ItemStackSchema(context))),
 		metadata({
 			name: "editor.block-generic-crafter.output-items",
 			description: "editor.block-generic-crafter.output-items-description",
 		}),
 	),
 	outputLiquid: v.pipe(
-		v.optional(v.string()),
+		v.optional(LiquidStackSchema(context)),
 		metadata({
 			name: "editor.block-generic-crafter.output-liquid",
 			description: "editor.block-generic-crafter.output-liquid-description",
 		}),
 	),
 	outputLiquids: v.pipe(
-		v.optional(v.array(v.string())),
+		v.optional(v.array(LiquidStackSchema(context))),
 		metadata({
 			name: "editor.block-generic-crafter.output-liquids",
 			description: "editor.block-generic-crafter.output-liquids-description",
@@ -2003,8 +2004,8 @@ const genericCrafterObjectSchema = v.object({
 	),
 });
 
-const heatCrafterObjectSchema = v.object({
-	...genericCrafterObjectSchema.entries,
+const heatCrafterObjectSchema = (context: ProjectContents) => v.object({
+	...genericCrafterObjectSchema(context).entries,
 	heatRequirement: v.pipe(
 		v.optional(v.number(), 10),
 		metadata({
@@ -2028,8 +2029,8 @@ const heatCrafterObjectSchema = v.object({
 	),
 });
 
-const attributeCrafterObjectSchema = v.object({
-	...genericCrafterObjectSchema.entries,
+const attributeCrafterObjectSchema = (context: ProjectContents) => v.object({
+	...genericCrafterObjectSchema(context).entries,
 	attribute: v.pipe(
 		v.optional(v.string(), "heat"),
 		metadata({
@@ -2088,9 +2089,9 @@ const attributeCrafterObjectSchema = v.object({
 	),
 });
 
-const separatorObjectSchema = v.object({
+const separatorObjectSchema = (context: ProjectContents) => v.object({
 	results: v.pipe(
-		v.optional(v.array(v.string())),
+		v.optional(v.array(ItemStackSchema(context))),
 		metadata({
 			name: "editor.block-separator.results",
 			description: "editor.block-separator.results-description",
@@ -2500,8 +2501,8 @@ const itemIncineratorObjectSchema = v.object({
 	),
 });
 
-const heatProducerObjectSchema = v.object({
-	...genericCrafterObjectSchema.entries,
+const heatProducerObjectSchema = (context: ProjectContents) => v.object({
+	...genericCrafterObjectSchema(context).entries,
 	heatOutput: v.pipe(
 		v.optional(v.number(), 10),
 		metadata({
@@ -5567,17 +5568,17 @@ const classSchemaMap = new ClassMap<BlockType>({
 	SolidPump: () => solidPumpObjectSchema,
 	Fracker: () => frackerObjectSchema,
 	// Production
-	GenericCrafter: () => genericCrafterObjectSchema,
-	HeatCrafter: () => heatCrafterObjectSchema,
-	AttributeCrafter: () => attributeCrafterObjectSchema,
-	Separator: () => separatorObjectSchema,
+	GenericCrafter: (context) => genericCrafterObjectSchema(context),
+	HeatCrafter: (context) => heatCrafterObjectSchema(context),
+	AttributeCrafter: (context) => attributeCrafterObjectSchema(context),
+	Separator: (context) => separatorObjectSchema(context),
 	Drill: () => drillObjectSchema,
 	BurstDrill: () => burstDrillObjectSchema,
 	BeamDrill: () => beamDrillObjectSchema,
 	WallCrafter: () => wallCrafterObjectSchema,
 	ItemIncinerator: () => itemIncineratorObjectSchema,
 	Incinerator: () => v.object({}),
-	HeatProducer: () => heatProducerObjectSchema,
+	HeatProducer: (context) => heatProducerObjectSchema(context),
 	// Defense
 	Wall: () => wallObjectSchema,
 	Thruster: () =>
