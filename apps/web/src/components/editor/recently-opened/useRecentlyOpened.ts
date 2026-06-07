@@ -14,6 +14,7 @@ export function useRecentlyOpened() {
 	const recentFiles = useProjectSession((state) => state.recentlyOpenedFiles[projectId]) ?? EMPTY;
 	const recordFileAccess = useProjectSession((state) => state.recordFileAccess);
 	const removeFromRecentFiles = useProjectSession((state) => state.removeFromRecentFiles);
+	const clearRecentFiles = useProjectSession((state) => state.clearRecentFiles);
 
 	useEffect(() => {
 		if (path && projectContext && treeSnapshot.contains(path)) {
@@ -46,7 +47,12 @@ export function useRecentlyOpened() {
 		[projectId, path, recentFiles, removeFromRecentFiles, setPath],
 	);
 
+	const handleClear = useCallback(() => {
+		clearRecentFiles(projectId);
+		setPath(null);
+	}, [clearRecentFiles, projectId, setPath]);
+
 	const isFileMissing = useCallback((filePath: string) => !treeSnapshot.contains(filePath), [treeSnapshot]);
 
-	return { recentFiles, path, handleTabClick, handleClose, isFileMissing };
+	return { recentFiles, path, handleTabClick, handleClose, handleClear, isFileMissing };
 }

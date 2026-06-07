@@ -1,8 +1,9 @@
 import { useRecentlyOpened } from "./useRecentlyOpened";
 import { RecentFileTab } from "./RecentFileTab";
+import { Trash } from "lucide-react";
 
 export function RecentlyOpenedFilesBar() {
-	const { recentFiles, path, handleTabClick, handleClose, isFileMissing } = useRecentlyOpened();
+	const { recentFiles, path, handleTabClick, handleClose, isFileMissing, handleClear } = useRecentlyOpened();
 
 	if (recentFiles.length === 0) return null;
 
@@ -18,6 +19,14 @@ export function RecentlyOpenedFilesBar() {
 					onClose={handleClose}
 				/>
 			))}
+			{recentFiles.length > 2 && (
+				<button
+					className="h-full flex items-center gap-1 px-2 py-1 text-xs transition-colors bg-accent/40 text-destructive"
+					onClick={handleClear}
+				>
+					<Trash className="size-3" />
+				</button>
+			)}
 		</div>
 	);
 }
