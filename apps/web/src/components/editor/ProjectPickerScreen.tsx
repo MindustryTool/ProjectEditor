@@ -76,6 +76,7 @@ function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: s
 			<div className="flex gap-2 flex-col">
 				<label className="text-xs font-medium text-muted-foreground">{t("project-picker-screen.name")}</label>
 				<Input
+					className="w-full text-sm"
 					placeholder={t("project-picker-screen.name-placeholder")}
 					value={name}
 					onChange={(e) => {
@@ -96,7 +97,7 @@ function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: s
 					</SelectTrigger>
 					<SelectContent>
 						{LANGUAGE_OPTIONS.map((opt) => (
-							<SelectItem key={opt.value} value={opt.value} className="text-xs">
+							<SelectItem key={opt.value} value={opt.value} className="text-xs" disabled={opt.value !== "json"}>
 								{opt.label}
 							</SelectItem>
 						))}
@@ -129,7 +130,7 @@ function ImportProjectSection({ onProjectSelected }: { onProjectSelected: (id: s
 			});
 
 			toast.success(`Project imported successfully`);
-			onProjectSelected(project.id, '');
+			onProjectSelected(project.id, "");
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Failed to import project");
 		}
@@ -205,7 +206,7 @@ function ProjectListSection({ onProjectSelected }: { onProjectSelected: (id: str
 							type="button"
 							className="w-full text-left text-xs"
 							onClick={() => {
-								onProjectSelected(project.id, '');
+								onProjectSelected(project.id, "");
 							}}
 						>
 							<div className="flex items-center gap-2 font-medium text-foreground">
