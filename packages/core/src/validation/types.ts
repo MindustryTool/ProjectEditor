@@ -25,10 +25,10 @@ export interface ValidationResult<Tkey extends string = string> {
 		messageKey: Tkey;
 		messageParams?: Record<string, unknown>;
 	}[];
-    duration: number;
+	duration: number;
 }
 
-export type ValidatorFn = (params: { path: string; content: string; context: ProjectContents }) => ValidationResult[];
+export type ValidatorFn = (params: { path: string; content: string; context: ProjectContents }) => Promise<ValidationResult[]>;
 
 export interface ValidatorRegistration {
 	name: string;

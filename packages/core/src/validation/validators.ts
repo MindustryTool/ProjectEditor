@@ -1,15 +1,6 @@
 import type { ValidationResult, ValidatorFn, ValidatorRegistration } from "./types";
 import { createValidatorRegistry } from "./registry";
 import { HJSON, HJSONError, HjsonObjectNode } from "@project/hjson";
-import {
-	BlockHjsonSchema,
-	ItemHjsonSchema,
-	LiquidHjsonSchema,
-	ModHjsonSchema,
-	SectorHjsonSchema,
-	StatusHjsonSchema,
-	UnitHjsonSchema,
-} from "@project/schema";
 import * as v from "valibot";
 import { findUnknownProperties } from "./utils";
 import type { SchemaFn } from "@project/schema";
@@ -23,37 +14,37 @@ const defaultValidatorRegistrations: readonly ValidatorRegistration[] = [
 	{
 		name: "mod-meta",
 		pattern: (path) => path.endsWith("mod.hjson") || path.endsWith("mod.json"),
-		validate: createValibotValidator(ModHjsonSchema),
+		validate: createValibotValidator(() => import("@project/schema").then((mod) => mod.ModHjsonSchema)),
 	},
 	{
 		name: "items-hjson",
 		pattern: (path) => path.startsWith("content/item") && (path.endsWith(".json") || path.endsWith(".hjson")),
-		validate: createValibotValidator(ItemHjsonSchema),
+		validate: createValibotValidator(() => import("@project/schema").then((mod) => mod.ItemHjsonSchema)),
 	},
 	{
 		name: "liquids-hjson",
 		pattern: (path) => path.startsWith("content/liquid") && (path.endsWith(".json") || path.endsWith(".hjson")),
-		validate: createValibotValidator(LiquidHjsonSchema),
+		validate: createValibotValidator(() => import("@project/schema").then((mod) => mod.LiquidHjsonSchema)),
 	},
 	{
 		name: "sectors-hjson",
 		pattern: (path) => path.startsWith("content/sector") && (path.endsWith(".json") || path.endsWith(".hjson")),
-		validate: createValibotValidator(SectorHjsonSchema),
+		validate: createValibotValidator(() => import("@project/schema").then((mod) => mod.SectorHjsonSchema)),
 	},
 	{
 		name: "statuses-hjson",
 		pattern: (path) => path.startsWith("content/status") && (path.endsWith(".json") || path.endsWith(".hjson")),
-		validate: createValibotValidator(StatusHjsonSchema),
+		validate: createValibotValidator(() => import("@project/schema").then((mod) => mod.StatusHjsonSchema)),
 	},
 	{
 		name: "units-hjson",
 		pattern: (path) => path.startsWith("content/unit") && (path.endsWith(".json") || path.endsWith(".hjson")),
-		validate: createValibotValidator(UnitHjsonSchema),
+		validate: createValibotValidator(() => import("@project/schema").then((mod) => mod.UnitHjsonSchema)),
 	},
 	{
 		name: "blocks-hjson",
 		pattern: (path) => path.startsWith("content/block") && (path.endsWith(".json") || path.endsWith(".hjson")),
-		validate: createValibotValidator(BlockHjsonSchema),
+		validate: createValibotValidator(() => import("@project/schema").then((mod) => mod.BlockHjsonSchema)),
 	},
 ];
 
@@ -75,7 +66,7 @@ export function createDefaultValidators() {
 	return registry;
 }
 
-function jsonSyntaxValidator({ path, content }: Parameters<ValidatorFn>[0]): ValidationResult[] {
+async function jsonSyntaxValidator({ path, content }: Parameters<ValidatorFn>[0]): Promise<ValidationResult[]> {
 	const trimmed = content.trim();
 
 	if (!trimmed) return [];
@@ -136,11 +127,12 @@ function jsonSyntaxValidator({ path, content }: Parameters<ValidatorFn>[0]): Val
 }
 
 function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>>(
-	schema: T | SchemaFn<T>,
+	schema: (() => Promise<T>) | (() => Promise<SchemaFn<T>>),
 ): ValidatorFn {
-	return ({ path, content, context }) => {
+	return async ({ path, content, context }) => {
 		const data = HJSON.parseWithCache(content);
-		const resolved = typeof schema === "function" ? schema(context) : schema;
+        const awaited = await schema();
+		const resolved = typeof awaited === "function" ? awaited(context) : awaited;
 		const { success, issues } = v.safeParse(resolved, data.valueOf());
 		const problems: ValidationResult[] = [];
 

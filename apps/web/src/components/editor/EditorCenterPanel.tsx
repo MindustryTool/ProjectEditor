@@ -7,9 +7,8 @@ import { Spinner } from "#/components/ui/spinner";
 import { useTranslation } from "react-i18next";
 import { usePath } from "#/hooks/use-path";
 import { ErrorBoundary } from "#/components/ui/error-boundary";
-import { SpriteEditor } from "#/components/editor/center/SpriteEditor";
-import { UnitHjsonSchema } from "@project/schema";
 
+const UnitSpriteEditor = lazy(() => import("#/components/editor/center/UnitSpritEdior").then((mod) => ({ default: mod.UnitSpriteEditor })));
 const MonacoEditor = lazy(() => import("#/components/editor/monaco/MonacoEditor").then((mod) => ({ default: mod.MonacoEditor })));
 
 function TextEditor({ path }: { path: string }) {
@@ -55,7 +54,7 @@ function EditorContent({ path }: { path: string }) {
 	}
 
 	if (path.startsWith("sprite:")) {
-		return <SpriteEditor path={striped} schema={UnitHjsonSchema} />;
+		return <UnitSpriteEditor striped={striped} />;
 	}
 
 	if (entry.kind === "file") {

@@ -12,15 +12,24 @@ import {
 	FileArchive,
 	Clock,
 	HardDrive,
-	GitFork,
-	TreePine,
-	Share2,
 	WifiOff,
 	Database,
 	Server,
 	Box,
-	FileType,
 	Palette,
+	Layout,
+	FileCheck,
+	FilePen,
+	Grid2x2,
+	ListTree,
+	FormInput,
+	Paintbrush,
+	Upload,
+	AlertCircle,
+	Bug,
+	GitBranch,
+	Monitor,
+	WrapText,
 } from "lucide-react";
 
 export const Route = createFileRoute("/$lang/")({
@@ -29,50 +38,82 @@ export const Route = createFileRoute("/$lang/")({
 
 const features = [
 	{
-		title: "Mod Editing",
-		icon: Package,
+		title: "Visual Content Editor",
+		icon: FormInput,
 		color: "from-emerald-500 to-teal-500",
 		bg: "bg-emerald-500/10",
 		items: [
-			{ label: "Edit mod metadata", icon: FileType },
-			{ label: "Edit content definitions", icon: FileCode2 },
-			{ label: "Manage assets", icon: Image },
-			{ label: "Localization editor", icon: Languages },
-			{ label: "JSON / HJSON editing", icon: FileJson },
+			{ label: "Schema-driven form editor", icon: FormInput },
+			{ label: "Mod metadata form (mod.hjson)", icon: FilePen },
+			{ label: "Array & object field editors", icon: Grid2x2 },
+			{ label: "Color picker with preview swatch", icon: Paintbrush },
+			{ label: "Sprite picker with upload & replace", icon: Upload },
+			{ label: "Content grid with sprite previews", icon: Image },
 		],
 	},
 	{
-		title: "File System",
-		icon: FolderOpen,
+		title: "Code Editor",
+		icon: FileCode2,
 		color: "from-blue-500 to-cyan-500",
 		bg: "bg-blue-500/10",
 		items: [
-			{ label: "Open / save local folders", icon: FolderOpen },
-			{ label: "Import / export ZIPs", icon: FileArchive },
-			{ label: "Autosave support", icon: Clock },
-			{ label: "Persistent local workspace", icon: HardDrive },
+			{ label: "Monaco-based code editor", icon: FileCode2 },
+			{ label: "HJSON / JSON syntax highlighting", icon: FileJson },
+			{ label: "Mindustry color tag support", icon: Palette },
+			{ label: "Inline validation markers", icon: AlertCircle },
+			{ label: "Lazy-loaded for fast startup", icon: Clock },
 		],
 	},
 	{
-		title: "Visual Editors",
-		icon: GitFork,
+		title: "File Explorer",
+		icon: ListTree,
 		color: "from-violet-500 to-purple-500",
 		bg: "bg-violet-500/10",
 		items: [
-			{ label: "Logic graph editor", icon: GitFork },
-			{ label: "Tech tree editor", icon: TreePine },
-			{ label: "Content graph tools", icon: Share2 },
+			{ label: "Collapsible directory tree", icon: ListTree },
+			{ label: "Validation badges & status dots", icon: Bug },
+			{ label: "Create, rename & delete files", icon: FilePen },
+			{ label: "Recently opened files bar (tabs)", icon: FolderOpen },
+			{ label: "Extensible file tree root node", icon: GitBranch },
 		],
 	},
 	{
-		title: "Offline First",
-		icon: WifiOff,
+		title: "Validation & Quality",
+		icon: FileCheck,
 		color: "from-amber-500 to-orange-500",
 		bg: "bg-amber-500/10",
 		items: [
-			{ label: "Installable PWA", icon: Box },
-			{ label: "Local caching", icon: Database },
-			{ label: "No server dependency", icon: Server },
+			{ label: "Real-time validation via web workers", icon: FileCheck },
+			{ label: "Per-file error & warning badges", icon: AlertCircle },
+			{ label: "Inline markers in Monaco editor", icon: FileCode2 },
+			{ label: "Pre-export validation gate", icon: FileArchive },
+			{ label: "Clickable error navigation", icon: Bug },
+		],
+	},
+	{
+		title: "Project Management",
+		icon: Package,
+		color: "from-rose-500 to-pink-500",
+		bg: "bg-rose-500/10",
+		items: [
+			{ label: "Create, open, close & switch projects", icon: FolderOpen },
+			{ label: "Import / export ZIP with validation", icon: FileArchive },
+			{ label: "Project settings & delete project", icon: FilePen },
+			{ label: "Auto-save & session recovery", icon: Clock },
+			{ label: "OPFS-based local filesystem", icon: Database },
+		],
+	},
+	{
+		title: "Offline & Cross-platform",
+		icon: Monitor,
+		color: "from-green-500 to-lime-500",
+		bg: "bg-green-500/10",
+		items: [
+			{ label: "Installable PWA (offline-first)", icon: Box },
+			{ label: "Theme switching: Light, Dark & Auto", icon: Monitor },
+			{ label: "i18n: English & Vietnamese", icon: Languages },
+			{ label: "Resizable three-column layout", icon: Layout },
+			{ label: "Status bar with live project info", icon: WrapText },
 		],
 	},
 ];
@@ -87,15 +128,24 @@ const iconMap: Record<string, typeof Palette> = {
 	FileArchive,
 	Clock,
 	HardDrive,
-	GitFork,
-	TreePine,
-	Share2,
 	WifiOff,
 	Database,
 	Server,
 	Box,
-	FileType,
 	Palette,
+	Layout,
+	FileCheck,
+	FilePen,
+	Grid2x2,
+	ListTree,
+	FormInput,
+	Paintbrush,
+	Upload,
+	AlertCircle,
+	Bug,
+	GitBranch,
+	Monitor,
+	WrapText,
 };
 
 function HomePage() {
@@ -137,8 +187,7 @@ function Hero() {
 						className="mb-10 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg fade-in-up"
 						style={{ animationDelay: "160ms" }}
 					>
-						A full-featured offline editor for Mindustry mods. Edit metadata, manage assets, build logic graphs, and pack your mod —
-						all from your browser, no server required.
+						A full-featured offline editor for Mindustry mods. Edit content with schema-driven forms and Monaco code editor, manage assets with sprite picker, validate in real-time, and export — all from your browser, no server required.
 					</p>
 
 					<div className="flex flex-wrap gap-3 fade-in-up" style={{ animationDelay: "240ms" }}>

@@ -36,7 +36,7 @@ export function createValidationRunner(registry: ValidatorRegistry): ValidationR
 
 		for (const v of validators) {
 			try {
-				const validatorResults = v.validate({ path, content: resolvedContent, context });
+				const validatorResults = await v.validate({ path, content: resolvedContent, context });
 				results.push(...validatorResults);
 			} catch (err) {
 				results.push({
