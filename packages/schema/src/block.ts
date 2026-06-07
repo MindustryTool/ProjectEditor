@@ -3201,7 +3201,7 @@ const reloadTurretObjectSchema = v.object({
 const turretObjectSchema = (context: ProjectContents) =>
 	v.object({
 		...reloadTurretObjectSchema.entries,
-        shoot: v.optional(ShootPatternHjsonSchema(context)),
+		shoot: v.optional(ShootPatternHjsonSchema(context)),
 		ammoUseEffect: v.optional(EffectFieldSchema(context)),
 		targetInterval: v.pipe(
 			v.optional(v.number(), 20),
@@ -3524,7 +3524,7 @@ const powerTurretObjectSchema = (context: ProjectContents) =>
 	v.object({
 		...turretObjectSchema(context).entries,
 		shootType: v.pipe(
-			v.optional(v.string()),
+			v.optional(BulletHjsonSchema(context)),
 			metadata({
 				name: "editor.block-power-turret.shoot-type",
 				description: "editor.block-power-turret.shoot-type-description",
@@ -3551,41 +3551,43 @@ const laserTurretObjectSchema = (context: ProjectContents) =>
 		),
 	});
 
-const continuousTurretObjectSchema = (context: ProjectContents) => v.object({
-	...turretObjectSchema(context).entries,
-	shootType: v.pipe(
-		v.optional(v.string()),
-		metadata({
-			name: "editor.block-continuous-turret.shoot-type",
-			description: "editor.block-continuous-turret.shoot-type-description",
-		}),
-	),
-	aimChangeSpeed: v.pipe(
-		v.optional(v.number()),
-		metadata({
-			name: "editor.block-continuous-turret.aim-change-speed",
-			description: "editor.block-continuous-turret.aim-change-speed-description",
-		}),
-	),
-	scaleDamageEfficiency: v.pipe(
-		v.optional(v.boolean(), false),
-		metadata({
-			name: "editor.block-continuous-turret.scale-damage-efficiency",
-			description: "editor.block-continuous-turret.scale-damage-efficiency-description",
-		}),
-	),
-});
+const continuousTurretObjectSchema = (context: ProjectContents) =>
+	v.object({
+		...turretObjectSchema(context).entries,
+		shootType: v.pipe(
+			v.optional(BulletHjsonSchema(context)),
+			metadata({
+				name: "editor.block-continuous-turret.shoot-type",
+				description: "editor.block-continuous-turret.shoot-type-description",
+			}),
+		),
+		aimChangeSpeed: v.pipe(
+			v.optional(v.number()),
+			metadata({
+				name: "editor.block-continuous-turret.aim-change-speed",
+				description: "editor.block-continuous-turret.aim-change-speed-description",
+			}),
+		),
+		scaleDamageEfficiency: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({
+				name: "editor.block-continuous-turret.scale-damage-efficiency",
+				description: "editor.block-continuous-turret.scale-damage-efficiency-description",
+			}),
+		),
+	});
 
-const continuousLiquidTurretObjectSchema = (context: ProjectContents) => v.object({
-	...continuousTurretObjectSchema(context).entries,
-	liquidConsumed: v.pipe(
-		v.optional(v.number(), 1 / 60),
-		metadata({
-			name: "editor.block-continuous-liquid-turret.liquid-consumed",
-			description: "editor.block-continuous-liquid-turret.liquid-consumed-description",
-		}),
-	),
-});
+const continuousLiquidTurretObjectSchema = (context: ProjectContents) =>
+	v.object({
+		...continuousTurretObjectSchema(context).entries,
+		liquidConsumed: v.pipe(
+			v.optional(v.number(), 1 / 60),
+			metadata({
+				name: "editor.block-continuous-liquid-turret.liquid-consumed",
+				description: "editor.block-continuous-liquid-turret.liquid-consumed-description",
+			}),
+		),
+	});
 
 const pointDefenseTurretObjectSchema = v.object({
 	baseTexture: TextureFieldSchema("@-base"),

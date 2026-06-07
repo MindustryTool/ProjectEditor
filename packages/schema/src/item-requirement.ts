@@ -1,8 +1,10 @@
 import * as v from "valibot";
 import { ContentNameSchema } from "./content";
+import { metadata } from "./utils";
 
 export const ItemRequirementSchema = v.pipe(
 	v.string(),
+	metadata({ type: "item-requirement" }),
 	v.check((value) => {
 		if (!value.includes("/")) {
 			return false;

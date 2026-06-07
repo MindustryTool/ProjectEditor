@@ -35,6 +35,7 @@ import type { SchemaRenderer } from "#/components/editor/right/FieldsRenderer";
 import type { Type } from "@project/schema";
 import { TextureField } from "#/components/editor/right/field/TextureField";
 import { TexturesField } from "#/components/editor/right/field/TexturesField";
+import { ItemRequirementField } from "#/components/editor/right/field/ItemRequirementField";
 
 export const schemaRenderers: Partial<Record<Type, SchemaRenderer>> = {
 	string: StringField,
@@ -48,6 +49,7 @@ export const schemaRenderers: Partial<Record<Type, SchemaRenderer>> = {
 	picklist: PickListField,
 	liquids: LiquidsListField,
 	select: SelectField,
+    'item-requirement': ItemRequirementField,
 	texture: TextureField,
     textures: TexturesField,
 };

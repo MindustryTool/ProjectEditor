@@ -5,9 +5,10 @@ import { EffectFieldSchema } from "./effect";
 import { ItemStackSchema } from "./item-stack";
 import { LiquidStackSchema } from "./liquid-stack";
 import { LiquidFieldSchema } from "./liquid";
+import { metadata } from "./utils";
 
 export const consumeTypes = [
-    "Consume",
+	"Consume",
 	"ConsumeCoolant",
 	"ConsumeItemCharged",
 	"ConsumeItemDynamic",
@@ -34,7 +35,7 @@ export const consumeTypes = [
 ] as const;
 
 const consumeSchema = v.object({
-    type: v.optional( v.picklist(consumeTypes), 'Consume'),
+	type: v.optional(v.picklist(consumeTypes), "Consume"),
 	/** If true, this consumer will not influence consumer validity. */
 	optional: v.optional(v.boolean(), false),
 	/** If true, this consumer will be displayed as a boost input. */
@@ -103,7 +104,7 @@ const consumeItemBoostSchema = (context: ProjectContents) =>
 const consumeLiquidBaseSchema = v.object({ ...consumeSchema.entries, amount: v.number() });
 
 const consumeLiquidFilterSchema = v.object({
-    ...consumeLiquidBaseSchema.entries,
+	...consumeLiquidBaseSchema.entries,
 });
 
 const consumeLiquidFlammableSchema = v.object({ ...consumeLiquidFilterSchema.entries, minFlammability: v.number() });
@@ -158,4 +159,5 @@ export const ConsumesHjsonSchema = (context: ProjectContents) =>
 				powerBuffered: v.number(),
 			}),
 		),
+		metadata({ type: "consumes" }),
 	);

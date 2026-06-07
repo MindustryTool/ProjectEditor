@@ -24,6 +24,7 @@ export const types = [
 	"select",
 	"texture",
     "textures",
+    "item-requirement",
 	"never",
 ] as const;
 

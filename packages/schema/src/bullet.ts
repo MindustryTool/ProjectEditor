@@ -1582,6 +1582,7 @@ const classSchemaMap: Record<BulletClass, SchemaFn<BulletObjectSchema>> = {
 			sideLength: v.optional(v.number(), 29),
 			sideWidth: v.optional(v.number(), 0.7),
 			lightningSpacing: v.optional(v.number(), -1),
+            colors: v.optional(v.array(MindustryHexColorSchema)),
 		}),
 	LightningBulletType: (_context) => v.object({}),
 	LiquidBulletType: (_context) =>

@@ -48,17 +48,17 @@ export abstract class HjsonNode {
 	abstract isBoolean(): this is HjsonValueNode<boolean>;
 
 	valueNode(label: string): HjsonValueNode {
-		if (!this.isValue()) throw new Error(`expected value node at ${label}`);
+		if (!this.isValue()) throw new Error(`expected value node at ${label} but got ${JSON.stringify(this.valueOf())}`);
 		return this;
 	}
 
 	arrayNode(label: string): HjsonArrayNode {
-		if (!this.isArray()) throw new Error(`expected array node at ${label}`);
+		if (!this.isArray()) throw new Error(`expected array node at ${label} but got ${JSON.stringify(this.valueOf())}`);
 		return this;
 	}
 
 	objectNode(label: string): HjsonObjectNode {
-		if (!this.isObject()) throw new Error(`expected object node at ${label}`);
+		if (!this.isObject()) throw new Error(`expected object node at ${label} but got ${JSON.stringify(this.valueOf())}`);
 		return this;
 	}
 
