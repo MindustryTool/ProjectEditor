@@ -1,7 +1,25 @@
 import { cn } from "#/lib/utils";
+import type { SchemaMetadata } from "@project/schema";
 
-export function Field({ className, jsonPath, ...props }: React.ComponentProps<"div"> & { jsonPath: string }) {
-	return <div id={jsonPath} className={cn("space-y-2", className)} {...props} />;
+export function Field({
+	className,
+	jsonPath,
+	metadata,
+	...props
+}: React.ComponentProps<"div"> & { jsonPath: string; metadata: SchemaMetadata | null }) {
+	return (
+		<div
+			id={jsonPath}
+			className={cn(
+				"space-y-2",
+				{
+					"opacity-50": metadata?.disabled,
+				},
+				className,
+			)}
+			{...props}
+		/>
+	);
 }
 
 export function FieldLabel({ className, ...props }: React.ComponentProps<"label">) {

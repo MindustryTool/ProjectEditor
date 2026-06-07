@@ -15,7 +15,7 @@ import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import { removeByJsonPath } from "./util";
 import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
-import type { Research } from "@project/schema";
+import type { Research, SchemaMetadata } from "@project/schema";
 import { getSchemaMetadata } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 
@@ -64,7 +64,7 @@ export const ResearchField = React.memo(function ResearchField({
 
 	return (
 		<>
-			<Field jsonPath={jsonPath}>
+			<Field jsonPath={jsonPath} metadata={metadata}>
 				<FieldLabel>
 					<SchemaLabel name={name} metadata={metadata} />
 				</FieldLabel>
@@ -85,6 +85,7 @@ export const ResearchField = React.memo(function ResearchField({
 				<FieldControl className="grid gap-2">
 					<ResearchRequirementList
 						jsonPath={jsonPath}
+						metadata={metadata}
 						requirements={requirements}
 						onChange={(newRequirements) => handleChange(parent, newRequirements)}
 					/>
@@ -101,10 +102,12 @@ const ResearchRequirementList = React.memo(function ResearchRequirementList({
 	requirements,
 	onChange,
 	jsonPath,
+    metadata,
 }: {
 	requirements: string[];
 	onChange: (requirements: string[]) => void;
 	jsonPath: string;
+	metadata: SchemaMetadata | null;
 }) {
 	const {
 		findContent,
@@ -128,7 +131,7 @@ const ResearchRequirementList = React.memo(function ResearchRequirementList({
 		const selectedItem = findContent(itemName, [items]);
 
 		return (
-			<Field key={index} jsonPath={jsonPath + "." + index}>
+			<Field key={index} jsonPath={jsonPath + "." + index} metadata={metadata}>
 				<FieldControl className="flex gap-1">
 					<Dialog>
 						<DialogTrigger asChild>

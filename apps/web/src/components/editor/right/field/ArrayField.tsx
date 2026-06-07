@@ -46,7 +46,7 @@ export const ArrayField = React.memo(function ArrayField({ path, name, value, on
 	}
 
 	return (
-		<Field jsonPath={jsonPath}>
+		<Field jsonPath={jsonPath} metadata={metadata}>
 			<FieldLabel>
 				<SchemaLabel name={name} metadata={metadata} />
 			</FieldLabel>

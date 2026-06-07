@@ -39,7 +39,8 @@ export const ContentFieldSchema = CachedSchema((context: ProjectContents) =>
 		v.string(),
 		v.transform((v) => v.replaceAll(context.name + "-", "")),
 		v.picklist(context.items.map((item) => item.name.replaceAll(context.name + "-", ""))),
-	));
+	),
+);
 
 export const ItemRequirementSchema = v.pipe(
 	v.string(),
@@ -172,7 +173,7 @@ export const SoundHjsonSchema = v.pipe(
 	}),
 );
 
-export const SpriteHjsonSchema: SchemaFn = CachedSchema((context) =>
+export const SpriteFieldSchema: SchemaFn = CachedSchema((context) =>
 	v.pipe(
 		v.picklist([...new Set(context.sprites.map((sprite) => sprite.name))]),
 		v.minLength(1),
@@ -182,6 +183,32 @@ export const SpriteHjsonSchema: SchemaFn = CachedSchema((context) =>
 		}),
 	),
 );
+
+export const ArrayTextureSchema = (format: string, length: number | number[]) =>
+	v.nullish(
+		v.pipe(
+			v.string(),
+			v.minLength(1),
+			v.maxLength(127),
+			metadata({
+				type: "textures",
+			}),
+			v.metadata({ format, length }),
+		),
+	);
+
+export const TextureFieldSchema = (format: string, fallback?: string) =>
+	v.nullish(
+		v.pipe(
+			v.string(),
+			v.minLength(1),
+			v.maxLength(127),
+			metadata({
+				type: "texture",
+			}),
+			v.metadata({ format, fallback }),
+		),
+	);
 
 export type SchemaFn<
 	T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>> = v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>,

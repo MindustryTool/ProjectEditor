@@ -32,7 +32,7 @@ export const NumberField = React.memo(function NumberField({ name, value, onChan
 	);
 
 	return (
-		<Field jsonPath={jsonPath}>
+		<Field jsonPath={jsonPath} metadata={metadata}>
 			<FieldLabel>
 				<SchemaLabel name={name} metadata={metadata} />
 			</FieldLabel>

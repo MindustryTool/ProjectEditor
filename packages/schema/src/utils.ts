@@ -21,7 +21,7 @@ export const types = [
 	"picklist",
 	"liquids",
 	"select",
-	"sprite",
+	"texture",
 	"never",
 ] as const;
 
@@ -195,6 +195,7 @@ export type SchemaMetadata = {
 		field: string;
 		value: unknown;
 	};
+    disabled?: boolean;
 };
 
 export function metadata<T>(meta: SchemaMetadata): v.MetadataAction<T, SchemaMetadata> {
@@ -202,56 +203,46 @@ export function metadata<T>(meta: SchemaMetadata): v.MetadataAction<T, SchemaMet
 }
 
 export function getSchemaMetadata(schema: AnySchema): SchemaMetadata | null {
-	let result: SchemaMetadata | null = null;
+	const result: SchemaMetadata = {};
+	const visited = new WeakSet<object>();
 
-	const raw = schema as unknown as { pipe?: Array<{ type: string; metadata: SchemaMetadata }> };
-	if (raw.pipe) {
-		const first = raw.pipe[0] as unknown as { pipe?: unknown[] } | undefined;
-		if (first?.pipe) {
-			result = getSchemaMetadata(first as unknown as AnySchema);
+	function walk(value: unknown) {
+		if (!value || typeof value !== "object") return;
+		if (visited.has(value as object)) return;
+		visited.add(value as object);
+
+		const obj = value as Record<string, unknown>;
+
+		if (obj.type === "metadata" && obj.metadata) {
+			Object.assign(result, obj.metadata);
 		}
-		for (const action of raw.pipe) {
-			if (action.type === "metadata" && action.metadata) {
-				if (result === null) {
-					result = { ...action.metadata };
-				} else {
-					Object.assign(result, action.metadata);
-				}
-			}
-		}
-		if (result) return result;
-	}
 
-	const unwrapped = unwrapSchema(schema);
-	const s = unwrapped as unknown as { type: string; pipe?: Array<{ type: string; metadata: SchemaMetadata }> };
-
-	if (!s.pipe) return result;
-
-	const first = s.pipe[0] as unknown as { pipe?: unknown[] } | undefined;
-    
-	if (first?.pipe) {
-		const nested = getSchemaMetadata(first as unknown as AnySchema);
-		if (nested) {
-			if (result === null) {
-				result = { ...nested };
+		for (const child of Object.values(obj)) {
+			if (Array.isArray(child)) {
+				for (const item of child) walk(item);
 			} else {
-				result = Object.assign({}, nested, result);
+				walk(child);
 			}
 		}
 	}
 
-	for (const action of s.pipe) {
-		if (action.type === "metadata" && action.metadata) {
-			if (result === null) {
-				result = { ...action.metadata };
-			} else {
-				Object.assign(result, action.metadata);
-			}
-		}
-	}
+	walk(schema);
+	walk(unwrapSchema(schema));
 
-	return result;
+	return Object.keys(result).length ? result : null;
 }
+
+export function fixed<K extends string, T extends Record<K, AnySchema>>(from: T, key: K, fixedValue?: v.InferOutput<T[K]>): AnySchema {
+	const schema = from[key];
+
+	if (fixedValue) {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		return v.optional(v.pipe(schema, v.value(fixedValue as any) as any, metadata({ disabled: true })), fixedValue);
+	}
+
+	return v.optional(v.pipe(schema, metadata({ disabled: true })), fixedValue);
+}
+
 
 export type SpriteData = {
 	name: string;

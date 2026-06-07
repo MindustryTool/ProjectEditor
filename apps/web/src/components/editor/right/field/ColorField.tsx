@@ -17,7 +17,7 @@ export const ColorField = React.memo(function ColorField({ name, value, onChange
 	hexValue = useMemo(() => (hexValue?.startsWith("#") ? hexValue : "#" + hexValue), [hexValue]);
 
 	return (
-		<Field jsonPath={jsonPath}>
+		<Field jsonPath={jsonPath} metadata={metadata}>
 			<FieldLabel>
 				<SchemaLabel name={name} metadata={metadata} />
 			</FieldLabel>

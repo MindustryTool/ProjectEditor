@@ -49,7 +49,7 @@ export const EffectField = React.memo(function EffectField({ path, name, value, 
 					</Button>
 				</div>
 				<Collapsible>
-					<Field jsonPath={jsonPath}>
+					<Field jsonPath={jsonPath} metadata={metadata}>
 						<CollapsibleTrigger asChild>
 							<Button variant="outline" className="flex items-center justify-between w-full">
 								<span>{String(typeValue)}</span>
@@ -99,7 +99,7 @@ export const EffectField = React.memo(function EffectField({ path, name, value, 
 					Custom
 				</Button>
 			</div>
-			<Field jsonPath={jsonPath}>
+			<Field jsonPath={jsonPath} metadata={metadata}>
 				<Dialog>
 					<DialogTrigger asChild>
 						<Button className="w-full justify-between" variant="outline">

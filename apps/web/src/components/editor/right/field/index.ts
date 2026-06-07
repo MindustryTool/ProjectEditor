@@ -9,7 +9,6 @@ import { EffectField } from "./EffectField";
 import { PickListField } from "./PickListField";
 import { LiquidsListField } from "./LiquidsListField";
 import { SelectField } from "./SelectField";
-import { SpriteField } from "./SpriteField";
 
 export { StringField } from "./StringField";
 export { NumberField } from "./NumberField";
@@ -22,19 +21,19 @@ export { EffectField } from "./EffectField";
 export { PickListField } from "./PickListField";
 export { LiquidsListField } from "./LiquidsListField";
 export { SelectField } from "./SelectField";
-export { SpriteField } from "./SpriteField";
 export { FieldCategory } from "./FieldCategory";
 export { SchemaLabel } from "./SchemaLabel";
 export { SchemaDescription } from "./SchemaDescription";
 export { FieldIssue } from "./FieldIssue";
 export { ItemGrid } from "./ItemGrid";
 export { SchemaArrayItemEditor } from "./SchemaArrayItemEditor";
+export { TextureField } from "./TextureField";
 export { Field } from "./Field";
 export { removeByJsonPath } from "./util";
 
 import type { SchemaRenderer } from "#/components/editor/right/FieldsRenderer";
 import type { Type } from "@project/schema";
-
+import { TextureField } from "#/components/editor/right/field/TextureField";
 
 export const schemaRenderers: Partial<Record<Type, SchemaRenderer>> = {
 	string: StringField,
@@ -48,5 +47,5 @@ export const schemaRenderers: Partial<Record<Type, SchemaRenderer>> = {
 	picklist: PickListField,
 	liquids: LiquidsListField,
 	select: SelectField,
-	sprite: SpriteField,
+	texture: TextureField,
 };

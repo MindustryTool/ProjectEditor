@@ -34,7 +34,7 @@ export const PickListField = React.memo(function PickListField({
 
 		if (options.length > 10) {
 			return (
-				<Field jsonPath={jsonPath}>
+				<Field jsonPath={jsonPath} metadata={metadata}>
 					<FieldLabel>
 						<SchemaLabel name={name} metadata={metadata} />
 					</FieldLabel>
@@ -94,7 +94,7 @@ export const PickListField = React.memo(function PickListField({
 		}
 
 		return (
-			<Field jsonPath={jsonPath}>
+			<Field jsonPath={jsonPath} metadata={metadata}>
 				<FieldLabel>
 					<SchemaLabel name={name} metadata={metadata} />
 				</FieldLabel>
