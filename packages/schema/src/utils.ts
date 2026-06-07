@@ -22,6 +22,7 @@ export const types = [
 	"liquids",
 	"select",
 	"texture",
+    "textures",
 	"never",
 ] as const;
 

@@ -34,6 +34,7 @@ export { removeByJsonPath } from "./util";
 import type { SchemaRenderer } from "#/components/editor/right/FieldsRenderer";
 import type { Type } from "@project/schema";
 import { TextureField } from "#/components/editor/right/field/TextureField";
+import { TexturesField } from "#/components/editor/right/field/TexturesField";
 
 export const schemaRenderers: Partial<Record<Type, SchemaRenderer>> = {
 	string: StringField,
@@ -48,4 +49,5 @@ export const schemaRenderers: Partial<Record<Type, SchemaRenderer>> = {
 	liquids: LiquidsListField,
 	select: SelectField,
 	texture: TextureField,
+    textures: TexturesField,
 };

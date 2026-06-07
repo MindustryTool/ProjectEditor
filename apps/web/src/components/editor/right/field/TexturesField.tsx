@@ -1,0 +1,93 @@
+import { Field, FieldControl, FieldLabel } from "#/components/editor/right/field/Field";
+import { SchemaDescription } from "#/components/editor/right/field/SchemaDescription";
+import { SchemaLabel } from "#/components/editor/right/field/SchemaLabel";
+import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
+import { SpriteUploader, SpriteViewer } from "#/components/editor/right/SpritePicker";
+import { Button } from "#/components/ui/button";
+import { useProjectSession } from "@project/core";
+import { getSchemaMetadata, type SchemaMetadata } from "@project/schema";
+import { useState } from "react";
+
+export function TexturesField({ name, path, entrySchema, jsonPath }: SchemaRendererProps) {
+	const [render, setRender] = useState(3);
+	const metadata = getSchemaMetadata(entrySchema);
+	const filename = path.split("/").pop();
+	if (!filename) {
+		throw new Error("Texture field path must end with a file name");
+	}
+
+	const contentName = filename.split(".")[0];
+	if (!contentName) {
+		throw new Error("Texture field path must end with a file name");
+	}
+
+	const { format, length } = metadata as SchemaMetadata & { format: string; length: number[] | number };
+
+	if (!format) {
+		throw new Error("Texture field format must be specified");
+	}
+
+	if (!format.includes("#")) {
+		throw new Error("Texture field format must contain # placeholder");
+	}
+
+	const spritePath = path.replace("contents", "sprites").replace(filename, format.replace("@", contentName)) + ".png";
+
+	const spritePaths = Array.isArray(length)
+		? generatePattern(spritePath, length)
+		: Array.from({ length }).map((_, index) => spritePath.replace("#", index.toString()));
+
+	return (
+		<Field jsonPath={jsonPath} metadata={metadata}>
+			<FieldLabel>
+				<SchemaLabel name={name} metadata={metadata} />
+			</FieldLabel>
+			<FieldControl className="space-y-2 text-muted-foreground text-xs">
+				{spritePaths.map((spritePath, index) => (index >= render ? null : <Item key={index} spritePath={spritePath} />))}
+				{render !== spritePaths.length && (
+					<Button className="w-full" onClick={() => setRender(spritePaths.length)}>
+						Show all (+{spritePaths.length - render})
+					</Button>
+				)}
+			</FieldControl>
+			<SchemaDescription metadata={metadata} />
+		</Field>
+	);
+}
+
+function Item({ spritePath }: { spritePath: string }) {
+	const exists = useProjectSession((s) => spritePath !== null && s.treeSnapshot.getEntry(spritePath) !== undefined);
+	const filename = spritePath.split("/").pop();
+
+	if (!filename) {
+		throw new Error("Texture field path must end with a file name");
+	}
+
+	return (
+		<div className="space-y-2">
+			<FieldLabel>{filename}</FieldLabel>
+			{exists ? <SpriteViewer path={spritePath} /> : <SpriteUploader path={spritePath} />}
+		</div>
+	);
+}
+
+function generatePattern(pattern: string, dimensions: number[]): string[] {
+	const result: string[] = [];
+
+	function walk(indices: number[]): void {
+		if (indices.length === dimensions.length) {
+			let i = 0;
+			result.push(pattern.replace(/#/g, () => String(indices[i++])));
+			return;
+		}
+
+		for (let j = 0; j < dimensions[indices.length]!; j++) {
+			indices.push(j);
+			walk(indices);
+			indices.pop();
+		}
+	}
+
+	walk([]);
+	return result;
+}

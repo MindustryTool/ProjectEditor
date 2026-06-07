@@ -12,8 +12,7 @@ interface SpritePickerProps {
 
 export function SpritePicker({ path }: SpritePickerProps) {
 	const spritePath = resolveContentSprite(path);
-	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
-	const exists = spritePath !== null && treeSnapshot.getEntry(spritePath) !== undefined;
+	const exists = useProjectSession((s) => spritePath !== null && s.treeSnapshot.getEntry(spritePath) !== undefined);
 
 	if (spritePath === null) {
 		return <p className="text-sm text-muted-foreground">Not a content JSON file</p>;
@@ -27,7 +26,7 @@ export function SpritePicker({ path }: SpritePickerProps) {
 	);
 }
 
-function SpriteViewer({ path: spritePath }: { path: string }) {
+export function SpriteViewer({ path: spritePath }: { path: string }) {
 	const { fs } = useCurrentProject();
 	const { data, isLoading, isError, error, write } = useFile(spritePath);
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -96,7 +95,7 @@ function SpriteViewer({ path: spritePath }: { path: string }) {
 	);
 }
 
-function SpriteUploader({ path: spritePath }: { path: string }) {
+export function SpriteUploader({ path: spritePath }: { path: string }) {
 	const { fs } = useCurrentProject();
 	const inputRef = useRef<HTMLInputElement>(null);
 
@@ -117,13 +116,12 @@ function SpriteUploader({ path: spritePath }: { path: string }) {
 	);
 
 	return (
-		<div className="flex flex-col items-center gap-3 py-4">
-			<File className="text-muted-foreground w-16 h-16" strokeWidth={1} />
-			<p className="text-sm text-muted-foreground">No sprite set</p>
-			<Button variant="outline" size="icon-lg" aria-label="Upload sprite" onClick={handleClick}>
-				<Upload className="w-4 h-4" />
+		<>
+			<Button className="ml-auto w-full justify-between cursor-pointer" variant="outline" aria-label="Upload sprite" onClick={handleClick}>
+				<p className="text-sm text-muted-foreground">No sprite set</p>
+				<Upload className="size-4 ml-auto" />
 			</Button>
-			<input ref={inputRef} type="file" accept=".png" className="hidden" onChange={handleFileChange} />
-		</div>
+			<input ref={inputRef} type="file" accept=".png" className="hidden w-0" onChange={handleFileChange} />
+		</>
 	);
 }

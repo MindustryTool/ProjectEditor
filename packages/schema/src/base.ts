@@ -192,6 +192,7 @@ export const ArrayTextureSchema = (format: string, length: number | number[]) =>
 			v.maxLength(127),
 			metadata({
 				type: "textures",
+                category: 'texture'
 			}),
 			v.metadata({ format, length }),
 		),
@@ -205,6 +206,7 @@ export const TextureFieldSchema = (format: string, fallback?: string) =>
 			v.maxLength(127),
 			metadata({
 				type: "texture",
+                category: 'texture'
 			}),
 			v.metadata({ format, fallback }),
 		),
