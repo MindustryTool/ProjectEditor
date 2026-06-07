@@ -1,12 +1,10 @@
 import * as v from "valibot";
 import { metadata } from "./utils";
-import { ResearchSchema, type SchemaFn } from "./base";
+import { ResearchSchema } from "./research";
+import type { SchemaFn } from "./utils";
 
 export const sectorBaseObjectSchema = v.object({
-	captureWave: v.pipe(
-		v.optional(v.pipe(v.number(), v.integer()), 0),
-		metadata({ name: "editor.sector.capture-wave" }),
-	),
+	captureWave: v.pipe(v.optional(v.pipe(v.number(), v.integer()), 0), metadata({ name: "editor.sector.capture-wave" })),
 	difficulty: v.pipe(
 		v.optional(v.pipe(v.number(), v.minValue(0), v.maxValue(10)), 0),
 		metadata({
@@ -14,18 +12,9 @@ export const sectorBaseObjectSchema = v.object({
 			description: "editor.sector.difficulty-description",
 		}),
 	),
-	startWaveTimeMultiplier: v.pipe(
-		v.optional(v.number(), 2),
-		metadata({ name: "editor.sector.start-wave-time-multiplier" }),
-	),
-	addStartingItems: v.pipe(
-		v.optional(v.boolean(), false),
-		metadata({ name: "editor.sector.add-starting-items" }),
-	),
-	noLighting: v.pipe(
-		v.optional(v.boolean(), false),
-		metadata({ name: "editor.sector.no-lighting" }),
-	),
+	startWaveTimeMultiplier: v.pipe(v.optional(v.number(), 2), metadata({ name: "editor.sector.start-wave-time-multiplier" })),
+	addStartingItems: v.pipe(v.optional(v.boolean(), false), metadata({ name: "editor.sector.add-starting-items" })),
+	noLighting: v.pipe(v.optional(v.boolean(), false), metadata({ name: "editor.sector.no-lighting" })),
 	isLastSector: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
@@ -47,10 +36,7 @@ export const sectorBaseObjectSchema = v.object({
 			description: "editor.sector.show-hidden-description",
 		}),
 	),
-	showSectorLandInfo: v.pipe(
-		v.optional(v.boolean(), true),
-		metadata({ name: "editor.sector.show-sector-land-info" }),
-	),
+	showSectorLandInfo: v.pipe(v.optional(v.boolean(), true), metadata({ name: "editor.sector.show-sector-land-info" })),
 	overrideLaunchDefaults: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
@@ -86,14 +72,8 @@ export const sectorBaseObjectSchema = v.object({
 			description: "editor.sector.original-position-description",
 		}),
 	),
-	planet: v.pipe(
-		v.optional(v.picklist(["serpulo", "erekir"])),
-		metadata({ name: "editor.sector.planet" }),
-	),
-	sector: v.pipe(
-		v.optional(v.pipe(v.number(), v.minValue(0)), 0),
-		metadata({ name: "editor.sector.sector" }),
-	),
+	planet: v.pipe(v.optional(v.picklist(["serpulo", "erekir"])), metadata({ name: "editor.sector.planet" })),
+	sector: v.pipe(v.optional(v.pipe(v.number(), v.minValue(0)), 0), metadata({ name: "editor.sector.sector" })),
 });
 
 export const SectorHjsonSchema: SchemaFn = (context) =>

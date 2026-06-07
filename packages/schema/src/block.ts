@@ -1,17 +1,12 @@
 import * as v from "valibot";
-import {
-	ArrayTextureSchema,
-	CachedSchema,
-	ContentFieldSchema,
-	EnvSchema,
-	Envs,
-	ItemRequirementSchema,
-	MindustryHexColorSchema,
-	ResearchSchema,
-	SoundHjsonSchema,
-	TextureFieldSchema,
-	type SchemaFn,
-} from "./base";
+import { ArrayTextureSchema } from "./textures";
+import { CachedSchema } from "./utils";
+import { ItemRequirementSchema } from "./item-requirement";
+import { MindustryHexColorSchema } from "./mindustry-hex-color";
+import { ResearchSchema } from "./research";
+import { SoundHjsonSchema } from "./sound";
+import { TextureFieldSchema } from "./texture";
+import type { SchemaFn } from "./utils";
 import { EffectFieldSchema } from "./effect";
 import { ItemFieldSchema } from "./item";
 import { LiquidFieldSchema } from "./liquid";
@@ -25,6 +20,9 @@ import { BuildVisibilitySchema } from "./build-visibility";
 import { TeamSchema } from "./team";
 import { fixed, metadata } from "./utils";
 import { TargetPriority } from "./target-priority";
+import { ConsumesHjsonSchema } from "./consumes";
+import { ContentFieldSchema } from "./content";
+import { Envs, EnvSchema } from "./envs";
 
 export const blockTypes = [
 	// Power
@@ -193,8 +191,8 @@ export type BlockType = (typeof blockTypes)[number];
 
 export const blockObjectSchema = {
 	type: v.pipe(v.optional(v.picklist(blockTypes))),
-    shadowTexture: TextureFieldSchema("@-shadow"),
-    teamTexture: TextureFieldSchema("@-team"),
+	shadowTexture: TextureFieldSchema("@-shadow"),
+	teamTexture: TextureFieldSchema("@-team"),
 	// Items
 	hasItems: v.pipe(
 		v.optional(v.boolean(), false),
@@ -1240,12 +1238,11 @@ export const blockObjectSchema = {
 	regionRotated2: v.pipe(v.optional(v.number(), -1), metadata({ name: "editor.block.region-rotated2" })),
 };
 
-const liquidBlockObjectSchema = 
-	v.object({
-		liquidRegion: TextureFieldSchema("@-liquid"),
-		topRegion: TextureFieldSchema("@-top"),
-		bottomRegion: TextureFieldSchema("@bottom"),
-	});
+const liquidBlockObjectSchema = v.object({
+	liquidRegion: TextureFieldSchema("@-liquid"),
+	topRegion: TextureFieldSchema("@-top"),
+	bottomRegion: TextureFieldSchema("@bottom"),
+});
 
 const powerBlockObjectSchema = v.object({});
 
@@ -1438,75 +1435,74 @@ const thermalGeneratorObjectSchema = v.object({
 	),
 });
 
-const nuclearReactorObjectSchema = 
-	v.object({
-		...powerGeneratorObjectSchema.entries,
-		topTexture: TextureFieldSchema("@-top"),
-		lightsTexture: TextureFieldSchema("@-lights"),
-		itemDuration: v.pipe(
-			v.optional(v.number(), 120),
-			metadata({
-				name: "editor.block-nuclear-reactor.item-duration",
-				description: "editor.block-nuclear-reactor.item-duration-description",
-			}),
-		),
-		heating: v.pipe(
-			v.optional(v.number(), 0.01),
-			metadata({
-				name: "editor.block-nuclear-reactor.heating",
-				description: "editor.block-nuclear-reactor.heating-description",
-			}),
-		),
-		heatOutput: v.pipe(
-			v.optional(v.number(), 15),
-			metadata({
-				name: "editor.block-nuclear-reactor.heat-output",
-				description: "editor.block-nuclear-reactor.heat-output-description",
-			}),
-		),
-		heatWarmupRate: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({
-				name: "editor.block-nuclear-reactor.heat-warmup-rate",
-				description: "editor.block-nuclear-reactor.heat-warmup-rate-description",
-			}),
-		),
-		ambientCooldownTime: v.pipe(
-			v.optional(v.number(), 1200),
-			metadata({
-				name: "editor.block-nuclear-reactor.ambient-cooldown-time",
-				description: "editor.block-nuclear-reactor.ambient-cooldown-time-description",
-			}),
-		),
-		smokeThreshold: v.pipe(
-			v.optional(v.number(), 0.3),
-			metadata({
-				name: "editor.block-nuclear-reactor.smoke-threshold",
-				description: "editor.block-nuclear-reactor.smoke-threshold-description",
-			}),
-		),
-		flashThreshold: v.pipe(
-			v.optional(v.number(), 0.46),
-			metadata({
-				name: "editor.block-nuclear-reactor.flash-threshold",
-				description: "editor.block-nuclear-reactor.flash-threshold-description",
-			}),
-		),
-		coolantPower: v.pipe(
-			v.optional(v.number(), 0.5),
-			metadata({
-				name: "editor.block-nuclear-reactor.coolant-power",
-				description: "editor.block-nuclear-reactor.coolant-power-description",
-			}),
-		),
-		fuelItem: v.pipe(
-			v.optional(v.string()),
-			metadata({
-				name: "editor.block-nuclear-reactor.fuel-item",
-				description: "editor.block-nuclear-reactor.fuel-item-description",
-			}),
-		),
-	});
+const nuclearReactorObjectSchema = v.object({
+	...powerGeneratorObjectSchema.entries,
+	topTexture: TextureFieldSchema("@-top"),
+	lightsTexture: TextureFieldSchema("@-lights"),
+	itemDuration: v.pipe(
+		v.optional(v.number(), 120),
+		metadata({
+			name: "editor.block-nuclear-reactor.item-duration",
+			description: "editor.block-nuclear-reactor.item-duration-description",
+		}),
+	),
+	heating: v.pipe(
+		v.optional(v.number(), 0.01),
+		metadata({
+			name: "editor.block-nuclear-reactor.heating",
+			description: "editor.block-nuclear-reactor.heating-description",
+		}),
+	),
+	heatOutput: v.pipe(
+		v.optional(v.number(), 15),
+		metadata({
+			name: "editor.block-nuclear-reactor.heat-output",
+			description: "editor.block-nuclear-reactor.heat-output-description",
+		}),
+	),
+	heatWarmupRate: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({
+			name: "editor.block-nuclear-reactor.heat-warmup-rate",
+			description: "editor.block-nuclear-reactor.heat-warmup-rate-description",
+		}),
+	),
+	ambientCooldownTime: v.pipe(
+		v.optional(v.number(), 1200),
+		metadata({
+			name: "editor.block-nuclear-reactor.ambient-cooldown-time",
+			description: "editor.block-nuclear-reactor.ambient-cooldown-time-description",
+		}),
+	),
+	smokeThreshold: v.pipe(
+		v.optional(v.number(), 0.3),
+		metadata({
+			name: "editor.block-nuclear-reactor.smoke-threshold",
+			description: "editor.block-nuclear-reactor.smoke-threshold-description",
+		}),
+	),
+	flashThreshold: v.pipe(
+		v.optional(v.number(), 0.46),
+		metadata({
+			name: "editor.block-nuclear-reactor.flash-threshold",
+			description: "editor.block-nuclear-reactor.flash-threshold-description",
+		}),
+	),
+	coolantPower: v.pipe(
+		v.optional(v.number(), 0.5),
+		metadata({
+			name: "editor.block-nuclear-reactor.coolant-power",
+			description: "editor.block-nuclear-reactor.coolant-power-description",
+		}),
+	),
+	fuelItem: v.pipe(
+		v.optional(v.string()),
+		metadata({
+			name: "editor.block-nuclear-reactor.fuel-item",
+			description: "editor.block-nuclear-reactor.fuel-item-description",
+		}),
+	),
+});
 
 const impactReactorObjectSchema = v.object({
 	...powerGeneratorObjectSchema.entries,
@@ -1527,7 +1523,7 @@ const impactReactorObjectSchema = v.object({
 });
 
 const variableReactorObjectSchema = v.object({
-    lightsTexture: TextureFieldSchema("@-lights"),
+	lightsTexture: TextureFieldSchema("@-lights"),
 	...powerGeneratorObjectSchema.entries,
 	maxHeat: v.pipe(
 		v.optional(v.number(), 100),
@@ -1580,24 +1576,23 @@ const variableReactorObjectSchema = v.object({
 	),
 });
 
-const lightBlockObjectSchema = 
-	v.object({
-		topTexture: TextureFieldSchema("@-top"),
-		brightness: v.pipe(
-			v.optional(v.number(), 0.9),
-			metadata({
-				name: "editor.block-light-block.brightness",
-				description: "editor.block-light-block.brightness-description",
-			}),
-		),
-		radius: v.pipe(
-			v.optional(v.number(), 200),
-			metadata({
-				name: "editor.block-light-block.radius",
-				description: "editor.block-light-block.radius-description",
-			}),
-		),
-	});
+const lightBlockObjectSchema = v.object({
+	topTexture: TextureFieldSchema("@-top"),
+	brightness: v.pipe(
+		v.optional(v.number(), 0.9),
+		metadata({
+			name: "editor.block-light-block.brightness",
+			description: "editor.block-light-block.brightness-description",
+		}),
+	),
+	radius: v.pipe(
+		v.optional(v.number(), 200),
+		metadata({
+			name: "editor.block-light-block.radius",
+			description: "editor.block-light-block.radius-description",
+		}),
+	),
+});
 
 const powerNodeObjectSchema = v.object({
 	...powerBlockObjectSchema.entries,
@@ -1647,29 +1642,28 @@ const powerNodeObjectSchema = v.object({
 	),
 });
 
-const longPowerNodeObjectSchema = 
-	v.object({
-		glowTexture: TextureFieldSchema("@-glow"),
-		...powerNodeObjectSchema.entries,
-		glowScl: v.pipe(
-			v.optional(v.number(), 16),
-			metadata({
-				name: "editor.block-long-power-node.glow-scl",
-				description: "editor.block-long-power-node.glow-scl-description",
-			}),
-		),
-		glowMag: v.pipe(
-			v.optional(v.number(), 0.6),
-			metadata({
-				name: "editor.block-long-power-node.glow-mag",
-				description: "editor.block-long-power-node.glow-mag-description",
-			}),
-		),
-	});
+const longPowerNodeObjectSchema = v.object({
+	glowTexture: TextureFieldSchema("@-glow"),
+	...powerNodeObjectSchema.entries,
+	glowScl: v.pipe(
+		v.optional(v.number(), 16),
+		metadata({
+			name: "editor.block-long-power-node.glow-scl",
+			description: "editor.block-long-power-node.glow-scl-description",
+		}),
+	),
+	glowMag: v.pipe(
+		v.optional(v.number(), 0.6),
+		metadata({
+			name: "editor.block-long-power-node.glow-mag",
+			description: "editor.block-long-power-node.glow-mag-description",
+		}),
+	),
+});
 
 const beamNodeObjectSchema = v.object({
-    beamTexture: TextureFieldSchema("@-beam", 'power-beam'),
-    beamEndTexture: TextureFieldSchema("@-beam-end", 'power-beam-end'),
+	beamTexture: TextureFieldSchema("@-beam", "power-beam"),
+	beamEndTexture: TextureFieldSchema("@-beam-end", "power-beam-end"),
 	...powerBlockObjectSchema.entries,
 	range: v.pipe(
 		v.optional(v.number(), 5),
@@ -1723,101 +1717,99 @@ const storageBlockObjectSchema = v.object({
 	),
 });
 
-const coreBlockObjectSchema = 
-	v.object({
-		...storageBlockObjectSchema.entries,
-		thruster1Texture: TextureFieldSchema("@-thruster1", "clear-effect"),
-		thruster2Texture: TextureFieldSchema("@-thruster2", "clear-effect"),
-		thrusterLength: v.pipe(
-			v.optional(v.number(), 3.5),
-			metadata({
-				name: "editor.block-core-block.thruster-length",
-				description: "editor.block-core-block.thruster-length-description",
-			}),
-		),
-		thrusterOffset: v.pipe(
-			v.optional(v.number(), 0),
-			metadata({
-				name: "editor.block-core-block.thruster-offset",
-				description: "editor.block-core-block.thruster-offset-description",
-			}),
-		),
-		isFirstTier: v.pipe(
-			v.optional(v.boolean(), false),
-			metadata({
-				name: "editor.block-core-block.is-first-tier",
-				description: "editor.block-core-block.is-first-tier-description",
-			}),
-		),
-		allowSpawn: v.pipe(
-			v.optional(v.boolean(), true),
-			metadata({
-				name: "editor.block-core-block.allow-spawn",
-				description: "editor.block-core-block.allow-spawn-description",
-			}),
-		),
-		requiresCoreZone: v.pipe(
-			v.optional(v.boolean(), false),
-			metadata({
-				name: "editor.block-core-block.requires-core-zone",
-				description: "editor.block-core-block.requires-core-zone-description",
-			}),
-		),
-		incinerateNonBuildable: v.pipe(
-			v.optional(v.boolean(), false),
-			metadata({
-				name: "editor.block-core-block.incinerate-non-buildable",
-				description: "editor.block-core-block.incinerate-non-buildable-description",
-			}),
-		),
-		landDuration: v.pipe(
-			v.optional(v.number(), 160),
-			metadata({
-				name: "editor.block-core-block.land-duration",
-				description: "editor.block-core-block.land-duration-description",
-			}),
-		),
-		launchSoundVolume: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({
-				name: "editor.block-core-block.launch-sound-volume",
-				description: "editor.block-core-block.launch-sound-volume-description",
-			}),
-		),
-		landSoundVolume: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({
-				name: "editor.block-core-block.land-sound-volume",
-				description: "editor.block-core-block.land-sound-volume-description",
-			}),
-		),
-		captureInvicibility: v.pipe(
-			v.optional(v.number(), 900),
-			metadata({
-				name: "editor.block-core-block.capture-invicibility",
-				description: "editor.block-core-block.capture-invicibility-description",
-			}),
-		),
-	});
+const coreBlockObjectSchema = v.object({
+	...storageBlockObjectSchema.entries,
+	thruster1Texture: TextureFieldSchema("@-thruster1", "clear-effect"),
+	thruster2Texture: TextureFieldSchema("@-thruster2", "clear-effect"),
+	thrusterLength: v.pipe(
+		v.optional(v.number(), 3.5),
+		metadata({
+			name: "editor.block-core-block.thruster-length",
+			description: "editor.block-core-block.thruster-length-description",
+		}),
+	),
+	thrusterOffset: v.pipe(
+		v.optional(v.number(), 0),
+		metadata({
+			name: "editor.block-core-block.thruster-offset",
+			description: "editor.block-core-block.thruster-offset-description",
+		}),
+	),
+	isFirstTier: v.pipe(
+		v.optional(v.boolean(), false),
+		metadata({
+			name: "editor.block-core-block.is-first-tier",
+			description: "editor.block-core-block.is-first-tier-description",
+		}),
+	),
+	allowSpawn: v.pipe(
+		v.optional(v.boolean(), true),
+		metadata({
+			name: "editor.block-core-block.allow-spawn",
+			description: "editor.block-core-block.allow-spawn-description",
+		}),
+	),
+	requiresCoreZone: v.pipe(
+		v.optional(v.boolean(), false),
+		metadata({
+			name: "editor.block-core-block.requires-core-zone",
+			description: "editor.block-core-block.requires-core-zone-description",
+		}),
+	),
+	incinerateNonBuildable: v.pipe(
+		v.optional(v.boolean(), false),
+		metadata({
+			name: "editor.block-core-block.incinerate-non-buildable",
+			description: "editor.block-core-block.incinerate-non-buildable-description",
+		}),
+	),
+	landDuration: v.pipe(
+		v.optional(v.number(), 160),
+		metadata({
+			name: "editor.block-core-block.land-duration",
+			description: "editor.block-core-block.land-duration-description",
+		}),
+	),
+	launchSoundVolume: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({
+			name: "editor.block-core-block.launch-sound-volume",
+			description: "editor.block-core-block.launch-sound-volume-description",
+		}),
+	),
+	landSoundVolume: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({
+			name: "editor.block-core-block.land-sound-volume",
+			description: "editor.block-core-block.land-sound-volume-description",
+		}),
+	),
+	captureInvicibility: v.pipe(
+		v.optional(v.number(), 900),
+		metadata({
+			name: "editor.block-core-block.capture-invicibility",
+			description: "editor.block-core-block.capture-invicibility-description",
+		}),
+	),
+});
 
-const unloaderObjectSchema = 
-	v.object({
-		centerTexture: TextureFieldSchema("@-center", "unloader-center"),
-		speed: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({
-				name: "editor.block-unloader.speed",
-				description: "editor.block-unloader.speed-description",
-			}),
-		),
-		allowCoreUnload: v.pipe(
-			v.optional(v.boolean(), true),
-			metadata({
-				name: "editor.block-unloader.allow-core-unload",
-				description: "editor.block-unloader.allow-core-unload-description",
-			}),
-		),
-	});
+const unloaderObjectSchema = v.object({
+	centerTexture: TextureFieldSchema("@-center", "unloader-center"),
+	speed: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({
+			name: "editor.block-unloader.speed",
+			description: "editor.block-unloader.speed-description",
+		}),
+	),
+	allowCoreUnload: v.pipe(
+		v.optional(v.boolean(), true),
+		metadata({
+			name: "editor.block-unloader.allow-core-unload",
+			description: "editor.block-unloader.allow-core-unload-description",
+		}),
+	),
+});
 
 // Liquid variant schemas
 const liquidRouterObjectSchema = v.object({
@@ -1831,9 +1823,9 @@ const liquidRouterObjectSchema = v.object({
 });
 
 const conduitObjectSchema = v.object({
-    topTextures: ArrayTextureSchema('@-top-#', 5),
-    bottomTextures: ArrayTextureSchema('@-bottom-#', 5),
-    capTexture: TextureFieldSchema("@-cap"),
+	topTextures: ArrayTextureSchema("@-top-#", 5),
+	bottomTextures: ArrayTextureSchema("@-bottom-#", 5),
+	capTexture: TextureFieldSchema("@-cap"),
 	padCorners: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
@@ -1875,58 +1867,56 @@ const pumpObjectSchema = v.object({
 	),
 });
 
-const solidPumpObjectSchema = 
-	v.object({
-		...pumpObjectSchema.entries,
-		rotatorTexture: TextureFieldSchema("@-rotator"),
-		result: v.pipe(
-			v.optional(v.string(), "water"),
-			metadata({
-				name: "editor.block-solid-pump.result",
-				description: "editor.block-solid-pump.result-description",
-			}),
-		),
-		updateEffectChance: v.pipe(
-			v.optional(v.number(), 0.02),
-			metadata({
-				name: "editor.block-solid-pump.update-effect-chance",
-				description: "editor.block-solid-pump.update-effect-chance-description",
-			}),
-		),
-		rotateSpeed: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({
-				name: "editor.block-solid-pump.rotate-speed",
-				description: "editor.block-solid-pump.rotate-speed-description",
-			}),
-		),
-		baseEfficiency: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({
-				name: "editor.block-solid-pump.base-efficiency",
-				description: "editor.block-solid-pump.base-efficiency-description",
-			}),
-		),
-		attribute: v.pipe(
-			v.optional(v.string()),
-			metadata({
-				name: "editor.block-solid-pump.attribute",
-				description: "editor.block-solid-pump.attribute-description",
-			}),
-		),
-	});
+const solidPumpObjectSchema = v.object({
+	...pumpObjectSchema.entries,
+	rotatorTexture: TextureFieldSchema("@-rotator"),
+	result: v.pipe(
+		v.optional(v.string(), "water"),
+		metadata({
+			name: "editor.block-solid-pump.result",
+			description: "editor.block-solid-pump.result-description",
+		}),
+	),
+	updateEffectChance: v.pipe(
+		v.optional(v.number(), 0.02),
+		metadata({
+			name: "editor.block-solid-pump.update-effect-chance",
+			description: "editor.block-solid-pump.update-effect-chance-description",
+		}),
+	),
+	rotateSpeed: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({
+			name: "editor.block-solid-pump.rotate-speed",
+			description: "editor.block-solid-pump.rotate-speed-description",
+		}),
+	),
+	baseEfficiency: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({
+			name: "editor.block-solid-pump.base-efficiency",
+			description: "editor.block-solid-pump.base-efficiency-description",
+		}),
+	),
+	attribute: v.pipe(
+		v.optional(v.string()),
+		metadata({
+			name: "editor.block-solid-pump.attribute",
+			description: "editor.block-solid-pump.attribute-description",
+		}),
+	),
+});
 
-const frackerObjectSchema = 
-	v.object({
-		...solidPumpObjectSchema.entries,
-		itemUseTime: v.pipe(
-			v.optional(v.number(), 100),
-			metadata({
-				name: "editor.block-fracker.item-use-time",
-				description: "editor.block-fracker.item-use-time-description",
-			}),
-		),
-	});
+const frackerObjectSchema = v.object({
+	...solidPumpObjectSchema.entries,
+	itemUseTime: v.pipe(
+		v.optional(v.number(), 100),
+		metadata({
+			name: "editor.block-fracker.item-use-time",
+			description: "editor.block-fracker.item-use-time-description",
+		}),
+	),
+});
 
 // Production variant schemas
 const genericCrafterObjectSchema = v.object({
@@ -2112,11 +2102,11 @@ const separatorObjectSchema = v.object({
 });
 
 const drillObjectSchema = v.object({
-      rimTexture: TextureFieldSchema("@-rim"),
-    rotatorRegion: TextureFieldSchema("@-rotator"),
-    topRegion: TextureFieldSchema("@-top"),
-    bottomRegion: TextureFieldSchema("@-bottom"),
-    itemRegion: TextureFieldSchema("@-item",'drill-item-@size'),
+	rimTexture: TextureFieldSchema("@-rim"),
+	rotatorRegion: TextureFieldSchema("@-rotator"),
+	topRegion: TextureFieldSchema("@-top"),
+	bottomRegion: TextureFieldSchema("@-bottom"),
+	itemRegion: TextureFieldSchema("@-item", "drill-item-@size"),
 	tier: v.pipe(
 		v.optional(v.number(), 0),
 		metadata({
@@ -2224,213 +2214,211 @@ const drillObjectSchema = v.object({
 	),
 });
 
-const burstDrillObjectSchema = 
-	v.object({
-		...drillObjectSchema.entries,
-		topInvertTexture: TextureFieldSchema("@-top-invert"),
-		glowTexture: TextureFieldSchema("@-glow"),
-		arrowTexture: TextureFieldSchema("@-arrow"),
-		arrowBlurTexture: TextureFieldSchema("@-arrow-blur"),
-		shake: v.pipe(
-			v.optional(v.number(), 2),
-			metadata({
-				name: "editor.block-burst-drill.shake",
-				description: "editor.block-burst-drill.shake-description",
-			}),
-		),
-		invertedTime: v.pipe(
-			v.optional(v.number(), 200),
-			metadata({
-				name: "editor.block-burst-drill.inverted-time",
-				description: "editor.block-burst-drill.inverted-time-description",
-			}),
-		),
-		arrowSpacing: v.pipe(
-			v.optional(v.number(), 4),
-			metadata({
-				name: "editor.block-burst-drill.arrow-spacing",
-				description: "editor.block-burst-drill.arrow-spacing-description",
-			}),
-		),
-		arrowOffset: v.pipe(
-			v.optional(v.number(), 0),
-			metadata({
-				name: "editor.block-burst-drill.arrow-offset",
-				description: "editor.block-burst-drill.arrow-offset-description",
-			}),
-		),
-		arrows: v.pipe(
-			v.optional(v.number(), 3),
-			metadata({
-				name: "editor.block-burst-drill.arrows",
-				description: "editor.block-burst-drill.arrows-description",
-			}),
-		),
-		drillSoundVolume: v.pipe(
-			v.optional(v.number(), 0.6),
-			metadata({
-				name: "editor.block-burst-drill.drill-sound-volume",
-				description: "editor.block-burst-drill.drill-sound-volume-description",
-			}),
-		),
-		drillSoundPitchRand: v.pipe(
-			v.optional(v.number(), 0.1),
-			metadata({
-				name: "editor.block-burst-drill.drill-sound-pitch-rand",
-				description: "editor.block-burst-drill.drill-sound-pitch-rand-description",
-			}),
-		),
-	});
+const burstDrillObjectSchema = v.object({
+	...drillObjectSchema.entries,
+	topInvertTexture: TextureFieldSchema("@-top-invert"),
+	glowTexture: TextureFieldSchema("@-glow"),
+	arrowTexture: TextureFieldSchema("@-arrow"),
+	arrowBlurTexture: TextureFieldSchema("@-arrow-blur"),
+	shake: v.pipe(
+		v.optional(v.number(), 2),
+		metadata({
+			name: "editor.block-burst-drill.shake",
+			description: "editor.block-burst-drill.shake-description",
+		}),
+	),
+	invertedTime: v.pipe(
+		v.optional(v.number(), 200),
+		metadata({
+			name: "editor.block-burst-drill.inverted-time",
+			description: "editor.block-burst-drill.inverted-time-description",
+		}),
+	),
+	arrowSpacing: v.pipe(
+		v.optional(v.number(), 4),
+		metadata({
+			name: "editor.block-burst-drill.arrow-spacing",
+			description: "editor.block-burst-drill.arrow-spacing-description",
+		}),
+	),
+	arrowOffset: v.pipe(
+		v.optional(v.number(), 0),
+		metadata({
+			name: "editor.block-burst-drill.arrow-offset",
+			description: "editor.block-burst-drill.arrow-offset-description",
+		}),
+	),
+	arrows: v.pipe(
+		v.optional(v.number(), 3),
+		metadata({
+			name: "editor.block-burst-drill.arrows",
+			description: "editor.block-burst-drill.arrows-description",
+		}),
+	),
+	drillSoundVolume: v.pipe(
+		v.optional(v.number(), 0.6),
+		metadata({
+			name: "editor.block-burst-drill.drill-sound-volume",
+			description: "editor.block-burst-drill.drill-sound-volume-description",
+		}),
+	),
+	drillSoundPitchRand: v.pipe(
+		v.optional(v.number(), 0.1),
+		metadata({
+			name: "editor.block-burst-drill.drill-sound-pitch-rand",
+			description: "editor.block-burst-drill.drill-sound-pitch-rand-description",
+		}),
+	),
+});
 
-const beamDrillObjectSchema = 
-	v.object({
-		beamTexture: TextureFieldSchema("@-beam", "drill-laser"),
-		beamEndTexture: TextureFieldSchema("@-beam-end", "drill-laser-end"),
-		beamCenterTexture: TextureFieldSchema("@-beam-center", "drill-laser-center"),
-		beamBoostTexture: TextureFieldSchema("@-beam-boost", "drill-laser-boost"),
-		beamBoostEndTexture: TextureFieldSchema("@-beam-boost-end", "drill-laser-boost-end"),
-		beamBoostCenterTexture: TextureFieldSchema("@-beam-boost-center", "drill-laser-boost-center"),
-		topTexture: TextureFieldSchema("@-top"),
-		glowTexture: TextureFieldSchema("@-glow"),
-		drillTime: v.pipe(
-			v.optional(v.number(), 200),
-			metadata({
-				name: "editor.block-beam-drill.drill-time",
-				description: "editor.block-beam-drill.drill-time-description",
-			}),
-		),
-		range: v.pipe(
-			v.optional(v.number(), 5),
-			metadata({
-				name: "editor.block-beam-drill.range",
-				description: "editor.block-beam-drill.range-description",
-			}),
-		),
-		tier: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({
-				name: "editor.block-beam-drill.tier",
-				description: "editor.block-beam-drill.tier-description",
-			}),
-		),
-		laserWidth: v.pipe(
-			v.optional(v.number(), 0.65),
-			metadata({
-				name: "editor.block-beam-drill.laser-width",
-				description: "editor.block-beam-drill.laser-width-description",
-			}),
-		),
-		optionalBoostIntensity: v.pipe(
-			v.optional(v.number(), 2.5),
-			metadata({
-				name: "editor.block-beam-drill.optional-boost-intensity",
-				description: "editor.block-beam-drill.optional-boost-intensity-description",
-			}),
-		),
-		drillMultipliers: v.pipe(
-			v.optional(v.record(v.string(), v.number())),
-			metadata({
-				name: "editor.block-beam-drill.drill-multipliers",
-				description: "editor.block-beam-drill.drill-multipliers-description",
-			}),
-		),
-		blockedItem: v.pipe(
-			v.optional(v.string()),
-			metadata({
-				name: "editor.block-beam-drill.blocked-item",
-				description: "editor.block-beam-drill.blocked-item-description",
-			}),
-		),
-		blockedItems: v.pipe(
-			v.optional(v.array(v.string())),
-			metadata({
-				name: "editor.block-beam-drill.blocked-items",
-				description: "editor.block-beam-drill.blocked-items-description",
-			}),
-		),
-		glowIntensity: v.pipe(
-			v.optional(v.number(), 0.2),
-			metadata({
-				name: "editor.block-beam-drill.glow-intensity",
-				description: "editor.block-beam-drill.glow-intensity-description",
-			}),
-		),
-		pulseIntensity: v.pipe(
-			v.optional(v.number(), 0.07),
-			metadata({
-				name: "editor.block-beam-drill.pulse-intensity",
-				description: "editor.block-beam-drill.pulse-intensity-description",
-			}),
-		),
-		glowScl: v.pipe(
-			v.optional(v.number(), 3),
-			metadata({
-				name: "editor.block-beam-drill.glow-scl",
-				description: "editor.block-beam-drill.glow-scl-description",
-			}),
-		),
-		sparks: v.pipe(
-			v.optional(v.number(), 7),
-			metadata({
-				name: "editor.block-beam-drill.sparks",
-				description: "editor.block-beam-drill.sparks-description",
-			}),
-		),
-		sparkRange: v.pipe(
-			v.optional(v.number(), 10),
-			metadata({
-				name: "editor.block-beam-drill.spark-range",
-				description: "editor.block-beam-drill.spark-range-description",
-			}),
-		),
-		sparkLife: v.pipe(
-			v.optional(v.number(), 27),
-			metadata({
-				name: "editor.block-beam-drill.spark-life",
-				description: "editor.block-beam-drill.spark-life-description",
-			}),
-		),
-		sparkRecurrence: v.pipe(
-			v.optional(v.number(), 4),
-			metadata({
-				name: "editor.block-beam-drill.spark-recurrence",
-				description: "editor.block-beam-drill.spark-recurrence-description",
-			}),
-		),
-		sparkSpread: v.pipe(
-			v.optional(v.number(), 45),
-			metadata({
-				name: "editor.block-beam-drill.spark-spread",
-				description: "editor.block-beam-drill.spark-spread-description",
-			}),
-		),
-		sparkSize: v.pipe(
-			v.optional(v.number(), 3.5),
-			metadata({
-				name: "editor.block-beam-drill.spark-size",
-				description: "editor.block-beam-drill.spark-size-description",
-			}),
-		),
-		heatPulse: v.pipe(
-			v.optional(v.number(), 0.3),
-			metadata({
-				name: "editor.block-beam-drill.heat-pulse",
-				description: "editor.block-beam-drill.heat-pulse-description",
-			}),
-		),
-		heatPulseScl: v.pipe(
-			v.optional(v.number(), 7),
-			metadata({
-				name: "editor.block-beam-drill.heat-pulse-scl",
-				description: "editor.block-beam-drill.heat-pulse-scl-description",
-			}),
-		),
-	});
+const beamDrillObjectSchema = v.object({
+	beamTexture: TextureFieldSchema("@-beam", "drill-laser"),
+	beamEndTexture: TextureFieldSchema("@-beam-end", "drill-laser-end"),
+	beamCenterTexture: TextureFieldSchema("@-beam-center", "drill-laser-center"),
+	beamBoostTexture: TextureFieldSchema("@-beam-boost", "drill-laser-boost"),
+	beamBoostEndTexture: TextureFieldSchema("@-beam-boost-end", "drill-laser-boost-end"),
+	beamBoostCenterTexture: TextureFieldSchema("@-beam-boost-center", "drill-laser-boost-center"),
+	topTexture: TextureFieldSchema("@-top"),
+	glowTexture: TextureFieldSchema("@-glow"),
+	drillTime: v.pipe(
+		v.optional(v.number(), 200),
+		metadata({
+			name: "editor.block-beam-drill.drill-time",
+			description: "editor.block-beam-drill.drill-time-description",
+		}),
+	),
+	range: v.pipe(
+		v.optional(v.number(), 5),
+		metadata({
+			name: "editor.block-beam-drill.range",
+			description: "editor.block-beam-drill.range-description",
+		}),
+	),
+	tier: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({
+			name: "editor.block-beam-drill.tier",
+			description: "editor.block-beam-drill.tier-description",
+		}),
+	),
+	laserWidth: v.pipe(
+		v.optional(v.number(), 0.65),
+		metadata({
+			name: "editor.block-beam-drill.laser-width",
+			description: "editor.block-beam-drill.laser-width-description",
+		}),
+	),
+	optionalBoostIntensity: v.pipe(
+		v.optional(v.number(), 2.5),
+		metadata({
+			name: "editor.block-beam-drill.optional-boost-intensity",
+			description: "editor.block-beam-drill.optional-boost-intensity-description",
+		}),
+	),
+	drillMultipliers: v.pipe(
+		v.optional(v.record(v.string(), v.number())),
+		metadata({
+			name: "editor.block-beam-drill.drill-multipliers",
+			description: "editor.block-beam-drill.drill-multipliers-description",
+		}),
+	),
+	blockedItem: v.pipe(
+		v.optional(v.string()),
+		metadata({
+			name: "editor.block-beam-drill.blocked-item",
+			description: "editor.block-beam-drill.blocked-item-description",
+		}),
+	),
+	blockedItems: v.pipe(
+		v.optional(v.array(v.string())),
+		metadata({
+			name: "editor.block-beam-drill.blocked-items",
+			description: "editor.block-beam-drill.blocked-items-description",
+		}),
+	),
+	glowIntensity: v.pipe(
+		v.optional(v.number(), 0.2),
+		metadata({
+			name: "editor.block-beam-drill.glow-intensity",
+			description: "editor.block-beam-drill.glow-intensity-description",
+		}),
+	),
+	pulseIntensity: v.pipe(
+		v.optional(v.number(), 0.07),
+		metadata({
+			name: "editor.block-beam-drill.pulse-intensity",
+			description: "editor.block-beam-drill.pulse-intensity-description",
+		}),
+	),
+	glowScl: v.pipe(
+		v.optional(v.number(), 3),
+		metadata({
+			name: "editor.block-beam-drill.glow-scl",
+			description: "editor.block-beam-drill.glow-scl-description",
+		}),
+	),
+	sparks: v.pipe(
+		v.optional(v.number(), 7),
+		metadata({
+			name: "editor.block-beam-drill.sparks",
+			description: "editor.block-beam-drill.sparks-description",
+		}),
+	),
+	sparkRange: v.pipe(
+		v.optional(v.number(), 10),
+		metadata({
+			name: "editor.block-beam-drill.spark-range",
+			description: "editor.block-beam-drill.spark-range-description",
+		}),
+	),
+	sparkLife: v.pipe(
+		v.optional(v.number(), 27),
+		metadata({
+			name: "editor.block-beam-drill.spark-life",
+			description: "editor.block-beam-drill.spark-life-description",
+		}),
+	),
+	sparkRecurrence: v.pipe(
+		v.optional(v.number(), 4),
+		metadata({
+			name: "editor.block-beam-drill.spark-recurrence",
+			description: "editor.block-beam-drill.spark-recurrence-description",
+		}),
+	),
+	sparkSpread: v.pipe(
+		v.optional(v.number(), 45),
+		metadata({
+			name: "editor.block-beam-drill.spark-spread",
+			description: "editor.block-beam-drill.spark-spread-description",
+		}),
+	),
+	sparkSize: v.pipe(
+		v.optional(v.number(), 3.5),
+		metadata({
+			name: "editor.block-beam-drill.spark-size",
+			description: "editor.block-beam-drill.spark-size-description",
+		}),
+	),
+	heatPulse: v.pipe(
+		v.optional(v.number(), 0.3),
+		metadata({
+			name: "editor.block-beam-drill.heat-pulse",
+			description: "editor.block-beam-drill.heat-pulse-description",
+		}),
+	),
+	heatPulseScl: v.pipe(
+		v.optional(v.number(), 7),
+		metadata({
+			name: "editor.block-beam-drill.heat-pulse-scl",
+			description: "editor.block-beam-drill.heat-pulse-scl-description",
+		}),
+	),
+});
 
 const wallCrafterObjectSchema = v.object({
 	topRegion: TextureFieldSchema("@-top"),
 	rotatorBottomRegion: TextureFieldSchema("@-rotator-bottom"),
-    rotatorRegion: TextureFieldSchema("@-rotator"),
+	rotatorRegion: TextureFieldSchema("@-rotator"),
 	drillTime: v.pipe(
 		v.optional(v.number(), 150),
 		metadata({
@@ -2496,18 +2484,17 @@ const wallCrafterObjectSchema = v.object({
 	),
 });
 
-const itemIncineratorObjectSchema = 
-	v.object({
-		liquidRegion: TextureFieldSchema("@-liquid"),
-		topRegion: TextureFieldSchema("@-top"),
-		effectChance: v.pipe(
-			v.optional(v.number(), 0.2),
-			metadata({
-				name: "editor.block-item-incinerator.effect-chance",
-				description: "editor.block-item-incinerator.effect-chance-description",
-			}),
-		),
-	});
+const itemIncineratorObjectSchema = v.object({
+	liquidRegion: TextureFieldSchema("@-liquid"),
+	topRegion: TextureFieldSchema("@-top"),
+	effectChance: v.pipe(
+		v.optional(v.number(), 0.2),
+		metadata({
+			name: "editor.block-item-incinerator.effect-chance",
+			description: "editor.block-item-incinerator.effect-chance-description",
+		}),
+	),
+});
 
 const heatProducerObjectSchema = v.object({
 	...genericCrafterObjectSchema.entries,
@@ -2567,7 +2554,7 @@ const wallObjectSchema = v.object({
 });
 
 const staticWallObjectSchema = v.object({
-    largeTexture: TextureFieldSchema("@-large"),
+	largeTexture: TextureFieldSchema("@-large"),
 	autotile: v.optional(v.boolean(), false),
 	autotileMidVariants: v.optional(v.pipe(v.number(), v.integer()), 1),
 });
@@ -2584,49 +2571,48 @@ const coloredWallObjectSchema = v.object({
 	),
 });
 
-const shieldWallObjectSchema = 
-	v.object({
-		...wallObjectSchema.entries,
-		glowTexture: TextureFieldSchema("@-glow"),
-		shieldHealth: v.pipe(
-			v.optional(v.number(), 900),
-			metadata({
-				name: "editor.block-shield-wall.shield-health",
-				description: "editor.block-shield-wall.shield-health-description",
-			}),
-		),
-		breakCooldown: v.pipe(
-			v.optional(v.number(), 600),
-			metadata({
-				name: "editor.block-shield-wall.break-cooldown",
-				description: "editor.block-shield-wall.break-cooldown-description",
-			}),
-		),
-		regenSpeed: v.pipe(
-			v.optional(v.number(), 2),
-			metadata({
-				name: "editor.block-shield-wall.regen-speed",
-				description: "editor.block-shield-wall.regen-speed-description",
-			}),
-		),
-		glowMag: v.pipe(
-			v.optional(v.number(), 0.6),
-			metadata({
-				name: "editor.block-shield-wall.glow-mag",
-				description: "editor.block-shield-wall.glow-mag-description",
-			}),
-		),
-		glowScl: v.pipe(
-			v.optional(v.number(), 8),
-			metadata({
-				name: "editor.block-shield-wall.glow-scl",
-				description: "editor.block-shield-wall.glow-scl-description",
-			}),
-		),
-	});
+const shieldWallObjectSchema = v.object({
+	...wallObjectSchema.entries,
+	glowTexture: TextureFieldSchema("@-glow"),
+	shieldHealth: v.pipe(
+		v.optional(v.number(), 900),
+		metadata({
+			name: "editor.block-shield-wall.shield-health",
+			description: "editor.block-shield-wall.shield-health-description",
+		}),
+	),
+	breakCooldown: v.pipe(
+		v.optional(v.number(), 600),
+		metadata({
+			name: "editor.block-shield-wall.break-cooldown",
+			description: "editor.block-shield-wall.break-cooldown-description",
+		}),
+	),
+	regenSpeed: v.pipe(
+		v.optional(v.number(), 2),
+		metadata({
+			name: "editor.block-shield-wall.regen-speed",
+			description: "editor.block-shield-wall.regen-speed-description",
+		}),
+	),
+	glowMag: v.pipe(
+		v.optional(v.number(), 0.6),
+		metadata({
+			name: "editor.block-shield-wall.glow-mag",
+			description: "editor.block-shield-wall.glow-mag-description",
+		}),
+	),
+	glowScl: v.pipe(
+		v.optional(v.number(), 8),
+		metadata({
+			name: "editor.block-shield-wall.glow-scl",
+			description: "editor.block-shield-wall.glow-scl-description",
+		}),
+	),
+});
 
 const doorObjectSchema = v.object({
-    openTexture: TextureFieldSchema("@-open"),
+	openTexture: TextureFieldSchema("@-open"),
 	...wallObjectSchema.entries,
 	chainEffect: v.pipe(
 		v.optional(v.boolean(), false),
@@ -2637,28 +2623,27 @@ const doorObjectSchema = v.object({
 	),
 });
 
-const autoDoorObjectSchema = 
-	v.object({
-		...wallObjectSchema.entries,
-		openTexture: TextureFieldSchema("@-open"),
-		checkInterval: v.pipe(
-			v.optional(v.number(), 20),
-			metadata({
-				name: "editor.block-auto-door.check-interval",
-				description: "editor.block-auto-door.check-interval-description",
-			}),
-		),
-		triggerMargin: v.pipe(
-			v.optional(v.number(), 12),
-			metadata({
-				name: "editor.block-auto-door.trigger-margin",
-				description: "editor.block-auto-door.trigger-margin-description",
-			}),
-		),
-	});
+const autoDoorObjectSchema = v.object({
+	...wallObjectSchema.entries,
+	openTexture: TextureFieldSchema("@-open"),
+	checkInterval: v.pipe(
+		v.optional(v.number(), 20),
+		metadata({
+			name: "editor.block-auto-door.check-interval",
+			description: "editor.block-auto-door.check-interval-description",
+		}),
+	),
+	triggerMargin: v.pipe(
+		v.optional(v.number(), 12),
+		metadata({
+			name: "editor.block-auto-door.trigger-margin",
+			description: "editor.block-auto-door.trigger-margin-description",
+		}),
+	),
+});
 
 const shockwaveTowerObjectSchema = v.object({
-    heatTexture: TextureFieldSchema("@-heat"),
+	heatTexture: TextureFieldSchema("@-heat"),
 	range: v.pipe(
 		v.optional(v.number(), 110),
 		metadata({
@@ -2731,66 +2716,65 @@ const shockwaveTowerObjectSchema = v.object({
 	),
 });
 
-const shockMineObjectSchema = 
-	v.object({
-		teamTopTexture: TextureFieldSchema("@-team-top"),
-		cooldown: v.pipe(
-			v.optional(v.number(), 80),
-			metadata({
-				name: "editor.block-shock-mine.cooldown",
-				description: "editor.block-shock-mine.cooldown-description",
-			}),
-		),
-		tileDamage: v.pipe(
-			v.optional(v.number(), 5),
-			metadata({
-				name: "editor.block-shock-mine.tile-damage",
-				description: "editor.block-shock-mine.tile-damage-description",
-			}),
-		),
-		damage: v.pipe(
-			v.optional(v.number(), 13),
-			metadata({
-				name: "editor.block-shock-mine.damage",
-				description: "editor.block-shock-mine.damage-description",
-			}),
-		),
-		length: v.pipe(
-			v.optional(v.number(), 10),
-			metadata({
-				name: "editor.block-shock-mine.length",
-				description: "editor.block-shock-mine.length-description",
-			}),
-		),
-		tendrils: v.pipe(
-			v.optional(v.number(), 6),
-			metadata({
-				name: "editor.block-shock-mine.tendrils",
-				description: "editor.block-shock-mine.tendrils-description",
-			}),
-		),
-		shots: v.pipe(
-			v.optional(v.number(), 6),
-			metadata({
-				name: "editor.block-shock-mine.shots",
-				description: "editor.block-shock-mine.shots-description",
-			}),
-		),
-		inaccuracy: v.pipe(
-			v.optional(v.number(), 0),
-			metadata({
-				name: "editor.block-shock-mine.inaccuracy",
-				description: "editor.block-shock-mine.inaccuracy-description",
-			}),
-		),
-		teamAlpha: v.pipe(
-			v.optional(v.number(), 0.3),
-			metadata({
-				name: "editor.block-shock-mine.team-alpha",
-				description: "editor.block-shock-mine.team-alpha-description",
-			}),
-		),
-	});
+const shockMineObjectSchema = v.object({
+	teamTopTexture: TextureFieldSchema("@-team-top"),
+	cooldown: v.pipe(
+		v.optional(v.number(), 80),
+		metadata({
+			name: "editor.block-shock-mine.cooldown",
+			description: "editor.block-shock-mine.cooldown-description",
+		}),
+	),
+	tileDamage: v.pipe(
+		v.optional(v.number(), 5),
+		metadata({
+			name: "editor.block-shock-mine.tile-damage",
+			description: "editor.block-shock-mine.tile-damage-description",
+		}),
+	),
+	damage: v.pipe(
+		v.optional(v.number(), 13),
+		metadata({
+			name: "editor.block-shock-mine.damage",
+			description: "editor.block-shock-mine.damage-description",
+		}),
+	),
+	length: v.pipe(
+		v.optional(v.number(), 10),
+		metadata({
+			name: "editor.block-shock-mine.length",
+			description: "editor.block-shock-mine.length-description",
+		}),
+	),
+	tendrils: v.pipe(
+		v.optional(v.number(), 6),
+		metadata({
+			name: "editor.block-shock-mine.tendrils",
+			description: "editor.block-shock-mine.tendrils-description",
+		}),
+	),
+	shots: v.pipe(
+		v.optional(v.number(), 6),
+		metadata({
+			name: "editor.block-shock-mine.shots",
+			description: "editor.block-shock-mine.shots-description",
+		}),
+	),
+	inaccuracy: v.pipe(
+		v.optional(v.number(), 0),
+		metadata({
+			name: "editor.block-shock-mine.inaccuracy",
+			description: "editor.block-shock-mine.inaccuracy-description",
+		}),
+	),
+	teamAlpha: v.pipe(
+		v.optional(v.number(), 0.3),
+		metadata({
+			name: "editor.block-shock-mine.team-alpha",
+			description: "editor.block-shock-mine.team-alpha-description",
+		}),
+	),
+});
 
 const regenProjectorObjectSchema = v.object({
 	range: v.pipe(
@@ -2830,304 +2814,299 @@ const regenProjectorObjectSchema = v.object({
 	),
 });
 
-const radarObjectSchema = 
-	v.object({
-		baseTexture: TextureFieldSchema("@-base"),
-		glowTexture: TextureFieldSchema("@-glow"),
-		discoveryTime: v.pipe(
-			v.optional(v.number(), 600),
-			metadata({
-				name: "editor.block-radar.discovery-time",
-				description: "editor.block-radar.discovery-time-description",
-			}),
-		),
-		rotateSpeed: v.pipe(
-			v.optional(v.number(), 2),
-			metadata({
-				name: "editor.block-radar.rotate-speed",
-				description: "editor.block-radar.rotate-speed-description",
-			}),
-		),
-		glowScl: v.pipe(
-			v.optional(v.number(), 5),
-			metadata({
-				name: "editor.block-radar.glow-scl",
-				description: "editor.block-radar.glow-scl-description",
-			}),
-		),
-		glowMag: v.pipe(
-			v.optional(v.number(), 0.6),
-			metadata({
-				name: "editor.block-radar.glow-mag",
-				description: "editor.block-radar.glow-mag-description",
-			}),
-		),
-	});
+const radarObjectSchema = v.object({
+	baseTexture: TextureFieldSchema("@-base"),
+	glowTexture: TextureFieldSchema("@-glow"),
+	discoveryTime: v.pipe(
+		v.optional(v.number(), 600),
+		metadata({
+			name: "editor.block-radar.discovery-time",
+			description: "editor.block-radar.discovery-time-description",
+		}),
+	),
+	rotateSpeed: v.pipe(
+		v.optional(v.number(), 2),
+		metadata({
+			name: "editor.block-radar.rotate-speed",
+			description: "editor.block-radar.rotate-speed-description",
+		}),
+	),
+	glowScl: v.pipe(
+		v.optional(v.number(), 5),
+		metadata({
+			name: "editor.block-radar.glow-scl",
+			description: "editor.block-radar.glow-scl-description",
+		}),
+	),
+	glowMag: v.pipe(
+		v.optional(v.number(), 0.6),
+		metadata({
+			name: "editor.block-radar.glow-mag",
+			description: "editor.block-radar.glow-mag-description",
+		}),
+	),
+});
 
-const overdriveProjectorObjectSchema = 
-	v.object({
-		topTexture: TextureFieldSchema("@-top"),
-		reload: v.pipe(
-			v.optional(v.number(), 60),
-			metadata({
-				name: "editor.block-overdrive-projector.reload",
-				description: "editor.block-overdrive-projector.reload-description",
-			}),
-		),
-		range: v.pipe(
-			v.optional(v.number(), 80),
-			metadata({
-				name: "editor.block-overdrive-projector.range",
-				description: "editor.block-overdrive-projector.range-description",
-			}),
-		),
-		speedBoost: v.pipe(
-			v.optional(v.number(), 1.5),
-			metadata({
-				name: "editor.block-overdrive-projector.speed-boost",
-				description: "editor.block-overdrive-projector.speed-boost-description",
-			}),
-		),
-		speedBoostPhase: v.pipe(
-			v.optional(v.number(), 0.75),
-			metadata({
-				name: "editor.block-overdrive-projector.speed-boost-phase",
-				description: "editor.block-overdrive-projector.speed-boost-phase-description",
-			}),
-		),
-		useTime: v.pipe(
-			v.optional(v.number(), 400),
-			metadata({
-				name: "editor.block-overdrive-projector.use-time",
-				description: "editor.block-overdrive-projector.use-time-description",
-			}),
-		),
-		phaseRangeBoost: v.pipe(
-			v.optional(v.number(), 20),
-			metadata({
-				name: "editor.block-overdrive-projector.phase-range-boost",
-				description: "editor.block-overdrive-projector.phase-range-boost-description",
-			}),
-		),
-		hasBoost: v.pipe(
-			v.optional(v.boolean(), true),
-			metadata({
-				name: "editor.block-overdrive-projector.has-boost",
-				description: "editor.block-overdrive-projector.has-boost-description",
-			}),
-		),
-	});
+const overdriveProjectorObjectSchema = v.object({
+	topTexture: TextureFieldSchema("@-top"),
+	reload: v.pipe(
+		v.optional(v.number(), 60),
+		metadata({
+			name: "editor.block-overdrive-projector.reload",
+			description: "editor.block-overdrive-projector.reload-description",
+		}),
+	),
+	range: v.pipe(
+		v.optional(v.number(), 80),
+		metadata({
+			name: "editor.block-overdrive-projector.range",
+			description: "editor.block-overdrive-projector.range-description",
+		}),
+	),
+	speedBoost: v.pipe(
+		v.optional(v.number(), 1.5),
+		metadata({
+			name: "editor.block-overdrive-projector.speed-boost",
+			description: "editor.block-overdrive-projector.speed-boost-description",
+		}),
+	),
+	speedBoostPhase: v.pipe(
+		v.optional(v.number(), 0.75),
+		metadata({
+			name: "editor.block-overdrive-projector.speed-boost-phase",
+			description: "editor.block-overdrive-projector.speed-boost-phase-description",
+		}),
+	),
+	useTime: v.pipe(
+		v.optional(v.number(), 400),
+		metadata({
+			name: "editor.block-overdrive-projector.use-time",
+			description: "editor.block-overdrive-projector.use-time-description",
+		}),
+	),
+	phaseRangeBoost: v.pipe(
+		v.optional(v.number(), 20),
+		metadata({
+			name: "editor.block-overdrive-projector.phase-range-boost",
+			description: "editor.block-overdrive-projector.phase-range-boost-description",
+		}),
+	),
+	hasBoost: v.pipe(
+		v.optional(v.boolean(), true),
+		metadata({
+			name: "editor.block-overdrive-projector.has-boost",
+			description: "editor.block-overdrive-projector.has-boost-description",
+		}),
+	),
+});
 
-const mendProjectorObjectSchema = 
-	v.object({
-		topTexture: TextureFieldSchema("@-top"),
-		reload: v.pipe(
-			v.optional(v.number(), 250),
-			metadata({
-				name: "editor.block-mend-projector.reload",
-				description: "editor.block-mend-projector.reload-description",
-			}),
-		),
-		range: v.pipe(
-			v.optional(v.number(), 60),
-			metadata({
-				name: "editor.block-mend-projector.range",
-				description: "editor.block-mend-projector.range-description",
-			}),
-		),
-		healPercent: v.pipe(
-			v.optional(v.number(), 12),
-			metadata({
-				name: "editor.block-mend-projector.heal-percent",
-				description: "editor.block-mend-projector.heal-percent-description",
-			}),
-		),
-		phaseBoost: v.pipe(
-			v.optional(v.number(), 12),
-			metadata({
-				name: "editor.block-mend-projector.phase-boost",
-				description: "editor.block-mend-projector.phase-boost-description",
-			}),
-		),
-		phaseRangeBoost: v.pipe(
-			v.optional(v.number(), 50),
-			metadata({
-				name: "editor.block-mend-projector.phase-range-boost",
-				description: "editor.block-mend-projector.phase-range-boost-description",
-			}),
-		),
-		useTime: v.pipe(
-			v.optional(v.number(), 400),
-			metadata({
-				name: "editor.block-mend-projector.use-time",
-				description: "editor.block-mend-projector.use-time-description",
-			}),
-		),
-		mendSoundVolume: v.pipe(
-			v.optional(v.number(), 0.5),
-			metadata({
-				name: "editor.block-mend-projector.mend-sound-volume",
-				description: "editor.block-mend-projector.mend-sound-volume-description",
-			}),
-		),
-	});
+const mendProjectorObjectSchema = v.object({
+	topTexture: TextureFieldSchema("@-top"),
+	reload: v.pipe(
+		v.optional(v.number(), 250),
+		metadata({
+			name: "editor.block-mend-projector.reload",
+			description: "editor.block-mend-projector.reload-description",
+		}),
+	),
+	range: v.pipe(
+		v.optional(v.number(), 60),
+		metadata({
+			name: "editor.block-mend-projector.range",
+			description: "editor.block-mend-projector.range-description",
+		}),
+	),
+	healPercent: v.pipe(
+		v.optional(v.number(), 12),
+		metadata({
+			name: "editor.block-mend-projector.heal-percent",
+			description: "editor.block-mend-projector.heal-percent-description",
+		}),
+	),
+	phaseBoost: v.pipe(
+		v.optional(v.number(), 12),
+		metadata({
+			name: "editor.block-mend-projector.phase-boost",
+			description: "editor.block-mend-projector.phase-boost-description",
+		}),
+	),
+	phaseRangeBoost: v.pipe(
+		v.optional(v.number(), 50),
+		metadata({
+			name: "editor.block-mend-projector.phase-range-boost",
+			description: "editor.block-mend-projector.phase-range-boost-description",
+		}),
+	),
+	useTime: v.pipe(
+		v.optional(v.number(), 400),
+		metadata({
+			name: "editor.block-mend-projector.use-time",
+			description: "editor.block-mend-projector.use-time-description",
+		}),
+	),
+	mendSoundVolume: v.pipe(
+		v.optional(v.number(), 0.5),
+		metadata({
+			name: "editor.block-mend-projector.mend-sound-volume",
+			description: "editor.block-mend-projector.mend-sound-volume-description",
+		}),
+	),
+});
 
-const forceProjectorObjectSchema = 
-	v.object({
-		topTexture: TextureFieldSchema("@-top"),
-		phaseUseTime: v.pipe(
-			v.optional(v.number(), 350),
-			metadata({
-				name: "editor.block-force-projector.phase-use-time",
-				description: "editor.block-force-projector.phase-use-time-description",
-			}),
-		),
-		phaseRadiusBoost: v.pipe(
-			v.optional(v.number(), 80),
-			metadata({
-				name: "editor.block-force-projector.phase-radius-boost",
-				description: "editor.block-force-projector.phase-radius-boost-description",
-			}),
-		),
-		phaseShieldBoost: v.pipe(
-			v.optional(v.number(), 400),
-			metadata({
-				name: "editor.block-force-projector.phase-shield-boost",
-				description: "editor.block-force-projector.phase-shield-boost-description",
-			}),
-		),
-		radius: v.pipe(
-			v.optional(v.number(), 101.7),
-			metadata({
-				name: "editor.block-force-projector.radius",
-				description: "editor.block-force-projector.radius-description",
-			}),
-		),
-		sides: v.pipe(
-			v.optional(v.number(), 6),
-			metadata({
-				name: "editor.block-force-projector.sides",
-				description: "editor.block-force-projector.sides-description",
-			}),
-		),
-		shieldRotation: v.pipe(
-			v.optional(v.number(), 0),
-			metadata({
-				name: "editor.block-force-projector.shield-rotation",
-				description: "editor.block-force-projector.shield-rotation-description",
-			}),
-		),
-		shieldHealth: v.pipe(
-			v.optional(v.number(), 700),
-			metadata({
-				name: "editor.block-force-projector.shield-health",
-				description: "editor.block-force-projector.shield-health-description",
-			}),
-		),
-		cooldownNormal: v.pipe(
-			v.optional(v.number(), 1.75),
-			metadata({
-				name: "editor.block-force-projector.cooldown-normal",
-				description: "editor.block-force-projector.cooldown-normal-description",
-			}),
-		),
-		cooldownLiquid: v.pipe(
-			v.optional(v.number(), 1.5),
-			metadata({
-				name: "editor.block-force-projector.cooldown-liquid",
-				description: "editor.block-force-projector.cooldown-liquid-description",
-			}),
-		),
-		cooldownBrokenBase: v.pipe(
-			v.optional(v.number(), 0.35),
-			metadata({
-				name: "editor.block-force-projector.cooldown-broken-base",
-				description: "editor.block-force-projector.cooldown-broken-base-description",
-			}),
-		),
-		coolantConsumption: v.pipe(
-			v.optional(v.number(), 0.1),
-			metadata({
-				name: "editor.block-force-projector.coolant-consumption",
-				description: "editor.block-force-projector.coolant-consumption-description",
-			}),
-		),
-		consumeCoolant: v.pipe(
-			v.optional(v.boolean(), true),
-			metadata({
-				name: "editor.block-force-projector.consume-coolant",
-				description: "editor.block-force-projector.consume-coolant-description",
-			}),
-		),
-		crashDamageMultiplier: v.pipe(
-			v.optional(v.number(), 2),
-			metadata({
-				name: "editor.block-force-projector.crash-damage-multiplier",
-				description: "editor.block-force-projector.crash-damage-multiplier-description",
-			}),
-		),
-		hitSoundVolume: v.pipe(
-			v.optional(v.number(), 0.12),
-			metadata({
-				name: "editor.block-force-projector.hit-sound-volume",
-				description: "editor.block-force-projector.hit-sound-volume-description",
-			}),
-		),
-	});
+const forceProjectorObjectSchema = v.object({
+	topTexture: TextureFieldSchema("@-top"),
+	phaseUseTime: v.pipe(
+		v.optional(v.number(), 350),
+		metadata({
+			name: "editor.block-force-projector.phase-use-time",
+			description: "editor.block-force-projector.phase-use-time-description",
+		}),
+	),
+	phaseRadiusBoost: v.pipe(
+		v.optional(v.number(), 80),
+		metadata({
+			name: "editor.block-force-projector.phase-radius-boost",
+			description: "editor.block-force-projector.phase-radius-boost-description",
+		}),
+	),
+	phaseShieldBoost: v.pipe(
+		v.optional(v.number(), 400),
+		metadata({
+			name: "editor.block-force-projector.phase-shield-boost",
+			description: "editor.block-force-projector.phase-shield-boost-description",
+		}),
+	),
+	radius: v.pipe(
+		v.optional(v.number(), 101.7),
+		metadata({
+			name: "editor.block-force-projector.radius",
+			description: "editor.block-force-projector.radius-description",
+		}),
+	),
+	sides: v.pipe(
+		v.optional(v.number(), 6),
+		metadata({
+			name: "editor.block-force-projector.sides",
+			description: "editor.block-force-projector.sides-description",
+		}),
+	),
+	shieldRotation: v.pipe(
+		v.optional(v.number(), 0),
+		metadata({
+			name: "editor.block-force-projector.shield-rotation",
+			description: "editor.block-force-projector.shield-rotation-description",
+		}),
+	),
+	shieldHealth: v.pipe(
+		v.optional(v.number(), 700),
+		metadata({
+			name: "editor.block-force-projector.shield-health",
+			description: "editor.block-force-projector.shield-health-description",
+		}),
+	),
+	cooldownNormal: v.pipe(
+		v.optional(v.number(), 1.75),
+		metadata({
+			name: "editor.block-force-projector.cooldown-normal",
+			description: "editor.block-force-projector.cooldown-normal-description",
+		}),
+	),
+	cooldownLiquid: v.pipe(
+		v.optional(v.number(), 1.5),
+		metadata({
+			name: "editor.block-force-projector.cooldown-liquid",
+			description: "editor.block-force-projector.cooldown-liquid-description",
+		}),
+	),
+	cooldownBrokenBase: v.pipe(
+		v.optional(v.number(), 0.35),
+		metadata({
+			name: "editor.block-force-projector.cooldown-broken-base",
+			description: "editor.block-force-projector.cooldown-broken-base-description",
+		}),
+	),
+	coolantConsumption: v.pipe(
+		v.optional(v.number(), 0.1),
+		metadata({
+			name: "editor.block-force-projector.coolant-consumption",
+			description: "editor.block-force-projector.coolant-consumption-description",
+		}),
+	),
+	consumeCoolant: v.pipe(
+		v.optional(v.boolean(), true),
+		metadata({
+			name: "editor.block-force-projector.consume-coolant",
+			description: "editor.block-force-projector.consume-coolant-description",
+		}),
+	),
+	crashDamageMultiplier: v.pipe(
+		v.optional(v.number(), 2),
+		metadata({
+			name: "editor.block-force-projector.crash-damage-multiplier",
+			description: "editor.block-force-projector.crash-damage-multiplier-description",
+		}),
+	),
+	hitSoundVolume: v.pipe(
+		v.optional(v.number(), 0.12),
+		metadata({
+			name: "editor.block-force-projector.hit-sound-volume",
+			description: "editor.block-force-projector.hit-sound-volume-description",
+		}),
+	),
+});
 
-const directionalForceProjectorObjectSchema = 
-	v.object({
-		topTexture: TextureFieldSchema("@-top"),
-		width: v.pipe(
-			v.optional(v.number(), 30),
-			metadata({
-				name: "editor.block-directional-force-projector.width",
-				description: "editor.block-directional-force-projector.width-description",
-			}),
-		),
-		shieldHealth: v.pipe(
-			v.optional(v.number(), 3000),
-			metadata({
-				name: "editor.block-directional-force-projector.shield-health",
-				description: "editor.block-directional-force-projector.shield-health-description",
-			}),
-		),
-		cooldownNormal: v.pipe(
-			v.optional(v.number(), 1.75),
-			metadata({
-				name: "editor.block-directional-force-projector.cooldown-normal",
-				description: "editor.block-directional-force-projector.cooldown-normal-description",
-			}),
-		),
-		cooldownLiquid: v.pipe(
-			v.optional(v.number(), 1.5),
-			metadata({
-				name: "editor.block-directional-force-projector.cooldown-liquid",
-				description: "editor.block-directional-force-projector.cooldown-liquid-description",
-			}),
-		),
-		cooldownBrokenBase: v.pipe(
-			v.optional(v.number(), 0.35),
-			metadata({
-				name: "editor.block-directional-force-projector.cooldown-broken-base",
-				description: "editor.block-directional-force-projector.cooldown-broken-base-description",
-			}),
-		),
-		length: v.pipe(
-			v.optional(v.number(), 40),
-			metadata({
-				name: "editor.block-directional-force-projector.length",
-				description: "editor.block-directional-force-projector.length-description",
-			}),
-		),
-		padSize: v.pipe(
-			v.optional(v.number(), 40),
-			metadata({
-				name: "editor.block-directional-force-projector.pad-size",
-				description: "editor.block-directional-force-projector.pad-size-description",
-			}),
-		),
-	});
+const directionalForceProjectorObjectSchema = v.object({
+	topTexture: TextureFieldSchema("@-top"),
+	width: v.pipe(
+		v.optional(v.number(), 30),
+		metadata({
+			name: "editor.block-directional-force-projector.width",
+			description: "editor.block-directional-force-projector.width-description",
+		}),
+	),
+	shieldHealth: v.pipe(
+		v.optional(v.number(), 3000),
+		metadata({
+			name: "editor.block-directional-force-projector.shield-health",
+			description: "editor.block-directional-force-projector.shield-health-description",
+		}),
+	),
+	cooldownNormal: v.pipe(
+		v.optional(v.number(), 1.75),
+		metadata({
+			name: "editor.block-directional-force-projector.cooldown-normal",
+			description: "editor.block-directional-force-projector.cooldown-normal-description",
+		}),
+	),
+	cooldownLiquid: v.pipe(
+		v.optional(v.number(), 1.5),
+		metadata({
+			name: "editor.block-directional-force-projector.cooldown-liquid",
+			description: "editor.block-directional-force-projector.cooldown-liquid-description",
+		}),
+	),
+	cooldownBrokenBase: v.pipe(
+		v.optional(v.number(), 0.35),
+		metadata({
+			name: "editor.block-directional-force-projector.cooldown-broken-base",
+			description: "editor.block-directional-force-projector.cooldown-broken-base-description",
+		}),
+	),
+	length: v.pipe(
+		v.optional(v.number(), 40),
+		metadata({
+			name: "editor.block-directional-force-projector.length",
+			description: "editor.block-directional-force-projector.length-description",
+		}),
+	),
+	padSize: v.pipe(
+		v.optional(v.number(), 40),
+		metadata({
+			name: "editor.block-directional-force-projector.pad-size",
+			description: "editor.block-directional-force-projector.pad-size-description",
+		}),
+	),
+});
 
 const baseShieldObjectSchema = v.object({
 	radius: v.pipe(
@@ -3602,7 +3581,7 @@ const continuousLiquidTurretObjectSchema = v.object({
 });
 
 const pointDefenseTurretObjectSchema = v.object({
-    baseTexture: TextureFieldSchema("@-base"),
+	baseTexture: TextureFieldSchema("@-base"),
 	...reloadTurretObjectSchema.entries,
 	retargetTime: v.pipe(
 		v.optional(v.number(), 5),
@@ -3635,10 +3614,10 @@ const pointDefenseTurretObjectSchema = v.object({
 });
 
 const tractorBeamTurretObjectSchema = v.object({
-    baseTexture: TextureFieldSchema("@-base"),
-    laserTexture: TextureFieldSchema("@-laser"),
-    laserStartTexture: TextureFieldSchema("@-laser-start"),
-    laserEndTexture: TextureFieldSchema("@-laser-end"),
+	baseTexture: TextureFieldSchema("@-base"),
+	laserTexture: TextureFieldSchema("@-laser"),
+	laserStartTexture: TextureFieldSchema("@-laser-start"),
+	laserEndTexture: TextureFieldSchema("@-laser-end"),
 	...baseTurretObjectSchema.entries,
 	retargetTime: v.pipe(
 		v.optional(v.number(), 5),
@@ -3719,111 +3698,108 @@ const tractorBeamTurretObjectSchema = v.object({
 	),
 });
 
-const buildTurretObjectSchema = 
-	v.object({
-		...baseTurretObjectSchema.entries,
-		baseTexture: TextureFieldSchema("@-base", "block-@size"),
-		glowTexture: TextureFieldSchema("@-glow"),
-		targetInterval: v.pipe(
-			v.optional(v.number(), 15),
-			metadata({
-				name: "editor.block-build-turret.target-interval",
-				description: "editor.block-build-turret.target-interval-description",
-			}),
-		),
-		buildSpeed: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({
-				name: "editor.block-build-turret.build-speed",
-				description: "editor.block-build-turret.build-speed-description",
-			}),
-		),
-		buildBeamOffset: v.pipe(
-			v.optional(v.number(), 5),
-			metadata({
-				name: "editor.block-build-turret.build-beam-offset",
-				description: "editor.block-build-turret.build-beam-offset-description",
-			}),
-		),
-		elevation: v.pipe(
-			v.optional(v.number(), -1),
-			metadata({
-				name: "editor.block-build-turret.elevation",
-				description: "editor.block-build-turret.elevation-description",
-			}),
-		),
-	});
+const buildTurretObjectSchema = v.object({
+	...baseTurretObjectSchema.entries,
+	baseTexture: TextureFieldSchema("@-base", "block-@size"),
+	glowTexture: TextureFieldSchema("@-glow"),
+	targetInterval: v.pipe(
+		v.optional(v.number(), 15),
+		metadata({
+			name: "editor.block-build-turret.target-interval",
+			description: "editor.block-build-turret.target-interval-description",
+		}),
+	),
+	buildSpeed: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({
+			name: "editor.block-build-turret.build-speed",
+			description: "editor.block-build-turret.build-speed-description",
+		}),
+	),
+	buildBeamOffset: v.pipe(
+		v.optional(v.number(), 5),
+		metadata({
+			name: "editor.block-build-turret.build-beam-offset",
+			description: "editor.block-build-turret.build-beam-offset-description",
+		}),
+	),
+	elevation: v.pipe(
+		v.optional(v.number(), -1),
+		metadata({
+			name: "editor.block-build-turret.elevation",
+			description: "editor.block-build-turret.elevation-description",
+		}),
+	),
+});
 
 // Distribution variant schemas
-const conveyorObjectSchema = 
-	v.object({
-		textures: ArrayTextureSchema( "@-#-#", [7, 3]),
-		speed: v.pipe(
-			v.optional(v.number(), 0),
-			metadata({
-				name: "editor.block-conveyor.speed",
-				description: "editor.block-conveyor.speed-description",
-			}),
-		),
-		displayedSpeed: v.pipe(
-			v.optional(v.number(), 0),
-			metadata({
-				name: "editor.block-conveyor.displayed-speed",
-				description: "editor.block-conveyor.displayed-speed-description",
-			}),
-		),
-		pushUnits: v.pipe(
-			v.optional(v.boolean(), true),
-			metadata({
-				name: "editor.block-conveyor.push-units",
-				description: "editor.block-conveyor.push-units-description",
-			}),
-		),
-	});
+const conveyorObjectSchema = v.object({
+	textures: ArrayTextureSchema("@-#-#", [7, 3]),
+	speed: v.pipe(
+		v.optional(v.number(), 0),
+		metadata({
+			name: "editor.block-conveyor.speed",
+			description: "editor.block-conveyor.speed-description",
+		}),
+	),
+	displayedSpeed: v.pipe(
+		v.optional(v.number(), 0),
+		metadata({
+			name: "editor.block-conveyor.displayed-speed",
+			description: "editor.block-conveyor.displayed-speed-description",
+		}),
+	),
+	pushUnits: v.pipe(
+		v.optional(v.boolean(), true),
+		metadata({
+			name: "editor.block-conveyor.push-units",
+			description: "editor.block-conveyor.push-units-description",
+		}),
+	),
+});
 
-const stackConveyorObjectSchema = 
-	v.object({
-		texture1: TextureFieldSchema("@-1"),
-		texture2: TextureFieldSchema("@-2"),
-		texture3: TextureFieldSchema("@-3"),
-		edgeTexture: TextureFieldSchema("@-edge"),
-		stackTexture: TextureFieldSchema("@-stack"),
-		glowAlpha: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({
-				name: "editor.block-stack-conveyor.glow-alpha",
-				description: "editor.block-stack-conveyor.glow-alpha-description",
-			}),
-		),
-		baseEfficiency: v.pipe(
-			v.optional(v.number(), 0),
-			metadata({
-				name: "editor.block-stack-conveyor.base-efficiency",
-				description: "editor.block-stack-conveyor.base-efficiency-description",
-			}),
-		),
-		speed: v.pipe(
-			v.optional(v.number(), 0),
-			metadata({
-				name: "editor.block-stack-conveyor.speed",
-				description: "editor.block-stack-conveyor.speed-description",
-			}),
-		),
-		outputRouter: v.pipe(
-			v.optional(v.boolean(), true),
-			metadata({
-				name: "editor.block-stack-conveyor.output-router",
-				description: "editor.block-stack-conveyor.output-router-description",
-			}),
-		),
-		recharge: v.pipe(
-			v.optional(v.number(), 2),
-			metadata({
-				name: "editor.block-stack-conveyor.recharge",
-				description: "editor.block-stack-conveyor.recharge-description",
-			}),
-		),
-	});
+const stackConveyorObjectSchema = v.object({
+	texture1: TextureFieldSchema("@-1"),
+	texture2: TextureFieldSchema("@-2"),
+	texture3: TextureFieldSchema("@-3"),
+	edgeTexture: TextureFieldSchema("@-edge"),
+	stackTexture: TextureFieldSchema("@-stack"),
+	glowAlpha: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({
+			name: "editor.block-stack-conveyor.glow-alpha",
+			description: "editor.block-stack-conveyor.glow-alpha-description",
+		}),
+	),
+	baseEfficiency: v.pipe(
+		v.optional(v.number(), 0),
+		metadata({
+			name: "editor.block-stack-conveyor.base-efficiency",
+			description: "editor.block-stack-conveyor.base-efficiency-description",
+		}),
+	),
+	speed: v.pipe(
+		v.optional(v.number(), 0),
+		metadata({
+			name: "editor.block-stack-conveyor.speed",
+			description: "editor.block-stack-conveyor.speed-description",
+		}),
+	),
+	outputRouter: v.pipe(
+		v.optional(v.boolean(), true),
+		metadata({
+			name: "editor.block-stack-conveyor.output-router",
+			description: "editor.block-stack-conveyor.output-router-description",
+		}),
+	),
+	recharge: v.pipe(
+		v.optional(v.number(), 2),
+		metadata({
+			name: "editor.block-stack-conveyor.recharge",
+			description: "editor.block-stack-conveyor.recharge-description",
+		}),
+	),
+});
 
 const routerObjectSchema = v.object({
 	speed: v.pipe(
@@ -3860,7 +3836,7 @@ const junctionObjectSchema = v.object({
 });
 
 const sorterObjectSchema = v.object({
-    crossTexture: TextureFieldSchema("@-cross", 'cross-full'),
+	crossTexture: TextureFieldSchema("@-cross", "cross-full"),
 	invert: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
@@ -3888,9 +3864,9 @@ const overflowGateObjectSchema = v.object({
 });
 
 const itemBridgeObjectSchema = v.object({
-    endTexture: TextureFieldSchema("@-end"),
-    bridgeTexture: TextureFieldSchema("@-bridge"),
-    arrowTexture: TextureFieldSchema("@-arrow"),
+	endTexture: TextureFieldSchema("@-end"),
+	bridgeTexture: TextureFieldSchema("@-bridge"),
+	arrowTexture: TextureFieldSchema("@-arrow"),
 	range: v.pipe(
 		v.optional(v.number(), 0),
 		metadata({
@@ -3989,11 +3965,11 @@ const bufferedItemBridgeObjectSchema = v.object({
 });
 
 const directionBridgeObjectSchema = v.object({
-    bridgeTexture: TextureFieldSchema("@-bridge"),
-    bridgeBottomTexture: TextureFieldSchema("@-bridge-bottom"),
-    bridgeLiquidTexture: TextureFieldSchema("@-bridge-liquid"),
-    arrowTexture: TextureFieldSchema("@-arrow"),
-   	range: v.pipe(
+	bridgeTexture: TextureFieldSchema("@-bridge"),
+	bridgeBottomTexture: TextureFieldSchema("@-bridge-bottom"),
+	bridgeLiquidTexture: TextureFieldSchema("@-bridge-liquid"),
+	arrowTexture: TextureFieldSchema("@-arrow"),
+	range: v.pipe(
 		v.optional(v.number(), 4),
 		metadata({
 			name: "editor.block-direction-bridge.range",
@@ -4002,29 +3978,28 @@ const directionBridgeObjectSchema = v.object({
 	),
 });
 
-const directionLiquidBridgeObjectSchema = 
-	v.object({
-		...directionBridgeObjectSchema.entries,
-		bottomTexture: TextureFieldSchema("@-bottom"),
-		speed: v.pipe(
-			v.optional(v.number(), 5),
-			metadata({
-				name: "editor.block-direction-liquid-bridge.speed",
-				description: "editor.block-direction-liquid-bridge.speed-description",
-			}),
-		),
-		liquidPadding: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({
-				name: "editor.block-direction-liquid-bridge.liquid-padding",
-				description: "editor.block-direction-liquid-bridge.liquid-padding-description",
-			}),
-		),
-	});
+const directionLiquidBridgeObjectSchema = v.object({
+	...directionBridgeObjectSchema.entries,
+	bottomTexture: TextureFieldSchema("@-bottom"),
+	speed: v.pipe(
+		v.optional(v.number(), 5),
+		metadata({
+			name: "editor.block-direction-liquid-bridge.speed",
+			description: "editor.block-direction-liquid-bridge.speed-description",
+		}),
+	),
+	liquidPadding: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({
+			name: "editor.block-direction-liquid-bridge.liquid-padding",
+			description: "editor.block-direction-liquid-bridge.liquid-padding-description",
+		}),
+	),
+});
 
 const ductObjectSchema = v.object({
-    topTexture: ArrayTextureSchema("@-top-#", 5),
-    bottomTexture: ArrayTextureSchema("@-bottom-#", 5),
+	topTexture: ArrayTextureSchema("@-top-#", 5),
+	bottomTexture: ArrayTextureSchema("@-bottom-#", 5),
 	speed: v.pipe(
 		v.optional(v.number(), 5),
 		metadata({
@@ -4042,7 +4017,7 @@ const ductObjectSchema = v.object({
 });
 
 const ductRouterObjectSchema = v.object({
-    topTexture: TextureFieldSchema("@-top"),
+	topTexture: TextureFieldSchema("@-top"),
 	speed: v.pipe(
 		v.optional(v.number(), 5),
 		metadata({
@@ -4052,29 +4027,28 @@ const ductRouterObjectSchema = v.object({
 	),
 });
 
-const stackRouterObjectSchema = 
-	v.object({
-		...ductRouterObjectSchema.entries,
-		glowTexture: TextureFieldSchema("@-glow", "arrow-glow"),
-		baseEfficiency: v.pipe(
-			v.optional(v.number(), 0),
-			metadata({
-				name: "editor.block-stack-router.base-efficiency",
-				description: "editor.block-stack-router.base-efficiency-description",
-			}),
-		),
-		glowAlpha: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({
-				name: "editor.block-stack-router.glow-alpha",
-				description: "editor.block-stack-router.glow-alpha-description",
-			}),
-		),
-	});
+const stackRouterObjectSchema = v.object({
+	...ductRouterObjectSchema.entries,
+	glowTexture: TextureFieldSchema("@-glow", "arrow-glow"),
+	baseEfficiency: v.pipe(
+		v.optional(v.number(), 0),
+		metadata({
+			name: "editor.block-stack-router.base-efficiency",
+			description: "editor.block-stack-router.base-efficiency-description",
+		}),
+	),
+	glowAlpha: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({
+			name: "editor.block-stack-router.glow-alpha",
+			description: "editor.block-stack-router.glow-alpha-description",
+		}),
+	),
+});
 
 const ductJunctionObjectSchema = v.object({
-    topTexture: TextureFieldSchema("@-top"),
-    bottomTexture: TextureFieldSchema("@-bottom"),
+	topTexture: TextureFieldSchema("@-top"),
+	bottomTexture: TextureFieldSchema("@-bottom"),
 	speed: v.pipe(
 		v.optional(v.number(), 5),
 		metadata({
@@ -4085,7 +4059,7 @@ const ductJunctionObjectSchema = v.object({
 });
 
 const overflowDuctObjectSchema = v.object({
-    topTexture: TextureFieldSchema("@-top"),
+	topTexture: TextureFieldSchema("@-top"),
 	speed: v.pipe(
 		v.optional(v.number(), 5),
 		metadata({
@@ -4187,9 +4161,9 @@ const massDriverObjectSchema = v.object({
 });
 
 const directionalUnloaderObjectSchema = v.object({
-    centerTexture: TextureFieldSchema("@-center", 'unloader-center'),
-    topTexture: TextureFieldSchema("@-top"),
-    arrowTexture: TextureFieldSchema("@-arrow"),
+	centerTexture: TextureFieldSchema("@-center", "unloader-center"),
+	topTexture: TextureFieldSchema("@-top"),
+	arrowTexture: TextureFieldSchema("@-arrow"),
 	speed: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
@@ -4224,60 +4198,58 @@ const payloadBlockObjectSchema = v.object({
 	),
 });
 
-const payloadConveyorObjectSchema = 
-	v.object({
-		topTexture: TextureFieldSchema("@-top"),
-		edgeTexture: TextureFieldSchema("@-edge"),
-		moveTime: v.pipe(
-			v.optional(v.number(), 45),
-			metadata({
-				name: "editor.block-payload-conveyor.move-time",
-				description: "editor.block-payload-conveyor.move-time-description",
-			}),
-		),
-		moveForce: v.pipe(
-			v.optional(v.number(), 201),
-			metadata({
-				name: "editor.block-payload-conveyor.move-force",
-				description: "editor.block-payload-conveyor.move-force-description",
-			}),
-		),
-		payloadLimit: v.pipe(
-			v.optional(v.number(), 3),
-			metadata({
-				name: "editor.block-payload-conveyor.payload-limit",
-				description: "editor.block-payload-conveyor.payload-limit-description",
-			}),
-		),
-		pushUnits: v.pipe(
-			v.optional(v.boolean(), true),
-			metadata({
-				name: "editor.block-payload-conveyor.push-units",
-				description: "editor.block-payload-conveyor.push-units-description",
-			}),
-		),
-	});
+const payloadConveyorObjectSchema = v.object({
+	topTexture: TextureFieldSchema("@-top"),
+	edgeTexture: TextureFieldSchema("@-edge"),
+	moveTime: v.pipe(
+		v.optional(v.number(), 45),
+		metadata({
+			name: "editor.block-payload-conveyor.move-time",
+			description: "editor.block-payload-conveyor.move-time-description",
+		}),
+	),
+	moveForce: v.pipe(
+		v.optional(v.number(), 201),
+		metadata({
+			name: "editor.block-payload-conveyor.move-force",
+			description: "editor.block-payload-conveyor.move-force-description",
+		}),
+	),
+	payloadLimit: v.pipe(
+		v.optional(v.number(), 3),
+		metadata({
+			name: "editor.block-payload-conveyor.payload-limit",
+			description: "editor.block-payload-conveyor.payload-limit-description",
+		}),
+	),
+	pushUnits: v.pipe(
+		v.optional(v.boolean(), true),
+		metadata({
+			name: "editor.block-payload-conveyor.push-units",
+			description: "editor.block-payload-conveyor.push-units-description",
+		}),
+	),
+});
 
-const payloadRouterObjectSchema = 
-	v.object({
-        overTexture: TextureFieldSchema("@-over"),
-		...payloadConveyorObjectSchema.entries,
-		invert: v.pipe(
-			v.optional(v.boolean(), false),
-			metadata({
-				name: "editor.block-payload-router.invert",
-				description: "editor.block-payload-router.invert-description",
-			}),
-		),
-	});
+const payloadRouterObjectSchema = v.object({
+	overTexture: TextureFieldSchema("@-over"),
+	...payloadConveyorObjectSchema.entries,
+	invert: v.pipe(
+		v.optional(v.boolean(), false),
+		metadata({
+			name: "editor.block-payload-router.invert",
+			description: "editor.block-payload-router.invert-description",
+		}),
+	),
+});
 
 const payloadVoidObjectSchema = v.object({ ...payloadBlockObjectSchema.entries });
 
 const payloadMassDriverObjectSchema = v.object({
-    baseTexture: TextureFieldSchema("@-base"),
-    capTexture: TextureFieldSchema("@-cap"),
-    leftTexture: TextureFieldSchema("@-left"),
-    rightTexture: TextureFieldSchema("@-right"),
+	baseTexture: TextureFieldSchema("@-base"),
+	capTexture: TextureFieldSchema("@-cap"),
+	leftTexture: TextureFieldSchema("@-left"),
+	rightTexture: TextureFieldSchema("@-right"),
 	...payloadBlockObjectSchema.entries,
 	range: v.pipe(
 		v.optional(v.number(), 100),
@@ -4542,73 +4514,70 @@ const reconstructorObjectSchema = v.object({
 	),
 });
 
-const unitAssemblerModuleObjectSchema = 
-	v.object({
-		...payloadBlockObjectSchema.entries,
-		sideTexture1: TextureFieldSchema("@-side1"),
-		sideTexture2: TextureFieldSchema("@-side2"),
-		tier: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({
-				name: "editor.block-unit-assembler-module.tier",
-				description: "editor.block-unit-assembler-module.tier-description",
-			}),
-		),
-	});
+const unitAssemblerModuleObjectSchema = v.object({
+	...payloadBlockObjectSchema.entries,
+	sideTexture1: TextureFieldSchema("@-side1"),
+	sideTexture2: TextureFieldSchema("@-side2"),
+	tier: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({
+			name: "editor.block-unit-assembler-module.tier",
+			description: "editor.block-unit-assembler-module.tier-description",
+		}),
+	),
+});
 
-const unitAssemblerObjectSchema = 
-	v.object({
-		...payloadBlockObjectSchema.entries,
-		sideTexture1: TextureFieldSchema("@-side1"),
-		sideTexture2: TextureFieldSchema("@-side2"),
-		areaSize: v.pipe(
-			v.optional(v.number(), 11),
-			metadata({
-				name: "editor.block-unit-assembler.area-size",
-				description: "editor.block-unit-assembler.area-size-description",
-			}),
-		),
-		dronesCreated: v.pipe(
-			v.optional(v.number(), 4),
-			metadata({
-				name: "editor.block-unit-assembler.drones-created",
-				description: "editor.block-unit-assembler.drones-created-description",
-			}),
-		),
-		droneConstructTime: v.pipe(
-			v.optional(v.number(), 240),
-			metadata({
-				name: "editor.block-unit-assembler.drone-construct-time",
-				description: "editor.block-unit-assembler.drone-construct-time-description",
-			}),
-		),
-		capacities: v.pipe(
-			v.optional(v.array(v.number()), []),
-			metadata({
-				name: "editor.block-unit-assembler.capacities",
-				description: "editor.block-unit-assembler.capacities-description",
-			}),
-		),
-		createSoundVolume: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({
-				name: "editor.block-unit-assembler.create-sound-volume",
-				description: "editor.block-unit-assembler.create-sound-volume-description",
-			}),
-		),
-	});
+const unitAssemblerObjectSchema = v.object({
+	...payloadBlockObjectSchema.entries,
+	sideTexture1: TextureFieldSchema("@-side1"),
+	sideTexture2: TextureFieldSchema("@-side2"),
+	areaSize: v.pipe(
+		v.optional(v.number(), 11),
+		metadata({
+			name: "editor.block-unit-assembler.area-size",
+			description: "editor.block-unit-assembler.area-size-description",
+		}),
+	),
+	dronesCreated: v.pipe(
+		v.optional(v.number(), 4),
+		metadata({
+			name: "editor.block-unit-assembler.drones-created",
+			description: "editor.block-unit-assembler.drones-created-description",
+		}),
+	),
+	droneConstructTime: v.pipe(
+		v.optional(v.number(), 240),
+		metadata({
+			name: "editor.block-unit-assembler.drone-construct-time",
+			description: "editor.block-unit-assembler.drone-construct-time-description",
+		}),
+	),
+	capacities: v.pipe(
+		v.optional(v.array(v.number()), []),
+		metadata({
+			name: "editor.block-unit-assembler.capacities",
+			description: "editor.block-unit-assembler.capacities-description",
+		}),
+	),
+	createSoundVolume: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({
+			name: "editor.block-unit-assembler.create-sound-volume",
+			description: "editor.block-unit-assembler.create-sound-volume-description",
+		}),
+	),
+});
 
-const unitCargoUnloadPointObjectSchema = 
-	v.object({
-		topTexture: TextureFieldSchema("@-top"),
-		staleTimeDuration: v.pipe(
-			v.optional(v.number(), 360),
-			metadata({
-				name: "editor.block-unit-cargo-unload-point.stale-time-duration",
-				description: "editor.block-unit-cargo-unload-point.stale-time-duration-description",
-			}),
-		),
-	});
+const unitCargoUnloadPointObjectSchema = v.object({
+	topTexture: TextureFieldSchema("@-top"),
+	staleTimeDuration: v.pipe(
+		v.optional(v.number(), 360),
+		metadata({
+			name: "editor.block-unit-cargo-unload-point.stale-time-duration",
+			description: "editor.block-unit-cargo-unload-point.stale-time-duration-description",
+		}),
+	),
+});
 
 const unitCargoLoaderObjectSchema = v.object({
 	unitBuildTime: v.pipe(
@@ -4648,83 +4617,82 @@ const unitCargoLoaderObjectSchema = v.object({
 	),
 });
 
-const repairTurretObjectSchema = 
-	v.object({
-		baseTexture: TextureFieldSchema("@-base"),
-		repairRadius: v.pipe(
-			v.optional(v.number(), 50),
-			metadata({
-				name: "editor.block-repair-turret.repair-radius",
-				description: "editor.block-repair-turret.repair-radius-description",
-			}),
-		),
-		repairSpeed: v.pipe(
-			v.optional(v.number(), 0.3),
-			metadata({
-				name: "editor.block-repair-turret.repair-speed",
-				description: "editor.block-repair-turret.repair-speed-description",
-			}),
-		),
-		powerUse: v.pipe(
-			v.optional(v.number()),
-			metadata({
-				name: "editor.block-repair-turret.power-use",
-				description: "editor.block-repair-turret.power-use-description",
-			}),
-		),
-		length: v.pipe(
-			v.optional(v.number(), 5),
-			metadata({
-				name: "editor.block-repair-turret.length",
-				description: "editor.block-repair-turret.length-description",
-			}),
-		),
-		beamWidth: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({
-				name: "editor.block-repair-turret.beam-width",
-				description: "editor.block-repair-turret.beam-width-description",
-			}),
-		),
-		pulseRadius: v.pipe(
-			v.optional(v.number(), 6),
-			metadata({
-				name: "editor.block-repair-turret.pulse-radius",
-				description: "editor.block-repair-turret.pulse-radius-description",
-			}),
-		),
-		pulseStroke: v.pipe(
-			v.optional(v.number(), 2),
-			metadata({
-				name: "editor.block-repair-turret.pulse-stroke",
-				description: "editor.block-repair-turret.pulse-stroke-description",
-			}),
-		),
-		acceptCoolant: v.pipe(
-			v.optional(v.boolean(), false),
-			metadata({
-				name: "editor.block-repair-turret.accept-coolant",
-				description: "editor.block-repair-turret.accept-coolant-description",
-			}),
-		),
-		coolantUse: v.pipe(
-			v.optional(v.number(), 0.5),
-			metadata({
-				name: "editor.block-repair-turret.coolant-use",
-				description: "editor.block-repair-turret.coolant-use-description",
-			}),
-		),
-		coolantMultiplier: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({
-				name: "editor.block-repair-turret.coolant-multiplier",
-				description: "editor.block-repair-turret.coolant-multiplier-description",
-			}),
-		),
-	});
+const repairTurretObjectSchema = v.object({
+	baseTexture: TextureFieldSchema("@-base"),
+	repairRadius: v.pipe(
+		v.optional(v.number(), 50),
+		metadata({
+			name: "editor.block-repair-turret.repair-radius",
+			description: "editor.block-repair-turret.repair-radius-description",
+		}),
+	),
+	repairSpeed: v.pipe(
+		v.optional(v.number(), 0.3),
+		metadata({
+			name: "editor.block-repair-turret.repair-speed",
+			description: "editor.block-repair-turret.repair-speed-description",
+		}),
+	),
+	powerUse: v.pipe(
+		v.optional(v.number()),
+		metadata({
+			name: "editor.block-repair-turret.power-use",
+			description: "editor.block-repair-turret.power-use-description",
+		}),
+	),
+	length: v.pipe(
+		v.optional(v.number(), 5),
+		metadata({
+			name: "editor.block-repair-turret.length",
+			description: "editor.block-repair-turret.length-description",
+		}),
+	),
+	beamWidth: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({
+			name: "editor.block-repair-turret.beam-width",
+			description: "editor.block-repair-turret.beam-width-description",
+		}),
+	),
+	pulseRadius: v.pipe(
+		v.optional(v.number(), 6),
+		metadata({
+			name: "editor.block-repair-turret.pulse-radius",
+			description: "editor.block-repair-turret.pulse-radius-description",
+		}),
+	),
+	pulseStroke: v.pipe(
+		v.optional(v.number(), 2),
+		metadata({
+			name: "editor.block-repair-turret.pulse-stroke",
+			description: "editor.block-repair-turret.pulse-stroke-description",
+		}),
+	),
+	acceptCoolant: v.pipe(
+		v.optional(v.boolean(), false),
+		metadata({
+			name: "editor.block-repair-turret.accept-coolant",
+			description: "editor.block-repair-turret.accept-coolant-description",
+		}),
+	),
+	coolantUse: v.pipe(
+		v.optional(v.number(), 0.5),
+		metadata({
+			name: "editor.block-repair-turret.coolant-use",
+			description: "editor.block-repair-turret.coolant-use-description",
+		}),
+	),
+	coolantMultiplier: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({
+			name: "editor.block-repair-turret.coolant-multiplier",
+			description: "editor.block-repair-turret.coolant-multiplier-description",
+		}),
+	),
+});
 
 const repairTowerObjectSchema = v.object({
-    glowTexture: TextureFieldSchema("@-glow"),
+	glowTexture: TextureFieldSchema("@-glow"),
 	range: v.pipe(
 		v.optional(v.number(), 80),
 		metadata({
@@ -4870,26 +4838,25 @@ const logicDisplayObjectSchema = v.object({
 	),
 });
 
-const tileableLogicDisplayObjectSchema = 
-	v.object({
-		...logicDisplayObjectSchema.entries,
-		backTexture: TextureFieldSchema("@-back"),
-		displayTextures: ArrayTextureSchema("@-#", 47),
-		maxDisplayDimensions: v.pipe(
-			v.optional(v.number(), 16),
-			metadata({
-				name: "editor.block-tileable-logic-display.max-display-dimensions",
-				description: "editor.block-tileable-logic-display.max-display-dimensions-description",
-			}),
-		),
-		frameSize: v.pipe(
-			v.optional(v.number(), 6),
-			metadata({
-				name: "editor.block-tileable-logic-display.frame-size",
-				description: "editor.block-tileable-logic-display.frame-size-description",
-			}),
-		),
-	});
+const tileableLogicDisplayObjectSchema = v.object({
+	...logicDisplayObjectSchema.entries,
+	backTexture: TextureFieldSchema("@-back"),
+	displayTextures: ArrayTextureSchema("@-#", 47),
+	maxDisplayDimensions: v.pipe(
+		v.optional(v.number(), 16),
+		metadata({
+			name: "editor.block-tileable-logic-display.max-display-dimensions",
+			description: "editor.block-tileable-logic-display.max-display-dimensions-description",
+		}),
+	),
+	frameSize: v.pipe(
+		v.optional(v.number(), 6),
+		metadata({
+			name: "editor.block-tileable-logic-display.frame-size",
+			description: "editor.block-tileable-logic-display.frame-size-description",
+		}),
+	),
+});
 
 const messageBlockObjectSchema = v.object({
 	maxTextLength: v.pipe(
@@ -4918,41 +4885,40 @@ const memoryBlockObjectSchema = v.object({
 	),
 });
 
-const canvasBlockObjectSchema = 
-	v.object({
-		sideTexture1: TextureFieldSchema("@-side1"),
-		sideTexture2: TextureFieldSchema("@-side2"),
-		cornerTexture1: TextureFieldSchema("@-corner1"),
-		cornerTexture2: TextureFieldSchema("@-corner2"),
-		padding: v.pipe(
-			v.optional(v.number(), 0),
-			metadata({
-				name: "editor.block-canvas-block.padding",
-				description: "editor.block-canvas-block.padding-description",
-			}),
-		),
-		canvasSize: v.pipe(
-			v.optional(v.number(), 8),
-			metadata({
-				name: "editor.block-canvas-block.canvas-size",
-				description: "editor.block-canvas-block.canvas-size-description",
-			}),
-		),
-		palette: v.pipe(
-			v.optional(v.array(v.number())),
-			metadata({
-				name: "editor.block-canvas-block.palette",
-				description: "editor.block-canvas-block.palette-description",
-			}),
-		),
-		bitsPerPixel: v.pipe(
-			v.optional(v.number()),
-			metadata({
-				name: "editor.block-canvas-block.bits-per-pixel",
-				description: "editor.block-canvas-block.bits-per-pixel-description",
-			}),
-		),
-	});
+const canvasBlockObjectSchema = v.object({
+	sideTexture1: TextureFieldSchema("@-side1"),
+	sideTexture2: TextureFieldSchema("@-side2"),
+	cornerTexture1: TextureFieldSchema("@-corner1"),
+	cornerTexture2: TextureFieldSchema("@-corner2"),
+	padding: v.pipe(
+		v.optional(v.number(), 0),
+		metadata({
+			name: "editor.block-canvas-block.padding",
+			description: "editor.block-canvas-block.padding-description",
+		}),
+	),
+	canvasSize: v.pipe(
+		v.optional(v.number(), 8),
+		metadata({
+			name: "editor.block-canvas-block.canvas-size",
+			description: "editor.block-canvas-block.canvas-size-description",
+		}),
+	),
+	palette: v.pipe(
+		v.optional(v.array(v.number())),
+		metadata({
+			name: "editor.block-canvas-block.palette",
+			description: "editor.block-canvas-block.palette-description",
+		}),
+	),
+	bitsPerPixel: v.pipe(
+		v.optional(v.number()),
+		metadata({
+			name: "editor.block-canvas-block.bits-per-pixel",
+			description: "editor.block-canvas-block.bits-per-pixel-description",
+		}),
+	),
+});
 
 // Heat variant schemas
 const heatConductorObjectSchema = v.object({
@@ -5177,7 +5143,7 @@ const coloredFloorObjectSchema = v.object({
 });
 
 const treeBlockObjectSchema = v.object({
-    shadowTexture: TextureFieldSchema("@-shadow"),
+	shadowTexture: TextureFieldSchema("@-shadow"),
 	shadowOffset: v.pipe(
 		v.optional(v.number(), -4),
 		metadata({
@@ -5225,303 +5191,299 @@ const tallBlockObjectSchema = v.object({
 	),
 });
 
-const cliffObjectSchema = 
-	v.object({
-		cliffmaskTexture: ArrayTextureSchema("cliffmask#", 128),
-		size: v.pipe(
-			v.optional(v.number(), 11),
-			metadata({
-				name: "editor.block-cliff.size",
-				description: "editor.block-cliff.size-description",
-			}),
-		),
-	});
+const cliffObjectSchema = v.object({
+	cliffmaskTexture: ArrayTextureSchema("cliffmask#", 128),
+	size: v.pipe(
+		v.optional(v.number(), 11),
+		metadata({
+			name: "editor.block-cliff.size",
+			description: "editor.block-cliff.size-description",
+		}),
+	),
+});
 
 // Campaign variant schemas
-const launchPadObjectSchema = 
-	v.object({
-		lightTexture: TextureFieldSchema("@-light"),
-		podTexture: TextureFieldSchema("@-pod"),
-		previewTexture: TextureFieldSchema("@-preview", "@"),
-		hasItems: fixed(blockObjectSchema, "hasItems", true),
-		solid: fixed(blockObjectSchema, "solid", true),
-		update: fixed(blockObjectSchema, "update", true),
-		configurable: fixed(blockObjectSchema, "configurable", true),
-		flags: fixed(blockObjectSchema, "flags", ["launchPad"]),
-		launchTime: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({
-				name: "editor.block-launch-pad.launch-time",
-				description: "editor.block-launch-pad.launch-time-description",
-			}),
-		),
-		launchSoundPitchRand: v.pipe(
-			v.optional(v.number(), 0.1),
-			metadata({
-				name: "editor.block-launch-pad.launch-sound-pitch-rand",
-				description: "editor.block-launch-pad.launch-sound-pitch-rand-description",
-			}),
-		),
-		acceptMultipleItems: v.pipe(
-			v.optional(v.boolean(), false),
-			metadata({
-				name: "editor.block-launch-pad.accept-multiple-items",
-				description: "editor.block-launch-pad.accept-multiple-items-description",
-			}),
-		),
-		lightStep: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({
-				name: "editor.block-launch-pad.light-step",
-				description: "editor.block-launch-pad.light-step-description",
-			}),
-		),
-		lightSteps: v.pipe(
-			v.optional(v.number(), 3),
-			metadata({
-				name: "editor.block-launch-pad.light-steps",
-				description: "editor.block-launch-pad.light-steps-description",
-			}),
-		),
-		liquidPad: v.pipe(
-			v.optional(v.number(), 2),
-			metadata({
-				name: "editor.block-launch-pad.liquid-pad",
-				description: "editor.block-launch-pad.liquid-pad-description",
-			}),
-		),
-	});
+const launchPadObjectSchema = v.object({
+	lightTexture: TextureFieldSchema("@-light"),
+	podTexture: TextureFieldSchema("@-pod"),
+	previewTexture: TextureFieldSchema("@-preview", "@"),
+	hasItems: fixed(blockObjectSchema, "hasItems", true),
+	solid: fixed(blockObjectSchema, "solid", true),
+	update: fixed(blockObjectSchema, "update", true),
+	configurable: fixed(blockObjectSchema, "configurable", true),
+	flags: fixed(blockObjectSchema, "flags", ["launchPad"]),
+	launchTime: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({
+			name: "editor.block-launch-pad.launch-time",
+			description: "editor.block-launch-pad.launch-time-description",
+		}),
+	),
+	launchSoundPitchRand: v.pipe(
+		v.optional(v.number(), 0.1),
+		metadata({
+			name: "editor.block-launch-pad.launch-sound-pitch-rand",
+			description: "editor.block-launch-pad.launch-sound-pitch-rand-description",
+		}),
+	),
+	acceptMultipleItems: v.pipe(
+		v.optional(v.boolean(), false),
+		metadata({
+			name: "editor.block-launch-pad.accept-multiple-items",
+			description: "editor.block-launch-pad.accept-multiple-items-description",
+		}),
+	),
+	lightStep: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({
+			name: "editor.block-launch-pad.light-step",
+			description: "editor.block-launch-pad.light-step-description",
+		}),
+	),
+	lightSteps: v.pipe(
+		v.optional(v.number(), 3),
+		metadata({
+			name: "editor.block-launch-pad.light-steps",
+			description: "editor.block-launch-pad.light-steps-description",
+		}),
+	),
+	liquidPad: v.pipe(
+		v.optional(v.number(), 2),
+		metadata({
+			name: "editor.block-launch-pad.liquid-pad",
+			description: "editor.block-launch-pad.liquid-pad-description",
+		}),
+	),
+});
 
-const landingPadObjectSchema = 
-	v.object({
-		podTexture: TextureFieldSchema("@-pod", "advanced-launch-pad-pod"),
-		hasItems: fixed(blockObjectSchema, "hasItems", true),
-		hasLiquids: fixed(blockObjectSchema, "hasLiquids", true),
-		solid: fixed(blockObjectSchema, "solid", true),
-		update: fixed(blockObjectSchema, "update", true),
-		configurable: fixed(blockObjectSchema, "configurable", true),
-		acceptsItems: fixed(blockObjectSchema, "acceptsItems", false),
-		emitLight: fixed(blockObjectSchema, "emitLight", true),
-		lightRadius: fixed(blockObjectSchema, "lightRadius", 90),
+const landingPadObjectSchema = v.object({
+	podTexture: TextureFieldSchema("@-pod", "advanced-launch-pad-pod"),
+	hasItems: fixed(blockObjectSchema, "hasItems", true),
+	hasLiquids: fixed(blockObjectSchema, "hasLiquids", true),
+	solid: fixed(blockObjectSchema, "solid", true),
+	update: fixed(blockObjectSchema, "update", true),
+	configurable: fixed(blockObjectSchema, "configurable", true),
+	acceptsItems: fixed(blockObjectSchema, "acceptsItems", false),
+	emitLight: fixed(blockObjectSchema, "emitLight", true),
+	lightRadius: fixed(blockObjectSchema, "lightRadius", 90),
 
-		arrivalDuration: v.pipe(
-			v.optional(v.number(), 150),
-			metadata({
-				name: "editor.block-landing-pad.arrival-duration",
-				description: "editor.block-landing-pad.arrival-duration-description",
-			}),
-		),
-		cooldownTime: v.pipe(
-			v.optional(v.number(), 150),
-			metadata({
-				name: "editor.block-landing-pad.cooldown-time",
-				description: "editor.block-landing-pad.cooldown-time-description",
-			}),
-		),
-		consumeLiquidAmount: v.pipe(
-			v.optional(v.number(), 100),
-			metadata({
-				name: "editor.block-landing-pad.consume-liquid-amount",
-				description: "editor.block-landing-pad.consume-liquid-amount-description",
-			}),
-		),
-		coolingEffectChance: v.pipe(
-			v.optional(v.number(), 0.2),
-			metadata({
-				name: "editor.block-landing-pad.cooling-effect-chance",
-				description: "editor.block-landing-pad.cooling-effect-chance-description",
-			}),
-		),
-		liquidPad: v.pipe(
-			v.optional(v.number(), 2),
-			metadata({
-				name: "editor.block-landing-pad.liquid-pad",
-				description: "editor.block-landing-pad.liquid-pad-description",
-			}),
-		),
-		landSoundVolume: v.pipe(
-			v.optional(v.number(), 0.75),
-			metadata({
-				name: "editor.block-landing-pad.land-sound-volume",
-				description: "editor.block-landing-pad.land-sound-volume-description",
-			}),
-		),
-	});
+	arrivalDuration: v.pipe(
+		v.optional(v.number(), 150),
+		metadata({
+			name: "editor.block-landing-pad.arrival-duration",
+			description: "editor.block-landing-pad.arrival-duration-description",
+		}),
+	),
+	cooldownTime: v.pipe(
+		v.optional(v.number(), 150),
+		metadata({
+			name: "editor.block-landing-pad.cooldown-time",
+			description: "editor.block-landing-pad.cooldown-time-description",
+		}),
+	),
+	consumeLiquidAmount: v.pipe(
+		v.optional(v.number(), 100),
+		metadata({
+			name: "editor.block-landing-pad.consume-liquid-amount",
+			description: "editor.block-landing-pad.consume-liquid-amount-description",
+		}),
+	),
+	coolingEffectChance: v.pipe(
+		v.optional(v.number(), 0.2),
+		metadata({
+			name: "editor.block-landing-pad.cooling-effect-chance",
+			description: "editor.block-landing-pad.cooling-effect-chance-description",
+		}),
+	),
+	liquidPad: v.pipe(
+		v.optional(v.number(), 2),
+		metadata({
+			name: "editor.block-landing-pad.liquid-pad",
+			description: "editor.block-landing-pad.liquid-pad-description",
+		}),
+	),
+	landSoundVolume: v.pipe(
+		v.optional(v.number(), 0.75),
+		metadata({
+			name: "editor.block-landing-pad.land-sound-volume",
+			description: "editor.block-landing-pad.land-sound-volume-description",
+		}),
+	),
+});
 
-const acceleratorObjectSchema = 
-	v.object({
-		launchArrowTexture: TextureFieldSchema("@-launch-arrow"),
-		update: fixed(blockObjectSchema, "update", true),
-		solid: fixed(blockObjectSchema, "solid", true),
-		hasItems: fixed(blockObjectSchema, "hasItems", true),
-		hasPower: fixed(blockObjectSchema, "hasPower", true),
-		itemCapacity: fixed(blockObjectSchema, "itemCapacity", 8000),
-		configurable: fixed(blockObjectSchema, "configurable", true),
-		emitLight: fixed(blockObjectSchema, "emitLight", true),
-		lightRadius: fixed(blockObjectSchema, "lightRadius", 70),
-		lightColor: fixed(blockObjectSchema, "lightColor"),
-		lightningSoundVolume: v.pipe(
-			v.optional(v.number(), 0.85),
-			metadata({
-				name: "editor.block-accelerator.lightning-sound-volume",
-				description: "editor.block-accelerator.lightning-sound-volume-description",
-			}),
-		),
-		launchDuration: v.pipe(
-			v.optional(v.number(), 120),
-			metadata({
-				name: "editor.block-accelerator.launch-duration",
-				description: "editor.block-accelerator.launch-duration-description",
-			}),
-		),
-		chargeDuration: v.pipe(
-			v.optional(v.number(), 220),
-			metadata({
-				name: "editor.block-accelerator.charge-duration",
-				description: "editor.block-accelerator.charge-duration-description",
-			}),
-		),
-		buildDuration: v.pipe(
-			v.optional(v.number(), 120),
-			metadata({
-				name: "editor.block-accelerator.build-duration",
-				description: "editor.block-accelerator.build-duration-description",
-			}),
-		),
-		landZoomFrom: v.pipe(
-			v.optional(v.number(), 0.02),
-			metadata({
-				name: "editor.block-accelerator.land-zoom-from",
-				description: "editor.block-accelerator.land-zoom-from-description",
-			}),
-		),
-		landZoomTo: v.pipe(
-			v.optional(v.number(), 4),
-			metadata({
-				name: "editor.block-accelerator.land-zoom-to",
-				description: "editor.block-accelerator.land-zoom-to-description",
-			}),
-		),
-		chargeZoomTo: v.pipe(
-			v.optional(v.number(), 5),
-			metadata({
-				name: "editor.block-accelerator.charge-zoom-to",
-				description: "editor.block-accelerator.charge-zoom-to-description",
-			}),
-		),
-		chargeRings: v.pipe(
-			v.optional(v.number(), 4),
-			metadata({
-				name: "editor.block-accelerator.charge-rings",
-				description: "editor.block-accelerator.charge-rings-description",
-			}),
-		),
-		ringRadBase: v.pipe(
-			v.optional(v.number(), 60),
-			metadata({
-				name: "editor.block-accelerator.ring-rad-base",
-				description: "editor.block-accelerator.ring-rad-base-description",
-			}),
-		),
-		ringRadSpacing: v.pipe(
-			v.optional(v.number(), 25),
-			metadata({
-				name: "editor.block-accelerator.ring-rad-spacing",
-				description: "editor.block-accelerator.ring-rad-spacing-description",
-			}),
-		),
-		ringRadPow: v.pipe(
-			v.optional(v.number(), 1.6),
-			metadata({
-				name: "editor.block-accelerator.ring-rad-pow",
-				description: "editor.block-accelerator.ring-rad-pow-description",
-			}),
-		),
-		ringStroke: v.pipe(
-			v.optional(v.number(), 3),
-			metadata({
-				name: "editor.block-accelerator.ring-stroke",
-				description: "editor.block-accelerator.ring-stroke-description",
-			}),
-		),
-		ringSpeedup: v.pipe(
-			v.optional(v.number(), 1.4),
-			metadata({
-				name: "editor.block-accelerator.ring-speedup",
-				description: "editor.block-accelerator.ring-speedup-description",
-			}),
-		),
-		chargeRingMerge: v.pipe(
-			v.optional(v.number(), 2),
-			metadata({
-				name: "editor.block-accelerator.charge-ring-merge",
-				description: "editor.block-accelerator.charge-ring-merge-description",
-			}),
-		),
-		ringArrowRad: v.pipe(
-			v.optional(v.number(), 3),
-			metadata({
-				name: "editor.block-accelerator.ring-arrow-rad",
-				description: "editor.block-accelerator.ring-arrow-rad-description",
-			}),
-		),
-		ringHandleTilt: v.pipe(
-			v.optional(v.number(), 0.8),
-			metadata({
-				name: "editor.block-accelerator.ring-handle-tilt",
-				description: "editor.block-accelerator.ring-handle-tilt-description",
-			}),
-		),
-		ringHandleLen: v.pipe(
-			v.optional(v.number(), 30),
-			metadata({
-				name: "editor.block-accelerator.ring-handle-len",
-				description: "editor.block-accelerator.ring-handle-len-description",
-			}),
-		),
-		launchLightning: v.pipe(
-			v.optional(v.number(), 20),
-			metadata({
-				name: "editor.block-accelerator.launch-lightning",
-				description: "editor.block-accelerator.launch-lightning-description",
-			}),
-		),
-		lightningDamage: v.pipe(
-			v.optional(v.number(), 40),
-			metadata({
-				name: "editor.block-accelerator.lightning-damage",
-				description: "editor.block-accelerator.lightning-damage-description",
-			}),
-		),
-		lightningOffset: v.pipe(
-			v.optional(v.number(), 24),
-			metadata({
-				name: "editor.block-accelerator.lightning-offset",
-				description: "editor.block-accelerator.lightning-offset-description",
-			}),
-		),
-		lightningLengthMin: v.pipe(
-			v.optional(v.number(), 5),
-			metadata({
-				name: "editor.block-accelerator.lightning-length-min",
-				description: "editor.block-accelerator.lightning-length-min-description",
-			}),
-		),
-		lightningLengthMax: v.pipe(
-			v.optional(v.number(), 25),
-			metadata({
-				name: "editor.block-accelerator.lightning-length-max",
-				description: "editor.block-accelerator.lightning-length-max-description",
-			}),
-		),
-		lightningLaunchChance: v.pipe(
-			v.optional(v.number(), 0.8),
-			metadata({
-				name: "editor.block-accelerator.lightning-launch-chance",
-				description: "editor.block-accelerator.lightning-launch-chance-description",
-			}),
-		),
-	});
+const acceleratorObjectSchema = v.object({
+	launchArrowTexture: TextureFieldSchema("@-launch-arrow"),
+	update: fixed(blockObjectSchema, "update", true),
+	solid: fixed(blockObjectSchema, "solid", true),
+	hasItems: fixed(blockObjectSchema, "hasItems", true),
+	hasPower: fixed(blockObjectSchema, "hasPower", true),
+	itemCapacity: fixed(blockObjectSchema, "itemCapacity", 8000),
+	configurable: fixed(blockObjectSchema, "configurable", true),
+	emitLight: fixed(blockObjectSchema, "emitLight", true),
+	lightRadius: fixed(blockObjectSchema, "lightRadius", 70),
+	lightColor: fixed(blockObjectSchema, "lightColor"),
+	lightningSoundVolume: v.pipe(
+		v.optional(v.number(), 0.85),
+		metadata({
+			name: "editor.block-accelerator.lightning-sound-volume",
+			description: "editor.block-accelerator.lightning-sound-volume-description",
+		}),
+	),
+	launchDuration: v.pipe(
+		v.optional(v.number(), 120),
+		metadata({
+			name: "editor.block-accelerator.launch-duration",
+			description: "editor.block-accelerator.launch-duration-description",
+		}),
+	),
+	chargeDuration: v.pipe(
+		v.optional(v.number(), 220),
+		metadata({
+			name: "editor.block-accelerator.charge-duration",
+			description: "editor.block-accelerator.charge-duration-description",
+		}),
+	),
+	buildDuration: v.pipe(
+		v.optional(v.number(), 120),
+		metadata({
+			name: "editor.block-accelerator.build-duration",
+			description: "editor.block-accelerator.build-duration-description",
+		}),
+	),
+	landZoomFrom: v.pipe(
+		v.optional(v.number(), 0.02),
+		metadata({
+			name: "editor.block-accelerator.land-zoom-from",
+			description: "editor.block-accelerator.land-zoom-from-description",
+		}),
+	),
+	landZoomTo: v.pipe(
+		v.optional(v.number(), 4),
+		metadata({
+			name: "editor.block-accelerator.land-zoom-to",
+			description: "editor.block-accelerator.land-zoom-to-description",
+		}),
+	),
+	chargeZoomTo: v.pipe(
+		v.optional(v.number(), 5),
+		metadata({
+			name: "editor.block-accelerator.charge-zoom-to",
+			description: "editor.block-accelerator.charge-zoom-to-description",
+		}),
+	),
+	chargeRings: v.pipe(
+		v.optional(v.number(), 4),
+		metadata({
+			name: "editor.block-accelerator.charge-rings",
+			description: "editor.block-accelerator.charge-rings-description",
+		}),
+	),
+	ringRadBase: v.pipe(
+		v.optional(v.number(), 60),
+		metadata({
+			name: "editor.block-accelerator.ring-rad-base",
+			description: "editor.block-accelerator.ring-rad-base-description",
+		}),
+	),
+	ringRadSpacing: v.pipe(
+		v.optional(v.number(), 25),
+		metadata({
+			name: "editor.block-accelerator.ring-rad-spacing",
+			description: "editor.block-accelerator.ring-rad-spacing-description",
+		}),
+	),
+	ringRadPow: v.pipe(
+		v.optional(v.number(), 1.6),
+		metadata({
+			name: "editor.block-accelerator.ring-rad-pow",
+			description: "editor.block-accelerator.ring-rad-pow-description",
+		}),
+	),
+	ringStroke: v.pipe(
+		v.optional(v.number(), 3),
+		metadata({
+			name: "editor.block-accelerator.ring-stroke",
+			description: "editor.block-accelerator.ring-stroke-description",
+		}),
+	),
+	ringSpeedup: v.pipe(
+		v.optional(v.number(), 1.4),
+		metadata({
+			name: "editor.block-accelerator.ring-speedup",
+			description: "editor.block-accelerator.ring-speedup-description",
+		}),
+	),
+	chargeRingMerge: v.pipe(
+		v.optional(v.number(), 2),
+		metadata({
+			name: "editor.block-accelerator.charge-ring-merge",
+			description: "editor.block-accelerator.charge-ring-merge-description",
+		}),
+	),
+	ringArrowRad: v.pipe(
+		v.optional(v.number(), 3),
+		metadata({
+			name: "editor.block-accelerator.ring-arrow-rad",
+			description: "editor.block-accelerator.ring-arrow-rad-description",
+		}),
+	),
+	ringHandleTilt: v.pipe(
+		v.optional(v.number(), 0.8),
+		metadata({
+			name: "editor.block-accelerator.ring-handle-tilt",
+			description: "editor.block-accelerator.ring-handle-tilt-description",
+		}),
+	),
+	ringHandleLen: v.pipe(
+		v.optional(v.number(), 30),
+		metadata({
+			name: "editor.block-accelerator.ring-handle-len",
+			description: "editor.block-accelerator.ring-handle-len-description",
+		}),
+	),
+	launchLightning: v.pipe(
+		v.optional(v.number(), 20),
+		metadata({
+			name: "editor.block-accelerator.launch-lightning",
+			description: "editor.block-accelerator.launch-lightning-description",
+		}),
+	),
+	lightningDamage: v.pipe(
+		v.optional(v.number(), 40),
+		metadata({
+			name: "editor.block-accelerator.lightning-damage",
+			description: "editor.block-accelerator.lightning-damage-description",
+		}),
+	),
+	lightningOffset: v.pipe(
+		v.optional(v.number(), 24),
+		metadata({
+			name: "editor.block-accelerator.lightning-offset",
+			description: "editor.block-accelerator.lightning-offset-description",
+		}),
+	),
+	lightningLengthMin: v.pipe(
+		v.optional(v.number(), 5),
+		metadata({
+			name: "editor.block-accelerator.lightning-length-min",
+			description: "editor.block-accelerator.lightning-length-min-description",
+		}),
+	),
+	lightningLengthMax: v.pipe(
+		v.optional(v.number(), 25),
+		metadata({
+			name: "editor.block-accelerator.lightning-length-max",
+			description: "editor.block-accelerator.lightning-length-max-description",
+		}),
+	),
+	lightningLaunchChance: v.pipe(
+		v.optional(v.number(), 0.8),
+		metadata({
+			name: "editor.block-accelerator.lightning-launch-chance",
+			description: "editor.block-accelerator.lightning-launch-chance-description",
+		}),
+	),
+});
 
 // Sandbox variant schemas
 const itemSourceObjectSchema = v.object({
@@ -5771,9 +5733,10 @@ const classSchemaMap: Record<BlockType, SchemaFn<v.ObjectSchema<v.ObjectEntries,
 	// Sandbox
 	ItemSource: () => itemSourceObjectSchema,
 	ItemVoid: () => v.object({}),
-	LiquidSource: () => v.object({
-        crossTexture: TextureFieldSchema("@-cross"),
-    }),
+	LiquidSource: () =>
+		v.object({
+			crossTexture: TextureFieldSchema("@-cross"),
+		}),
 	LiquidVoid: () => v.object({}),
 	ShallowLiquid: (context) =>
 		v.object({
@@ -5821,6 +5784,7 @@ export const BlockHjsonSchema: SchemaFn = CachedSchema((context) => {
 			v.object({
 				...blockObjectSchema,
 				...variantEntries,
+				consumes: v.optional(ConsumesHjsonSchema(context)),
 				requirements: v.optional(v.array(ItemRequirementSchema), []),
 				researchCost: v.optional(v.array(ItemRequirementSchema)),
 				researchCostMultipliers: v.optional(v.record(v.string(), v.number())),

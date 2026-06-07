@@ -1,5 +1,7 @@
 import * as v from "valibot";
-import { CachedSchema, MindustryHexColorSchema, type SchemaFn } from "./base";
+import { CachedSchema } from "./utils";
+import { MindustryHexColorSchema } from "./mindustry-hex-color";
+import type { SchemaFn } from "./utils";
 import { EffectFieldSchema } from "./effect";
 import { metadata } from "./utils";
 

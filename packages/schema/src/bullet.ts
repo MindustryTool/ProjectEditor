@@ -1,5 +1,9 @@
 import * as v from "valibot";
-import { CachedSchema, Interps, MindustryHexColorSchema, SoundHjsonSchema, type SchemaFn } from "./base";
+import { CachedSchema } from "./utils";
+import { Interps } from "./interps";
+import { MindustryHexColorSchema } from "./mindustry-hex-color";
+import { SoundHjsonSchema } from "./sound";
+import type { SchemaFn } from "./utils";
 import { EffectFieldSchema } from "./effect";
 import { PartHjsonSchema } from "./part";
 import { ShootPatternHjsonSchema } from "./shoot-pattern";
@@ -1624,7 +1628,7 @@ const classSchemaMap: Record<BulletClass, SchemaFn<BulletObjectSchema>> = {
 export const BulletHjsonSchema: SchemaFn = CachedSchema((context) => {
 	return v.lazy((input) => {
 		if (input && typeof input === "object") {
-			const type = 'type' in input ? input["type"] as string : 'BasicBulletType';
+			const type = "type" in input ? (input["type"] as string) : "BasicBulletType";
 
 			if (classSchemaMap[type as BulletClass]) {
 				const schema = classSchemaMap[type as BulletClass];

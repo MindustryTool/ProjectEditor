@@ -1,12 +1,21 @@
 import * as v from "valibot";
-import { MindustryHexColorSchema, SoundHjsonSchema, type SchemaFn } from "./base";
+import { MindustryHexColorSchema } from "./mindustry-hex-color";
+import { SoundHjsonSchema } from "./sound";
+import type { SchemaFn } from "./utils";
 import { StatusStringSchema } from "./status";
 import { EffectFieldSchema } from "./effect";
 import { PartHjsonSchema } from "./part";
 import { ShootPatternHjsonSchema } from "./shoot-pattern";
 import { BulletHjsonSchema } from "./bullet";
+import { fixed } from "./utils";
+import type { ProjectContents } from "@project/types";
+
+const weaponTypes = ["Weapon", "BuildWeapon", "MineWeapon", "PointDefenseBulletWeapon", "PointDefenseWeapon", "RepairBeamWeapon"] as const;
+
+type WeaponType = (typeof weaponTypes)[number];
 
 const weaponObjectSchema = {
+	type: v.optional(v.picklist(weaponTypes), "Weapon"),
 	name: v.optional(v.string()),
 	shots: v.optional(v.number(), 1),
 	display: v.optional(v.boolean(), true),
@@ -15,6 +24,7 @@ const weaponObjectSchema = {
 	alternate: v.optional(v.boolean(), true),
 	rotate: v.optional(v.boolean(), false),
 	showStatSprite: v.optional(v.boolean(), true),
+	reload: v.optional(v.number(), 1),
 
 	baseRotation: v.optional(v.number(), 0),
 
@@ -36,7 +46,6 @@ const weaponObjectSchema = {
 	targetSwitchInterval: v.optional(v.number(), 70),
 
 	rotateSpeed: v.optional(v.number(), 20),
-	reload: v.optional(v.number(), 1),
 	inaccuracy: v.optional(v.number(), 0),
 	shake: v.optional(v.number(), 0),
 	recoil: v.optional(v.number(), 1.5),
@@ -97,13 +106,98 @@ const weaponObjectSchema = {
 	shootOnDeath: v.optional(v.boolean(), false),
 };
 
-export const WeaponHjsonSchema: SchemaFn = (context) =>
+const buildWeaponSchema = v.object({
+	rotate: fixed(weaponObjectSchema, "rotate", true),
+	noAttack: fixed(weaponObjectSchema, "noAttack", true),
+	predictTarget: fixed(weaponObjectSchema, "predictTarget", false),
+	display: fixed(weaponObjectSchema, "display", false),
+	useAttackRange: fixed(weaponObjectSchema, "useAttackRange", false),
+});
+
+const mineWeaponSchema = v.object({
+	rotate: fixed(weaponObjectSchema, "rotate", true),
+	noAttack: fixed(weaponObjectSchema, "noAttack", true),
+	predictTarget: fixed(weaponObjectSchema, "predictTarget", false),
+	display: fixed(weaponObjectSchema, "display", false),
+	useAttackRange: fixed(weaponObjectSchema, "useAttackRange", false),
+});
+
+const pointDefenseBulletWeaponSchema = v.object({
+	autoTarget: fixed(weaponObjectSchema, "autoTarget", true),
+	controllable: fixed(weaponObjectSchema, "controllable", false),
+	rotate: fixed(weaponObjectSchema, "rotate", true),
+	useAttackRange: fixed(weaponObjectSchema, "useAttackRange", false),
+	targetInterval: fixed(weaponObjectSchema, "targetInterval", 5),
+});
+
+const pointDefenseWeaponSchema = (context: ProjectContents) =>
 	v.object({
-		...weaponObjectSchema,
-		bullet: v.optional(BulletHjsonSchema(context)),
-		ejectEffect: v.optional(EffectFieldSchema(context)),
-		shoot: v.optional(ShootPatternHjsonSchema(context)),
-		shootStatus: v.optional(StatusStringSchema(context)),
-		shootOnDeathEffect: v.optional(EffectFieldSchema(context)),
-		parts: v.optional(PartHjsonSchema(context), []),
+		color: v.optional(MindustryHexColorSchema),
+		beamEffect: v.optional(EffectFieldSchema(context)),
+		predictTarget: fixed(weaponObjectSchema, "predictTarget", true),
+		autoTarget: fixed(weaponObjectSchema, "autoTarget", true),
+		controllable: fixed(weaponObjectSchema, "controllable", false),
+		rotate: fixed(weaponObjectSchema, "rotate", true),
+		useAttackRange: fixed(weaponObjectSchema, "useAttackRange", false),
+		targetInterval: fixed(weaponObjectSchema, "targetInterval", 10),
+	});
+
+const repairBeamWeaponSchema = (context: ProjectContents) =>
+	v.object({
+		targetBuildings: v.optional(v.boolean(), false),
+		targetUnits: v.optional(v.boolean(), true),
+		repairSpeed: v.optional(v.number(), 0.3),
+		fractionRepairSpeed: v.optional(v.number(), 0),
+		beamWidth: v.optional(v.number(), 1),
+		pulseRadius: v.optional(v.number(), 6),
+		pulseStroke: v.optional(v.number(), 2),
+		widthSinMag: v.optional(v.number(), 0),
+		widthSinScl: v.optional(v.number(), 4),
+		recentDamageMultiplier: v.optional(v.number(), 0.1),
+		laserColor: v.optional(MindustryHexColorSchema, "98ffa9"),
+		laserTopColor: v.optional(MindustryHexColorSchema, "ffffff"),
+		healColor: v.optional(MindustryHexColorSchema),
+		healEffect: v.optional(EffectFieldSchema(context)),
+
+		reload: fixed(weaponObjectSchema, "reload", 1),
+		predictTarget: fixed(weaponObjectSchema, "predictTarget", false),
+		autoTarget: fixed(weaponObjectSchema, "autoTarget", true),
+		controllable: fixed(weaponObjectSchema, "controllable", false),
+		rotate: fixed(weaponObjectSchema, "rotate", true),
+		recoil: fixed(weaponObjectSchema, "recoil", 0),
+		noAttack: fixed(weaponObjectSchema, "noAttack", true),
+		useAttackRange: fixed(weaponObjectSchema, "useAttackRange", false),
+		activeSound: fixed(weaponObjectSchema, "activeSound", "healBlockFull"),
+	});
+
+const weaponTypeMap: Record<WeaponType, SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>> = {
+	Weapon: () => v.object({}),
+	BuildWeapon: () => buildWeaponSchema,
+	MineWeapon: () => mineWeaponSchema,
+	PointDefenseBulletWeapon: () => pointDefenseBulletWeaponSchema,
+	PointDefenseWeapon: (context) => pointDefenseWeaponSchema(context),
+	RepairBeamWeapon: (context) => repairBeamWeaponSchema(context),
+};
+
+export const WeaponHjsonSchema: SchemaFn = (context) =>
+	v.lazy((input) => {
+		const weaponVariant = {};
+		if (input && typeof input === "object" && "type" in input && typeof input.type === "string") {
+			const weaponType = input.type as WeaponType;
+			const clzz = weaponTypeMap[weaponType](context);
+			if (clzz) {
+				Object.assign(weaponVariant, clzz.entries);
+			}
+		}
+
+		return v.object({
+			...weaponObjectSchema,
+			...weaponVariant,
+			bullet: v.optional(BulletHjsonSchema(context)),
+			ejectEffect: v.optional(EffectFieldSchema(context)),
+			shoot: v.optional(ShootPatternHjsonSchema(context)),
+			shootStatus: v.optional(StatusStringSchema(context)),
+			shootOnDeathEffect: v.optional(EffectFieldSchema(context)),
+			parts: v.optional(PartHjsonSchema(context), []),
+		});
 	});

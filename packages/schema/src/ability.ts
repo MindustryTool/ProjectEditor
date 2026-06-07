@@ -1,5 +1,9 @@
 import * as v from "valibot";
-import { CachedSchema, Interps, MindustryHexColorSchema, SoundHjsonSchema, type SchemaFn } from "./base";
+import { CachedSchema } from "./utils";
+import { Interps } from "./interps";
+import { MindustryHexColorSchema } from "./mindustry-hex-color";
+import { SoundHjsonSchema } from "./sound";
+import type { SchemaFn } from "./utils";
 import { EffectFieldSchema } from "./effect";
 import { StatusFieldSchema } from "./status";
 import { LiquidFieldSchema } from "./liquid";
@@ -23,12 +27,13 @@ export const abilityClasses = [
 	"StatusFieldAbility",
 	"SuppressionFieldAbility",
 	"UnitSpawnAbility",
+	"Ability",
 ] as const;
 
 export type AbilityClass = (typeof abilityClasses)[number];
 
 const abilityBaseObjectSchema = v.object({
-	type: v.picklist(abilityClasses),
+	type: v.optional(v.picklist(abilityClasses), "Ability"),
 	display: v.optional(v.boolean(), true),
 	data: v.optional(v.number(), 0),
 });
@@ -118,6 +123,7 @@ const regenAbilityObjectSchema = v.object({
 type AbilityObjectSchema = v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>;
 
 const classSchemaMap: Record<AbilityClass, SchemaFn<AbilityObjectSchema>> = {
+	Ability: () => v.object({}),
 	ArmorPlateAbility: (_context) => armorPlateAbilityObjectSchema as AbilityObjectSchema,
 	EmptyDataAbility: (_context) => v.object({}) as AbilityObjectSchema,
 	EnergyFieldAbility: (context) =>

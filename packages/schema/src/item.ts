@@ -1,5 +1,7 @@
 import * as v from "valibot";
-import { MindustryHexColorSchema, ResearchSchema, type SchemaFn } from "./base";
+import { MindustryHexColorSchema } from "./mindustry-hex-color";
+import { ResearchSchema } from "./research";
+import type { SchemaFn } from "./utils";
 import { metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
 

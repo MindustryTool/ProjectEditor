@@ -1,5 +1,6 @@
 import type { HjsonObjectNode } from "@project/hjson";
 import * as v from "valibot";
+import type { ProjectContents } from "@project/types";
 
 export type AnySchema =
 	| v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>
@@ -244,6 +245,11 @@ export function fixed<K extends string, T extends Record<K, AnySchema>>(from: T,
 	return v.optional(v.pipe(schema, metadata({ disabled: true })), fixedValue);
 }
 
+export type SchemaFn<
+	T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>> = v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>,
+> = (context: ProjectContents) => T;
+
+
 
 export type SpriteData = {
 	name: string;
@@ -322,4 +328,61 @@ export function collectSpriteData(
 	visit(node.valueOf(), schema, "");
 
 	return result;
+}
+
+export function CachedSchema<T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>>(schemaFn: SchemaFn<T>): SchemaFn<T> {
+	let cacheValue: T | null = null;
+	let cacheKey: ProjectContents | null = null;
+
+	return (context: ProjectContents) => {
+		if (cacheKey === context && cacheValue) {
+			return cacheValue;
+		}
+
+		const result = schemaFn(context);
+		cacheValue = result;
+		cacheKey = context;
+		return result;
+	};
+}
+
+export function findContent(name: string, context: ProjectContents) {
+	name = name.replace(context.name + "-", "");
+
+	const find = (name: string, items: readonly { name: string }[]) => {
+		return items.find((entry) => entry.name.replaceAll(context.name + "-", "") === name);
+	};
+
+	const item = find(name, context.items);
+
+	if (item) {
+		return item;
+	}
+
+	const block = find(name, context.blocks);
+	if (block) {
+		return block;
+	}
+
+	const liquid = find(name, context.liquids);
+	if (liquid) {
+		return liquid;
+	}
+
+	const sector = find(name, context.sectors);
+	if (sector) {
+		return sector;
+	}
+
+	const status = find(name, context.statuses);
+	if (status) {
+		return status;
+	}
+
+	const unit = find(name, context.units);
+	if (unit) {
+		return unit;
+	}
+
+	return null;
 }

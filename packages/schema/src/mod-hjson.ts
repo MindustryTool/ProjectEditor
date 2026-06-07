@@ -1,6 +1,6 @@
 import * as v from "valibot";
-import { ContentNameSchema } from "./base";
 import { metadata } from "./utils";
+import { ContentNameSchema } from "./content";
 
 export const ModHjsonSchema = v.object({
 	name: v.pipe(ContentNameSchema, metadata({ name: "editor.mod-hjson.name", description: "editor.mod-hjson.name-description" })),

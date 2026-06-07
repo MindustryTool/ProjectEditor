@@ -1,5 +1,6 @@
 import * as v from "valibot";
-import { CachedSchema, type SchemaFn } from "./base";
+import { CachedSchema } from "./utils";
+import type { SchemaFn } from "./utils";
 
 import { metadata } from "./utils";
 
