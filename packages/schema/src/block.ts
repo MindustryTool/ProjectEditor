@@ -23,6 +23,8 @@ import { TargetPriority } from "./target-priority";
 import { ConsumesHjsonSchema } from "./consumes";
 import { ContentFieldSchema } from "./content";
 import { Envs, EnvSchema } from "./envs";
+import type { ProjectContents } from "@project/types";
+import { ShootPatternHjsonSchema } from "./shoot-pattern";
 
 export const blockTypes = [
 	// Power
@@ -3196,356 +3198,361 @@ const reloadTurretObjectSchema = v.object({
 	),
 });
 
-const turretObjectSchema = v.object({
-	...reloadTurretObjectSchema.entries,
-	targetInterval: v.pipe(
-		v.optional(v.number(), 20),
-		metadata({
-			name: "editor.block-turret.target-interval",
-			description: "editor.block-turret.target-interval-description",
-		}),
-	),
-	newTargetInterval: v.pipe(
-		v.optional(v.number(), -1),
-		metadata({
-			name: "editor.block-turret.new-target-interval",
-			description: "editor.block-turret.new-target-interval-description",
-		}),
-	),
-	maxAmmo: v.pipe(
-		v.optional(v.number(), 30),
-		metadata({
-			name: "editor.block-turret.max-ammo",
-			description: "editor.block-turret.max-ammo-description",
-		}),
-	),
-	ammoPerShot: v.pipe(
-		v.optional(v.number(), 1),
-		metadata({
-			name: "editor.block-turret.ammo-per-shot",
-			description: "editor.block-turret.ammo-per-shot-description",
-		}),
-	),
-	consumeAmmoOnce: v.pipe(
-		v.optional(v.boolean(), true),
-		metadata({
-			name: "editor.block-turret.consume-ammo-once",
-			description: "editor.block-turret.consume-ammo-once-description",
-		}),
-	),
-	heatRequirement: v.pipe(
-		v.optional(v.number(), -1),
-		metadata({
-			name: "editor.block-turret.heat-requirement",
-			description: "editor.block-turret.heat-requirement-description",
-		}),
-	),
-	maxHeatEfficiency: v.pipe(
-		v.optional(v.number(), 3),
-		metadata({
-			name: "editor.block-turret.max-heat-efficiency",
-			description: "editor.block-turret.max-heat-efficiency-description",
-		}),
-	),
-	inaccuracy: v.pipe(
-		v.optional(v.number(), 0),
-		metadata({
-			name: "editor.block-turret.inaccuracy",
-			description: "editor.block-turret.inaccuracy-description",
-		}),
-	),
-	velocityRnd: v.pipe(
-		v.optional(v.number(), 0),
-		metadata({
-			name: "editor.block-turret.velocity-rnd",
-			description: "editor.block-turret.velocity-rnd-description",
-		}),
-	),
-	scaleLifetimeOffset: v.pipe(
-		v.optional(v.number(), 0),
-		metadata({
-			name: "editor.block-turret.scale-lifetime-offset",
-			description: "editor.block-turret.scale-lifetime-offset-description",
-		}),
-	),
-	shootCone: v.pipe(
-		v.optional(v.number(), 8),
-		metadata({
-			name: "editor.block-turret.shoot-cone",
-			description: "editor.block-turret.shoot-cone-description",
-		}),
-	),
-	shootX: v.pipe(
-		v.optional(v.number(), 0),
-		metadata({
-			name: "editor.block-turret.shoot-x",
-			description: "editor.block-turret.shoot-x-description",
-		}),
-	),
-	shootY: v.pipe(
-		v.optional(v.number()),
-		metadata({
-			name: "editor.block-turret.shoot-y",
-			description: "editor.block-turret.shoot-y-description",
-		}),
-	),
-	xRand: v.pipe(
-		v.optional(v.number(), 0),
-		metadata({
-			name: "editor.block-turret.x-rand",
-			description: "editor.block-turret.x-rand-description",
-		}),
-	),
-	drawMinRange: v.pipe(
-		v.optional(v.boolean(), false),
-		metadata({
-			name: "editor.block-turret.draw-min-range",
-			description: "editor.block-turret.draw-min-range-description",
-		}),
-	),
-	trackingRange: v.pipe(
-		v.optional(v.number(), 0),
-		metadata({
-			name: "editor.block-turret.tracking-range",
-			description: "editor.block-turret.tracking-range-description",
-		}),
-	),
-	minRange: v.pipe(
-		v.optional(v.number(), 0),
-		metadata({
-			name: "editor.block-turret.min-range",
-			description: "editor.block-turret.min-range-description",
-		}),
-	),
-	minWarmup: v.pipe(
-		v.optional(v.number(), 0),
-		metadata({
-			name: "editor.block-turret.min-warmup",
-			description: "editor.block-turret.min-warmup-description",
-		}),
-	),
-	accurateDelay: v.pipe(
-		v.optional(v.boolean(), true),
-		metadata({
-			name: "editor.block-turret.accurate-delay",
-			description: "editor.block-turret.accurate-delay-description",
-		}),
-	),
-	moveWhileCharging: v.pipe(
-		v.optional(v.boolean(), true),
-		metadata({
-			name: "editor.block-turret.move-while-charging",
-			description: "editor.block-turret.move-while-charging-description",
-		}),
-	),
-	reloadWhileCharging: v.pipe(
-		v.optional(v.boolean(), true),
-		metadata({
-			name: "editor.block-turret.reload-while-charging",
-			description: "editor.block-turret.reload-while-charging-description",
-		}),
-	),
-	warmupMaintainTime: v.pipe(
-		v.optional(v.number(), 0),
-		metadata({
-			name: "editor.block-turret.warmup-maintain-time",
-			description: "editor.block-turret.warmup-maintain-time-description",
-		}),
-	),
-	targetAir: v.pipe(
-		v.optional(v.boolean(), true),
-		metadata({
-			name: "editor.block-turret.target-air",
-			description: "editor.block-turret.target-air-description",
-		}),
-	),
-	targetGround: v.pipe(
-		v.optional(v.boolean(), true),
-		metadata({
-			name: "editor.block-turret.target-ground",
-			description: "editor.block-turret.target-ground-description",
-		}),
-	),
-	targetBlocks: v.pipe(
-		v.optional(v.boolean(), true),
-		metadata({
-			name: "editor.block-turret.target-blocks",
-			description: "editor.block-turret.target-blocks-description",
-		}),
-	),
-	targetHealing: v.pipe(
-		v.optional(v.boolean(), false),
-		metadata({
-			name: "editor.block-turret.target-healing",
-			description: "editor.block-turret.target-healing-description",
-		}),
-	),
-	playerControllable: v.pipe(
-		v.optional(v.boolean(), true),
-		metadata({
-			name: "editor.block-turret.player-controllable",
-			description: "editor.block-turret.player-controllable-description",
-		}),
-	),
-	displayAmmoMultiplier: v.pipe(
-		v.optional(v.boolean(), true),
-		metadata({
-			name: "editor.block-turret.display-ammo-multiplier",
-			description: "editor.block-turret.display-ammo-multiplier-description",
-		}),
-	),
-	targetUnderBlocks: v.pipe(
-		v.optional(v.boolean(), true),
-		metadata({
-			name: "editor.block-turret.target-under-blocks",
-			description: "editor.block-turret.target-under-blocks-description",
-		}),
-	),
-	alwaysShooting: v.pipe(
-		v.optional(v.boolean(), false),
-		metadata({
-			name: "editor.block-turret.always-shooting",
-			description: "editor.block-turret.always-shooting-description",
-		}),
-	),
-	predictTarget: v.pipe(
-		v.optional(v.boolean(), true),
-		metadata({
-			name: "editor.block-turret.predict-target",
-			description: "editor.block-turret.predict-target-description",
-		}),
-	),
-	shootSoundVolume: v.pipe(
-		v.optional(v.number(), 1),
-		metadata({
-			name: "editor.block-turret.shoot-sound-volume",
-			description: "editor.block-turret.shoot-sound-volume-description",
-		}),
-	),
-	loopSoundVolume: v.pipe(
-		v.optional(v.number(), 0.5),
-		metadata({
-			name: "editor.block-turret.loop-sound-volume",
-			description: "editor.block-turret.loop-sound-volume-description",
-		}),
-	),
-	soundPitchMin: v.pipe(
-		v.optional(v.number(), 0.9),
-		metadata({
-			name: "editor.block-turret.sound-pitch-min",
-			description: "editor.block-turret.sound-pitch-min-description",
-		}),
-	),
-	soundPitchMax: v.pipe(
-		v.optional(v.number(), 1.1),
-		metadata({
-			name: "editor.block-turret.sound-pitch-max",
-			description: "editor.block-turret.sound-pitch-max-description",
-		}),
-	),
-	ammoEjectBack: v.pipe(
-		v.optional(v.number(), 1),
-		metadata({
-			name: "editor.block-turret.ammo-eject-back",
-			description: "editor.block-turret.ammo-eject-back-description",
-		}),
-	),
-	shootWarmupSpeed: v.pipe(
-		v.optional(v.number(), 0.1),
-		metadata({
-			name: "editor.block-turret.shoot-warmup-speed",
-			description: "editor.block-turret.shoot-warmup-speed-description",
-		}),
-	),
-	linearWarmup: v.pipe(
-		v.optional(v.boolean(), false),
-		metadata({
-			name: "editor.block-turret.linear-warmup",
-			description: "editor.block-turret.linear-warmup-description",
-		}),
-	),
-	recoil: v.pipe(
-		v.optional(v.number(), 1),
-		metadata({
-			name: "editor.block-turret.recoil",
-			description: "editor.block-turret.recoil-description",
-		}),
-	),
-	recoils: v.pipe(
-		v.optional(v.number(), -1),
-		metadata({
-			name: "editor.block-turret.recoils",
-			description: "editor.block-turret.recoils-description",
-		}),
-	),
-	recoilTime: v.pipe(
-		v.optional(v.number(), -1),
-		metadata({
-			name: "editor.block-turret.recoil-time",
-			description: "editor.block-turret.recoil-time-description",
-		}),
-	),
-	recoilPow: v.pipe(
-		v.optional(v.number(), 1.8),
-		metadata({
-			name: "editor.block-turret.recoil-pow",
-			description: "editor.block-turret.recoil-pow-description",
-		}),
-	),
-	cooldownTime: v.pipe(
-		v.optional(v.number(), 20),
-		metadata({
-			name: "editor.block-turret.cooldown-time",
-			description: "editor.block-turret.cooldown-time-description",
-		}),
-	),
-	elevation: v.pipe(
-		v.optional(v.number(), -1),
-		metadata({
-			name: "editor.block-turret.elevation",
-			description: "editor.block-turret.elevation-description",
-		}),
-	),
-	shake: v.pipe(
-		v.optional(v.number(), 0),
-		metadata({
-			name: "editor.block-turret.shake",
-			description: "editor.block-turret.shake-description",
-		}),
-	),
-});
+const turretObjectSchema = (context: ProjectContents) =>
+	v.object({
+		...reloadTurretObjectSchema.entries,
+        shoot: v.optional(ShootPatternHjsonSchema(context)),
+		ammoUseEffect: v.optional(EffectFieldSchema(context)),
+		targetInterval: v.pipe(
+			v.optional(v.number(), 20),
+			metadata({
+				name: "editor.block-turret.target-interval",
+				description: "editor.block-turret.target-interval-description",
+			}),
+		),
+		newTargetInterval: v.pipe(
+			v.optional(v.number(), -1),
+			metadata({
+				name: "editor.block-turret.new-target-interval",
+				description: "editor.block-turret.new-target-interval-description",
+			}),
+		),
+		maxAmmo: v.pipe(
+			v.optional(v.number(), 30),
+			metadata({
+				name: "editor.block-turret.max-ammo",
+				description: "editor.block-turret.max-ammo-description",
+			}),
+		),
+		ammoPerShot: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({
+				name: "editor.block-turret.ammo-per-shot",
+				description: "editor.block-turret.ammo-per-shot-description",
+			}),
+		),
+		consumeAmmoOnce: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({
+				name: "editor.block-turret.consume-ammo-once",
+				description: "editor.block-turret.consume-ammo-once-description",
+			}),
+		),
+		heatRequirement: v.pipe(
+			v.optional(v.number(), -1),
+			metadata({
+				name: "editor.block-turret.heat-requirement",
+				description: "editor.block-turret.heat-requirement-description",
+			}),
+		),
+		maxHeatEfficiency: v.pipe(
+			v.optional(v.number(), 3),
+			metadata({
+				name: "editor.block-turret.max-heat-efficiency",
+				description: "editor.block-turret.max-heat-efficiency-description",
+			}),
+		),
+		inaccuracy: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({
+				name: "editor.block-turret.inaccuracy",
+				description: "editor.block-turret.inaccuracy-description",
+			}),
+		),
+		velocityRnd: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({
+				name: "editor.block-turret.velocity-rnd",
+				description: "editor.block-turret.velocity-rnd-description",
+			}),
+		),
+		scaleLifetimeOffset: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({
+				name: "editor.block-turret.scale-lifetime-offset",
+				description: "editor.block-turret.scale-lifetime-offset-description",
+			}),
+		),
+		shootCone: v.pipe(
+			v.optional(v.number(), 8),
+			metadata({
+				name: "editor.block-turret.shoot-cone",
+				description: "editor.block-turret.shoot-cone-description",
+			}),
+		),
+		shootX: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({
+				name: "editor.block-turret.shoot-x",
+				description: "editor.block-turret.shoot-x-description",
+			}),
+		),
+		shootY: v.pipe(
+			v.optional(v.number()),
+			metadata({
+				name: "editor.block-turret.shoot-y",
+				description: "editor.block-turret.shoot-y-description",
+			}),
+		),
+		xRand: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({
+				name: "editor.block-turret.x-rand",
+				description: "editor.block-turret.x-rand-description",
+			}),
+		),
+		drawMinRange: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({
+				name: "editor.block-turret.draw-min-range",
+				description: "editor.block-turret.draw-min-range-description",
+			}),
+		),
+		trackingRange: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({
+				name: "editor.block-turret.tracking-range",
+				description: "editor.block-turret.tracking-range-description",
+			}),
+		),
+		minRange: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({
+				name: "editor.block-turret.min-range",
+				description: "editor.block-turret.min-range-description",
+			}),
+		),
+		minWarmup: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({
+				name: "editor.block-turret.min-warmup",
+				description: "editor.block-turret.min-warmup-description",
+			}),
+		),
+		accurateDelay: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({
+				name: "editor.block-turret.accurate-delay",
+				description: "editor.block-turret.accurate-delay-description",
+			}),
+		),
+		moveWhileCharging: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({
+				name: "editor.block-turret.move-while-charging",
+				description: "editor.block-turret.move-while-charging-description",
+			}),
+		),
+		reloadWhileCharging: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({
+				name: "editor.block-turret.reload-while-charging",
+				description: "editor.block-turret.reload-while-charging-description",
+			}),
+		),
+		warmupMaintainTime: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({
+				name: "editor.block-turret.warmup-maintain-time",
+				description: "editor.block-turret.warmup-maintain-time-description",
+			}),
+		),
+		targetAir: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({
+				name: "editor.block-turret.target-air",
+				description: "editor.block-turret.target-air-description",
+			}),
+		),
+		targetGround: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({
+				name: "editor.block-turret.target-ground",
+				description: "editor.block-turret.target-ground-description",
+			}),
+		),
+		targetBlocks: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({
+				name: "editor.block-turret.target-blocks",
+				description: "editor.block-turret.target-blocks-description",
+			}),
+		),
+		targetHealing: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({
+				name: "editor.block-turret.target-healing",
+				description: "editor.block-turret.target-healing-description",
+			}),
+		),
+		playerControllable: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({
+				name: "editor.block-turret.player-controllable",
+				description: "editor.block-turret.player-controllable-description",
+			}),
+		),
+		displayAmmoMultiplier: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({
+				name: "editor.block-turret.display-ammo-multiplier",
+				description: "editor.block-turret.display-ammo-multiplier-description",
+			}),
+		),
+		targetUnderBlocks: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({
+				name: "editor.block-turret.target-under-blocks",
+				description: "editor.block-turret.target-under-blocks-description",
+			}),
+		),
+		alwaysShooting: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({
+				name: "editor.block-turret.always-shooting",
+				description: "editor.block-turret.always-shooting-description",
+			}),
+		),
+		predictTarget: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({
+				name: "editor.block-turret.predict-target",
+				description: "editor.block-turret.predict-target-description",
+			}),
+		),
+		shootSoundVolume: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({
+				name: "editor.block-turret.shoot-sound-volume",
+				description: "editor.block-turret.shoot-sound-volume-description",
+			}),
+		),
+		loopSoundVolume: v.pipe(
+			v.optional(v.number(), 0.5),
+			metadata({
+				name: "editor.block-turret.loop-sound-volume",
+				description: "editor.block-turret.loop-sound-volume-description",
+			}),
+		),
+		soundPitchMin: v.pipe(
+			v.optional(v.number(), 0.9),
+			metadata({
+				name: "editor.block-turret.sound-pitch-min",
+				description: "editor.block-turret.sound-pitch-min-description",
+			}),
+		),
+		soundPitchMax: v.pipe(
+			v.optional(v.number(), 1.1),
+			metadata({
+				name: "editor.block-turret.sound-pitch-max",
+				description: "editor.block-turret.sound-pitch-max-description",
+			}),
+		),
+		ammoEjectBack: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({
+				name: "editor.block-turret.ammo-eject-back",
+				description: "editor.block-turret.ammo-eject-back-description",
+			}),
+		),
+		shootWarmupSpeed: v.pipe(
+			v.optional(v.number(), 0.1),
+			metadata({
+				name: "editor.block-turret.shoot-warmup-speed",
+				description: "editor.block-turret.shoot-warmup-speed-description",
+			}),
+		),
+		linearWarmup: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({
+				name: "editor.block-turret.linear-warmup",
+				description: "editor.block-turret.linear-warmup-description",
+			}),
+		),
+		recoil: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({
+				name: "editor.block-turret.recoil",
+				description: "editor.block-turret.recoil-description",
+			}),
+		),
+		recoils: v.pipe(
+			v.optional(v.number(), -1),
+			metadata({
+				name: "editor.block-turret.recoils",
+				description: "editor.block-turret.recoils-description",
+			}),
+		),
+		recoilTime: v.pipe(
+			v.optional(v.number(), -1),
+			metadata({
+				name: "editor.block-turret.recoil-time",
+				description: "editor.block-turret.recoil-time-description",
+			}),
+		),
+		recoilPow: v.pipe(
+			v.optional(v.number(), 1.8),
+			metadata({
+				name: "editor.block-turret.recoil-pow",
+				description: "editor.block-turret.recoil-pow-description",
+			}),
+		),
+		cooldownTime: v.pipe(
+			v.optional(v.number(), 20),
+			metadata({
+				name: "editor.block-turret.cooldown-time",
+				description: "editor.block-turret.cooldown-time-description",
+			}),
+		),
+		elevation: v.pipe(
+			v.optional(v.number(), -1),
+			metadata({
+				name: "editor.block-turret.elevation",
+				description: "editor.block-turret.elevation-description",
+			}),
+		),
+		shake: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({
+				name: "editor.block-turret.shake",
+				description: "editor.block-turret.shake-description",
+			}),
+		),
+	});
 
-const powerTurretObjectSchema = v.object({
-	...turretObjectSchema.entries,
-	shootType: v.pipe(
-		v.optional(v.string()),
-		metadata({
-			name: "editor.block-power-turret.shoot-type",
-			description: "editor.block-power-turret.shoot-type-description",
-		}),
-	),
-});
+const powerTurretObjectSchema = (context: ProjectContents) =>
+	v.object({
+		...turretObjectSchema(context).entries,
+		shootType: v.pipe(
+			v.optional(v.string()),
+			metadata({
+				name: "editor.block-power-turret.shoot-type",
+				description: "editor.block-power-turret.shoot-type-description",
+			}),
+		),
+	});
 
-const laserTurretObjectSchema = v.object({
-	...powerTurretObjectSchema.entries,
-	firingMoveFract: v.pipe(
-		v.optional(v.number(), 0.25),
-		metadata({
-			name: "editor.block-laser-turret.firing-move-fract",
-			description: "editor.block-laser-turret.firing-move-fract-description",
-		}),
-	),
-	shootDuration: v.pipe(
-		v.optional(v.number(), 100),
-		metadata({
-			name: "editor.block-laser-turret.shoot-duration",
-			description: "editor.block-laser-turret.shoot-duration-description",
-		}),
-	),
-});
+const laserTurretObjectSchema = (context: ProjectContents) =>
+	v.object({
+		...powerTurretObjectSchema(context).entries,
+		firingMoveFract: v.pipe(
+			v.optional(v.number(), 0.25),
+			metadata({
+				name: "editor.block-laser-turret.firing-move-fract",
+				description: "editor.block-laser-turret.firing-move-fract-description",
+			}),
+		),
+		shootDuration: v.pipe(
+			v.optional(v.number(), 100),
+			metadata({
+				name: "editor.block-laser-turret.shoot-duration",
+				description: "editor.block-laser-turret.shoot-duration-description",
+			}),
+		),
+	});
 
-const continuousTurretObjectSchema = v.object({
-	...turretObjectSchema.entries,
+const continuousTurretObjectSchema = (context: ProjectContents) => v.object({
+	...turretObjectSchema(context).entries,
 	shootType: v.pipe(
 		v.optional(v.string()),
 		metadata({
@@ -3569,8 +3576,8 @@ const continuousTurretObjectSchema = v.object({
 	),
 });
 
-const continuousLiquidTurretObjectSchema = v.object({
-	...continuousTurretObjectSchema.entries,
+const continuousLiquidTurretObjectSchema = (context: ProjectContents) => v.object({
+	...continuousTurretObjectSchema(context).entries,
 	liquidConsumed: v.pipe(
 		v.optional(v.number(), 1 / 60),
 		metadata({
@@ -5589,23 +5596,23 @@ const classSchemaMap: Record<BlockType, SchemaFn<v.ObjectSchema<v.ObjectEntries,
 	// Turrets
 	BaseTurret: () => baseTurretObjectSchema,
 	ReloadTurret: () => reloadTurretObjectSchema,
-	Turret: () => turretObjectSchema,
-	PowerTurret: () => powerTurretObjectSchema,
-	LaserTurret: () => laserTurretObjectSchema,
+	Turret: (context) => turretObjectSchema(context),
+	PowerTurret: (context) => powerTurretObjectSchema(context),
+	LaserTurret: (context) => laserTurretObjectSchema(context),
 	ItemTurret: (context) =>
-		v.object({ ammoTypes: v.record(ItemFieldSchema(context), BulletHjsonSchema(context)), ...turretObjectSchema.entries }),
+		v.object({ ammoTypes: v.record(ItemFieldSchema(context), BulletHjsonSchema(context)), ...turretObjectSchema(context).entries }),
 	LiquidTurret: (context) =>
 		v.object({
 			ammoTypes: v.record(LiquidFieldSchema(context), BulletHjsonSchema(context)),
 			extinguish: v.optional(v.boolean(), true),
-			...turretObjectSchema.entries,
+			...turretObjectSchema(context).entries,
 		}),
-	ContinuousTurret: () => continuousTurretObjectSchema,
-	ContinuousLiquidTurret: () => continuousLiquidTurretObjectSchema,
+	ContinuousTurret: (context) => continuousTurretObjectSchema(context),
+	ContinuousLiquidTurret: (context) => continuousLiquidTurretObjectSchema(context),
 	PayloadAmmoTurret: (context) =>
 		v.object({
 			ammoTypes: v.record(ContentFieldSchema(context), BulletHjsonSchema(context)),
-			...turretObjectSchema.entries,
+			...turretObjectSchema(context).entries,
 		}),
 	PointDefenseTurret: () => pointDefenseTurretObjectSchema,
 	TractorBeamTurret: () => tractorBeamTurretObjectSchema,

@@ -1627,18 +1627,17 @@ const classSchemaMap: Record<BulletClass, SchemaFn<BulletObjectSchema>> = {
 
 export const BulletHjsonSchema: SchemaFn = CachedSchema((context) => {
 	return v.lazy((input) => {
+		const variant = {};
 		if (input && typeof input === "object") {
 			const type = "type" in input ? (input["type"] as string) : "BasicBulletType";
 
 			if (classSchemaMap[type as BulletClass]) {
 				const schema = classSchemaMap[type as BulletClass];
-				return v.pipe(
-					v.object({ ...createBulletBaseObjectSchema(context).entries, ...schema(context).entries }),
-					metadata({ type: "bullet" }),
-				);
+
+				Object.assign(variant, schema(context).entries);
 			}
 		}
 
-		return v.pipe(createBulletBaseObjectSchema(context), metadata({ type: "bullet" }));
+		return v.pipe(v.object({ ...createBulletBaseObjectSchema(context).entries, ...variant }), metadata({ type: "bullet" }));
 	});
 });

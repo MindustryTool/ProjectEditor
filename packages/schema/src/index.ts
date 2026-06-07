@@ -52,11 +52,5 @@ export {
 	resolveSchema,
 	unwrapSchema,
 } from "./utils";
-export type {
-	AnySchema,
-	SchemaFn,
-	SchemaMetadata,
-	SpriteData,
-	Type,
-} from "./utils";
+export type { AnySchema, SchemaFn, SchemaMetadata, SpriteData, Type } from "./utils";
 export { WeaponHjsonSchema } from "./weapon";

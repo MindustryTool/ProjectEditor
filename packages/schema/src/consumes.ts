@@ -100,7 +100,7 @@ const consumeItemsSchema = (context: ProjectContents) =>
 const consumeItemBoostSchema = (context: ProjectContents) =>
 	v.union([v.array(ItemStackSchema(context)), v.object({ items: v.array(ItemStackSchema(context)) })]);
 
-const consumeLiquidBaseSchema = v.object({ ...consumeSchema.entries, ammount: v.number() });
+const consumeLiquidBaseSchema = v.object({ ...consumeSchema.entries, amount: v.number() });
 
 const consumeLiquidFilterSchema = v.object({
     ...consumeLiquidBaseSchema.entries,
