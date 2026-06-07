@@ -4,6 +4,8 @@ import resourcesToBackend from "i18next-resources-to-backend";
 
 let initPromise: Promise<void> | null = null;
 
+const translations = import.meta.glob("./locales/*/translation.ts");
+
 export function initI18n() {
 	if (i18n.isInitialized) {
 		return Promise.resolve();
@@ -22,15 +24,14 @@ export function initI18n() {
 	initPromise = i18n
 		.use(initReactI18next)
 		.use(
-			resourcesToBackend((lng: string) => {
-				switch (lng) {
-					case "en":
-						return import("./locales/en/translation");
-					case "vi":
-						return import("./locales/vi/translation");
-					default:
-						throw new Error(`Unsupported language: ${lng}`);
-				}
+			resourcesToBackend(async(language: string) => {
+				 const loader = translations[`./locales/${language}/translation.ts`];
+
+					if (!loader) {
+						throw new Error(`Unsupported language: ${language}`);
+					}
+
+					return await loader();
 			}),
 		)
 		.init({

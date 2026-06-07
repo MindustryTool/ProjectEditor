@@ -124,7 +124,7 @@ export { useAppStore } from "./stores/project";
 export { useProjectSession, useCurrentProject, TreeSnapshot } from "./stores/session";
 
 export type { FileEntry, FileStore } from "./stores/file";
-export { useFileStore, isDirty, isError, getEntry, selectEntry, selectIsSaving } from "./stores/file";
+export { useFileStore, isDirty, isError, getEntry, selectEntry, exists, selectIsSaving } from "./stores/file";
 
 export { WriteQueue, getWriteQueue, disposeWriteQueue } from "./write-queue.js";
 export type { UseFileResult } from "./hooks/use-file-content";

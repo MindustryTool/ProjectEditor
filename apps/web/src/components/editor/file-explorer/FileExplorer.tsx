@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import type { TreeNode } from "@project/fs";
 import { useCurrentProject, useProjectSession } from "@project/core";
-import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { cn } from "~/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from "~/components/ui/dropdown-menu";
 import { buildFileTree } from "./file-tree";
@@ -21,7 +20,6 @@ interface FileExplorerProps {
 }
 
 export function FileExplorer({ className }: FileExplorerProps) {
-	const { metadata } = useProjectContext();
 	const context = useCurrentProject();
 	const treeSnapshot = useProjectSession((state) => state.treeSnapshot);
 	const setEditingPath = useFileExplorerStore((s) => s.setEditingPath);
@@ -40,13 +38,13 @@ export function FileExplorer({ className }: FileExplorerProps) {
 
 	const projectTree = useMemo(() => {
 		const rootNode: TreeNode = {
-			name: metadata.name.toUpperCase(),
+			name: "",
 			type: "folder",
 			children: buildFileTree(treeSnapshot, context.project.id),
 			path: "/",
 		};
 		return [rootNode];
-	}, [context.project.id, metadata.name, treeSnapshot]);
+	}, [context.project.id, treeSnapshot]);
 
 	const handleContextMenu = useCallback((path: string, rect: DOMRect) => {
 		setContextMenu({ path, x: rect.right, y: rect.top });

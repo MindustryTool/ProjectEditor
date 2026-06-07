@@ -32,6 +32,11 @@ export function selectEntry(projectId: string, path: string) {
 	return (state: FileStore) => state.fileContents[key];
 }
 
+export function exists(projectId: string, path: string) {
+	const key = cacheKey(projectId, path);
+	return (state: FileStore) => state.fileContents[key] !== undefined;
+}
+
 export function selectIsSaving(projectId: string, path: string) {
 	const key = cacheKey(projectId, path);
 	return (state: FileStore) => state.savingPaths.includes(key);

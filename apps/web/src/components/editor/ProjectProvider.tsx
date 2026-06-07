@@ -135,5 +135,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 		[metadata.name],
 	);
 
-	return <ProjectContext.Provider value={{ contents, metadata, findContent }}>{children}</ProjectContext.Provider>;
+	const contextValue = useMemo(() => ({ contents, metadata, findContent }), [contents, metadata, findContent]);
+
+	return <ProjectContext.Provider value={contextValue}>{children}</ProjectContext.Provider>;
 }

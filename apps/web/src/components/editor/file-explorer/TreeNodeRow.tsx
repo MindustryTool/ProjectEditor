@@ -8,6 +8,7 @@ import { useFileExplorerStore } from "./useFileExplorerState";
 import { useTreeNodeActions } from "./useTreeNodeActions";
 import { getIcon } from "./file-tree";
 import React from "react";
+import { useProjectContext } from "#/components/editor/ProjectProvider";
 
 interface TreeNodeRowProps {
 	node: TreeNode;
@@ -100,7 +101,7 @@ export const TreeNodeRow = React.memo(function TreeNodeRow({ node, depth, expand
 						onClick={(e) => e.stopPropagation()}
 					/>
 				) : (
-					<span className={cn("flex-1 truncate", filenameClass)}>{node.name}</span>
+					<span className={cn("flex-1 truncate", filenameClass)}>{node.name === "" ? RootName() : node.name}</span>
 				)}
 				{showActions && (isFolder || !isDefault) && (
 					<div
@@ -136,3 +137,9 @@ export const TreeNodeRow = React.memo(function TreeNodeRow({ node, depth, expand
 		</div>
 	);
 });
+
+function RootName() {
+	const { metadata } = useProjectContext();
+
+	return metadata.name.toUpperCase();
+}

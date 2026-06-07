@@ -2,6 +2,7 @@ import { useEffect, useCallback } from "react";
 import { useFileStore, isDirty, isError, selectEntry, selectIsSaving, getEntry } from "@project/core";
 import { useProjectSession } from "@project/core";
 import { getWriteQueue } from "@project/core";
+import { useShallow } from "zustand/shallow";
 
 export interface UseFileResult<T> {
 	data: T | null;
@@ -20,8 +21,8 @@ export function useFile(path: string): UseFileResult<ArrayBuffer> {
 	const projectId = useProjectSession((s) => s.projectContext?.project.id);
 	const fs = useProjectSession((s) => s.projectContext?.fs);
 
-	const entry = useFileStore(projectId ? selectEntry(projectId, path) : () => undefined);
-	const isSaving = useFileStore(projectId ? selectIsSaving(projectId, path) : () => false);
+	const entry = useFileStore(useShallow(projectId ? selectEntry(projectId, path) : () => undefined));
+	const isSaving = useFileStore(useShallow(projectId ? selectIsSaving(projectId, path) : () => false));
 
 	useEffect(() => {
 		if (projectId && fs && path && entry === undefined) {
