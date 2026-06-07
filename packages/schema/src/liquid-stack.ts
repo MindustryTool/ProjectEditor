@@ -32,11 +32,11 @@ export const LiquidStackSchema = (context: ProjectContents) =>
 					return false;
 				}
 
-				if (!v.safeParse(v.pipe(v.string(), v.toNumber(), v.minValue(0), v.integer()), number).success) {
+				if (!v.safeParse(v.pipe(v.string(), v.toNumber(), v.minValue(0)), number).success) {
 					return false;
 				}
 
 				return true;
-			}, "Invalid item requirement, must be in the format 'item/number'"),
+			}, "Invalid item requirement, must be in the format 'liquid/number'"),
 		)
 	]);

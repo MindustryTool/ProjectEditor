@@ -1,7 +1,6 @@
 import * as v from "valibot";
 import { ArrayTextureSchema } from "./textures";
 import { CachedSchema } from "./utils";
-import { ItemRequirementSchema } from "./item-requirement";
 import { MindustryHexColorSchema } from "./mindustry-hex-color";
 import { ResearchSchema } from "./research";
 import { SoundHjsonSchema } from "./sound";
@@ -26,6 +25,7 @@ import { Envs, EnvSchema } from "./envs";
 import type { ProjectContents } from "@project/types";
 import { ShootPatternHjsonSchema } from "./shoot-pattern";
 import { ClassMap, classSchema } from "./class";
+import { ItemStackSchema } from "./item-stack";
 
 export const blockTypes = [
 	// Power
@@ -5789,8 +5789,8 @@ export const BlockHjsonSchema: SchemaFn = CachedSchema((context) => {
 				...blockObjectSchema,
 				...variant,
 				consumes: v.optional(ConsumesHjsonSchema(context)),
-				requirements: v.optional(v.array(ItemRequirementSchema), []),
-				researchCost: v.optional(v.array(ItemRequirementSchema)),
+				requirements: v.optional(v.array(ItemStackSchema(context)), []),
+				researchCost: v.optional(v.array(ItemStackSchema(context))),
 				researchCostMultipliers: v.optional(v.record(v.string(), v.number())),
 				itemDrop: v.optional(ItemFieldSchema(context)),
 				lightLiquid: v.optional(LiquidFieldSchema(context)),

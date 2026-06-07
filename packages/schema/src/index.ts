@@ -19,7 +19,6 @@ export { CacheLayerSchema } from "./cache-layer";
 export { CategorySchema } from "./category";
 export { Interps } from "./interps";
 export { ItemHjsonSchema } from "./item";
-export { ItemRequirementSchema } from "./item-requirement";
 export { ItemStackSchema } from "./item-stack";
 export { LiquidHjsonSchema } from "./liquid";
 export { LiquidStackSchema } from "./liquid-stack";

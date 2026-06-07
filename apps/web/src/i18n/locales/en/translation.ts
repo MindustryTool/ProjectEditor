@@ -8,6 +8,7 @@ export const en = {
 	"editor.explorer": "Explorer",
 	"editor.editor": "Editor",
 	"editor.files": "Files",
+	"editor.search": "Search",
 	"editor.no-file-selected": "No file selected",
 	"editor.mod-hjson.name": "Name",
 	"editor.mod-hjson.name-description": "The internal mod identifier (e.g., 'example-mod')",

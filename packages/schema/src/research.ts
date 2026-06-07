@@ -1,9 +1,9 @@
 import * as v from "valibot";
 import { CachedSchema, findContent } from "./utils";
 import { ContentNameSchema } from "./content";
-import { ItemRequirementSchema } from "./item-requirement";
 import { metadata } from "./utils";
 import type { SchemaFn } from "./utils";
+import { ItemStackSchema } from "./item-stack";
 
 export const ResearchSchema: SchemaFn = CachedSchema((context) => {
 	return v.pipe(
@@ -14,7 +14,7 @@ export const ResearchSchema: SchemaFn = CachedSchema((context) => {
 
 			return v.object({
 				parent: v.optional(ContentNameSchema),
-				requirements: v.optional(v.array(ItemRequirementSchema)),
+				requirements: v.optional(v.array(ItemStackSchema(context)), []),
 				objectives: v.optional(v.object({})),
 				planet: v.optional(v.string()),
 				robot: v.optional(v.boolean()),
@@ -62,30 +62,32 @@ export const ResearchSchema: SchemaFn = CachedSchema((context) => {
 						const items = context.items;
 						for (let i = 0; i < requirement.length; i++) {
 							const req = requirement[i]!;
-							const parts = req.split("/");
-							const itemName = parts[0]!.replace(context.name + "-", "");
-							const item = items.find((i) => i.name.replaceAll(context.name + "-", "") === itemName);
+							if (typeof req === "string") {
+								const parts = req.split("/");
+								const itemName = parts[0]!.replace(context.name + "-", "");
+								const item = items.find((i) => i.name.replaceAll(context.name + "-", "") === itemName);
 
-							if (!item) {
-								addIssue({
-									message: `Item ${itemName} not found`,
-									path: [
-										{
-											type: "object",
-											key: "requirements",
-											input: value,
-											origin: "value",
-											value: req,
-										},
-										{
-											type: "array",
-											key: i,
-											input: requirement,
-											origin: "value",
-											value: req,
-										},
-									],
-								});
+								if (!item) {
+									addIssue({
+										message: `Item ${itemName} not found`,
+										path: [
+											{
+												type: "object",
+												key: "requirements",
+												input: value,
+												origin: "value",
+												value: req,
+											},
+											{
+												type: "array",
+												key: i,
+												input: requirement,
+												origin: "value",
+												value: req,
+											},
+										],
+									});
+								}
 							}
 						}
 					}

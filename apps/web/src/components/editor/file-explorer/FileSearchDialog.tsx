@@ -6,8 +6,11 @@ import { useProjectSession } from "@project/core";
 import { Search } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export function FileSearchDialog() {
+	const { t } = useTranslation();
+    
 	return (
 		<Dialog>
 			<DialogTrigger className="w-full">
@@ -19,7 +22,7 @@ export function FileSearchDialog() {
 				</InputGroup>
 			</DialogTrigger>
 			<DialogContent className="max-h-[50dvh] h-full overflow-hidden flex flex-col">
-				<DialogTitle />
+				<DialogTitle>{t('editor.search')}</DialogTitle>
 				<VisuallyHidden.Root>
 					<DialogDescription />
 				</VisuallyHidden.Root>
@@ -66,7 +69,7 @@ function Content() {
 						.map((item) => (
 							<div
 								key={item.path}
-								className="w-full rounded-md border p-2 flex gap-2 items-center"
+								className="w-full rounded-md border py-2 px-1 flex gap-2 items-center cursor-pointer bg-accent"
 								onClick={() => setPath(item.path)}
 							>
 								<FileIcon path={item.path} />
