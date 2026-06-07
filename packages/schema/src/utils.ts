@@ -331,21 +331,23 @@ export function collectSpriteData(
 	return result;
 }
 
-export function CachedSchema<T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>>(schemaFn: SchemaFn<T>): SchemaFn<T> {
-	let cacheValue: T | null = null;
-	let cacheKey: ProjectContents | null = null;
+export function cached<TArgs extends readonly unknown[], TResult>(fn: (...args: TArgs) => TResult): (...args: TArgs) => TResult {
+	let lastArgs: TArgs | null = null;
+	let lastResult: TResult;
 
-	return (context: ProjectContents) => {
-		if (cacheKey === context && cacheValue) {
-			return cacheValue;
+	return (...args: TArgs): TResult => {
+		if (lastArgs && lastArgs.length === args.length && args.every((arg, i) => arg === lastArgs![i])) {
+			return lastResult;
 		}
 
-		const result = schemaFn(context);
-		cacheValue = result;
-		cacheKey = context;
-		return result;
+		lastResult = fn(...args);
+		lastArgs = args;
+
+		return lastResult;
 	};
 }
+
+export const CachedSchema = cached;
 
 export function findContent(name: string, context: ProjectContents) {
 	name = name.replace(context.name + "-", "");

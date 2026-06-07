@@ -1,7 +1,7 @@
 import * as v from "valibot";
-import { metadata } from "./utils";
+import { CachedSchema, metadata } from "./utils";
 
-export const ArrayTextureSchema = (format: string, length: number | number[]) =>
+export const ArrayTextureSchema = CachedSchema((format: string, length: number | number[]) =>
 	v.nullish(
 		v.pipe(
 			v.string(),
@@ -13,4 +13,5 @@ export const ArrayTextureSchema = (format: string, length: number | number[]) =>
 			}),
 			v.metadata({ format, length }),
 		),
-	);
+	),
+);

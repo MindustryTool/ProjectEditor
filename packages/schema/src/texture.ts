@@ -1,7 +1,7 @@
 import * as v from "valibot";
-import { metadata } from "./utils";
+import { CachedSchema, metadata } from "./utils";
 
-export const TextureFieldSchema = (format: string, fallback?: string) =>
+export const TextureFieldSchema = CachedSchema((format: string, fallback?: string) =>
 	v.nullish(
 		v.pipe(
 			v.string(),
@@ -13,4 +13,5 @@ export const TextureFieldSchema = (format: string, fallback?: string) =>
 			}),
 			v.metadata({ format, fallback }),
 		),
-	);
+	),
+);

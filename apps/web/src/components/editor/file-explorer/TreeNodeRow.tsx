@@ -1,14 +1,15 @@
-import { useRef, useEffect, useCallback } from "react";
-import { Plus, MoreHorizontal, ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronRight, ChevronDown } from "lucide-react";
 import { cn } from "~/lib/utils";
-import { isDefaultPath, type TreeNode } from "@project/fs";
-import { useFileStore, isDirty, selectEntry, selectIsSaving, useValidationStore, useCurrentProject } from "@project/core";
-import { useShallow } from "zustand/react/shallow";
-import { useFileExplorerStore } from "./useFileExplorerState";
+import { type TreeNode } from "@project/fs";
+import { useFileStore, useCurrentProject } from "@project/core";
 import { useTreeNodeActions } from "./useTreeNodeActions";
 import { getIcon } from "./file-tree";
+import { RootName } from "./RootName";
+import { TreeNodeRenameInput } from "./TreeNodeRenameInput";
+import { TreeNodeLabel } from "./TreeNodeLabel";
+import { TreeNodeActions } from "./TreeNodeActions";
+import { TreeNodeStatus } from "./TreeNodeStatus";
 import React from "react";
-import { useProjectContext } from "#/components/editor/ProjectProvider";
 
 interface TreeNodeRowProps {
 	node: TreeNode;
@@ -20,41 +21,11 @@ interface TreeNodeRowProps {
 
 export const TreeNodeRow = React.memo(function TreeNodeRow({ node, depth, expanded, onToggle, onContextMenu }: TreeNodeRowProps) {
 	const context = useCurrentProject();
-	const projectId = useFileExplorerStore((s) => s.projectId);
 	const { currentPath, isSelected, isEditing, isFolder, handleClick, handleCreateClick, handleRenameConfirm, handleInputKeyDown } =
 		useTreeNodeActions(node, onToggle);
-
-	const errorCount = useValidationStore(useShallow((s) => s.results.getRollup()[currentPath]?.error ?? 0));
-	const warningCount = useValidationStore(useShallow((s) => s.results.getRollup()[currentPath]?.warning ?? 0));
-
-	const fileEntry = useFileStore(useShallow(selectEntry(projectId, currentPath)));
-	const isItemDirty = fileEntry ? isDirty(fileEntry) : false;
-	const isItemSaving = useFileStore(useShallow(selectIsSaving(projectId, currentPath)));
 	const loadFile = useFileStore((s) => s.loadFile);
 
-	const filenameClass =
-		errorCount > 0
-			? "text-red-400 underline decoration-wavy"
-			: !isFolder && warningCount > 0 && errorCount === 0
-				? "text-yellow-400 underline decoration-wavy"
-				: "text-foreground";
-
-	const isDefault = isDefaultPath(context.fs.defaultProjectTree, currentPath);
 	const isRoot = depth === 0 && currentPath === "";
-	const showActions = !isEditing;
-	const inputRef = useRef<HTMLInputElement>(null);
-
-	useEffect(() => {
-		if (isEditing && inputRef.current) {
-			inputRef.current.focus();
-			inputRef.current.select();
-		}
-	}, [isEditing]);
-
-	const handleMoreClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-		e.stopPropagation();
-		onContextMenu?.(currentPath, e.currentTarget.getBoundingClientRect());
-	}, [currentPath, onContextMenu]);
 
 	return (
 		<div
@@ -92,54 +63,32 @@ export const TreeNodeRow = React.memo(function TreeNodeRow({ node, depth, expand
 				)}
 				{getIcon(node, expanded)}
 				{isEditing ? (
-					<input
-						ref={inputRef}
+					<TreeNodeRenameInput
 						defaultValue={node.name}
-						className="min-w-0 flex-1 rounded border border-border bg-background px-1 py-0 text-sm outline-none"
+						onConfirm={handleRenameConfirm}
 						onKeyDown={handleInputKeyDown}
-						onBlur={(e) => handleRenameConfirm(e.target.value)}
-						onClick={(e) => e.stopPropagation()}
 					/>
 				) : (
-					<span className={cn("flex-1 truncate", filenameClass)}>{isRoot ? RootName() : node.name}</span>
+					<TreeNodeLabel
+						name={isRoot ? <RootName /> : node.name}
+						currentPath={currentPath}
+						isFolder={isFolder}
+					/>
 				)}
-				{showActions && (isFolder || !isDefault) && (
-					<div
-						className={cn(
-							"flex items-center gap-0.5 ml-auto",
-							!isSelected && "md:invisible group-hover:visible",
-							isSelected && "visible",
-						)}
-					>
-						{isFolder && (
-							<button
-								onClick={handleCreateClick}
-								className="flex size-6 items-center justify-center rounded hover:bg-accent"
-								title="Create"
-							>
-								<Plus className="size-3 text-muted-foreground" />
-							</button>
-						)}
-						{!isRoot && !isDefault && (
-							<button
-								onClick={handleMoreClick}
-								className="flex size-6 items-center justify-center rounded hover:bg-accent"
-								title="More actions"
-							>
-								<MoreHorizontal className="size-3 text-muted-foreground" />
-							</button>
-						)}
-					</div>
-				)}
-				{!isFolder && isItemSaving && <span className="h-2 w-2 shrink-0 rounded-full bg-white mr-2" />}
-				{!isFolder && !isItemSaving && isItemDirty && <span className="h-2 w-2 shrink-0 rounded-full bg-amber-400 mr-2" />}
+				<TreeNodeActions
+					currentPath={currentPath}
+					depth={depth}
+					isFolder={isFolder}
+					isEditing={isEditing}
+					isSelected={isSelected}
+					onCreateClick={handleCreateClick}
+					onContextMenu={onContextMenu}
+				/>
+				<TreeNodeStatus
+					currentPath={currentPath}
+					isFolder={isFolder}
+				/>
 			</div>
 		</div>
 	);
 });
-
-function RootName() {
-	const { metadata } = useProjectContext();
-
-	return metadata.name.toUpperCase();
-}

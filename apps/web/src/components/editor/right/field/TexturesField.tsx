@@ -6,9 +6,10 @@ import { SpriteUploader, SpriteViewer } from "#/components/editor/right/SpritePi
 import { Button } from "#/components/ui/button";
 import { useProjectSession } from "@project/core";
 import { getSchemaMetadata, type SchemaMetadata } from "@project/schema";
+import React from "react";
 import { useState } from "react";
 
-export function TexturesField({ name, path, entrySchema, jsonPath }: SchemaRendererProps) {
+export const TexturesField = React.memo(function TexturesField({ name, path, entrySchema, jsonPath }: SchemaRendererProps) {
 	const [render, setRender] = useState(3);
 	const metadata = getSchemaMetadata(entrySchema);
 	const filename = path.split("/").pop();
@@ -53,7 +54,7 @@ export function TexturesField({ name, path, entrySchema, jsonPath }: SchemaRende
 			<SchemaDescription metadata={metadata} />
 		</Field>
 	);
-}
+});
 
 function Item({ spritePath }: { spritePath: string }) {
 	const exists = useProjectSession((s) => spritePath !== null && s.treeSnapshot.getEntry(spritePath) !== undefined);

@@ -5,8 +5,9 @@ import type { SchemaRendererProps } from "#/components/editor/right/FieldsRender
 import { SpriteUploader, SpriteViewer } from "#/components/editor/right/SpritePicker";
 import { useProjectSession } from "@project/core";
 import { getSchemaMetadata, type SchemaMetadata } from "@project/schema";
+import React from "react";
 
-export function TextureField({ name, path, entrySchema, jsonPath }: SchemaRendererProps) {
+export const TextureField = React.memo(function TextureField({ name, path, entrySchema, jsonPath }: SchemaRendererProps) {
 	const metadata = getSchemaMetadata(entrySchema);
 	const filename = path.split("/").pop();
 	if (!filename) {
@@ -40,4 +41,4 @@ export function TextureField({ name, path, entrySchema, jsonPath }: SchemaRender
 			<SchemaDescription metadata={metadata} />
 		</Field>
 	);
-}
+});
