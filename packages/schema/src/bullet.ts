@@ -11,7 +11,7 @@ import { StatusFieldSchema } from "./status";
 import { LiquidFieldSchema } from "./liquid";
 import { UnitFieldSchema } from "./unit";
 import { metadata } from "./utils";
-import { classSchema } from "./class";
+import { ClassMap, classSchema } from "./class";
 
 export const bulletTypes = [
 	"ArtilleryBulletType",
@@ -43,8 +43,6 @@ export const bulletTypes = [
 ] as const;
 
 export type BulletClass = (typeof bulletTypes)[number];
-
-type BulletObjectSchema = v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>;
 
 const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>> = (context) => {
 	return v.object({
@@ -1539,7 +1537,7 @@ const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.E
 	});
 };
 
-const classSchemaMap: Record<BulletClass, SchemaFn<BulletObjectSchema>> = {
+const classSchemaMap = new ClassMap<BulletClass>({
 	ArtilleryBulletType: (_context) =>
 		v.object({
 			trailMult: v.optional(v.number(), 1),
@@ -1583,7 +1581,7 @@ const classSchemaMap: Record<BulletClass, SchemaFn<BulletObjectSchema>> = {
 			sideLength: v.optional(v.number(), 29),
 			sideWidth: v.optional(v.number(), 0.7),
 			lightningSpacing: v.optional(v.number(), -1),
-            colors: v.optional(v.array(MindustryHexColorSchema)),
+			colors: v.optional(v.array(MindustryHexColorSchema)),
 		}),
 	LightningBulletType: (_context) => v.object({}),
 	LiquidBulletType: (_context) =>
@@ -1625,20 +1623,11 @@ const classSchemaMap: Record<BulletClass, SchemaFn<BulletObjectSchema>> = {
 			serrationSpacing: v.optional(v.number(), 8),
 		}),
 	SpaceLiquidBulletType: (_context) => v.object({}),
-};
+});
 
 export const BulletHjsonSchema: SchemaFn = CachedSchema((context) => {
 	return v.lazy((input) => {
-		const variant = {};
-		if (input && typeof input === "object") {
-			const type = "type" in input ? (input["type"] as string) : "BasicBulletType";
-
-			if (classSchemaMap[type as BulletClass]) {
-				const schema = classSchemaMap[type as BulletClass];
-
-				Object.assign(variant, schema(context).entries);
-			}
-		}
+		const variant = classSchemaMap.get(input, context);
 
 		return v.pipe(v.object({ ...createBulletBaseObjectSchema(context).entries, ...variant }), metadata({ type: "bullet" }));
 	});

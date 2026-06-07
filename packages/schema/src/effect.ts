@@ -5,7 +5,7 @@ import { MindustryHexColorSchema } from "./mindustry-hex-color";
 import { SoundHjsonSchema } from "./sound";
 import type { SchemaFn } from "./utils";
 import { metadata } from "./utils";
-import { classSchema } from "./class";
+import { ClassMap, classSchema } from "./class";
 
 export const effectClasses = [
 	"ParticleEffect",
@@ -18,7 +18,7 @@ export const effectClasses = [
 	"WrapEffect",
 ] as const;
 
-export type EffectClass = (typeof effectClasses)[number];
+export type EffectType = (typeof effectClasses)[number];
 
 const effectBaseObjectSchema = v.object({
 	type: v.pipe(
@@ -277,7 +277,7 @@ export const waveEffectObjectSchema = v.object({
 	),
 });
 
-const classSchemaMap: Record<EffectClass, SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>> = {
+const effectClassMap = new ClassMap<EffectType>({
 	ParticleEffect: (_context) => particleEffectObjectSchema,
 	MultiEffect: (context) =>
 		v.object({
@@ -364,7 +364,7 @@ const classSchemaMap: Record<EffectClass, SchemaFn<v.ObjectSchema<v.ObjectEntrie
 				metadata({ name: "editor.effect.wrap-rotation", description: "editor.effect.wrap-rotation-description" }),
 			),
 		}),
-};
+});
 
 export const EffectFieldSchema: SchemaFn = CachedSchema((context) => {
 	return v.pipe(
@@ -385,15 +385,14 @@ export const EffectFieldSchema: SchemaFn = CachedSchema((context) => {
 
 export const EffectHjsonSchema: SchemaFn = CachedSchema((context) => {
 	return v.lazy((input) => {
-		if (input && typeof input === "object" && "type" in input) {
-			const type = input.type;
+		const effectVariant = effectClassMap.get(input, context);
 
-			if (typeof type === "string" && classSchemaMap[type as EffectClass]) {
-				const schema = classSchemaMap[type as EffectClass];
-				return v.pipe(v.object({ ...effectBaseObjectSchema.entries, ...schema(context).entries }), metadata({ type: "effect" }));
-			}
-		}
-
-		return v.pipe(effectBaseObjectSchema, metadata({ type: "effect" }));
+		return v.pipe(
+			v.object({
+				...effectBaseObjectSchema.entries,
+				...effectVariant,
+			}),
+			metadata({ type: "effect" }),
+		);
 	});
 });

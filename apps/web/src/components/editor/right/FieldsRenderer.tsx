@@ -70,8 +70,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	try {
 		node = HJSON.parseWithCache(data);
 	} catch (error) {
-		console.error("Error parsing JSON:", error);
-		return null;
+		return String(error);
 	}
 
 	if (!node.isObject()) {

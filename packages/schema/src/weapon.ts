@@ -9,7 +9,7 @@ import { ShootPatternHjsonSchema } from "./shoot-pattern";
 import { BulletHjsonSchema } from "./bullet";
 import { fixed, metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
-import { classSchema } from "./class";
+import { ClassMap, classSchema } from "./class";
 
 const weaponTypes = ["Weapon", "BuildWeapon", "MineWeapon", "PointDefenseBulletWeapon", "PointDefenseWeapon", "RepairBeamWeapon"] as const;
 
@@ -171,25 +171,18 @@ const repairBeamWeaponSchema = (context: ProjectContents) =>
 		activeSound: fixed(weaponObjectSchema, "activeSound", "healBlockFull"),
 	});
 
-const weaponTypeMap: Record<WeaponType, SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>> = {
+const weaponTypeMap = new ClassMap<WeaponType>({
 	Weapon: () => v.object({}),
 	BuildWeapon: () => buildWeaponSchema,
 	MineWeapon: () => mineWeaponSchema,
 	PointDefenseBulletWeapon: () => pointDefenseBulletWeaponSchema,
 	PointDefenseWeapon: (context) => pointDefenseWeaponSchema(context),
 	RepairBeamWeapon: (context) => repairBeamWeaponSchema(context),
-};
+});
 
 export const WeaponHjsonSchema: SchemaFn = (context) =>
 	v.lazy((input) => {
-		const weaponVariant = {};
-		if (input && typeof input === "object" && "type" in input && typeof input.type === "string") {
-			const weaponType = input.type as WeaponType;
-			const clzz = weaponTypeMap[weaponType](context);
-			if (clzz) {
-				Object.assign(weaponVariant, clzz.entries);
-			}
-		}
+		const weaponVariant = weaponTypeMap.get(input, context);
 
 		return v.object({
 			...weaponObjectSchema,

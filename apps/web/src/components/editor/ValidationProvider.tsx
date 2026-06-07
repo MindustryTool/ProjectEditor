@@ -31,7 +31,7 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 
 	useEffect(() => {
 		validationService.contents = contents;
-        validationService.revalidateFiles(projectId);
+		validationService.revalidateFiles(projectId);
 	}, [contents, projectId]);
 
 	useEffect(() => {
@@ -77,9 +77,19 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 	}, [path, projectId]);
 
 	useEffect(() => {
-		for (const path of Object.keys(useValidationStore.getState().results.resultsByPath)) {
-			validationService.scheduleValidation(projectId, path);
-		}
+		const unsub = useValidationStore.persist.onFinishHydration((state) => {
+            console.log("Finish");
+            console.log(state.results.resultsByPath);
+            
+			for (const path of Object.keys(state.results.resultsByPath)) {
+				validationService.scheduleValidation(projectId, path);
+				console.log(path);
+			}
+		});
+
+		return () => {
+			unsub();
+		};
 	}, [projectId]);
 
 	const ctxValue = useMemo<ValidationContextValue>(

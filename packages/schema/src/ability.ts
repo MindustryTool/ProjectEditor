@@ -9,7 +9,7 @@ import { StatusFieldSchema } from "./status";
 import { LiquidFieldSchema } from "./liquid";
 import { BulletHjsonSchema } from "./bullet";
 import { metadata } from "./utils";
-import { classSchema } from "./class";
+import { ClassMap, classSchema } from "./class";
 
 export const abilityClasses = [
 	"ArmorPlateAbility",
@@ -122,12 +122,10 @@ const regenAbilityObjectSchema = v.object({
 	),
 });
 
-type AbilityObjectSchema = v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>;
-
-const classSchemaMap: Record<AbilityClass, SchemaFn<AbilityObjectSchema>> = {
+const classSchemaMap = new ClassMap<AbilityClass>({
 	Ability: () => v.object({}),
-	ArmorPlateAbility: (_context) => armorPlateAbilityObjectSchema as AbilityObjectSchema,
-	EmptyDataAbility: (_context) => v.object({}) as AbilityObjectSchema,
+	ArmorPlateAbility: (_context) => armorPlateAbilityObjectSchema,
+	EmptyDataAbility: (_context) => v.object({}),
 	EnergyFieldAbility: (context) =>
 		v.object({
 			damage: v.pipe(
@@ -234,7 +232,7 @@ const classSchemaMap: Record<AbilityClass, SchemaFn<AbilityObjectSchema>> = {
 				metadata({ name: "editor.ability.use-ammo", description: "editor.ability.use-ammo-description" }),
 			),
 		}),
-	ForceFieldAbility: (_context) => forceFieldAbilityObjectSchema as AbilityObjectSchema,
+	ForceFieldAbility: (_context) => forceFieldAbilityObjectSchema,
 	LiquidExplodeAbility: (context) =>
 		v.object({
 			liquid: v.pipe(
@@ -423,7 +421,7 @@ const classSchemaMap: Record<AbilityClass, SchemaFn<AbilityObjectSchema>> = {
 				metadata({ name: "editor.ability.shoot-sound-lightning", description: "editor.ability.shoot-sound-lightning-description" }),
 			),
 		}),
-	RegenAbility: (_context) => regenAbilityObjectSchema as AbilityObjectSchema,
+	RegenAbility: (_context) => regenAbilityObjectSchema,
 	RepairFieldAbility: (context) =>
 		v.object({
 			amount: v.pipe(
@@ -792,20 +790,13 @@ const classSchemaMap: Record<AbilityClass, SchemaFn<AbilityObjectSchema>> = {
 				metadata({ name: "editor.ability.parentize-effects", description: "editor.ability.parentize-effects-description" }),
 			),
 		}),
-};
+});
 
 export const AbilityHjsonSchema: SchemaFn = CachedSchema((context) => {
 	return v.lazy((input) => {
-		if (input && typeof input === "object" && "type" in input) {
-			const type = input.type;
+		const variant = classSchemaMap.get(input, context);
 
-			if (type && classSchemaMap[type as AbilityClass]) {
-				const schemaFn = classSchemaMap[type as AbilityClass];
-				return v.pipe(v.object({ ...abilityBaseObjectSchema.entries, ...schemaFn(context).entries }), metadata({ type: "ability" }));
-			}
-		}
-
-		return v.pipe(abilityBaseObjectSchema, metadata({ type: "ability" }));
+		return v.pipe(v.object({ ...abilityBaseObjectSchema.entries, ...variant }), metadata({ type: "ability" }));
 	});
 });
 

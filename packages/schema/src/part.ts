@@ -4,7 +4,7 @@ import { MindustryHexColorSchema } from "./mindustry-hex-color";
 import type { SchemaFn } from "./utils";
 import { EffectFieldSchema } from "./effect";
 import { metadata } from "./utils";
-import { classSchema } from "./class";
+import { ClassMap, classSchema } from "./class";
 
 export const partClasses = ["RegionPart", "DrawPart", "EffectSpawnerPart", "FlarePart", "HaloPart", "HoverPart", "ShapePart"] as const;
 
@@ -138,7 +138,7 @@ export const shapePartObjectSchema = v.object({
 	layerOffset: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.layer-offset" })),
 });
 
-const classSchemaMap: Record<PartClass, SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>> = {
+const classSchemaMap = new ClassMap<PartClass>({
 	DrawPart: (_context) => v.object({}),
 	RegionPart: (context) =>
 		v.object({
@@ -373,19 +373,12 @@ const classSchemaMap: Record<PartClass, SchemaFn<v.ObjectSchema<v.ObjectEntries,
 	HaloPart: (_context) => haloPartObjectSchema,
 	HoverPart: (_context) => hoverPartObjectSchema,
 	ShapePart: (_context) => shapePartObjectSchema,
-};
+});
 
 export const PartHjsonSchema: SchemaFn = CachedSchema((context) => {
 	return v.lazy((input) => {
-		if (input && typeof input === "object" && "type" in input) {
-			const type = input.type;
+		const variant = classSchemaMap.get(input, context);
 
-			if (type && classSchemaMap[type as PartClass]) {
-				const schemaFn = classSchemaMap[type as PartClass];
-				return v.pipe(v.object({ ...drawPartBaseObjectSchema.entries, ...schemaFn(context).entries }), metadata({ type: "part" }));
-			}
-		}
-
-		return v.pipe(drawPartBaseObjectSchema, metadata({ type: "part" }));
+		return v.pipe(v.object({ ...drawPartBaseObjectSchema.entries, ...variant }), metadata({ type: "part" }));
 	});
 });

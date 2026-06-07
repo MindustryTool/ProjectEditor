@@ -3,7 +3,7 @@ import { CachedSchema } from "./utils";
 import type { SchemaFn } from "./utils";
 
 import { metadata } from "./utils";
-import { classSchema } from "./class";
+import { ClassMap, classSchema } from "./class";
 
 export const shootPatternTypes = [
 	"ShootPattern",
@@ -96,7 +96,7 @@ export const shootSummonObjectSchema = v.object({
 	spread: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.shoot-pattern.spread" })),
 });
 
-const classSchemaMap: Record<ShootPatternType, SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>> = {
+const classSchemaMap = new ClassMap<ShootPatternType>({
 	ShootAlternate: (_context) => shootAlternateObjectSchema,
 	ShootBarrel: (_context) => shootBarrelObjectSchema,
 	ShootHelix: (_context) => shootHelixObjectSchema,
@@ -109,25 +109,12 @@ const classSchemaMap: Record<ShootPatternType, SchemaFn<v.ObjectSchema<v.ObjectE
 	ShootSpread: (_context) => shootSpreadObjectSchema,
 	ShootSummon: (_context) => shootSummonObjectSchema,
 	ShootPattern: (_context) => shootPatternBaseObjectSchema,
-};
+});
 
 export const ShootPatternHjsonSchema: SchemaFn = CachedSchema((context) => {
 	return v.lazy((input) => {
-		if (input && typeof input === "object" && "type" in input) {
-			const type = input.type;
+		const variant = classSchemaMap.get(input, context);
 
-			if (typeof type === "string" && classSchemaMap[type as ShootPatternType]) {
-				const schema = classSchemaMap[type as ShootPatternType];
-				return v.pipe(
-					v.object({
-						...shootPatternBaseObjectSchema.entries,
-						...schema(context).entries,
-					}),
-					metadata({ type: "shoot-pattern" }),
-				);
-			}
-		}
-
-		return v.pipe(shootPatternBaseObjectSchema, metadata({ type: "shoot-pattern" }));
+		return v.pipe(v.object({ ...shootPatternBaseObjectSchema.entries, ...variant }), metadata({ type: "shoot-pattern" }));
 	});
 });

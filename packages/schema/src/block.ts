@@ -25,7 +25,7 @@ import { ContentFieldSchema } from "./content";
 import { Envs, EnvSchema } from "./envs";
 import type { ProjectContents } from "@project/types";
 import { ShootPatternHjsonSchema } from "./shoot-pattern";
-import { classSchema } from "./class";
+import { ClassMap, classSchema } from "./class";
 
 export const blockTypes = [
 	// Power
@@ -5519,7 +5519,7 @@ const overlayFloorObjectSchema = v.object({
 	),
 });
 
-const classSchemaMap: Record<BlockType, SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>> = {
+const classSchemaMap = new ClassMap<BlockType>({
 	// Power
 	Block: () => v.object({}),
 	PowerBlock: () => powerBlockObjectSchema,
@@ -5770,7 +5770,7 @@ const classSchemaMap: Record<BlockType, SchemaFn<v.ObjectSchema<v.ObjectEntries,
 			...floorObjectSchema.entries,
 			maxSize: v.optional(v.pipe(v.number(), v.integer()), 3),
 		}),
-};
+});
 
 export const BlockFieldSchema: SchemaFn = CachedSchema((context) => {
 	return v.pipe(
@@ -5782,20 +5782,12 @@ export const BlockFieldSchema: SchemaFn = CachedSchema((context) => {
 
 export const BlockHjsonSchema: SchemaFn = CachedSchema((context) => {
 	return v.lazy((input) => {
-		const variantEntries: v.ObjectEntries = {};
-
-		if (input && typeof input === "object" && "type" in input) {
-			const type = input.type;
-			if (typeof type === "string" && classSchemaMap[type as BlockType]) {
-				const schema = classSchemaMap[type as BlockType];
-				Object.assign(variantEntries, schema(context).entries);
-			}
-		}
+		const variant = classSchemaMap.get(input, context);
 
 		return v.pipe(
 			v.object({
 				...blockObjectSchema,
-				...variantEntries,
+				...variant,
 				consumes: v.optional(ConsumesHjsonSchema(context)),
 				requirements: v.optional(v.array(ItemRequirementSchema), []),
 				researchCost: v.optional(v.array(ItemRequirementSchema)),
