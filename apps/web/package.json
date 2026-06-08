@@ -49,7 +49,6 @@
         "konva": "^10.3.0",
         "lucide-react": "catalog:",
         "monaco-editor": "catalog:",
-        "nuqs": "catalog:",
         "posthog-js": "^1.379.1",
         "radix-ui": "catalog:",
         "react": "^19.2.0",

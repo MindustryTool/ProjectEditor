@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { cn } from "~/lib/utils";
 import { useValidationStore } from "@project/core";
 import { useShallow } from "zustand/react/shallow";
+import React from "react";
 
 interface TreeNodeLabelProps {
 	name: string | ReactNode;
@@ -9,7 +10,7 @@ interface TreeNodeLabelProps {
 	isFolder: boolean;
 }
 
-export function TreeNodeLabel({ name, currentPath, isFolder }: TreeNodeLabelProps) {
+export const TreeNodeLabel = React.memo(function TreeNodeLabel({ name, currentPath, isFolder }: TreeNodeLabelProps) {
 	const errorCount = useValidationStore(useShallow((s) => s.results.getRollup()[currentPath]?.error ?? 0));
 	const warningCount = useValidationStore(useShallow((s) => s.results.getRollup()[currentPath]?.warning ?? 0));
 
@@ -21,4 +22,4 @@ export function TreeNodeLabel({ name, currentPath, isFolder }: TreeNodeLabelProp
 				: "text-foreground";
 
 	return <span className={cn("flex-1 truncate", className)}>{name}</span>;
-}
+});

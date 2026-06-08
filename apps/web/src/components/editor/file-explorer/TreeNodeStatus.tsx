@@ -1,13 +1,14 @@
 import { useFileStore, isDirty, selectEntry, selectIsSaving } from "@project/core";
 import { useShallow } from "zustand/react/shallow";
 import { useFileExplorerStore } from "./useFileExplorerState";
+import React from "react";
 
 interface TreeNodeStatusProps {
 	currentPath: string;
 	isFolder: boolean;
 }
 
-export function TreeNodeStatus({ currentPath, isFolder }: TreeNodeStatusProps) {
+export const TreeNodeStatus = React.memo(function TreeNodeStatus({ currentPath, isFolder }: TreeNodeStatusProps) {
 	const projectId = useFileExplorerStore((s) => s.projectId);
 	const fileEntry = useFileStore(useShallow(selectEntry(projectId, currentPath)));
 	const isSaving = useFileStore(useShallow(selectIsSaving(projectId, currentPath)));
@@ -25,4 +26,4 @@ export function TreeNodeStatus({ currentPath, isFolder }: TreeNodeStatusProps) {
 	}
 
 	return null;
-}
+});

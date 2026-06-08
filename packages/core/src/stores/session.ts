@@ -169,6 +169,7 @@ interface ProjectSession {
 	projectContext: ProjectContext | null;
 	treeSnapshot: TreeSnapshot;
 	recentlyOpenedFiles: Record<string, RecentFileEntry[]>;
+	selectedPath: string | null;
 
 	setCurrentProject: (context: ProjectContext | null) => void;
 	updateCurrentProject: (patch: Partial<ProjectInfo>) => void;
@@ -176,6 +177,7 @@ interface ProjectSession {
 	recordFileAccess: (projectId: string, path: string) => void;
 	removeFromRecentFiles: (projectId: string, path: string) => void;
 	clearRecentFiles: (projectId: string) => void;
+	setSelectedPath: (path: string | null) => void;
 }
 
 export const useProjectSession = create<ProjectSession>()(
@@ -184,6 +186,7 @@ export const useProjectSession = create<ProjectSession>()(
 			projectContext: null,
 			treeSnapshot: new TreeSnapshot([]),
 			recentlyOpenedFiles: {},
+			selectedPath: null,
 
 			setCurrentProject: (context) => {
 				set((state) => ({
@@ -236,6 +239,10 @@ export const useProjectSession = create<ProjectSession>()(
 					delete rest[projectId];
 					return { recentlyOpenedFiles: rest };
 				});
+			},
+
+			setSelectedPath: (path) => {
+				set({ selectedPath: path });
 			},
 		}),
 		{

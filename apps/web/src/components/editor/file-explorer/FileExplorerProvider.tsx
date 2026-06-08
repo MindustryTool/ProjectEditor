@@ -1,10 +1,9 @@
 import { useCallback, useEffect, type ReactNode } from "react";
-import { useCurrentProject } from "@project/core";
+import { useCurrentProject, useProjectSession } from "@project/core";
 import { useFileExplorerStore } from "./useFileExplorerState";
 import { DeleteFileDialog } from "./DeleteFileDialog";
 import { CreateFileDialog } from "./CreateFileDialog";
 import { useExpanded } from "#/components/editor/file-explorer/use-expaned";
-import { usePath } from "#/hooks/use-path";
 
 export function FileExplorerProvider({ children }: { children: ReactNode }) {
 	const context = useCurrentProject();
@@ -13,7 +12,7 @@ export function FileExplorerProvider({ children }: { children: ReactNode }) {
 	const setDeleteTargetPath = useFileExplorerStore((s) => s.setDeleteTargetPath);
 	const setCreateTargetPath = useFileExplorerStore((s) => s.setCreateTargetPath);
 	const setProjectId = useFileExplorerStore((s) => s.setProjectId);
-	const [, setPath] = usePath();
+	const setSelectedPath = useProjectSession((s) => s.setSelectedPath);
 
 	useEffect(() => {
 		setProjectId(context.project.id);
@@ -21,10 +20,10 @@ export function FileExplorerProvider({ children }: { children: ReactNode }) {
 
 	const handleCreateSuccess = useCallback(
 		(newPath: string) => {
-			setPath(newPath);
+			setSelectedPath(newPath);
 			setCreateTargetPath(null);
 		},
-		[setPath, setCreateTargetPath],
+		[setSelectedPath, setCreateTargetPath],
 	);
 
 	return (
@@ -39,7 +38,7 @@ export function FileExplorerProvider({ children }: { children: ReactNode }) {
 
 function PathListener() {
 	const [, setExpanded] = useExpanded();
-	const [path] = usePath();
+	const path = useProjectSession((s) => s.selectedPath);
 
 	useEffect(() => {
 		if (path) {

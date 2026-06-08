@@ -6,7 +6,6 @@ export { CreateFileDialog } from "./CreateFileDialog";
 export { DeleteFileDialog } from "./DeleteFileDialog";
 export { useFileExplorerStore } from "./useFileExplorerState";
 export type { FileExplorerStore } from "./useFileExplorerState";
-export { useTreeNodeActions } from "./useTreeNodeActions";
 export { buildFileTree, getIcon } from "./file-tree";
 export { RootName } from "./RootName";
 export { TreeNodeRenameInput } from "./TreeNodeRenameInput";

@@ -43,7 +43,6 @@ catalog:
   jsdom: ^28.1.0
   lucide-react: ^0.545.0
   monaco-editor: ^0.52.2
-  nuqs: ^2.8.9
   prettier: ^3.5.0
   radix-ui: ^1.4.3
   react-i18next: ^17.0.8

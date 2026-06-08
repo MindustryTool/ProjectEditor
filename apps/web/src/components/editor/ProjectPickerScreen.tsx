@@ -14,10 +14,10 @@ import { LANGUAGE_OPTIONS, LanguageBadge } from "./LanguageBadge";
 import { Spinner } from "#/components/ui/spinner";
 
 interface ProjectPickerScreenProps {
-	onProjectSelected: (id: string, path: string) => void;
+	onProjectSelected: (id: string) => void;
 }
 
-function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: string, path: string) => void }) {
+function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: string) => void }) {
 	const { t } = useTranslation();
 	const createProject = useAppStore((s) => s.createNewProject);
 	const [name, setName] = useState("");
@@ -65,7 +65,7 @@ function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: s
 			setLanguage("json");
 			setNameError("");
 
-			onProjectSelected(context.project.id, "content/items/test-item.hjson");
+			onProjectSelected(context.project.id);
 		} catch (e) {
 			toast.error(`Failed to create project ${e}`);
 		}
@@ -109,7 +109,7 @@ function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: s
 	);
 }
 
-function ImportProjectSection({ onProjectSelected }: { onProjectSelected: (id: string, path: string) => void }) {
+function ImportProjectSection({ onProjectSelected }: { onProjectSelected: (id: string) => void }) {
 	const { t } = useTranslation();
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [importing, setImporting] = useState(false);
@@ -130,7 +130,7 @@ function ImportProjectSection({ onProjectSelected }: { onProjectSelected: (id: s
 			});
 
 			toast.success(`Project imported successfully`);
-			onProjectSelected(project.id, "");
+			onProjectSelected(project.id);
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Failed to import project");
 		}
@@ -164,7 +164,7 @@ function ImportProjectSection({ onProjectSelected }: { onProjectSelected: (id: s
 	);
 }
 
-function ProjectActionsSection({ onProjectSelected }: { onProjectSelected: (id: string, path: string) => void }) {
+function ProjectActionsSection({ onProjectSelected }: { onProjectSelected: (id: string) => void }) {
 	const { t } = useTranslation();
 
 	return (
@@ -189,7 +189,7 @@ function ProjectActionsSection({ onProjectSelected }: { onProjectSelected: (id: 
 	);
 }
 
-function ProjectListSection({ onProjectSelected }: { onProjectSelected: (id: string, path: string) => void }) {
+function ProjectListSection({ onProjectSelected }: { onProjectSelected: (id: string) => void }) {
 	const { t } = useTranslation();
 	const projects = useAppStore((s) => s.projects);
 
@@ -206,7 +206,7 @@ function ProjectListSection({ onProjectSelected }: { onProjectSelected: (id: str
 							type="button"
 							className="w-full text-left text-xs"
 							onClick={() => {
-								onProjectSelected(project.id, "");
+								onProjectSelected(project.id);
 							}}
 						>
 							<div className="flex items-center gap-2 font-medium text-foreground">

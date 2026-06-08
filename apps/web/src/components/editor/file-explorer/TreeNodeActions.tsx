@@ -3,14 +3,13 @@ import { Plus, MoreHorizontal } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { isDefaultPath } from "@project/fs";
 import { useCurrentProject } from "@project/core";
+import { useFileExplorerStore } from "./useFileExplorerState";
 
 interface TreeNodeActionsProps {
 	currentPath: string;
 	depth: number;
 	isFolder: boolean;
-	isEditing: boolean;
 	isSelected: boolean;
-	onCreateClick: (e: React.MouseEvent) => void;
 	onContextMenu?: (path: string, rect: DOMRect) => void;
 }
 
@@ -18,22 +17,27 @@ export function TreeNodeActions({
 	currentPath,
 	depth,
 	isFolder,
-	isEditing,
 	isSelected,
-	onCreateClick,
 	onContextMenu,
 }: TreeNodeActionsProps) {
 	const context = useCurrentProject();
 	const isDefault = isDefaultPath(context.fs.defaultProjectTree, currentPath);
 	const isRoot = depth === 0 && currentPath === "";
-	const showActions = !isEditing;
+	const setCreateTargetPath = useFileExplorerStore((s) => s.setCreateTargetPath);
+	const editingPath = useFileExplorerStore((s) => s.editingPath);
+	const isEditing = editingPath === currentPath;
+
+	const handleCreateClick = useCallback((e: React.MouseEvent) => {
+		e.stopPropagation();
+		setCreateTargetPath(currentPath);
+	}, [currentPath, setCreateTargetPath]);
 
 	const handleMoreClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
 		e.stopPropagation();
 		onContextMenu?.(currentPath, e.currentTarget.getBoundingClientRect());
 	}, [currentPath, onContextMenu]);
 
-	if (!showActions || (!isFolder && isDefault)) return null;
+	if (isEditing) return null;
 
 	return (
 		<div
@@ -45,7 +49,7 @@ export function TreeNodeActions({
 		>
 			{isFolder && (
 				<button
-					onClick={onCreateClick}
+					onClick={handleCreateClick}
 					className="flex size-6 items-center justify-center rounded hover:bg-accent"
 					title="Create"
 				>

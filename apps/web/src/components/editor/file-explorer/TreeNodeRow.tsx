@@ -1,14 +1,14 @@
 import { ChevronRight, ChevronDown } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { type TreeNode } from "@project/fs";
-import { useTreeNodeActions } from "./useTreeNodeActions";
 import { getIcon } from "./file-tree";
 import { RootName } from "./RootName";
 import { TreeNodeRenameInput } from "./TreeNodeRenameInput";
 import { TreeNodeLabel } from "./TreeNodeLabel";
 import { TreeNodeActions } from "./TreeNodeActions";
 import { TreeNodeStatus } from "./TreeNodeStatus";
-import React from "react";
+import { useProjectSession } from "@project/core";
+import React, { useCallback } from "react";
 
 interface TreeNodeRowProps {
 	node: TreeNode;
@@ -19,10 +19,19 @@ interface TreeNodeRowProps {
 }
 
 export const TreeNodeRow = React.memo(function TreeNodeRow({ node, depth, expanded, onToggle, onContextMenu }: TreeNodeRowProps) {
-	const { currentPath, isSelected, isEditing, isFolder, handleClick, handleCreateClick, handleRenameConfirm, handleInputKeyDown } =
-		useTreeNodeActions(node, onToggle);
-
+	const currentPath = node.path === "/" ? "" : node.path;
+	const isSelected = useProjectSession((s) => s.selectedPath === currentPath);
+	const setSelectedPath = useProjectSession((s) => s.setSelectedPath);
+	const isFolder = node.type === "folder";
 	const isRoot = depth === 0 && currentPath === "";
+
+	const handleClick = useCallback(() => {
+		if (isFolder) {
+			onToggle?.();
+		} else {
+			setSelectedPath(currentPath);
+		}
+	}, [isFolder, onToggle, setSelectedPath, currentPath]);
 
 	return (
 		<div>
@@ -53,18 +62,14 @@ export const TreeNodeRow = React.memo(function TreeNodeRow({ node, depth, expand
 					</span>
 				)}
 				{getIcon(node, expanded)}
-				{isEditing ? (
-					<TreeNodeRenameInput defaultValue={node.name} onConfirm={handleRenameConfirm} onKeyDown={handleInputKeyDown} />
-				) : (
+				<TreeNodeRenameInput currentPath={currentPath} nodeName={node.name}>
 					<TreeNodeLabel name={isRoot ? <RootName /> : node.name} currentPath={currentPath} isFolder={isFolder} />
-				)}
+				</TreeNodeRenameInput>
 				<TreeNodeActions
 					currentPath={currentPath}
 					depth={depth}
 					isFolder={isFolder}
-					isEditing={isEditing}
 					isSelected={isSelected}
-					onCreateClick={handleCreateClick}
 					onContextMenu={onContextMenu}
 				/>
 				<TreeNodeStatus currentPath={currentPath} isFolder={isFolder} />

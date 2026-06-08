@@ -2,7 +2,7 @@ import { memo } from "react";
 import { ProjectPickerScreen } from "./ProjectPickerScreen";
 
 interface ProjectsPageProps {
-	onProjectSelected: (id: string, path: string) => void;
+	onProjectSelected: (id: string) => void;
 }
 
 export const ProjectsPage = memo(function ProjectsPage({ onProjectSelected }: ProjectsPageProps) {
