@@ -96,7 +96,7 @@ export function SpriteViewer({ path: spritePath }: { path: string }) {
 }
 
 export function SpriteUploader({ path: spritePath }: { path: string }) {
-	const { fs } = useCurrentProject();
+	const { write } = useFile(spritePath);
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	const handleClick = useCallback(() => {
@@ -109,15 +109,20 @@ export function SpriteUploader({ path: spritePath }: { path: string }) {
 			if (!file) return;
 
 			const buf = await file.arrayBuffer();
-			await fs.writeFile(spritePath, buf);
+			await write(buf);
 			e.target.value = "";
 		},
-		[fs, spritePath],
+		[write],
 	);
 
 	return (
 		<>
-			<Button className="ml-auto w-full justify-between cursor-pointer" variant="outline" aria-label="Upload sprite" onClick={handleClick}>
+			<Button
+				className="ml-auto w-full justify-between cursor-pointer"
+				variant="outline"
+				aria-label="Upload sprite"
+				onClick={handleClick}
+			>
 				<p className="text-sm text-muted-foreground">No sprite set</p>
 				<Upload className="size-4 ml-auto" />
 			</Button>

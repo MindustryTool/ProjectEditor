@@ -56,32 +56,32 @@ const readModMetadata = (json: string, hjson: string) => {
 
 	if (object && object instanceof HjsonObjectNode) {
 		if (object.get("name")) {
-			mod.name = object.get("name").asString()!;
+			mod.name = object.get("name").asString() || "";
 		}
 
 		if (object.get("version")) {
-			mod.version = object.get("version").asString()!;
+			mod.version = object.get("version").asString() || "";
 		}
 
 		if (object.get("author")) {
-			mod.author = object.get("author").asString()!;
+			mod.author = object.get("author").asString() || "";
 		}
 
 		const deps = object.get("dependencies");
 		if (deps && deps.isArray()) {
-			mod.dependencies = deps.valueOf() as string[];
+			mod.dependencies = (deps.valueOf() as string[]) || [];
 		}
 
 		if (object.get("description")) {
-			mod.description = object.get("description").asString()!;
+			mod.description = object.get("description").asString() || "";
 		}
 
 		if (object.get("displayName")) {
-			mod.displayName = object.get("displayName").asString()!;
+			mod.displayName = object.get("displayName").asString() || "";
 		}
 
 		if (object.get("minGameVersion")) {
-			mod.minGameVersion = object.get("minGameVersion").asString()!;
+			mod.minGameVersion = object.get("minGameVersion").asString() || "";
 		}
 	}
 

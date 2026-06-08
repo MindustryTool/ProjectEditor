@@ -1,4 +1,5 @@
 import { useIsDesktop } from "~/hooks/use-is-desktop";
+import { NavigationGuardDialog } from "./NavigationGuardDialog";
 import { ProjectMenu } from "./toolbar/ProjectMenu";
 import { EditMenu } from "./toolbar/EditMenu";
 import { ViewMenu } from "./toolbar/ViewMenu";
@@ -333,10 +334,12 @@ function EditorMobileLayout() {
 export function EditorShell() {
 	const [isDesktop] = useIsDesktop();
 	const padding = useAppStore((state) => state.settings.padding);
+	const projectId = useProjectSession((s) => s.projectContext?.project.id ?? null);
 
 	return (
 		<ProjectProvider>
 			<ValidationProvider />
+			<NavigationGuardDialog projectId={projectId} />
 			<FileExplorerProvider>
 				<ErrorBoundary>
 					<div

@@ -41,17 +41,16 @@ export class ProjectFileSystem {
 	}
 
 	async readFile(path: string): Promise<ArrayBuffer | null> {
-        console.log("readFile", path);
+		console.log("readFile", path);
 		return this.vfs.readFile(this.scopePath(path));
 	}
 
 	async writeFile(path: string, data: BufferSource): Promise<void> {
 		await this.vfs.writeFile(this.scopePath(path), data);
 		this.events.emit("file:write", { path });
-		const file = this.files.find((f) => f.path === path);
-		if (!file) {
-			this.files.push({ path, kind: "file", name: path.split("/").pop() || "" });
-			this.onTreeSnapshotChange(this.files);
+
+		if (!this.files.some((f) => f.path === path)) {
+			await this.refreshTree();
 		}
 	}
 
