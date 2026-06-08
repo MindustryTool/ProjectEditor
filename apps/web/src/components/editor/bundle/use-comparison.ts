@@ -22,7 +22,11 @@ export function useComparison(path: string, rows: BundleRow[]) {
 
 	const comparisonBundleFile = useMemo(() => {
 		if (!comparisonData) return null;
-		try { return parseBundle(comparisonData); } catch { return null; }
+		try {
+			return parseBundle(comparisonData);
+		} catch {
+			return null;
+		}
 	}, [comparisonData]);
 
 	function rowState(hasKey: boolean, val: string): "translated" | "untranslated" | "missing" {
