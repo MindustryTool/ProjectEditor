@@ -132,10 +132,14 @@ function SpriteCanvas({ path, schema }: { path: string; schema: AnySchema | Sche
 					</Stage>
 				</div>
 			</ResizablePanel>
-			<ResizableHandle withHandle />
-			<ResizablePanel defaultSize="25%" minSize="15%" maxSize="40%">
-				<SpriteSidebar sprites={sprites} />
-			</ResizablePanel>
+			{sprites.length > 0 && (
+				<>
+					<ResizableHandle withHandle />
+					<ResizablePanel defaultSize="25%" minSize="15%" maxSize="40%">
+						<SpriteSidebar sprites={sprites} />
+					</ResizablePanel>
+				</>
+			)}
 		</ResizablePanelGroup>
 	);
 }

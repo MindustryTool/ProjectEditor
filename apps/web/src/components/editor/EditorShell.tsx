@@ -132,7 +132,7 @@ function EditorContent({ path }: { path: string }) {
 
 	switch (route.type) {
 		case "empty":
-			return null;
+			return <div className="flex h-full w-full items-center justify-center font-semibold">Nothing here</div>;
 		case "bundle":
 			return <BundleContent path={route.path} />;
 		case "mod":
@@ -163,7 +163,8 @@ const panelFallback = (
 function PropertiesPanel({ route }: { route: PropertiesRoute }) {
 	switch (route.type) {
 		case "none":
-			return null;
+			return <div className="flex h-full w-full items-center justify-center font-semibold">No properties</div>;
+
 		case "mod":
 			return (
 				<Suspense fallback={panelFallback}>
@@ -296,8 +297,10 @@ function EditorMobileLayout() {
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
 						<div className="flex flex-col flex-1 overflow-hidden bg-background w-full gap-1">
 							<ErrorBoundary>
-								<RecentlyOpenedFilesBar />
-								{path ? <EditorContent path={path} /> : <NoOpenedFileScreen />}
+								<Suspense>
+									<RecentlyOpenedFilesBar />
+									{path ? <EditorContent path={path} /> : <NoOpenedFileScreen />}
+								</Suspense>
 							</ErrorBoundary>
 						</div>
 					</div>
@@ -306,7 +309,9 @@ function EditorMobileLayout() {
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
 						<div className="flex flex-1 overflow-hidden bg-background w-full">
 							<ErrorBoundary>
-								<PropertiesPanel route={propertiesRoute} />
+                                <Suspense>
+									<PropertiesPanel route={propertiesRoute} />
+                                </Suspense>
 							</ErrorBoundary>
 						</div>
 					</div>
