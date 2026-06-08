@@ -57,7 +57,7 @@ export const BundleToolbar = memo(function BundleToolbar({
 						<SelectTrigger size="sm">
 							<SelectValue className="text-xs" placeholder={t("bundle-editor.compare-with")} />
 						</SelectTrigger>
-						<SelectContent>
+						<SelectContent position="popper">
 							{comparisonPath && (
 								<SelectItem key={"None"} value={"None"}>
 									None

@@ -15,7 +15,9 @@ export const Row = memo(function Row({ row, comparisonRow, onValueChange, onComp
 	if (row.isInvalid) {
 		return (
 			<div className={`grid ${gridCols} h-10 max-h-10 min-h-10 border-b border-border/20`}>
-				<div className="col-span-full flex items-center py-1 px-1 text-red-400/70 font-mono text-xs text-ellipsis w-full text-nowrap overflow-hidden">{row.value}</div>
+				<div className="col-span-full flex items-center py-1 px-1 text-red-400/70 font-mono text-xs text-ellipsis w-full text-nowrap overflow-hidden">
+					{row.value}
+				</div>
 			</div>
 		);
 	}
@@ -37,7 +39,15 @@ export const Row = memo(function Row({ row, comparisonRow, onValueChange, onComp
 	);
 });
 
-const RowInput = memo(function RowInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+const RowInput = memo(function RowInput({
+	value,
+	onChange,
+	placeholder,
+}: {
+	value: string;
+	onChange: (v: string) => void;
+	placeholder?: string;
+}) {
 	const [local, setLocal] = useState(value);
 
 	return (
@@ -47,6 +57,7 @@ const RowInput = memo(function RowInput({ value, onChange }: { value: string; on
 				setLocal(e.target.value);
 				onChange(e.target.value);
 			}}
+			placeholder={placeholder}
 			className={`text-xs w-full font-mono border-none appearance-none bg-transparent outline-none ring-0 focus:ring-0`}
 		/>
 	);
