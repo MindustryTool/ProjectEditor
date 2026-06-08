@@ -1,18 +1,20 @@
-import { memo, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import type { BundleRow } from "./types";
 
 interface RowProps {
 	row: BundleRow;
 	comparisonRow: BundleRow | null;
-	onValueChange: (key: string, value: string) => void;
+	onValueChange: (key: string, value: string | null) => void;
 	onComparisonValueChange: (key: string, value: string) => void;
 }
 
 export const Row = memo(function Row({ row, comparisonRow, onValueChange, onComparisonValueChange }: RowProps) {
-	const isMissing = !row.existsInBundle;
-	const gridCols = comparisonRow !== null ? "grid-cols-[35%_1fr_1fr]" : "grid-cols-[35%_1fr]";
+	const isInvalid = row.state === "invalid";
+	const gridCols = comparisonRow !== null ? "grid-cols-[35%_1fr_1fr_auto]" : "grid-cols-[35%_1fr_auto]";
 
-	if (row.isInvalid) {
+	const handleOnChange = useCallback((v: string) => onValueChange(row.key, v), [row.key, onValueChange]);
+
+	if (isInvalid) {
 		return (
 			<div className={`grid ${gridCols} h-10 max-h-10 min-h-10 border-b border-border/20`}>
 				<div className="col-span-full flex items-center py-1 px-1 text-red-400/70 font-mono text-xs text-ellipsis w-full text-nowrap overflow-hidden">
@@ -22,21 +24,58 @@ export const Row = memo(function Row({ row, comparisonRow, onValueChange, onComp
 		);
 	}
 
+	const rowBg = row.state === "missing" ? "bg-yellow-300/6" : row.state === "extra" ? "bg-blue-300/6" : "hover:bg-muted/30";
+
 	return (
-		<div
-			className={`grid ${gridCols} divide-x items-center h-10 max-h-10 min-h-10 border-b border-border/20 transition-colors ${isMissing ? "bg-yellow-300/6" : "hover:bg-muted/30"}`}
-		>
+		<div className={`grid ${gridCols} divide-x items-center h-10 max-h-10 min-h-10 border-b border-border/20 transition-colors ${rowBg}`}>
 			<div className="h-full flex items-center px-1.5 font-mono text-xs text-foreground/80 w-full text-ellipsis">{row.key}</div>
 			<div className="h-full flex items-center px-1.5">
-				<RowInput value={row.value} onChange={(v) => onValueChange(row.key, v)} />
+				<RowInput value={row.value} onChange={handleOnChange} />
 			</div>
 			{comparisonRow !== null && (
 				<div className="h-full flex items-center px-1.5">
-					<RowInput value={comparisonRow.value} onChange={(v) => onComparisonValueChange(comparisonRow.key, v)} />
+					<ComparationRowInput value={comparisonRow} onChange={onComparisonValueChange} />
+				</div>
+			)}
+			{row.state === "extra" && (
+				<div className="flex items-center justify-center w-10">
+					<button
+						type="button"
+						onClick={() => onValueChange(row.key, null)}
+						className="size-5 text-destructive flex items-center justify-center rounded hover:text-red-400 hover:bg-red-400/10 transition-colors"
+						title="Delete key"
+					>
+						<svg
+							width="12"
+							height="12"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+						>
+							<path d="M3 6h18" />
+							<path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+							<path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+						</svg>
+					</button>
 				</div>
 			)}
 		</div>
 	);
+});
+
+const ComparationRowInput = memo(function ComparationRowInput({
+	value,
+	onChange,
+}: {
+	value: BundleRow;
+	onChange: (key: string, value: string) => void;
+}) {
+	const handleComparison = useCallback((v: string) => onChange(value.key, v), [value.key, onChange]);
+
+	return <RowInput value={value.value} onChange={handleComparison} />;
 });
 
 const RowInput = memo(function RowInput({

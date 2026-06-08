@@ -15,7 +15,7 @@ interface BundleToolbarProps {
 	onComparisonPathChange: (path: string | null) => void;
 }
 
-const STATE_FILTERS: StateFilter[] = ["all", "translated", "untranslated", "invalid"];
+const STATE_FILTERS: StateFilter[] = ["all", "translated", "untranslated", "extra", "missing", "invalid"];
 
 export const BundleToolbar = memo(function BundleToolbar({
 	searchQuery,

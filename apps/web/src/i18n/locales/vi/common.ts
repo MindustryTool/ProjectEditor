@@ -116,6 +116,8 @@ export const vi = {
 	"bundle-editor.translated": "Đã dịch",
 	"bundle-editor.untranslated": "Chưa dịch",
 	"bundle-editor.invalid": "Không hợp lệ",
+	"bundle-editor.extra": "Thừa",
+	"bundle-editor.missing": "Thiếu",
 	"bundle-editor.no-matching-entries": "Không có mục nào khớp",
 	"bundle-editor.loading": "Đang tải...",
 	"bundle-editor.missing-compare": "(thiếu)",

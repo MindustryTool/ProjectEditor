@@ -25,22 +25,29 @@ export function useComparison(path: string, rows: BundleRow[]) {
 		try { return parseBundle(comparisonData); } catch { return null; }
 	}, [comparisonData]);
 
+	function rowState(hasKey: boolean, val: string): "translated" | "untranslated" | "missing" {
+		if (!hasKey) return "missing";
+		return val === "" ? "untranslated" : "translated";
+	}
+
 	const comparisonRows: BundleRow[] | null = useMemo(() => {
 		if (!comparisonBundleFile) return null;
-		const keyMap = new Map<string, string>();
+		const valueMap = new Map<string, string>();
 		let id = 0;
 		for (const entry of comparisonBundleFile.entries) {
 			if (entry.type === "entry" && entry.key) {
-				keyMap.set(entry.key, entry.value ?? "");
+				valueMap.set(entry.key, entry.value ?? "");
 			}
 		}
-		return rows.map((r) => ({
-			id: id++,
-			key: r.key,
-			value: keyMap.get(r.key) ?? "",
-			existsInBundle: keyMap.has(r.key),
-			isInvalid: false,
-		}));
+		return rows.map((r) => {
+			const val = valueMap.get(r.key) ?? "";
+			return {
+				id: id++,
+				key: r.key,
+				value: val,
+				state: rowState(valueMap.has(r.key), val),
+			};
+		});
 	}, [comparisonBundleFile, rows]);
 
 	const updateComparisonValue = useCallback(

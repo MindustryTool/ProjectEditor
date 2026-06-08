@@ -2,7 +2,7 @@ import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useFileString, getLocaleFromFilename, SUPPORTED_LOCALES } from "@project/core";
 import { useFileName } from "#/hooks/use-path";
-import { parseRows, getCounts } from "./parse-rows";
+import { parseRows } from "./parse-rows";
 import { writeKey } from "./write-key";
 import { useComparison } from "./use-comparison";
 import { BundleToolbar } from "./BundleToolbar";
@@ -34,14 +34,20 @@ export const BundleGrid = memo(function BundleGrid({ path, contentKeys, toggle }
 		return SUPPORTED_LOCALES[localeCode] ?? localeCode;
 	}, [localeCode]);
 
-	const rows = useMemo(() => parseRows(data, contentKeys), [data, contentKeys]);
+	const { rows, all, translated, untranslated, extra, missing, invalid } = useMemo(
+		() => parseRows(data, contentKeys),
+		[data, contentKeys],
+	);
 
-	const counts = useMemo(() => getCounts(rows), [rows]);
+	const counts = useMemo(
+		() => ({ all, translated, untranslated, extra, missing, invalid }),
+		[all, translated, untranslated, extra, missing, invalid],
+	);
 
 	const comparison = useComparison(path, rows);
 
 	const onValueChange = useCallback(
-		(key: string, value: string) => {
+		(key: string, value: string | null) => {
 			write((prev) => writeKey(prev, key, value));
 		},
 		[write],
@@ -53,22 +59,14 @@ export const BundleGrid = memo(function BundleGrid({ path, contentKeys, toggle }
 
 		if (sq) result = result.filter((r) => r.key.toLowerCase().includes(sq) || r.value.toLowerCase().includes(sq));
 
-		switch (stateFilter) {
-			case "translated":
-				return result.filter((r) => r.existsInBundle && !r.isInvalid && r.value !== "");
-			case "untranslated":
-				return result.filter((r) => !r.existsInBundle || r.value === "");
-			case "invalid":
-				return result.filter((r) => r.isInvalid);
-			default:
-				return result;
-		}
+		if (stateFilter === "all") return result;
+		return result.filter((r) => r.state === stateFilter);
 	}, [rows, searchQuery, stateFilter]);
 
 	const scrollRef = useRef<HTMLDivElement>(null);
 
 	const showComparison = comparison.comparisonRows !== null;
-	const gridCols = showComparison ? "grid-cols-[35%_1fr_1fr]" : "grid-cols-[35%_1fr]";
+	const gridCols = showComparison ? "grid-cols-[35%_1fr_1fr_auto]" : "grid-cols-[35%_1fr_auto]";
 
 	const virtualizer = useVirtualizer({
 		count: filteredRows.length,
@@ -116,6 +114,7 @@ export const BundleGrid = memo(function BundleGrid({ path, contentKeys, toggle }
 								{comparison.availableComparisonFiles.find((f) => f.path === comparison.comparisonPath)?.localeName ?? ""}
 							</div>
 						)}
+						<div className="w-10" />
 					</div>
 				</div>
 

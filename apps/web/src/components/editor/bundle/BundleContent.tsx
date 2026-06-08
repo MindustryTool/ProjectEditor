@@ -70,7 +70,7 @@ export const BundleContent = memo(function BundleContent({ path }: { path: strin
 	const handleViewChange = useCallback((v: BundleView) => setView(v), []);
 
 	return (
-		<div className="flex flex-col h-full w-full gap-1.5 px-2">
+		<div className="flex flex-col h-full w-full gap-1.5">
 			{view === "editor" && (
 				<div className="flex items-center justify-end shrink-0">
 					<BundleViewToggle view={view} onChange={handleViewChange} />

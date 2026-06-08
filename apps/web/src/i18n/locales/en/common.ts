@@ -126,6 +126,8 @@ export const en = {
 	"bundle-editor.translated": "Translated",
 	"bundle-editor.untranslated": "Untranslated",
 	"bundle-editor.invalid": "Invalid",
+	"bundle-editor.extra": "Extra",
+	"bundle-editor.missing": "Missing",
 	"bundle-editor.no-matching-entries": "No matching entries",
 	"bundle-editor.loading": "Loading...",
 	"bundle-editor.missing-compare": "(missing)",
