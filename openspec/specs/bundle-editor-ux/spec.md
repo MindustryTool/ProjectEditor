@@ -1,5 +1,3 @@
-## ADDED Requirements
-
 ### Requirement: Unified search input
 The system SHALL provide a single search input that filters rows by matching against both key and value.
 

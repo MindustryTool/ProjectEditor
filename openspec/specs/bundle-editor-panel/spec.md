@@ -53,18 +53,15 @@ The system SHALL display a scrollable grid of all i18n keys with their values fr
 #### Scenario: Missing key display
 - **WHEN** an i18n key is discovered from content files but is not present in the bundle file
 - **THEN** it SHALL be displayed with a yellow background indicator
-- **THEN** its value input SHALL be disabled (read-only) until explicitly added
+- **THEN** its value input SHALL be enabled (editable)
 
 ### Requirement: Side-by-side comparison
-The system SHALL allow selecting a second locale file from the `bundles/` directory for side-by-side comparison.
+The system SHALL allow selecting a second locale file from the `bundles/` directory for side-by-side comparison, with the dropdown on the same toolbar row as search and state filters.
 
 #### Scenario: Select comparison file
 - **WHEN** user selects a second locale file from a dropdown
+- **THEN** the dropdown SHALL be positioned on the same toolbar row as the search input and state filter tabs
 - **THEN** the panel SHALL display two value columns, both editable, each saving to its respective file
-
-#### Scenario: Keys missing in primary file
-- **WHEN** a key exists in content but is missing from the primary bundle file
-- **THEN** the row SHALL be rendered with yellow background and disabled input
 
 ### Requirement: Content key discovery
 The system SHALL discover i18n keys from content folder files via a configurable mapping function.
@@ -78,15 +75,11 @@ The system SHALL discover i18n keys from content folder files via a configurable
 - **THEN** that file SHALL be excluded from the key list
 
 ### Requirement: Row filtering
-The system SHALL support filtering the displayed key-value rows.
+The system SHALL support filtering the displayed key-value rows using a unified search input.
 
-#### Scenario: Filter by key
-- **WHEN** user types in the key filter input
-- **THEN** only rows whose key contains the filter text SHALL be shown
-
-#### Scenario: Filter by value
-- **WHEN** user types in the value filter input
-- **THEN** only rows whose value contains the filter text SHALL be shown
+#### Scenario: Filter by key or value
+- **WHEN** user types in the search input
+- **THEN** only rows whose key OR value contains the filter text SHALL be shown
 
 #### Scenario: Filter by translated state
 - **WHEN** user selects "translated" filter
