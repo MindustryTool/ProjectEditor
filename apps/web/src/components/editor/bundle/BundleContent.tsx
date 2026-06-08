@@ -2,6 +2,7 @@ import { lazy, memo, Suspense, useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useProjectSession } from "@project/core";
 import { TextEditor } from "#/components/editor/TextEditor";
+import { useProjectContext } from "#/components/editor/ProjectProvider";
 
 const BundleGrid = lazy(() => import("#/components/editor/bundle/BundleGrid").then((mod) => ({ default: mod.BundleGrid })));
 
@@ -34,18 +35,37 @@ const BundleViewToggle = memo(function BundleViewToggle({ view, onChange }: { vi
 	);
 });
 
+const contentMap: Record<string, string> = {
+	blocks: "block",
+	units: "unit",
+	sectors: "sector",
+	items: "item",
+	liquids: "liquid",
+	status: "status",
+};
+
 export const BundleContent = memo(function BundleContent({ path }: { path: string }) {
 	const { t } = useTranslation();
 	const [view, setView] = useState<BundleView>("grid");
 	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
+	const modName = useProjectContext().metadata.name;
 
 	const contentKeys = useMemo(() => {
 		const allEntries = treeSnapshot.getEntries();
 		return allEntries
 			.filter((e) => e.kind === "file" && e.path.startsWith("content/") && (e.path.endsWith(".json") || e.path.endsWith(".hjson")))
-			.map((e) => (e.path.split("/").pop() ?? "").replace(/\.(json|hjson)$/, ""))
-			.filter(Boolean);
-	}, [treeSnapshot]);
+			.flatMap((e) => {
+				const parts = e.path.split("/");
+				const name = (e.path.split("/").pop() ?? "").replace(/\.(json|hjson)$/, "");
+				const type = contentMap[parts[1] || ""];
+
+				if (!type || !name) {
+					return [];
+				}
+
+				return [`${type}.${modName}-${name}.name`, `${type}.${modName}-${name}.description`];
+			});
+	}, [treeSnapshot, modName]);
 
 	const handleViewChange = useCallback((v: BundleView) => setView(v), []);
 

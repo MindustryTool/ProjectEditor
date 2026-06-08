@@ -125,7 +125,7 @@ export const BundleGrid = memo(function BundleGrid({ path, contentKeys, toggle }
 						<div className="col-span-full text-center text-muted-foreground/50">{t("bundle-editor.no-matching-entries")}</div>
 					</div>
 				) : (
-					<div style={{ height: `${virtualizer.getTotalSize()}px`, position: "relative" }}>
+					<div className="divide-y" style={{ height: `${virtualizer.getTotalSize()}px`, position: "relative" }}>
 						{virtualizer.getVirtualItems().map((virtualItem) => {
 							const row = filteredRows[virtualItem.index]!;
 							return (

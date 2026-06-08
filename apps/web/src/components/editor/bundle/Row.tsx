@@ -15,21 +15,21 @@ export const Row = memo(function Row({ row, comparisonRow, onValueChange, onComp
 	if (row.isInvalid) {
 		return (
 			<div className={`grid ${gridCols} h-10 max-h-10 min-h-10 border-b border-border/20`}>
-				<div className="col-span-full py-1 px-1 text-red-400/70 font-mono text-xs">{row.value}</div>
+				<div className="col-span-full flex items-center py-1 px-1 text-red-400/70 font-mono text-xs text-ellipsis w-full text-nowrap overflow-hidden">{row.value}</div>
 			</div>
 		);
 	}
 
 	return (
 		<div
-			className={`grid ${gridCols} h-10 max-h-10 min-h-10 border-b border-border/20 transition-colors ${isMissing ? "bg-yellow-300/6" : "hover:bg-muted/30"}`}
+			className={`grid ${gridCols} divide-x items-center h-10 max-h-10 min-h-10 border-b border-border/20 transition-colors ${isMissing ? "bg-yellow-300/6" : "hover:bg-muted/30"}`}
 		>
-			<div className="py-1 px-1 font-mono text-xs text-foreground/80 truncate">{row.key}</div>
-			<div className="py-1 px-1">
+			<div className="h-full flex items-center px-1.5 font-mono text-xs text-foreground/80 w-full text-ellipsis">{row.key}</div>
+			<div className="h-full flex items-center px-1.5">
 				<RowInput value={row.value} onChange={(v) => onValueChange(row.key, v)} />
 			</div>
 			{comparisonRow !== null && (
-				<div className="py-1 px-1">
+				<div className="h-full flex items-center px-1.5">
 					<RowInput value={comparisonRow.value} onChange={(v) => onComparisonValueChange(comparisonRow.key, v)} />
 				</div>
 			)}
