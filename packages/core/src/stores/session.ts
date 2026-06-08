@@ -249,6 +249,7 @@ export const useProjectSession = create<ProjectSession>()(
 			name: "project-session",
 			partialize: (state) => ({
 				recentlyOpenedFiles: state.recentlyOpenedFiles,
+                selectedPath: state.selectedPath,
 			}),
 		},
 	),

@@ -16,12 +16,16 @@ The system SHALL render the SplitView center panel based on the currently select
 - **THEN** the center panel SHALL not render any content
 
 ### Requirement: Dynamic right panel content
-The system SHALL render the SplitView right (properties) panel based on the currently selected file path.
+The system SHALL render the SplitView right (properties) panel based on the currently selected file path. When the path matches a bundle file pattern, the BundleEditorPanel SHALL be rendered instead of a placeholder or generic editor.
 
 #### Scenario: No path selected
 - **WHEN** the `?path=` parameter is absent, empty, or null
 - **THEN** the right panel SHALL not render any content
 
-#### Scenario: Path selected
-- **WHEN** a valid `?path=` value is present
-- **THEN** the right panel SHALL render content (placeholder for now)
+#### Scenario: Path selected (non-bundle)
+- **WHEN** a valid `?path=` value is present and does not match a bundle file pattern
+- **THEN** the right panel SHALL render content as before (unchanged behavior)
+
+#### Scenario: Bundle file selected
+- **WHEN** the `?path=` value matches `bundles/bundle.properties` or `bundles/bundle_<locale>.properties`
+- **THEN** the right panel SHALL render the BundleEditorPanel component

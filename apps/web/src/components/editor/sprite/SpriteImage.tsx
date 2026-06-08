@@ -3,7 +3,7 @@ import { useFile } from "@project/core";
 import type Konva from "konva";
 import { useCallback, useEffect, useState } from "react";
 import { Image as KonvaImage } from "react-konva";
-import { applyOutline } from "#/components/editor/center/sprite-utils";
+import { applyOutline } from "#/components/editor/sprite/sprite-utils";
 
 export function SpriteImage({
 	x,

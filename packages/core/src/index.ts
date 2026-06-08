@@ -159,6 +159,11 @@ export type {
 	ValidationWorkerApi,
 } from "./validation/worker";
 
+// === Bundle utilities ===
+
+export { parseBundle, writeBundle, SUPPORTED_LOCALES, getLocaleFromFilename, isBundleFilename } from "./bundle/index.js";
+export type { BundleEntry, BundleEntryType, BundleFile } from "./bundle/types.js";
+
 // === ProjectFileSystem (moved from @project/fs) ===
 
 export { ProjectFileSystem, createProjectFileSystem, deleteProjectFiles } from "./project-file-system.js";

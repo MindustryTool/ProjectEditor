@@ -1,5 +1,5 @@
-import { useContainerDimensions } from "#/components/editor/center/use-container-dimensions";
-import { useCanvasInteraction } from "#/components/editor/center/use-canvas-interaction";
+import { useContainerDimensions } from "#/components/editor/sprite/use-container-dimensions";
+import { useCanvasInteraction } from "#/components/editor/sprite/use-canvas-interaction";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { Spinner } from "#/components/ui/spinner";
 import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
@@ -9,7 +9,7 @@ import { collectSpriteData, type AnySchema, type SchemaFn, type SpriteData } fro
 import { resolveContentSprite } from "@project/utils";
 import { useCallback, useMemo, useState } from "react";
 import { Layer, Stage } from "react-konva";
-import { updateSpritePosition } from "#/components/editor/center/sprite-utils";
+import { updateSpritePosition } from "#/components/editor/sprite/sprite-utils";
 import { SpriteImage } from "./SpriteImage";
 
 export function SpriteEditor({ path, schema }: { path: string; schema: AnySchema | SchemaFn }) {
