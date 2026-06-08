@@ -53,11 +53,16 @@ export const BundleToolbar = memo(function BundleToolbar({
 			</div>
 			{availableComparisonFiles.length > 0 && (
 				<div className="ml-auto">
-					<Select value={comparisonPath ?? ""} onValueChange={(v) => onComparisonPathChange(v || null)}>
+					<Select value={comparisonPath ?? ""} onValueChange={(v) => onComparisonPathChange(v === "None" ? null : v)}>
 						<SelectTrigger size="sm">
 							<SelectValue className="text-xs" placeholder={t("bundle-editor.compare-with")} />
 						</SelectTrigger>
 						<SelectContent>
+							{comparisonPath && (
+								<SelectItem key={"None"} value={"None"}>
+									None
+								</SelectItem>
+							)}
 							{availableComparisonFiles.map((f) => (
 								<SelectItem key={f.path} value={f.path}>
 									{f.localeName}
