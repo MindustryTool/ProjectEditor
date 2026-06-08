@@ -16,7 +16,7 @@ export function useComparison(path: string, rows: BundleRow[]) {
 			.filter((e) => e.kind === "file" && e.path.startsWith("bundles/") && isBundleFilename(e.name) && e.path !== path)
 			.map((e) => ({
 				path: e.path,
-				localeName: SUPPORTED_LOCALES[getLocaleFromFilename(e.name) ?? ""] ?? e.name,
+				localeName: SUPPORTED_LOCALES[getLocaleFromFilename(e.name) ?? "en"] ?? e.name,
 			}));
 	}, [treeSnapshot, path]);
 

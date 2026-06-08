@@ -1,1 +1,18 @@
-export const vi = {} as const satisfies Record<string, string>;
+export const vi = {
+	"editor.mod-hjson.name": "Tên",
+	"editor.mod-hjson.name-description": "Định danh nội bộ của mod (vd: 'example-mod')",
+	"editor.mod-hjson.display-name": "Tên hiển thị",
+	"editor.mod-hjson.display-name-description": "Tên hiển thị cho người chơi",
+	"editor.mod-hjson.author": "Tác giả",
+	"editor.mod-hjson.author-description": "Tên tác giả của mod",
+	"editor.mod-hjson.description": "Mô tả",
+	"editor.mod-hjson.description-description": "Mô tả ngắn về chức năng của mod",
+	"editor.mod-hjson.version": "Phiên bản",
+	"editor.mod-hjson.version-description": "Phiên bản ngữ nghĩa (vd: '1.0.0')",
+	"editor.mod-hjson.min-game-version": "Phiên bản game tối thiểu",
+	"editor.mod-hjson.min-game-version-description": "Phiên bản Mindustry tối thiểu yêu cầu",
+	"editor.mod-hjson.hidden": "Ẩn",
+	"editor.mod-hjson.hidden-description": "Ẩn mod này khỏi danh sách mod trực tuyến",
+	"editor.mod-hjson.dependencies": "Phụ thuộc",
+	"editor.mod-hjson.dependencies-description": "Các mod khác mà mod này phụ thuộc",
+} as const satisfies Record<string, string>;
