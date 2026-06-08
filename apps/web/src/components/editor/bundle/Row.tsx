@@ -10,7 +10,7 @@ interface RowProps {
 
 export const Row = memo(function Row({ row, comparisonRow, onValueChange, onComparisonValueChange }: RowProps) {
 	const isInvalid = row.state === "invalid";
-	const gridCols = comparisonRow !== null ? "grid-cols-[35%_1fr_1fr_auto]" : "grid-cols-[35%_1fr_auto]";
+	const gridCols = comparisonRow !== null ? "grid-cols-[35%_1fr_1fr_40px]" : "grid-cols-[35%_1fr_40px]";
 
 	const handleOnChange = useCallback((v: string) => onValueChange(row.key, v), [row.key, onValueChange]);
 
@@ -27,13 +27,13 @@ export const Row = memo(function Row({ row, comparisonRow, onValueChange, onComp
 	const rowBg = row.state === "missing" ? "bg-yellow-300/6" : row.state === "extra" ? "bg-blue-300/6" : "hover:bg-muted/30";
 
 	return (
-		<div className={`grid ${gridCols} divide-x items-center h-10 max-h-10 min-h-10 border-b border-border/20 transition-colors ${rowBg}`}>
+		<div className={`grid ${gridCols} items-center h-10 max-h-10 min-h-10 border-b border-border/20 transition-colors ${rowBg}`}>
 			<div className="h-full flex items-center px-1.5 font-mono text-xs text-foreground/80 w-full text-ellipsis">{row.key}</div>
-			<div className="h-full flex items-center px-1.5">
+			<div className="h-full flex items-center px-1.5 border-l">
 				<RowInput value={row.value} onChange={handleOnChange} />
 			</div>
 			{comparisonRow !== null && (
-				<div className="h-full flex items-center px-1.5">
+				<div className="h-full flex items-center px-1.5 border-l">
 					<ComparationRowInput value={comparisonRow} onChange={onComparisonValueChange} />
 				</div>
 			)}
