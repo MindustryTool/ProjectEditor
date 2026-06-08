@@ -65,7 +65,6 @@ export function ValidationProvider() {
 		const unsub = useValidationStore.persist.onFinishHydration((state) => {
 			for (const path of Object.keys(state.results.resultsByPath)) {
 				validationService.scheduleValidation(projectId, path);
-				console.log(path);
 			}
 		});
 

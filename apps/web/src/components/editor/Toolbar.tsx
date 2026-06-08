@@ -1,7 +1,12 @@
 import { AppSettingsDialog } from "#/components/editor/AppSettingsDialog";
+import { Badge } from "#/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "#/components/ui/dropdown-menu";
-import { CircleQuestionMark, Send } from "lucide-react";
+import { CircleQuestionMark, Send, Wrench } from "lucide-react";
+import { VisuallyHidden } from "radix-ui";
 import type { ReactNode } from "react";
+import { useMemo } from "react";
+import { useFileStore } from "@project/core";
 import { cn } from "~/lib/utils";
 
 interface ToolbarProps {
@@ -23,21 +28,130 @@ export function Toolbar({ children, className }: ToolbarProps) {
 
 function HelpMenu() {
 	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger>
-				<CircleQuestionMark className="size-4" />
-			</DropdownMenuTrigger>
-			<DropdownMenuContent align="start" className="w-44">
-				<DropdownMenuItem>
-					<Send />
-					<a href="https://your-choice-seven.vercel.app/projects/cmm8tccmc0001vlucyj8bn6s1">Feedback</a>
-				</DropdownMenuItem>
-				<DropdownMenuItem>
-					<DiscordIcon className="text-[#5865F2] hover:text-[#5865F2] focus:text-[#5865F2]" />
-					<a href="https://mindustry-tool.com/links/mindustry-tool">Discord</a>
-				</DropdownMenuItem>
-			</DropdownMenuContent>
-		</DropdownMenu>
+		<Dialog>
+			<DropdownMenu>
+				<DropdownMenuTrigger>
+					<CircleQuestionMark className="size-4" />
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align="start" className="w-44">
+					<DropdownMenuItem>
+						<DiscordIcon className="text-[#5865F2] hover:text-[#5865F2] focus:text-[#5865F2]" />
+						<a href="https://mindustry-tool.com/links/mindustry-tool">Discord</a>
+					</DropdownMenuItem>
+					<DropdownMenuItem>
+						<Send />
+						<a href="https://your-choice-seven.vercel.app/projects/cmm8tccmc0001vlucyj8bn6s1">Feedback</a>
+					</DropdownMenuItem>
+					<DialogTrigger asChild>
+						<DropdownMenuItem>
+							<Wrench />
+							<span>Debug</span>
+						</DropdownMenuItem>
+					</DialogTrigger>
+				</DropdownMenuContent>
+			</DropdownMenu>
+			<DialogContent className="max-w-[90vw] sm:max-w-[90vw] w-fit">
+				<DialogTitle>Debug</DialogTitle>
+				<VisuallyHidden.Root>
+					<DialogDescription />
+				</VisuallyHidden.Root>
+				<DebugDialogContent />
+			</DialogContent>
+		</Dialog>
+	);
+}
+
+function formatBytes(bytes: number): string {
+	if (bytes === 0) return "0 B";
+	const units = ["B", "KB", "MB", "GB"];
+	const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+	const value = bytes / Math.pow(1024, i);
+	return `${value.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+interface FileInfo {
+	key: string;
+	projectId: string;
+	path: string;
+	size: number;
+	isDirty: boolean;
+	hasError: boolean;
+	loading: boolean;
+	savedAt: number | null;
+}
+
+function DebugDialogContent() {
+	const fileContents = useFileStore((s) => s.fileContents);
+
+	const files = useMemo<FileInfo[]>(() => {
+		const result: FileInfo[] = [];
+		for (const [key, entry] of Object.entries(fileContents)) {
+			const sep = key.indexOf("::");
+			const projectId = sep !== -1 ? key.slice(0, sep) : "";
+			const filePath = sep !== -1 ? key.slice(sep + 2) : key;
+			result.push({
+				key,
+				projectId,
+				path: filePath,
+				size: entry.data?.byteLength ?? 0,
+				isDirty: entry.currentVersion !== entry.savedVersion,
+				hasError: entry.error !== null,
+				loading: entry.loading,
+				savedAt: entry.savedAt,
+			});
+		}
+		result.sort((a, b) => b.size - a.size);
+		return result;
+	}, [fileContents]);
+
+	return (
+		<div className="text-xs font-mono w-fit flex flex-col max-h-[80dvh] overflow-y-auto">
+			<div className="flex items-center gap-2 px-1 py-1.5 text-muted-foreground border-b sticky top-0 bg-background">
+				<span className="w-52 shrink-0">Path</span>
+				<span className="w-16 shrink-0 text-right">Size</span>
+				<span className="w-14 shrink-0 text-center">State</span>
+				<span className="w-20 shrink-0 text-right">Saved At</span>
+			</div>
+			{files.length === 0 && <div className="px-1 py-4 text-center text-muted-foreground">No files loaded</div>}
+			<div  className="flex items-center gap-2 px-1 py-1 hover:bg-muted/50 border-b border-border/30">
+				<span className="w-52 shrink-0 truncate" >
+					Total
+				</span>
+				<span className="w-16 shrink-0 text-right tabular-nums">{formatBytes(files.reduce((a, b) => a + b.size, 0))}</span>
+				<span className="w-14 shrink-0 flex justify-center gap-1">
+				</span>
+				<span className="w-20 shrink-0 text-right tabular-nums text-muted-foreground">
+				</span>
+			</div>
+			{files.map((f) => (
+				<div key={f.key} className="flex items-center gap-2 px-1 py-1 hover:bg-muted/50 border-b border-border/30">
+					<span className="w-52 shrink-0 truncate" title={f.path}>
+						{f.path}
+					</span>
+					<span className="w-16 shrink-0 text-right tabular-nums">{formatBytes(f.size)}</span>
+					<span className="w-14 shrink-0 flex justify-center gap-1">
+						{f.loading && (
+							<Badge variant="outline" className="h-4 px-1 text-[10px]">
+								...
+							</Badge>
+						)}
+						{f.isDirty && (
+							<Badge variant="default" className="h-4 px-1 text-[10px]">
+								M
+							</Badge>
+						)}
+						{f.hasError && (
+							<Badge variant="destructive" className="h-4 px-1 text-[10px]">
+								E
+							</Badge>
+						)}
+					</span>
+					<span className="w-20 shrink-0 text-right tabular-nums text-muted-foreground">
+						{f.savedAt ? new Date(f.savedAt).toLocaleTimeString() : "—"}
+					</span>
+				</div>
+			))}
+		</div>
 	);
 }
 

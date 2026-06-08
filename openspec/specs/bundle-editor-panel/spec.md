@@ -51,9 +51,23 @@ The system SHALL display a scrollable grid of all i18n keys with their values fr
 - **THEN** each row SHALL have an editable value input
 
 #### Scenario: Missing key display
-- **WHEN** an i18n key is discovered from content files but is not present in the bundle file
-- **THEN** it SHALL be displayed with a yellow background indicator
+- **WHEN** an i18n key from content files is absent in the bundle file
+- **THEN** the row SHALL have state `"missing"` with a yellow background indicator
 - **THEN** its value input SHALL be enabled (editable)
+
+#### Scenario: Extra key display
+- **WHEN** a key is present in the bundle file but not in content files
+- **THEN** the row SHALL have state `"extra"` with distinct visual styling
+- **THEN** its value input SHALL be enabled (editable)
+
+#### Scenario: Untranslated key display
+- **WHEN** a key exists in the bundle file with an empty value
+- **THEN** the row SHALL have state `"untranslated"`
+- **THEN** its value input SHALL show a blank field and be enabled
+
+#### Scenario: State column
+- **WHEN** the grid renders
+- **THEN** a delete button SHALL appear in the last column for all non-invalid rows
 
 ### Requirement: Side-by-side comparison
 The system SHALL allow selecting a second locale file from the `bundles/` directory for side-by-side comparison, with the dropdown on the same toolbar row as search and state filters.
@@ -75,7 +89,7 @@ The system SHALL discover i18n keys from content folder files via a configurable
 - **THEN** that file SHALL be excluded from the key list
 
 ### Requirement: Row filtering
-The system SHALL support filtering the displayed key-value rows using a unified search input.
+The system SHALL support filtering the displayed key-value rows using a unified search input and state-based filter tabs.
 
 #### Scenario: Filter by key or value
 - **WHEN** user types in the search input
@@ -83,15 +97,23 @@ The system SHALL support filtering the displayed key-value rows using a unified 
 
 #### Scenario: Filter by translated state
 - **WHEN** user selects "translated" filter
-- **THEN** only rows where the key exists in the bundle (has a value) SHALL be shown
+- **THEN** only rows with state `"translated"` SHALL be shown
 
 #### Scenario: Filter by untranslated state
 - **WHEN** user selects "untranslated" filter
-- **THEN** only rows where the key is missing from the bundle SHALL be shown
+- **THEN** only rows with state `"untranslated"` SHALL be shown
+
+#### Scenario: Filter by extra state
+- **WHEN** user selects "extra" filter
+- **THEN** only rows with state `"extra"` SHALL be shown
+
+#### Scenario: Filter by missing state
+- **WHEN** user selects "missing" filter
+- **THEN** only rows with state `"missing"` SHALL be shown
 
 #### Scenario: Filter by invalid state
 - **WHEN** user selects "invalid" filter
-- **THEN** only rows with invalid parse lines SHALL be shown
+- **THEN** only rows with state `"invalid"` SHALL be shown
 
 #### Scenario: Show all
 - **WHEN** user selects "all" filter
