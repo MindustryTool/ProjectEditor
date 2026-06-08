@@ -5,6 +5,14 @@
         "**/*.tsx",
         "src/services/validation-service.ts"
     ],
+    "exclude": [
+        "dist",
+        ".vite",
+        ".turbo",
+        ".next",
+        "coverage",
+        "node_modules"
+    ],
     "compilerOptions": {
         "target": "ES2022",
         "jsx": "react-jsx",

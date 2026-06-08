@@ -32,7 +32,7 @@ export function parseRows(data: string | null, contentKeys: string[]): BundleRow
 export function getCounts(rows: BundleRow[]): Record<StateFilter, number> {
 	return {
 		all: rows.length,
-		translated: rows.filter((r) => r.existsInBundle && !r.isInvalid).length,
+		translated: rows.filter((r) => r.existsInBundle && !r.isInvalid && r.value !== "").length,
 		untranslated: rows.filter((r) => !r.existsInBundle || r.value === "").length,
 		invalid: rows.filter((r) => r.isInvalid).length,
 	};

@@ -1,10 +1,11 @@
 import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
+import { FLAG_MAP, getLocaleFromFilename } from "@project/core";
 import { resolveContentSprite } from "@project/utils";
 import { File } from "lucide-react";
 
 export function FileIcon({ path }: { path: string }) {
 	if (path.endsWith(".png")) {
-		return <ImageFilePreview path={path} className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4" />;
+		return <ImageFilePreview path={path} className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4 flex items-center justify-center" />;
 	}
 
 	if (path.endsWith(".mp3")) {
@@ -55,18 +56,19 @@ export function FileIcon({ path }: { path: string }) {
 			</svg>
 		);
 	}
+	const filename = path.split("/").pop() || "";
+
+	const locale = getLocaleFromFilename(filename);
+
+	if (locale) {
+		return <span className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4 flex items-center justify-center">{FLAG_MAP[locale]}</span>;
+	}
 
 	const assetPath = resolveContentSprite(path);
 
 	if (assetPath) {
-		return (
-			<ImageFilePreview
-				path={assetPath}
-				className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4"
-				fallback={<File />}
-			/>
-		);
+		return <ImageFilePreview path={assetPath} className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4 flex items-center justify-center" fallback={<File />} />;
 	}
 
-	return <File className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4" />;
+	return <File className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4 flex items-center justify-center" />;
 }

@@ -1,4 +1,4 @@
-export const SUPPORTED_LOCALES: Record<string, string> = {
+export const SUPPORTED_LOCALES = {
 	ca: "Català",
 	id_ID: "Bahasa Indonesia",
 	da: "Dansk",
@@ -34,16 +34,58 @@ export const SUPPORTED_LOCALES: Record<string, string> = {
 	zh_TW: "正體中文",
 	ja: "日本語",
 	ko: "한국어",
+} as const;
+
+type SupportedLocale = keyof typeof SUPPORTED_LOCALES;
+
+export const FLAG_MAP: Record<SupportedLocale, string> = {
+	ca: "🇪🇸", // Catalonia (no official emoji, usually Spain)
+	id_ID: "🇮🇩",
+	da: "🇩🇰",
+	de: "🇩🇪",
+	et: "🇪🇪",
+	en: "🇺🇸", // or 🇬🇧 depending on your preference
+	es: "🇪🇸",
+	eu: "🇪🇸", // Basque Country (no official emoji)
+	fil: "🇵🇭",
+	fr: "🇫🇷",
+	it: "🇮🇹",
+	lt: "🇱🇹",
+	hu: "🇭🇺",
+	nl: "🇳🇱",
+	nl_BE: "🇧🇪",
+	pl: "🇵🇱",
+	pt_BR: "🇧🇷",
+	pt_PT: "🇵🇹",
+	ro: "🇷🇴",
+	fi: "🇫🇮",
+	sv: "🇸🇪",
+	vi: "🇻🇳",
+	tk: "🇹🇲",
+	tr: "🇹🇷",
+	cs: "🇨🇿",
+	be: "🇧🇾",
+	bg: "🇧🇬",
+	ru: "🇷🇺",
+	sr: "🇷🇸",
+	uk_UA: "🇺🇦",
+	th: "🇹🇭",
+	zh_CN: "🇨🇳",
+	zh_TW: "🇹🇼",
+	ja: "🇯🇵",
+	ko: "🇰🇷",
 };
 
 const BUNDLE_PATTERN = /^bundle(?:_([a-zA-Z_]+))?\.properties$/;
 
-export function getLocaleFromFilename(filename: string): string | null {
+export function getLocaleFromFilename(filename: string): SupportedLocale | null {
 	const match = BUNDLE_PATTERN.exec(filename);
 	if (!match) return null;
-	const code = match[1];
+	const code = match[1] as SupportedLocale;
 	if (!code) return "en";
-	if (code in SUPPORTED_LOCALES) return code;
+	if (code in SUPPORTED_LOCALES) {
+		return code;
+	}
 	return null;
 }
 

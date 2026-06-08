@@ -150,8 +150,6 @@ const iconIndex: Record<string, typeof Package> = {
 };
 
 function HomePage() {
-	const { t } = useTranslation();
-
 	return (
 		<div className="flex flex-1 flex-col">
 			<SiteNav />
@@ -203,8 +201,6 @@ function SiteNav() {
 }
 
 function Hero() {
-	const { t } = useTranslation();
-
 	return (
 		<section className="relative overflow-hidden px-4">
 			<div className="pointer-events-none absolute inset-0 select-none">

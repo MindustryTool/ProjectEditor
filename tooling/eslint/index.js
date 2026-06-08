@@ -1,7 +1,6 @@
 import tseslint from "typescript-eslint";
 import reactPlugin from "eslint-plugin-react";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
-import importPlugin from "eslint-plugin-import";
 
 export default tseslint.config(
 	{ ignores: ["**/dist/**", "**/.next/**", "**/node_modules/**"] },
@@ -9,7 +8,6 @@ export default tseslint.config(
 		extends: [...tseslint.configs.recommended],
 		plugins: {
 			react: reactPlugin,
-			import: importPlugin,
 			"react-hooks": reactHooksPlugin,
 		},
 		rules: {
@@ -19,8 +17,6 @@ export default tseslint.config(
 			"@typescript-eslint/no-explicit-any": "warn",
 			"@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
 			"@typescript-eslint/consistent-type-imports": "error",
-			"import/no-relative-parent-imports": "error",
-			"import/no-useless-path-segments": "error",
 			"no-restricted-imports": [
 				"error",
 				{

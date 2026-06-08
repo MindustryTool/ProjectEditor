@@ -16,10 +16,11 @@
     "format:fix": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\""
   },
   "devDependencies": {
+    "@tooling/eslint": "workspace:*",
+    "@typescript/native-preview": "7.0.0-dev.20260607.1",
+    "eslint": "catalog:",
     "prettier": "catalog:",
     "turbo": "catalog:",
-    "typescript": "^5.7.0",
-    "eslint": "catalog:",
-    "@tooling/eslint": "workspace:*"
+    "typescript": "^5.7.0"
   }
 }

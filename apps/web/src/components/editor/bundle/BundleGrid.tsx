@@ -55,7 +55,7 @@ export const BundleGrid = memo(function BundleGrid({ path, contentKeys, toggle }
 
 		switch (stateFilter) {
 			case "translated":
-				return result.filter((r) => r.existsInBundle && !r.isInvalid);
+				return result.filter((r) => r.existsInBundle && !r.isInvalid && r.value !== "");
 			case "untranslated":
 				return result.filter((r) => !r.existsInBundle || r.value === "");
 			case "invalid":
@@ -89,7 +89,6 @@ export const BundleGrid = memo(function BundleGrid({ path, contentKeys, toggle }
 			<div className="flex items-center justify-between shrink-0">
 				<div className="flex items-center gap-2 text-sm">
 					{fileName !== null && <span className="font-semibold text-foreground">{fileName}</span>}
-					{localeCode !== null && <span className="tracking-wide text-muted-foreground/70 uppercase">{localeName}</span>}
 				</div>
 				{toggle}
 			</div>
