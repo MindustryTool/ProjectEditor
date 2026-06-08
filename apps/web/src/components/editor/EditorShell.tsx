@@ -292,9 +292,9 @@ function EditorMobileLayout() {
 				<LocalizationMenu />
 			</Toolbar>
 			<Tabs defaultValue="center" className="flex min-h-0 flex-1 overflow-hidden w-full">
-				<TabsContent value="center" className="flex flex-1 overflow-hidden bg-background w-full">
+				<TabsContent value="center" className="flex flex-1 overflow-hidden bg-background w-full p-1">
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
-						<div className="flex flex-col flex-1 overflow-hidden bg-background w-full">
+						<div className="flex flex-col flex-1 overflow-hidden bg-background w-full gap-1">
 							<ErrorBoundary>
 								<RecentlyOpenedFilesBar />
 								{path ? <EditorContent path={path} /> : <NoOpenedFileScreen />}
@@ -302,7 +302,7 @@ function EditorMobileLayout() {
 						</div>
 					</div>
 				</TabsContent>
-				<TabsContent value="right" className="flex flex-1 overflow-hidden bg-background w-full h-full">
+				<TabsContent value="right" className="flex flex-1 overflow-hidden bg-background w-full h-full p-1">
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
 						<div className="flex flex-1 overflow-hidden bg-background w-full">
 							<ErrorBoundary>
@@ -311,7 +311,7 @@ function EditorMobileLayout() {
 						</div>
 					</div>
 				</TabsContent>
-				<TabsList className="w-full justify-around rounded-none border-t bg-card shrink-0">
+				<TabsList className="w-full justify-around rounded-none border-t bg-card shrink-0 min-h-10 max-h-10">
 					<TabsTrigger value="center" className="flex-1">
 						{t("editor.editor")}
 					</TabsTrigger>
