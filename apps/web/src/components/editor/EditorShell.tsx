@@ -29,6 +29,7 @@ import { NoOpenedFileScreen } from "./NoOpenedFileScreen";
 import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 const ModHjsonPanel = lazy(() => import("./right/ModHjsonPanel").then((m) => ({ default: m.ModHjsonPanel })));
 const ItemPanel = lazy(() => import("./right/ItemPanel").then((m) => ({ default: m.ItemPanel })));
@@ -39,34 +40,108 @@ const UnitPanel = lazy(() => import("./right/UnitPanel").then((m) => ({ default:
 const BlockPanel = lazy(() => import("./right/BlockPanel").then((m) => ({ default: m.BlockPanel })));
 const UnitSpriteEditor = lazy(() => import("#/components/editor/sprite/UnitSpritEdior").then((mod) => ({ default: mod.UnitSpriteEditor })));
 
+type EditorRoute =
+  | { type: "empty" }
+  | { type: "bundle"; path: string }
+  | { type: "mod"; path: string }
+  | { type: "image"; path: string }
+  | { type: "sprite"; path: string; striped: string }
+  | { type: "text"; path: string };
+
+type PropertiesRoute =
+  | { type: "none" }
+  | { type: "mod"; path: string }
+  | { type: "item"; path: string }
+  | { type: "liquid"; path: string }
+  | { type: "sector"; path: string }
+  | { type: "status"; path: string }
+  | { type: "unit"; path: string }
+  | { type: "block"; path: string };
+
+function matchEditorRoute(path: string | null, entry: { kind: string } | undefined): EditorRoute {
+  if (path === null || entry === undefined) return { type: "empty" };
+
+  if (path.startsWith("bundles/") && isBundleFilename(path.split("/").pop() ?? "")) {
+    return { type: "bundle", path };
+  }
+
+  if (path === "mod.hjson" || (path.startsWith("content") && path.endsWith(".json"))) {
+    return { type: "mod", path };
+  }
+
+  if (path.endsWith(".png")) {
+    return { type: "image", path };
+  }
+
+  if (path.startsWith("sprite:")) {
+    return { type: "sprite", path, striped: path.replace("sprite:", "") };
+  }
+
+  if (entry.kind === "file") {
+    return { type: "text", path };
+  }
+
+  return { type: "empty" };
+}
+
+function matchPropertiesRoute(path: string | null): PropertiesRoute {
+  if (path === null) return { type: "none" };
+
+  if (path === "mod.hjson" || path === "mod.json") {
+    return { type: "mod", path };
+  }
+
+  if (path.startsWith("content/items") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
+    return { type: "item", path };
+  }
+
+  if (path.startsWith("content/liquids") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
+    return { type: "liquid", path };
+  }
+
+  if (path.startsWith("content/sectors") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
+    return { type: "sector", path };
+  }
+
+  if (path.startsWith("content/status") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
+    return { type: "status", path };
+  }
+
+  if (path.replace("sprite:", "").startsWith("content/units") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
+    return { type: "unit", path: path.replace("sprite:", "") };
+  }
+
+  if (path.startsWith("content/blocks") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
+    return { type: "block", path };
+  }
+
+  if (path.startsWith("content")) {
+    return { type: "none" };
+  }
+
+  return { type: "none" };
+}
+
 function EditorContent({ path }: { path: string }) {
 	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
 	const striped = path.replace("sprite:", "");
 	const entry = treeSnapshot.getEntry(striped);
+	const route = matchEditorRoute(path, entry);
 
-	if (entry === undefined) return null;
-
-	if (path.startsWith("bundles/") && isBundleFilename(path.split("/").pop() ?? "")) {
-		return <BundleContent path={path} />;
+	switch (route.type) {
+		case "empty":
+			return null;
+		case "bundle":
+			return <BundleContent path={route.path} />;
+		case "mod":
+			return <TextEditor path={route.path} />;
+		case "image":
+			return <ImageWithSize path={route.path} />;
+		case "sprite":
+			return <UnitSpriteEditor striped={route.striped} />;
+		case "text":
+			return <TextEditor path={route.path} />;
 	}
-
-	if (path === "mod.hjson" || (path.startsWith("content") && path.endsWith(".json"))) {
-		return <TextEditor path={path} />;
-	}
-
-	if (path.endsWith(".png")) {
-		return <ImageWithSize path={path} />;
-	}
-
-	if (path.startsWith("sprite:")) {
-		return <UnitSpriteEditor striped={striped} />;
-	}
-
-	if (entry.kind === "file") {
-		return <TextEditor path={path} />;
-	}
-
-	return null;
 }
 
 const EditorLeftPanel = memo(function EditorLeftPanel() {
@@ -84,67 +159,54 @@ const panelFallback = (
 );
 
 function EditorProperties({ path }: { path: string }) {
-	if (path === "mod.hjson" || path === "mod.json") {
-		return (
-			<Suspense fallback={panelFallback}>
-				<ModHjsonPanel path={path} />
-			</Suspense>
-		);
-	}
+	const route = matchPropertiesRoute(path);
 
-	if (path.startsWith("content/items") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
-		return (
-			<Suspense fallback={panelFallback}>
-				<ItemPanel path={path} />
-			</Suspense>
-		);
+	switch (route.type) {
+		case "none":
+			return null;
+		case "mod":
+			return (
+				<Suspense fallback={panelFallback}>
+					<ModHjsonPanel path={route.path} />
+				</Suspense>
+			);
+		case "item":
+			return (
+				<Suspense fallback={panelFallback}>
+					<ItemPanel path={route.path} />
+				</Suspense>
+			);
+		case "liquid":
+			return (
+				<Suspense fallback={panelFallback}>
+					<LiquidPanel path={route.path} />
+				</Suspense>
+			);
+		case "sector":
+			return (
+				<Suspense fallback={panelFallback}>
+					<SectorPanel path={route.path} />
+				</Suspense>
+			);
+		case "status":
+			return (
+				<Suspense fallback={panelFallback}>
+					<StatusPanel path={route.path} />
+				</Suspense>
+			);
+		case "unit":
+			return (
+				<Suspense fallback={panelFallback}>
+					<UnitPanel path={route.path} />
+				</Suspense>
+			);
+		case "block":
+			return (
+				<Suspense fallback={panelFallback}>
+					<BlockPanel path={route.path} />
+				</Suspense>
+			);
 	}
-
-	if (path.startsWith("content/liquids") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
-		return (
-			<Suspense fallback={panelFallback}>
-				<LiquidPanel path={path} />
-			</Suspense>
-		);
-	}
-
-	if (path.startsWith("content/sectors") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
-		return (
-			<Suspense fallback={panelFallback}>
-				<SectorPanel path={path} />
-			</Suspense>
-		);
-	}
-
-	if (path.startsWith("content/status") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
-		return (
-			<Suspense fallback={panelFallback}>
-				<StatusPanel path={path} />
-			</Suspense>
-		);
-	}
-
-	if (path.replace("sprite:", "").startsWith("content/units") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
-		return (
-			<Suspense fallback={panelFallback}>
-				<UnitPanel path={path.replace("sprite:", "")} />
-			</Suspense>
-		);
-	}
-
-	if (path.startsWith("content/blocks") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
-		return (
-			<Suspense fallback={panelFallback}>
-				<BlockPanel path={path} />
-			</Suspense>
-		);
-	}
-
-	if (path.startsWith("content")) {
-		return null;
-	}
-
-	return null;
 }
 
 const EditorPanels = memo(function EditorPanels() {
@@ -245,6 +307,7 @@ function EditorDesktopLayout() {
 function EditorMobileLayout() {
 	const { t } = useTranslation();
 	const [sheetOpen, setSheetOpen] = useState(false);
+	const [path] = usePath();
 
 	return (
 		<Fragment>
@@ -268,13 +331,35 @@ function EditorMobileLayout() {
 				<ExportMenu />
 				<LocalizationMenu />
 			</Toolbar>
-			<div className="flex min-h-0 flex-1 overflow-hidden w-full">
-				<div className="flex flex-1 overflow-hidden bg-background w-full">
-					<ErrorBoundary>
-						<EditorPanels />
-					</ErrorBoundary>
-				</div>
-			</div>
+			<Tabs defaultValue="center" className="flex min-h-0 flex-1 overflow-hidden w-full">
+				<TabsContent value="center" className="flex flex-1 overflow-hidden bg-background w-full">
+					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
+						<div className="flex flex-col flex-1 overflow-hidden bg-background w-full">
+							<ErrorBoundary>
+								<RecentlyOpenedFilesBar />
+								{path ? <EditorContent path={path} /> : <NoOpenedFileScreen />}
+							</ErrorBoundary>
+						</div>
+					</div>
+				</TabsContent>
+				<TabsContent value="right" className="flex flex-1 overflow-hidden bg-background w-full h-full">
+					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
+						<div className="flex flex-1 overflow-hidden bg-background w-full">
+							<ErrorBoundary>
+								{path && <EditorProperties path={path} />}
+							</ErrorBoundary>
+						</div>
+					</div>
+				</TabsContent>
+				<TabsList className="w-full justify-around rounded-none border-t bg-card shrink-0">
+					<TabsTrigger value="center" className="flex-1">
+						{t("editor.editor")}
+					</TabsTrigger>
+					<TabsTrigger value="right" className="flex-1">
+						{t("editor.properties")}
+					</TabsTrigger>
+				</TabsList>
+			</Tabs>
 			<StatusBar left={<StatusBarLeft />} center={<StatusBarCenter />} right={<StatusBarRight />} />
 		</Fragment>
 	);

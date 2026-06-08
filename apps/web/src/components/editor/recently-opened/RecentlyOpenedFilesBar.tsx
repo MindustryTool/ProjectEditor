@@ -49,7 +49,7 @@ export function RecentlyOpenedFilesBar() {
 	if (recentFiles.length === 0) return null;
 
 	return (
-		<div className="flex items-center gap-px overflow-x-auto py-0.5">
+		<div className="flex items-center gap-1 overflow-x-auto py-0.5 min-h-10 max-h-10">
 			{recentFiles.map((entry) => (
 				<RecentFileTab
 					key={entry.path}

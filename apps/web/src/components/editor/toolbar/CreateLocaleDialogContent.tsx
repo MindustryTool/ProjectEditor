@@ -77,7 +77,7 @@ export function CreateLocaleDialogContent({ onClose }: CreateLocaleDialogContent
 						<SelectContent>
 							{availableLocales.map(([code, name]) => (
 								<SelectItem key={code} value={code}>
-									{FLAG_MAP[code]} {code} — {name}
+									{FLAG_MAP[code as keyof typeof FLAG_MAP]} {code} — {name}
 								</SelectItem>
 							))}
 						</SelectContent>
