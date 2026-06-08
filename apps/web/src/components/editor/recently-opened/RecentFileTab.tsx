@@ -1,3 +1,4 @@
+import { useProjectSession } from "@project/core";
 import { X } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { FileIcon } from "#/components/editor/FileIcon";
@@ -5,14 +6,14 @@ import type { RecentFileEntry } from "@project/core";
 
 interface RecentFileTabProps {
 	entry: RecentFileEntry;
-	isActive: boolean;
-	isMissing: boolean;
 	onClick: (filePath: string) => void;
 	onClose: (filePath: string) => void;
 }
 
-export function RecentFileTab({ entry, isActive, isMissing, onClick, onClose }: RecentFileTabProps) {
+export function RecentFileTab({ entry, onClick, onClose }: RecentFileTabProps) {
 	const name = entry.path.split("/").pop() ?? entry.path;
+	const isActive = useProjectSession((s) => s.selectedPath === entry.path);
+	const isMissing = useProjectSession((s) => !s.treeSnapshot.contains(entry.path));
 
 	return (
 		<button

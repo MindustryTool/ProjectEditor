@@ -1,9 +1,50 @@
-import { useRecentlyOpened } from "./useRecentlyOpened";
+import { useCallback } from "react";
+import { useProjectSession, useCurrentProject } from "@project/core";
+import { useRecentFiles } from "./useRecentFiles";
+import { useRecentFileRecorder } from "./useRecentFileRecorder";
 import { RecentFileTab } from "./RecentFileTab";
 import { Trash } from "lucide-react";
 
 export function RecentlyOpenedFilesBar() {
-	const { recentFiles, path, handleTabClick, handleClose, isFileMissing, handleClear } = useRecentlyOpened();
+	const recentFiles = useRecentFiles();
+	const projectId = useCurrentProject().project.id;
+
+	useRecentFileRecorder();
+
+	const handleTabClick = useCallback(
+		(filePath: string) => {
+			const state = useProjectSession.getState();
+			if (state.treeSnapshot.contains(filePath)) {
+				state.recordFileAccess(projectId, filePath);
+			}
+			state.setSelectedPath(filePath);
+		},
+		[projectId],
+	);
+
+	const handleClose = useCallback(
+		(filePath: string) => {
+			const state = useProjectSession.getState();
+			state.removeFromRecentFiles(projectId, filePath);
+			const currentPath = state.selectedPath;
+			if (filePath.trim() === currentPath?.trim()) {
+				const files = state.recentlyOpenedFiles[projectId] ?? [];
+				const first = files.filter((e) => e.path !== filePath)[0];
+				if (first) {
+					state.setSelectedPath(first.path);
+				} else {
+					state.setSelectedPath(null);
+				}
+			}
+		},
+		[projectId],
+	);
+
+	const handleClear = useCallback(() => {
+		const state = useProjectSession.getState();
+		state.clearRecentFiles(projectId);
+		state.setSelectedPath(null);
+	}, [projectId]);
 
 	if (recentFiles.length === 0) return null;
 
@@ -13,8 +54,6 @@ export function RecentlyOpenedFilesBar() {
 				<RecentFileTab
 					key={entry.path}
 					entry={entry}
-					isActive={entry.path === path}
-					isMissing={isFileMissing(entry.path)}
 					onClick={handleTabClick}
 					onClose={handleClose}
 				/>
