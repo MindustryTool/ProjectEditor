@@ -292,7 +292,7 @@ function EditorMobileLayout() {
 				<ExportMenu />
 				<LocalizationMenu />
 			</Toolbar>
-			<Tabs defaultValue="center" className="flex min-h-0 flex-1 overflow-hidden w-full">
+			<Tabs defaultValue="right" className="flex min-h-0 flex-1 overflow-hidden w-full">
 				<TabsContent value="center" className="flex flex-1 overflow-hidden bg-background w-full p-1">
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
 						<div className="flex flex-col flex-1 overflow-hidden bg-background w-full gap-1">
@@ -309,19 +309,19 @@ function EditorMobileLayout() {
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
 						<div className="flex flex-1 overflow-hidden bg-background w-full">
 							<ErrorBoundary>
-                                <Suspense>
+								<Suspense>
 									<PropertiesPanel route={propertiesRoute} />
-                                </Suspense>
+								</Suspense>
 							</ErrorBoundary>
 						</div>
 					</div>
 				</TabsContent>
 				<TabsList className="w-full justify-around rounded-none border-t bg-card shrink-0 min-h-10 max-h-10">
-					<TabsTrigger value="center" className="flex-1">
-						{t("editor.editor")}
-					</TabsTrigger>
 					<TabsTrigger value="right" className="flex-1">
 						{t("editor.properties")}
+					</TabsTrigger>
+					<TabsTrigger value="center" className="flex-1">
+						{t("editor.editor")}
 					</TabsTrigger>
 				</TabsList>
 			</Tabs>

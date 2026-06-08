@@ -13,6 +13,7 @@ const cache: { content: string; node: HjsonNode; hit: number; time: number }[] =
 
 export const HJSON = {
 	parseWithCache(content: string) {
+        content = content || "{}";
 		let existing = undefined;
 
 		for (let i = cache.length - 1; i >= 0; i--) {
