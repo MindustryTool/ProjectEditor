@@ -80,6 +80,16 @@ function SpriteCanvas({ path, schema }: { path: string; schema: AnySchema | Sche
 		<ResizablePanelGroup orientation="horizontal" className="flex-1">
 			<ResizablePanel defaultSize="75%" minSize="50%">
 				<div ref={canvasRef} className="h-full relative">
+					{error && (
+						<div className="absolute top-1 left-1 text-red-400/70 font-mono text-xs text-ellipsis w-full text-nowrap overflow-hidden">
+							{error}
+						</div>
+					)}
+					{isLoading && (
+						<div className="flex w-full h-full items-center justify-center">
+							<Spinner />
+						</div>
+					)}
 					<CoordsDisplay x={posRef.current.x} y={posRef.current.y} />
 					<Stage
 						className="h-full w-full"
@@ -97,16 +107,6 @@ function SpriteCanvas({ path, schema }: { path: string; schema: AnySchema | Sche
 						y={posRef.current.y}
 					>
 						<Layer>
-							{error && (
-								<div className="absolute top-1 left-1 text-red-400/70 font-mono text-xs text-ellipsis w-full text-nowrap overflow-hidden">
-									{error}
-								</div>
-							)}
-							{isLoading && (
-								<div className="flex w-full h-full items-center justify-center">
-									<Spinner />
-								</div>
-							)}
 							{baseSprite && <SpriteImage path={baseSprite} x={0} y={0} mirror={false} />}
 							{sprites.map((sprite) => (
 								<SpriteImage
