@@ -3,7 +3,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 export const SchemaDescription = React.memo(function SchemaDescription({ metadata }: { metadata: SchemaMetadata | null }) {
-	const { t } = useTranslation();
+	const { t } = useTranslation("schema");
 
 	if (!metadata?.description) {
 		return null;
