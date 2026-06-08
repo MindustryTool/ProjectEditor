@@ -57,7 +57,7 @@ export const BundleGrid = memo(function BundleGrid({ path, contentKeys, toggle }
 			case "translated":
 				return result.filter((r) => r.existsInBundle && !r.isInvalid);
 			case "untranslated":
-				return result.filter((r) => !r.existsInBundle);
+				return result.filter((r) => !r.existsInBundle || r.value === "");
 			case "invalid":
 				return result.filter((r) => r.isInvalid);
 			default:

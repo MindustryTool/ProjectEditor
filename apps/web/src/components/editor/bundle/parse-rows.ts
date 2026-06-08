@@ -33,7 +33,7 @@ export function getCounts(rows: BundleRow[]): Record<StateFilter, number> {
 	return {
 		all: rows.length,
 		translated: rows.filter((r) => r.existsInBundle && !r.isInvalid).length,
-		untranslated: rows.filter((r) => !r.existsInBundle).length,
+		untranslated: rows.filter((r) => !r.existsInBundle || r.value === "").length,
 		invalid: rows.filter((r) => r.isInvalid).length,
 	};
 }
