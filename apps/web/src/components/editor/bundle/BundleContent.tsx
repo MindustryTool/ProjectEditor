@@ -63,7 +63,7 @@ export const BundleContent = memo(function BundleContent({ path }: { path: strin
 					return [];
 				}
 
-				return [`${type}.${modName}-${name}.name`, `${type}.${modName}-${name}.description`];
+				return [`${type}.${modName}-${name}.name`, `${type}.${modName}-${name}.description`, `${type}.${modName}-${name}.details`];
 			});
 	}, [treeSnapshot, modName]);
 
