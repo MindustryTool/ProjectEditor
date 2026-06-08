@@ -122,6 +122,7 @@ export type * from "@project/types";
 export type { ProjectContext, RecentFileEntry } from "./stores/session";
 export { useAppStore } from "./stores/project";
 export { useProjectSession, useCurrentProject, TreeSnapshot } from "./stores/session";
+export { useExpandedStore, selectIsExpanded } from "./stores/expanded";
 
 export type { FileEntry, FileStore } from "./stores/file";
 export { useFileStore, isDirty, isError, getEntry, selectEntry, exists, selectIsSaving } from "./stores/file";

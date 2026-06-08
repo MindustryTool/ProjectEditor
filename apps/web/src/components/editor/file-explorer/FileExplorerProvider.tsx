@@ -1,9 +1,8 @@
 import { useCallback, useEffect, type ReactNode } from "react";
-import { useCurrentProject, useProjectSession } from "@project/core";
+import { useCurrentProject, useProjectSession, useExpandedStore } from "@project/core";
 import { useFileExplorerStore } from "./useFileExplorerState";
 import { DeleteFileDialog } from "./DeleteFileDialog";
 import { CreateFileDialog } from "./CreateFileDialog";
-import { useExpanded } from "#/components/editor/file-explorer/use-expaned";
 
 export function FileExplorerProvider({ children }: { children: ReactNode }) {
 	const context = useCurrentProject();
@@ -37,20 +36,22 @@ export function FileExplorerProvider({ children }: { children: ReactNode }) {
 }
 
 function PathListener() {
-	const [, setExpanded] = useExpanded();
+	const setManyExpanded = useExpandedStore((s) => s.setManyExpanded);
 	const path = useProjectSession((s) => s.selectedPath);
 
 	useEffect(() => {
 		if (path) {
 			const segments = path.split("/");
 			if (segments.length === 0) return;
+			const updates: Record<string, boolean> = {};
 			let current = segments[0]!;
 			for (let i = 1; i < segments.length; i++) {
-				setExpanded((prev) => ({ ...prev, [current]: true }));
+				updates[current] = true;
 				current += "/" + segments[i];
 			}
+			setManyExpanded(updates);
 		}
-	}, [path, setExpanded]);
+	}, [path, setManyExpanded]);
 
 	return null;
 }
