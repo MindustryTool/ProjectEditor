@@ -6,11 +6,11 @@ import { useSectors } from "#/hooks/use-sectors";
 import { useSprites } from "#/hooks/use-sprites";
 import { useStatuses } from "#/hooks/use-statuses";
 import { useUnits } from "#/hooks/use-units";
-import { useFileString } from "@project/core";
+import { useFileStore, useFileString, useProjectSession } from "@project/core";
 import { HJSON, HjsonObjectNode } from "@project/hjson";
 import { type ModHjsonData } from "@project/schema";
 import type { ContentEntry, ProjectContents } from "@project/types";
-import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from "react";
 
 export interface ProjectContextValue {
 	metadata: ModHjsonData;
@@ -92,6 +92,8 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 	const { data: jsonText } = useFileString("mod.json");
 	const { data: hjsonText } = useFileString("mod.hjson");
 
+	const projectId = useProjectSession((s) => s.projectContext?.project?.id);
+
 	const metadata = useMemo(() => readModMetadata(jsonText || "", hjsonText || ""), [jsonText, hjsonText]);
 
 	const items = useItems(metadata);
@@ -136,6 +138,14 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 	);
 
 	const contextValue = useMemo(() => ({ contents, metadata, findContent }), [contents, metadata, findContent]);
+
+	useEffect(() => {
+		if (projectId) {
+			return () => {
+				useFileStore.getState().clearAllFiles(projectId);
+			};
+		}
+	}, [projectId]);
 
 	return <ProjectContext.Provider value={contextValue}>{children}</ProjectContext.Provider>;
 }

@@ -18,3 +18,5 @@ app.config.timestamp-*.js
 .xdg*
 
 openspec/changes/archive/
+**/data/**/*.png
+**/data/**/*.json

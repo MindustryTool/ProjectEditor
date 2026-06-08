@@ -41,85 +41,85 @@ const BlockPanel = lazy(() => import("./right/BlockPanel").then((m) => ({ defaul
 const UnitSpriteEditor = lazy(() => import("#/components/editor/sprite/UnitSpritEdior").then((mod) => ({ default: mod.UnitSpriteEditor })));
 
 type EditorRoute =
-  | { type: "empty" }
-  | { type: "bundle"; path: string }
-  | { type: "mod"; path: string }
-  | { type: "image"; path: string }
-  | { type: "sprite"; path: string; striped: string }
-  | { type: "text"; path: string };
+	| { type: "empty" }
+	| { type: "bundle"; path: string }
+	| { type: "mod"; path: string }
+	| { type: "image"; path: string }
+	| { type: "sprite"; path: string; striped: string }
+	| { type: "text"; path: string };
 
 type PropertiesRoute =
-  | { type: "none" }
-  | { type: "mod"; path: string }
-  | { type: "item"; path: string }
-  | { type: "liquid"; path: string }
-  | { type: "sector"; path: string }
-  | { type: "status"; path: string }
-  | { type: "unit"; path: string }
-  | { type: "block"; path: string };
+	| { type: "none" }
+	| { type: "mod"; path: string }
+	| { type: "item"; path: string }
+	| { type: "liquid"; path: string }
+	| { type: "sector"; path: string }
+	| { type: "status"; path: string }
+	| { type: "unit"; path: string }
+	| { type: "block"; path: string };
 
 function matchEditorRoute(path: string | null, entry: { kind: string } | undefined): EditorRoute {
-  if (path === null || entry === undefined) return { type: "empty" };
+	if (path === null || entry === undefined) return { type: "empty" };
 
-  if (path.startsWith("bundles/") && isBundleFilename(path.split("/").pop() ?? "")) {
-    return { type: "bundle", path };
-  }
+	if (path.startsWith("bundles/") && isBundleFilename(path.split("/").pop() ?? "")) {
+		return { type: "bundle", path };
+	}
 
-  if (path === "mod.hjson" || (path.startsWith("content") && path.endsWith(".json"))) {
-    return { type: "mod", path };
-  }
+	if (path === "mod.hjson" || (path.startsWith("content") && path.endsWith(".json"))) {
+		return { type: "mod", path };
+	}
 
-  if (path.endsWith(".png")) {
-    return { type: "image", path };
-  }
+	if (path.endsWith(".png")) {
+		return { type: "image", path };
+	}
 
-  if (path.startsWith("sprite:")) {
-    return { type: "sprite", path, striped: path.replace("sprite:", "") };
-  }
+	if (path.startsWith("sprite:")) {
+		return { type: "sprite", path, striped: path.replace("sprite:", "") };
+	}
 
-  if (entry.kind === "file") {
-    return { type: "text", path };
-  }
+	if (entry.kind === "file") {
+		return { type: "text", path };
+	}
 
-  return { type: "empty" };
+	return { type: "empty" };
 }
 
 function matchPropertiesRoute(path: string | null): PropertiesRoute {
-  if (path === null) return { type: "none" };
+	if (path === null) return { type: "none" };
 
-  if (path === "mod.hjson" || path === "mod.json") {
-    return { type: "mod", path };
-  }
+	if (path === "mod.hjson" || path === "mod.json") {
+		return { type: "mod", path };
+	}
 
-  if (path.startsWith("content/items") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
-    return { type: "item", path };
-  }
+	if (path.startsWith("content/items") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
+		return { type: "item", path };
+	}
 
-  if (path.startsWith("content/liquids") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
-    return { type: "liquid", path };
-  }
+	if (path.startsWith("content/liquids") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
+		return { type: "liquid", path };
+	}
 
-  if (path.startsWith("content/sectors") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
-    return { type: "sector", path };
-  }
+	if (path.startsWith("content/sectors") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
+		return { type: "sector", path };
+	}
 
-  if (path.startsWith("content/status") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
-    return { type: "status", path };
-  }
+	if (path.startsWith("content/status") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
+		return { type: "status", path };
+	}
 
-  if (path.replace("sprite:", "").startsWith("content/units") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
-    return { type: "unit", path: path.replace("sprite:", "") };
-  }
+	if (path.replace("sprite:", "").startsWith("content/units") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
+		return { type: "unit", path: path.replace("sprite:", "") };
+	}
 
-  if (path.startsWith("content/blocks") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
-    return { type: "block", path };
-  }
+	if (path.startsWith("content/blocks") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
+		return { type: "block", path };
+	}
 
-  if (path.startsWith("content")) {
-    return { type: "none" };
-  }
+	if (path.startsWith("content")) {
+		return { type: "none" };
+	}
 
-  return { type: "none" };
+	return { type: "none" };
 }
 
 function EditorContent({ path }: { path: string }) {
@@ -158,9 +158,7 @@ const panelFallback = (
 	</div>
 );
 
-function EditorProperties({ path }: { path: string }) {
-	const route = matchPropertiesRoute(path);
-
+function PropertiesPanel({ route }: { route: PropertiesRoute }) {
 	switch (route.type) {
 		case "none":
 			return null;
@@ -209,11 +207,41 @@ function EditorProperties({ path }: { path: string }) {
 	}
 }
 
+function DesktopPropertiesSection({
+	route,
+	rightWidth,
+	startResize,
+}: {
+	route: PropertiesRoute;
+	rightWidth: number;
+	startResize: (e: React.MouseEvent) => void;
+}) {
+	switch (route.type) {
+		case "none":
+			return null;
+		default:
+			return (
+				<>
+					<div
+						className="group flex w-1.5 shrink-0 cursor-col-resize items-center justify-center transition-colors hover:bg-accent active:bg-accent bg-background"
+						onMouseDown={startResize}
+					>
+						<div className="h-8 w-0.5 rounded-full bg-card-foreground opacity-0 transition-opacity group-hover:opacity-60" />
+					</div>
+					<div style={{ width: rightWidth, minWidth: 300 }} className="shrink-0 border-l bg-card overflow-y-auto">
+						<PropertiesPanel route={route} />
+					</div>
+				</>
+			);
+	}
+}
+
 const EditorPanels = memo(function EditorPanels() {
 	const [path] = usePath();
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [rightWidth, setRightWidth] = useState(360);
 	const dragRef = useRef<{ startX: number; startWidth: number } | null>(null);
+	const propertiesRoute = path ? matchPropertiesRoute(path) : { type: "none" as const };
 
 	const startResize = useCallback(
 		(e: React.MouseEvent) => {
@@ -255,24 +283,11 @@ const EditorPanels = memo(function EditorPanels() {
 		<div ref={containerRef} className="flex min-h-0 flex-1 overflow-hidden w-full">
 			<div className="flex min-h-0 flex-1 flex-col overflow-hidden h-full py-1">
 				<RecentlyOpenedFilesBar />
-				<div className="flex min-h-0 flex-1 flex-col overflow-hidden">{path ? <EditorContent path={path} /> : <NoOpenedFileScreen />}</div>
+				<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+					{path ? <EditorContent path={path} /> : <NoOpenedFileScreen />}
+				</div>
 			</div>
-			{path !== null && (
-				<>
-					<div
-						className="group flex w-1.5 shrink-0 cursor-col-resize items-center justify-center transition-colors hover:bg-accent active:bg-accent bg-background"
-						onMouseDown={startResize}
-					>
-						<div className="h-8 w-0.5 rounded-full bg-card-foreground opacity-0 transition-opacity group-hover:opacity-60" />
-					</div>
-					<div
-						style={{ width: rightWidth, minWidth: 300 }}
-						className="shrink-0 border-l bg-card overflow-y-auto"
-					>
-						<EditorProperties path={path} />
-					</div>
-				</>
-			)}
+			<DesktopPropertiesSection route={propertiesRoute} rightWidth={rightWidth} startResize={startResize} />
 		</div>
 	);
 });
@@ -308,6 +323,7 @@ function EditorMobileLayout() {
 	const { t } = useTranslation();
 	const [sheetOpen, setSheetOpen] = useState(false);
 	const [path] = usePath();
+	const propertiesRoute = path ? matchPropertiesRoute(path) : { type: "none" as const };
 
 	return (
 		<Fragment>
@@ -346,7 +362,7 @@ function EditorMobileLayout() {
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
 						<div className="flex flex-1 overflow-hidden bg-background w-full">
 							<ErrorBoundary>
-								{path && <EditorProperties path={path} />}
+								<PropertiesPanel route={propertiesRoute} />
 							</ErrorBoundary>
 						</div>
 					</div>
