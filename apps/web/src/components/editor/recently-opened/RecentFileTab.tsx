@@ -18,7 +18,7 @@ export function RecentFileTab({ entry, onClick, onClose }: RecentFileTabProps) {
 	return (
 		<button
 			className={cn(
-				"group flex items-center gap-1 px-2 py-1 text-xs transition-colors bg-accent/40",
+				"group flex items-center gap-1 px-2 py-1 text-xs transition-colors bg-accent/40 h-full rounded",
 				isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground",
 				isMissing && "line-through text-destructive",
 			)}

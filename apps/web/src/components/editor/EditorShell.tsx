@@ -6,7 +6,7 @@ import { ExportMenu } from "./ExportMenu";
 import { LocalizationMenu } from "./toolbar/LocalizationMenu";
 import { Toolbar } from "./Toolbar";
 import { StatusBar } from "./StatusBar";
-import { SplitView, SplitViewLeft, SplitViewCenter } from "~/components/ui/SplitView";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "~/components/ui/resizable";
 import { StatusBarLeft } from "./statusbar/StatusBarLeft";
 import { StatusBarCenter } from "./statusbar/StatusBarCenter";
 import { StatusBarRight } from "./statusbar/StatusBarRight";
@@ -14,7 +14,7 @@ import { ValidationProvider } from "#/components/editor/ValidationProvider";
 import { Fragment } from "react/jsx-runtime";
 import { ErrorBoundary } from "#/components/ui/error-boundary";
 import { ProjectProvider } from "#/components/editor/ProjectProvider";
-import { lazy, memo, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { lazy, memo, Suspense, useState } from "react";
 import { FileExplorerProvider } from "./file-explorer/FileExplorerProvider";
 import { useAppStore, useProjectSession, isBundleFilename } from "@project/core";
 import { Panel } from "./Panel";
@@ -87,6 +87,8 @@ function matchEditorRoute(path: string | null, entry: { kind: string } | undefin
 function matchPropertiesRoute(path: string | null): PropertiesRoute {
 	if (path === null) return { type: "none" };
 
+	if (path.startsWith("sprite:")) return { type: "none" };
+
 	if (path === "mod.hjson" || path === "mod.json") {
 		return { type: "mod", path };
 	}
@@ -107,8 +109,8 @@ function matchPropertiesRoute(path: string | null): PropertiesRoute {
 		return { type: "status", path };
 	}
 
-	if (path.replace("sprite:", "").startsWith("content/units") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
-		return { type: "unit", path: path.replace("sprite:", "") };
+	if (path.startsWith("content/units") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
+		return { type: "unit", path };
 	}
 
 	if (path.startsWith("content/blocks") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
@@ -207,88 +209,33 @@ function PropertiesPanel({ route }: { route: PropertiesRoute }) {
 	}
 }
 
-function DesktopPropertiesSection({
-	route,
-	rightWidth,
-	startResize,
-}: {
-	route: PropertiesRoute;
-	rightWidth: number;
-	startResize: (e: React.MouseEvent) => void;
-}) {
-	switch (route.type) {
-		case "none":
-			return null;
-		default:
-			return (
-				<>
-					<div
-						className="group flex w-1.5 shrink-0 cursor-col-resize items-center justify-center transition-colors hover:bg-accent active:bg-accent bg-background"
-						onMouseDown={startResize}
-					>
-						<div className="h-8 w-0.5 rounded-full bg-card-foreground opacity-0 transition-opacity group-hover:opacity-60" />
-					</div>
-					<div style={{ width: rightWidth, minWidth: 300 }} className="shrink-0 border-l bg-card overflow-y-auto">
-						<PropertiesPanel route={route} />
-					</div>
-				</>
-			);
-	}
-}
-
 const EditorPanels = memo(function EditorPanels() {
 	const [path] = usePath();
-	const containerRef = useRef<HTMLDivElement>(null);
-	const [rightWidth, setRightWidth] = useState(360);
-	const dragRef = useRef<{ startX: number; startWidth: number } | null>(null);
 	const propertiesRoute = path ? matchPropertiesRoute(path) : { type: "none" as const };
 
-	const startResize = useCallback(
-		(e: React.MouseEvent) => {
-			e.preventDefault();
-			dragRef.current = { startX: e.clientX, startWidth: rightWidth };
-			document.body.style.cursor = "col-resize";
-			document.body.style.userSelect = "none";
-		},
-		[rightWidth],
-	);
-
-	useEffect(() => {
-		const onMouseMove = (e: MouseEvent) => {
-			const drag = dragRef.current;
-			if (!drag || !containerRef.current) return;
-
-			const containerRect = containerRef.current.getBoundingClientRect();
-			const delta = e.clientX - drag.startX;
-			const newWidth = Math.max(300, drag.startWidth - delta);
-			const maxWidth = containerRect.width - 300;
-			setRightWidth(Math.min(newWidth, maxWidth));
-		};
-
-		const onMouseUp = () => {
-			dragRef.current = null;
-			document.body.style.cursor = "";
-			document.body.style.userSelect = "";
-		};
-
-		window.addEventListener("mousemove", onMouseMove);
-		window.addEventListener("mouseup", onMouseUp);
-		return () => {
-			window.removeEventListener("mousemove", onMouseMove);
-			window.removeEventListener("mouseup", onMouseUp);
-		};
-	}, []);
-
 	return (
-		<div ref={containerRef} className="flex min-h-0 flex-1 overflow-hidden w-full">
-			<div className="flex min-h-0 flex-1 flex-col overflow-hidden h-full py-1">
-				<RecentlyOpenedFilesBar />
-				<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-					{path ? <EditorContent path={path} /> : <NoOpenedFileScreen />}
+		<>
+			<ResizablePanel defaultSize="70%" minSize="30%">
+				<div className="flex min-h-0 flex-1 flex-col overflow-hidden h-full p-1 gap-1">
+					<RecentlyOpenedFilesBar />
+					<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+						<Suspense>{path ? <EditorContent path={path} /> : <NoOpenedFileScreen />}</Suspense>
+					</div>
 				</div>
-			</div>
-			<DesktopPropertiesSection route={propertiesRoute} rightWidth={rightWidth} startResize={startResize} />
-		</div>
+			</ResizablePanel>
+			{propertiesRoute.type !== "none" && (
+				<>
+					<ResizableHandle withHandle />
+					<ResizablePanel defaultSize="30%" minSize="20%">
+						<div className="h-full overflow-y-auto bg-card">
+							<Suspense>
+								<PropertiesPanel route={propertiesRoute} />
+							</Suspense>
+						</div>
+					</ResizablePanel>
+				</>
+			)}
+		</>
 	);
 });
 
@@ -302,18 +249,15 @@ function EditorDesktopLayout() {
 				<ExportMenu />
 				<LocalizationMenu />
 			</Toolbar>
-			<SplitView defaultLeftWidth={260} minPanelWidth={300}>
-				<SplitViewLeft>
+			<ResizablePanelGroup orientation="horizontal" className="flex min-h-0 flex-1">
+				<ResizablePanel defaultSize="30%" minSize="20%">
 					<ErrorBoundary>
 						<EditorLeftPanel />
 					</ErrorBoundary>
-				</SplitViewLeft>
-				<SplitViewCenter>
-					<ErrorBoundary>
-						<EditorPanels />
-					</ErrorBoundary>
-				</SplitViewCenter>
-			</SplitView>
+				</ResizablePanel>
+				<ResizableHandle withHandle />
+				<EditorPanels />
+			</ResizablePanelGroup>
 			<StatusBar left={<StatusBarLeft />} center={<StatusBarCenter />} right={<StatusBarRight />} />
 		</Fragment>
 	);

@@ -49,7 +49,7 @@ export function RecentlyOpenedFilesBar() {
 	if (recentFiles.length === 0) return null;
 
 	return (
-		<div className="flex items-center gap-1 overflow-x-auto py-0.5 min-h-10 max-h-10">
+		<div className="flex items-center gap-1 overflow-x-auto min-h-8 max-h-8">
 			{recentFiles.map((entry) => (
 				<RecentFileTab
 					key={entry.path}
@@ -60,7 +60,7 @@ export function RecentlyOpenedFilesBar() {
 			))}
 			{recentFiles.length > 2 && (
 				<button
-					className="h-full flex items-center gap-1 px-2 py-1 text-xs transition-colors bg-accent/40 text-destructive"
+					className="h-full rounded flex aspect-square items-center gap-1 justify-center text-xs transition-colors bg-accent/40 text-destructive"
 					onClick={handleClear}
 				>
 					<Trash className="size-3" />

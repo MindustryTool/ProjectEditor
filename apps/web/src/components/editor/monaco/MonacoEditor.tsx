@@ -117,6 +117,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 	return (
 		<div ref={containerRef} className="relative h-full w-full flex">
 			<Editor
+				className="rounded overflow-hidden bg-card"
 				key={path}
 				theme={theme}
 				language={language}
