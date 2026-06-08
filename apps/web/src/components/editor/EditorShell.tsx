@@ -31,48 +31,47 @@ export function EditorShell() {
 
 	return (
 		<ProjectProvider>
-			<ValidationProvider>
-				<FileExplorerProvider>
-					<ErrorBoundary>
-						<div
-							className="flex min-h-0 flex-1 flex-col bg-background text-foreground overflow-hidden w-full h-dvh max-h-dvh"
-							style={{ padding }}
-						>
-							{isDesktop ? (
-								<Fragment>
-									<Toolbar>
-										<ProjectMenu />
-										<EditMenu />
-										<ViewMenu />
-										<ExportMenu />
-										<LocalizationMenu />
-									</Toolbar>
-									<SplitView defaultLeftWidth={260} defaultRightWidth={360} minPanelWidth={300}>
-										<SplitViewLeft>
-											<ErrorBoundary>
-												<EditorLeftPanel />
-											</ErrorBoundary>
-										</SplitViewLeft>
-										<SplitViewCenter>
-											<ErrorBoundary>
-												<EditorCenterPanel />
-											</ErrorBoundary>
-										</SplitViewCenter>
-										<SplitViewRight>
-											<ErrorBoundary>
-												<EditorRightPanel />
-											</ErrorBoundary>
-										</SplitViewRight>
-									</SplitView>
-									<StatusBar left={<StatusBarLeft />} center={<StatusBarCenter />} right={<StatusBarRight />} />
-								</Fragment>
-							) : (
-								<EditorMobileLayout />
-							)}
-						</div>
-					</ErrorBoundary>
-				</FileExplorerProvider>
-			</ValidationProvider>
+			<ValidationProvider />
+			<FileExplorerProvider>
+				<ErrorBoundary>
+					<div
+						className="flex min-h-0 flex-1 flex-col bg-background text-foreground overflow-hidden w-full h-dvh max-h-dvh"
+						style={{ padding }}
+					>
+						{isDesktop ? (
+							<Fragment>
+								<Toolbar>
+									<ProjectMenu />
+									<EditMenu />
+									<ViewMenu />
+									<ExportMenu />
+									<LocalizationMenu />
+								</Toolbar>
+								<SplitView defaultLeftWidth={260} defaultRightWidth={360} minPanelWidth={300}>
+									<SplitViewLeft>
+										<ErrorBoundary>
+											<EditorLeftPanel />
+										</ErrorBoundary>
+									</SplitViewLeft>
+									<SplitViewCenter>
+										<ErrorBoundary>
+											<EditorCenterPanel />
+										</ErrorBoundary>
+									</SplitViewCenter>
+									<SplitViewRight>
+										<ErrorBoundary>
+											<EditorRightPanel />
+										</ErrorBoundary>
+									</SplitViewRight>
+								</SplitView>
+								<StatusBar left={<StatusBarLeft />} center={<StatusBarCenter />} right={<StatusBarRight />} />
+							</Fragment>
+						) : (
+							<EditorMobileLayout />
+						)}
+					</div>
+				</ErrorBoundary>
+			</FileExplorerProvider>
 		</ProjectProvider>
 	);
 }

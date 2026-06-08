@@ -1,27 +1,12 @@
-import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
-import { useValidationStore, useAppStore, useCurrentProject, type ValidationBatchFile, type ValidationResult } from "@project/core";
+import { useEffect } from "react";
+import { useValidationStore, useAppStore, useCurrentProject } from "@project/core";
 import { useShallow } from "zustand/react/shallow";
 import { usePath } from "#/hooks/use-path";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { useParams } from "@tanstack/react-router";
 import { validationService } from "#/services/validation-service";
 
-export interface ValidationContextValue {
-	validateFile: (path: string, getContent: () => Promise<string>) => Promise<void>;
-	validateFiles: (files: ValidationBatchFile[]) => Promise<Record<string, ValidationResult[]> | null>;
-}
-
-const ValidationFileContext = createContext<ValidationContextValue | null>(null);
-
-export function useValidationContext(): ValidationContextValue {
-	const ctx = useContext(ValidationFileContext);
-
-	if (!ctx) throw new Error("useValidationContext() must be used within a ValidationProvider");
-
-	return ctx;
-}
-
-export function ValidationProvider({ children }: { children: ReactNode }) {
+export function ValidationProvider() {
 	const [path] = usePath();
 	const { lang } = useParams({ strict: false });
 	const projectContext = useCurrentProject();
@@ -78,9 +63,6 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 
 	useEffect(() => {
 		const unsub = useValidationStore.persist.onFinishHydration((state) => {
-            console.log("Finish");
-            console.log(state.results.resultsByPath);
-            
 			for (const path of Object.keys(state.results.resultsByPath)) {
 				validationService.scheduleValidation(projectId, path);
 				console.log(path);
@@ -92,13 +74,5 @@ export function ValidationProvider({ children }: { children: ReactNode }) {
 		};
 	}, [projectId]);
 
-	const ctxValue = useMemo<ValidationContextValue>(
-		() => ({
-			validateFile: validationService.validateFile,
-			validateFiles: validationService.validateFiles,
-		}),
-		[],
-	);
-
-	return <ValidationFileContext.Provider value={ctxValue}>{children}</ValidationFileContext.Provider>;
+	return null;
 }

@@ -9,8 +9,8 @@ import { Button } from "~/components/ui/button";
 import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from "~/components/ui/input-group";
 import { Progress } from "~/components/ui/progress";
 import { ValidationErrorList, type ValidationFileError } from "#/components/editor/ValidationErrorList";
-import { useValidationContext } from "#/components/editor/ValidationProvider";
 import { usePath } from "#/hooks/use-path";
+import { validationService } from "#/services/validation-service";
 
 interface ExportMenuProps {
 	className?: string;
@@ -155,7 +155,7 @@ async function loadAndValidateAll(
 					messageKey: err instanceof Error ? err.message : "Unknown error",
 					startLine: 1,
 					startColumn: 1,
-                    duration: 0,
+					duration: 0,
 				},
 			]);
 		}
@@ -182,7 +182,6 @@ function ExportDialogContent({
 	const { t } = useTranslation();
 	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
 	const projectContext = useProjectSession((s) => s.projectContext);
-	const { validateFiles } = useValidationContext();
 	const [downloadLoading, setDownloadLoading] = useState(false);
 	const [currentFile, setCurrentFile] = useState("");
 	const [validationProgress, setValidationProgress] = useState(0);
@@ -202,7 +201,7 @@ function ExportDialogContent({
 			resultsByPath = await loadAndValidateAll(
 				treeSnapshot,
 				(path) => projectContext.fs.readFile(path),
-				validateFiles,
+				validationService.validateFiles,
 				(path, completed, total) => {
 					currentFileRef.current = path;
 					progressRef.current = Math.round(((completed + 1) / total) * 100);
@@ -231,7 +230,7 @@ function ExportDialogContent({
 			handleExport(filename);
 			onClose();
 		}
-	}, [projectContext, treeSnapshot, validateFiles, handleExport, filename, onClose, onOpenValidation]);
+	}, [projectContext, treeSnapshot, handleExport, filename, onClose, onOpenValidation]);
 
 	return (
 		<>

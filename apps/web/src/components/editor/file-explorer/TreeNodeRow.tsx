@@ -1,7 +1,6 @@
 import { ChevronRight, ChevronDown } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { type TreeNode } from "@project/fs";
-import { useFileStore, useCurrentProject } from "@project/core";
 import { useTreeNodeActions } from "./useTreeNodeActions";
 import { getIcon } from "./file-tree";
 import { RootName } from "./RootName";
@@ -20,21 +19,13 @@ interface TreeNodeRowProps {
 }
 
 export const TreeNodeRow = React.memo(function TreeNodeRow({ node, depth, expanded, onToggle, onContextMenu }: TreeNodeRowProps) {
-	const context = useCurrentProject();
 	const { currentPath, isSelected, isEditing, isFolder, handleClick, handleCreateClick, handleRenameConfirm, handleInputKeyDown } =
 		useTreeNodeActions(node, onToggle);
-	const loadFile = useFileStore((s) => s.loadFile);
 
 	const isRoot = depth === 0 && currentPath === "";
 
 	return (
-		<div
-			onPointerEnter={() => {
-				if (!isFolder) {
-					loadFile(context.project.id, currentPath, context.fs);
-				}
-			}}
-		>
+		<div>
 			<div
 				className={cn(
 					"group flex cursor-pointer items-center gap-1 rounded py-1 text-sm hover:bg-accent",
@@ -63,17 +54,9 @@ export const TreeNodeRow = React.memo(function TreeNodeRow({ node, depth, expand
 				)}
 				{getIcon(node, expanded)}
 				{isEditing ? (
-					<TreeNodeRenameInput
-						defaultValue={node.name}
-						onConfirm={handleRenameConfirm}
-						onKeyDown={handleInputKeyDown}
-					/>
+					<TreeNodeRenameInput defaultValue={node.name} onConfirm={handleRenameConfirm} onKeyDown={handleInputKeyDown} />
 				) : (
-					<TreeNodeLabel
-						name={isRoot ? <RootName /> : node.name}
-						currentPath={currentPath}
-						isFolder={isFolder}
-					/>
+					<TreeNodeLabel name={isRoot ? <RootName /> : node.name} currentPath={currentPath} isFolder={isFolder} />
 				)}
 				<TreeNodeActions
 					currentPath={currentPath}
@@ -84,10 +67,7 @@ export const TreeNodeRow = React.memo(function TreeNodeRow({ node, depth, expand
 					onCreateClick={handleCreateClick}
 					onContextMenu={onContextMenu}
 				/>
-				<TreeNodeStatus
-					currentPath={currentPath}
-					isFolder={isFolder}
-				/>
+				<TreeNodeStatus currentPath={currentPath} isFolder={isFolder} />
 			</div>
 		</div>
 	);
