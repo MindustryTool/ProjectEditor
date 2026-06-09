@@ -49,5 +49,5 @@ export type {
 export { parseBundle, writeBundle, SUPPORTED_LOCALES, FLAG_MAP, getLocaleFromFilename, isBundleFilename } from "./bundle/index.js";
 export type { BundleEntry, BundleEntryType, BundleFile } from "./bundle/types.js";
 
-export { ProjectFileSystem, createProjectFileSystem, deleteProjectFiles } from "./project-file-system.js";
-export type { ProjectFileSystemOptions } from "./project-file-system.js";
+export { ProjectFileSystem, createProjectFileSystem, deleteProjectFiles } from "./project-fs.js";
+export type { ProjectFileSystemOptions } from "./project-fs.js";

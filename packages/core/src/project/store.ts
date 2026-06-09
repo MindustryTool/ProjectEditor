@@ -5,7 +5,7 @@ import { useValidationStore } from "../validation/store";
 import { ValidationResults } from "../validation/types";
 import { useProjectSession } from "../project/session";
 import { AppSettingsSchema, ProjectRecordSchema, type AppSettings, type ProjectRecord } from "@project/schema";
-import { createProjectFileSystem } from "../project-file-system";
+import { createProjectFileSystem } from "../project-fs";
 import { importProject } from "../importer";
 import { type EventBus, type ProjectEventMap, type ProjectInfo, type Unsubscribe, type ProjectLanguage, TreeSnapshot } from "../types";
 import type { ProjectContext } from "../project/session";

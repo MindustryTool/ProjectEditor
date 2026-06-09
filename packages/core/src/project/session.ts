@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { ProjectFileSystem } from "../project-file-system";
+import type { ProjectFileSystem } from "../project-fs";
 import { TreeSnapshot, type EventBus, type ProjectEventMap, type ProjectInfo } from "../types";
 
 export interface ProjectContext {
