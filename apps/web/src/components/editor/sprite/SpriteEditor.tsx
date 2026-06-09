@@ -6,7 +6,6 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "~/componen
 import { useFileString, useProjectSession } from "@project/core";
 import { HJSON } from "@project/hjson";
 import { collectSpriteData, type AnySchema, type SchemaFn, type SpriteData } from "@project/schema";
-import { resolveContentSprite } from "@project/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Layer, Stage } from "react-konva";
 import { updateSpritePosition } from "#/components/editor/sprite/sprite-utils";
@@ -42,7 +41,7 @@ function SpriteCanvas({ path, schema }: { path: string; schema: AnySchema | Sche
 	const { contents } = useProjectContext();
 	const { data, isLoading, write } = useFileString(path);
 	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
-	const baseSprite = useMemo(() => resolveContentSprite(path), [path]);
+	const baseSprite = useMemo(() => treeSnapshot.findContentSpritePath(path), [path, treeSnapshot]);
 
 	const { stageRef, posRef, scaleRef, handleWheel, handleDragEnd } = useCanvasInteraction(canvasDimensions.width, canvasDimensions.height);
 

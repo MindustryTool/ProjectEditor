@@ -11,8 +11,8 @@ interface SpritePickerProps {
 }
 
 export function SpritePicker({ path }: SpritePickerProps) {
-	const spritePath = resolveContentSprite(path);
-	const exists = useProjectSession((s) => spritePath !== null && s.treeSnapshot.getEntry(spritePath) !== undefined);
+	const existingPath = useProjectSession((s) => s.treeSnapshot.findContentSpritePath(path));
+	const spritePath = existingPath || resolveContentSprite(path);
 
 	if (spritePath === null) {
 		return <p className="text-sm text-muted-foreground">Not a content JSON file</p>;
@@ -21,7 +21,7 @@ export function SpritePicker({ path }: SpritePickerProps) {
 	return (
 		<FormField>
 			<FormLabel>Sprite</FormLabel>
-			<FormControl>{exists ? <SpriteViewer path={spritePath} /> : <SpriteUploader path={spritePath} />}</FormControl>
+			<FormControl>{existingPath ? <SpriteViewer path={spritePath} /> : <SpriteUploader path={spritePath} />}</FormControl>
 		</FormField>
 	);
 }

@@ -1,6 +1,6 @@
 import { cn, getImageUrl } from "#/lib/utils";
-import { useFile } from "@project/core";
-import { resolveContentSprite } from "@project/utils";
+import { useFile, useProjectSession } from "@project/core";
+import { hasContentSprite } from "@project/utils";
 import { File } from "lucide-react";
 import React, { useMemo, useState, type ReactNode } from "react";
 
@@ -18,22 +18,33 @@ export const ImageFilePreview = React.memo(function ImageFilePreview({
 	fallback,
 	...props
 }: ImageFilePreviewProps & React.ComponentProps<"img">) {
-	let resolvedPath: string | null = path;
+	const isContentSprite = hasContentSprite(path);
 
-	if (!path.endsWith(".png")) {
-		if (path.endsWith(".json")) {
-			resolvedPath = resolveContentSprite(path);
-			if (!resolvedPath) {
-				return <File className={className} />;
-			}
-		}
-
-		if (!resolvedPath?.endsWith(".png")) {
-			throw new Error(`ImageFilePreview only supports png file: ${resolvedPath}`);
-		}
+	if (isContentSprite) {
+		return <ContentImageFilePreview path={path} className={className} onSize={onSize} fallback={fallback} {...props} />;
 	}
 
-	return <Image path={resolvedPath} className={className} onSize={onSize} fallback={fallback} {...props} />;
+	if (!path.endsWith(".png")) {
+		return <File className={className} />
+	}
+
+	return <Image path={path} className={className} onSize={onSize} fallback={fallback} {...props} />;
+});
+
+export const ContentImageFilePreview = React.memo(function ContentImageFilePreview({
+	path,
+	className,
+	onSize,
+	fallback,
+	...props
+}: ImageFilePreviewProps & React.ComponentProps<"img">) {
+	const spritePath = useProjectSession((s) => s.treeSnapshot.findContentSpritePath(path));
+
+	if (!spritePath) {
+		return <File className={className} />
+	}
+
+	return <Image path={spritePath} className={className} onSize={onSize} fallback={fallback} {...props} />;
 });
 
 const Image = React.memo(function Image({

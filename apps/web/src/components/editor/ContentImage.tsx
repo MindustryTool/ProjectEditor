@@ -1,4 +1,3 @@
-import { resolveContentSprite } from "@project/utils";
 import { memo } from "react";
 import type { ContentEntry } from "@project/types";
 import { ImageFilePreview } from "./ImageFilePreview";
@@ -15,9 +14,5 @@ export const ContentImage = memo(function ContentImage({
 		return <ContentApiImage type={entry.contentType} name={entry.name} className={className} />;
 	}
 
-	const assetPath = resolveContentSprite(entry.path);
-
-	if (!assetPath) return null;
-
-	return <ImageFilePreview path={assetPath} className={className} />;
+	return <ImageFilePreview path={entry.path} className={className} />;
 });

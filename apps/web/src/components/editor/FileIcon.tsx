@@ -1,6 +1,6 @@
 import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
 import { FLAG_MAP, getLocaleFromFilename } from "@project/core";
-import { resolveContentSprite } from "@project/utils";
+import { hasContentSprite } from "@project/utils";
 import { File } from "lucide-react";
 
 export function FileIcon({ path }: { path: string }) {
@@ -64,10 +64,16 @@ export function FileIcon({ path }: { path: string }) {
 		return <span className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4 flex items-center justify-center">{FLAG_MAP[locale]}</span>;
 	}
 
-	const assetPath = resolveContentSprite(path);
+	const isContentSprite = hasContentSprite(path);
 
-	if (assetPath) {
-		return <ImageFilePreview path={assetPath} className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4 flex items-center justify-center" fallback={<File />} />;
+	if (isContentSprite) {
+		return (
+			<ImageFilePreview
+				path={path}
+				className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4 flex items-center justify-center"
+				fallback={<File />}
+			/>
+		);
 	}
 
 	return <File className="h-3.5 w-3.5 shrink-0 text-muted-foreground ml-4 flex items-center justify-center" />;

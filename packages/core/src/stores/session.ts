@@ -164,6 +164,16 @@ export class TreeSnapshot {
 	getEntry(path: string) {
 		return this.entries.find((e) => e.path === path);
 	}
+
+	findContentSpritePath(path: string) {
+		const filename = path.split("/").pop()?.replace(".json", "")?.replace(".hjson", "") || null;
+
+		if (!filename) {
+			return null;
+		}
+
+		return this.entries.find((e) => e.name === filename + ".png")?.path || null;
+	}
 }
 interface ProjectSession {
 	projectContext: ProjectContext | null;
@@ -249,7 +259,7 @@ export const useProjectSession = create<ProjectSession>()(
 			name: "project-session",
 			partialize: (state) => ({
 				recentlyOpenedFiles: state.recentlyOpenedFiles,
-                selectedPath: state.selectedPath,
+				selectedPath: state.selectedPath,
 			}),
 		},
 	),
