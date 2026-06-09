@@ -11,6 +11,7 @@ import { StatusFieldSchema } from "./status";
 import { LiquidFieldSchema } from "./liquid";
 import { metadata } from "./utils";
 import { ClassMap, classSchema } from "./class";
+import { ContentNameSchema } from "./content";
 
 const BulletUnitFieldSchema: SchemaFn = (context) =>
 	v.pipe(
@@ -52,6 +53,7 @@ export type BulletClass = (typeof bulletTypes)[number];
 
 const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>> = (context) => {
 	return v.object({
+        name: ContentNameSchema,
 		type: classSchema(bulletTypes, "BasicBulletType"),
 		lifetime: v.pipe(
 			v.optional(v.number(), 40),

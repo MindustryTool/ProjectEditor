@@ -20,7 +20,7 @@ import { TeamSchema } from "./team";
 import { fixed, metadata } from "./utils";
 import { TargetPriority } from "./target-priority";
 import { ConsumesHjsonSchema } from "./consumes";
-import { ContentFieldSchema } from "./content";
+import { ContentFieldSchema, ContentNameSchema } from "./content";
 import { Envs, EnvSchema } from "./envs";
 import type { ProjectContents } from "@project/types";
 import { ShootPatternHjsonSchema } from "./shoot-pattern";
@@ -195,6 +195,7 @@ export const blockTypes = [
 export type BlockType = (typeof blockTypes)[number];
 
 export const blockObjectSchema = {
+    name: ContentNameSchema,
 	type: classSchema(blockTypes, "Block"),
 	shadowTexture: TextureFieldSchema("@-shadow"),
 	teamTexture: TextureFieldSchema("@-team"),

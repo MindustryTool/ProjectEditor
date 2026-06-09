@@ -5,8 +5,10 @@ import type { SchemaFn } from "./utils";
 import { EffectFieldSchema } from "./effect";
 import { metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
+import { ContentNameSchema } from "./content";
 
 export const liquidBaseObjectSchema = v.object({
+    name: ContentNameSchema,
 	gas: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
