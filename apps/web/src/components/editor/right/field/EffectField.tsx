@@ -19,6 +19,7 @@ import { FieldLabel } from "#/components/ui/field";
 import { FieldControl } from "#/components/editor/right/field/Field";
 import { getSchemaMetadata } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
+import { schemaRenderers } from "#/components/editor/right/field/renderer";
 
 export const EffectField = React.memo(function EffectField({ path, name, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
@@ -162,3 +163,5 @@ function EffectDialogContent({
 		</ToggleGroup>
 	);
 }
+
+schemaRenderers.set("effect", EffectField);

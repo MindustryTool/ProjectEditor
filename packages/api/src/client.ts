@@ -83,6 +83,20 @@ export class MindustryApiClient {
 		return this.get<Sound[]>("/sounds", options);
 	}
 
+	getSchematicPreview(buffer: ArrayBuffer): Promise<Uint8Array> {
+		const formData = new FormData();
+		formData.append("data", new Blob([buffer]));
+
+		return this.post<Uint8Array>("/schematics/image", formData);
+	}
+
+    getMapPreview(buffer: ArrayBuffer): Promise<Uint8Array> {
+        const formData = new FormData();
+        formData.append("data", new Blob([buffer]));
+
+        return this.post<Uint8Array>("/maps/image", formData);
+    }
+
 	async get<TResponse>(path: string, options?: RequestOptions): Promise<TResponse> {
 		const config: AxiosRequestConfig = {};
 		if (options?.signal) config.signal = options.signal;

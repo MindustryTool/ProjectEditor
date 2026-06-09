@@ -10,6 +10,7 @@ import { SchemaLabel } from "./SchemaLabel";
 import { SchemaArrayItemEditor } from "./SchemaArrayItemEditor";
 import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
 import { Separator } from "#/components/ui/separator";
+import { schemaRenderers } from "#/components/editor/right/field/renderer";
 
 export const ArrayField = React.memo(function ArrayField({ path, name, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
 	const arrayValue = Array.isArray(value) ? value : undefined;
@@ -112,3 +113,5 @@ function ArrayElement({
 		</div>
 	);
 }
+
+schemaRenderers.set("array", ArrayField);

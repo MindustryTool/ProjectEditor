@@ -1,6 +1,6 @@
 import { detectSchemaType } from "@project/schema";
 import React, { useMemo } from "react";
-import { schemaRenderers } from "./index";
+import { schemaRenderers } from "./renderer";
 import type { HjsonNode } from "@project/hjson";
 import type { AnySchema } from "@project/schema";
 
@@ -21,7 +21,7 @@ export const SchemaArrayItemEditor = React.memo(function SchemaArrayItemEditor({
 }: SchemaArrayItemEditorProps) {
 	const type = useMemo(() => detectSchemaType(itemSchema, value), [itemSchema, value]);
 
-	const Renderer = schemaRenderers[type];
+	const Renderer = schemaRenderers.get(type);
 
 	if (Renderer === undefined) {
 		return <span className="text-red-400 text-sm">Unknown field type {jsonPath}</span>;

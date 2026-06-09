@@ -3,12 +3,14 @@ import { getSchemaMetadata, getSchemaEntries, resolveSchema, detectSchemaType } 
 import React from "react";
 import * as v from "valibot";
 import type { HjsonNode } from "@project/hjson";
-import { FieldCategory, SchemaLabel, schemaRenderers } from "./index";
 import { type SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
 import type { AnySchema } from "@project/schema";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 import { Button } from "#/components/ui/button";
+import { SchemaLabel } from "#/components/editor/right/field/SchemaLabel";
+import { FieldCategory } from "#/components/editor/right/field/FieldCategory";
+import { schemaRenderers } from "#/components/editor/right/field/renderer";
 
 export const ObjectField = React.memo(function ObjectField({ name, path, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
 	if (typeof value !== "object" || value === null) {
@@ -60,7 +62,7 @@ function buildCategoryObjectFields(
 			lastCategory = metadata.category;
 		}
 
-		const Renderer = schemaRenderers[type];
+		const Renderer = schemaRenderers.get(type);
 
 		if (Renderer === undefined) {
 			elements.push(
@@ -88,3 +90,5 @@ function buildCategoryObjectFields(
 
 	return elements;
 }
+
+schemaRenderers.set("object", ObjectField);

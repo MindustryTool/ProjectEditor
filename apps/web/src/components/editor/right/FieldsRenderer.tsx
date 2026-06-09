@@ -3,10 +3,11 @@ import { FormControl, FormLabel } from "#/components/ui/form";
 import { useFileString } from "@project/core";
 import { HJSON, HjsonNode } from "@project/hjson";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
-import { FieldCategory, schemaRenderers } from "./field";
 import React, { Suspense, useCallback, useEffect, useState } from "react";
 import { resolveSchema, detectSchemaType, getSchemaEntries, getSchemaMetadata, type AnySchema, type SchemaFn } from "@project/schema";
 import * as v from "valibot";
+import { FieldCategory } from "#/components/editor/right/field/FieldCategory";
+import { schemaRenderers } from "#/components/editor/right/field/renderer";
 
 export type SchemaRendererProps = {
 	name: string;
@@ -131,7 +132,7 @@ function Child({
 			lastCategory = metadata.category;
 		}
 
-		const Renderer = schemaRenderers[type];
+		const Renderer = schemaRenderers.get(type);
 
 		if (Renderer === undefined) {
 			elements.push(

@@ -1,26 +1,26 @@
 {
-  "name": "project-editor",
-  "private": true,
-  "packageManager": "pnpm@11.5.0",
-  "engines": {
-    "node": ">=22"
-  },
-  "scripts": {
-    "dev": "turbo dev",
-    "build": "turbo build",
-    "typecheck": "turbo typecheck",
-    "lint": "eslint .",
-    "clean": "turbo clean",
-    "test": "turbo run test",
-    "format": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
-    "format:fix": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\""
-  },
-  "devDependencies": {
-    "@tooling/eslint": "workspace:*",
-    "@typescript/native-preview": "7.0.0-dev.20260607.1",
-    "eslint": "catalog:",
-    "prettier": "catalog:",
-    "turbo": "catalog:",
-    "typescript": "^5.7.0"
-  }
+    "name": "project-editor",
+    "private": true,
+    "packageManager": "pnpm@11.5.0",
+    "engines": {
+        "node": ">=22"
+    },
+    "scripts": {
+        "dev": "turbo dev",
+        "build": "turbo build",
+        "typecheck": "turbo typecheck",
+        "lint": "eslint .",
+        "clean": "turbo clean",
+        "test": "turbo run test",
+        "format": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+        "format:fix": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\""
+    },
+    "devDependencies": {
+        "@tooling/eslint": "workspace:*",
+        "@typescript/native-preview": "7.0.0-dev.20260607.1",
+        "eslint": "catalog:",
+        "prettier": "catalog:",
+        "turbo": "catalog:",
+        "typescript": "^5.7.0"
+    }
 }

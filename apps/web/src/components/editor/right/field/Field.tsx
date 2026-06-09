@@ -37,3 +37,4 @@ export function FieldLabel({ className, ...props }: React.ComponentProps<"label"
 export function FieldControl({ className, ...props }: React.ComponentProps<"div">) {
 	return <div className={cn("[&>input]:w-full [&>select]:w-full", className)} {...props} />;
 }
+

@@ -14,6 +14,7 @@ import { Check, ChevronDown, Search } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { VisuallyHidden } from "radix-ui";
+import { schemaRenderers } from "#/components/editor/right/field/renderer";
 
 export const PickListField = React.memo(function PickListField({
 	name,
@@ -130,3 +131,5 @@ export const PickListField = React.memo(function PickListField({
 
 	throw new Error(`Unknown option ${value}, this should not happen`);
 });
+
+schemaRenderers.set("picklist", PickListField);

@@ -11,11 +11,12 @@ import { SchemaLabel } from "./SchemaLabel";
 import { removeByJsonPath } from "./util";
 import { getSchemaMetadata } from "@project/schema";
 import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
+import { schemaRenderers } from "#/components/editor/right/field/renderer";
 
 export const StringField = React.memo(function StringField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const stringValue = typeof value === "string" ? value : String(value);
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
-	
+
 	function handleChange(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
 		const newVal = event.currentTarget.value;
 		const isDefault = newVal === v.getDefault(entrySchema);
@@ -45,3 +46,5 @@ export const StringField = React.memo(function StringField({ name, value, onChan
 		</Field>
 	);
 });
+
+schemaRenderers.set("string", StringField);

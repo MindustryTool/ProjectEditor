@@ -31,6 +31,7 @@ import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { SchematicMapPreview } from "#/components/editor/SchematicMapPreview";
 
 const ModHjsonPanel = lazy(() => import("./right/ModHjsonPanel").then((m) => ({ default: m.ModHjsonPanel })));
 const ItemPanel = lazy(() => import("./right/ItemPanel").then((m) => ({ default: m.ItemPanel })));
@@ -47,7 +48,9 @@ type EditorRoute =
 	| { type: "mod"; path: string }
 	| { type: "image"; path: string }
 	| { type: "sprite"; path: string; striped: string }
-	| { type: "text"; path: string };
+	| { type: "text"; path: string }
+	| { type: "msav"; path: string }
+	| { type: "msch"; path: string };
 
 type PropertiesRoute =
 	| { type: "none" }
@@ -61,6 +64,8 @@ type PropertiesRoute =
 
 function matchEditorRoute(path: string | null, entry: { kind: string } | undefined): EditorRoute {
 	if (path === null || entry === undefined) return { type: "empty" };
+
+	path = path.toLowerCase();
 
 	if (path.startsWith("bundles/") && isBundleFilename(path.split("/").pop() ?? "")) {
 		return { type: "bundle", path };
@@ -78,7 +83,15 @@ function matchEditorRoute(path: string | null, entry: { kind: string } | undefin
 		return { type: "sprite", path, striped: path.replace("sprite:", "") };
 	}
 
-	if (entry.kind === "file") {
+    if (path.endsWith(".msav")) {
+        return { type: "msav", path };
+    }
+
+    if (path.endsWith(".msch")) {
+        return { type: "msch", path };
+    }
+
+	if ([".json", ".hjson", ".md", ".txt"].some((k) => path.endsWith(k))) {
 		return { type: "text", path };
 	}
 
@@ -87,6 +100,8 @@ function matchEditorRoute(path: string | null, entry: { kind: string } | undefin
 
 function matchPropertiesRoute(path: string | null): PropertiesRoute {
 	if (path === null) return { type: "none" };
+
+    path = path.toLowerCase();
 
 	if (path.startsWith("sprite:")) return { type: "none" };
 
@@ -142,6 +157,10 @@ function EditorContent({ path }: { path: string }) {
 			return <ImageWithSize path={route.path} />;
 		case "sprite":
 			return <UnitSpriteEditor striped={route.striped} />;
+        case "msav":
+            return <SchematicMapPreview path={route.path} type="msav" />;
+        case "msch":
+            return <SchematicMapPreview path={route.path} type="msch" />;
 		case "text":
 			return <TextEditor path={route.path} />;
 	}
