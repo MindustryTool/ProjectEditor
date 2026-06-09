@@ -21,7 +21,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Check circular dependencies
         run: |
-          for project in apps/web packages/api packages/config packages/core packages/fs packages/hjson packages/schema packages/state packages/types packages/utils packages/zip; do
+          for project in apps/web packages/api packages/config packages/core packages/fs packages/hjson packages/state packages/types packages/utils packages/zip; do
             echo "Checking $project..."
             (cd "$project" && pnpm exec depcruise src --config .dependency-cruiser.cjs)
           done

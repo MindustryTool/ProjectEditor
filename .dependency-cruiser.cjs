@@ -4,7 +4,7 @@ module.exports = {
 			name: "no-circular",
 			severity: "error",
 			from: {
-				pathNot: "src/routeTree.gen.ts|src/router.tsx|/schema/",
+				pathNot: "src/routeTree.gen.ts|src/router.tsx",
 			},
 			to: { circular: true },
 		},
