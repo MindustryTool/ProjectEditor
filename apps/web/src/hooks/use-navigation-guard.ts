@@ -3,7 +3,7 @@ import { useBlocker } from "@tanstack/react-router";
 
 export function useNavigationGuard(projectId: string | null) {
 	const shouldBlockFn = useCallback(() => {
-		return !!projectId;
+		return !!projectId && process.env.NODE_ENV !== "development";
 	}, [projectId]);
 
 	const blocker = useBlocker({

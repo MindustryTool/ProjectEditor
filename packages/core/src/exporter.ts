@@ -1,4 +1,4 @@
-import type { EventBus, ProjectEventMap, ProjectInfo } from "./stores/project.js";
+import type { EventBus, ProjectEventMap, ProjectInfo } from "#/types";
 
 export interface ExportFs {
 	readdir(path: string): Promise<{ name: string; path: string; kind: "file" | "directory" }[]>;
