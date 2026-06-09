@@ -51,6 +51,10 @@ const SchematicMapLoader = React.memo(function SchematicMapLoader({ data, type }
 		return <div className="flex justify-center items-center h-full w-full overflow-hidden">{String(error)}</div>;
 	}
 
+    if (!imageUrl) {
+        return null;
+    }
+
 	return (
 		<img className="w-full h-full object-contain" src={imageUrl} alt={type === "schematic" ? "Schematic" : "Map"} />
 	);
