@@ -8,7 +8,7 @@ import {
 	getSchemaMetadata,
 	type AnySchema,
 	MindustryHexColorSchema,
-    metadata,
+	metadata,
 	UnitHjsonSchema,
 } from "@project/schema";
 import type { ProjectContents } from "@project/types";
@@ -181,10 +181,7 @@ describe("getSchemaMetadata", () => {
 	});
 
 	it("unwrapSchema still strips v.pipe(v.optional(x), metadata()) to reach inner type", () => {
-		const schema = v.pipe(
-			v.optional(v.number()),
-			metadata({ name: "test" }),
-		);
+		const schema = v.pipe(v.optional(v.number()), metadata({ name: "test" }));
 		const unwrapped = unwrapSchema(schema as AnySchema);
 		expect((unwrapped as unknown as { type: string }).type).toBe("number");
 	});
@@ -206,7 +203,7 @@ describe("getSchemaMetadata", () => {
 			units: [],
 			sprites: [],
 			effects: [],
-            sounds: [],
+			sounds: [],
 		};
 		const schema = UnitHjsonSchema(mockContext);
 		const entries = getSchemaEntries(schema as AnySchema);
@@ -234,14 +231,8 @@ describe("getSchemaMetadata", () => {
 	});
 
 	it("getSchemaMetadata merges metadata from nested pipes", () => {
-		const inner = v.pipe(
-			v.string(),
-			metadata({ name: "inner-name", description: "inner-desc" }),
-		);
-		const schema = v.pipe(
-			inner,
-			metadata({ visibleWhen: { field: "x", value: true } }),
-		);
+		const inner = v.pipe(v.string(), metadata({ name: "inner-name", description: "inner-desc" }));
+		const schema = v.pipe(inner, metadata({ visibleWhen: { field: "x", value: true } }));
 		expect(getSchemaMetadata(schema as AnySchema)).toEqual({
 			name: "inner-name",
 			description: "inner-desc",
@@ -250,14 +241,8 @@ describe("getSchemaMetadata", () => {
 	});
 
 	it("getSchemaMetadata nested pipe outer overrides inner on conflict", () => {
-		const inner = v.pipe(
-			v.string(),
-			metadata({ name: "inner-name", description: "inner-desc" }),
-		);
-		const schema = v.pipe(
-			inner,
-			metadata({ name: "outer-name" }),
-		);
+		const inner = v.pipe(v.string(), metadata({ name: "inner-name", description: "inner-desc" }));
+		const schema = v.pipe(inner, metadata({ name: "outer-name" }));
 		expect(getSchemaMetadata(schema as AnySchema)).toEqual({
 			name: "outer-name",
 			description: "inner-desc",
@@ -265,14 +250,8 @@ describe("getSchemaMetadata", () => {
 	});
 
 	it("getTypeFromMetadata extracts type from merged metadata", () => {
-		const inner = v.pipe(
-			v.string(),
-			metadata({ name: "inner" }),
-		);
-		const schema = v.pipe(
-			inner,
-			metadata({ type: "effect" }),
-		);
+		const inner = v.pipe(v.string(), metadata({ name: "inner" }));
+		const schema = v.pipe(inner, metadata({ type: "effect" }));
 		const meta = getSchemaMetadata(schema as AnySchema);
 		expect(meta).toEqual({ name: "inner", type: "effect" });
 	});
@@ -286,15 +265,9 @@ describe("getSchemaMetadata", () => {
 		});
 		const entries = getSchemaEntries(schema as AnySchema);
 		const categories = entries.map(([, s]) => getSchemaMetadata(s as AnySchema)?.category);
-		const advIndices = categories
-			.map((c, i) => (c === "advanced" ? i : -1))
-			.filter((i) => i >= 0);
-		const genIndices = categories
-			.map((c, i) => (c === "general" ? i : -1))
-			.filter((i) => i >= 0);
-		const plainIndices = categories
-			.map((c, i) => (c === undefined ? i : -1))
-			.filter((i) => i >= 0);
+		const advIndices = categories.map((c, i) => (c === "advanced" ? i : -1)).filter((i) => i >= 0);
+		const genIndices = categories.map((c, i) => (c === "general" ? i : -1)).filter((i) => i >= 0);
+		const plainIndices = categories.map((c, i) => (c === undefined ? i : -1)).filter((i) => i >= 0);
 
 		expect(advIndices[0]!).toBeLessThan(advIndices[1]!);
 		expect(advIndices[0]!).toBeLessThan(genIndices[0]!);
@@ -310,7 +283,7 @@ describe("resolveSchema", () => {
 
 	it("returns inner schema for v.pipe(object, metadata)", () => {
 		const inner = v.object({ x: v.string() });
-		const piped = v.pipe(inner, metadata({ type: "object"  }));
+		const piped = v.pipe(inner, metadata({ type: "object" }));
 		const resolved = resolveSchema(piped as AnySchema, {});
 		expect(resolved).not.toBe(piped);
 		expect((resolved as unknown as { entries: Record<string, unknown> }).entries).toBeDefined();
@@ -322,6 +295,7 @@ describe("resolveSchema", () => {
 			if (type === "a") return v.object({ aField: v.string() });
 			return v.object({ bField: v.number() });
 		});
+        
 		const resolvedA = resolveSchema(schema as AnySchema, { type: "a" });
 		expect((resolvedA as unknown as Record<string, unknown>).type).toBe("object");
 		expect(getSchemaEntries(resolvedA as AnySchema).map(([k]) => k)).toEqual(["aField"]);

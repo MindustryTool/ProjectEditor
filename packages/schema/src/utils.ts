@@ -150,12 +150,22 @@ export function resolveSchema(schema: AnySchema, value: unknown): AnySchema {
 
 	if (Array.isArray(s.pipe)) {
 		for (let i = s.pipe.length - 1; i >= 0; i--) {
-			const { type } = detectSchemaType(s.pipe[i] as AnySchema, value);
+            const inner = s.pipe[i] as AnySchema | v.MetadataAction<unknown, Record<string, unknown>>;
+
+            if (inner.kind === "metadata") {
+                continue;
+            }
+
+            if (inner.type === "object" || inner.type === "array") {
+                return inner;
+            }
+
+			const { type } = detectSchemaType(inner, value);
 			if (type === "never") {
 				continue;
 			}
 
-			return resolveSchema(s.pipe[i] as AnySchema, value);
+			return resolveSchema(inner, value);
 		}
 	}
 
