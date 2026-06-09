@@ -8,7 +8,7 @@ export type * from "./project/store.js";
 
 export type { ProjectContext, RecentFileEntry } from "./project/session.js";
 export { useAppStore } from "./project/store.js";
-export { useProjectSession, useCurrentProject, TreeSnapshot, selectIsExpanded } from "./project/session.js";
+export { useProjectSession, useCurrentProject, selectIsExpanded } from "./project/session.js";
 
 export type { FileEntry, FileStore } from "./file/store.js";
 export { useFileStore, isDirty, isError, getEntry, selectEntry, exists, selectIsSaving } from "./file/store.js";
