@@ -4,10 +4,10 @@ import { ResearchSchema } from "./research";
 import type { SchemaFn } from "./utils";
 import { metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
-import { ContentNameSchema } from "./content";
 
 export const itemBaseObjectSchema = v.object({
-    name: ContentNameSchema,
+	name: v.optional(v.string()),
+	description: v.optional(v.string()),
 	hardness: v.pipe(
 		v.optional(v.pipe(v.number(), v.minValue(0), v.integer())),
 		metadata({ name: "editor.item.hardness", description: "editor.item.hardness-description" }),

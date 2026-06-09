@@ -20,7 +20,7 @@ import { TeamSchema } from "./team";
 import { fixed, metadata } from "./utils";
 import { TargetPriority } from "./target-priority";
 import { ConsumesHjsonSchema } from "./consumes";
-import { ContentFieldSchema, ContentNameSchema } from "./content";
+import { ContentFieldSchema } from "./content";
 import { Envs, EnvSchema } from "./envs";
 import type { ProjectContents } from "@project/types";
 import { ShootPatternHjsonSchema } from "./shoot-pattern";
@@ -195,7 +195,8 @@ export const blockTypes = [
 export type BlockType = (typeof blockTypes)[number];
 
 export const blockObjectSchema = {
-    name: ContentNameSchema,
+	name: v.optional(v.string()),
+	description: v.optional(v.string()),
 	type: classSchema(blockTypes, "Block"),
 	shadowTexture: TextureFieldSchema("@-shadow"),
 	teamTexture: TextureFieldSchema("@-team"),
@@ -1925,187 +1926,191 @@ const frackerObjectSchema = v.object({
 });
 
 // Production variant schemas
-const genericCrafterObjectSchema = (context: ProjectContents) => v.object({
-	outputItem: v.pipe(
-		v.optional(ItemStackSchema(context)),
-		metadata({
-			name: "editor.block-generic-crafter.output-item",
-			description: "editor.block-generic-crafter.output-item-description",
-		}),
-	),
-	outputItems: v.pipe(
-		v.optional(v.array(ItemStackSchema(context))),
-		metadata({
-			name: "editor.block-generic-crafter.output-items",
-			description: "editor.block-generic-crafter.output-items-description",
-		}),
-	),
-	outputLiquid: v.pipe(
-		v.optional(LiquidStackSchema(context)),
-		metadata({
-			name: "editor.block-generic-crafter.output-liquid",
-			description: "editor.block-generic-crafter.output-liquid-description",
-		}),
-	),
-	outputLiquids: v.pipe(
-		v.optional(v.array(LiquidStackSchema(context))),
-		metadata({
-			name: "editor.block-generic-crafter.output-liquids",
-			description: "editor.block-generic-crafter.output-liquids-description",
-		}),
-	),
-	liquidOutputDirections: v.pipe(
-		v.optional(v.array(v.number()), [-1]),
-		metadata({
-			name: "editor.block-generic-crafter.liquid-output-directions",
-			description: "editor.block-generic-crafter.liquid-output-directions-description",
-		}),
-	),
-	dumpExtraLiquid: v.pipe(
-		v.optional(v.boolean(), true),
-		metadata({
-			name: "editor.block-generic-crafter.dump-extra-liquid",
-			description: "editor.block-generic-crafter.dump-extra-liquid-description",
-		}),
-	),
-	ignoreLiquidFullness: v.pipe(
-		v.optional(v.boolean(), false),
-		metadata({
-			name: "editor.block-generic-crafter.ignore-liquid-fullness",
-			description: "editor.block-generic-crafter.ignore-liquid-fullness-description",
-		}),
-	),
-	craftTime: v.pipe(
-		v.optional(v.number(), 80),
-		metadata({
-			name: "editor.block-generic-crafter.craft-time",
-			description: "editor.block-generic-crafter.craft-time-description",
-		}),
-	),
-	updateEffectChance: v.pipe(
-		v.optional(v.number(), 0.04),
-		metadata({
-			name: "editor.block-generic-crafter.update-effect-chance",
-			description: "editor.block-generic-crafter.update-effect-chance-description",
-		}),
-	),
-	updateEffectSpread: v.pipe(
-		v.optional(v.number(), 4),
-		metadata({
-			name: "editor.block-generic-crafter.update-effect-spread",
-			description: "editor.block-generic-crafter.update-effect-spread-description",
-		}),
-	),
-	warmupSpeed: v.pipe(
-		v.optional(v.number(), 0.019),
-		metadata({
-			name: "editor.block-generic-crafter.warmup-speed",
-			description: "editor.block-generic-crafter.warmup-speed-description",
-		}),
-	),
-});
+const genericCrafterObjectSchema = (context: ProjectContents) =>
+	v.object({
+		outputItem: v.pipe(
+			v.optional(ItemStackSchema(context)),
+			metadata({
+				name: "editor.block-generic-crafter.output-item",
+				description: "editor.block-generic-crafter.output-item-description",
+			}),
+		),
+		outputItems: v.pipe(
+			v.optional(v.array(ItemStackSchema(context))),
+			metadata({
+				name: "editor.block-generic-crafter.output-items",
+				description: "editor.block-generic-crafter.output-items-description",
+			}),
+		),
+		outputLiquid: v.pipe(
+			v.optional(LiquidStackSchema(context)),
+			metadata({
+				name: "editor.block-generic-crafter.output-liquid",
+				description: "editor.block-generic-crafter.output-liquid-description",
+			}),
+		),
+		outputLiquids: v.pipe(
+			v.optional(v.array(LiquidStackSchema(context))),
+			metadata({
+				name: "editor.block-generic-crafter.output-liquids",
+				description: "editor.block-generic-crafter.output-liquids-description",
+			}),
+		),
+		liquidOutputDirections: v.pipe(
+			v.optional(v.array(v.number()), [-1]),
+			metadata({
+				name: "editor.block-generic-crafter.liquid-output-directions",
+				description: "editor.block-generic-crafter.liquid-output-directions-description",
+			}),
+		),
+		dumpExtraLiquid: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({
+				name: "editor.block-generic-crafter.dump-extra-liquid",
+				description: "editor.block-generic-crafter.dump-extra-liquid-description",
+			}),
+		),
+		ignoreLiquidFullness: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({
+				name: "editor.block-generic-crafter.ignore-liquid-fullness",
+				description: "editor.block-generic-crafter.ignore-liquid-fullness-description",
+			}),
+		),
+		craftTime: v.pipe(
+			v.optional(v.number(), 80),
+			metadata({
+				name: "editor.block-generic-crafter.craft-time",
+				description: "editor.block-generic-crafter.craft-time-description",
+			}),
+		),
+		updateEffectChance: v.pipe(
+			v.optional(v.number(), 0.04),
+			metadata({
+				name: "editor.block-generic-crafter.update-effect-chance",
+				description: "editor.block-generic-crafter.update-effect-chance-description",
+			}),
+		),
+		updateEffectSpread: v.pipe(
+			v.optional(v.number(), 4),
+			metadata({
+				name: "editor.block-generic-crafter.update-effect-spread",
+				description: "editor.block-generic-crafter.update-effect-spread-description",
+			}),
+		),
+		warmupSpeed: v.pipe(
+			v.optional(v.number(), 0.019),
+			metadata({
+				name: "editor.block-generic-crafter.warmup-speed",
+				description: "editor.block-generic-crafter.warmup-speed-description",
+			}),
+		),
+	});
 
-const heatCrafterObjectSchema = (context: ProjectContents) => v.object({
-	...genericCrafterObjectSchema(context).entries,
-	heatRequirement: v.pipe(
-		v.optional(v.number(), 10),
-		metadata({
-			name: "editor.block-heat-crafter.heat-requirement",
-			description: "editor.block-heat-crafter.heat-requirement-description",
-		}),
-	),
-	overheatScale: v.pipe(
-		v.optional(v.number(), 1),
-		metadata({
-			name: "editor.block-heat-crafter.overheat-scale",
-			description: "editor.block-heat-crafter.overheat-scale-description",
-		}),
-	),
-	maxEfficiency: v.pipe(
-		v.optional(v.number(), 4),
-		metadata({
-			name: "editor.block-heat-crafter.max-efficiency",
-			description: "editor.block-heat-crafter.max-efficiency-description",
-		}),
-	),
-});
+const heatCrafterObjectSchema = (context: ProjectContents) =>
+	v.object({
+		...genericCrafterObjectSchema(context).entries,
+		heatRequirement: v.pipe(
+			v.optional(v.number(), 10),
+			metadata({
+				name: "editor.block-heat-crafter.heat-requirement",
+				description: "editor.block-heat-crafter.heat-requirement-description",
+			}),
+		),
+		overheatScale: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({
+				name: "editor.block-heat-crafter.overheat-scale",
+				description: "editor.block-heat-crafter.overheat-scale-description",
+			}),
+		),
+		maxEfficiency: v.pipe(
+			v.optional(v.number(), 4),
+			metadata({
+				name: "editor.block-heat-crafter.max-efficiency",
+				description: "editor.block-heat-crafter.max-efficiency-description",
+			}),
+		),
+	});
 
-const attributeCrafterObjectSchema = (context: ProjectContents) => v.object({
-	...genericCrafterObjectSchema(context).entries,
-	attribute: v.pipe(
-		v.optional(v.string(), "heat"),
-		metadata({
-			name: "editor.block-attribute-crafter.attribute",
-			description: "editor.block-attribute-crafter.attribute-description",
-		}),
-	),
-	baseEfficiency: v.pipe(
-		v.optional(v.number(), 1),
-		metadata({
-			name: "editor.block-attribute-crafter.base-efficiency",
-			description: "editor.block-attribute-crafter.base-efficiency-description",
-		}),
-	),
-	boostScale: v.pipe(
-		v.optional(v.number(), 1),
-		metadata({
-			name: "editor.block-attribute-crafter.boost-scale",
-			description: "editor.block-attribute-crafter.boost-scale-description",
-		}),
-	),
-	maxBoost: v.pipe(
-		v.optional(v.number(), 1),
-		metadata({
-			name: "editor.block-attribute-crafter.max-boost",
-			description: "editor.block-attribute-crafter.max-boost-description",
-		}),
-	),
-	minEfficiency: v.pipe(
-		v.optional(v.number(), -1),
-		metadata({
-			name: "editor.block-attribute-crafter.min-efficiency",
-			description: "editor.block-attribute-crafter.min-efficiency-description",
-		}),
-	),
-	displayEfficiencyScale: v.pipe(
-		v.optional(v.number(), 1),
-		metadata({
-			name: "editor.block-attribute-crafter.display-efficiency-scale",
-			description: "editor.block-attribute-crafter.display-efficiency-scale-description",
-		}),
-	),
-	displayEfficiency: v.pipe(
-		v.optional(v.boolean(), true),
-		metadata({
-			name: "editor.block-attribute-crafter.display-efficiency",
-			description: "editor.block-attribute-crafter.display-efficiency-description",
-		}),
-	),
-	scaleLiquidConsumption: v.pipe(
-		v.optional(v.boolean(), false),
-		metadata({
-			name: "editor.block-attribute-crafter.scale-liquid-consumption",
-			description: "editor.block-attribute-crafter.scale-liquid-consumption-description",
-		}),
-	),
-});
+const attributeCrafterObjectSchema = (context: ProjectContents) =>
+	v.object({
+		...genericCrafterObjectSchema(context).entries,
+		attribute: v.pipe(
+			v.optional(v.string(), "heat"),
+			metadata({
+				name: "editor.block-attribute-crafter.attribute",
+				description: "editor.block-attribute-crafter.attribute-description",
+			}),
+		),
+		baseEfficiency: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({
+				name: "editor.block-attribute-crafter.base-efficiency",
+				description: "editor.block-attribute-crafter.base-efficiency-description",
+			}),
+		),
+		boostScale: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({
+				name: "editor.block-attribute-crafter.boost-scale",
+				description: "editor.block-attribute-crafter.boost-scale-description",
+			}),
+		),
+		maxBoost: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({
+				name: "editor.block-attribute-crafter.max-boost",
+				description: "editor.block-attribute-crafter.max-boost-description",
+			}),
+		),
+		minEfficiency: v.pipe(
+			v.optional(v.number(), -1),
+			metadata({
+				name: "editor.block-attribute-crafter.min-efficiency",
+				description: "editor.block-attribute-crafter.min-efficiency-description",
+			}),
+		),
+		displayEfficiencyScale: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({
+				name: "editor.block-attribute-crafter.display-efficiency-scale",
+				description: "editor.block-attribute-crafter.display-efficiency-scale-description",
+			}),
+		),
+		displayEfficiency: v.pipe(
+			v.optional(v.boolean(), true),
+			metadata({
+				name: "editor.block-attribute-crafter.display-efficiency",
+				description: "editor.block-attribute-crafter.display-efficiency-description",
+			}),
+		),
+		scaleLiquidConsumption: v.pipe(
+			v.optional(v.boolean(), false),
+			metadata({
+				name: "editor.block-attribute-crafter.scale-liquid-consumption",
+				description: "editor.block-attribute-crafter.scale-liquid-consumption-description",
+			}),
+		),
+	});
 
-const separatorObjectSchema = (context: ProjectContents) => v.object({
-	results: v.pipe(
-		v.optional(v.array(ItemStackSchema(context))),
-		metadata({
-			name: "editor.block-separator.results",
-			description: "editor.block-separator.results-description",
-		}),
-	),
-	craftTime: v.pipe(
-		v.optional(v.number(), 0),
-		metadata({
-			name: "editor.block-separator.craft-time",
-			description: "editor.block-separator.craft-time-description",
-		}),
-	),
-});
+const separatorObjectSchema = (context: ProjectContents) =>
+	v.object({
+		results: v.pipe(
+			v.optional(v.array(ItemStackSchema(context))),
+			metadata({
+				name: "editor.block-separator.results",
+				description: "editor.block-separator.results-description",
+			}),
+		),
+		craftTime: v.pipe(
+			v.optional(v.number(), 0),
+			metadata({
+				name: "editor.block-separator.craft-time",
+				description: "editor.block-separator.craft-time-description",
+			}),
+		),
+	});
 
 const drillObjectSchema = v.object({
 	rimTexture: TextureFieldSchema("@-rim"),
@@ -2502,23 +2507,24 @@ const itemIncineratorObjectSchema = v.object({
 	),
 });
 
-const heatProducerObjectSchema = (context: ProjectContents) => v.object({
-	...genericCrafterObjectSchema(context).entries,
-	heatOutput: v.pipe(
-		v.optional(v.number(), 10),
-		metadata({
-			name: "editor.block-heat-producer.heat-output",
-			description: "editor.block-heat-producer.heat-output-description",
-		}),
-	),
-	warmupRate: v.pipe(
-		v.optional(v.number(), 0.15),
-		metadata({
-			name: "editor.block-heat-producer.warmup-rate",
-			description: "editor.block-heat-producer.warmup-rate-description",
-		}),
-	),
-});
+const heatProducerObjectSchema = (context: ProjectContents) =>
+	v.object({
+		...genericCrafterObjectSchema(context).entries,
+		heatOutput: v.pipe(
+			v.optional(v.number(), 10),
+			metadata({
+				name: "editor.block-heat-producer.heat-output",
+				description: "editor.block-heat-producer.heat-output-description",
+			}),
+		),
+		warmupRate: v.pipe(
+			v.optional(v.number(), 0.15),
+			metadata({
+				name: "editor.block-heat-producer.warmup-rate",
+				description: "editor.block-heat-producer.warmup-rate-description",
+			}),
+		),
+	});
 
 // Defense variant schemas
 const wallObjectSchema = v.object({
