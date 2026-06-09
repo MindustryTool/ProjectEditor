@@ -1,13 +1,13 @@
 import type { TreeSnapshot, ValidationBatchFile, ValidationResult } from "@project/core";
 import { useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { getExporter, hasDefaultValidatorMatch } from "@project/core";
+import { hasDefaultValidatorMatch, JsonExporter } from "@project/core";
 import { useProjectSession, useValidationStore } from "@project/core";
-import { cn } from "~/lib/utils";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
-import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from "~/components/ui/input-group";
-import { Progress } from "~/components/ui/progress";
+import { cn } from "#/lib/utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "#/components/ui/dialog";
+import { Button } from "#/components/ui/button";
+import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from "#/components/ui/input-group";
+import { Progress } from "#/components/ui/progress";
 import { ValidationErrorList, type ValidationFileError } from "#/components/editor/ValidationErrorList";
 import { usePath } from "#/hooks/use-path";
 import { validationService } from "#/services/validation-service";
@@ -30,7 +30,7 @@ export function ExportMenu({ className }: ExportMenuProps) {
 			if (!projectContext) return;
 
 			try {
-				const exporter = getExporter(projectContext.project.language);
+				const exporter = new JsonExporter();
 				const zipData = await exporter.export(projectContext);
 
 				const bytes = new Uint8Array(zipData.byteLength);

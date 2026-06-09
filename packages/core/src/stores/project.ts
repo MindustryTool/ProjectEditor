@@ -1,13 +1,14 @@
+import * as v from "valibot";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { ProjectLanguage, ProjectEventMap, ProjectInfo, ProjectContext } from "@project/core";
-import { createProjectInfo, createEventBus, importProject, ValidationResults, useValidationStore } from "@project/core";
-import { createProjectFileSystem } from "@project/core";
-import { TreeSnapshot, useProjectSession } from "./session";
+import { useValidationStore } from "#/validation/store";
+import { ValidationResults } from "#/validation/types";
+import { TreeSnapshot, useProjectSession } from "#/stores/session";
 import { AppSettingsSchema, ProjectRecordSchema, type AppSettings, type ProjectRecord } from "@project/schema";
-import * as v from "valibot";
-
-export type { ProjectContext, RecentFileEntry } from "./session";
+import { createProjectFileSystem } from "#/project-file-system";
+import { importProject } from "#/importer";
+import type { EventBus, ProjectEventMap, ProjectInfo, Unsubscribe, ProjectLanguage } from "#/types";
+import type { ProjectContext } from "#/stores/session";
 
 interface AppState {
 	projects: Record<string, ProjectRecord>;
@@ -25,17 +26,25 @@ export const useAppStore = create<AppState>()(
 	persist(
 		(set, get) => ({
 			projects: {},
-			settings: { firstTime: true, theme: "system" as const, fontSize: 14, tabSize: 2, padding: 0,  validation: { validationDelayMs: 500 } },
+			settings: {
+				firstTime: true,
+				theme: "system" as const,
+				fontSize: 14,
+				tabSize: 2,
+				padding: 0,
+				validation: { validationDelayMs: 500 },
+			},
 
 			createNewProject: async (name: string, language: ProjectLanguage) => {
-				const project = createProjectInfo(name, language);
-				get().saveProject({
-					id: project.id,
-					name: project.name,
-					language: project.language,
-					createdAt: project.createdAt,
-					updatedAt: project.updatedAt,
-				});
+				const project = {
+					id: crypto.randomUUID(),
+					name,
+					language,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+				};
+
+				await get().saveProject(project);
 
 				const events = createEventBus<ProjectEventMap>();
 				const fs = await createProjectFileSystem(project, events, {
@@ -94,15 +103,15 @@ export const useAppStore = create<AppState>()(
 			},
 			importProject: async (buffer, callback) => {
 				const result = await importProject(new Uint8Array(buffer));
-				const project = createProjectInfo(result.name, result.language);
+				const project = {
+					id: crypto.randomUUID(),
+					name: result.name,
+					language: result.language,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+				};
 
-				await useAppStore.getState().saveProject({
-					id: project.id,
-					name: project.name,
-					language: project.language,
-					createdAt: project.createdAt,
-					updatedAt: project.updatedAt,
-				});
+				await useAppStore.getState().saveProject(project);
 
 				const events = createEventBus<ProjectEventMap>();
 				const fs = await createProjectFileSystem(project, events, {
@@ -147,3 +156,45 @@ export const useAppStore = create<AppState>()(
 		},
 	),
 );
+
+export function createEventBus<T extends { [K in keyof T]: unknown[] }>(): EventBus<T> {
+	const handlers = new Map<string, Set<(...args: unknown[]) => void>>();
+
+	function on<K extends keyof T>(event: K, handler: (...args: T[K]) => void): Unsubscribe {
+		const key = String(event);
+		if (!handlers.has(key)) handlers.set(key, new Set());
+		handlers.get(key)!.add(handler as (...args: unknown[]) => void);
+		return () => {
+			handlers.get(key)?.delete(handler as (...args: unknown[]) => void);
+		};
+	}
+
+	function off<K extends keyof T>(event: K, handler: (...args: T[K]) => void): void {
+		const key = String(event);
+		handlers.get(key)?.delete(handler as (...args: unknown[]) => void);
+	}
+
+	function once<K extends keyof T>(event: K, handler: (...args: T[K]) => void): Unsubscribe {
+		const wrapped = (...args: T[K]) => {
+			off(event, wrapped as (...args: T[K]) => void);
+			handler(...args);
+		};
+		return on(event, wrapped as (...args: T[K]) => void);
+	}
+
+	function emit<K extends keyof T>(event: K, ...args: T[K]): void {
+		const key = String(event);
+		const set = handlers.get(key);
+		if (!set) return;
+		for (const h of [...set]) {
+			try {
+				h(...args);
+			} catch (e) {
+				console.error(e);
+			}
+		}
+		console.log(`Emitted ${key} with ${JSON.stringify(args)}`);
+	}
+
+	return { on, off, once, emit };
+}

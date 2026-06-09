@@ -1,4 +1,4 @@
-import { useIsDesktop } from "~/hooks/use-is-desktop";
+import { useIsDesktop } from "#/hooks/use-is-desktop";
 import { NavigationGuardDialog } from "./NavigationGuardDialog";
 import { ProjectMenu } from "./toolbar/ProjectMenu";
 import { EditMenu } from "./toolbar/EditMenu";
@@ -7,7 +7,7 @@ import { ExportMenu } from "./ExportMenu";
 import { LocalizationMenu } from "./toolbar/LocalizationMenu";
 import { Toolbar } from "./Toolbar";
 import { StatusBar } from "./StatusBar";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "~/components/ui/resizable";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "#/components/ui/resizable";
 import { StatusBarLeft } from "./statusbar/StatusBarLeft";
 import { StatusBarCenter } from "./statusbar/StatusBarCenter";
 import { StatusBarRight } from "./statusbar/StatusBarRight";
@@ -29,8 +29,8 @@ import { ImageWithSize } from "./ImageWithSize";
 import { NoOpenedFileScreen } from "./NoOpenedFileScreen";
 import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Sheet, SheetContent, SheetTrigger } from "#/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import { SchematicMapPreview } from "#/components/editor/SchematicMapPreview";
 
 const ModHjsonPanel = lazy(() => import("./right/ModHjsonPanel").then((m) => ({ default: m.ModHjsonPanel })));
@@ -83,13 +83,13 @@ function matchEditorRoute(path: string | null, entry: { kind: string } | undefin
 		return { type: "sprite", path, striped: path.replace("sprite:", "") };
 	}
 
-    if (path.endsWith(".msav")) {
-        return { type: "msav", path };
-    }
+	if (path.endsWith(".msav")) {
+		return { type: "msav", path };
+	}
 
-    if (path.endsWith(".msch")) {
-        return { type: "msch", path };
-    }
+	if (path.endsWith(".msch")) {
+		return { type: "msch", path };
+	}
 
 	if ([".json", ".hjson", ".md", ".txt"].some((k) => path.endsWith(k))) {
 		return { type: "text", path };
@@ -101,7 +101,7 @@ function matchEditorRoute(path: string | null, entry: { kind: string } | undefin
 function matchPropertiesRoute(path: string | null): PropertiesRoute {
 	if (path === null) return { type: "none" };
 
-    path = path.toLowerCase();
+	path = path.toLowerCase();
 
 	if (path.startsWith("sprite:")) return { type: "none" };
 
@@ -157,10 +157,10 @@ function EditorContent({ path }: { path: string }) {
 			return <ImageWithSize path={route.path} />;
 		case "sprite":
 			return <UnitSpriteEditor striped={route.striped} />;
-        case "msav":
-            return <SchematicMapPreview path={route.path} type="map" />;
-        case "msch":
-            return <SchematicMapPreview path={route.path} type="schematic" />;
+		case "msav":
+			return <SchematicMapPreview path={route.path} type="map" />;
+		case "msch":
+			return <SchematicMapPreview path={route.path} type="schematic" />;
 		case "text":
 			return <TextEditor path={route.path} />;
 	}

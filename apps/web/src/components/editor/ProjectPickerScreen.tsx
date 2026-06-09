@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import { Button } from "#/components/ui/button";
+import { Input } from "#/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 import type { ProjectLanguage } from "@project/core";
 import { useAppStore } from "@project/core";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import { FolderOpen, Plus, Settings, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Separator } from "#/components/ui/separator";
-import { ProjectSettingsDialog } from "~/components/editor/toolbar/ProjectSettingsDialog";
+import { ProjectSettingsDialog } from "#/components/editor/toolbar/ProjectSettingsDialog";
 import { LANGUAGE_OPTIONS, LanguageBadge } from "./LanguageBadge";
 import { Spinner } from "#/components/ui/spinner";
 

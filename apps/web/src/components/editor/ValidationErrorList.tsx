@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { ValidationResult } from "@project/core";
-import { cn } from "~/lib/utils";
+import { cn } from "#/lib/utils";
 import { useCallback, useState } from "react";
 
 export type ValidationFileError = ValidationResult & { filePath: string };
@@ -29,7 +29,7 @@ export function ValidationErrorList({ items, onNavigate, className }: Validation
 			const scrollHeight = target.scrollHeight;
 			const clientHeight = target.clientHeight;
 			const isAtBottom = scrollTop + clientHeight >= scrollHeight - 100;
-            
+
 			if (isAtBottom) {
 				setRender(render + 30);
 			}

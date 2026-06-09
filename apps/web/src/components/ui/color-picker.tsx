@@ -14,9 +14,9 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { Input } from "~/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
-import { cn } from "~/lib/utils";
+import { Input } from "#/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
+import { cn } from "#/lib/utils";
 
 interface Ctx {
 	hue: number;

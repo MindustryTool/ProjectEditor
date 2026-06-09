@@ -8,8 +8,8 @@ import {
 	SelectGroup,
 	SelectLabel,
 	SelectSeparator,
-} from "~/components/ui/select";
-import { Label } from "~/components/ui/label";
+} from "#/components/ui/select";
+import { Label } from "#/components/ui/label";
 import { ContentImage } from "#/components/editor/ContentImage";
 import type { ContentEntry } from "@project/types";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
@@ -86,7 +86,7 @@ function createHookSelector(useHook: () => readonly ContentEntry[]) {
 			const entry = entriesRef.current.find((e) => e.path === choice);
 			if (entry?.type === "project") {
 				// TODO: load project file
-                return entry.path;
+				return entry.path;
 			}
 			return "";
 		}, [choice]);

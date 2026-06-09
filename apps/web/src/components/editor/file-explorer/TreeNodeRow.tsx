@@ -1,5 +1,5 @@
 import { ChevronRight, ChevronDown } from "lucide-react";
-import { cn } from "~/lib/utils";
+import { cn } from "#/lib/utils";
 import { type TreeNode } from "@project/fs";
 import { getIcon } from "./file-tree";
 import { RootName } from "./RootName";

@@ -11,10 +11,10 @@ import {
 	DropdownMenuSubContent,
 	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+} from "#/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
-import { cn } from "~/lib/utils";
-import { SUPPORTED_LOCALES, type Locale } from "~/lib/locales";
+import { cn } from "#/lib/utils";
+import { SUPPORTED_LOCALES, type Locale } from "#/lib/locales";
 import { useTheme } from "#/components/ThemeProvider";
 
 type Theme = "light" | "dark" | "system";

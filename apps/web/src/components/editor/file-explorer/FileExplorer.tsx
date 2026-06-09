@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import type { TreeNode } from "@project/fs";
 import { useCurrentProject, useProjectSession } from "@project/core";
-import { cn } from "~/lib/utils";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from "~/components/ui/dropdown-menu";
+import { cn } from "#/lib/utils";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from "#/components/ui/dropdown-menu";
 import { buildFileTree } from "./file-tree";
 import { TreeNodeChildren } from "./TreeNodeChildren";
 import { FileSearchDialog } from "#/components/editor/file-explorer/FileSearchDialog";
@@ -57,12 +57,13 @@ export function FileExplorer({ className }: FileExplorerProps) {
 				<TreeNodeChildren key={node.name} node={node} depth={0} onContextMenu={handleContextMenu} />
 			))}
 			{contextMenu && (
-				<DropdownMenu open onOpenChange={(open) => { if (!open) setContextMenu(null); }}>
-					<DropdownMenuContent
-						side="right"
-						sideOffset={0}
-						style={{ position: "fixed", left: contextMenu.x, top: contextMenu.y }}
-					>
+				<DropdownMenu
+					open
+					onOpenChange={(open) => {
+						if (!open) setContextMenu(null);
+					}}
+				>
+					<DropdownMenuContent side="right" sideOffset={0} style={{ position: "fixed", left: contextMenu.x, top: contextMenu.y }}>
 						<DropdownMenuItem
 							onClick={() => {
 								setEditingPath(contextMenu.path);

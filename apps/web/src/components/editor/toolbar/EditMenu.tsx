@@ -3,8 +3,8 @@ import { useTranslation } from "react-i18next";
 import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { useAppStore, useFileString, useProjectSession } from "@project/core";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
-import { cn } from "~/lib/utils";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "#/components/ui/dropdown-menu";
+import { cn } from "#/lib/utils";
 import { usePath } from "#/hooks/use-path";
 import { canFormatFilePath, formatFileContent } from "#/lib/format-file-content";
 

@@ -2,7 +2,7 @@ import { HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { ThemeProvider } from "#/components/ThemeProvider";
-import { Toaster } from "~/components/ui/sonner";
+import { Toaster } from "#/components/ui/sonner";
 import i18n from "#/i18n/i18n";
 import { PostHogProvider } from "@posthog/react";
 
@@ -50,10 +50,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 						}}
 					>
 						<QueryClientProvider client={queryClient}>
-								<ThemeProvider defaultTheme="system" storageKey="theme">
-									{children}
-								</ThemeProvider>
-							</QueryClientProvider>
+							<ThemeProvider defaultTheme="system" storageKey="theme">
+								{children}
+							</ThemeProvider>
+						</QueryClientProvider>
 					</PostHogProvider>
 				</main>
 				<Toaster />

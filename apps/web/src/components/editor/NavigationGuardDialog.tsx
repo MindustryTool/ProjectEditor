@@ -6,9 +6,9 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-} from "~/components/ui/alert-dialog";
-import { Button } from "~/components/ui/button";
-import { useNavigationGuard } from "~/hooks/use-navigation-guard";
+} from "#/components/ui/alert-dialog";
+import { Button } from "#/components/ui/button";
+import { useNavigationGuard } from "#/hooks/use-navigation-guard";
 
 interface NavigationGuardDialogProps {
 	projectId: string | null;

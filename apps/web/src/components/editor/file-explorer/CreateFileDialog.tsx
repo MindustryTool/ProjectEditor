@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "~/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
-import { Button } from "~/components/ui/button";
-import { Label } from "~/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "#/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
+import { Button } from "#/components/ui/button";
+import { Label } from "#/components/ui/label";
 import { InputGroup, InputGroupInput, InputGroupAddon } from "#/components/ui/input-group";
 import { useCurrentProject } from "@project/core";
 import { TemplateSelector } from "#/components/editor/left/TemplateSelector";

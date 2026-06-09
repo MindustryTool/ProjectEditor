@@ -5,10 +5,10 @@ import { toast } from "sonner";
 import { deleteProjectFiles } from "@project/core";
 import { useAppStore, useProjectSession } from "@project/core";
 import type { ProjectRecord } from "@project/schema";
-import { Spinner } from "~/components/ui/spinner";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
+import { Spinner } from "#/components/ui/spinner";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
+import { Button } from "#/components/ui/button";
+import { Input } from "#/components/ui/input";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -19,7 +19,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 	AlertDialogTrigger,
-} from "~/components/ui/alert-dialog";
+} from "#/components/ui/alert-dialog";
 import { useProjectActions } from "#/hooks/use-project-actions";
 
 type NameError = "empty" | "invalid" | null;

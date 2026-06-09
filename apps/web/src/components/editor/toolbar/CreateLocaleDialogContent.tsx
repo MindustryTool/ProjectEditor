@@ -1,9 +1,9 @@
 import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useProjectSession, SUPPORTED_LOCALES, isBundleFilename, getLocaleFromFilename, parseBundle } from "@project/core";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
-import { Button } from "~/components/ui/button";
-import { DialogHeader, DialogTitle, DialogFooter } from "~/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
+import { Button } from "#/components/ui/button";
+import { DialogHeader, DialogTitle, DialogFooter } from "#/components/ui/dialog";
 import { FLAG_MAP } from "@project/core";
 import { FileIcon } from "#/components/editor/FileIcon";
 

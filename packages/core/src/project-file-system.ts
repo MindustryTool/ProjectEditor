@@ -1,4 +1,4 @@
-import type { EventBus, ProjectEventMap, ProjectInfo } from "./index.js";
+import type { EventBus, ProjectEventMap, ProjectInfo } from "#/types";
 import type { VirtualFileSystem, FileEntry, FileStat, TreeNode } from "@project/fs";
 import { type DefaultProjectFileTree, jsonProjectTree, createOPFSAdapter } from "@project/fs";
 import { HJSON } from "@project/hjson";

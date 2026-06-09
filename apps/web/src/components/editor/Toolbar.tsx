@@ -7,7 +7,7 @@ import { VisuallyHidden } from "radix-ui";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { useFileStore } from "@project/core";
-import { cn } from "~/lib/utils";
+import { cn } from "#/lib/utils";
 
 interface ToolbarProps {
 	children: ReactNode;
@@ -113,15 +113,11 @@ function DebugDialogContent() {
 				<span className="w-20 shrink-0 text-right">Saved At</span>
 			</div>
 			{files.length === 0 && <div className="px-1 py-4 text-center text-muted-foreground">No files loaded</div>}
-			<div  className="flex items-center gap-2 px-1 py-1 hover:bg-muted/50 border-b border-border/30">
-				<span className="w-52 shrink-0 truncate" >
-					Total
-				</span>
+			<div className="flex items-center gap-2 px-1 py-1 hover:bg-muted/50 border-b border-border/30">
+				<span className="w-52 shrink-0 truncate">Total</span>
 				<span className="w-16 shrink-0 text-right tabular-nums">{formatBytes(files.reduce((a, b) => a + b.size, 0))}</span>
-				<span className="w-14 shrink-0 flex justify-center gap-1">
-				</span>
-				<span className="w-20 shrink-0 text-right tabular-nums text-muted-foreground">
-				</span>
+				<span className="w-14 shrink-0 flex justify-center gap-1"></span>
+				<span className="w-20 shrink-0 text-right tabular-nums text-muted-foreground"></span>
 			</div>
 			{files.map((f) => (
 				<div key={f.key} className="flex items-center gap-2 px-1 py-1 hover:bg-muted/50 border-b border-border/30">

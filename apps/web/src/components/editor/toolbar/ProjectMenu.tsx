@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "#/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
-import { cn } from "~/lib/utils";
+import { cn } from "#/lib/utils";
 import { useProjectSession, useAppStore } from "@project/core";
 import { toast } from "sonner";
 import { ProjectPickerDialog } from "#/components/editor/ProjectPickerDialog";
@@ -79,7 +79,6 @@ export function ProjectMenu({ className }: ProjectMenuProps) {
 		},
 		[createProject, navigateToProject],
 	);
-
 
 	const handleOpenProject = useCallback(
 		async (record: ProjectRecord) => {

@@ -1,6 +1,6 @@
 import { lazy, memo, Suspense } from "react";
 import { useFileString } from "@project/core";
-import { getLanguageFromPath } from "~/lib/monaco/languageMap";
+import { getLanguageFromPath } from "#/lib/monaco/languageMap";
 import { Spinner } from "#/components/ui/spinner";
 import { ErrorBoundary } from "#/components/ui/error-boundary";
 

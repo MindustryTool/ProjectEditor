@@ -9,7 +9,7 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-} from "~/components/ui/alert-dialog";
+} from "#/components/ui/alert-dialog";
 import { useCurrentProject } from "@project/core";
 
 interface DeleteFileDialogProps {

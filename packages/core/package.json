@@ -1,40 +1,40 @@
 {
-  "name": "@project/core",
-  "type": "module",
-  "version": "0.1.0",
-  "private": true,
-  "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "import": "./src/index.ts",
-      "default": "./src/index.ts"
+    "name": "@project/core",
+    "type": "module",
+    "version": "0.1.0",
+    "private": true,
+    "exports": {
+        ".": {
+            "types": "./src/index.ts",
+            "import": "./src/index.ts",
+            "default": "./src/index.ts"
+        }
+    },
+    "scripts": {
+        "typecheck": "tsc --noEmit",
+        "clean": "rm -rf dist",
+        "test": "vitest run",
+        "test:watch": "vitest"
+    },
+    "dependencies": {
+        "@project/zip": "workspace:*",
+        "@project/utils": "workspace:*",
+        "@project/config": "workspace:*",
+        "@project/fs": "workspace:*",
+        "@project/schema": "workspace:*",
+        "@project/hjson": "workspace:*",
+        "@project/types": "workspace:*",
+        "zustand": "catalog:",
+        "valibot": "catalog:"
+    },
+    "peerDependencies": {
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
+    },
+    "devDependencies": {
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "typescript": "^5.7.0",
+        "vitest": "catalog:"
     }
-  },
-  "scripts": {
-    "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist",
-    "test": "vitest run",
-    "test:watch": "vitest"
-  },
-  "dependencies": {
-    "@project/zip": "workspace:*",
-    "@project/utils": "workspace:*",
-    "@project/config": "workspace:*",
-    "@project/fs": "workspace:*",
-    "@project/schema": "workspace:*",
-    "@project/hjson": "workspace:*",
-    "@project/types": "workspace:*",
-    "zustand": "catalog:",
-    "valibot": "catalog:"
-  },
-  "peerDependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
-  },
-  "devDependencies": {
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "typescript": "^5.7.0",
-    "vitest": "catalog:"
-  }
 }

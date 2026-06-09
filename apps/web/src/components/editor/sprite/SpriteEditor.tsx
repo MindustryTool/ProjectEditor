@@ -2,7 +2,7 @@ import { useCanvasInteraction } from "#/components/editor/sprite/use-canvas-inte
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { Spinner } from "#/components/ui/spinner";
 import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "~/components/ui/resizable";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "#/components/ui/resizable";
 import { useFileString, useProjectSession } from "@project/core";
 import { HJSON } from "@project/hjson";
 import { collectSpriteData, type AnySchema, type SchemaFn, type SpriteData } from "@project/schema";

@@ -2,11 +2,11 @@ import { useMemo, useRef } from "react";
 import { debounce } from "@project/utils";
 import type { editor, IDisposable } from "monaco-editor";
 import Editor, { type BeforeMount, type OnMount, type Monaco } from "@monaco-editor/react";
-import { HJSON_LANGUAGE_ID, hjsonMonarchGrammar, hjsonLanguageConfig } from "~/lib/monaco/hjsonLanguage";
-import { JSON_MINDUSTRY_LANGUAGE_ID, jsonMindustryMonarchGrammar, jsonMindustryLanguageConfig } from "~/lib/monaco/jsonMindustryLanguage";
-import { getColorThemeRules, MONACO_THEME_DARK, MONACO_THEME_LIGHT } from "~/lib/monaco/colorTags";
+import { HJSON_LANGUAGE_ID, hjsonMonarchGrammar, hjsonLanguageConfig } from "#/lib/monaco/hjsonLanguage";
+import { JSON_MINDUSTRY_LANGUAGE_ID, jsonMindustryMonarchGrammar, jsonMindustryLanguageConfig } from "#/lib/monaco/jsonMindustryLanguage";
+import { getColorThemeRules, MONACO_THEME_DARK, MONACO_THEME_LIGHT } from "#/lib/monaco/colorTags";
 import { useAppStore } from "@project/core";
-import { configureMonaco } from "~/lib/monaco/setup";
+import { configureMonaco } from "#/lib/monaco/setup";
 import { useMonacoTheme } from "#/lib/monaco/use-monaco-theme";
 import { Spinner } from "#/components/ui/spinner";
 import { useEditorValidation } from "./useEditorValidation";
@@ -44,10 +44,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 	const onChangeRef = useRef(onChange);
 	onChangeRef.current = onChange;
 
-	const debouncedOnChange = useMemo(
-		() => debounce((value: string) => onChangeRef.current(value), 50),
-		[],
-	);
+	const debouncedOnChange = useMemo(() => debounce((value: string) => onChangeRef.current(value), 50), []);
 	const theme = useMonacoTheme();
 	const fontSize = useAppStore((s) => s.settings.fontSize);
 	const tabSize = useAppStore((s) => s.settings.tabSize);

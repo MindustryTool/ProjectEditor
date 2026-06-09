@@ -8,7 +8,7 @@ import {
 	toPickerColorValue,
 	type MINDUSTRY_COLORS,
 	type MindustryColorTagMatch,
-} from "~/lib/monaco/colorTags";
+} from "#/lib/monaco/colorTags";
 
 export interface ActiveColorTagState extends MindustryColorTagMatch {
 	lineNumber: number;
@@ -57,8 +57,8 @@ export function useColorTagPicker({ editorRef, monacoRef, readOnly, containerRef
 			if (!anchor) return null;
 
 			const duration = Date.now() - start;
-			
-            if (duration > 10) {
+
+			if (duration > 10) {
 				console.warn(`resolveActiveColorTag took ${duration}ms`);
 			}
 
@@ -75,7 +75,7 @@ export function useColorTagPicker({ editorRef, monacoRef, readOnly, containerRef
 
 	const refreshActiveColorTag = useCallback(
 		(position?: IPosition | null) => {
-            const start = Date.now();
+			const start = Date.now();
 			setActiveColorTag(resolveActiveColorTag(position));
 			const duration = Date.now() - start;
 			if (duration > 10) {
@@ -92,7 +92,7 @@ export function useColorTagPicker({ editorRef, monacoRef, readOnly, containerRef
 
 	const replaceActiveColorTag = useCallback(
 		(replacement: string) => {
-            const start = Date.now();
+			const start = Date.now();
 			const editor = editorRef.current;
 			const monaco = monacoRef.current;
 			const activeTag = activeColorTag;
