@@ -1,6 +1,7 @@
 import { useBaseBlocks } from "#/hooks/use-base-blocks";
-import { useProjectSession, type ContentEntry } from "@project/core";
+import { useProjectSession } from "@project/core";
 import type { ModHjsonData } from "@project/schema";
+import type { ContentEntry } from "@project/types";
 import { useMemo } from "react";
 
 export function useBlocks(metadata: ModHjsonData): ContentEntry[] {
