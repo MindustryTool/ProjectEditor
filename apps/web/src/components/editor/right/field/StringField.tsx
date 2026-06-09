@@ -10,8 +10,7 @@ import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import { removeByJsonPath } from "./util";
 import { getSchemaMetadata } from "@project/schema";
-import type { SchemaRendererProps } from "#/components/editor/right/field/renderer";
-import { schemaRenderers } from "#/components/editor/right/field/renderer";
+import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 
 export const StringField = React.memo(function StringField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const stringValue = typeof value === "string" ? value : String(value);
@@ -46,5 +45,3 @@ export const StringField = React.memo(function StringField({ name, value, onChan
 		</Field>
 	);
 });
-
-schemaRenderers.set("string", StringField);

@@ -1,8 +1,7 @@
 import { Field, FieldControl, FieldLabel } from "#/components/editor/right/field/Field";
-import { schemaRenderers } from "#/components/editor/right/field/renderer";
 import { SchemaDescription } from "#/components/editor/right/field/SchemaDescription";
 import { SchemaLabel } from "#/components/editor/right/field/SchemaLabel";
-import type { SchemaRendererProps } from "#/components/editor/right/field/renderer";
+import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { SpriteUploader, SpriteViewer } from "#/components/editor/right/SpritePicker";
 import { useProjectSession } from "@project/core";
 import { getSchemaMetadata, type SchemaMetadata } from "@project/schema";
@@ -43,5 +42,3 @@ export const TextureField = React.memo(function TextureField({ name, path, entry
 		</Field>
 	);
 });
-
-schemaRenderers.set("texture", TextureField);

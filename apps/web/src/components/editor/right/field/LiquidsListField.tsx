@@ -9,8 +9,7 @@ import * as v from "valibot";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
-import type { SchemaRendererProps } from "#/components/editor/right/field/renderer";
-import { schemaRenderers } from "#/components/editor/right/field/renderer";
+import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 
 export const LiquidsListField = React.memo(function LiquidsListField({
 	name,
@@ -69,5 +68,3 @@ export const LiquidsListField = React.memo(function LiquidsListField({
 
 	throw new Error(`Unknown option ${value}, this should not happen`);
 });
-
-schemaRenderers.set("liquids", LiquidsListField);

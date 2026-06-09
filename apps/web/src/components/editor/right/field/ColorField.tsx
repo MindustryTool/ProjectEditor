@@ -7,9 +7,8 @@ import * as v from "valibot";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
-import type { SchemaRendererProps } from "#/components/editor/right/field/renderer";
+import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { getSchemaMetadata } from "@project/schema";
-import { schemaRenderers } from "#/components/editor/right/field/renderer";
 
 export const ColorField = React.memo(function ColorField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	let hexValue = typeof value === "string" ? value : ((v.getDefault(entrySchema) ?? "333333") as string);
@@ -54,5 +53,3 @@ export const ColorField = React.memo(function ColorField({ name, value, onChange
 		</Field>
 	);
 });
-
-schemaRenderers.set("color", ColorField);

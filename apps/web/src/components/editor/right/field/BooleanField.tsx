@@ -8,8 +8,7 @@ import { SchemaLabel } from "./SchemaLabel";
 import { removeByJsonPath } from "./util";
 import { getSchemaMetadata, hasNullableWrapper } from "@project/schema";
 import { HJSON } from "@project/hjson";
-import type { SchemaRendererProps } from "#/components/editor/right/field/renderer";
-import { schemaRenderers } from "#/components/editor/right/field/renderer";
+import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 
 export const BooleanField = React.memo(function BooleanField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const checked = typeof value === "boolean" ? value : v.getDefault(entrySchema);
@@ -39,5 +38,3 @@ export const BooleanField = React.memo(function BooleanField({ name, value, onCh
 		</Field>
 	);
 });
-
-schemaRenderers.set("boolean", BooleanField);

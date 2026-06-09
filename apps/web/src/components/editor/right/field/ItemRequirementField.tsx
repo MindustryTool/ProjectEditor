@@ -10,12 +10,11 @@ import React, { useMemo } from "react";
 import { ItemGrid } from "./ItemGrid";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
-import type { SchemaRendererProps } from "#/components/editor/right/field/renderer";
+import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { getSchemaMetadata } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { EMPTY_ARRAY } from "#/lib/utils";
 import type { HjsonNode } from "@project/hjson";
-import { schemaRenderers } from "#/components/editor/right/field/renderer";
 
 export const ItemRequirementField = React.memo(function ItemRequirementField({
 	name,
@@ -122,5 +121,3 @@ export const ItemRequirementField = React.memo(function ItemRequirementField({
 		</div>
 	);
 });
-
-schemaRenderers.set("item-requirement", ItemRequirementField);

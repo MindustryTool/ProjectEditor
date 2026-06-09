@@ -8,9 +8,8 @@ import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import { removeByJsonPath } from "./util";
-import type { SchemaRendererProps } from "#/components/editor/right/field/renderer";
+import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { getSchemaMetadata } from "@project/schema";
-import { schemaRenderers } from "#/components/editor/right/field/renderer";
 
 export const NumberField = React.memo(function NumberField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
 	const numValue = typeof value === "number" ? value : String(value);
@@ -45,5 +44,3 @@ export const NumberField = React.memo(function NumberField({ name, value, onChan
 		</Field>
 	);
 });
-
-schemaRenderers.set("number", NumberField);

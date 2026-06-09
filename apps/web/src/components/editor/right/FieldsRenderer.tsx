@@ -4,15 +4,24 @@ import { useFileString } from "@project/core";
 import { HJSON, HjsonNode } from "@project/hjson";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import React, { Suspense, useCallback, useEffect, useState } from "react";
-import { resolveSchema, detectSchemaType, getSchemaEntries, getSchemaMetadata, type AnySchema, type SchemaFn } from "@project/schema";
+import {
+	resolveSchema,
+	detectSchemaType,
+	getSchemaEntries,
+	getSchemaMetadata,
+	type AnySchema,
+	type SchemaFn,
+} from "@project/schema";
 import * as v from "valibot";
+
 import { FieldCategory } from "#/components/editor/right/field/FieldCategory";
-import { schemaRenderers } from "#/components/editor/right/field/renderer";
+import { getRenderer } from "#/components/editor/right/field/registry";
 
 interface FieldsRendererProps {
 	path: string;
 	schema: AnySchema | SchemaFn;
 }
+
 
 export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 	const { data, isLoading, write } = useFileString(path);
@@ -121,7 +130,7 @@ function Child({
 			lastCategory = metadata.category;
 		}
 
-		const Renderer = schemaRenderers.get(type);
+		const Renderer = getRenderer(type);
 
 		if (Renderer === undefined) {
 			elements.push(
@@ -132,7 +141,16 @@ function Child({
 			);
 		} else {
 			elements.push(
-				<Renderer key={key} path={path} name={name} value={value} onChange={onChange} entrySchema={entrySchema} jsonPath={name} />,
+				<Renderer
+					key={key}
+					path={path}
+					name={name}
+					value={value}
+					onChange={onChange}
+					entrySchema={entrySchema}
+					jsonPath={name}
+					getRenderer={getRenderer}
+				/>,
 			);
 		}
 	}

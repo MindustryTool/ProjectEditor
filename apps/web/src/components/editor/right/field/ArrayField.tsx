@@ -8,11 +8,18 @@ import * as v from "valibot";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import { SchemaArrayItemEditor } from "./SchemaArrayItemEditor";
-import type { SchemaRendererProps } from "#/components/editor/right/field/renderer";
+import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { Separator } from "#/components/ui/separator";
-import { schemaRenderers } from "#/components/editor/right/field/renderer";
 
-export const ArrayField = React.memo(function ArrayField({ path, name, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
+export const ArrayField = React.memo(function ArrayField({
+	path,
+	name,
+	value,
+	onChange,
+	entrySchema,
+	jsonPath,
+	getRenderer,
+}: SchemaRendererProps) {
 	const arrayValue = Array.isArray(value) ? value : undefined;
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
@@ -63,6 +70,7 @@ export const ArrayField = React.memo(function ArrayField({ path, name, value, on
 							onChange={onChange}
 							jsonPath={jsonPath}
 							path={path}
+							getRenderer={getRenderer}
 						/>
 					))}
 					<Button type="button" variant="outline" size="sm" onClick={handleAdd}>
@@ -81,6 +89,7 @@ function ArrayElement({
 	onChange,
 	jsonPath,
 	path,
+	getRenderer,
 }: {
 	path: string;
 	index: number;
@@ -88,6 +97,7 @@ function ArrayElement({
 	itemSchema: AnySchema;
 	onChange: Parameters<typeof ArrayField>[0]["onChange"];
 	jsonPath: string;
+	getRenderer: Parameters<typeof ArrayField>[0]["getRenderer"];
 }) {
 	const currentItemSchema = getArrayItemSchema(itemSchema, index);
 	const entryJsonPath = jsonPath ? `${jsonPath}[${index}]` : `[${index}]`;
@@ -109,9 +119,14 @@ function ArrayElement({
 				</Button>
 			</div>
 			<Separator />
-			<SchemaArrayItemEditor path={path} value={value} itemSchema={currentItemSchema} onChange={onChange} jsonPath={entryJsonPath} />
+			<SchemaArrayItemEditor
+				path={path}
+				value={value}
+				itemSchema={currentItemSchema}
+				onChange={onChange}
+				jsonPath={entryJsonPath}
+				getRenderer={getRenderer}
+			/>
 		</div>
 	);
 }
-
-schemaRenderers.set("array", ArrayField);

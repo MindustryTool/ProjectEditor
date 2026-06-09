@@ -10,7 +10,6 @@ import { ChevronDown } from "lucide-react";
 import { Button } from "#/components/ui/button";
 import { SchemaLabel } from "#/components/editor/right/field/SchemaLabel";
 import { FieldCategory } from "#/components/editor/right/field/FieldCategory";
-import { schemaRenderers } from "#/components/editor/right/field/renderer";
 
 export const ObjectField = React.memo(function ObjectField({ name, path, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
 	if (typeof value !== "object" || value === null) {
@@ -90,5 +89,3 @@ function buildCategoryObjectFields(
 
 	return elements;
 }
-
-schemaRenderers.set("object", ObjectField);

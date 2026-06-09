@@ -14,11 +14,10 @@ import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import { removeByJsonPath } from "./util";
-import type { SchemaRendererProps } from "#/components/editor/right/field/renderer";
+import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import type { Research, SchemaMetadata } from "@project/schema";
 import { getSchemaMetadata } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
-import { schemaRenderers } from "#/components/editor/right/field/renderer";
 
 export const ResearchField = React.memo(function ResearchField({
 	name,
@@ -276,5 +275,3 @@ const ResearchParentToggleGroup = React.memo(function ResearchParentToggleGroup(
 		</ToggleGroup>
 	);
 });
-
-schemaRenderers.set("research", ResearchField);
