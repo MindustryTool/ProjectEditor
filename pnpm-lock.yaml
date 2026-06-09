@@ -188,27 +188,6 @@ importers:
 
   apps/app:
     dependencies:
-      '@project/api':
-        specifier: workspace:*
-        version: link:../../packages/api
-      '@project/config':
-        specifier: workspace:*
-        version: link:../../packages/config
-      '@project/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@project/fs':
-        specifier: workspace:*
-        version: link:../../packages/fs
-      '@project/schema':
-        specifier: workspace:*
-        version: link:../../packages/schema
-      '@project/utils':
-        specifier: workspace:*
-        version: link:../../packages/utils
-      '@project/zip':
-        specifier: workspace:*
-        version: link:../../packages/zip
       react:
         specifier: ^19.0.0
         version: 19.2.6
