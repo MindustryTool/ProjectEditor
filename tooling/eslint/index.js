@@ -22,7 +22,7 @@ export default tseslint.config(
 				{
 					patterns: [
 						{
-							group: ["../**"],
+							group: ["./../**"],
 							message: "Relative imports to parent directories are not allowed. Use absolute imports instead.",
 						},
 					],

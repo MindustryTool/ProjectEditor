@@ -1,14 +1,14 @@
 import * as v from "valibot";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { useValidationStore } from "#/validation/store";
-import { ValidationResults } from "#/validation/types";
-import { useProjectSession } from "#/project/session";
+import { useValidationStore } from "../validation/store";
+import { ValidationResults } from "../validation/types";
+import { useProjectSession } from "../project/session";
 import { AppSettingsSchema, ProjectRecordSchema, type AppSettings, type ProjectRecord } from "@project/schema";
-import { createProjectFileSystem } from "#/project-file-system";
-import { importProject } from "#/importer";
-import { type EventBus, type ProjectEventMap, type ProjectInfo, type Unsubscribe, type ProjectLanguage, TreeSnapshot } from "#/types";
-import type { ProjectContext } from "#/project/session";
+import { createProjectFileSystem } from "../project-file-system";
+import { importProject } from "../importer";
+import { type EventBus, type ProjectEventMap, type ProjectInfo, type Unsubscribe, type ProjectLanguage, TreeSnapshot } from "../types";
+import type { ProjectContext } from "../project/session";
 
 interface AppState {
 	projects: Record<string, ProjectRecord>;

@@ -17,15 +17,15 @@
         "test:watch": "vitest"
     },
     "dependencies": {
-        "@project/zip": "workspace:*",
-        "@project/utils": "workspace:*",
         "@project/config": "workspace:*",
         "@project/fs": "workspace:*",
-        "@project/schema": "workspace:*",
         "@project/hjson": "workspace:*",
+        "@project/schema": "workspace:*",
         "@project/types": "workspace:*",
-        "zustand": "catalog:",
-        "valibot": "catalog:"
+        "@project/utils": "workspace:*",
+        "@project/zip": "workspace:*",
+        "valibot": "catalog:",
+        "zustand": "catalog:"
     },
     "peerDependencies": {
         "react": "^19.0.0",
@@ -35,6 +35,7 @@
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "typescript": "^5.7.0",
+        "vite-tsconfig-paths": "^6.1.1",
         "vitest": "catalog:"
     }
 }

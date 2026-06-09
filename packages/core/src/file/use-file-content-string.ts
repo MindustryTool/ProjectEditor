@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from "react";
 import { useFile, type UseFileResult } from "./use-file-content";
-import { useProjectSession } from "#/project/session";
-import { getEntry } from "#/file/store";
+import { useProjectSession } from "../project/session.js";
+import { getEntry } from "../file/store.js";
 
 export type UseFileStringResult = UseFileResult<string>;
 
