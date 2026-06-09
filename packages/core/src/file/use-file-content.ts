@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useMemo } from "react";
-import { useFileStore, isDirty, isError, selectEntry, selectIsSaving, getEntry } from "#/stores/file";
-import { useProjectSession } from "#/stores/session";
+import { useFileStore, isDirty, isError, selectEntry, selectIsSaving, getEntry } from "#/file/store";
+import { useProjectSession } from "#/project/session";
 import { getWriteQueue } from "#/write-queue";
 import { useStoreWithEqualityFn } from "zustand/traditional";
 import { shallow } from "zustand/shallow";

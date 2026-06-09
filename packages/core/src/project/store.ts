@@ -3,12 +3,12 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { useValidationStore } from "#/validation/store";
 import { ValidationResults } from "#/validation/types";
-import { TreeSnapshot, useProjectSession } from "#/stores/session";
+import { TreeSnapshot, useProjectSession } from "#/project/session";
 import { AppSettingsSchema, ProjectRecordSchema, type AppSettings, type ProjectRecord } from "@project/schema";
 import { createProjectFileSystem } from "#/project-file-system";
 import { importProject } from "#/importer";
 import type { EventBus, ProjectEventMap, ProjectInfo, Unsubscribe, ProjectLanguage } from "#/types";
-import type { ProjectContext } from "#/stores/session";
+import type { ProjectContext } from "#/project/session";
 
 interface AppState {
 	projects: Record<string, ProjectRecord>;

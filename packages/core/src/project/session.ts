@@ -17,6 +17,133 @@ export interface RecentFileEntry {
 
 const MAX_RECENT_FILES = 50;
 
+interface ProjectSession {
+	projectContext: ProjectContext | null;
+	treeSnapshot: TreeSnapshot;
+	recentlyOpenedFiles: Record<string, RecentFileEntry[]>;
+	selectedPath: string | null;
+	expanded: Record<string, boolean>;
+
+	setExpanded: (path: string, isExpanded: boolean) => void;
+	toggleExpanded: (path: string) => void;
+	setManyExpanded: (updates: Record<string, boolean>) => void;
+	setCurrentProject: (context: ProjectContext | null) => void;
+	updateCurrentProject: (patch: Partial<ProjectInfo>) => void;
+	reset: () => void;
+	recordFileAccess: (projectId: string, path: string) => void;
+	removeFromRecentFiles: (projectId: string, path: string) => void;
+	clearRecentFiles: (projectId: string) => void;
+	setSelectedPath: (path: string | null) => void;
+}
+
+export const useProjectSession = create<ProjectSession>()(
+	persist(
+		(set) => ({
+			projectContext: null,
+			treeSnapshot: new TreeSnapshot([]),
+			recentlyOpenedFiles: {},
+			selectedPath: null,
+			expanded: { "/": true },
+
+			setExpanded: (path, isExpanded) => {
+				set((state) => ({
+					expanded: { ...state.expanded, [path]: isExpanded },
+				}));
+			},
+
+			toggleExpanded: (path) => {
+				set((state) => ({
+					expanded: { ...state.expanded, [path]: !state.expanded[path] },
+				}));
+			},
+
+			setManyExpanded: (updates) => {
+				set((state) => ({
+					expanded: { ...state.expanded, ...updates },
+				}));
+			},
+
+			setCurrentProject: (context) => {
+				set((state) => ({
+					projectContext: context,
+					treeSnapshot: context ? state.treeSnapshot : new TreeSnapshot([]),
+				}));
+			},
+
+			updateCurrentProject: (patch) => {
+				set((state) => {
+					if (!state.projectContext) return state;
+					const nextProject: ProjectInfo = { ...state.projectContext.project, ...patch };
+					return {
+						projectContext: { ...state.projectContext, project: nextProject },
+					};
+				});
+			},
+
+			reset: () => {
+				set({ projectContext: null, treeSnapshot: new TreeSnapshot([]) });
+			},
+
+			recordFileAccess: (projectId, path) => {
+				set((state) => {
+					const projectFiles = state.recentlyOpenedFiles[projectId] ?? [];
+					return {
+						recentlyOpenedFiles: {
+							...state.recentlyOpenedFiles,
+							[projectId]: touchEntry(projectFiles, path, Date.now()),
+						},
+					};
+				});
+			},
+
+			removeFromRecentFiles: (projectId, path) => {
+				set((state) => {
+					const projectFiles = state.recentlyOpenedFiles[projectId] ?? [];
+					return {
+						recentlyOpenedFiles: {
+							...state.recentlyOpenedFiles,
+							[projectId]: removeEntry(projectFiles, path),
+						},
+					};
+				});
+			},
+
+			clearRecentFiles: (projectId) => {
+				set((state) => {
+					const rest = { ...state.recentlyOpenedFiles };
+					delete rest[projectId];
+					return { recentlyOpenedFiles: rest };
+				});
+			},
+
+			setSelectedPath: (path) => {
+				set({ selectedPath: path });
+			},
+		}),
+		{
+			name: "project-session",
+			partialize: (state) => ({
+				recentlyOpenedFiles: state.recentlyOpenedFiles,
+				selectedPath: state.selectedPath,
+			}),
+		},
+	),
+);
+
+export function useCurrentProject() {
+	const state = useProjectSession((state) => state.projectContext);
+
+	if (state === null) {
+		throw new Error("No project project context");
+	}
+
+	return state;
+}
+
+export function selectIsExpanded(path: string) {
+	return (state: ProjectSession) => Boolean(state.expanded[path] || false);
+}
+
 function evictLRU(entries: RecentFileEntry[]): RecentFileEntry[] {
 	if (entries.length <= MAX_RECENT_FILES) return entries;
 	const sorted = [...entries].sort((a, b) => b.lastAccessedAt - a.lastAccessedAt);
@@ -174,103 +301,4 @@ export class TreeSnapshot {
 
 		return this.entries.find((e) => e.name === filename + ".png")?.path || null;
 	}
-}
-interface ProjectSession {
-	projectContext: ProjectContext | null;
-	treeSnapshot: TreeSnapshot;
-	recentlyOpenedFiles: Record<string, RecentFileEntry[]>;
-	selectedPath: string | null;
-
-	setCurrentProject: (context: ProjectContext | null) => void;
-	updateCurrentProject: (patch: Partial<ProjectInfo>) => void;
-	reset: () => void;
-	recordFileAccess: (projectId: string, path: string) => void;
-	removeFromRecentFiles: (projectId: string, path: string) => void;
-	clearRecentFiles: (projectId: string) => void;
-	setSelectedPath: (path: string | null) => void;
-}
-
-export const useProjectSession = create<ProjectSession>()(
-	persist(
-		(set) => ({
-			projectContext: null,
-			treeSnapshot: new TreeSnapshot([]),
-			recentlyOpenedFiles: {},
-			selectedPath: null,
-
-			setCurrentProject: (context) => {
-				set((state) => ({
-					projectContext: context,
-					treeSnapshot: context ? state.treeSnapshot : new TreeSnapshot([]),
-				}));
-			},
-
-			updateCurrentProject: (patch) => {
-				set((state) => {
-					if (!state.projectContext) return state;
-					const nextProject: ProjectInfo = { ...state.projectContext.project, ...patch };
-					return {
-						projectContext: { ...state.projectContext, project: nextProject },
-					};
-				});
-			},
-
-			reset: () => {
-				set({ projectContext: null, treeSnapshot: new TreeSnapshot([]) });
-			},
-
-			recordFileAccess: (projectId, path) => {
-				set((state) => {
-					const projectFiles = state.recentlyOpenedFiles[projectId] ?? [];
-					return {
-						recentlyOpenedFiles: {
-							...state.recentlyOpenedFiles,
-							[projectId]: touchEntry(projectFiles, path, Date.now()),
-						},
-					};
-				});
-			},
-
-			removeFromRecentFiles: (projectId, path) => {
-				set((state) => {
-					const projectFiles = state.recentlyOpenedFiles[projectId] ?? [];
-					return {
-						recentlyOpenedFiles: {
-							...state.recentlyOpenedFiles,
-							[projectId]: removeEntry(projectFiles, path),
-						},
-					};
-				});
-			},
-
-			clearRecentFiles: (projectId) => {
-				set((state) => {
-					const rest = { ...state.recentlyOpenedFiles };
-					delete rest[projectId];
-					return { recentlyOpenedFiles: rest };
-				});
-			},
-
-			setSelectedPath: (path) => {
-				set({ selectedPath: path });
-			},
-		}),
-		{
-			name: "project-session",
-			partialize: (state) => ({
-				recentlyOpenedFiles: state.recentlyOpenedFiles,
-				selectedPath: state.selectedPath,
-			}),
-		},
-	),
-);
-
-export function useCurrentProject() {
-	const state = useProjectSession((state) => state.projectContext);
-
-	if (state === null) {
-		throw new Error("No project project context");
-	}
-
-	return state;
 }

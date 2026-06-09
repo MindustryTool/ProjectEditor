@@ -1,5 +1,5 @@
 import { useCallback, useEffect, type ReactNode } from "react";
-import { useCurrentProject, useProjectSession, useExpandedStore } from "@project/core";
+import { useCurrentProject, useProjectSession } from "@project/core";
 import { useFileExplorerStore } from "./useFileExplorerState";
 import { DeleteFileDialog } from "./DeleteFileDialog";
 import { CreateFileDialog } from "./CreateFileDialog";
@@ -36,7 +36,7 @@ export function FileExplorerProvider({ children }: { children: ReactNode }) {
 }
 
 function PathListener() {
-	const setManyExpanded = useExpandedStore((s) => s.setManyExpanded);
+	const setManyExpanded = useProjectSession((s) => s.setManyExpanded);
 	const path = useProjectSession((s) => s.selectedPath);
 
 	useEffect(() => {

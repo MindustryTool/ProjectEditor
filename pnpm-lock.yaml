@@ -542,16 +542,6 @@ importers:
         specifier: 'catalog:'
         version: 4.1.7(@types/node@22.19.19)(jsdom@28.1.0(@noble/hashes@1.8.0))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.14(@types/node@22.19.19)(esbuild@0.27.3)(jiti@2.7.0))
 
-  packages/state:
-    dependencies:
-      '@project/core':
-        specifier: workspace:*
-        version: link:../core
-    devDependencies:
-      typescript:
-        specifier: ^5.7.0
-        version: 5.9.3
-
   packages/types:
     devDependencies:
       typescript:

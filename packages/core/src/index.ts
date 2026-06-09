@@ -4,21 +4,20 @@ export { importProject } from "./importer.js";
 export type { ImportResult } from "./importer.js";
 
 export * from "./types";
-export type * from "./stores/project";
+export type * from "./project/store.js";
 
-export type { ProjectContext, RecentFileEntry } from "./stores/session";
-export { useAppStore } from "./stores/project";
-export { useProjectSession, useCurrentProject, TreeSnapshot } from "./stores/session";
-export { useExpandedStore, selectIsExpanded } from "./stores/expanded";
+export type { ProjectContext, RecentFileEntry } from "./project/session.js";
+export { useAppStore } from "./project/store.js";
+export { useProjectSession, useCurrentProject, TreeSnapshot, selectIsExpanded } from "./project/session.js";
 
-export type { FileEntry, FileStore } from "./stores/file";
-export { useFileStore, isDirty, isError, getEntry, selectEntry, exists, selectIsSaving } from "./stores/file";
+export type { FileEntry, FileStore } from "./file/store.js";
+export { useFileStore, isDirty, isError, getEntry, selectEntry, exists, selectIsSaving } from "./file/store.js";
 
 export { WriteQueue, getWriteQueue, disposeWriteQueue } from "./write-queue.js";
-export type { UseFileResult } from "./hooks/use-file-content";
-export { useFile } from "./hooks/use-file-content";
-export type { UseFileStringResult } from "./hooks/use-file-content-string";
-export { useFileString } from "./hooks/use-file-content-string";
+export type { UseFileResult } from "./file/use-file-content.js";
+export { useFile } from "./file/use-file-content.js";
+export type { UseFileStringResult } from "./file/use-file-content-string.js";
+export { useFileString } from "./file/use-file-content-string.js";
 
 export { severityLabel, isErrorOrWarning } from "./validation/types";
 export { findUnknownProperties } from "./validation/utils";

@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from "react";
 import { useFile, type UseFileResult } from "./use-file-content";
-import { useProjectSession } from "#/stores/session";
-import { getEntry } from "#/stores/file";
+import { useProjectSession } from "#/project/session";
+import { getEntry } from "#/file/store";
 
 export type UseFileStringResult = UseFileResult<string>;
 
@@ -25,7 +25,6 @@ export function useFileString(path: string): {
 
 		return new TextDecoder().decode(result.data);
 	}, [result.data]);
-
 
 	const write = useCallback(
 		(contentOrUpdater: string | ((prev: string | null) => string)) => {
