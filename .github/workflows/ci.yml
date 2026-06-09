@@ -18,7 +18,11 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-      - name: Check circular dependencies (web)
-        run: pnpm --filter web exec depcruise src --config .dependency-cruiser.cjs
       - run: pnpm install --frozen-lockfile
+      - name: Check circular dependencies
+        run: |
+          for project in apps/web packages/api packages/config packages/core packages/fs packages/hjson packages/schema packages/state packages/types packages/utils packages/zip; do
+            echo "Checking $project..."
+            (cd "$project" && pnpm exec depcruise src --config .dependency-cruiser.cjs)
+          done
       - run: pnpm turbo run typecheck lint test

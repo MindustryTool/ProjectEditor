@@ -158,9 +158,9 @@ function EditorContent({ path }: { path: string }) {
 		case "sprite":
 			return <UnitSpriteEditor striped={route.striped} />;
         case "msav":
-            return <SchematicMapPreview path={route.path} type="msav" />;
+            return <SchematicMapPreview path={route.path} type="map" />;
         case "msch":
-            return <SchematicMapPreview path={route.path} type="msch" />;
+            return <SchematicMapPreview path={route.path} type="schematic" />;
 		case "text":
 			return <TextEditor path={route.path} />;
 	}
