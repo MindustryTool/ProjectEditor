@@ -3,15 +3,23 @@ import { getSchemaMetadata, getSchemaEntries, resolveSchema, detectSchemaType } 
 import React from "react";
 import * as v from "valibot";
 import type { HjsonNode } from "@project/hjson";
-import { type SchemaRendererProps } from "#/components/editor/right/field/renderer";
 import type { AnySchema } from "@project/schema";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 import { Button } from "#/components/ui/button";
 import { SchemaLabel } from "#/components/editor/right/field/SchemaLabel";
 import { FieldCategory } from "#/components/editor/right/field/FieldCategory";
+import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 
-export const ObjectField = React.memo(function ObjectField({ name, path, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
+export const ObjectField = React.memo(function ObjectField({
+	name,
+	path,
+	value,
+	onChange,
+	entrySchema,
+	jsonPath,
+	getRenderer,
+}: SchemaRendererProps) {
 	if (typeof value !== "object" || value === null) {
 		return null;
 	}
@@ -28,7 +36,7 @@ export const ObjectField = React.memo(function ObjectField({ name, path, value, 
 			</CollapsibleTrigger>
 			<CollapsibleContent>
 				<div className="border-border grid gap-6 mt-2 p-2 border rounded-md">
-					{buildCategoryObjectFields(entries, value, path, onChange, jsonPath)}
+					{buildCategoryObjectFields(entries, value, path, onChange, jsonPath, getRenderer)}
 				</div>
 			</CollapsibleContent>
 		</Collapsible>
@@ -41,6 +49,7 @@ function buildCategoryObjectFields(
 	path: string,
 	onChange: (jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => void,
 	jsonPath: string,
+	getRenderer: SchemaRendererProps["getRenderer"],
 ) {
 	const elements: React.ReactNode[] = [];
 	let lastCategory: string | undefined;
@@ -61,7 +70,7 @@ function buildCategoryObjectFields(
 			lastCategory = metadata.category;
 		}
 
-		const Renderer = schemaRenderers.get(type);
+		const Renderer = getRenderer(type);
 
 		if (Renderer === undefined) {
 			elements.push(
@@ -82,6 +91,7 @@ function buildCategoryObjectFields(
 					onChange={onChange}
 					entrySchema={childSchema as AnySchema}
 					jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
+					getRenderer={getRenderer}
 				/>,
 			);
 		}

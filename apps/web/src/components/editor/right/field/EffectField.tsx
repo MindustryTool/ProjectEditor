@@ -20,7 +20,15 @@ import { FieldControl } from "#/components/editor/right/field/Field";
 import { getSchemaMetadata } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 
-export const EffectField = React.memo(function EffectField({ path, name, value, onChange, entrySchema, jsonPath }: SchemaRendererProps) {
+export const EffectField = React.memo(function EffectField({
+	path,
+	name,
+	value,
+	onChange,
+	entrySchema,
+	jsonPath,
+	getRenderer,
+}: SchemaRendererProps) {
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 	const effects = useProjectContext().contents.effects;
 
@@ -65,6 +73,7 @@ export const EffectField = React.memo(function EffectField({ path, name, value, 
 									entrySchema={entrySchema}
 									onChange={onChange}
 									jsonPath={jsonPath}
+									getRenderer={getRenderer}
 								/>
 								<Separator />
 							</FieldControl>
