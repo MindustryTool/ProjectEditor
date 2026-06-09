@@ -25,6 +25,7 @@ export const types = [
 	"texture",
 	"textures",
 	"item-requirement",
+    'union',
 	"never",
 ] as const;
 
@@ -86,6 +87,7 @@ function getSchemaType(schema: AnySchema, value: unknown): { type: Type; schema:
 	if (s.type === "array") return { type: "array", schema };
 	if (s.type === "picklist") return { type: "picklist", schema };
 	if (s.type === "never") return { type: "never", schema };
+	if (s.type === "union") return { type: "union", schema };
 
 	if (s.kind === "schema") {
 		console.warn({ unknownType: s.type });

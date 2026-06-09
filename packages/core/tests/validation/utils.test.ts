@@ -60,6 +60,16 @@ describe("findUnknownProperties", () => {
 			const result = findUnknownProperties(schema, { a: "x", b: 1, c: 2 });
 			expect(result).toEqual(["b", "c"]);
 		});
+
+		it("returns multiple unknown keys at root in sorted order", () => {
+			const schema = v.object({});
+			const value = { z: 1, a: 2, m: 3 };
+			const result = findUnknownProperties(schema, value);
+			expect(result).toContain("z");
+			expect(result).toContain("a");
+			expect(result).toContain("m");
+			expect(result).toHaveLength(3);
+		});
 	});
 
 	describe("object schema — nested / multiple layers", () => {
@@ -81,6 +91,20 @@ describe("findUnknownProperties", () => {
 			});
 			const value = { lvl1: { lvl2: { lvl3: "ok", lvl4: "extra" } } };
 			expect(findUnknownProperties(schema, value)).toEqual(["lvl1.lvl2.lvl4"]);
+		});
+
+		it("recurses 4+ levels deep and builds correct paths", () => {
+			const schema = v.object({
+				a: v.object({
+					b: v.object({
+						c: v.object({
+							d: v.number(),
+						}),
+					}),
+				}),
+			});
+			const value = { a: { b: { c: { d: 1, e: "extra" } } } };
+			expect(findUnknownProperties(schema, value)).toEqual(["a.b.c.e"]);
 		});
 
 		it("detects unknowns at every nesting level", () => {
@@ -142,6 +166,36 @@ describe("findUnknownProperties", () => {
 			});
 			const value = { a: { n: 1, extra: true } };
 			expect(findUnknownProperties(schema, value)).toEqual([]);
+		});
+
+		it("recurses into v.undefinedable fields", () => {
+			const schema = v.object({
+				a: v.undefinedable(v.object({ n: v.number() })),
+			});
+			const value = { a: { n: 1, extra: true } };
+			expect(findUnknownProperties(schema, value)).toEqual(["a.extra"]);
+		});
+
+		it("recurses into v.exactOptional fields", () => {
+			const schema = v.object({
+				a: v.exactOptional(v.object({ n: v.number() })),
+			});
+			const value = { a: { n: 1, extra: true } };
+			expect(findUnknownProperties(schema, value)).toEqual(["a.extra"]);
+		});
+
+		it("handles undefined value for optional wrapped object", () => {
+			const schema = v.object({
+				a: v.optional(v.object({ n: v.number() })),
+			});
+			expect(findUnknownProperties(schema, { a: undefined })).toEqual([]);
+		});
+
+		it("handles undefined value for nullish wrapped object", () => {
+			const schema = v.object({
+				a: v.nullish(v.object({ n: v.number() })),
+			});
+			expect(findUnknownProperties(schema, { a: undefined })).toEqual([]);
 		});
 
 		it("recurses into nested optional → object fields within deeper objects", () => {
@@ -249,6 +303,12 @@ describe("findUnknownProperties", () => {
 			const value = { point: [1, 2, 3, 4] };
 			expect(findUnknownProperties(schema, value)).toEqual(["point[3]"]);
 		});
+
+		it("recurses into extra tuple elements that are objects", () => {
+			const schema = v.tuple([v.string()]);
+			const value = ["hello", { x: 1, y: 2 }];
+			expect(findUnknownProperties(schema, value)).toEqual(["[1]"]); // extra element is reported, not recursed
+		});
 	});
 
 	describe("mixed / combined nesting", () => {
@@ -351,6 +411,25 @@ describe("findUnknownProperties", () => {
 			});
 			const value = { cfg: { a: "x", b: 42, common: 1 } };
 			expect(findUnknownProperties(schema, value)).toEqual([]);
+		});
+
+		it("handles intersect with empty option set (merged has no entries)", () => {
+			const schema = v.object({
+				cfg: v.intersect([]),
+			});
+			const value = { cfg: { extra: true } };
+			expect(findUnknownProperties(schema, value)).toEqual([]);
+		});
+
+		it("wrapped in v.pipe with v.metadata still unwraps correctly", () => {
+			const schema = v.object({
+				inner: v.pipe(
+					v.optional(v.object({ n: v.number() })),
+					v.metadata({ label: "inner" }),
+				),
+			});
+			const value = { inner: { n: 1, extra: true } };
+			expect(findUnknownProperties(schema, value)).toEqual(["inner.extra"]);
 		});
 	});
 
