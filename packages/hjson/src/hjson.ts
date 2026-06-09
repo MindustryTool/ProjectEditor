@@ -32,7 +32,7 @@ export const HJSON = {
 		const node = HJSON.parseStructured(content);
 		cache.push({ content, node, hit: 0, time: Date.now() });
 
-		if (cache.length > 100) {
+		if (cache.length > 1000) {
 			cache.sort((a, b) => {
 				if (a.hit !== b.hit) {
 					return b.hit - a.hit;
