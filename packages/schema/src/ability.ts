@@ -10,6 +10,7 @@ import { LiquidFieldSchema } from "./liquid";
 import { BulletHjsonSchema } from "./bullet";
 import { metadata } from "./utils";
 import { ClassMap, classSchema } from "./class";
+import type { ProjectContents } from "@project/types";
 
 export const abilityClasses = [
 	"ArmorPlateAbility",
@@ -72,7 +73,7 @@ const armorPlateAbilityObjectSchema = v.object({
 	),
 });
 
-const forceFieldAbilityObjectSchema = v.object({
+const forceFieldAbilityObjectSchema = (context: ProjectContents) =>  v.object({
 	radius: v.pipe(
 		v.optional(v.number(), 60),
 		metadata({ name: "editor.ability.radius-force", description: "editor.ability.radius-force-description" }),
@@ -98,11 +99,11 @@ const forceFieldAbilityObjectSchema = v.object({
 		metadata({ name: "editor.ability.rotation-force", description: "editor.ability.rotation-force-description" }),
 	),
 	breakSound: v.pipe(
-		v.optional(SoundHjsonSchema),
+		v.optional(SoundHjsonSchema(context)),
 		metadata({ name: "editor.ability.break-sound-force", description: "editor.ability.break-sound-force-description" }),
 	),
 	hitSound: v.pipe(
-		v.optional(SoundHjsonSchema),
+		v.optional(SoundHjsonSchema(context)),
 		metadata({ name: "editor.ability.hit-sound-force", description: "editor.ability.hit-sound-force-description" }),
 	),
 	hitSoundVolume: v.pipe(
@@ -157,7 +158,7 @@ const classSchemaMap = new ClassMap<AbilityClass>({
 				metadata({ name: "editor.ability.status", description: "editor.ability.status-description" }),
 			),
 			shootSound: v.pipe(
-				v.optional(SoundHjsonSchema),
+				v.optional(SoundHjsonSchema(context)),
 				metadata({ name: "editor.ability.shoot-sound", description: "editor.ability.shoot-sound-description" }),
 			),
 			statusDuration: v.pipe(
@@ -232,7 +233,7 @@ const classSchemaMap = new ClassMap<AbilityClass>({
 				metadata({ name: "editor.ability.use-ammo", description: "editor.ability.use-ammo-description" }),
 			),
 		}),
-	ForceFieldAbility: (_context) => forceFieldAbilityObjectSchema,
+	ForceFieldAbility: (context) => forceFieldAbilityObjectSchema(context),
 	LiquidExplodeAbility: (context) =>
 		v.object({
 			liquid: v.pipe(
@@ -417,7 +418,7 @@ const classSchemaMap = new ClassMap<AbilityClass>({
 				metadata({ name: "editor.ability.parentize-effects", description: "editor.ability.parentize-effects-description" }),
 			),
 			shootSound: v.pipe(
-				v.optional(SoundHjsonSchema),
+				v.optional(SoundHjsonSchema(context)),
 				metadata({ name: "editor.ability.shoot-sound-lightning", description: "editor.ability.shoot-sound-lightning-description" }),
 			),
 		}),
@@ -449,7 +450,7 @@ const classSchemaMap = new ClassMap<AbilityClass>({
 				metadata({ name: "editor.ability.active-effect", description: "editor.ability.active-effect-description" }),
 			),
 			sound: v.pipe(
-				v.optional(SoundHjsonSchema),
+				v.optional(SoundHjsonSchema(context)),
 				metadata({ name: "editor.ability.sound", description: "editor.ability.sound-description" }),
 			),
 			soundVolume: v.pipe(
@@ -518,15 +519,15 @@ const classSchemaMap = new ClassMap<AbilityClass>({
 				metadata({ name: "editor.ability.reflect-time", description: "editor.ability.reflect-time-description" }),
 			),
 			deflectSound: v.pipe(
-				v.optional(SoundHjsonSchema),
+				v.optional(SoundHjsonSchema(context)),
 				metadata({ name: "editor.ability.deflect-sound", description: "editor.ability.deflect-sound-description" }),
 			),
 			breakSound: v.pipe(
-				v.optional(SoundHjsonSchema),
+				v.optional(SoundHjsonSchema(context)),
 				metadata({ name: "editor.ability.break-sound-arc", description: "editor.ability.break-sound-arc-description" }),
 			),
 			hitSound: v.pipe(
-				v.optional(SoundHjsonSchema),
+				v.optional(SoundHjsonSchema(context)),
 				metadata({ name: "editor.ability.hit-sound-arc", description: "editor.ability.hit-sound-arc-description" }),
 			),
 			hitSoundVolume: v.pipe(
@@ -589,7 +590,7 @@ const classSchemaMap = new ClassMap<AbilityClass>({
 				metadata({ name: "editor.ability.active-effect", description: "editor.ability.active-effect-description" }),
 			),
 			sound: v.pipe(
-				v.optional(SoundHjsonSchema),
+				v.optional(SoundHjsonSchema(context)),
 				metadata({ name: "editor.ability.sound", description: "editor.ability.sound-description" }),
 			),
 			soundVolume: v.pipe(

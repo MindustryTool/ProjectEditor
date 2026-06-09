@@ -324,7 +324,7 @@ const effectClassMap = new ClassMap<EffectType>({
 	SoundEffect: (context) =>
 		v.object({
 			sound: v.pipe(
-				v.optional(SoundHjsonSchema),
+				v.optional(SoundHjsonSchema(context)),
 				metadata({ name: "editor.effect.sound", description: "editor.effect.sound-description" }),
 			),
 			minPitch: v.pipe(

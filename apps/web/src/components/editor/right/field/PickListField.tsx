@@ -12,6 +12,7 @@ import { Check, ChevronDown, Search } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { VisuallyHidden } from "radix-ui";
+import { levenshtein } from "#/lib/utils";
 
 export const PickListField = React.memo(function PickListField({
 	name,
@@ -28,9 +29,15 @@ export const PickListField = React.memo(function PickListField({
 	const [filter, setFilter] = useState("");
 
 	if ("options" in unwrappedSchema && Array.isArray(unwrappedSchema.options)) {
-		const options = unwrappedSchema.options.map((v) => String(v)).sort();
+		const options = useMemo(() => {
+			const list = (unwrappedSchema.options as unknown[]).map((v) => String(v));
+			return filter ? levenshtein(list, (i) => i, filter) : list.sort();
+		}, [filter, unwrappedSchema.options]);
 
-		const stringValue = typeof value === "string" ? value : value ? String(value) : String((defaultValue ?? options[0]) || "");
+		const stringValue = useMemo(
+			() => (typeof value === "string" ? value : value ? String(value) : String((defaultValue ?? options[0]) || "")),
+			[value, defaultValue, options],
+		);
 
 		if (options.length > 10) {
 			return (
@@ -77,14 +84,12 @@ export const PickListField = React.memo(function PickListField({
 										<InputGroupInput value={filter} onChange={(event) => setFilter(event.currentTarget.value)} />
 									</InputGroup>
 									<div className="max-h-[80dvh] flex flex-col md:max-h-[50dvh] overflow-y-auto border p-2 rounded-md">
-										{options
-											.filter((i) => i.toLowerCase().includes(filter.toLowerCase()))
-											.map((item) => (
-												<ToggleGroupItem className="justify-between" key={item} value={item}>
-													<span>{item}</span>
-													{stringValue === item && <Check />}
-												</ToggleGroupItem>
-											))}
+										{options.map((item) => (
+											<ToggleGroupItem className="justify-between" key={item} value={item}>
+												<span>{item}</span>
+												{stringValue === item && <Check />}
+											</ToggleGroupItem>
+										))}
 									</div>
 								</div>
 							</ToggleGroup>

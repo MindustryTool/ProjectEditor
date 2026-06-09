@@ -1550,57 +1550,6 @@ const unitObjectSchema = {
 			category: "editor.unit.category.visuals-effects",
 		}),
 	),
-
-	deathSound: v.pipe(
-		v.optional(SoundHjsonSchema),
-		metadata({
-			name: "editor.unit.death-sound",
-			description: "editor.unit.death-sound-description",
-			category: "editor.unit.category.audio",
-		}),
-	),
-	wreckSound: v.pipe(
-		v.optional(SoundHjsonSchema),
-		metadata({
-			name: "editor.unit.wreck-sound",
-			description: "editor.unit.wreck-sound-description",
-			category: "editor.unit.category.audio",
-			visibleWhen: { field: "createWreck", value: true },
-		}),
-	),
-	loopSound: v.pipe(
-		v.optional(SoundHjsonSchema),
-		metadata({
-			name: "editor.unit.loop-sound",
-			description: "editor.unit.loop-sound-description",
-			category: "editor.unit.category.audio",
-		}),
-	),
-	stepSound: v.pipe(
-		v.optional(SoundHjsonSchema),
-		metadata({
-			name: "editor.unit.step-sound",
-			description: "editor.unit.step-sound-description",
-			category: "editor.unit.category.audio",
-		}),
-	),
-	tankMoveSound: v.pipe(
-		v.optional(SoundHjsonSchema),
-		metadata({
-			name: "editor.unit.tank-move-sound",
-			description: "editor.unit.tank-move-sound-description",
-			category: "editor.unit.category.audio",
-		}),
-	),
-	moveSound: v.pipe(
-		v.optional(SoundHjsonSchema),
-		metadata({
-			name: "editor.unit.move-sound",
-			description: "editor.unit.move-sound-description",
-			category: "editor.unit.category.audio",
-		}),
-	),
-
 	engineColor: v.pipe(
 		v.optional(MindustryHexColorSchema),
 		metadata({
@@ -1632,14 +1581,6 @@ const unitObjectSchema = {
 			description: "editor.unit.outline-color-description",
 			category: "editor.unit.category.visuals-effects",
 			visibleWhen: { field: "outlines", value: true },
-		}),
-	),
-	mineSound: v.pipe(
-		v.optional(SoundHjsonSchema),
-		metadata({
-			name: "editor.unit.mine-sound",
-			description: "editor.unit.mine-sound-description",
-			category: "editor.unit.category.audio",
 		}),
 	),
 	mechLegColor: v.pipe(
@@ -1832,6 +1773,63 @@ export const UnitHjsonSchema: SchemaFn = (context) =>
 				name: "editor.unit.engines",
 				description: "editor.unit.engines-description",
 				category: "editor.unit.category.visuals-effects",
+			}),
+		),
+		deathSound: v.pipe(
+			v.optional(SoundHjsonSchema(context)),
+			metadata({
+				name: "editor.unit.death-sound",
+				description: "editor.unit.death-sound-description",
+				category: "editor.unit.category.audio",
+			}),
+		),
+		wreckSound: v.pipe(
+			v.optional(SoundHjsonSchema(context)),
+			metadata({
+				name: "editor.unit.wreck-sound",
+				description: "editor.unit.wreck-sound-description",
+				category: "editor.unit.category.audio",
+				visibleWhen: { field: "createWreck", value: true },
+			}),
+		),
+		loopSound: v.pipe(
+			v.optional(SoundHjsonSchema(context)),
+			metadata({
+				name: "editor.unit.loop-sound",
+				description: "editor.unit.loop-sound-description",
+				category: "editor.unit.category.audio",
+			}),
+		),
+		stepSound: v.pipe(
+			v.optional(SoundHjsonSchema(context)),
+			metadata({
+				name: "editor.unit.step-sound",
+				description: "editor.unit.step-sound-description",
+				category: "editor.unit.category.audio",
+			}),
+		),
+		tankMoveSound: v.pipe(
+			v.optional(SoundHjsonSchema(context)),
+			metadata({
+				name: "editor.unit.tank-move-sound",
+				description: "editor.unit.tank-move-sound-description",
+				category: "editor.unit.category.audio",
+			}),
+		),
+		moveSound: v.pipe(
+			v.optional(SoundHjsonSchema(context)),
+			metadata({
+				name: "editor.unit.move-sound",
+				description: "editor.unit.move-sound-description",
+				category: "editor.unit.category.audio",
+			}),
+		),
+		mineSound: v.pipe(
+			v.optional(SoundHjsonSchema(context)),
+			metadata({
+				name: "editor.unit.mine-sound",
+				description: "editor.unit.mine-sound-description",
+				category: "editor.unit.category.audio",
 			}),
 		),
 		research: v.optional(ResearchSchema(context)),

@@ -298,7 +298,7 @@ const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.E
 			}),
 		),
 		shootSound: v.pipe(
-			v.optional(SoundHjsonSchema),
+			v.optional(SoundHjsonSchema(context)),
 			metadata({
 				name: "editor.bullet.shoot-sound",
 				description: "editor.bullet.shoot-sound-description",
@@ -306,7 +306,7 @@ const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.E
 			}),
 		),
 		hitSound: v.pipe(
-			v.optional(SoundHjsonSchema),
+			v.optional(SoundHjsonSchema(context)),
 			metadata({
 				name: "editor.bullet.hit-sound",
 				description: "editor.bullet.hit-sound-description",
@@ -314,7 +314,7 @@ const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.E
 			}),
 		),
 		despawnSound: v.pipe(
-			v.optional(SoundHjsonSchema),
+			v.optional(SoundHjsonSchema(context)),
 			metadata({
 				name: "editor.bullet.despawn-sound",
 				description: "editor.bullet.despawn-sound-description",
@@ -665,7 +665,7 @@ const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.E
 			}),
 		),
 		healSound: v.pipe(
-			v.optional(SoundHjsonSchema),
+			v.optional(SoundHjsonSchema(context)),
 			metadata({
 				name: "editor.bullet.heal-sound",
 				description: "editor.bullet.heal-sound-description",
@@ -1637,6 +1637,6 @@ export const BulletHjsonSchema: SchemaFn = CachedSchema((context) => {
 	return v.lazy((input) => {
 		const variant = classSchemaMap.get(input, context);
 
-		return v.pipe(v.object({ ...createBulletBaseObjectSchema(context).entries, ...variant }), metadata({ type: "bullet" }));
+		return v.pipe(v.object({ ...createBulletBaseObjectSchema(context).entries, ...variant }));
 	});
 });

@@ -96,11 +96,6 @@ const weaponObjectSchema = {
 
 	layerOffset: v.optional(v.number(), 0),
 
-	activeSound: v.optional(SoundHjsonSchema),
-	shootSound: v.optional(SoundHjsonSchema),
-	initialShootSound: v.optional(SoundHjsonSchema),
-	chargeSound: v.optional(SoundHjsonSchema),
-
 	heatColor: v.optional(MindustryHexColorSchema),
 
 	shootStatusDuration: v.optional(v.number(), 60 * 5),
@@ -169,7 +164,6 @@ const repairBeamWeaponSchema = (context: ProjectContents) =>
 		recoil: fixed(weaponObjectSchema, "recoil", 0),
 		noAttack: fixed(weaponObjectSchema, "noAttack", true),
 		useAttackRange: fixed(weaponObjectSchema, "useAttackRange", false),
-		activeSound: fixed(weaponObjectSchema, "activeSound", "healBlockFull"),
 	});
 
 const weaponTypeMap = new ClassMap<WeaponType>({
@@ -194,5 +188,9 @@ export const WeaponHjsonSchema: SchemaFn = (context) =>
 			shootStatus: v.optional(StatusStringSchema(context)),
 			shootOnDeathEffect: v.optional(EffectFieldSchema(context)),
 			parts: v.optional(PartHjsonSchema(context), []),
+			activeSound: v.optional(SoundHjsonSchema(context)),
+			shootSound: v.optional(SoundHjsonSchema(context)),
+			initialShootSound: v.optional(SoundHjsonSchema(context)),
+			chargeSound: v.optional(SoundHjsonSchema(context)),
 		});
 	});

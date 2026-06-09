@@ -3,6 +3,7 @@ import { useEffects } from "#/hooks/use-effects";
 import { useItems } from "#/hooks/use-items";
 import { useLiquids } from "#/hooks/use-liquids";
 import { useSectors } from "#/hooks/use-sectors";
+import { useSounds } from "#/hooks/use-sounds";
 import { useSprites } from "#/hooks/use-sprites";
 import { useStatuses } from "#/hooks/use-statuses";
 import { useUnits } from "#/hooks/use-units";
@@ -104,6 +105,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 	const units = useUnits(metadata);
 	const effects = useEffects(metadata);
 	const sprites = useSprites();
+    const sounds = useSounds();
 
 	const contents = useMemo<ProjectContents>(
 		() => ({
@@ -116,8 +118,9 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 			units,
 			sprites,
 			effects,
+            sounds,
 		}),
-		[items, blocks, liquids, sectors, statuses, units, sprites, effects, metadata.name],
+		[items, blocks, liquids, sectors, statuses, units, sprites, effects, sounds, metadata.name],
 	);
 
 	const findContent = useCallback(
