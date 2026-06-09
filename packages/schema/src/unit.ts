@@ -13,6 +13,7 @@ import { EngineHjsonSchema } from "./engine";
 
 import { metadata } from "./utils";
 import { classSchema } from "./class";
+
 const unitTypes = ["flying", "mech", "legs", "naval", "payload", "missile", "tank", "hover", "tether", "crawl"] as const;
 const unitTemplates = ["ErekirUnitType", "MissileUnitType", "NeoplasmUnitType", "TankUnitType", "UnitType"] as const;
 

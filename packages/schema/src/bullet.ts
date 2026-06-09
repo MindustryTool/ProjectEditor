@@ -9,9 +9,15 @@ import { PartHjsonSchema } from "./part";
 import { ShootPatternHjsonSchema } from "./shoot-pattern";
 import { StatusFieldSchema } from "./status";
 import { LiquidFieldSchema } from "./liquid";
-import { UnitFieldSchema } from "./unit";
 import { metadata } from "./utils";
 import { ClassMap, classSchema } from "./class";
+
+const BulletUnitFieldSchema: SchemaFn = (context) =>
+	v.pipe(
+		v.string(),
+		v.transform((v) => v.replaceAll(context.name + "-", "")),
+		v.picklist(context.units.map((unit) => unit.name.replaceAll(context.name + "-", ""))),
+	);
 
 export const bulletTypes = [
 	"ArtilleryBulletType",
@@ -1012,7 +1018,7 @@ const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.E
 			}),
 		),
 		spawnUnit: v.pipe(
-			v.optional(UnitFieldSchema(context)),
+			v.optional(BulletUnitFieldSchema(context)),
 			metadata({
 				name: "editor.bullet.spawn-unit",
 				description: "editor.bullet.spawn-unit-description",
@@ -1020,7 +1026,7 @@ const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.E
 			}),
 		),
 		despawnUnit: v.pipe(
-			v.optional(UnitFieldSchema(context)),
+			v.optional(BulletUnitFieldSchema(context)),
 			metadata({
 				name: "editor.bullet.despawn-unit",
 				description: "editor.bullet.despawn-unit-description",

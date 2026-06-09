@@ -1,12 +1,20 @@
 import * as v from "valibot";
 import type { ProjectContents } from "@project/types";
-import { ItemFieldSchema } from "./item";
 import { ContentNameSchema } from "./content";
+
+export function ItemStackItemFieldSchema(context: ProjectContents) {
+    return v.pipe(
+        v.string(),
+        v.transform((v) => v.replaceAll(context.name + "-", "")),
+        v.picklist(context.items.map((item) => item.name.replaceAll(context.name + "-", ""))),
+    );
+}
+
 
 export const ItemStackSchema = (context: ProjectContents) =>
 	v.union([
 		v.object({
-			item: ItemFieldSchema(context),
+			item: ItemStackItemFieldSchema(context),
 			amount: v.pipe(v.number(), v.integer(), v.minValue(0)),
 		}),
 		v.pipe(
