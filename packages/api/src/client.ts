@@ -21,7 +21,6 @@ export class MindustryApiClient {
 			timeout: 30_000,
 			headers: {
 				Accept: "application/json",
-				"Content-Type": "application/json",
 			},
 		});
 
@@ -83,19 +82,19 @@ export class MindustryApiClient {
 		return this.get<Sound[]>("/sounds", options);
 	}
 
-	getSchematicPreview(buffer: ArrayBuffer): Promise<Uint8Array> {
+	getSchematicPreview(buffer: ArrayBuffer){
 		const formData = new FormData();
 		formData.append("data", new Blob([buffer]));
 
-		return this.post<Uint8Array>("/schematics/image", formData);
+		return this.instance.post<Uint8Array>("/schematics/image", formData, { responseType: "arraybuffer" });
 	}
 
-    getMapPreview(buffer: ArrayBuffer): Promise<Uint8Array> {
-        const formData = new FormData();
-        formData.append("data", new Blob([buffer]));
+	getMapPreview(buffer: ArrayBuffer){
+		const formData = new FormData();
+		formData.append("data", new Blob([buffer]));
 
-        return this.post<Uint8Array>("/maps/image", formData);
-    }
+		return this.instance.post<Uint8Array>("/maps/image", formData, { responseType: "arraybuffer" });
+	}
 
 	async get<TResponse>(path: string, options?: RequestOptions): Promise<TResponse> {
 		const config: AxiosRequestConfig = {};

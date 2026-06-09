@@ -2,12 +2,22 @@ import { Spinner } from "#/components/ui/spinner";
 import { apiClient } from "@project/api";
 import { useFile } from "@project/core";
 import { useQuery } from "@tanstack/react-query";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 
 export const SchematicMapPreview = React.memo(function SchematicMapPreview({ path, type }: { path: string; type: "schematic" | "map" }) {
 	const { data, isLoading } = useFile(path);
-	
-    if (isLoading) {
+	const { data: preview, isLoading: previewLoading, write: writePreview } = useFile(path + ".preview");
+
+	const imageUrl = useMemo(() => {
+		if (!preview) {
+			return null;
+		}
+
+		const blob = new Blob([preview], { type: "image/png" });
+		return URL.createObjectURL(blob);
+	}, [preview]);
+
+	if (isLoading || previewLoading) {
 		return (
 			<div className="flex justify-center items-center h-full w-full overflow-hidden">
 				<Spinner />
@@ -16,13 +26,25 @@ export const SchematicMapPreview = React.memo(function SchematicMapPreview({ pat
 	}
 
 	if (!data) {
-		return null;
+		return "No data";
 	}
 
-    return <SchematicMapLoader data={data} type={type} />
+	if (imageUrl) {
+		return <img className="w-full h-full object-contain" src={imageUrl} alt={type === "schematic" ? "Schematic" : "Map"} />;
+	}
+
+	return <SchematicMapLoader data={data} type={type} writePreview={writePreview} />;
 });
 
-const SchematicMapLoader = React.memo(function SchematicMapLoader({ data, type }: { data: ArrayBuffer; type: "schematic" | "map" }) {
+const SchematicMapLoader = React.memo(function SchematicMapLoader({
+	data,
+	type,
+	writePreview,
+}: {
+	data: ArrayBuffer;
+	type: "schematic" | "map";
+	writePreview: (preview: ArrayBuffer) => void;
+}) {
 	const {
 		data: image,
 		isLoading,
@@ -33,11 +55,11 @@ const SchematicMapLoader = React.memo(function SchematicMapLoader({ data, type }
 		queryFn: () => (type === "schematic" ? apiClient.getSchematicPreview(data) : apiClient.getMapPreview(data)),
 	});
 
-	const imageUrl = useMemo(() => {
-		if (!image) return null;
-		const blob = new Blob([Buffer.from(image)], { type: "image/jpeg" });
-		return URL.createObjectURL(blob);
-	}, [image]);
+	useEffect(() => {
+		if (image) {
+			writePreview(new Uint8Array(image.data).slice().buffer);
+		}
+	}, [image, writePreview]);
 
 	if (isLoading) {
 		return (
@@ -51,11 +73,5 @@ const SchematicMapLoader = React.memo(function SchematicMapLoader({ data, type }
 		return <div className="flex justify-center items-center h-full w-full overflow-hidden">{String(error)}</div>;
 	}
 
-    if (!imageUrl) {
-        return null;
-    }
-
-	return (
-		<img className="w-full h-full object-contain" src={imageUrl} alt={type === "schematic" ? "Schematic" : "Map"} />
-	);
+	return null;
 });
