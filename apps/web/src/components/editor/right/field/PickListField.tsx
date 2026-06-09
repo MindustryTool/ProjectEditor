@@ -128,5 +128,7 @@ export const PickListField = React.memo(function PickListField({
 		);
 	}
 
-	throw new Error(`Unknown option ${value}, this should not happen`);
+	throw new Error(
+		`Unknown schema for field ${jsonPath}, this should not happen, schema: ${JSON.stringify(unwrappedSchema, null, 2)}, value: ${JSON.stringify(value, null, 2)}`,
+	);
 });

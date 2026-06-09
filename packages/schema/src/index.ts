@@ -46,7 +46,6 @@ export {
 	getSchemaEntries,
 	getSchemaMetadata,
 	hasNullableWrapper,
-	hasNullishWrapper,
 	metadata,
 	resolveSchema,
 	unwrapSchema,

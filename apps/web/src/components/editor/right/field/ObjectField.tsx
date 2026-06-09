@@ -57,7 +57,7 @@ function buildCategoryObjectFields(
 	for (const [name, childSchema] of entries) {
 		const key = name;
 		const childValue = (value as Record<string, unknown>)?.[name];
-		const type = detectSchemaType(childSchema, childValue);
+		const { type, schema } = detectSchemaType(childSchema, childValue);
 		const metadata = getSchemaMetadata(childSchema);
 
 		if (metadata?.visibleWhen && typeof value === "object" && value !== null) {
@@ -89,7 +89,7 @@ function buildCategoryObjectFields(
 					name={name}
 					value={childValue ?? v.getDefaults(childSchema)}
 					onChange={onChange}
-					entrySchema={childSchema as AnySchema}
+					entrySchema={schema}
 					jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
 					getRenderer={getRenderer}
 				/>,

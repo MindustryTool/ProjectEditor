@@ -1,15 +1,13 @@
 import { Button } from "#/components/ui/button";
 import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
-import { getArrayItemSchema, getSchemaMetadata, unwrapSchema, type AnySchema } from "@project/schema";
+import { detectSchemaType, getArrayItemSchema, getSchemaMetadata, unwrapSchema, type AnySchema } from "@project/schema";
 import { HJSON } from "@project/hjson";
-import { Plus, X } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import React, { useCallback, useMemo } from "react";
 import * as v from "valibot";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
-import { SchemaArrayItemEditor } from "./SchemaArrayItemEditor";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
-import { Separator } from "#/components/ui/separator";
 
 export const ArrayField = React.memo(function ArrayField({
 	path,
@@ -63,10 +61,11 @@ export const ArrayField = React.memo(function ArrayField({
 				<div className="flex flex-col gap-2 border p-2 rounded-md border-dashed">
 					{arrayValue.map((el, index) => (
 						<ArrayElement
+							name={name}
 							key={index}
 							index={index}
 							value={el}
-							itemSchema={entrySchema}
+							itemSchema={getArrayItemSchema(entrySchema, index)}
 							onChange={onChange}
 							jsonPath={jsonPath}
 							path={path}
@@ -83,6 +82,7 @@ export const ArrayField = React.memo(function ArrayField({
 });
 
 function ArrayElement({
+	name,
 	index,
 	value,
 	itemSchema,
@@ -91,6 +91,7 @@ function ArrayElement({
 	path,
 	getRenderer,
 }: {
+	name: string;
 	path: string;
 	index: number;
 	value: unknown;
@@ -99,7 +100,6 @@ function ArrayElement({
 	jsonPath: string;
 	getRenderer: Parameters<typeof ArrayField>[0]["getRenderer"];
 }) {
-	const currentItemSchema = getArrayItemSchema(itemSchema, index);
 	const entryJsonPath = jsonPath ? `${jsonPath}[${index}]` : `[${index}]`;
 
 	const handleRemove = useCallback(() => {
@@ -110,23 +110,29 @@ function ArrayElement({
 		});
 	}, [onChange, jsonPath, index]);
 
+	const { type, schema } = useMemo(() => detectSchemaType(itemSchema, value), [itemSchema, value]);
+
+	const Renderer = getRenderer(type);
+
+	if (Renderer === undefined) {
+		return <span className="text-red-400 text-sm">Unknown field type {jsonPath}</span>;
+	}
+
 	return (
 		<div key={index} className="flex flex-col gap-2 relative border p-2 rounded-md">
-			<div className="w-full flex items-center justify-between">
-				<p className="font-semibold">{index + 1}</p>
-				<Button size="sm" className="text-destructive" variant="ghost" onClick={handleRemove}>
-					<X />
-				</Button>
-			</div>
-			<Separator />
-			<SchemaArrayItemEditor
+			<Renderer
+				key={entryJsonPath}
+				name={`${index + 1} - ${name}`}
 				path={path}
 				value={value}
-				itemSchema={currentItemSchema}
 				onChange={onChange}
+				entrySchema={schema}
 				jsonPath={entryJsonPath}
 				getRenderer={getRenderer}
 			/>
+			<Button size="sm" className="text-destructive w-full" variant="destructive" onClick={handleRemove}>
+				<Trash2 />
+			</Button>
 		</div>
 	);
 }

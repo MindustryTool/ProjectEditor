@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
 	resolveSchema,
 	unwrapSchema,
-	hasNullishWrapper,
 	getSchemaEntries,
 	getArrayItemSchema,
 	getSchemaMetadata,
@@ -47,33 +46,6 @@ describe("unwrapSchema", () => {
 	it("does not strip v.pipe", () => {
 		const schema = v.pipe(v.string(), v.minLength(1));
 		expect(unwrapSchema(schema as AnySchema)).toBe(schema);
-	});
-});
-
-describe("hasNullishWrapper", () => {
-	it("returns true for v.optional", () => {
-		expect(hasNullishWrapper(v.optional(v.string()) as AnySchema)).toBe(true);
-	});
-
-	it("returns true for v.optional", () => {
-		expect(hasNullishWrapper(v.optional(v.string()) as AnySchema)).toBe(true);
-	});
-
-	it("returns true for v.nullable", () => {
-		expect(hasNullishWrapper(v.nullable(v.string()) as AnySchema)).toBe(true);
-	});
-
-	it("returns false for bare types", () => {
-		expect(hasNullishWrapper(v.string() as AnySchema)).toBe(false);
-		expect(hasNullishWrapper(v.number() as AnySchema)).toBe(false);
-	});
-
-	it("returns false for v.pipe", () => {
-		expect(hasNullishWrapper(v.pipe(v.string(), v.minLength(1)) as AnySchema)).toBe(false);
-	});
-
-	it("returns false for v.object", () => {
-		expect(hasNullishWrapper(v.object({}) as AnySchema)).toBe(false);
 	});
 });
 
@@ -337,7 +309,7 @@ describe("resolveSchema", () => {
 
 	it("returns inner schema for v.pipe(object, metadata)", () => {
 		const inner = v.object({ x: v.string() });
-		const piped = v.pipe(inner, metadata({ type: "test" }));
+		const piped = v.pipe(inner, metadata({ type: "object"  }));
 		const resolved = resolveSchema(piped as AnySchema, {});
 		expect(resolved).not.toBe(piped);
 		expect((resolved as unknown as { entries: Record<string, unknown> }).entries).toBeDefined();
@@ -385,7 +357,7 @@ describe("resolveSchema", () => {
 describe("getSchemaEntries with valibot pipe structure", () => {
 	it("extracts entries from v.pipe(object, metadata)", () => {
 		const inner = v.object({ name: v.string() });
-		const piped = v.pipe(inner, metadata({ type: "test" }));
+		const piped = v.pipe(inner, metadata({ type: "object" }));
 		const entries = getSchemaEntries(piped as AnySchema);
 		expect(entries).toHaveLength(1);
 		expect(entries[0]![0]).toBe("name");

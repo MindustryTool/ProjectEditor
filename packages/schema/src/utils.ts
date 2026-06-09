@@ -23,8 +23,8 @@ export const types = [
 	"liquids",
 	"select",
 	"texture",
-    "textures",
-    "item-requirement",
+	"textures",
+	"item-requirement",
 	"never",
 ] as const;
 
@@ -42,44 +42,54 @@ export function hasNullableWrapper(schema: AnySchema): boolean {
 	return ["nullable", "nullish"].includes(s.type);
 }
 
-export function hasNullishWrapper(schema: AnySchema): boolean {
-	const s = schema as unknown as { type: string };
-	return WRAPPER_TYPES.has(s.type);
-}
-
 function getTypeFromMetadata(schema: AnySchema): Type | null {
 	const meta = getSchemaMetadata(schema);
-	if (!meta?.type) return null;
+	if (!meta?.type) {
+		return null;
+	}
+
 	const t = meta.type;
+
 	if ((types as readonly string[]).includes(t)) {
 		return t as Type;
 	}
 	console.warn(`Unknown type: ${t}`);
+
 	return null;
 }
 
-function getSchemaType(schema: AnySchema, value: unknown): Type {
-	const s = schema as unknown as { type: string; pipe?: AnySchema[] };
+function getSchemaType(schema: AnySchema, value: unknown): { type: Type; schema: AnySchema } {
+	const s = schema as unknown as { type: string; pipe?: AnySchema[]; kind: string };
 
 	if (s.pipe && s.pipe.length > 0) {
-		const first: AnySchema = s.pipe[0]!;
-		return detectSchemaType(first, value);
+		for (let i = s.pipe.length - 1; i >= 0; i--) {
+			const { type } = detectSchemaType(s.pipe[i] as AnySchema, value);
+			if (type === "never") {
+				continue;
+			}
+
+			return { type, schema: s.pipe[i] as AnySchema };
+		}
+		console.warn({ unknownTypeInPipe: s.type });
+		return { type: "never", schema };
 	}
 
-	if (s.type === "string") return "string";
-	if (s.type === "number") return "number";
-	if (s.type === "boolean") return "boolean";
-	if (s.type === "object") return "object";
-	if (s.type === "array") return "array";
-	if (s.type === "picklist") return "picklist";
-	if (s.type === "never") return "never";
+	if (s.type === "string") return { type: "string", schema };
+	if (s.type === "number") return { type: "number", schema };
+	if (s.type === "boolean") return { type: "boolean", schema };
+	if (s.type === "object") return { type: "object", schema };
+	if (s.type === "array") return { type: "array", schema };
+	if (s.type === "picklist") return { type: "picklist", schema };
+	if (s.type === "never") return { type: "never", schema };
 
-	console.warn({ unknownType: s.type });
+	if (s.kind === "schema") {
+		console.warn({ unknownType: s.type });
+	}
 
-	return s.type as Type;
+	return { type: "never", schema };
 }
 
-export function detectSchemaType(rawSchema: AnySchema, value: unknown): Type {
+export function detectSchemaType(rawSchema: AnySchema, value: unknown): { type: Type; schema: AnySchema } {
 	const unwrapped = unwrapSchema(rawSchema) as unknown as {
 		type: string;
 		pipe?: AnySchema[] | Array<{ type: string }>;
@@ -90,7 +100,7 @@ export function detectSchemaType(rawSchema: AnySchema, value: unknown): Type {
 	let metadataType = getTypeFromMetadata(unwrapped);
 
 	if (metadataType) {
-		return metadataType;
+		return { type: metadataType, schema: unwrapped };
 	}
 
 	if (unwrapped.type === "lazy" && unwrapped.getter) {
@@ -100,7 +110,7 @@ export function detectSchemaType(rawSchema: AnySchema, value: unknown): Type {
 	metadataType = getTypeFromMetadata(unwrapped);
 
 	if (metadataType) {
-		return metadataType;
+		return { type: metadataType, schema: unwrapped };
 	}
 
 	return getSchemaType(unwrapped, value);
@@ -122,8 +132,15 @@ export function resolveSchema(schema: AnySchema, value: unknown): AnySchema {
 		return resolveSchema(s.getter(value), value);
 	}
 
-	if (Array.isArray(s.pipe) && s.pipe.length > 0) {
-		return resolveSchema(s.pipe[0] as AnySchema, value);
+	if (Array.isArray(s.pipe)) {
+		for (let i = s.pipe.length - 1; i >= 0; i--) {
+			const { type } = detectSchemaType(s.pipe[i] as AnySchema, value);
+			if (type === "never") {
+				continue;
+			}
+
+			return resolveSchema(s.pipe[i] as AnySchema, value);
+		}
 	}
 
 	return schema;
@@ -189,7 +206,7 @@ export function getArrayItemSchema(schema: AnySchema, index = 0): AnySchema {
 }
 
 export type SchemaMetadata = {
-	type?: string;
+	type?: Type;
 	name?: string;
 	description?: string;
 	category?: string;
@@ -198,7 +215,7 @@ export type SchemaMetadata = {
 		field: string;
 		value: unknown;
 	};
-    disabled?: boolean;
+	disabled?: boolean;
 };
 
 export function metadata<T>(meta: SchemaMetadata): v.MetadataAction<T, SchemaMetadata> {
@@ -249,8 +266,6 @@ export function fixed<K extends string, T extends Record<K, AnySchema>>(from: T,
 export type SchemaFn<
 	T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>> = v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>,
 > = (context: ProjectContents) => T;
-
-
 
 export type SpriteData = {
 	name: string;

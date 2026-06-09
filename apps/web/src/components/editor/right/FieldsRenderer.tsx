@@ -4,14 +4,7 @@ import { useFileString } from "@project/core";
 import { HJSON, HjsonNode } from "@project/hjson";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import React, { Suspense, useCallback, useEffect, useState } from "react";
-import {
-	resolveSchema,
-	detectSchemaType,
-	getSchemaEntries,
-	getSchemaMetadata,
-	type AnySchema,
-	type SchemaFn,
-} from "@project/schema";
+import { resolveSchema, detectSchemaType, getSchemaEntries, getSchemaMetadata, type AnySchema, type SchemaFn } from "@project/schema";
 import * as v from "valibot";
 
 import { FieldCategory } from "#/components/editor/right/field/FieldCategory";
@@ -21,7 +14,6 @@ interface FieldsRendererProps {
 	path: string;
 	schema: AnySchema | SchemaFn;
 }
-
 
 export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema }: FieldsRendererProps) {
 	const { data, isLoading, write } = useFileString(path);
@@ -112,7 +104,7 @@ function Child({
 		const key = name + path;
 		const childNode = node.get(name);
 		const value = childNode.isMissing() ? v.getDefaults(entrySchema) : childNode.valueOf();
-		const type = detectSchemaType(entrySchema, value);
+		const { type, schema } = detectSchemaType(entrySchema, value);
 		const metadata = getSchemaMetadata(entrySchema);
 
 		if (count > render) break;
@@ -147,7 +139,7 @@ function Child({
 					name={name}
 					value={value}
 					onChange={onChange}
-					entrySchema={entrySchema}
+					entrySchema={schema}
 					jsonPath={name}
 					getRenderer={getRenderer}
 				/>,
