@@ -14,7 +14,7 @@ import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import { ObjectField } from "./ObjectField";
-import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
+import type { SchemaRendererProps } from "#/components/editor/right/field/renderer";
 import { FieldLabel } from "#/components/ui/field";
 import { FieldControl } from "#/components/editor/right/field/Field";
 import { getSchemaMetadata } from "@project/schema";

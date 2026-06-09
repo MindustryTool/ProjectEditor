@@ -8,7 +8,7 @@ import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import { removeByJsonPath } from "./util";
-import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
+import type { SchemaRendererProps } from "#/components/editor/right/field/renderer";
 import { getSchemaMetadata } from "@project/schema";
 import { schemaRenderers } from "#/components/editor/right/field/renderer";
 

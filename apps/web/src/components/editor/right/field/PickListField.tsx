@@ -7,7 +7,7 @@ import * as v from "valibot";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
-import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
+import type { SchemaRendererProps } from "#/components/editor/right/field/renderer";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
 import { Button } from "#/components/ui/button";
 import { Check, ChevronDown, Search } from "lucide-react";

@@ -8,7 +8,7 @@ import * as v from "valibot";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import { SchemaArrayItemEditor } from "./SchemaArrayItemEditor";
-import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
+import type { SchemaRendererProps } from "#/components/editor/right/field/renderer";
 import { Separator } from "#/components/ui/separator";
 import { schemaRenderers } from "#/components/editor/right/field/renderer";
 

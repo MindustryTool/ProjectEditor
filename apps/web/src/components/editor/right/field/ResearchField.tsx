@@ -14,7 +14,7 @@ import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import { removeByJsonPath } from "./util";
-import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
+import type { SchemaRendererProps } from "#/components/editor/right/field/renderer";
 import type { Research, SchemaMetadata } from "@project/schema";
 import { getSchemaMetadata } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
@@ -61,7 +61,7 @@ export const ResearchField = React.memo(function ResearchField({
 		handleChange(parent, [...requirements, "copper" + "/" + 10]);
 	}
 
-    const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
+	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
 	return (
 		<>
@@ -103,7 +103,7 @@ const ResearchRequirementList = React.memo(function ResearchRequirementList({
 	requirements,
 	onChange,
 	jsonPath,
-    metadata,
+	metadata,
 }: {
 	requirements: string[];
 	onChange: (requirements: string[]) => void;

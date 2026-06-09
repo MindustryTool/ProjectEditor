@@ -2,7 +2,7 @@ import { Field, FieldControl, FieldLabel } from "#/components/editor/right/field
 import { schemaRenderers } from "#/components/editor/right/field/renderer";
 import { SchemaDescription } from "#/components/editor/right/field/SchemaDescription";
 import { SchemaLabel } from "#/components/editor/right/field/SchemaLabel";
-import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
+import type { SchemaRendererProps } from "#/components/editor/right/field/renderer";
 import { SpriteUploader, SpriteViewer } from "#/components/editor/right/SpritePicker";
 import { Button } from "#/components/ui/button";
 import { useProjectSession } from "@project/core";

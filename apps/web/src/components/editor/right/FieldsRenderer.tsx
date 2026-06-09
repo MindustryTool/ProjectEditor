@@ -9,17 +9,6 @@ import * as v from "valibot";
 import { FieldCategory } from "#/components/editor/right/field/FieldCategory";
 import { schemaRenderers } from "#/components/editor/right/field/renderer";
 
-export type SchemaRendererProps = {
-	name: string;
-	path: string;
-	value: unknown;
-	entrySchema: AnySchema;
-	jsonPath: string;
-	onChange: (jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => void;
-};
-
-export type SchemaRenderer = React.ComponentType<SchemaRendererProps>;
-
 interface FieldsRendererProps {
 	path: string;
 	schema: AnySchema | SchemaFn;

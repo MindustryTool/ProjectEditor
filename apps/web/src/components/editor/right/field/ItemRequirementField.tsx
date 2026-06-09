@@ -10,7 +10,7 @@ import React, { useMemo } from "react";
 import { ItemGrid } from "./ItemGrid";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
-import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
+import type { SchemaRendererProps } from "#/components/editor/right/field/renderer";
 import { getSchemaMetadata } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { EMPTY_ARRAY } from "#/lib/utils";
@@ -122,6 +122,5 @@ export const ItemRequirementField = React.memo(function ItemRequirementField({
 		</div>
 	);
 });
-
 
 schemaRenderers.set("item-requirement", ItemRequirementField);

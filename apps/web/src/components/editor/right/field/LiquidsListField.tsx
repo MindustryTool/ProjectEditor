@@ -9,7 +9,7 @@ import * as v from "valibot";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
-import type { SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
+import type { SchemaRendererProps } from "#/components/editor/right/field/renderer";
 import { schemaRenderers } from "#/components/editor/right/field/renderer";
 
 export const LiquidsListField = React.memo(function LiquidsListField({

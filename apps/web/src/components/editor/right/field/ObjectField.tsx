@@ -3,7 +3,7 @@ import { getSchemaMetadata, getSchemaEntries, resolveSchema, detectSchemaType } 
 import React from "react";
 import * as v from "valibot";
 import type { HjsonNode } from "@project/hjson";
-import { type SchemaRendererProps } from "#/components/editor/right/FieldsRenderer";
+import { type SchemaRendererProps } from "#/components/editor/right/field/renderer";
 import type { AnySchema } from "@project/schema";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
