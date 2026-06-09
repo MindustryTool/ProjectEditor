@@ -1,28 +1,34 @@
 import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
 import { Checkbox } from "#/components/ui/checkbox";
 import React, { useCallback, useMemo } from "react";
-import * as v from "valibot";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
-import { removeByJsonPath } from "./util";
 import { getSchemaMetadata, hasNullableWrapper } from "@project/schema";
 import { HJSON } from "@project/hjson";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 
-export const BooleanField = React.memo(function BooleanField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
-	const checked = typeof value === "boolean" ? value : v.getDefault(entrySchema);
+export const BooleanField = React.memo(function BooleanField({
+	name,
+	value,
+	onChange,
+	entrySchema,
+	jsonPath,
+	path,
+	defaultValue,
+}: SchemaRendererProps) {
+	const checked = typeof value === "boolean" ? value : Boolean(defaultValue);
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
 	const handleChange = useCallback(
 		(val: boolean) => {
-			if (val === v.getDefault(entrySchema) && !hasNullableWrapper(entrySchema)) {
-				onChange(jsonPath, (parent, key, original) => removeByJsonPath(parent, key, original));
+			if (val === defaultValue && !hasNullableWrapper(entrySchema)) {
+				onChange(jsonPath, (parent, original, key) => parent.patchRemove(original, key));
 				return;
 			}
-			onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(val)));
+			onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, HJSON.stringify(val)));
 		},
-		[onChange, jsonPath, entrySchema],
+		[onChange, jsonPath, entrySchema, defaultValue],
 	);
 
 	return (

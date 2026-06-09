@@ -9,7 +9,6 @@ import { HJSON } from "@project/hjson";
 import { VisuallyHidden } from "radix-ui";
 import { ChevronDown, ChevronsUpDown, Search } from "lucide-react";
 import React, { useMemo, useState } from "react";
-import * as v from "valibot";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
@@ -28,6 +27,7 @@ export const EffectField = React.memo(function EffectField({
 	entrySchema,
 	jsonPath,
 	getRenderer,
+	defaultValue,
 }: SchemaRendererProps) {
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 	const effects = useProjectContext().contents.effects;
@@ -45,8 +45,8 @@ export const EffectField = React.memo(function EffectField({
 					<Button
 						variant="outline"
 						onClick={() =>
-							onChange(jsonPath, (parent, key, original) =>
-								parent.objectNode(key).patchField(original, key, HJSON.stringify(effects[0]?.name)),
+							onChange(jsonPath, (parent, original, key) =>
+								parent.patchValue(original, key, HJSON.stringify(effects[0]?.name)),
 							)
 						}
 					>
@@ -74,6 +74,7 @@ export const EffectField = React.memo(function EffectField({
 									onChange={onChange}
 									jsonPath={jsonPath}
 									getRenderer={getRenderer}
+									defaultValue={defaultValue}
 								/>
 								<Separator />
 							</FieldControl>
@@ -85,7 +86,7 @@ export const EffectField = React.memo(function EffectField({
 		);
 	}
 
-	const stringValue = typeof value === "string" ? value : ((v.getDefault(entrySchema) ?? "") as string);
+	const stringValue = typeof value === "string" ? value : ((defaultValue ?? "") as string);
 
 	return (
 		<div className="grid gap-2">
@@ -100,8 +101,8 @@ export const EffectField = React.memo(function EffectField({
 				<Button
 					variant="outline"
 					onClick={() =>
-						onChange(jsonPath, (parent, key, original) =>
-							parent.objectNode(key).patchField(original, key, HJSON.stringify({ type: "ParticleEffect" })),
+						onChange(jsonPath, (parent, original, key) =>
+							parent.patchValue(original, key, HJSON.stringify({ type: "ParticleEffect" })),
 						)
 					}
 				>
@@ -147,7 +148,7 @@ function EffectDialogContent({
 			type="single"
 			value={value}
 			onValueChange={(v) =>
-				onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(v)))
+				onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, HJSON.stringify(v)))
 			}
 			asChild
 		>

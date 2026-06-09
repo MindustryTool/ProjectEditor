@@ -1,9 +1,7 @@
 import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
-import { HJSON } from "@project/hjson";
-import { getSchemaMetadata, unwrapSchema } from "@project/schema";
+import { getSchemaMetadata, hasNullableWrapper, unwrapSchema } from "@project/schema";
 import React, { useMemo, useState } from "react";
-import * as v from "valibot";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
@@ -22,8 +20,8 @@ export const PickListField = React.memo(function PickListField({
 	entrySchema,
 	jsonPath,
 	path,
+	defaultValue,
 }: SchemaRendererProps) {
-	const stringValue = typeof value === "string" ? value : ((v.getDefault(entrySchema) ?? "") as string);
 	const unwrappedSchema = unwrapSchema(entrySchema);
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
@@ -31,6 +29,8 @@ export const PickListField = React.memo(function PickListField({
 
 	if ("options" in unwrappedSchema && Array.isArray(unwrappedSchema.options)) {
 		const options = unwrappedSchema.options.map((v) => String(v)).sort();
+
+		const stringValue = typeof value === "string" ? value : value ? String(value) : String((defaultValue ?? options[0]) || "");
 
 		if (options.length > 10) {
 			return (
@@ -58,11 +58,14 @@ export const PickListField = React.memo(function PickListField({
 								type="single"
 								value={stringValue}
 								onValueChange={(v) => {
-									if (v) {
-										onChange(jsonPath, (parent, key, original) =>
-											parent.objectNode(key).patchField(original, key, HJSON.stringify(v)),
-										);
+									const isDefault = v === String(defaultValue ?? "");
+									const isNullable = hasNullableWrapper(entrySchema);
+
+									if (v === "" || (isDefault && !isNullable)) {
+										return onChange(jsonPath, (parent, original, key) => parent.patchRemove(original, key));
 									}
+
+									onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, v));
 								}}
 								asChild
 							>
@@ -103,9 +106,16 @@ export const PickListField = React.memo(function PickListField({
 						key={name}
 						value={stringValue}
 						onValueChange={(nextValue) =>
-							onChange(jsonPath, (parent, key, original) =>
-								parent.objectNode(key).patchField(original, key, HJSON.stringify(nextValue)),
-							)
+							onChange(jsonPath, (parent, original, key) => {
+								const isDefault = nextValue === String(defaultValue ?? "");
+								const isNullable = hasNullableWrapper(entrySchema);
+
+								if (nextValue === "" || (isDefault && !isNullable)) {
+									return parent.patchRemove(original, key);
+								}
+
+								return parent.patchValue(original, key, nextValue);
+							})
 						}
 					>
 						<SelectTrigger className="w-full">

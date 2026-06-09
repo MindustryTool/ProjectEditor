@@ -75,7 +75,6 @@ export class OPFSAdapter implements VirtualFileSystem {
 
 	async readFile(path: string): Promise<ArrayBuffer | null> {
 		try {
-            console.log("readFile", path);
 			const [dir, name] = await resolveHandle(this.root, path);
 			const fileHandle = await dir.getFileHandle(name);
 			const file = await fileHandle.getFile();

@@ -1,8 +1,6 @@
 import { FieldControl, FieldLabel } from "#/components/editor/right/field/Field";
-import { getSchemaMetadata, getSchemaEntries, resolveSchema, detectSchemaType } from "@project/schema";
+import { getSchemaMetadata, getSchemaEntries, resolveSchema, detectSchemaType, getDefaults } from "@project/schema";
 import React from "react";
-import * as v from "valibot";
-import type { HjsonNode } from "@project/hjson";
 import type { AnySchema } from "@project/schema";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
@@ -47,7 +45,7 @@ function buildCategoryObjectFields(
 	entries: [string, AnySchema][],
 	value: unknown,
 	path: string,
-	onChange: (jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => void,
+	onChange: SchemaRendererProps["onChange"],
 	jsonPath: string,
 	getRenderer: SchemaRendererProps["getRenderer"],
 ) {
@@ -57,6 +55,7 @@ function buildCategoryObjectFields(
 	for (const [name, childSchema] of entries) {
 		const key = name;
 		const childValue = (value as Record<string, unknown>)?.[name];
+		const defaultValue = getDefaults(childSchema, childValue);
 		const { type, schema } = detectSchemaType(childSchema, childValue);
 		const metadata = getSchemaMetadata(childSchema);
 
@@ -78,7 +77,7 @@ function buildCategoryObjectFields(
 					<FieldLabel>
 						<SchemaLabel name={name} metadata={metadata} />
 					</FieldLabel>
-					<span className="text-red-400 text-sm">Unknown field type {type}</span>
+					<span className="text-red-400 text-sm">Unknown field type '{type}'</span>
 				</FieldControl>,
 			);
 		} else {
@@ -87,11 +86,12 @@ function buildCategoryObjectFields(
 					key={key}
 					path={path}
 					name={name}
-					value={childValue ?? v.getDefaults(childSchema)}
+					value={childValue ?? defaultValue}
 					onChange={onChange}
 					entrySchema={schema}
 					jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
 					getRenderer={getRenderer}
+					defaultValue={defaultValue}
 				/>,
 			);
 		}

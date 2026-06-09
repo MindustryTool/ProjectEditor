@@ -41,7 +41,6 @@ export class ProjectFileSystem {
 	}
 
 	async readFile(path: string): Promise<ArrayBuffer | null> {
-		console.log("readFile", path);
 		return this.vfs.readFile(this.scopePath(path));
 	}
 

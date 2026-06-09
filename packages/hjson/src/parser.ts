@@ -527,6 +527,7 @@ export class Parser {
 		node: HjsonNode,
 		keyHint: string,
 		reviver?: (key: string, value: unknown) => unknown,
+		parent?: HjsonStructuredNode,
 	): HjsonStructuredNode {
 		switch (node.kind) {
 			case "null":
@@ -534,30 +535,40 @@ export class Parser {
 			case "number":
 			case "string": {
 				const val = reviver ? reviver(keyHint, node.value) : node.value;
-				return new HjsonValueNode(val, { ...node.loc.start }, { ...node.loc.end });
+				return new HjsonValueNode(val, { ...node.loc.start }, { ...node.loc.end }, parent);
 			}
 			case "array": {
-				const elements: ElementInfo[] = [];
 				const data: unknown[] = [];
+				const elements: ElementInfo[] = [];
+				const arr = new HjsonArrayNode(data, elements, { ...node.loc.start }, { ...node.loc.end }, parent);
 				node.elements.forEach((el, i) => {
-					const val = this.convertNodeStructured(el, String(i), reviver);
+					const val = this.convertNodeStructured(el, String(i), reviver, arr);
 					elements.push(createElementInfo(i, val, { ...el.loc.start }, { ...el.loc.end }, { ...el.loc.start }, { ...el.loc.end }));
 					data.push(val.valueOf());
 				});
 				const finalData = reviver ? reviver(keyHint, data) : data;
-				return new HjsonArrayNode(finalData as unknown[], elements, { ...node.loc.start }, { ...node.loc.end });
+				if (finalData !== data) {
+					data.length = 0;
+					if (Array.isArray(finalData)) {
+						data.push(...finalData);
+					}
+				}
+				return arr;
 			}
 			case "object": {
-				const fieldInfos: FieldInfo[] = [];
+				const fields = new Map<string, FieldInfo>();
 				const rawValues: Map<string, HjsonStructuredNode> = new Map();
 				const data: Record<string, unknown> = {};
 
+				const object = new HjsonObjectNode(data, fields, { ...node.loc.start }, { ...node.loc.end }, parent);
+
 				for (const member of node.members) {
 					const key = member.key.value;
-					const val = this.convertNodeStructured(member.value, key, reviver);
+					const val = this.convertNodeStructured(member.value, key, reviver, object);
 					rawValues.set(key, val);
 					data[key] = val.valueOf();
-					fieldInfos.push(
+					fields.set(
+						key,
 						createFieldInfo(
 							key,
 							val,
@@ -570,26 +581,25 @@ export class Parser {
 				}
 
 				const finalData = reviver ? reviver(keyHint, data) : data;
-				// If the reviver returned something else, we might need to handle it,
-				// but typically it should return an object for object nodes.
 				const resultData = finalData && typeof finalData === "object" ? finalData : data;
 
-				// Re-sync field values if reviver changed them
-				if (finalData !== data && typeof finalData === "object" && finalData !== null) {
-					for (const fi of fieldInfos) {
-						if (fi.key in finalData) {
-							const newVal = (finalData as Record<string, unknown>)[fi.key];
-							const oldRaw = rawValues.get(fi.key);
-							if (oldRaw && oldRaw.valueOf() !== newVal) {
-								// If it changed, we wrap it in a new ValueNode without precise loc (or keep old loc?)
-								// For now, let's just update the value.
-								fi.value = new HjsonValueNode(newVal, fi.valueStart, fi.valueEnd);
-							}
+				if (resultData !== data) {
+					for (const key of Object.keys(data)) {
+						delete data[key];
+					}
+					for (const [key, val] of Object.entries(resultData)) {
+						(data as Record<string, unknown>)[key] = val;
+					}
+					for (const [key, newVal] of Object.entries(resultData)) {
+						const oldRaw = rawValues.get(key);
+						if (oldRaw && oldRaw.valueOf() !== newVal) {
+							const fi = fields.get(key)!;
+							fi.value = new HjsonValueNode(newVal, fi.valueStart, fi.valueEnd, object);
 						}
 					}
 				}
 
-				return new HjsonObjectNode(resultData as Record<string, unknown>, fieldInfos, { ...node.loc.start }, { ...node.loc.end });
+				return object;
 			}
 			default:
 				throw new Error(`Unknown node kind: ${(node as { kind: string }).kind}`);

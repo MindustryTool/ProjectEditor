@@ -44,6 +44,7 @@ export function hasNullableWrapper(schema: AnySchema): boolean {
 
 function getTypeFromMetadata(schema: AnySchema): Type | null {
 	const meta = getSchemaMetadata(schema);
+
 	if (!meta?.type) {
 		return null;
 	}
@@ -114,6 +115,16 @@ export function detectSchemaType(rawSchema: AnySchema, value: unknown): { type: 
 	}
 
 	return getSchemaType(unwrapped, value);
+}
+
+export function getDefaults(schema: AnySchema, value: unknown): unknown {
+	const s = schema as unknown as { type: string; getter?: (val: unknown) => AnySchema };
+
+	if (s.type === "lazy" && s.getter) {
+		return getDefaults(s.getter(value), value);
+	}
+
+	return v.getDefaults(schema);
 }
 
 export function resolveSchema(schema: AnySchema, value: unknown): AnySchema {
@@ -206,7 +217,7 @@ export function getArrayItemSchema(schema: AnySchema, index = 0): AnySchema {
 }
 
 export type SchemaMetadata = {
-	type?: Type;
+	type?: string;
 	name?: string;
 	description?: string;
 	category?: string;
@@ -227,14 +238,24 @@ export function getSchemaMetadata(schema: AnySchema): SchemaMetadata | null {
 	const visited = new WeakSet<object>();
 
 	function walk(value: unknown) {
-		if (!value || typeof value !== "object") return;
-		if (visited.has(value as object)) return;
+		if (!value || typeof value !== "object") {
+			return;
+		}
+
+		if (visited.has(value as object)) {
+			return;
+		}
+
 		visited.add(value as object);
 
 		const obj = value as Record<string, unknown>;
 
 		if (obj.type === "metadata" && obj.metadata) {
 			Object.assign(result, obj.metadata);
+		}
+
+		if (obj.type === "array" || obj.type === "object") {
+			return;
 		}
 
 		for (const child of Object.values(obj)) {

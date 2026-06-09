@@ -1,10 +1,9 @@
 import { Button } from "#/components/ui/button";
 import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
-import { detectSchemaType, getArrayItemSchema, getSchemaMetadata, unwrapSchema, type AnySchema } from "@project/schema";
+import { detectSchemaType, getArrayItemSchema, getDefaults, getSchemaMetadata, unwrapSchema, type AnySchema } from "@project/schema";
 import { HJSON } from "@project/hjson";
 import { Plus, Trash2 } from "lucide-react";
 import React, { useCallback, useMemo } from "react";
-import * as v from "valibot";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
@@ -28,7 +27,8 @@ export const ArrayField = React.memo(function ArrayField({
 
 		const nextItemSchema = getArrayItemSchema(entrySchema, arrayValue.length);
 
-		let defaultValue: unknown = v.getDefaults(nextItemSchema);
+		let defaultValue: unknown = getDefaults(nextItemSchema, arrayValue?.[arrayValue.length]);
+
 		if (defaultValue === undefined) {
 			const typeDefault = unwrapSchema(nextItemSchema);
 			if (typeDefault.type === "object") {
@@ -40,10 +40,12 @@ export const ArrayField = React.memo(function ArrayField({
 			}
 		}
 
-		onChange(jsonPath, (parent, key, original) => {
-			const arr = parent.get(key);
-			if (!arr.isArray()) throw new Error(`expected array at ${jsonPath}`);
-			return arr.insertElement(original, arrayValue.length, HJSON.stringify(defaultValue));
+		onChange(jsonPath, (parent, original, key) => {
+			if (parent.get(key).isMissing()) {
+				return parent.patchValue(original, key, HJSON.stringify([defaultValue]));
+			}
+
+			return parent.get(key).arrayNode().insertElement(original, arrayValue.length, HJSON.stringify(defaultValue));
 		});
 	}, [arrayValue, entrySchema, onChange, jsonPath]);
 
@@ -102,20 +104,18 @@ function ArrayElement({
 }) {
 	const entryJsonPath = jsonPath ? `${jsonPath}[${index}]` : `[${index}]`;
 
-	const handleRemove = useCallback(() => {
-		onChange(jsonPath, (parent, key, original) => {
-			const arr = parent.get(key);
-			if (!arr.isArray()) throw new Error(`expected array at ${jsonPath}`);
-			return arr.removeElement(original, index);
-		});
-	}, [onChange, jsonPath, index]);
+	const handleRemove = useCallback(
+		() => onChange(jsonPath, (parent, original, key) => parent.get(key).patchRemove(original, index)),
+		[onChange, jsonPath, index],
+	);
 
 	const { type, schema } = useMemo(() => detectSchemaType(itemSchema, value), [itemSchema, value]);
+	const defaultValue = getDefaults(schema, value);
 
 	const Renderer = getRenderer(type);
 
 	if (Renderer === undefined) {
-		return <span className="text-red-400 text-sm">Unknown field type {jsonPath}</span>;
+		return <span className="text-red-400 text-sm">Unknown field type '{type}'</span>;
 	}
 
 	return (
@@ -129,6 +129,7 @@ function ArrayElement({
 				entrySchema={schema}
 				jsonPath={entryJsonPath}
 				getRenderer={getRenderer}
+				defaultValue={defaultValue}
 			/>
 			<Button size="sm" className="text-destructive w-full" variant="destructive" onClick={handleRemove}>
 				<Trash2 />

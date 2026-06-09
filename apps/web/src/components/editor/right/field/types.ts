@@ -7,7 +7,8 @@ export type SchemaRendererProps = {
 	value: unknown;
 	entrySchema: AnySchema;
 	jsonPath: string;
-	onChange: (jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => void;
+    defaultValue: unknown;
+	onChange: (jsonPath: string, updater: (parent: HjsonNode, original: string, key: string | number, root: HjsonNode) => string) => void;
 	getRenderer: (type: Type) => SchemaRenderer | undefined;
 };
 

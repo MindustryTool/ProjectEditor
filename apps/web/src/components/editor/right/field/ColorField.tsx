@@ -3,18 +3,29 @@ import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover
 import { ColorPicker, ColorPickerAlpha, ColorPickerFormat, ColorPickerHue, ColorPickerSelection } from "#/components/ui/color-picker";
 import { HJSON } from "@project/hjson";
 import React, { useMemo } from "react";
-import * as v from "valibot";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { getSchemaMetadata } from "@project/schema";
 
-export const ColorField = React.memo(function ColorField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
-	let hexValue = typeof value === "string" ? value : ((v.getDefault(entrySchema) ?? "333333") as string);
+export const ColorField = React.memo(function ColorField({
+	name,
+	value,
+	onChange,
+	entrySchema,
+	jsonPath,
+	path,
+	defaultValue,
+}: SchemaRendererProps) {
+	let hexValue = typeof value === "string" ? value : (String(defaultValue ?? "333333") as string);
+	hexValue = useMemo(() => (hexValue?.startsWith("#") ? hexValue : "#" + hexValue), [hexValue]);
 
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
-	hexValue = useMemo(() => (hexValue?.startsWith("#") ? hexValue : "#" + hexValue), [hexValue]);
+
+	if (metadata!.type !== "color") {
+		throw new Error("ColorField type must be color type: " + JSON.stringify(metadata) + " value: " + JSON.stringify(value));
+	}
 
 	return (
 		<Field jsonPath={jsonPath} metadata={metadata}>
@@ -34,9 +45,7 @@ export const ColorField = React.memo(function ColorField({ name, value, onChange
 							<ColorPicker
 								value={hexValue}
 								onChange={(val) =>
-									onChange(jsonPath, (parent, key, original) =>
-										parent.objectNode(key).patchField(original, key, HJSON.stringify(val)),
-									)
+									onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, HJSON.stringify(val)))
 								}
 							>
 								<ColorPickerSelection className="h-40 rounded-lg" />

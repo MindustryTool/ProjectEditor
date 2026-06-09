@@ -14,7 +14,6 @@ import type { SchemaRendererProps } from "#/components/editor/right/field/types"
 import { getSchemaMetadata } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { EMPTY_ARRAY } from "#/lib/utils";
-import type { HjsonNode } from "@project/hjson";
 
 export const ItemRequirementField = React.memo(function ItemRequirementField({
 	name,
@@ -26,9 +25,7 @@ export const ItemRequirementField = React.memo(function ItemRequirementField({
 	const requirements = Array.isArray(value) ? (value as string[]) : EMPTY_ARRAY;
 
 	function handleAddNewReq() {
-		onChange(jsonPath, (parent, key, original) =>
-			(parent.path(jsonPath)?.value as HjsonNode).arrayNode(key).insertElement(original, requirements.length, "copper/10"),
-		);
+		onChange(jsonPath, (parent, original) => parent.arrayNode().insertElement(original, requirements.length, "copper/10"));
 	}
 
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
@@ -40,15 +37,11 @@ export const ItemRequirementField = React.memo(function ItemRequirementField({
 	const addedReq = requirements.map((requirement: string) => requirement.split("/")[0]!);
 
 	function handleRemoveReq(index: number) {
-		onChange(jsonPath, (parent, key, original) =>
-			(parent.path(jsonPath)?.value as HjsonNode).arrayNode(key).removeElement(original, index),
-		);
+		onChange(jsonPath, (node, original) => node.parent!.arrayNode().removeElement(original, index));
 	}
 
 	function handleUpdateReq(index: number, item: string, number: number) {
-		onChange(jsonPath, (parent, key, original) =>
-			(parent.path(jsonPath)?.value as HjsonNode).arrayNode(key).patchElement(original, index, item + "/" + number),
-		);
+		onChange(jsonPath, (parent, original) => parent.patchValue(original, index, item + "/" + number));
 	}
 
 	return (

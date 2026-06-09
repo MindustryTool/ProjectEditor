@@ -1,14 +1,28 @@
 import { ErrorBoundary } from "#/components/ui/error-boundary";
 import { FormControl, FormLabel } from "#/components/ui/form";
 import { useFileString } from "@project/core";
-import { HJSON, HjsonNode } from "@project/hjson";
+import type { HjsonNode } from "@project/hjson";
+import { HJSON } from "@project/hjson";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import React, { Suspense, useCallback, useEffect, useState } from "react";
-import { resolveSchema, detectSchemaType, getSchemaEntries, getSchemaMetadata, type AnySchema, type SchemaFn } from "@project/schema";
-import * as v from "valibot";
+import {
+	resolveSchema,
+	detectSchemaType,
+	getSchemaEntries,
+	getSchemaMetadata,
+	type AnySchema,
+	type SchemaFn,
+	getDefaults,
+} from "@project/schema";
 
 import { FieldCategory } from "#/components/editor/right/field/FieldCategory";
 import { getRenderer } from "#/components/editor/right/field/registry";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
+import { Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useLocalStorage } from "usehooks-ts";
+import { levenshtein } from "#/lib/utils";
+import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 
 interface FieldsRendererProps {
 	path: string;
@@ -19,35 +33,53 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	const { data, isLoading, write } = useFileString(path);
 	const { contents } = useProjectContext();
 	const [render, setRender] = useState(30);
+	const [filter, setFilter] = useLocalStorage("property-filter", "");
+	const { t } = useTranslation();
 
 	const onChange = useCallback(
-		(jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => {
+		(jsonPath: string, updater: (node: HjsonNode, original: string, key: string | number, root: HjsonNode) => string) => {
 			write((content: string | null) => {
 				if (content === null) {
 					throw new Error("Attempting to write into unloaded file");
 				}
 
 				const root = HJSON.parseWithCache(content);
-				const splitAt = Math.max(jsonPath.lastIndexOf("."), jsonPath.lastIndexOf("["));
-				if (splitAt === -1) {
-					return updater(root, jsonPath, content, root);
+
+				const segments = jsonPath
+					.split(/[.\]\[]/)
+					.filter((s) => s.trim().length > 0)
+					.map((s) => {
+						try {
+							const num = parseInt(s);
+							if (isNaN(num)) {
+								return s;
+							}
+							return num;
+						} catch {
+							return s;
+						}
+					});
+
+				if (segments.length === 0) {
+					throw new Error(`jsonPath is empty: ${jsonPath}`);
 				}
 
-				const parentPath = jsonPath.slice(0, splitAt);
-				const key = jsonPath.slice(splitAt + 1).replace(/]$/, "");
-				const parentInfo = root.path(parentPath);
-
-				if (!parentInfo) {
-					throw new Error(`parent path not found: ${parentPath}`);
+				if (segments.length === 1) {
+					updater(root, content, segments[0]!, root);
 				}
 
-				const parent = parentInfo.value;
+				const key = segments[segments.length - 1]!;
+				let parent = root;
 
-				if (!(parent instanceof HjsonNode)) {
-					throw new Error(`expected node at ${parentPath}`);
+				for (let i = 0; i < segments.length - 1; i++) {
+					parent = parent.get(segments[i]!);
 				}
 
-				return updater(parent, key, content, root);
+				if (parent.isMissing()) {
+					throw new Error(`Parent is not found: ${jsonPath}`);
+				}
+
+				return updater(parent, content, key, root);
 			});
 		},
 		[write],
@@ -70,11 +102,18 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 
 	const resolvedSchema = resolveSchema(typeof schema === "function" ? schema(contents) : schema, node.valueOf());
 	const entries = getSchemaEntries(resolvedSchema);
+	const filtered = filter ? levenshtein(entries, ([name]) => name, filter, 30) : entries;
 
 	return (
 		<Suspense>
 			<ErrorBoundary>
-				<Child entries={entries} node={node} path={path} onChange={onChange} render={render} setRender={setRender} />
+				<InputGroup>
+					<InputGroupAddon>
+						<Search className="size-4" />
+					</InputGroupAddon>
+					<InputGroupInput value={filter} onChange={(e) => setFilter(e.target.value)} placeholder={t("editor.search")} />
+				</InputGroup>
+				<Child entries={filtered} node={node} path={path} onChange={onChange} render={render} setRender={setRender} />
 			</ErrorBoundary>
 		</Suspense>
 	);
@@ -91,19 +130,21 @@ function Child({
 	entries: [string, AnySchema][];
 	node: HjsonNode;
 	path: string;
-	onChange: (jsonPath: string, updater: (parent: HjsonNode, key: string, original: string, root: HjsonNode) => string) => void;
+	onChange: SchemaRendererProps["onChange"];
 	render: number;
 	setRender: (callback: (render: number) => number) => void;
 }) {
 	const endRef = React.useRef<HTMLDivElement>(null);
 	const elements: React.ReactNode[] = [];
+	const seen = new Set<string>();
 	let lastCategory: string | undefined;
 	let count = 0;
 
 	for (const [name, entrySchema] of entries) {
 		const key = name + path;
 		const childNode = node.get(name);
-		const value = childNode.isMissing() ? v.getDefaults(entrySchema) : childNode.valueOf();
+		const defaultValue = getDefaults(entrySchema, childNode.valueOf());
+		const value = childNode.isMissing() ? defaultValue : childNode.valueOf();
 		const { type, schema } = detectSchemaType(entrySchema, value);
 		const metadata = getSchemaMetadata(entrySchema);
 
@@ -118,6 +159,8 @@ function Child({
 		}
 
 		if (metadata?.category && metadata.category !== lastCategory) {
+			if (seen.has(metadata.category)) continue;
+			seen.add(metadata.category);
 			elements.push(<FieldCategory key={`cat-${metadata.category}`} category={metadata.category} />);
 			lastCategory = metadata.category;
 		}
@@ -128,7 +171,7 @@ function Child({
 			elements.push(
 				<FormControl key={key}>
 					<FormLabel>{name}</FormLabel>
-					<span className="text-yellow-400 text-sm">Unknown field type {type}</span>
+					<span className="text-yellow-400 text-sm">Unknown field type '{type}'</span>
 				</FormControl>,
 			);
 		} else {
@@ -142,6 +185,7 @@ function Child({
 					entrySchema={schema}
 					jsonPath={name}
 					getRenderer={getRenderer}
+					defaultValue={defaultValue}
 				/>,
 			);
 		}

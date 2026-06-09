@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { HJSON } from "@project/hjson";
-import type { HjsonObjectNode, HjsonArrayNode, HjsonNode, HjsonValueNode } from "@project/hjson";
+import { HJSON, HjsonMissingNode, HjsonObjectNode, HjsonArrayNode, HjsonValueNode } from "@project/hjson";
+import type { HjsonNode } from "@project/hjson";
 
 function parseStructured(input: string) {
 	return HJSON.parseStructured(input) as HjsonObjectNode;
@@ -718,5 +718,107 @@ describe("HjsonValueNode.patchValue", () => {
 		const valueNode = root.get("count") as HjsonValueNode;
 		const result = valueNode.patchValue(text, "100");
 		expect(result).toBe("name: alpha\n  count: 100\n  active: true");
+	});
+});
+
+describe("Parent node access", () => {
+	it("value node parent is set from object field", () => {
+		const text = 'name: "hello"';
+		const root = parseStructured(text);
+		const valueNode = root.get("name") as HjsonValueNode;
+		expect(valueNode.parent).toBe(root);
+	});
+
+	it("value node parent is set from array element", () => {
+		const text = 'items: ["a", "b"]';
+		const root = parseStructured(text);
+		const arr = root.get("items") as HjsonArrayNode;
+		const el0 = arr.at(0)!;
+		const valueNode = el0.value as HjsonValueNode;
+		expect(valueNode.parent).toBe(arr);
+	});
+
+	it("nested object parent is set correctly", () => {
+		const text = "outer: {inner: {key: 1}}";
+		const root = parseStructured(text);
+		const outer = root.get("outer") as HjsonObjectNode;
+		const inner = outer.get("inner") as HjsonObjectNode;
+		expect(inner.parent).toBe(outer);
+	});
+
+	it("array parent is set correctly", () => {
+		const text = "items: [1, 2, 3]";
+		const root = parseStructured(text);
+		const arr = root.get("items") as HjsonArrayNode;
+		expect(arr.parent).toBe(root);
+	});
+
+	it("root node has undefined parent", () => {
+		const text = "name: hello";
+		const root = parseStructured(text);
+		expect(root.parent).toBeUndefined();
+	});
+
+	it("HjsonMissingNode.parent is undefined", () => {
+		expect(HjsonMissingNode.instance.parent).toBeUndefined();
+	});
+
+	it("upward traversal from leaf to root via repeated .parent", () => {
+		const text = "a: {b: {c: 1}}";
+		const root = parseStructured(text);
+		const a = root.get("a") as HjsonObjectNode;
+		const b = a.get("b") as HjsonObjectNode;
+		const c = b.get("c") as HjsonValueNode;
+
+		expect(c.parent).toBe(b);
+		expect(c.parent!.parent).toBe(a);
+		expect(c.parent!.parent!.parent).toBe(root);
+		expect(c.parent!.parent!.parent!.parent).toBeUndefined();
+	});
+
+	it("chained parent access (node.parent.parent)", () => {
+		const text = "a: {b: 1}";
+		const root = parseStructured(text);
+		const a = root.get("a") as HjsonObjectNode;
+		const b = a.get("b") as HjsonValueNode;
+		expect(b.parent!.parent).toBe(root);
+	});
+
+	it("node constructed without explicit parent has undefined parent", () => {
+		const valueNode = new HjsonValueNode("test", { row: 1, col: 1, index: 0 }, { row: 1, col: 5, index: 4 });
+		expect(valueNode.parent).toBeUndefined();
+	});
+
+	it("Object patchRemove removes own child (no parent delegation)", () => {
+		const text = "{a: 1, b: 2, c: 3}";
+		const root = parseStructured(text);
+		const result = root.patchRemove(text, "a");
+		expect(result).toBe("{b: 2, c: 3}");
+	});
+
+	it("Array patchRemove removes own child (no parent delegation)", () => {
+		const text = "arr: [1, 2, 3]";
+		const root = parseStructured(text);
+		const arr = root.get("arr") as HjsonArrayNode;
+		const original = "arr: [1, 2, 3]";
+		const result = arr.patchRemove(original, 0);
+		expect(result).toBe("arr: [2, 3]");
+	});
+
+	it("ValueNode patchRemove delegates to parent when parent exists", () => {
+		// ValueNode.patchRemove delegates to parent when parent is set
+		const text = "{a: 1, b: 2}";
+		const root = parseStructured(text);
+		const bNode = root.get("b") as HjsonValueNode;
+		const result = bNode.patchRemove(text, "b");
+		expect(result).toBe("{a: 1}");
+	});
+
+	it("ValueNode patchRemove removes inline when no parent", () => {
+		// A standalone value node (no parent) removes itself inline
+		const standalone = new HjsonValueNode("hello", { row: 1, col: 1, index: 0 }, { row: 1, col: 6, index: 5 });
+		const original = "hello";
+		const result = standalone.patchRemove(original, "");
+		expect(result).toBe("");
 	});
 });

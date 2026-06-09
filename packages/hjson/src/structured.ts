@@ -39,6 +39,8 @@ export function createFieldInfo<T>(
 }
 
 export abstract class HjsonNode {
+	#parent?: HjsonNode;
+
 	abstract isObject(): this is HjsonObjectNode;
 	abstract isArray(): this is HjsonArrayNode;
 	abstract isValue(): this is HjsonValueNode;
@@ -46,19 +48,28 @@ export abstract class HjsonNode {
 	abstract isString(): this is HjsonValueNode<string>;
 	abstract isNumber(): this is HjsonValueNode<number>;
 	abstract isBoolean(): this is HjsonValueNode<boolean>;
+	abstract patchValue(original: string, key: string | number, newValue: string): string;
 
-	valueNode(label: string): HjsonValueNode {
-		if (!this.isValue()) throw new Error(`expected value node at ${label} but got ${JSON.stringify(this.valueOf())}`);
+	constructor(parent?: HjsonNode) {
+		this.#parent = parent;
+	}
+
+	get parent(): HjsonNode | undefined {
+		return this.#parent;
+	}
+
+	valueNode(): HjsonValueNode {
+		if (!this.isValue()) throw new Error(`expected value node but got ${JSON.stringify(this.valueOf())}`);
 		return this;
 	}
 
-	arrayNode(label: string): HjsonArrayNode {
-		if (!this.isArray()) throw new Error(`expected array node at ${label} but got ${JSON.stringify(this.valueOf())}`);
+	arrayNode(): HjsonArrayNode {
+		if (!this.isArray()) throw new Error(`expected array node but got ${JSON.stringify(this.valueOf())}`);
 		return this;
 	}
 
-	objectNode(label: string): HjsonObjectNode {
-		if (!this.isObject()) throw new Error(`expected object node at ${label} but got ${JSON.stringify(this.valueOf())}`);
+	objectNode(): HjsonObjectNode {
+		if (!this.isObject()) throw new Error(`expected object node but got ${JSON.stringify(this.valueOf())}`);
 		return this;
 	}
 
@@ -66,25 +77,37 @@ export abstract class HjsonNode {
 
 	path(pathStr: string): FieldInfo | ElementInfo | undefined {
 		if (!pathStr) return undefined;
+
 		const segments = pathStr.match(/(\w+)|\[(\d+)\]/g);
+
 		if (!segments || segments.length === 0) return undefined;
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		let current: HjsonNode = this;
+
 		for (let i = 0; i < segments.length - 1; i++) {
 			const seg = segments[i]!;
-			const info = seg.startsWith("[")
-				? current.at(Number.parseInt(seg.slice(1, -1), 10))
-				: current.at(seg);
+			const info = seg.startsWith("[") ? current.at(Number.parseInt(seg.slice(1, -1), 10)) : current.at(seg);
 			if (!info) return undefined;
 			current = info.value as HjsonNode;
 		}
+
 		const last = segments[segments.length - 1]!;
-		return last.startsWith("[")
-			? current.at(Number.parseInt(last.slice(1, -1), 10))
-			: current.at(last);
+
+		return last.startsWith("[") ? current.at(Number.parseInt(last.slice(1, -1), 10)) : current.at(last);
+	}
+
+	nodePath(pathStr: string): HjsonNode {
+		const field = this.path(pathStr);
+		if (field && field.value instanceof HjsonNode) {
+			return field.value as HjsonNode;
+		}
+
+		return HjsonMissingNode.instance;
 	}
 
 	abstract at(value: string | number): FieldInfo | ElementInfo | undefined;
+
+	abstract patchRemove(original: string, key: string | number): string;
 
 	abstract info(): InfoBase | undefined;
 
@@ -105,12 +128,22 @@ export class HjsonObjectNode extends HjsonNode {
 	readonly #start?: Position;
 	readonly #end?: Position;
 
-	constructor(data: Record<string, unknown>, fields: Iterable<FieldInfo>, start?: Position, end?: Position) {
-		super();
+	constructor(
+		data: Record<string, unknown>,
+		fields: Map<string, FieldInfo> | Iterable<FieldInfo>,
+		start?: Position,
+		end?: Position,
+		parent?: HjsonNode,
+	) {
+		super(parent);
 		this.#data = data;
-		this.#fields = new Map();
-		for (const f of fields) {
-			this.#fields.set(f.key, f);
+		if (fields instanceof Map) {
+			this.#fields = fields;
+		} else {
+			this.#fields = new Map();
+			for (const f of fields) {
+				this.#fields.set(f.key, f);
+			}
 		}
 		this.#start = start;
 		this.#end = end;
@@ -145,6 +178,7 @@ export class HjsonObjectNode extends HjsonNode {
 				return info.value;
 			}
 		}
+
 		return HjsonMissingNode.instance;
 	}
 
@@ -153,6 +187,14 @@ export class HjsonObjectNode extends HjsonNode {
 			return this.#fields.get(value);
 		}
 		return undefined;
+	}
+
+	patchRemove(original: string, key: string | number): string {
+		if (typeof key !== "string") {
+			throw new Error(`key must be a string: 'received '${key}'`);
+		}
+
+		return this.removeField(original, key);
 	}
 
 	info(): InfoBase | undefined {
@@ -192,7 +234,11 @@ export class HjsonObjectNode extends HjsonNode {
 	 * If the field exists, it uses replaceValue.
 	 * If not, it uses insertField.
 	 */
-	patchField(original: string, key: string, newValue: string): string {
+	patchValue(original: string, key: string | number, newValue: string): string {
+		if (typeof key !== "string") {
+			throw new Error(`key must be a string: 'received '${key}'`);
+		}
+
 		const info = this.field(key);
 		if (info) {
 			return info.replaceValue(original, newValue);
@@ -344,8 +390,8 @@ export class HjsonArrayNode extends HjsonNode {
 	readonly #start?: Position;
 	readonly #end?: Position;
 
-	constructor(data: unknown[], elements: ElementInfo[], start?: Position, end?: Position) {
-		super();
+	constructor(data: unknown[], elements: ElementInfo[], start?: Position, end?: Position, parent?: HjsonNode) {
+		super(parent);
 		this.#data = data;
 		this.#elements = elements;
 		this.#start = start;
@@ -381,6 +427,7 @@ export class HjsonArrayNode extends HjsonNode {
 				return el.value;
 			}
 		}
+
 		return HjsonMissingNode.instance;
 	}
 
@@ -389,6 +436,14 @@ export class HjsonArrayNode extends HjsonNode {
 			return this.#elements[value];
 		}
 		return undefined;
+	}
+
+	patchRemove(original: string, index: number | string): string {
+		if (typeof index !== "number") {
+			throw new Error(`index must be a number: 'received '${index}'`);
+		}
+
+		return this.removeElement(original, index);
 	}
 
 	info(): InfoBase | undefined {
@@ -432,9 +487,16 @@ export class HjsonArrayNode extends HjsonNode {
 		return this.#elements[0]!.start.row === this.#start.row;
 	}
 
-	patchElement(original: string, index: number, newValue: string): string {
-		const el = this.#elements[index];
-		if (!el) return original;
+	patchValue(original: string, key: string | number, newValue: string): string {
+		if (typeof key !== "number") {
+			throw new Error(`key must be a number: 'received '${key}'`);
+		}
+
+		const el = this.#elements[key];
+		if (!el) {
+			return original;
+		}
+
 		return el.replaceValue(original, newValue);
 	}
 
@@ -548,8 +610,8 @@ export class HjsonValueNode<T = unknown> extends HjsonNode {
 	readonly #start: Position;
 	readonly #end: Position;
 
-	constructor(value: T, start: Position, end: Position) {
-		super();
+	constructor(value: T, start: Position, end: Position, parent?: HjsonNode) {
+		super(parent);
 		this.#value = value;
 		this.#start = start;
 		this.#end = end;
@@ -580,8 +642,17 @@ export class HjsonValueNode<T = unknown> extends HjsonNode {
 	get(_key: string | number): HjsonNode {
 		return HjsonMissingNode.instance;
 	}
+
 	at(_value: string | number): undefined {
 		return undefined;
+	}
+
+	patchRemove(original: string, key: string | number): string {
+		if (this.parent) {
+			return this.parent.patchRemove(original, key);
+		}
+
+		return original.slice(0, this.#start.index) + original.slice(this.#end.index);
 	}
 
 	info(): InfoBase {
@@ -623,9 +694,13 @@ export class HjsonValueNode<T = unknown> extends HjsonNode {
 export class HjsonMissingNode extends HjsonNode {
 	static readonly instance = new HjsonMissingNode();
 
-	private constructor() {
-		super();
+	private constructor(parent?: HjsonNode) {
+		super(parent);
 	}
+    
+    patchValue(_original: string, _key: string | number, _newValue: string): string {
+        throw new Error("Cannot patch missing node");
+    }
 
 	isObject(): this is HjsonObjectNode {
 		return false;
@@ -656,6 +731,10 @@ export class HjsonMissingNode extends HjsonNode {
 		return undefined;
 	}
 
+	patchRemove(_original: string, _key: string | number): string {
+		throw new Error("Missing node cannot be removed");
+	}
+
 	info(): undefined {
 		return undefined;
 	}
@@ -678,5 +757,4 @@ export class HjsonMissingNode extends HjsonNode {
 	}
 }
 
-export type HjsonResult<T> =
-	T extends Record<string, unknown> ? HjsonObjectNode : T extends unknown[] ? HjsonArrayNode : HjsonValueNode<T>;
+export type HjsonResult<T> = T extends Record<string, unknown> ? HjsonObjectNode : T extends unknown[] ? HjsonArrayNode : HjsonValueNode<T>;

@@ -13,7 +13,6 @@ import { ItemGrid } from "./ItemGrid";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
-import { removeByJsonPath } from "./util";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import type { Research, SchemaMetadata } from "@project/schema";
 import { getSchemaMetadata } from "@project/schema";
@@ -46,13 +45,13 @@ export const ResearchField = React.memo(function ResearchField({
 
 	function handleChange(newParent: string, newRequirements: string[]) {
 		if (!newParent && newRequirements.length === 0) {
-			onChange(jsonPath, (parent, key, original) => removeByJsonPath(parent, key, original));
+			onChange(jsonPath, (parent, original, key) => parent.patchRemove(original, key));
 		} else if (newRequirements.length > 0) {
-			onChange(jsonPath, (parent, key, original) =>
-				parent.objectNode(key).patchField(original, key, HJSON.stringify({ parent: newParent, requirements: newRequirements })),
+			onChange(jsonPath, (parent, original, key) =>
+				parent.patchValue(original, key, HJSON.stringify({ parent: newParent, requirements: newRequirements })),
 			);
 		} else {
-			onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(newParent)));
+			onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, HJSON.stringify(newParent)));
 		}
 	}
 

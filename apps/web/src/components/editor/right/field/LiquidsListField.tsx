@@ -5,7 +5,6 @@ import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { getSchemaMetadata, unwrapSchema } from "@project/schema";
 import { HJSON } from "@project/hjson";
 import React, { useMemo } from "react";
-import * as v from "valibot";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
@@ -18,8 +17,9 @@ export const LiquidsListField = React.memo(function LiquidsListField({
 	entrySchema,
 	jsonPath,
 	path,
+    defaultValue,
 }: SchemaRendererProps) {
-	const stringValue = typeof value === "string" ? value : ((v.getDefault(entrySchema) ?? "") as string);
+	const stringValue = typeof value === "string" ? value : ((defaultValue ?? "") as string);
 	const context = useProjectContext();
 	const unwrappedSchema = unwrapSchema(entrySchema);
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
@@ -41,8 +41,8 @@ export const LiquidsListField = React.memo(function LiquidsListField({
 						key={name}
 						value={stringValue}
 						onValueChange={(nextValue) =>
-							onChange(jsonPath, (parent, key, original) =>
-								parent.objectNode(key).patchField(original, key, HJSON.stringify(nextValue)),
+							onChange(jsonPath, (parent, original, key) =>
+								parent.patchValue(original, key, HJSON.stringify(nextValue)),
 							)
 						}
 					>

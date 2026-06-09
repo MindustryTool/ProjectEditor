@@ -2,6 +2,7 @@ import { FileIcon } from "#/components/editor/FileIcon";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
 import { usePath } from "#/hooks/use-path";
+import { levenshtein } from "#/lib/utils";
 import { useProjectSession } from "@project/core";
 import { Search } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
@@ -10,7 +11,7 @@ import { useTranslation } from "react-i18next";
 
 export function FileSearchDialog() {
 	const { t } = useTranslation();
-    
+
 	return (
 		<Dialog>
 			<DialogTrigger className="w-full p-1">
@@ -22,7 +23,7 @@ export function FileSearchDialog() {
 				</InputGroup>
 			</DialogTrigger>
 			<DialogContent className="max-h-[50dvh] h-full overflow-hidden flex flex-col">
-				<DialogTitle>{t('editor.search')}</DialogTitle>
+				<DialogTitle>{t("editor.search")}</DialogTitle>
 				<VisuallyHidden.Root>
 					<DialogDescription />
 				</VisuallyHidden.Root>
@@ -62,9 +63,7 @@ function Content() {
 				}}
 			>
 				{filter &&
-					treeSnapshot
-						.getEntries()
-						.filter((item) => item.path.includes(filter))
+					levenshtein(treeSnapshot.getEntries(), (entry) => entry.path, filter)
 						.slice(0, cursor)
 						.map((item) => (
 							<div

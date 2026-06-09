@@ -1,34 +1,31 @@
 import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
 import { Input } from "#/components/ui/input";
 import { hasNullableWrapper } from "@project/schema";
-import { HJSON } from "@project/hjson";
 import React, { useCallback, useMemo } from "react";
-import * as v from "valibot";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
-import { removeByJsonPath } from "./util";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { getSchemaMetadata } from "@project/schema";
 
-export const NumberField = React.memo(function NumberField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
-	const numValue = typeof value === "number" ? value : String(value);
+export const NumberField = React.memo(function NumberField({ name, value, onChange, entrySchema, jsonPath, path, defaultValue }: SchemaRendererProps) {
+	const numValue = typeof value === "number" ? value : isNaN(Number(value)) ? Number(defaultValue || 0) : Number(value);
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
 			const newVal = event.currentTarget.valueAsNumber;
-			const isDefault = newVal === v.getDefault(entrySchema);
+			const isDefault = newVal === defaultValue;
 			const isNullable = hasNullableWrapper(entrySchema);
 
 			if (Number.isNaN(newVal) || (isDefault && !isNullable)) {
-				onChange(jsonPath, (parent, key, original) => removeByJsonPath(parent, key, original));
+				onChange(jsonPath, (parent, original, key) => parent.patchRemove(original, key));
 				return;
 			}
 
-			onChange(jsonPath, (parent, key, original) => parent.objectNode(key).patchField(original, key, HJSON.stringify(newVal)));
+			onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, String(newVal)));
 		},
-		[onChange, jsonPath, entrySchema],
+		[onChange, jsonPath, entrySchema, defaultValue],
 	);
 
 	return (
