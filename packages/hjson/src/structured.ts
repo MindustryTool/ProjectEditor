@@ -1,7 +1,16 @@
-import { stringify as hjsonStringify } from "./serializer.js";
+﻿import { stringify as hjsonStringify } from "./serializer.js";
 
-function serializeValue(v: unknown): string {
-	return hjsonStringify(v, null, undefined);
+function serializeValue(v: unknown, baseIndent?: string): string {
+	const text = hjsonStringify(v, null, 2);
+	if (baseIndent && text.includes("\n")) {
+		return reindentSerialized(text, baseIndent);
+	}
+	return text;
+}
+
+function reindentSerialized(text: string, baseIndent: string): string {
+	const lines = text.split("\n");
+	return lines.map((line, i) => (i === 0 ? line : baseIndent + line)).join("\n");
 }
 
 export interface Position {
@@ -39,7 +48,8 @@ export function createFieldInfo<T>(
 		valueStart,
 		valueEnd,
 		replaceValue(original: string, newValue: unknown) {
-			return original.slice(0, valueStart.index) + serializeValue(newValue) + original.slice(valueEnd.index);
+			const baseIndent = " ".repeat(Math.max(0, start.col - 1));
+			return original.slice(0, valueStart.index) + serializeValue(newValue, baseIndent) + original.slice(valueEnd.index);
 		},
 	};
 }
@@ -288,42 +298,6 @@ export class HjsonObjectNode extends HjsonNode {
 		return original.slice(0, commaEnd) + original.slice(info.end.index);
 	}
 
-	#findPrecedingComment(original: string, fromIndex: number): { text: string; start: number; end: number } | undefined {
-		let i = fromIndex - 1;
-		while (i >= 0 && (original[i] === " " || original[i] === "\t")) {
-			i--;
-		}
-		if (i >= 0 && original[i] === "\n") {
-			i--;
-			while (i >= 0 && original[i] !== "\n") {
-				if (original[i] === "#") {
-					const start = i;
-					let end = start;
-					while (end < original.length && original[end] !== "\n") {
-						end++;
-					}
-					return { text: original.slice(start, end), start, end };
-				}
-				i--;
-			}
-		}
-		return undefined;
-	}
-
-	patchComment(original: string, key: string, newComment: string): string {
-		const info = this.field(key);
-		if (!info) return original;
-
-		const existing = this.#findPrecedingComment(original, info.start.index);
-		if (existing) {
-			return original.slice(0, existing.start) + newComment + original.slice(existing.end);
-		}
-
-		const indent = info.start.col > 1 ? " ".repeat(info.start.col - 1) : "";
-		const prefix = indent ? newComment + "\n" + indent : newComment + "\n";
-		return original.slice(0, info.start.index) + prefix + original.slice(info.start.index);
-	}
-
 	detectIndent(): string {
 		for (const fi of this.#fields.values()) {
 			if (fi.start.col > 1) {
@@ -358,7 +332,8 @@ export class HjsonObjectNode extends HjsonNode {
 	 * Otherwise (flat root object), appends at end.
 	 */
 	insertField(original: string, key: string, newValue: unknown): string {
-		const val = serializeValue(newValue);
+		const indent = this.detectIndent();
+		const val = serializeValue(newValue, indent);
 		if (this.#end) {
 			const closeIdx = this.#end.index - 1;
 			if (closeIdx >= 0 && original[closeIdx] === "}") {
@@ -370,10 +345,11 @@ export class HjsonObjectNode extends HjsonNode {
 					i--;
 				}
 				const before = original.slice(0, i + 1);
-				const after = original.slice(closeIdx);
-				const indent = this.detectIndent();
+				const closeBrace = original.slice(closeIdx, closeIdx + 1);
+				const afterRest = original.slice(closeIdx + 1);
 				const hasFields = this.#fields.size > 0;
-				return before + (hasFields ? "," : "") + "\n" + indent + key + ": " + val + "\n" + after;
+				const braceIndent = indent.length >= 2 ? indent.slice(0, -2) : "";
+				return before + (hasFields ? "," : "") + "\n" + indent + key + ": " + val + ",\n" + braceIndent + closeBrace + afterRest;
 			}
 		}
 		// Flat root object (no braces) or no position info: append at end
@@ -447,7 +423,8 @@ export function createElementInfo<T>(
 		valueStart,
 		valueEnd,
 		replaceValue(original: string, newValue: unknown) {
-			return original.slice(0, valueStart.index) + serializeValue(newValue) + original.slice(valueEnd.index);
+			const baseIndent = " ".repeat(Math.max(0, start.col - 1));
+			return original.slice(0, valueStart.index) + serializeValue(newValue, baseIndent) + original.slice(valueEnd.index);
 		},
 	};
 }
@@ -584,18 +561,21 @@ export class HjsonArrayNode extends HjsonNode {
 	}
 
 	insertElement(original: string, index: number, newValue: unknown): string {
-		const val = serializeValue(newValue);
 		const len = this.#elements.length;
 		if (index < 0 || index > len) return original;
 
 		if (len === 0) {
 			const openIdx = this.#start!.index + 1;
 			const closeIdx = this.#end!.index;
-			return original.slice(0, openIdx) + val + original.slice(closeIdx - 1);
+			const elIndent = this.detectIndent();
+			const val = serializeValue(newValue, elIndent);
+			const bracketIndent = elIndent.length >= 2 ? elIndent.slice(0, -2) : "";
+			return original.slice(0, openIdx) + "\n" + elIndent + val + ",\n" + bracketIndent + original.slice(closeIdx - 1);
 		}
 
 		const isMultiline = !this.#isInline(original);
 		const indent = this.detectIndent();
+		const val = serializeValue(newValue, indent);
 		const sep = isMultiline ? ",\n" + indent : ", ";
 
 		if (index === 0) {
@@ -617,7 +597,11 @@ export class HjsonArrayNode extends HjsonNode {
 				}
 				break;
 			}
-			return original.slice(0, insIdx) + sep + val + original.slice(insIdx);
+			if (isMultiline) {
+				const bracketIndent = indent.length >= 2 ? indent.slice(0, -2) : "";
+				return original.slice(0, insIdx) + ",\n" + indent + val + ",\n" + bracketIndent + original.slice(closeIdx);
+			}
+			return original.slice(0, insIdx) + ", " + val + original.slice(insIdx);
 		}
 
 		const insIdx = this.#elements[index]!.start.index;
@@ -652,41 +636,6 @@ export class HjsonArrayNode extends HjsonNode {
 		return original.slice(0, commaEnd) + original.slice(el!.end.index);
 	}
 
-	#findPrecedingComment(original: string, fromIndex: number): { text: string; start: number; end: number } | undefined {
-		let i = fromIndex - 1;
-		while (i >= 0 && (original[i] === " " || original[i] === "\t")) {
-			i--;
-		}
-		if (i >= 0 && original[i] === "\n") {
-			i--;
-			while (i >= 0 && original[i] !== "\n") {
-				if (original[i] === "#") {
-					const start = i;
-					let end = start;
-					while (end < original.length && original[end] !== "\n") {
-						end++;
-					}
-					return { text: original.slice(start, end), start, end };
-				}
-				i--;
-			}
-		}
-		return undefined;
-	}
-
-	patchComment(original: string, index: number, newComment: string): string {
-		const el = this.#elements[index];
-		if (!el) return original;
-
-		const existing = this.#findPrecedingComment(original, el.start.index);
-		if (existing) {
-			return original.slice(0, existing.start) + newComment + original.slice(existing.end);
-		}
-
-		// Insert new comment before the element
-		const indent = this.detectIndent();
-		return original.slice(0, el.start.index) + newComment + "\n" + indent + original.slice(el.start.index);
-	}
 }
 
 export class HjsonValueNode<T = unknown> extends HjsonNode {

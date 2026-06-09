@@ -18,7 +18,7 @@ describe("FieldInfo.replaceValue", () => {
 		const field = root.field("name")!;
 		const result = field.replaceValue(text, "new");
 		const post = { name: "new" };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("replaces numeric field value in source", () => {
@@ -28,7 +28,7 @@ describe("FieldInfo.replaceValue", () => {
 		const field = root.field("version")!;
 		const result = field.replaceValue(text, 42);
 		const post = { version: 42 };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 });
 
@@ -41,7 +41,7 @@ describe("ElementInfo.replaceValue", () => {
 		const el = arr.at(0)!;
 		const result = el.replaceValue(text, "x");
 		const post = { data: ["x", "b", "c"] };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("replaces last element in source", () => {
@@ -52,7 +52,7 @@ describe("ElementInfo.replaceValue", () => {
 		const el = arr.at(2)!;
 		const result = el.replaceValue(text, 99);
 		const post = { data: [1, 2, 99] };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 });
 
@@ -67,7 +67,7 @@ describe("HjsonObjectNode.patchValue", () => {
 		const root = parseStructured(text);
 		const result = root.patchValue(text, "name", "new");
 		const post = { name: "new" };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("inserts new field when key does not exist", () => {
@@ -76,7 +76,7 @@ describe("HjsonObjectNode.patchValue", () => {
 		const root = parseStructured(text);
 		const result = root.patchValue(text, "version", "1.0");
 		const post = { name: "test", version: "1.0" };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("throws when key is not a string", () => {
@@ -98,7 +98,7 @@ describe("HjsonObjectNode.removeField", () => {
 		const root = parseStructured(text);
 		const result = root.removeField(text, "name");
 		const post = {};
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("removes first field of a multi-field object", () => {
@@ -107,7 +107,7 @@ describe("HjsonObjectNode.removeField", () => {
 		const root = parseStructured(text);
 		const result = root.removeField(text, "a");
 		const post = { b: 2, c: 3 };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("removes middle field of a multi-field object", () => {
@@ -116,7 +116,7 @@ describe("HjsonObjectNode.removeField", () => {
 		const root = parseStructured(text);
 		const result = root.removeField(text, "b");
 		const post = { a: 1, c: 3 };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("removes last field of a multi-field object", () => {
@@ -125,7 +125,7 @@ describe("HjsonObjectNode.removeField", () => {
 		const root = parseStructured(text);
 		const result = root.removeField(text, "c");
 		const post = { a: 1, b: 2 };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("returns original when key does not exist", () => {
@@ -133,7 +133,7 @@ describe("HjsonObjectNode.removeField", () => {
 		const text = HJSON.stringify(pre, null, 2);
 		const root = parseStructured(text);
 		const result = root.removeField(text, "nonexistent");
-		expect(HJSON.format(result)).toBe(HJSON.stringify(pre, null, 2));
+		expect(result).toBe(HJSON.stringify(pre, null, 2));
 	});
 
 	it("removes a multiline nested field from a braced object", () => {
@@ -142,7 +142,7 @@ describe("HjsonObjectNode.removeField", () => {
 		const root = parseStructured(text);
 		const result = root.removeField(text, "nested");
 		const post = { a: 1, b: 2 };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("removes last multiline nested field from a braced object", () => {
@@ -151,7 +151,7 @@ describe("HjsonObjectNode.removeField", () => {
 		const root = parseStructured(text);
 		const result = root.removeField(text, "nested");
 		const post = { a: 1, b: 2 };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("handles trailing comma before the removed field", () => {
@@ -160,7 +160,7 @@ describe("HjsonObjectNode.removeField", () => {
 		const root = parseStructured(text);
 		const result = root.removeField(text, "b");
 		const post = { a: 1 };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 });
 
@@ -175,7 +175,7 @@ describe("HjsonObjectNode.insertField", () => {
 		const root = parseStructured(text);
 		const result = root.insertField(text, "cost", 7);
 		const post = { hardness: 82, cost: 7 };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("inserts into an empty braced object", () => {
@@ -184,7 +184,7 @@ describe("HjsonObjectNode.insertField", () => {
 		const root = parseStructured(text);
 		const result = root.insertField(text, "active", true);
 		const post = { active: true };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("inserts into an object with field", () => {
@@ -193,7 +193,7 @@ describe("HjsonObjectNode.insertField", () => {
 		const root = parseStructured(text);
 		const result = root.insertField(text, "b", 2);
 		const post = { a: 1, b: 2 };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("inserts into empty nested braced object with correct indent", () => {
@@ -203,7 +203,7 @@ describe("HjsonObjectNode.insertField", () => {
 		const innerObj = root.get("a") as HjsonObjectNode;
 		const result = innerObj.insertField(text, "b", 1);
 		const post = { a: { b: 1 } };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("inserts into deeply nested empty object (3 levels)", () => {
@@ -213,43 +213,11 @@ describe("HjsonObjectNode.insertField", () => {
 		const innerObj = root.get("a").get("b") as HjsonObjectNode;
 		const result = innerObj.insertField(text, "c", 1);
 		const post = { a: { b: { c: 1 } } };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 });
 
-// ---------------------------------------------------------------------------
-// HjsonObjectNode.patchComment
-// ---------------------------------------------------------------------------
 
-describe("HjsonObjectNode.patchComment", () => {
-	it("replaces an existing preceding comment", () => {
-		const pre = { name: "exo" };
-		const base = HJSON.stringify(pre, null, 2);
-		const text = base.replace("  name:", "  # old\n  name:");
-		const root = parseStructured(text);
-		const result = root.patchComment(text, "name", "# new");
-		expect(result).toContain("# new");
-		expect(result).not.toContain("# old");
-		expect(HJSON.parse(result)).toEqual(pre);
-	});
-
-	it("inserts a comment when none exists", () => {
-		const pre = { name: "exo" };
-		const text = HJSON.stringify(pre, null, 2);
-		const root = parseStructured(text);
-		const result = root.patchComment(text, "name", "# added");
-		expect(result).toContain("# added");
-		expect(HJSON.parse(result)).toEqual(pre);
-	});
-
-	it("returns original when field key does not exist", () => {
-		const pre = { a: 1 };
-		const text = HJSON.stringify(pre, null, 2);
-		const root = parseStructured(text);
-		const result = root.patchComment(text, "nonexistent", "# comment");
-		expect(HJSON.format(result)).toBe(HJSON.stringify(pre, null, 2));
-	});
-});
 
 // ---------------------------------------------------------------------------
 // HjsonArrayNode.patchValue
@@ -263,7 +231,7 @@ describe("HjsonArrayNode.patchValue", () => {
 		const arr = root.get("data") as HjsonArrayNode;
 		const result = arr.patchValue(text, 1, "y");
 		const post = { data: ["a", "y", "c"] };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("replaces first element", () => {
@@ -273,7 +241,7 @@ describe("HjsonArrayNode.patchValue", () => {
 		const arr = root.get("data") as HjsonArrayNode;
 		const result = arr.patchValue(text, 0, "x");
 		const post = { data: ["x", "b", "c"] };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("replaces last element", () => {
@@ -283,7 +251,7 @@ describe("HjsonArrayNode.patchValue", () => {
 		const arr = root.get("data") as HjsonArrayNode;
 		const result = arr.patchValue(text, 2, "z");
 		const post = { data: ["a", "b", "z"] };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("returns original for out-of-bounds index", () => {
@@ -292,7 +260,7 @@ describe("HjsonArrayNode.patchValue", () => {
 		const root = parseStructured(text);
 		const arr = root.get("data") as HjsonArrayNode;
 		const result = arr.patchValue(text, 99, "x");
-		expect(HJSON.format(result)).toBe(HJSON.stringify(pre, null, 2));
+		expect(result).toBe(HJSON.stringify(pre, null, 2));
 	});
 
 	it("throws when key is not a number", () => {
@@ -316,7 +284,7 @@ describe("HjsonArrayNode.insertElement", () => {
 		const arr = root.get("data") as HjsonArrayNode;
 		const result = arr.insertElement(text, 0, "a");
 		const post = { data: ["a", "b", "c"] };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("inserts in the middle of an array", () => {
@@ -326,7 +294,7 @@ describe("HjsonArrayNode.insertElement", () => {
 		const arr = root.get("data") as HjsonArrayNode;
 		const result = arr.insertElement(text, 1, "b");
 		const post = { data: ["a", "b", "c"] };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("appends at the end of an array", () => {
@@ -336,7 +304,7 @@ describe("HjsonArrayNode.insertElement", () => {
 		const arr = root.get("data") as HjsonArrayNode;
 		const result = arr.insertElement(text, 2, "c");
 		const post = { data: ["a", "b", "c"] };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("inserts into an empty array", () => {
@@ -346,7 +314,7 @@ describe("HjsonArrayNode.insertElement", () => {
 		const arr = root.get("data") as HjsonArrayNode;
 		const result = arr.insertElement(text, 0, "a");
 		const post = { data: ["a"] };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("returns original for out-of-bounds index", () => {
@@ -355,7 +323,7 @@ describe("HjsonArrayNode.insertElement", () => {
 		const root = parseStructured(text);
 		const arr = root.get("data") as HjsonArrayNode;
 		const result = arr.insertElement(text, 5, "b");
-		expect(HJSON.format(result)).toBe(HJSON.stringify(pre, null, 2));
+		expect(result).toBe(HJSON.stringify(pre, null, 2));
 	});
 
 	it("returns original for negative index", () => {
@@ -364,7 +332,7 @@ describe("HjsonArrayNode.insertElement", () => {
 		const root = parseStructured(text);
 		const arr = root.get("data") as HjsonArrayNode;
 		const result = arr.insertElement(text, -1, "b");
-		expect(HJSON.format(result)).toBe(HJSON.stringify(pre, null, 2));
+		expect(result).toBe(HJSON.stringify(pre, null, 2));
 	});
 
 	it("inserts element into empty nested array stays inline", () => {
@@ -374,7 +342,7 @@ describe("HjsonArrayNode.insertElement", () => {
 		const arr = root.get("items") as HjsonArrayNode;
 		const result = arr.insertElement(text, 0, 1);
 		const post = { items: [1] };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 });
 
@@ -390,7 +358,7 @@ describe("HjsonArrayNode.removeElement", () => {
 		const arr = root.get("data") as HjsonArrayNode;
 		const result = arr.removeElement(text, 0);
 		const post = { data: ["b", "c"] };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("removes middle element", () => {
@@ -400,7 +368,7 @@ describe("HjsonArrayNode.removeElement", () => {
 		const arr = root.get("data") as HjsonArrayNode;
 		const result = arr.removeElement(text, 1);
 		const post = { data: ["a", "c"] };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("removes last element", () => {
@@ -410,7 +378,7 @@ describe("HjsonArrayNode.removeElement", () => {
 		const arr = root.get("data") as HjsonArrayNode;
 		const result = arr.removeElement(text, 2);
 		const post = { data: ["a", "b"] };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("removes single element leaving empty array", () => {
@@ -420,7 +388,7 @@ describe("HjsonArrayNode.removeElement", () => {
 		const arr = root.get("data") as HjsonArrayNode;
 		const result = arr.removeElement(text, 0);
 		const post = { data: [] };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("returns original for out-of-bounds index", () => {
@@ -429,7 +397,7 @@ describe("HjsonArrayNode.removeElement", () => {
 		const root = parseStructured(text);
 		const arr = root.get("data") as HjsonArrayNode;
 		const result = arr.removeElement(text, 99);
-		expect(HJSON.format(result)).toBe(HJSON.stringify(pre, null, 2));
+		expect(result).toBe(HJSON.stringify(pre, null, 2));
 	});
 
 	it("returns original for negative index", () => {
@@ -438,7 +406,7 @@ describe("HjsonArrayNode.removeElement", () => {
 		const root = parseStructured(text);
 		const arr = root.get("data") as HjsonArrayNode;
 		const result = arr.removeElement(text, -1);
-		expect(HJSON.format(result)).toBe(HJSON.stringify(pre, null, 2));
+		expect(result).toBe(HJSON.stringify(pre, null, 2));
 	});
 });
 
@@ -454,7 +422,7 @@ describe("HjsonValueNode.patchValue", () => {
 		const valueNode = root.get("name") as HjsonValueNode;
 		const result = valueNode.patchValue(text, "world");
 		const post = { name: "world" };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("replaces numeric value", () => {
@@ -464,7 +432,7 @@ describe("HjsonValueNode.patchValue", () => {
 		const valueNode = root.get("count") as HjsonValueNode;
 		const result = valueNode.patchValue(text, 100);
 		const post = { count: 100 };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("replaces boolean value", () => {
@@ -474,7 +442,7 @@ describe("HjsonValueNode.patchValue", () => {
 		const valueNode = root.get("active") as HjsonValueNode;
 		const result = valueNode.patchValue(text, false);
 		const post = { active: false };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("replaces value within a nested object", () => {
@@ -485,7 +453,7 @@ describe("HjsonValueNode.patchValue", () => {
 		const inner = obj.get("inner") as HjsonValueNode;
 		const result = inner.patchValue(text, "new-val");
 		const post = { obj: { inner: "new-val" } };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("replaces value within an array element", () => {
@@ -497,7 +465,7 @@ describe("HjsonValueNode.patchValue", () => {
 		const valueNode = el.value as HjsonValueNode;
 		const result = valueNode.patchValue(text, 42);
 		const post = { items: [42, 2, 3] };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 });
 
@@ -513,7 +481,7 @@ describe("HjsonValueNode.patchRemove", () => {
 		const bNode = root.get("b") as HjsonValueNode;
 		const result = bNode.patchRemove(text, "b");
 		const post = { a: 1 };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("removes inline when node has no parent", () => {
@@ -549,7 +517,7 @@ describe("Auto-serialization", () => {
 		const root = parseStructured(text);
 		const result = root.patchValue(text, "a", { b: 1, c: "hello" });
 		const post = { a: { b: 1, c: "hello" } };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("patchValue with raw array auto-serializes correctly", () => {
@@ -558,7 +526,7 @@ describe("Auto-serialization", () => {
 		const root = parseStructured(text);
 		const result = root.patchValue(text, "a", [1, 2, 3]);
 		const post = { a: [1, 2, 3] };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("replaceValue with raw object auto-serializes correctly", () => {
@@ -568,7 +536,7 @@ describe("Auto-serialization", () => {
 		const field = root.field("name")!;
 		const result = field.replaceValue(text, { nested: true });
 		const post = { name: { nested: true } };
-		expect(HJSON.format(result)).toBe(HJSON.stringify(post, null, 2));
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 });
 
@@ -587,7 +555,7 @@ describe("Sequential patching", () => {
 			content = node.patchValue(content, "research", { parent: "team-quantra", requirements: [v] });
 		}
 		const post = { cost: 1, research: { parent: "team-quantra", requirements: ["lead/200555"] } };
-		expect(HJSON.format(content)).toBe(HJSON.stringify(post, null, 2));
+		expect(content).toBe(HJSON.stringify(post, null, 2));
 	});
 });
 
@@ -598,7 +566,7 @@ describe("Round-trip patching", () => {
 		const root = parseStructured(text);
 		const patched = root.patchValue(text, "b", 42);
 		const post = { a: 1, b: 42, c: 3 };
-		expect(HJSON.format(patched)).toBe(HJSON.stringify(post, null, 2));
+		expect(patched).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("insertField round-trips correctly", () => {
@@ -607,7 +575,7 @@ describe("Round-trip patching", () => {
 		const root = parseStructured(text);
 		const patched = root.insertField(text, "b", 2);
 		const post = { a: 1, b: 2 };
-		expect(HJSON.format(patched)).toBe(HJSON.stringify(post, null, 2));
+		expect(patched).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("insertElement round-trips correctly", () => {
@@ -617,7 +585,7 @@ describe("Round-trip patching", () => {
 		const arr = root.get("data") as HjsonArrayNode;
 		const patched = arr.insertElement(text, 2, 3);
 		const post = { data: [1, 2, 3] };
-		expect(HJSON.format(patched)).toBe(HJSON.stringify(post, null, 2));
+		expect(patched).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("removeElement round-trips correctly", () => {
@@ -627,7 +595,7 @@ describe("Round-trip patching", () => {
 		const arr = root.get("data") as HjsonArrayNode;
 		const patched = arr.removeElement(text, 1);
 		const post = { data: [1, 3] };
-		expect(HJSON.format(patched)).toBe(HJSON.stringify(post, null, 2));
+		expect(patched).toBe(HJSON.stringify(post, null, 2));
 	});
 });
 
@@ -659,7 +627,7 @@ describe("Structured pre/post round-trip", () => {
 				const text = S(pre);
 				const root = HJSON.parseStructured(text) as HjsonObjectNode;
 				const result = root.patchValue(text, target, 99);
-				expect(HJSON.format(result)).toBe(S(post));
+				expect(result).toBe(HJSON.stringify(post, null, 2));
 			});
 		}
 
@@ -671,7 +639,7 @@ describe("Structured pre/post round-trip", () => {
 				const text = S(pre);
 				const root = HJSON.parseStructured(text) as HjsonObjectNode;
 				const result = root.insertField(text, "newField", 42);
-				expect(HJSON.format(result)).toBe(S(post));
+				expect(result).toBe(HJSON.stringify(post, null, 2));
 			});
 		}
 
@@ -684,7 +652,7 @@ describe("Structured pre/post round-trip", () => {
 				const text = S(pre);
 				const root = HJSON.parseStructured(text) as HjsonObjectNode;
 				const result = root.removeField(text, "k1");
-				expect(HJSON.format(result)).toBe(S(post));
+				expect(result).toBe(HJSON.stringify(post, null, 2));
 			});
 		}
 	});
@@ -704,7 +672,7 @@ describe("Structured pre/post round-trip", () => {
 				const root = HJSON.parseStructured(text) as HjsonObjectNode;
 				const arr = root.get("data") as HjsonArrayNode;
 				const result = arr.patchValue(text, Math.floor(n / 2), 99);
-				expect(HJSON.format(result)).toBe(S(post));
+				expect(result).toBe(HJSON.stringify(post, null, 2));
 			});
 		}
 
@@ -716,7 +684,7 @@ describe("Structured pre/post round-trip", () => {
 				const root = HJSON.parseStructured(text) as HjsonObjectNode;
 				const arr = root.get("data") as HjsonArrayNode;
 				const result = arr.insertElement(text, n, 99);
-				expect(HJSON.format(result)).toBe(S(post));
+				expect(result).toBe(HJSON.stringify(post, null, 2));
 			});
 		}
 
@@ -729,7 +697,7 @@ describe("Structured pre/post round-trip", () => {
 				const root = HJSON.parseStructured(text) as HjsonObjectNode;
 				const arr = root.get("data") as HjsonArrayNode;
 				const result = arr.removeElement(text, idx);
-				expect(HJSON.format(result)).toBe(S(post));
+				expect(result).toBe(HJSON.stringify(post, null, 2));
 			});
 		}
 	});
@@ -746,7 +714,7 @@ describe("Structured pre/post round-trip", () => {
 			const root = HJSON.parseStructured(text) as HjsonObjectNode;
 			const inner = root.get("outer") as HjsonObjectNode;
 			const result = inner.patchValue(text, "b", 99);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("inserts into nested object (1→2 fields)", () => {
@@ -756,7 +724,7 @@ describe("Structured pre/post round-trip", () => {
 			const root = HJSON.parseStructured(text) as HjsonObjectNode;
 			const inner = root.get("outer") as HjsonObjectNode;
 			const result = inner.insertField(text, "b", 2);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("inserts into empty nested object", () => {
@@ -766,7 +734,7 @@ describe("Structured pre/post round-trip", () => {
 			const root = HJSON.parseStructured(text) as HjsonObjectNode;
 			const inner = root.get("outer") as HjsonObjectNode;
 			const result = inner.insertField(text, "x", 1);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("removes from nested object (2→1 fields)", () => {
@@ -776,7 +744,7 @@ describe("Structured pre/post round-trip", () => {
 			const root = HJSON.parseStructured(text) as HjsonObjectNode;
 			const inner = root.get("outer") as HjsonObjectNode;
 			const result = inner.removeField(text, "b");
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 	});
 
@@ -793,7 +761,7 @@ describe("Structured pre/post round-trip", () => {
 			const outer = root.get("data") as HjsonArrayNode;
 			const inner = outer.at(1)!.value as HjsonArrayNode;
 			const result = inner.patchValue(text, 1, 99);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("inserts into nested array", () => {
@@ -804,7 +772,7 @@ describe("Structured pre/post round-trip", () => {
 			const outer = root.get("data") as HjsonArrayNode;
 			const inner = outer.at(1)!.value as HjsonArrayNode;
 			const result = inner.insertElement(text, 1, 4);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("removes from nested array", () => {
@@ -815,7 +783,7 @@ describe("Structured pre/post round-trip", () => {
 			const outer = root.get("data") as HjsonArrayNode;
 			const inner = outer.at(1)!.value as HjsonArrayNode;
 			const result = inner.removeElement(text, 1);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 	});
 
@@ -832,7 +800,7 @@ describe("Structured pre/post round-trip", () => {
 			const root = HJSON.parseStructured(text) as HjsonObjectNode;
 			const arr = root.get("items") as HjsonArrayNode;
 			const result = arr.patchValue(text, 1, 99);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("inserts array element inside object", () => {
@@ -842,7 +810,7 @@ describe("Structured pre/post round-trip", () => {
 			const root = HJSON.parseStructured(text) as HjsonObjectNode;
 			const arr = root.get("items") as HjsonArrayNode;
 			const result = arr.insertElement(text, 1, 2);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("removes array element inside object", () => {
@@ -852,7 +820,7 @@ describe("Structured pre/post round-trip", () => {
 			const root = HJSON.parseStructured(text) as HjsonObjectNode;
 			const arr = root.get("items") as HjsonArrayNode;
 			const result = arr.removeElement(text, 1);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("removes all array elements → empty array", () => {
@@ -862,7 +830,7 @@ describe("Structured pre/post round-trip", () => {
 			const root = HJSON.parseStructured(text) as HjsonObjectNode;
 			const arr = root.get("items") as HjsonArrayNode;
 			const result = arr.removeElement(text, 0);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 	});
 
@@ -881,7 +849,7 @@ describe("Structured pre/post round-trip", () => {
 			const el = arr.at(1)!;
 			const obj = el.value as HjsonObjectNode;
 			const result = obj.patchValue(text, "b", 99);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("inserts field inside object array element", () => {
@@ -893,7 +861,7 @@ describe("Structured pre/post round-trip", () => {
 			const el = arr.at(1)!;
 			const obj = el.value as HjsonObjectNode;
 			const result = obj.insertField(text, "c", 3);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("removes field inside object array element", () => {
@@ -905,7 +873,7 @@ describe("Structured pre/post round-trip", () => {
 			const el = arr.at(1)!;
 			const obj = el.value as HjsonObjectNode;
 			const result = obj.removeField(text, "y");
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("inserts new object into array", () => {
@@ -915,7 +883,7 @@ describe("Structured pre/post round-trip", () => {
 			const root = HJSON.parseStructured(text) as HjsonObjectNode;
 			const arr = root.get("data") as HjsonArrayNode;
 			const result = arr.insertElement(text, 1, { b: 2 });
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 	});
 
@@ -932,7 +900,7 @@ describe("Structured pre/post round-trip", () => {
 			const l1 = root.get("a") as HjsonObjectNode;
 			const l2 = l1.get("b") as HjsonObjectNode;
 			const result = l2.patchValue(text, "x", 99);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("inserts field into deeply nested object (1→2 fields)", () => {
@@ -943,7 +911,7 @@ describe("Structured pre/post round-trip", () => {
 			const l1 = root.get("a") as HjsonObjectNode;
 			const l2 = l1.get("b") as HjsonObjectNode;
 			const result = l2.insertField(text, "y", 2);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("inserts into empty nested object (depth 3)", () => {
@@ -954,7 +922,7 @@ describe("Structured pre/post round-trip", () => {
 			const l1 = root.get("a") as HjsonObjectNode;
 			const l2 = l1.get("b") as HjsonObjectNode;
 			const result = l2.insertField(text, "x", 1);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("removes field from deeply nested object", () => {
@@ -965,7 +933,7 @@ describe("Structured pre/post round-trip", () => {
 			const l1 = root.get("a") as HjsonObjectNode;
 			const l2 = l1.get("b") as HjsonObjectNode;
 			const result = l2.removeField(text, "y");
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 	});
 
@@ -983,7 +951,7 @@ describe("Structured pre/post round-trip", () => {
 			const l2 = l1.at(0)!.value as HjsonArrayNode;
 			const l3 = l2.at(1)!.value as HjsonArrayNode;
 			const result = l3.patchValue(text, 1, 99);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("inserts into deeply nested array", () => {
@@ -995,7 +963,7 @@ describe("Structured pre/post round-trip", () => {
 			const l2 = l1.at(0)!.value as HjsonArrayNode;
 			const l3 = l2.at(1)!.value as HjsonArrayNode;
 			const result = l3.insertElement(text, 2, 4);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("removes from deeply nested array", () => {
@@ -1007,7 +975,7 @@ describe("Structured pre/post round-trip", () => {
 			const l2 = l1.at(0)!.value as HjsonArrayNode;
 			const l3 = l2.at(1)!.value as HjsonArrayNode;
 			const result = l3.removeElement(text, 1);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 	});
 
@@ -1026,7 +994,7 @@ describe("Structured pre/post round-trip", () => {
 			const obj = el.value as HjsonObjectNode;
 			const inner = obj.get("inner") as HjsonObjectNode;
 			const result = inner.patchValue(text, "x", 99);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("inserts field in object inside array inside object", () => {
@@ -1039,7 +1007,7 @@ describe("Structured pre/post round-trip", () => {
 			const obj = el.value as HjsonObjectNode;
 			const inner = obj.get("inner") as HjsonObjectNode;
 			const result = inner.insertField(text, "y", 3);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("removes field from object inside array inside object", () => {
@@ -1052,7 +1020,7 @@ describe("Structured pre/post round-trip", () => {
 			const obj = el.value as HjsonObjectNode;
 			const inner = obj.get("inner") as HjsonObjectNode;
 			const result = inner.removeField(text, "y");
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 	});
 
@@ -1070,7 +1038,7 @@ describe("Structured pre/post round-trip", () => {
 			const l2 = l1.get("b") as HjsonObjectNode;
 			const l3 = l2.get("c") as HjsonObjectNode;
 			const result = l3.patchValue(text, "x", 99);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("inserts field 4 levels deep", () => {
@@ -1082,7 +1050,7 @@ describe("Structured pre/post round-trip", () => {
 			const l2 = l1.get("b") as HjsonObjectNode;
 			const l3 = l2.get("c") as HjsonObjectNode;
 			const result = l3.insertField(text, "y", 2);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("inserts into empty object 4 levels deep", () => {
@@ -1094,7 +1062,7 @@ describe("Structured pre/post round-trip", () => {
 			const l2 = l1.get("b") as HjsonObjectNode;
 			const l3 = l2.get("c") as HjsonObjectNode;
 			const result = l3.insertField(text, "x", 1);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("removes field 4 levels deep", () => {
@@ -1106,7 +1074,7 @@ describe("Structured pre/post round-trip", () => {
 			const l2 = l1.get("b") as HjsonObjectNode;
 			const l3 = l2.get("c") as HjsonObjectNode;
 			const result = l3.removeField(text, "y");
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 	});
 
@@ -1125,7 +1093,7 @@ describe("Structured pre/post round-trip", () => {
 			const el = l2.at(0)!;
 			const obj = el.value as HjsonObjectNode;
 			const result = obj.patchValue(text, "x", 99);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("inserts field in object inside array inside array", () => {
@@ -1138,7 +1106,7 @@ describe("Structured pre/post round-trip", () => {
 			const el = l2.at(0)!;
 			const obj = el.value as HjsonObjectNode;
 			const result = obj.insertField(text, "z", 3);
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 
 		it("removes field from object inside array inside array", () => {
@@ -1151,7 +1119,7 @@ describe("Structured pre/post round-trip", () => {
 			const el = l2.at(0)!;
 			const obj = el.value as HjsonObjectNode;
 			const result = obj.removeField(text, "z");
-			expect(HJSON.format(result)).toBe(S(post));
+			expect(result).toBe(HJSON.stringify(post, null, 2));
 		});
 	});
 });

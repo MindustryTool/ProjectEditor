@@ -74,7 +74,7 @@ export const ArrayField = React.memo(function ArrayField({
 							getRenderer={getRenderer}
 						/>
 					))}
-					<Button type="button" variant="outline" size="sm" onClick={handleAdd}>
+					<Button type="button" size="sm" onClick={handleAdd}>
 						<Plus /> Add
 					</Button>
 				</div>
