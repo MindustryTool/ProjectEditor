@@ -43,7 +43,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 					throw new Error("Attempting to write into unloaded file");
 				}
 
-				const root = HJSON.parseWithCache(content);
+				let root = HJSON.parseWithCache(content);
 
 				const segments = jsonPath
 					.split(/[.\]\[]/)
@@ -72,7 +72,30 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 				let parent = root;
 
 				for (let i = 0; i < segments.length - 1; i++) {
-					parent = parent.get(segments[i]!);
+					const currentKey = segments[i]!;
+					const child = parent.get(currentKey);
+
+					if (child.isMissing()) {
+						const nextKey = segments[i + 1];
+						if (nextKey !== undefined) {
+							const nextValue = typeof nextKey === "string" ? {} : [];
+
+							if (parent.isObject() && typeof currentKey === "string") {
+								content = parent.insertField(content!, currentKey, nextValue);
+							} else if (parent.isArray() && typeof currentKey === "number") {
+								content = parent.insertElement(content!, currentKey, nextValue);
+							} else {
+								throw new Error(`Invalid key: ${currentKey} with parent type: ${parent.valueOf()}`);
+							}
+
+							i = -1;
+							parent = HJSON.parseWithCache(content);
+							root = parent;
+							continue;
+						}
+					}
+
+					parent = child;
 				}
 
 				if (parent.isMissing()) {

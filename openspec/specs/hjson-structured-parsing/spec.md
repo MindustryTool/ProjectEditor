@@ -66,8 +66,8 @@ The `HjsonResult<T>` conditional type SHALL resolve to nodes with appropriate va
 - **WHEN** `T` is a primitive type
 - **THEN** `HjsonResult<T>` SHALL resolve to `HjsonValueNode<T>`
 
-### Requirement: FieldInfo and ElementInfo are generic
-`FieldInfo<T>` and `ElementInfo<T>` SHALL use type parameter `T` for their `value` property, defaulting to `unknown`.
+### Requirement: FieldInfo and ElementInfo are generic with replaceValue
+`FieldInfo<T>` and `ElementInfo<T>` SHALL use type parameter `T` for their `value` property, defaulting to `unknown`. Both SHALL provide a `replaceValue(original: string, newValue: unknown): string` method that replaces the value in the source string. The `newValue` parameter SHALL accept `unknown` and be serialized via compact HJSON (`hjsonStringify(v, null, undefined)`) internally.
 
 #### Scenario: FieldInfo typed value access
 - **WHEN** inspecting a `FieldInfo<string>`
@@ -76,6 +76,14 @@ The `HjsonResult<T>` conditional type SHALL resolve to nodes with appropriate va
 #### Scenario: ElementInfo typed value access
 - **WHEN** inspecting an `ElementInfo<number>`
 - **THEN** `value` SHALL be typed as `number`
+
+#### Scenario: replaceValue accepts unknown and serializes objects
+- **WHEN** `replaceValue(original, { key: "val" })` is called
+- **THEN** the value SHALL be serialized to compact HJSON before replacement
+
+#### Scenario: replaceValue with raw string
+- **WHEN** `replaceValue(original, "hello")` is called
+- **THEN** the string SHALL be serialized by HJSON (producing a bareword if no quoting needed)
 
 ### Requirement: Unified field/element access via at()
 
@@ -134,11 +142,11 @@ A base interface (`InfoBase`) SHALL be provided with `start: Position` and `end:
 - **AND** the returned info SHALL have a `.value` property containing the target node
 
 ### Requirement: ElementInfo extends InfoBase with replaceValue
-`ElementInfo` SHALL include a `replaceValue(original: string, newValue: string): string` method that replaces the element's value in the original source string using positional slicing.
+`ElementInfo` SHALL include a `replaceValue(original: string, newValue: unknown): string` method that replaces the element's value in the original source string using positional slicing. Non-string values SHALL be serialized via compact HJSON (`hjsonStringify(v, null, undefined)`).
 
 #### Scenario: Replace array element value
-- **WHEN** `elementInfo.replaceValue(original, '"new-value"')` is called
-- **THEN** it SHALL return `original` with the element's value range replaced by `"new-value"`
+- **WHEN** `elementInfo.replaceValue(original, "new-value")` is called
+- **THEN** it SHALL return `original` with the element's value range replaced by the HJSON-serialized value
 - **AND** the replacement SHALL be based on `valueStart.index` and `valueEnd.index`
 
 ### Requirement: HjsonArrayNode provides element mutation methods
@@ -265,3 +273,25 @@ Existing strict structured parsing behavior SHALL remain the default for current
 #### Scenario: Strict parsing still throws on invalid input
 - **WHEN** `HJSON.parseStructured` is called without enabling tolerant formatting behavior on invalid HJSON
 - **THEN** it SHALL continue to throw the same parsing error behavior as before
+
+### Requirement: Inserted fields in empty nested objects use correct indentation
+
+`HjsonObjectNode.insertField` and `HjsonArrayNode.insertElement` SHALL produce correctly indented output when inserting into empty nested containers by deriving the indent from the parent node's field/element position.
+
+#### Scenario: Insert field into empty nested object detects indent from parent
+- **WHEN** `insertField` is called on an empty `HjsonObjectNode` that is a value of a field in a parent object
+- **THEN** the indent for the inserted field SHALL be one indent step deeper than the parent field's key column
+- **AND** the indent step SHALL be detected from the difference between the parent field's column and sibling fields' columns
+
+#### Scenario: Insert element into empty nested array detects indent from parent
+- **WHEN** `insertElement` is called on an empty `HjsonArrayNode` that is a value of a field in a parent object
+- **THEN** the indent for the inserted element SHALL be one indent step deeper than the parent field's key column
+
+#### Scenario: Root empty object with no parent uses default indent
+- **WHEN** `insertField` is called on an empty `HjsonObjectNode` with no `parent`
+- **THEN** it SHALL use `"  "` (two spaces) as the fallback indent
+- **AND** the output SHALL remain valid HJSON
+
+#### Scenario: Existing non-empty objects continue to use field-based indent
+- **WHEN** `insertField` is called on an `HjsonObjectNode` that has existing fields
+- **THEN** it SHALL continue to use the existing `start.col`-based indent detection (unchanged behavior)

@@ -187,7 +187,7 @@ export const WeaponHjsonSchema: SchemaFn = (context) =>
 			shoot: v.optional(ShootPatternHjsonSchema(context)),
 			shootStatus: v.optional(StatusStringSchema(context)),
 			shootOnDeathEffect: v.optional(EffectFieldSchema(context)),
-			parts: v.optional(PartHjsonSchema(context), []),
+			parts: v.optional(v.array(PartHjsonSchema(context)), []),
 			activeSound: v.optional(SoundHjsonSchema(context)),
 			shootSound: v.optional(SoundHjsonSchema(context)),
 			initialShootSound: v.optional(SoundHjsonSchema(context)),

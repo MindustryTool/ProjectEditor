@@ -5,7 +5,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/component
 import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
 import { Separator } from "#/components/ui/separator";
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
-import { HJSON } from "@project/hjson";
 import { VisuallyHidden } from "radix-ui";
 import { ChevronDown, ChevronsUpDown, Search } from "lucide-react";
 import React, { useMemo, useState } from "react";
@@ -46,7 +45,7 @@ export const EffectField = React.memo(function EffectField({
 						variant="outline"
 						onClick={() =>
 							onChange(jsonPath, (parent, original, key) =>
-								parent.patchValue(original, key, HJSON.stringify(effects[0]?.name)),
+								parent.patchValue(original, key, effects[0]?.name ?? ""),
 							)
 						}
 					>
@@ -102,7 +101,7 @@ export const EffectField = React.memo(function EffectField({
 					variant="outline"
 					onClick={() =>
 						onChange(jsonPath, (parent, original, key) =>
-							parent.patchValue(original, key, HJSON.stringify({ type: "ParticleEffect" })),
+							parent.patchValue(original, key, { type: "ParticleEffect" }),
 						)
 					}
 				>
@@ -148,7 +147,7 @@ function EffectDialogContent({
 			type="single"
 			value={value}
 			onValueChange={(v) =>
-				onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, HJSON.stringify(v)))
+				onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, v))
 			}
 			asChild
 		>

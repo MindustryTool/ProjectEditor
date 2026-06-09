@@ -1,7 +1,7 @@
 import { Button } from "#/components/ui/button";
 import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
 import { detectSchemaType, getArrayItemSchema, getDefaults, getSchemaMetadata, unwrapSchema, type AnySchema } from "@project/schema";
-import { HJSON } from "@project/hjson";
+
 import { Plus, Trash2 } from "lucide-react";
 import React, { useCallback, useMemo } from "react";
 import { SchemaDescription } from "./SchemaDescription";
@@ -42,10 +42,10 @@ export const ArrayField = React.memo(function ArrayField({
 
 		onChange(jsonPath, (parent, original, key) => {
 			if (parent.get(key).isMissing()) {
-				return parent.patchValue(original, key, HJSON.stringify([defaultValue]));
+				return parent.patchValue(original, key, [defaultValue]);
 			}
 
-			return parent.get(key).arrayNode().insertElement(original, arrayValue.length, HJSON.stringify(defaultValue));
+			return parent.get(key).arrayNode().insertElement(original, arrayValue.length, defaultValue);
 		});
 	}, [arrayValue, entrySchema, onChange, jsonPath]);
 

@@ -330,8 +330,8 @@ describe("Parser", () => {
       const text = '{"x": "hello"}';
       const result = parseStructured(text) as HjsonObjectNode;
       const info = result.at("x")!;
-      const patched = info.replaceValue(text, '"world"');
-      expect(patched).toBe('{"x": "world"}');
+      const patched = info.replaceValue(text, "world");
+      expect(patched).toBe('{"x": world}');
     });
 
     it("at(number) on array can access nested FieldInfo via ElementInfo.value", () => {

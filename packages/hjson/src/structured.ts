@@ -1,3 +1,9 @@
+import { stringify as hjsonStringify } from "./serializer.js";
+
+function serializeValue(v: unknown): string {
+	return hjsonStringify(v, null, undefined);
+}
+
 export interface Position {
 	row: number;
 	col: number;
@@ -14,7 +20,7 @@ export interface FieldInfo<T = unknown> extends InfoBase {
 	value: T;
 	valueStart: Position;
 	valueEnd: Position;
-	replaceValue(original: string, newValue: string): string;
+	replaceValue(original: string, newValue: unknown): string;
 }
 
 export function createFieldInfo<T>(
@@ -32,8 +38,8 @@ export function createFieldInfo<T>(
 		end,
 		valueStart,
 		valueEnd,
-		replaceValue(original: string, newValue: string) {
-			return original.slice(0, valueStart.index) + newValue + original.slice(valueEnd.index);
+		replaceValue(original: string, newValue: unknown) {
+			return original.slice(0, valueStart.index) + serializeValue(newValue) + original.slice(valueEnd.index);
 		},
 	};
 }
@@ -48,7 +54,7 @@ export abstract class HjsonNode {
 	abstract isString(): this is HjsonValueNode<string>;
 	abstract isNumber(): this is HjsonValueNode<number>;
 	abstract isBoolean(): this is HjsonValueNode<boolean>;
-	abstract patchValue(original: string, key: string | number, newValue: string): string;
+	abstract patchValue(original: string, key: string | number, newValue: unknown): string;
 
 	constructor(parent?: HjsonNode) {
 		this.#parent = parent;
@@ -120,6 +126,8 @@ export abstract class HjsonNode {
 	toJSON(): unknown {
 		return this.valueOf();
 	}
+
+	abstract detectIndent(): string;
 }
 
 export class HjsonObjectNode extends HjsonNode {
@@ -234,7 +242,7 @@ export class HjsonObjectNode extends HjsonNode {
 	 * If the field exists, it uses replaceValue.
 	 * If not, it uses insertField.
 	 */
-	patchValue(original: string, key: string | number, newValue: string): string {
+	patchValue(original: string, key: string | number, newValue: unknown): string {
 		if (typeof key !== "string") {
 			throw new Error(`key must be a string: 'received '${key}'`);
 		}
@@ -316,11 +324,30 @@ export class HjsonObjectNode extends HjsonNode {
 		return original.slice(0, info.start.index) + prefix + original.slice(info.start.index);
 	}
 
-	#detectIndent(): string {
+	detectIndent(): string {
 		for (const fi of this.#fields.values()) {
 			if (fi.start.col > 1) {
 				return " ".repeat(fi.start.col - 1);
 			}
+		}
+		return this.#emptyDetectIndent();
+	}
+
+	#emptyDetectIndent(): string {
+		// Walk up parent chain to find containing field and compute correct indent
+		if (this.parent instanceof HjsonObjectNode) {
+			const parentObj = this.parent as HjsonObjectNode;
+			for (const fi of parentObj.fields()) {
+				if (fi.value === this) {
+					const indentStep = detectIndentStep(parentObj, fi);
+					return " ".repeat(fi.start.col - 1 + indentStep);
+				}
+			}
+		}
+		if (this.parent instanceof HjsonArrayNode) {
+			const parentArr = this.parent as HjsonArrayNode;
+			const arrIndent = parentArr.detectIndent();
+			return " ".repeat(arrIndent.length + 2);
 		}
 		return "  ";
 	}
@@ -330,7 +357,8 @@ export class HjsonObjectNode extends HjsonNode {
 	 * If the object uses braces ({}), inserts before the closing brace.
 	 * Otherwise (flat root object), appends at end.
 	 */
-	insertField(original: string, key: string, newValue: string): string {
+	insertField(original: string, key: string, newValue: unknown): string {
+		const val = serializeValue(newValue);
 		if (this.#end) {
 			const closeIdx = this.#end.index - 1;
 			if (closeIdx >= 0 && original[closeIdx] === "}") {
@@ -343,15 +371,15 @@ export class HjsonObjectNode extends HjsonNode {
 				}
 				const before = original.slice(0, i + 1);
 				const after = original.slice(closeIdx);
-				const indent = this.#detectIndent();
+				const indent = this.detectIndent();
 				const hasFields = this.#fields.size > 0;
-				return before + (hasFields ? "," : "") + "\n" + indent + key + ": " + newValue + "\n" + after;
+				return before + (hasFields ? "," : "") + "\n" + indent + key + ": " + val + "\n" + after;
 			}
 		}
 		// Flat root object (no braces) or no position info: append at end
 		const trimmed = original.trimEnd();
 		const suffix = trimmed.length > 0 && !trimmed.endsWith("\n") ? "\n" : "";
-		return trimmed + suffix + `${key}: ${newValue}\n`;
+		return trimmed + suffix + `${key}: ${val}\n`;
 	}
 }
 
@@ -360,7 +388,47 @@ export interface ElementInfo<T = unknown> extends InfoBase {
 	value: T;
 	valueStart: Position;
 	valueEnd: Position;
-	replaceValue(original: string, newValue: string): string;
+	replaceValue(original: string, newValue: unknown): string;
+}
+
+function detectIndentStep(obj: HjsonObjectNode, forField: FieldInfo): number {
+	const cols: number[] = [];
+	for (const fi of obj.fields()) {
+		if (fi.key !== forField.key) {
+			cols.push(fi.start.col);
+		}
+	}
+	if (cols.length === 0) {
+		// Single field: detect step from the object's opening brace column
+		const startCol = obj.info()?.start?.col;
+		if (startCol != null && startCol < forField.start.col) {
+			return forField.start.col - startCol;
+		}
+		// Otherwise try grandparent
+		const parent = obj.parent;
+		if (parent instanceof HjsonObjectNode) {
+			for (const fi of parent.fields()) {
+				if (fi.value === obj) {
+					return detectIndentStep(parent, fi);
+				}
+			}
+		}
+		return 2;
+	}
+	cols.sort((a, b) => a - b);
+	cols.push(forField.start.col);
+	cols.sort((a, b) => a - b);
+	const idx = cols.indexOf(forField.start.col);
+	let minStep = 2;
+	if (idx > 0) {
+		const prev = cols[idx - 1]!;
+		minStep = Math.min(minStep, forField.start.col - prev);
+	}
+	if (idx < cols.length - 1) {
+		const next = cols[idx + 1]!;
+		minStep = Math.min(minStep, next - forField.start.col);
+	}
+	return Math.max(1, minStep);
 }
 
 export function createElementInfo<T>(
@@ -378,8 +446,8 @@ export function createElementInfo<T>(
 		end,
 		valueStart,
 		valueEnd,
-		replaceValue(original: string, newValue: string) {
-			return original.slice(0, valueStart.index) + newValue + original.slice(valueEnd.index);
+		replaceValue(original: string, newValue: unknown) {
+			return original.slice(0, valueStart.index) + serializeValue(newValue) + original.slice(valueEnd.index);
 		},
 	};
 }
@@ -474,10 +542,25 @@ export class HjsonArrayNode extends HjsonNode {
 		return this.#elements;
 	}
 
-	#detectIndent(): string {
+	detectIndent(): string {
 		const firstEl = this.#elements[0];
 		if (firstEl && firstEl.start.col > 1) {
 			return " ".repeat(firstEl.start.col - 1);
+		}
+		// Empty array fallback: walk parent chain
+		if (this.parent instanceof HjsonObjectNode) {
+			const parentObj = this.parent as HjsonObjectNode;
+			for (const fi of parentObj.fields()) {
+				if (fi.value === this) {
+					const indentStep = detectIndentStep(parentObj, fi);
+					return " ".repeat(fi.start.col - 1 + indentStep);
+				}
+			}
+		}
+		if (this.parent instanceof HjsonArrayNode) {
+			const parentArr = this.parent as HjsonArrayNode;
+			const parentIndent = parentArr.detectIndent();
+			return " ".repeat(parentIndent.length + 2);
 		}
 		return "  ";
 	}
@@ -487,7 +570,7 @@ export class HjsonArrayNode extends HjsonNode {
 		return this.#elements[0]!.start.row === this.#start.row;
 	}
 
-	patchValue(original: string, key: string | number, newValue: string): string {
+	patchValue(original: string, key: string | number, newValue: unknown): string {
 		if (typeof key !== "number") {
 			throw new Error(`key must be a number: 'received '${key}'`);
 		}
@@ -500,23 +583,24 @@ export class HjsonArrayNode extends HjsonNode {
 		return el.replaceValue(original, newValue);
 	}
 
-	insertElement(original: string, index: number, newValue: string): string {
+	insertElement(original: string, index: number, newValue: unknown): string {
+		const val = serializeValue(newValue);
 		const len = this.#elements.length;
 		if (index < 0 || index > len) return original;
 
 		if (len === 0) {
 			const openIdx = this.#start!.index + 1;
 			const closeIdx = this.#end!.index;
-			return original.slice(0, openIdx) + newValue + original.slice(closeIdx - 1);
+			return original.slice(0, openIdx) + val + original.slice(closeIdx - 1);
 		}
 
 		const isMultiline = !this.#isInline(original);
-		const indent = this.#detectIndent();
+		const indent = this.detectIndent();
 		const sep = isMultiline ? ",\n" + indent : ", ";
 
 		if (index === 0) {
 			const insIdx = this.#elements[0]!.start.index;
-			return original.slice(0, insIdx) + newValue + sep + original.slice(insIdx);
+			return original.slice(0, insIdx) + val + sep + original.slice(insIdx);
 		}
 
 		if (index === len) {
@@ -533,11 +617,11 @@ export class HjsonArrayNode extends HjsonNode {
 				}
 				break;
 			}
-			return original.slice(0, insIdx) + sep + newValue + original.slice(insIdx);
+			return original.slice(0, insIdx) + sep + val + original.slice(insIdx);
 		}
 
 		const insIdx = this.#elements[index]!.start.index;
-		return original.slice(0, insIdx) + newValue + sep + original.slice(insIdx);
+		return original.slice(0, insIdx) + val + sep + original.slice(insIdx);
 	}
 
 	removeElement(original: string, index: number): string {
@@ -600,7 +684,7 @@ export class HjsonArrayNode extends HjsonNode {
 		}
 
 		// Insert new comment before the element
-		const indent = this.#detectIndent();
+		const indent = this.detectIndent();
 		return original.slice(0, el.start.index) + newComment + "\n" + indent + original.slice(el.start.index);
 	}
 }
@@ -686,8 +770,12 @@ export class HjsonValueNode<T = unknown> extends HjsonNode {
 		return this.#end;
 	}
 
-	patchValue(original: string, newValue: string): string {
-		return original.slice(0, this.#start.index) + newValue + original.slice(this.#end.index);
+	patchValue(original: string, newValue: unknown): string {
+		return original.slice(0, this.#start.index) + serializeValue(newValue) + original.slice(this.#end.index);
+	}
+
+	detectIndent(): string {
+		return "";
 	}
 }
 
@@ -698,7 +786,7 @@ export class HjsonMissingNode extends HjsonNode {
 		super(parent);
 	}
     
-    patchValue(_original: string, _key: string | number, _newValue: string): string {
+    patchValue(_original: string, _key: string | number, _newValue: unknown): string {
         throw new Error("Cannot patch missing node");
     }
 
@@ -754,6 +842,10 @@ export class HjsonMissingNode extends HjsonNode {
 
 	valueOf(): undefined {
 		return undefined;
+	}
+
+	detectIndent(): string {
+		return "";
 	}
 }
 

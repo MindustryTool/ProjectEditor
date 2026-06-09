@@ -3,7 +3,6 @@ import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { getSchemaMetadata, unwrapSchema } from "@project/schema";
-import { HJSON } from "@project/hjson";
 import React, { useMemo } from "react";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
@@ -42,7 +41,7 @@ export const LiquidsListField = React.memo(function LiquidsListField({
 						value={stringValue}
 						onValueChange={(nextValue) =>
 							onChange(jsonPath, (parent, original, key) =>
-								parent.patchValue(original, key, HJSON.stringify(nextValue)),
+								parent.patchValue(original, key, nextValue),
 							)
 						}
 					>

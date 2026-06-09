@@ -5,7 +5,6 @@ import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field
 import { Input } from "#/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
-import { HJSON } from "@project/hjson";
 import { ChevronDown, Plus, X } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
 import React, { useMemo } from "react";
@@ -48,10 +47,10 @@ export const ResearchField = React.memo(function ResearchField({
 			onChange(jsonPath, (parent, original, key) => parent.patchRemove(original, key));
 		} else if (newRequirements.length > 0) {
 			onChange(jsonPath, (parent, original, key) =>
-				parent.patchValue(original, key, HJSON.stringify({ parent: newParent, requirements: newRequirements })),
+				parent.patchValue(original, key, { parent: newParent, requirements: newRequirements }),
 			);
 		} else {
-			onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, HJSON.stringify(newParent)));
+			onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, newParent));
 		}
 	}
 

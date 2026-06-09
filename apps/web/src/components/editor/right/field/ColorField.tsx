@@ -1,7 +1,6 @@
 import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
 import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover";
 import { ColorPicker, ColorPickerAlpha, ColorPickerFormat, ColorPickerHue, ColorPickerSelection } from "#/components/ui/color-picker";
-import { HJSON } from "@project/hjson";
 import React, { useMemo } from "react";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
@@ -45,7 +44,7 @@ export const ColorField = React.memo(function ColorField({
 							<ColorPicker
 								value={hexValue}
 								onChange={(val) =>
-									onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, HJSON.stringify(val)))
+									onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, val))
 								}
 							>
 								<ColorPickerSelection className="h-40 rounded-lg" />

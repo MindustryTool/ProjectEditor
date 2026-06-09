@@ -2,7 +2,6 @@ import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field
 import { Input } from "#/components/ui/input";
 import { Textarea } from "#/components/ui/textarea";
 import { hasNullableWrapper } from "@project/schema";
-import { HJSON } from "@project/hjson";
 import React, { useCallback, useMemo } from "react";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
@@ -32,7 +31,7 @@ export const StringField = React.memo(function StringField({
 				onChange(jsonPath, (parent, original, key) => parent.patchRemove(original, key));
 				return;
 			}
-			onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, HJSON.stringify(newVal)));
+			onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, newVal));
 		},
 		[defaultValue, entrySchema, jsonPath, onChange],
 	);

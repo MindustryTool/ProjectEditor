@@ -5,7 +5,6 @@ import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import { getSchemaMetadata, hasNullableWrapper } from "@project/schema";
-import { HJSON } from "@project/hjson";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 
 export const BooleanField = React.memo(function BooleanField({
@@ -26,7 +25,7 @@ export const BooleanField = React.memo(function BooleanField({
 				onChange(jsonPath, (parent, original, key) => parent.patchRemove(original, key));
 				return;
 			}
-			onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, HJSON.stringify(val)));
+			onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, val));
 		},
 		[onChange, jsonPath, entrySchema, defaultValue],
 	);

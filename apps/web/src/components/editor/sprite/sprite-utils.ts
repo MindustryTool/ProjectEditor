@@ -1,9 +1,9 @@
 import { HJSON } from "@project/hjson";
 
 export function updateSpritePosition(data: string, xPath: string, yPath: string, x: number, y: number): string | null {
-	const result = HJSON.parseWithCache(data).path(xPath)?.replaceValue(data, HJSON.stringify(x));
+	const result = HJSON.parseWithCache(data).path(xPath)?.replaceValue(data, x);
 	if (!result) return null;
-	return HJSON.parseWithCache(result).path(yPath)?.replaceValue(result, HJSON.stringify(y)) ?? null;
+	return HJSON.parseWithCache(result).path(yPath)?.replaceValue(result, y) ?? null;
 }
 
 export function applyOutline(imageData: ImageData) {
