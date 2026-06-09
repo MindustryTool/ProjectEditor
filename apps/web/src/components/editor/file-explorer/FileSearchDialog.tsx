@@ -13,8 +13,8 @@ export function FileSearchDialog() {
     
 	return (
 		<Dialog>
-			<DialogTrigger className="w-full">
-				<InputGroup className="h-7 w-full">
+			<DialogTrigger className="w-full p-1">
+				<InputGroup className="w-full h-8 rounded">
 					<InputGroupAddon>
 						<Search className="size-4" />
 					</InputGroupAddon>

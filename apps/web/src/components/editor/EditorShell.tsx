@@ -18,7 +18,6 @@ import { ProjectProvider } from "#/components/editor/ProjectProvider";
 import { lazy, memo, Suspense, useState } from "react";
 import { FileExplorerProvider } from "./file-explorer/FileExplorerProvider";
 import { useAppStore, useProjectSession, isBundleFilename } from "@project/core";
-import { Panel } from "./Panel";
 import { FileExplorer } from "#/components/editor/file-explorer";
 import { Spinner } from "#/components/ui/spinner";
 import { usePath } from "#/hooks/use-path";
@@ -65,8 +64,6 @@ type PropertiesRoute =
 function matchEditorRoute(path: string | null, entry: { kind: string } | undefined): EditorRoute {
 	if (path === null || entry === undefined) return { type: "empty" };
 
-	path = path.toLowerCase();
-
 	if (path.startsWith("bundles/") && isBundleFilename(path.split("/").pop() ?? "")) {
 		return { type: "bundle", path };
 	}
@@ -100,8 +97,6 @@ function matchEditorRoute(path: string | null, entry: { kind: string } | undefin
 
 function matchPropertiesRoute(path: string | null): PropertiesRoute {
 	if (path === null) return { type: "none" };
-
-	path = path.toLowerCase();
 
 	if (path.startsWith("sprite:")) return { type: "none" };
 
@@ -167,11 +162,7 @@ function EditorContent({ path }: { path: string }) {
 }
 
 const EditorLeftPanel = memo(function EditorLeftPanel() {
-	return (
-		<Panel>
-			<FileExplorer />
-		</Panel>
-	);
+	return <FileExplorer />;
 });
 
 const panelFallback = (
@@ -301,9 +292,7 @@ function EditorMobileLayout() {
 						</button>
 					</SheetTrigger>
 					<SheetContent side="left" showCloseButton={false} className="w-4/5 sm:max-w-sm max-h-dvh">
-						<Panel>
-							<FileExplorer />
-						</Panel>
+						<FileExplorer />
 					</SheetContent>
 				</Sheet>
 				<ProjectMenu />

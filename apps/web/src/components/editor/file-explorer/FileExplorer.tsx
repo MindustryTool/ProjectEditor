@@ -8,6 +8,7 @@ import { buildFileTree } from "./file-tree";
 import { TreeNodeChildren } from "./TreeNodeChildren";
 import { FileSearchDialog } from "#/components/editor/file-explorer/FileSearchDialog";
 import { useFileExplorerStore } from "./useFileExplorerState";
+import { Separator } from "#/components/ui/separator";
 
 interface ContextMenuState {
 	path: string;
@@ -51,40 +52,43 @@ export function FileExplorer({ className }: FileExplorerProps) {
 	}, []);
 
 	return (
-		<div ref={containerRef} className={cn("h-full w-full overflow-y-auto", className)}>
+		<div ref={containerRef} className={cn("h-full w-full overflow-hidden flex-col flex", className)}>
 			<FileSearchDialog />
-			{projectTree.map((node) => (
-				<TreeNodeChildren key={node.name} node={node} depth={0} onContextMenu={handleContextMenu} />
-			))}
-			{contextMenu && (
-				<DropdownMenu
-					open
-					onOpenChange={(open) => {
-						if (!open) setContextMenu(null);
-					}}
-				>
-					<DropdownMenuContent side="right" sideOffset={0} style={{ position: "fixed", left: contextMenu.x, top: contextMenu.y }}>
-						<DropdownMenuItem
-							onClick={() => {
-								setEditingPath(contextMenu.path);
-								setContextMenu(null);
-							}}
-						>
-							<Pencil className="size-3" />
-							Rename
-						</DropdownMenuItem>
-						<DropdownMenuItem
-							onClick={() => {
-								setDeleteTargetPath(contextMenu.path);
-								setContextMenu(null);
-							}}
-						>
-							<Trash2 className="size-3" />
-							Delete
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
-			)}
+			<Separator />
+			<div className="h-full w-full overflow-y-auto pb-10 pt-0 px-1">
+				{projectTree.map((node) => (
+					<TreeNodeChildren key={node.name} node={node} depth={0} onContextMenu={handleContextMenu} />
+				))}
+				{contextMenu && (
+					<DropdownMenu
+						open
+						onOpenChange={(open) => {
+							if (!open) setContextMenu(null);
+						}}
+					>
+						<DropdownMenuContent side="right" sideOffset={0} style={{ position: "fixed", left: contextMenu.x, top: contextMenu.y }}>
+							<DropdownMenuItem
+								onClick={() => {
+									setEditingPath(contextMenu.path);
+									setContextMenu(null);
+								}}
+							>
+								<Pencil className="size-3" />
+								Rename
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								onClick={() => {
+									setDeleteTargetPath(contextMenu.path);
+									setContextMenu(null);
+								}}
+							>
+								<Trash2 className="size-3" />
+								Delete
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				)}
+			</div>
 		</div>
 	);
 }
