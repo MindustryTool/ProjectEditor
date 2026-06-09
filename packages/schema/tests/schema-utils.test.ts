@@ -206,6 +206,7 @@ describe("getSchemaMetadata", () => {
 			units: [],
 			sprites: [],
 			effects: [],
+            sounds: [],
 		};
 		const schema = UnitHjsonSchema(mockContext);
 		const entries = getSchemaEntries(schema as AnySchema);

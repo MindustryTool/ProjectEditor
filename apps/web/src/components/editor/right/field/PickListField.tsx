@@ -1,7 +1,7 @@
 import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 import { getSchemaMetadata, hasNullableWrapper, unwrapSchema } from "@project/schema";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
@@ -25,21 +25,28 @@ export const PickListField = React.memo(function PickListField({
 }: SchemaRendererProps) {
 	const unwrappedSchema = unwrapSchema(entrySchema);
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
+	const [render, setRender] = useState(30);
 
 	const [filter, setFilter] = useState("");
 
 	if ("options" in unwrappedSchema && Array.isArray(unwrappedSchema.options)) {
 		const options = useMemo(() => {
 			const list = (unwrappedSchema.options as unknown[]).map((v) => String(v));
-			return filter ? levenshtein(list, (i) => i, filter) : list.sort();
-		}, [filter, unwrappedSchema.options]);
+			return (filter ? levenshtein(list, (i) => i, filter) : list.sort()).slice(0, render);
+		}, [filter, unwrappedSchema.options, render]);
 
 		const stringValue = useMemo(
 			() => (typeof value === "string" ? value : value ? String(value) : String((defaultValue ?? options[0]) || "")),
 			[value, defaultValue, options],
 		);
 
-		if (options.length > 10) {
+		const handleScroll = useCallback((event: React.UIEvent) => {
+			if (event.currentTarget.scrollHeight - event.currentTarget.scrollTop <= event.currentTarget.clientHeight + 100) {
+				setRender((prev) => prev + 50);
+			}
+		}, []);
+
+		if (unwrappedSchema.options.length > 10) {
 			return (
 				<Field jsonPath={jsonPath} metadata={metadata}>
 					<FieldLabel>
@@ -83,7 +90,10 @@ export const PickListField = React.memo(function PickListField({
 										</InputGroupAddon>
 										<InputGroupInput value={filter} onChange={(event) => setFilter(event.currentTarget.value)} />
 									</InputGroup>
-									<div className="max-h-[80dvh] flex flex-col md:max-h-[50dvh] overflow-y-auto border p-2 rounded-md">
+									<div
+										className="max-h-[80dvh] flex flex-col md:max-h-[50dvh] overflow-y-auto border p-2 rounded-md"
+										onScroll={handleScroll}
+									>
 										{options.map((item) => (
 											<ToggleGroupItem className="justify-between" key={item} value={item}>
 												<span>{item}</span>

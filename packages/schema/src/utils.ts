@@ -60,7 +60,7 @@ function getTypeFromMetadata(schema: AnySchema): Type | null {
 }
 
 function getSchemaType(schema: AnySchema, value: unknown): { type: Type; schema: AnySchema } {
-	const s = schema as unknown as { type: string; pipe?: AnySchema[]; kind: string };
+	const s = schema as unknown as {  type: string; pipe?: AnySchema[]; kind: string };
 
 	if (s.pipe && s.pipe.length > 0) {
 		for (let i = s.pipe.length - 1; i >= 0; i--) {
@@ -74,6 +74,10 @@ function getSchemaType(schema: AnySchema, value: unknown): { type: Type; schema:
 		console.warn({ unknownTypeInPipe: s.type });
 		return { type: "never", schema };
 	}
+
+    if (s.kind !== "schema") {
+        return { type: "never", schema };
+    }
 
 	if (s.type === "string") return { type: "string", schema };
 	if (s.type === "number") return { type: "number", schema };
@@ -92,6 +96,7 @@ function getSchemaType(schema: AnySchema, value: unknown): { type: Type; schema:
 
 export function detectSchemaType(rawSchema: AnySchema, value: unknown): { type: Type; schema: AnySchema } {
 	const unwrapped = unwrapSchema(rawSchema) as unknown as {
+        kind: string;
 		type: string;
 		pipe?: AnySchema[] | Array<{ type: string }>;
 		getter?: (val: unknown) => AnySchema;
