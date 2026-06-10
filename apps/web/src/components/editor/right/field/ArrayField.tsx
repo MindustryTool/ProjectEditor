@@ -1,5 +1,5 @@
 import { Button } from "#/components/ui/button";
-import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
+import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { detectSchemaType, getArrayItemSchema, getDefaults, getSchemaMetadata, unwrapSchema, type AnySchema } from "@project/schema";
 
 import { Plus, Trash2 } from "lucide-react";
@@ -53,9 +53,7 @@ export const ArrayField = React.memo(function ArrayField({
 
 	return (
 		<Field jsonPath={jsonPath} metadata={metadata}>
-			<FieldLabel>
-				<SchemaLabel name={name} metadata={metadata} />
-			</FieldLabel>
+			<SchemaLabel name={name} metadata={metadata} />
 			<SchemaDescription metadata={metadata} />
 			<FieldControl>
 				<div className="flex flex-col gap-2 border p-2 rounded-md border-dashed">
@@ -128,7 +126,7 @@ function ArrayElement({
 				jsonPath={entryJsonPath}
 				getRenderer={getRenderer}
 				defaultValue={defaultValue}
-                nested
+				nested
 			/>
 			<Button size="sm" className="text-destructive w-full" variant="destructive" onClick={handleRemove}>
 				<Trash2 />

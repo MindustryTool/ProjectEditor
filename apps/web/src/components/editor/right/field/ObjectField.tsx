@@ -1,4 +1,4 @@
-import { FieldControl, FieldLabel } from "#/components/editor/right/field/Field";
+import { FieldControl } from "#/components/editor/right/field/Field";
 import { getSchemaMetadata, getSchemaEntries, resolveSchema, detectSchemaType, getDefaults } from "@project/schema";
 import React, { useMemo } from "react";
 import type { AnySchema } from "@project/schema";
@@ -23,8 +23,6 @@ export const ObjectField = React.memo(function ObjectField({
 	const resolvedValue = useMemo(() => (value && typeof value === "object" ? value : {}), [value]);
 
 	const entries = getSchemaEntries(resolveSchema(entrySchema, resolvedValue));
-
-    console.log(nested)
 
 	return (
 		<Collapsible id={jsonPath}>
@@ -80,9 +78,7 @@ function buildCategoryObjectFields(
 		if (Renderer === undefined) {
 			elements.push(
 				<FieldControl key={key}>
-					<FieldLabel>
-						<SchemaLabel name={name} metadata={metadata} />
-					</FieldLabel>
+					<SchemaLabel name={name} metadata={metadata} />
 					<span className="text-red-400 text-sm">Unknown field type '{type}'</span>
 				</FieldControl>,
 			);

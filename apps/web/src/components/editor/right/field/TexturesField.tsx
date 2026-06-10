@@ -1,4 +1,4 @@
-import { Field, FieldControl, FieldLabel } from "#/components/editor/right/field/Field";
+import { Field, FieldControl } from "#/components/editor/right/field/Field";
 import { SchemaDescription } from "#/components/editor/right/field/SchemaDescription";
 import { SchemaLabel } from "#/components/editor/right/field/SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
@@ -13,7 +13,7 @@ export const TexturesField = React.memo(function TexturesField({ name, path, ent
 	const [render, setRender] = useState(3);
 	const metadata = getSchemaMetadata(entrySchema);
 	const filename = path.split("/").pop();
-    
+
 	if (!filename) {
 		throw new Error("Texture field path must end with a file name");
 	}
@@ -41,9 +41,7 @@ export const TexturesField = React.memo(function TexturesField({ name, path, ent
 
 	return (
 		<Field jsonPath={jsonPath} metadata={metadata}>
-			<FieldLabel>
-				<SchemaLabel name={name} metadata={metadata} />
-			</FieldLabel>
+			<SchemaLabel name={name} metadata={metadata} />
 			<FieldControl className="space-y-2 text-muted-foreground text-xs">
 				{spritePaths.map((spritePath, index) => (index >= render ? null : <Item key={index} spritePath={spritePath} />))}
 				{render !== spritePaths.length && (
@@ -67,7 +65,7 @@ function Item({ spritePath }: { spritePath: string }) {
 
 	return (
 		<div className="space-y-2">
-			<FieldLabel>{filename}</FieldLabel>
+             <span className="text-xs">{filename}</span>
 			{exists ? <SpriteViewer path={spritePath} /> : <SpriteUploader path={spritePath} />}
 		</div>
 	);

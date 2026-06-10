@@ -1,4 +1,4 @@
-import { Field, FieldControl, FieldLabel } from "#/components/editor/right/field/Field";
+import { Field, FieldControl } from "#/components/editor/right/field/Field";
 import { SchemaDescription } from "#/components/editor/right/field/SchemaDescription";
 import { SchemaLabel } from "#/components/editor/right/field/SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
@@ -34,9 +34,7 @@ export const TextureField = React.memo(function TextureField({ name, path, entry
 
 	return (
 		<Field jsonPath={jsonPath} metadata={metadata}>
-			<FieldLabel>
-				<SchemaLabel name={name} metadata={metadata} />
-			</FieldLabel>
+			<SchemaLabel name={name} metadata={metadata} />
 			<FieldControl>{exists ? <SpriteViewer path={spritePath} /> : <SpriteUploader path={spritePath} />}</FieldControl>
 			<SchemaDescription metadata={metadata} />
 		</Field>

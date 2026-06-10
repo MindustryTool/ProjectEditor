@@ -1,4 +1,4 @@
-import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
+import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 import { getSchemaMetadata, hasNullableWrapper, unwrapSchema } from "@project/schema";
 import React, { useCallback, useMemo, useState } from "react";
@@ -49,9 +49,7 @@ export const PickListField = React.memo(function PickListField({
 		if (unwrappedSchema.options.length > 10) {
 			return (
 				<Field jsonPath={jsonPath} metadata={metadata}>
-					<FieldLabel>
-						<SchemaLabel name={name} metadata={metadata} />
-					</FieldLabel>
+					<SchemaLabel name={name} metadata={metadata} />
 					<Dialog>
 						<DialogTrigger asChild>
 							<Button className="w-full justify-between" variant="outline">
@@ -61,9 +59,7 @@ export const PickListField = React.memo(function PickListField({
 						</DialogTrigger>
 						<DialogContent>
 							<DialogTitle>
-								<FieldLabel>
-									<SchemaLabel name={name} metadata={metadata} />
-								</FieldLabel>
+								<SchemaLabel name={name} metadata={metadata} />
 							</DialogTitle>
 							<VisuallyHidden.Root>
 								<DialogDescription />
@@ -115,9 +111,7 @@ export const PickListField = React.memo(function PickListField({
 
 		return (
 			<Field jsonPath={jsonPath} metadata={metadata}>
-				<FieldLabel>
-					<SchemaLabel name={name} metadata={metadata} />
-				</FieldLabel>
+				<SchemaLabel name={name} metadata={metadata} />
 				<FieldControl>
 					<Select
 						key={name}

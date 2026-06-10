@@ -1,4 +1,4 @@
-import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
+import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { Input } from "#/components/ui/input";
 import { hasNullableWrapper } from "@project/schema";
 import React, { useCallback, useMemo } from "react";
@@ -8,7 +8,15 @@ import { SchemaLabel } from "./SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { getSchemaMetadata } from "@project/schema";
 
-export const NumberField = React.memo(function NumberField({ name, value, onChange, entrySchema, jsonPath, path, defaultValue }: SchemaRendererProps) {
+export const NumberField = React.memo(function NumberField({
+	name,
+	value,
+	onChange,
+	entrySchema,
+	jsonPath,
+	path,
+	defaultValue,
+}: SchemaRendererProps) {
 	const numValue = typeof value === "number" ? value : isNaN(Number(value)) ? Number(defaultValue || 0) : Number(value);
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
@@ -30,9 +38,7 @@ export const NumberField = React.memo(function NumberField({ name, value, onChan
 
 	return (
 		<Field jsonPath={jsonPath} metadata={metadata}>
-			<FieldLabel>
-				<SchemaLabel name={name} metadata={metadata} />
-			</FieldLabel>
+			<SchemaLabel name={name} metadata={metadata} />
 			<FieldControl>
 				<Input key={name} value={numValue} onChange={handleChange} type="number" />
 			</FieldControl>

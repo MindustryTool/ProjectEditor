@@ -153,7 +153,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 
 	const resolvedSchema = resolveSchema(typeof schema === "function" ? schema(contents) : schema, node.valueOf());
 	const entries = getSchemaEntries(resolvedSchema);
-	const filtered = filter ? levenshtein(entries, ([name]) => name, filter, 30) : entries;
+	const filtered = filter ? levenshtein(entries, ([name]) => name, filter, 10) : entries;
 
 	return (
 		<Suspense>

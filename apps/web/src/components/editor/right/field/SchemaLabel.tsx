@@ -6,8 +6,12 @@ export const SchemaLabel = React.memo(function SchemaLabel({ name, metadata }: {
 	const { t } = useTranslation("schema");
 
 	return metadata?.name ? (
-		<span className="first-letter:uppercase lowercase">{(t as (key: string) => string)(metadata.name)}</span>
+		<span className="first-letter:uppercase lowercase flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">
+			{(t as (key: string) => string)(metadata.name)}
+		</span>
 	) : (
-		<span>{name}</span>
+		<span className="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">
+			{name}
+		</span>
 	);
 });

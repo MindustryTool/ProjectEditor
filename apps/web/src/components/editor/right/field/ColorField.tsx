@@ -1,4 +1,4 @@
-import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
+import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover";
 import { ColorPicker, ColorPickerAlpha, ColorPickerFormat, ColorPickerHue, ColorPickerSelection } from "#/components/ui/color-picker";
 import React, { useMemo } from "react";
@@ -28,9 +28,7 @@ export const ColorField = React.memo(function ColorField({
 
 	return (
 		<Field jsonPath={jsonPath} metadata={metadata}>
-			<FieldLabel>
-				<SchemaLabel name={name} metadata={metadata} />
-			</FieldLabel>
+			<SchemaLabel name={name} metadata={metadata} />
 			<FieldControl>
 				<div className="flex items-center gap-2">
 					<Popover>
@@ -43,9 +41,7 @@ export const ColorField = React.memo(function ColorField({
 						<PopoverContent className="w-64 p-3" side="bottom" align="start">
 							<ColorPicker
 								value={hexValue}
-								onChange={(val) =>
-									onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, val))
-								}
+								onChange={(val) => onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, val))}
 							>
 								<ColorPickerSelection className="h-40 rounded-lg" />
 								<ColorPickerHue />

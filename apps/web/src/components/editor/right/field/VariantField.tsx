@@ -1,4 +1,4 @@
-import { Field, FieldLabel } from "#/components/editor/right/field/Field";
+import { Field } from "#/components/editor/right/field/Field";
 import { SchemaDescription } from "#/components/editor/right/field/SchemaDescription";
 import { SchemaLabel } from "#/components/editor/right/field/SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
@@ -52,9 +52,7 @@ export const VariantField = React.memo(function VariantField({
 		if (options.length === 0) {
 			return (
 				<Field jsonPath={jsonPath} metadata={fieldMetadata}>
-					<FieldLabel>
-						<SchemaLabel name={name} metadata={fieldMetadata} />
-					</FieldLabel>
+					<SchemaLabel name={name} metadata={fieldMetadata} />
 					<SchemaDescription metadata={fieldMetadata} />
 					{name} has no options
 				</Field>
@@ -70,9 +68,7 @@ export const VariantField = React.memo(function VariantField({
 
 			return (
 				<Field jsonPath={jsonPath} metadata={fieldMetadata}>
-					<FieldLabel>
-						<SchemaLabel name={name} metadata={fieldMetadata} />
-					</FieldLabel>
+					<SchemaLabel name={name} metadata={fieldMetadata} />
 					<SchemaDescription metadata={fieldMetadata} />
 					<Renderer
 						path={path}
@@ -119,9 +115,7 @@ export const VariantField = React.memo(function VariantField({
 							}
 						}}
 					>
-						<FieldLabel>
-							<SchemaLabel name={name} metadata={fieldMetadata} />
-						</FieldLabel>
+						<SchemaLabel name={name} metadata={fieldMetadata} />
 						<SchemaDescription metadata={fieldMetadata} />
 						<TabsList className="w-full border p-0 overflow-hidden" defaultValue={defaultTab}>
 							<TabsTrigger className="border-none h-full rounded-none" value={name1}>
@@ -177,9 +171,7 @@ export const VariantField = React.memo(function VariantField({
 
 		return (
 			<Field jsonPath={jsonPath} metadata={fieldMetadata} className="w-full p-2 border rounded-md bg-muted">
-				<FieldLabel>
-					<SchemaLabel name={name} metadata={fieldMetadata} />
-				</FieldLabel>
+				<SchemaLabel name={name} metadata={fieldMetadata} />
 				<SchemaDescription metadata={fieldMetadata} />
 				<Select
 					defaultValue={defaultTab}
@@ -214,7 +206,7 @@ export const VariantField = React.memo(function VariantField({
 					jsonPath={jsonPath}
 					getRenderer={getRenderer}
 					defaultValue={selecting.defaultValue}
-                    nested
+					nested
 				/>
 			</Field>
 		);

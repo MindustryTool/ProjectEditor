@@ -1,5 +1,5 @@
 import { ContentImage } from "#/components/editor/ContentImage";
-import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
+import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { getSchemaMetadata, unwrapSchema } from "@project/schema";
@@ -16,7 +16,7 @@ export const LiquidsListField = React.memo(function LiquidsListField({
 	entrySchema,
 	jsonPath,
 	path,
-    defaultValue,
+	defaultValue,
 }: SchemaRendererProps) {
 	const stringValue = typeof value === "string" ? value : ((defaultValue ?? "") as string);
 	const context = useProjectContext();
@@ -32,18 +32,12 @@ export const LiquidsListField = React.memo(function LiquidsListField({
 
 		return (
 			<Field jsonPath={jsonPath} metadata={metadata}>
-				<FieldLabel>
-					<SchemaLabel name={name} metadata={metadata} />
-				</FieldLabel>
+				<SchemaLabel name={name} metadata={metadata} />
 				<FieldControl>
 					<Select
 						key={name}
 						value={stringValue}
-						onValueChange={(nextValue) =>
-							onChange(jsonPath, (parent, original, key) =>
-								parent.patchValue(original, key, nextValue),
-							)
-						}
+						onValueChange={(nextValue) => onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, nextValue))}
 					>
 						<SelectTrigger className="w-full">
 							<SelectValue placeholder="None" />

@@ -1,7 +1,7 @@
 import { ContentImage } from "#/components/editor/ContentImage";
 import { Button } from "#/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
-import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
+import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { Input } from "#/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
@@ -63,9 +63,7 @@ export const ResearchField = React.memo(function ResearchField({
 	return (
 		<>
 			<Field jsonPath={jsonPath} metadata={metadata}>
-				<FieldLabel>
-					<SchemaLabel name={name} metadata={metadata} />
-				</FieldLabel>
+				<SchemaLabel name={name} metadata={metadata} />
 				<FieldControl>
 					<Dialog>
 						<ResearchParentTrigger parent={parent} />
@@ -124,10 +122,10 @@ const ResearchRequirementList = React.memo(function ResearchRequirementList({
 
 	return requirements.map((requirement: string, index: number) => {
 		const parts = requirement?.split("/") || [];
-        
-        if (parts.length !== 2) {
-            return null;
-        }
+
+		if (parts.length !== 2) {
+			return null;
+		}
 
 		const itemName = parts[0]!;
 		const reqNumber = Number(parts[1]);

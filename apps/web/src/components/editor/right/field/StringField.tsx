@@ -1,4 +1,4 @@
-import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
+import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { Input } from "#/components/ui/input";
 import { Textarea } from "#/components/ui/textarea";
 import { hasNullableWrapper } from "@project/schema";
@@ -38,9 +38,7 @@ export const StringField = React.memo(function StringField({
 
 	return (
 		<Field jsonPath={jsonPath} metadata={metadata}>
-			<FieldLabel>
-				<SchemaLabel name={name} metadata={metadata} />
-			</FieldLabel>
+			<SchemaLabel name={name} metadata={metadata} />
 			<FieldControl>
 				{metadata?.multiline ? (
 					<Textarea key={name} value={stringValue} onChange={handleChange} />

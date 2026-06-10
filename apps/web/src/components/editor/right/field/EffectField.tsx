@@ -13,7 +13,6 @@ import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import { ObjectField } from "./ObjectField";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
-import { FieldLabel } from "#/components/ui/field";
 import { FieldControl } from "#/components/editor/right/field/Field";
 import { getSchemaMetadata } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
@@ -31,27 +30,21 @@ export const EffectField = React.memo(function EffectField({
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 	const effects = useProjectContext().contents.effects;
 
-    if (metadata!.type !== "effect") {
-        throw new Error(`EffectField must be used with effect schema, got ${JSON.stringify(entrySchema)}`);
-    }
+	if (metadata!.type !== "effect") {
+		throw new Error(`EffectField must be used with effect schema, got ${JSON.stringify(entrySchema)}`);
+	}
 
 	if (typeof value === "object" && value !== null) {
 		const typeValue = (value as Record<string, unknown>)?.type ?? "";
 
 		return (
 			<div className="grid gap-2">
-				<FieldLabel>
-					<SchemaLabel name={name} metadata={metadata} />
-				</FieldLabel>
+				<SchemaLabel name={name} metadata={metadata} />
 				<SchemaDescription metadata={metadata} />
 				<div className="grid grid-cols-2 gap-2">
 					<Button
 						variant="outline"
-						onClick={() =>
-							onChange(jsonPath, (parent, original, key) =>
-								parent.patchValue(original, key, effects[0]?.name ?? ""),
-							)
-						}
+						onClick={() => onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, effects[0]?.name ?? ""))}
 					>
 						Built-In
 					</Button>
@@ -93,9 +86,7 @@ export const EffectField = React.memo(function EffectField({
 
 	return (
 		<div className="grid gap-2">
-			<FieldLabel>
-				<SchemaLabel name={name} metadata={metadata} />
-			</FieldLabel>
+			<SchemaLabel name={name} metadata={metadata} />
 			<SchemaDescription metadata={metadata} />
 			<div className="grid grid-cols-2 gap-2">
 				<Button variant="outline" disabled>
@@ -103,11 +94,7 @@ export const EffectField = React.memo(function EffectField({
 				</Button>
 				<Button
 					variant="outline"
-					onClick={() =>
-						onChange(jsonPath, (parent, original, key) =>
-							parent.patchValue(original, key, { type: "ParticleEffect" }),
-						)
-					}
+					onClick={() => onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, { type: "ParticleEffect" }))}
 				>
 					Custom
 				</Button>
@@ -150,9 +137,7 @@ function EffectDialogContent({
 		<ToggleGroup
 			type="single"
 			value={value}
-			onValueChange={(v) =>
-				onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, v))
-			}
+			onValueChange={(v) => onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, v))}
 			asChild
 		>
 			<div className="grid gap-2">

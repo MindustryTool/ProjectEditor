@@ -1,4 +1,4 @@
-import { FieldControl, Field, FieldLabel } from "#/components/editor/right/field/Field";
+import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { Checkbox } from "#/components/ui/checkbox";
 import React, { useCallback, useMemo } from "react";
 import { FieldIssue } from "./FieldIssue";
@@ -34,9 +34,7 @@ export const BooleanField = React.memo(function BooleanField({
 		<Field jsonPath={jsonPath} metadata={metadata}>
 			<FieldControl className="flex-row flex gap-1">
 				<Checkbox key={name} checked={checked} onCheckedChange={handleChange} />
-				<FieldLabel>
-					<SchemaLabel name={name} metadata={metadata} />
-				</FieldLabel>
+				<SchemaLabel name={name} metadata={metadata} />
 			</FieldControl>
 			<SchemaDescription metadata={metadata} />
 			<FieldIssue path={path} jsonPath={jsonPath} />
