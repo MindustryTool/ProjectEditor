@@ -27,6 +27,7 @@ import { ShootPatternHjsonSchema } from "./shoot-pattern";
 import { ClassMap, classSchema } from "./class";
 import { ItemStackSchema } from "./item-stack";
 import { LiquidStackSchema } from "./liquid-stack";
+import { UnitFieldSchema } from "./unit";
 
 export const blockTypes = [
 	// Power
@@ -4453,48 +4454,58 @@ const singleBlockProducerObjectSchema = v.object({
 });
 
 // Unit variant schemas
-const unitFactoryObjectSchema = v.object({
-	...unitBlockObjectSchema.entries,
-	capacities: v.pipe(
-		v.optional(v.array(v.number()), []),
-		metadata({
-			name: "editor.block-unit-factory.capacities",
-			description: "editor.block-unit-factory.capacities-description",
-		}),
-	),
-	createSoundVolume: v.pipe(
-		v.optional(v.number(), 1),
-		metadata({
-			name: "editor.block-unit-factory.create-sound-volume",
-			description: "editor.block-unit-factory.create-sound-volume-description",
-		}),
-	),
-});
+const unitFactoryObjectSchema = (context: ProjectContents) =>
+	v.object({
+		...unitBlockObjectSchema.entries,
+		plans: v.array(
+			v.object({
+				unit: UnitFieldSchema(context),
+				time: v.pipe(v.number(), v.integer(), v.minValue(0)),
+				requirements: v.array(ItemStackSchema(context)),
+			}),
+		),
+		capacities: v.pipe(
+			v.optional(v.array(v.number()), []),
+			metadata({
+				name: "editor.block-unit-factory.capacities",
+				description: "editor.block-unit-factory.capacities-description",
+			}),
+		),
+		createSoundVolume: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({
+				name: "editor.block-unit-factory.create-sound-volume",
+				description: "editor.block-unit-factory.create-sound-volume-description",
+			}),
+		),
+	});
 
-const reconstructorObjectSchema = v.object({
-	...unitBlockObjectSchema.entries,
-	constructTime: v.pipe(
-		v.optional(v.number(), 120),
-		metadata({
-			name: "editor.block-reconstructor.construct-time",
-			description: "editor.block-reconstructor.construct-time-description",
-		}),
-	),
-	capacities: v.pipe(
-		v.optional(v.array(v.number()), []),
-		metadata({
-			name: "editor.block-reconstructor.capacities",
-			description: "editor.block-reconstructor.capacities-description",
-		}),
-	),
-	createSoundVolume: v.pipe(
-		v.optional(v.number(), 1),
-		metadata({
-			name: "editor.block-reconstructor.create-sound-volume",
-			description: "editor.block-reconstructor.create-sound-volume-description",
-		}),
-	),
-});
+const reconstructorObjectSchema = (context: ProjectContents) =>
+	v.object({
+		...unitBlockObjectSchema.entries,
+		upgrades: v.array(v.array(UnitFieldSchema(context))),
+		constructTime: v.pipe(
+			v.optional(v.number(), 120),
+			metadata({
+				name: "editor.block-reconstructor.construct-time",
+				description: "editor.block-reconstructor.construct-time-description",
+			}),
+		),
+		capacities: v.pipe(
+			v.optional(v.array(v.number()), []),
+			metadata({
+				name: "editor.block-reconstructor.capacities",
+				description: "editor.block-reconstructor.capacities-description",
+			}),
+		),
+		createSoundVolume: v.pipe(
+			v.optional(v.number(), 1),
+			metadata({
+				name: "editor.block-reconstructor.create-sound-volume",
+				description: "editor.block-reconstructor.create-sound-volume-description",
+			}),
+		),
+	});
 
 const unitAssemblerModuleObjectSchema = v.object({
 	...payloadBlockObjectSchema.entries,
@@ -5634,8 +5645,8 @@ const classSchemaMap = new ClassMap<BlockType>({
 	SingleBlockProducer: () => singleBlockProducerObjectSchema,
 	// Unit
 	UnitBlock: () => unitBlockObjectSchema,
-	UnitFactory: () => unitFactoryObjectSchema,
-	Reconstructor: () => reconstructorObjectSchema,
+	UnitFactory: (context) => unitFactoryObjectSchema(context),
+	Reconstructor: (context) => reconstructorObjectSchema(context),
 	UnitAssemblerModule: () => unitAssemblerModuleObjectSchema,
 	UnitAssembler: () => unitAssemblerObjectSchema,
 	UnitCargoUnloadPoint: () => unitCargoUnloadPointObjectSchema,

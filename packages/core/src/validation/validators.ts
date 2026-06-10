@@ -131,7 +131,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 ): ValidatorFn {
 	return async ({ path, content, context }) => {
 		const data = HJSON.parseWithCache(content);
-        const awaited = await schema();
+		const awaited = await schema();
 		const resolved = typeof awaited === "function" ? awaited(context) : awaited;
 		const { success, issues } = v.safeParse(resolved, data.valueOf());
 		const problems: ValidationResult[] = [];
@@ -140,7 +140,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 			const resolveFieldData = (fieldData: ReturnType<typeof data.get>, path: (string | number)[]) => {
 				for (const key of path.filter((p) => p !== undefined || p !== null || p !== "")) {
 					const nested = fieldData.get(key);
-					if (nested) {
+					if (nested && !nested.isMissing()) {
 						fieldData = nested;
 					} else {
 						break;
