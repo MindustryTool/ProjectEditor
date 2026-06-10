@@ -50,6 +50,7 @@ async function resolveHandle(
 	root: FileSystemDirectoryHandle,
 	path: string,
 	create: boolean = false,
+	resolveFull: boolean = false,
 ): Promise<[FileSystemDirectoryHandle, string]> {
 	const parts = path.replace(/^\/+/, "").split("/").filter(Boolean);
 
@@ -57,17 +58,16 @@ async function resolveHandle(
 
 	let dir: FileSystemDirectoryHandle = root;
 
-	for (let i = 0; i < parts.length - 1; i++) {
+	const end = resolveFull ? parts.length : parts.length - 1;
+	for (let i = 0; i < end; i++) {
 		dir = create ? await dir.getDirectoryHandle(parts[i]!, { create: true }) : await dir.getDirectoryHandle(parts[i]!);
 	}
 
-	const name = parts[parts.length - 1]!;
-
-	return [dir, name];
-}
-
-async function getDirHandle(dir: FileSystemDirectoryHandle, name: string): Promise<FileSystemDirectoryHandle> {
-	return dir.getDirectoryHandle(name);
+	if (!resolveFull) {
+		const name = parts[parts.length - 1]!;
+		return [dir, name];
+	}
+	return [dir, ""];
 }
 
 export class OPFSAdapter implements VirtualFileSystem {
@@ -125,10 +125,10 @@ export class OPFSAdapter implements VirtualFileSystem {
 
 	async readdir(path: string): Promise<FileEntry[]> {
 		try {
-			const dir: FileSystemDirectoryHandle =
-				path.replace(/^\/+/, "") === "" ? this.root : await getDirHandle(...(await resolveHandle(this.root, path)));
+			const normalized = path.replace(/^\/+/, "").replace(/\/+$/, "");
+			const [dir] = await resolveHandle(this.root, normalized || "/", false, true);
 			const entries: FileEntry[] = [];
-			const base = `/${path.replace(/^\/+/, "").replace(/\/+$/, "")}`;
+			const base = normalized ? `/${normalized}` : "/";
 			const basePrefix = base === "/" ? "" : base;
 			for await (const [name, handle] of (dir as AsyncIterableFileSystemDirectoryHandle).entries()) {
 				entries.push({
@@ -146,6 +146,14 @@ export class OPFSAdapter implements VirtualFileSystem {
 	}
 
 	async stat(path: string): Promise<FileStat> {
+		if (!path || path === "/") {
+			return {
+				name: "",
+				kind: "directory",
+				size: 0,
+				lastModified: new Date(0),
+			};
+		}
 		const [dir, name] = await resolveHandle(this.root, path);
 		try {
 			const fileHandle = await dir.getFileHandle(name);
@@ -172,9 +180,20 @@ export class OPFSAdapter implements VirtualFileSystem {
 	}
 
 	async exists(path: string): Promise<boolean> {
+		if (!path || path === "/") return true;
 		try {
-			await this.stat(path);
-			return true;
+			const [dir, name] = await resolveHandle(this.root, path);
+			try {
+				await dir.getFileHandle(name);
+				return true;
+			} catch {
+				try {
+					await dir.getDirectoryHandle(name);
+					return true;
+				} catch {
+					return false;
+				}
+			}
 		} catch {
 			return false;
 		}
@@ -183,13 +202,23 @@ export class OPFSAdapter implements VirtualFileSystem {
 	async rename(oldPath: string, newPath: string): Promise<void> {
 		try {
 			if (oldPath === newPath) return;
-			const data = await this.readFile(oldPath);
-			if (data !== null) {
-				await this.writeFile(newPath, data);
+			const s = await this.stat(oldPath);
+			if (s.kind === "file") {
+				const data = await this.readFile(oldPath);
+				if (data !== null) {
+					await this.writeFile(newPath, data);
+				}
+				await this.delete(oldPath);
+			} else {
+				const entries = await this.readdir(oldPath);
+				await this.mkdir(newPath);
+				for (const entry of entries) {
+					await this.rename(`${oldPath}/${entry.name}`, `${newPath}/${entry.name}`);
+				}
+				await this.delete(oldPath);
 			}
-			await this.delete(oldPath);
 		} catch (err) {
-			const message = err instanceof DOMException && err.name === "NotFoundError" ? "File not found" : "Error renaming file";
+			const message = err instanceof DOMException && err.name === "NotFoundError" ? "File not found" : "Error renaming";
 			console.error(message, oldPath, newPath, err);
 			throw err;
 		}
@@ -208,7 +237,8 @@ export class OPFSAdapter implements VirtualFileSystem {
 	async copy(src: string, dst: string): Promise<void> {
 		try {
 			const data = await this.readFile(src);
-			await this.writeFile(dst, data || new ArrayBuffer(0));
+			if (data === null) throw new Error(`Source not found: ${src}`);
+			await this.writeFile(dst, data);
 		} catch (err) {
 			const message = err instanceof DOMException && err.name === "NotFoundError" ? "File not found" : "Error copying file";
 			console.error(message, src, dst, err);
@@ -252,15 +282,14 @@ export class DefaultProjectFileTree {
 }
 
 export function isDefaultPath(tree: DefaultProjectFileTree, path: string): boolean {
-	function walk(nodes: TreeNode[], parentPath: string): boolean {
+	function walk(nodes: TreeNode[]): boolean {
 		for (const node of nodes) {
-			const nodePath = parentPath ? `${parentPath}/${node.name}` : node.name;
-			if (nodePath === path) return true;
-			if (node.children && walk(node.children, nodePath)) return true;
+			if (node.path === path) return true;
+			if (node.children && walk(node.children)) return true;
 		}
 		return false;
 	}
-	return walk(tree.projectTree, "");
+	return walk(tree.projectTree);
 }
 
 export const jsonProjectTree = new DefaultProjectFileTree([
@@ -271,7 +300,6 @@ export const jsonProjectTree = new DefaultProjectFileTree([
 		children: [
 			{ name: "items", type: "folder", path: "content/items" },
 			{ name: "blocks", type: "folder", path: "content/blocks" },
-			{ name: "blocks", type: "folder", path: "content/liquids" },
 			{ name: "liquids", type: "folder", path: "content/liquids" },
 			{ name: "units", type: "folder", path: "content/units" },
 		],

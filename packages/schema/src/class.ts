@@ -1,5 +1,5 @@
 import * as v from "valibot";
-import type { SchemaFn } from "./utils";
+import type { AnySchema, SchemaFn } from "./utils";
 import type { ProjectContents } from "@project/types";
 
 export const classSchema = <T extends string>(classTypes: readonly T[], defaultValue?: NoInfer<T>) =>
@@ -18,41 +18,55 @@ export const classSchema = <T extends string>(classTypes: readonly T[], defaultV
 				v.picklist(classTypes),
 			);
 
-type ClassExtends<T extends string> = v.ObjectSchema<
-	{
-		className: v.LiteralSchema<T, v.ErrorMessage<v.LiteralIssue> | undefined>;
-	},
-	v.ErrorMessage<v.ObjectIssue> | undefined
->;
+type ClassExtends<T extends string> = {
+	className?: v.LiteralSchema<T, v.ErrorMessage<v.LiteralIssue> | undefined>;
+};
 
-export function extend<T extends string>(clazz: T): ClassExtends<T> {
-	return v.object({ className: v.literal(clazz) });
+function extend<T extends string>(clazz: NoInfer<T>, schema: Record<string, AnySchema>): ClassExtends<T> {
+	return { className: v.literal(clazz), ...schema };
 }
 
 export class ClassMap<K extends string> {
 	constructor(
 		private readonly map: Record<
 			K,
-			SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>> | ClassExtends<K>
+			SchemaFn<v.ObjectSchema<v.ObjectEntries & ClassExtends<K>, v.ErrorMessage<v.ObjectIssue> | undefined>>
 		>,
 	) {}
+
+	register(
+		clazz: K,
+		provider: (props: {
+			extend: (clazz: K, schema: Record<string, AnySchema>) => ClassExtends<K>;
+		}) => SchemaFn<v.ObjectSchema<v.ObjectEntries & ClassExtends<K>, v.ErrorMessage<v.ObjectIssue> | undefined>>,
+	) {
+		this.map[clazz] = provider({ extend });
+	}
 
 	get(object: unknown, context: ProjectContents) {
 		const result: v.ObjectEntries = {};
 		if (object && typeof object === "object" && "type" in object && typeof object.type === "string") {
 			const key = (object.type.slice(0, 1).toUpperCase() + object.type.slice(1)) as K;
+			const visit = new Set<K>();
+
 			try {
 				const resoleKey = (key: K) => {
+					if (visit.has(key)) {
+						throw new Error(`Class ${key} circular reference`);
+					}
+
+					visit.add(key);
+
 					if (this.map[key]) {
-						const value = this.map[key];
-						if (typeof value === "function") {
-							Object.assign(result, value(context).entries);
-						} else {
+						const value = this.map[key](context);
+						if (value.entries.className) {
 							resoleKey(value.entries.className.literal);
+							delete value.entries.className;
 						}
+						Object.assign(result, value.entries);
 					} else {
-                        throw new Error(`Class ${key} not found`);
-                    }
+						throw new Error(`Class ${key} not found`);
+					}
 				};
 
 				resoleKey(key);
