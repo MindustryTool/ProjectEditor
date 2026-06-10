@@ -74,9 +74,6 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 
 						const container = typeof nextKey === "number" ? [] : {};
 
-						// -------------------------
-						// Missing node
-						// -------------------------
 						if (child.isMissing()) {
 							if (parent.isObject() && typeof currentKey === "string") {
 								content = parent.insertField(content!, currentKey, container);
@@ -91,9 +88,6 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 							break;
 						}
 
-						// -------------------------
-						// Value node in middle path
-						// -------------------------
 						if (child.isValue() && i < segments.length - 1) {
 							if (parent.isObject() && typeof currentKey === "string") {
 								content = parent.patchValue(content!, currentKey, container);
@@ -168,9 +162,20 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 					<InputGroupAddon>
 						<Search className="size-4" />
 					</InputGroupAddon>
-					<InputGroupInput value={filter} onChange={(e) => setFilter(e.target.value)} placeholder={t("editor.search")} />
+					<InputGroupInput //
+						value={filter}
+						onChange={(e) => setFilter(e.target.value)}
+						placeholder={t("editor.search")}
+					/>
 				</InputGroup>
-				<Children entries={filtered} node={node} path={path} onChange={onChange} render={render} setRender={setRender} />
+				<Children
+					entries={filtered} //
+					node={node}
+					path={path}
+					onChange={onChange}
+					render={render}
+					setRender={setRender}
+				/>
 			</ErrorBoundary>
 		</Suspense>
 	);
@@ -236,18 +241,17 @@ function Children({
 			);
 		} else {
 			elements.push(
-				<ErrorBoundary key={key}>
-					<Renderer
-						path={path}
-						name={name}
-						value={value}
-						onChange={onChange}
-						entrySchema={schema}
-						jsonPath={name}
-						getRenderer={getRenderer}
-						defaultValue={defaultValue}
-					/>
-				</ErrorBoundary>,
+				<Renderer
+					key={key}
+					path={path}
+					name={name}
+					value={value}
+					onChange={onChange}
+					entrySchema={schema}
+					jsonPath={name}
+					getRenderer={getRenderer}
+					defaultValue={defaultValue}
+				/>,
 			);
 		}
 	}

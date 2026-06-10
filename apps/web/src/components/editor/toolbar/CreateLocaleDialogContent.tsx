@@ -83,25 +83,27 @@ export function CreateLocaleDialogContent({ onClose }: CreateLocaleDialogContent
 						</SelectContent>
 					</Select>
 				</div>
-				<div className="flex flex-col gap-2">
-					<label className="text-xs font-medium text-muted-foreground">{t("create-locale-dialog.source-bundle-picker")}</label>
-					<Select value={selectedSource} onValueChange={setSelectedSource}>
-						<SelectTrigger className="w-full">
-							<SelectValue placeholder={t("create-locale-dialog.source-bundle-picker")} />
-						</SelectTrigger>
-						<SelectContent>
-							{availableSourceBundles.map((bundle) => (
-								<SelectItem key={bundle.path} value={bundle.path}>
-									<FileIcon path={bundle.path} />
-									{bundle.path}
-								</SelectItem>
-							))}
-							{availableSourceBundles.length === 0 && (
-								<div className="px-2 py-4 text-center text-xs text-muted-foreground">No bundle files found</div>
-							)}
-						</SelectContent>
-					</Select>
-				</div>
+				{availableSourceBundles.length > 0 && (
+					<div className="flex flex-col gap-2">
+						<label className="text-xs font-medium text-muted-foreground">{t("create-locale-dialog.source-bundle-picker")}</label>
+						<Select value={selectedSource} onValueChange={setSelectedSource}>
+							<SelectTrigger className="w-full">
+								<SelectValue placeholder={t("create-locale-dialog.source-bundle-picker")} />
+							</SelectTrigger>
+							<SelectContent>
+								{availableSourceBundles.map((bundle) => (
+									<SelectItem key={bundle.path} value={bundle.path}>
+										<FileIcon path={bundle.path} />
+										{bundle.path}
+									</SelectItem>
+								))}
+								{availableSourceBundles.length === 0 && (
+									<div className="px-2 py-4 text-center text-xs text-muted-foreground">No bundle files found</div>
+								)}
+							</SelectContent>
+						</Select>
+					</div>
+				)}
 			</div>
 			<DialogFooter>
 				<Button variant="outline" onClick={onClose}>

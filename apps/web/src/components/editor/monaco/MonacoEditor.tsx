@@ -44,7 +44,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 	const onChangeRef = useRef(onChange);
 	onChangeRef.current = onChange;
 
-	const debouncedOnChange = useMemo(() => debounce((value: string) => onChangeRef.current(value), 50), []);
+	const debouncedOnChange = useMemo(() => debounce((value: string) => onChangeRef.current(value), 100), []);
 	const theme = useMonacoTheme();
 	const fontSize = useAppStore((s) => s.settings.fontSize);
 	const tabSize = useAppStore((s) => s.settings.tabSize);
