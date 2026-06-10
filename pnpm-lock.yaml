@@ -185,6 +185,9 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.4(jiti@2.7.0)
+      playwright:
+        specifier: 'catalog:'
+        version: 1.60.0
       prettier:
         specifier: 'catalog:'
         version: 3.8.3

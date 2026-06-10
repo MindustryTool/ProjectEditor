@@ -19,6 +19,7 @@
         "@tooling/eslint": "workspace:*",
         "@typescript/native-preview": "7.0.0-dev.20260607.1",
         "eslint": "catalog:",
+        "playwright": "catalog:",
         "prettier": "catalog:",
         "turbo": "catalog:",
         "typescript": "^5.7.0",

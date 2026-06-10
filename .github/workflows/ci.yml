@@ -20,7 +20,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Install Playwright (browser tests)
-        run: npx playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
       - name: Check circular dependencies
         run: |
           for project in apps/web packages/api packages/config packages/core packages/fs packages/hjson packages/schema packages/types packages/utils packages/zip; do
