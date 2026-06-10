@@ -718,8 +718,13 @@ export class HjsonValueNode<T = unknown> extends HjsonNode {
 		return this.#end;
 	}
 
-	patchValue(_original: string, _key: string | number, _newValue: unknown): string {
-		throw new Error("Cannot patch value node");
+	patchValue(original: string, key: string | number, newValue: unknown): string {
+		const val = arguments.length <= 2 ? key : newValue;
+		if (val === undefined) {
+			return original.slice(0, this.#start.index) + original.slice(this.#end.index);
+		}
+		const baseIndent = " ".repeat(Math.max(0, this.#start.col - 1));
+		return original.slice(0, this.#start.index) + serializeValue(val, baseIndent) + original.slice(this.#end.index);
 	}
 
 	detectIndent(): string {
