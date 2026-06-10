@@ -1,9 +1,6 @@
 import * as v from "valibot";
-import { CachedSchema } from "./utils";
-import type { SchemaFn } from "./utils";
-
 import { metadata } from "./utils";
-import { ClassMap, classSchema } from "./class";
+import { ClassMap, classSchema, createClassHjsonSchema } from "./class";
 
 export const shootPatternTypes = [
 	"ShootPattern",
@@ -111,10 +108,8 @@ const classSchemaMap = new ClassMap<ShootPatternType>({
 	ShootPattern: (_context) => shootPatternBaseObjectSchema,
 });
 
-export const ShootPatternHjsonSchema: SchemaFn = CachedSchema((context) => {
-	return v.lazy((input) => {
-		const variant = classSchemaMap.get(input, context);
-
-		return v.pipe(v.object({ ...shootPatternBaseObjectSchema.entries, ...variant }), metadata({ type: "shoot-pattern" }));
-	});
+export const ShootPatternHjsonSchema = createClassHjsonSchema({
+	classMap: classSchemaMap,
+	baseSchema: shootPatternBaseObjectSchema.entries,
+	type: "shoot-pattern",
 });

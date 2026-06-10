@@ -12,7 +12,7 @@ import { ConsumesHjsonSchema } from "./consumes";
 import { ResearchSchema } from "./research";
 import { SoundHjsonSchema } from "./sound";
 
-import { ClassMap } from "./class";
+import { ClassMap, createClassHjsonSchema } from "./class";
 import { ItemStackSchema } from "./item-stack";
 
 import { blockTypes, blockObjectSchema } from "./block-object";
@@ -423,63 +423,57 @@ export const BlockFieldSchema: SchemaFn = CachedSchema((context) => {
 	);
 });
 
-export const BlockHjsonSchema: SchemaFn = CachedSchema((context) => {
-	return v.lazy((input) => {
-		const variant = classSchemaMap.get(input, context);
-
-		return v.pipe(
-			v.object({
-				...blockObjectSchema,
-				...variant,
-				consumes: v.optional(ConsumesHjsonSchema(context)),
-				requirements: v.optional(v.array(ItemStackSchema(context)), []),
-				researchCost: v.optional(v.array(ItemStackSchema(context))),
-				researchCostMultipliers: v.optional(v.record(v.string(), v.number())),
-				itemDrop: v.optional(ItemFieldSchema(context)),
-				lightLiquid: v.optional(LiquidFieldSchema(context)),
-				destroyBullet: v.optional(BulletHjsonSchema(context)),
-				placeEffect: v.optional(EffectFieldSchema(context)),
-				breakEffect: v.optional(EffectFieldSchema(context)),
-				destroyEffect: v.optional(EffectFieldSchema(context)),
-				research: v.optional(ResearchSchema(context)),
-				configureSound: v.pipe(
-					v.optional(SoundHjsonSchema(context)),
-					metadata({
-						name: "editor.block.configure-sound",
-						description: "editor.block.configure-sound-description",
-						visibleWhen: { field: "configurable", value: true },
-					}),
-				),
-				placeSound: v.pipe(
-					v.optional(SoundHjsonSchema(context)),
-					metadata({
-						name: "editor.block.place-sound",
-						description: "editor.block.place-sound-description",
-					}),
-				),
-				breakSound: v.pipe(
-					v.optional(SoundHjsonSchema(context)),
-					metadata({
-						name: "editor.block.break-sound",
-						description: "editor.block.break-sound-description",
-					}),
-				),
-				destroySound: v.pipe(
-					v.optional(SoundHjsonSchema(context)),
-					metadata({
-						name: "editor.block.destroy-sound",
-						description: "editor.block.destroy-sound-description",
-					}),
-				),
-				ambientSound: v.pipe(
-					v.optional(SoundHjsonSchema(context)),
-					metadata({
-						name: "editor.block.ambient-sound",
-						description: "editor.block.ambient-sound-description",
-					}),
-				),
+export const BlockHjsonSchema = createClassHjsonSchema({
+	classMap: classSchemaMap,
+	baseSchema: blockObjectSchema,
+	type: "block",
+	extra: (context) => ({
+		consumes: v.optional(ConsumesHjsonSchema(context)),
+		requirements: v.optional(v.array(ItemStackSchema(context)), []),
+		researchCost: v.optional(v.array(ItemStackSchema(context))),
+		researchCostMultipliers: v.optional(v.record(v.string(), v.number())),
+		itemDrop: v.optional(ItemFieldSchema(context)),
+		lightLiquid: v.optional(LiquidFieldSchema(context)),
+		destroyBullet: v.optional(BulletHjsonSchema(context)),
+		placeEffect: v.optional(EffectFieldSchema(context)),
+		breakEffect: v.optional(EffectFieldSchema(context)),
+		destroyEffect: v.optional(EffectFieldSchema(context)),
+		research: v.optional(ResearchSchema(context)),
+		configureSound: v.pipe(
+			v.optional(SoundHjsonSchema(context)),
+			metadata({
+				name: "editor.block.configure-sound",
+				description: "editor.block.configure-sound-description",
+				visibleWhen: { field: "configurable", value: true },
 			}),
-			metadata({ type: "block" }),
-		);
-	});
+		),
+		placeSound: v.pipe(
+			v.optional(SoundHjsonSchema(context)),
+			metadata({
+				name: "editor.block.place-sound",
+				description: "editor.block.place-sound-description",
+			}),
+		),
+		breakSound: v.pipe(
+			v.optional(SoundHjsonSchema(context)),
+			metadata({
+				name: "editor.block.break-sound",
+				description: "editor.block.break-sound-description",
+			}),
+		),
+		destroySound: v.pipe(
+			v.optional(SoundHjsonSchema(context)),
+			metadata({
+				name: "editor.block.destroy-sound",
+				description: "editor.block.destroy-sound-description",
+			}),
+		),
+		ambientSound: v.pipe(
+			v.optional(SoundHjsonSchema(context)),
+			metadata({
+				name: "editor.block.ambient-sound",
+				description: "editor.block.ambient-sound-description",
+			}),
+		),
+	}),
 });

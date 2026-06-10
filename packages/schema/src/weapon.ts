@@ -1,7 +1,6 @@
 import * as v from "valibot";
 import { MindustryHexColorSchema } from "./mindustry-hex-color";
 import { SoundHjsonSchema } from "./sound";
-import type { SchemaFn } from "./utils";
 import { StatusStringSchema } from "./status";
 import { EffectFieldSchema } from "./effect";
 import { PartHjsonSchema } from "./part";
@@ -9,7 +8,7 @@ import { ShootPatternHjsonSchema } from "./shoot-pattern";
 import { BulletHjsonSchema } from "./bullet";
 import { cached, fixed, metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
-import { ClassMap, classSchema } from "./class";
+import { ClassMap, classSchema, createClassHjsonSchema } from "./class";
 
 const weaponTypes = ["Weapon", "BuildWeapon", "MineWeapon", "PointDefenseBulletWeapon", "PointDefenseWeapon", "RepairBeamWeapon"] as const;
 
@@ -177,22 +176,20 @@ const weaponTypeMap = new ClassMap<WeaponType>({
 	RepairBeamWeapon: (context) => repairBeamWeaponSchema(context),
 });
 
-export const WeaponHjsonSchema: SchemaFn = (context) =>
-	v.lazy((input) => {
-		const weaponVariant = weaponTypeMap.get(input, context);
-
-		return v.object({
-			...weaponObjectSchema,
-			...weaponVariant,
-			bullet: v.optional(BulletHjsonSchema(context)),
-			ejectEffect: v.optional(EffectFieldSchema(context)),
-			shoot: v.optional(ShootPatternHjsonSchema(context)),
-			shootStatus: v.optional(StatusStringSchema(context)),
-			shootOnDeathEffect: v.optional(EffectFieldSchema(context)),
-			parts: v.optional(v.array(PartHjsonSchema(context)), []),
-			activeSound: v.optional(SoundHjsonSchema(context)),
-			shootSound: v.optional(SoundHjsonSchema(context)),
-			initialShootSound: v.optional(SoundHjsonSchema(context)),
-			chargeSound: v.optional(SoundHjsonSchema(context)),
-		});
-	});
+export const WeaponHjsonSchema = createClassHjsonSchema({
+	classMap: weaponTypeMap,
+	baseSchema: weaponObjectSchema,
+	type: "weapon",
+	extra: (context) => ({
+		bullet: v.optional(BulletHjsonSchema(context)),
+		ejectEffect: v.optional(EffectFieldSchema(context)),
+		shoot: v.optional(ShootPatternHjsonSchema(context)),
+		shootStatus: v.optional(StatusStringSchema(context)),
+		shootOnDeathEffect: v.optional(EffectFieldSchema(context)),
+		parts: v.optional(v.array(PartHjsonSchema(context)), []),
+		activeSound: v.optional(SoundHjsonSchema(context)),
+		shootSound: v.optional(SoundHjsonSchema(context)),
+		initialShootSound: v.optional(SoundHjsonSchema(context)),
+		chargeSound: v.optional(SoundHjsonSchema(context)),
+	}),
+});

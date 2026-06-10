@@ -1,5 +1,6 @@
 import * as v from "valibot";
 import type { AnySchema, SchemaFn } from "./utils";
+import { CachedSchema, getSchemaMetadata, metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
 
 export const classSchema = <T extends string>(classTypes: readonly T[], defaultValue?: NoInfer<T>) =>
@@ -22,10 +23,6 @@ type ClassExtends<T extends string> = {
 	className?: v.LiteralSchema<T, v.ErrorMessage<v.LiteralIssue> | undefined>;
 };
 
-function extend<T extends string>(clazz: NoInfer<T>, schema: Record<string, AnySchema>): ClassExtends<T> {
-	return { className: v.literal(clazz), ...schema };
-}
-
 export class ClassMap<K extends string> {
 	constructor(
 		private readonly map: Record<
@@ -33,15 +30,6 @@ export class ClassMap<K extends string> {
 			SchemaFn<v.ObjectSchema<v.ObjectEntries & ClassExtends<K>, v.ErrorMessage<v.ObjectIssue> | undefined>>
 		>,
 	) {}
-
-	register(
-		clazz: K,
-		provider: (props: {
-			extend: (clazz: K, schema: Record<string, AnySchema>) => ClassExtends<K>;
-		}) => SchemaFn<v.ObjectSchema<v.ObjectEntries & ClassExtends<K>, v.ErrorMessage<v.ObjectIssue> | undefined>>,
-	) {
-		this.map[clazz] = provider({ extend });
-	}
 
 	get(object: unknown, context: ProjectContents) {
 		const result: v.ObjectEntries = {};
@@ -77,4 +65,40 @@ export class ClassMap<K extends string> {
 
 		return result;
 	}
+}
+
+export function mergeEntries(
+	base: Record<string, AnySchema>,
+	variant: Record<string, AnySchema>,
+): Record<string, AnySchema> {
+	const result = { ...base };
+	for (const [key, variantField] of Object.entries(variant)) {
+		if (variantField === undefined) continue;
+		if (key in result) {
+			const baseMeta = getSchemaMetadata(result[key]!);
+			const variantMeta = getSchemaMetadata(variantField);
+			const mergedMeta: Record<string, unknown> = { ...(baseMeta ?? {}), ...(variantMeta ?? {}) };
+			result[key] = v.pipe(variantField, metadata(mergedMeta));
+		} else {
+			result[key] = variantField;
+		}
+	}
+	return result;
+}
+
+export function createClassHjsonSchema<K extends string>(config: {
+	classMap: ClassMap<K>;
+	baseSchema: Record<string, AnySchema> | ((context: ProjectContents) => Record<string, AnySchema>);
+	type: string;
+	extra?: (context: ProjectContents) => Record<string, AnySchema>;
+}): SchemaFn {
+	return CachedSchema((context) =>
+		v.lazy((input) => {
+			const variant = config.classMap.get(input, context);
+			const base = typeof config.baseSchema === "function" ? config.baseSchema(context) : config.baseSchema;
+			const entries = mergeEntries(base, variant);
+			const extraFields = config.extra?.(context) ?? {};
+			return v.pipe(v.object({ ...entries, ...extraFields }), metadata({ type: config.type }));
+		}),
+	);
 }

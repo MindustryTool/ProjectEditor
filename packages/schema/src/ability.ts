@@ -1,5 +1,5 @@
 import * as v from "valibot";
-import { cached, CachedSchema } from "./utils";
+import { cached } from "./utils";
 import { Interps } from "./interps";
 import { MindustryHexColorSchema } from "./mindustry-hex-color";
 import { SoundHjsonSchema } from "./sound";
@@ -9,7 +9,7 @@ import { StatusFieldSchema } from "./status";
 import { LiquidFieldSchema } from "./liquid";
 import { BulletHjsonSchema } from "./bullet";
 import { metadata } from "./utils";
-import { ClassMap, classSchema } from "./class";
+import { ClassMap, classSchema, createClassHjsonSchema } from "./class";
 import type { ProjectContents } from "@project/types";
 
 export const abilityClasses = [
@@ -793,12 +793,10 @@ const classSchemaMap = new ClassMap<AbilityClass>({
 		}),
 });
 
-export const AbilityHjsonSchema: SchemaFn = CachedSchema((context) => {
-	return v.lazy((input) => {
-		const variant = classSchemaMap.get(input, context);
-
-		return v.pipe(v.object({ ...abilityBaseObjectSchema.entries, ...variant }), metadata({ type: "ability" }));
-	});
+export const AbilityHjsonSchema = createClassHjsonSchema({
+	classMap: classSchemaMap,
+	baseSchema: abilityBaseObjectSchema.entries,
+	type: "ability",
 });
 
 export const AbilityFieldSchema: SchemaFn = (context) =>

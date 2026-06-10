@@ -5,7 +5,7 @@ import { MindustryHexColorSchema } from "./mindustry-hex-color";
 import { SoundHjsonSchema } from "./sound";
 import type { SchemaFn } from "./utils";
 import { metadata } from "./utils";
-import { ClassMap, classSchema } from "./class";
+import { ClassMap, classSchema, createClassHjsonSchema } from "./class";
 
 export const effectClasses = [
 	"ParticleEffect",
@@ -383,16 +383,8 @@ export const EffectFieldSchema: SchemaFn = CachedSchema((context) => {
 	);
 });
 
-export const EffectHjsonSchema: SchemaFn = CachedSchema((context) => {
-	return v.lazy((input) => {
-		const effectVariant = effectClassMap.get(input, context);
-
-		return v.pipe(
-			v.object({
-				...effectBaseObjectSchema.entries,
-				...effectVariant,
-			}),
-			metadata({ type: "effect" }),
-		);
-	});
+export const EffectHjsonSchema = createClassHjsonSchema({
+	classMap: effectClassMap,
+	baseSchema: effectBaseObjectSchema.entries,
+	type: "effect",
 });

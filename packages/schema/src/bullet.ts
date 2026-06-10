@@ -10,7 +10,7 @@ import { ShootPatternHjsonSchema } from "./shoot-pattern";
 import { StatusFieldSchema } from "./status";
 import { LiquidFieldSchema } from "./liquid";
 import { metadata } from "./utils";
-import { ClassMap, classSchema } from "./class";
+import { ClassMap, classSchema, createClassHjsonSchema } from "./class";
 
 const BulletUnitFieldSchema: SchemaFn = (context) =>
 	v.pipe(
@@ -1633,10 +1633,8 @@ const classSchemaMap = new ClassMap<BulletClass>({
 	SpaceLiquidBulletType: (_context) => v.object({}),
 });
 
-export const BulletHjsonSchema: SchemaFn = CachedSchema((context) => {
-	return v.lazy((input) => {
-		const variant = classSchemaMap.get(input, context);
-
-		return v.pipe(v.object({ ...createBulletBaseObjectSchema(context).entries, ...variant }));
-	});
+export const BulletHjsonSchema = createClassHjsonSchema({
+	classMap: classSchemaMap,
+	baseSchema: (ctx) => createBulletBaseObjectSchema(ctx).entries,
+	type: "bullet",
 });

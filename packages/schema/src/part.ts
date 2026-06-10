@@ -1,10 +1,8 @@
 import * as v from "valibot";
-import { CachedSchema } from "./utils";
 import { MindustryHexColorSchema } from "./mindustry-hex-color";
-import type { SchemaFn } from "./utils";
 import { EffectFieldSchema } from "./effect";
 import { metadata } from "./utils";
-import { ClassMap, classSchema } from "./class";
+import { ClassMap, classSchema, createClassHjsonSchema } from "./class";
 
 export const partClasses = ["RegionPart", "DrawPart", "EffectSpawnerPart", "FlarePart", "HaloPart", "HoverPart", "ShapePart"] as const;
 
@@ -375,10 +373,8 @@ const classSchemaMap = new ClassMap<PartClass>({
 	ShapePart: (_context) => shapePartObjectSchema,
 });
 
-export const PartHjsonSchema: SchemaFn = CachedSchema((context) => {
-	return v.lazy((input) => {
-		const variant = classSchemaMap.get(input, context);
-
-		return v.pipe(v.object({ ...drawPartBaseObjectSchema.entries, ...variant }), metadata({ type: "part" }));
-	});
+export const PartHjsonSchema = createClassHjsonSchema({
+	classMap: classSchemaMap,
+	baseSchema: drawPartBaseObjectSchema.entries,
+	type: "part",
 });
