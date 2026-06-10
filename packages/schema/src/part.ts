@@ -2,7 +2,8 @@ import * as v from "valibot";
 import { MindustryHexColorSchema } from "./mindustry-hex-color";
 import { EffectFieldSchema } from "./effect";
 import { metadata } from "./utils";
-import { ClassMap, classSchema, createClassHjsonSchema } from "./class";
+import type { SchemaFn } from "./utils";
+import { ClassMap, classSchema } from "./class";
 
 export const partClasses = ["RegionPart", "DrawPart", "EffectSpawnerPart", "FlarePart", "HaloPart", "HoverPart", "ShapePart"] as const;
 
@@ -136,10 +137,9 @@ export const shapePartObjectSchema = v.object({
 	layerOffset: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.layer-offset" })),
 });
 
-const classSchemaMap = new ClassMap<PartClass>({
-	DrawPart: (_context) => v.object({}),
-	RegionPart: (context) =>
-		v.object({
+export const PartHjsonSchema: SchemaFn = new ClassMap<PartClass>({
+	DrawPart: (_context) => ({}),
+	RegionPart: (context) => ({
 			suffix: v.pipe(
 				v.optional(v.string(), ""),
 				metadata({
@@ -307,8 +307,7 @@ const classSchemaMap = new ClassMap<PartClass>({
 				metadata({ name: "editor.part.moves", category: "editor.part.category.structure" }),
 			),
 		}),
-	EffectSpawnerPart: (context) =>
-		v.object({
+	EffectSpawnerPart: (context) => ({
 			x: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.x", category: "editor.part.category.transform" })),
 			y: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.y", category: "editor.part.category.transform" })),
 			width: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.width", category: "editor.part.category.transform" })),
@@ -367,14 +366,11 @@ const classSchemaMap = new ClassMap<PartClass>({
 				metadata({ name: "editor.part.progress", category: "editor.part.category.progress" }),
 			),
 		}),
-	FlarePart: (_context) => flarePartObjectSchema,
-	HaloPart: (_context) => haloPartObjectSchema,
-	HoverPart: (_context) => hoverPartObjectSchema,
-	ShapePart: (_context) => shapePartObjectSchema,
-});
-
-export const PartHjsonSchema = createClassHjsonSchema({
-	classMap: classSchemaMap,
+	FlarePart: (_context) => flarePartObjectSchema.entries,
+	HaloPart: (_context) => haloPartObjectSchema.entries,
+	HoverPart: (_context) => hoverPartObjectSchema.entries,
+	ShapePart: (_context) => shapePartObjectSchema.entries,
+}, {
 	baseSchema: drawPartBaseObjectSchema.entries,
 	type: "part",
-});
+}).schema;

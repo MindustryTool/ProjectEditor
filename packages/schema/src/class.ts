@@ -19,54 +19,6 @@ export const classSchema = <T extends string>(classTypes: readonly T[], defaultV
 				v.picklist(classTypes),
 			);
 
-type ClassExtends<T extends string> = {
-	className?: v.LiteralSchema<T, v.ErrorMessage<v.LiteralIssue> | undefined>;
-};
-
-export class ClassMap<K extends string> {
-	constructor(
-		private readonly map: Record<
-			K,
-			SchemaFn<v.ObjectSchema<v.ObjectEntries & ClassExtends<K>, v.ErrorMessage<v.ObjectIssue> | undefined>>
-		>,
-	) {}
-
-	get(object: unknown, context: ProjectContents) {
-		const result: v.ObjectEntries = {};
-		if (object && typeof object === "object" && "type" in object && typeof object.type === "string") {
-			const key = (object.type.slice(0, 1).toUpperCase() + object.type.slice(1)) as K;
-			const visit = new Set<K>();
-
-			try {
-				const resoleKey = (key: K) => {
-					if (visit.has(key)) {
-						throw new Error(`Class ${key} circular reference`);
-					}
-
-					visit.add(key);
-
-					if (this.map[key]) {
-						const value = this.map[key](context);
-						if (value.entries.className) {
-							resoleKey(value.entries.className.literal);
-							delete value.entries.className;
-						}
-						Object.assign(result, value.entries);
-					} else {
-						throw new Error(`Class ${key} not found`);
-					}
-				};
-
-				resoleKey(key);
-			} catch {
-				console.error(this.map[key]);
-			}
-		}
-
-		return result;
-	}
-}
-
 export function mergeEntries(
 	base: Record<string, AnySchema>,
 	variant: Record<string, AnySchema>,
@@ -86,19 +38,58 @@ export function mergeEntries(
 	return result;
 }
 
-export function createClassHjsonSchema<K extends string>(config: {
-	classMap: ClassMap<K>;
-	baseSchema: Record<string, AnySchema> | ((context: ProjectContents) => Record<string, AnySchema>);
-	type: string;
-	extra?: (context: ProjectContents) => Record<string, AnySchema>;
-}): SchemaFn {
-	return CachedSchema((context) =>
-		v.lazy((input) => {
-			const variant = config.classMap.get(input, context);
-			const base = typeof config.baseSchema === "function" ? config.baseSchema(context) : config.baseSchema;
-			const entries = mergeEntries(base, variant);
-			const extraFields = config.extra?.(context) ?? {};
-			return v.pipe(v.object({ ...entries, ...extraFields }), metadata({ type: config.type }));
-		}),
-	);
+export class ClassMap<K extends string> {
+	private _schema?: SchemaFn;
+
+	constructor(
+		private readonly map: Record<K, (context: ProjectContents) => Record<string, AnySchema>>,
+		private readonly options: {
+			baseSchema: Record<string, AnySchema> | ((context: ProjectContents) => Record<string, AnySchema>);
+			type: string;
+			extra?: (context: ProjectContents) => Record<string, AnySchema>;
+		},
+	) {}
+
+	get schema(): SchemaFn {
+		if (!this._schema) {
+			this._schema = CachedSchema((context) =>
+				v.lazy((input) => {
+					const variant = this.collect(input, context);
+					const base = typeof this.options.baseSchema === "function" ? this.options.baseSchema(context) : this.options.baseSchema;
+					const entries = mergeEntries(base, variant);
+					const extraFields = this.options.extra?.(context) ?? {};
+					return v.pipe(v.object({ ...entries, ...extraFields }), metadata({ type: this.options.type }));
+				}),
+			);
+		}
+		return this._schema;
+	}
+
+	private collect(object: unknown, context: ProjectContents): Record<string, AnySchema> {
+		const result: Record<string, AnySchema> = {};
+		if (object && typeof object === "object" && "type" in object && typeof object.type === "string") {
+			const key = (object.type.slice(0, 1).toUpperCase() + object.type.slice(1)) as K;
+			const visit = new Set<K>();
+
+			const resolveKey = (key: K) => {
+				if (visit.has(key)) throw new Error(`Class ${key} circular reference`);
+				visit.add(key);
+
+				const entries = this.map[key]?.(context);
+				if (!entries) return;
+
+				for (const [entryKey, schema] of Object.entries(entries)) {
+					if (entryKey === "className") continue;
+					result[entryKey] = schema;
+				}
+			};
+
+			try {
+				resolveKey(key);
+			} catch {
+				console.error(this.map[key]);
+			}
+		}
+		return result;
+	}
 }

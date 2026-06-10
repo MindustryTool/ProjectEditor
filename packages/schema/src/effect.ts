@@ -5,7 +5,7 @@ import { MindustryHexColorSchema } from "./mindustry-hex-color";
 import { SoundHjsonSchema } from "./sound";
 import type { SchemaFn } from "./utils";
 import { metadata } from "./utils";
-import { ClassMap, classSchema, createClassHjsonSchema } from "./class";
+import { ClassMap, classSchema } from "./class";
 
 export const effectClasses = [
 	"ParticleEffect",
@@ -277,18 +277,16 @@ export const waveEffectObjectSchema = v.object({
 	),
 });
 
-const effectClassMap = new ClassMap<EffectType>({
-	ParticleEffect: (_context) => particleEffectObjectSchema,
-	MultiEffect: (context) =>
-		v.object({
+export const EffectHjsonSchema = new ClassMap<EffectType>({
+	ParticleEffect: (_context) => particleEffectObjectSchema.entries,
+	MultiEffect: (context) => ({
 			effects: v.pipe(
 				v.array(EffectFieldSchema(context)),
 				metadata({ name: "editor.effect.multi-effects", description: "editor.effect.multi-effects-description" }),
 			),
 		}),
-	ExplosionEffect: (_context) => explosionEffectObjectSchema,
-	RadialEffect: (context) =>
-		v.object({
+	ExplosionEffect: (_context) => explosionEffectObjectSchema.entries,
+	RadialEffect: (context) => ({
 			effect: v.pipe(
 				EffectFieldSchema(context),
 				metadata({ name: "editor.effect.radial-effect", description: "editor.effect.radial-effect-description" }),
@@ -314,15 +312,13 @@ const effectClassMap = new ClassMap<EffectType>({
 				metadata({ name: "editor.effect.amount", description: "editor.effect.amount-description" }),
 			),
 		}),
-	SeqEffect: (context) =>
-		v.object({
+	SeqEffect: (context) => ({
 			effects: v.pipe(
 				v.array(EffectFieldSchema(context)),
 				metadata({ name: "editor.effect.seq-effects", description: "editor.effect.seq-effects-description" }),
 			),
 		}),
-	SoundEffect: (context) =>
-		v.object({
+	SoundEffect: (context) => ({
 			sound: v.pipe(
 				v.optional(SoundHjsonSchema(context)),
 				metadata({ name: "editor.effect.sound", description: "editor.effect.sound-description" }),
@@ -348,9 +344,8 @@ const effectClassMap = new ClassMap<EffectType>({
 				metadata({ name: "editor.effect.sound-effect", description: "editor.effect.sound-effect-description" }),
 			),
 		}),
-	WaveEffect: (_context) => waveEffectObjectSchema,
-	WrapEffect: (context) =>
-		v.object({
+	WaveEffect: (_context) => waveEffectObjectSchema.entries,
+	WrapEffect: (context) => ({
 			effect: v.pipe(
 				EffectFieldSchema(context),
 				metadata({ name: "editor.effect.wrap-effect", description: "editor.effect.wrap-effect-description" }),
@@ -364,7 +359,10 @@ const effectClassMap = new ClassMap<EffectType>({
 				metadata({ name: "editor.effect.wrap-rotation", description: "editor.effect.wrap-rotation-description" }),
 			),
 		}),
-});
+}, {
+	baseSchema: effectBaseObjectSchema.entries,
+	type: "effect",
+}).schema;
 
 export const EffectFieldSchema: SchemaFn = CachedSchema((context) => {
 	return v.pipe(
@@ -381,10 +379,4 @@ export const EffectFieldSchema: SchemaFn = CachedSchema((context) => {
 		}),
 		metadata({ type: "effect" }),
 	);
-});
-
-export const EffectHjsonSchema = createClassHjsonSchema({
-	classMap: effectClassMap,
-	baseSchema: effectBaseObjectSchema.entries,
-	type: "effect",
 });

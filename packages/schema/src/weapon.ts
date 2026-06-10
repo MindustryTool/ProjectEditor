@@ -8,7 +8,7 @@ import { ShootPatternHjsonSchema } from "./shoot-pattern";
 import { BulletHjsonSchema } from "./bullet";
 import { cached, fixed, metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
-import { ClassMap, classSchema, createClassHjsonSchema } from "./class";
+import { ClassMap, classSchema } from "./class";
 
 const weaponTypes = ["Weapon", "BuildWeapon", "MineWeapon", "PointDefenseBulletWeapon", "PointDefenseWeapon", "RepairBeamWeapon"] as const;
 
@@ -167,17 +167,14 @@ const repairBeamWeaponSchema = cached((context: ProjectContents) =>
 	}),
 );
 
-const weaponTypeMap = new ClassMap<WeaponType>({
-	Weapon: () => v.object({}),
-	BuildWeapon: () => buildWeaponSchema,
-	MineWeapon: () => mineWeaponSchema,
-	PointDefenseBulletWeapon: () => pointDefenseBulletWeaponSchema,
-	PointDefenseWeapon: (context) => pointDefenseWeaponSchema(context),
-	RepairBeamWeapon: (context) => repairBeamWeaponSchema(context),
-});
-
-export const WeaponHjsonSchema = createClassHjsonSchema({
-	classMap: weaponTypeMap,
+export const WeaponHjsonSchema = new ClassMap<WeaponType>({
+	Weapon: () => ({}),
+	BuildWeapon: () => buildWeaponSchema.entries,
+	MineWeapon: () => mineWeaponSchema.entries,
+	PointDefenseBulletWeapon: () => pointDefenseBulletWeaponSchema.entries,
+	PointDefenseWeapon: (context) => pointDefenseWeaponSchema(context).entries,
+	RepairBeamWeapon: (context) => repairBeamWeaponSchema(context).entries,
+}, {
 	baseSchema: weaponObjectSchema,
 	type: "weapon",
 	extra: (context) => ({
@@ -192,4 +189,4 @@ export const WeaponHjsonSchema = createClassHjsonSchema({
 		initialShootSound: v.optional(SoundHjsonSchema(context)),
 		chargeSound: v.optional(SoundHjsonSchema(context)),
 	}),
-});
+}).schema;

@@ -53,4 +53,4 @@ export {
 } from "./utils";
 export type { AnySchema, SchemaFn, SchemaMetadata, SpriteData, Type } from "./utils";
 export { WeaponHjsonSchema } from "./weapon";
-export { ClassMap, createClassHjsonSchema, classSchema } from "./class";
+export { ClassMap, classSchema } from "./class";

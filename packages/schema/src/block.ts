@@ -12,7 +12,7 @@ import { ConsumesHjsonSchema } from "./consumes";
 import { ResearchSchema } from "./research";
 import { SoundHjsonSchema } from "./sound";
 
-import { ClassMap, createClassHjsonSchema } from "./class";
+import { ClassMap } from "./class";
 import { ItemStackSchema } from "./item-stack";
 
 import { blockTypes, blockObjectSchema } from "./block-object";
@@ -162,269 +162,241 @@ import { launchPadObjectSchema, landingPadObjectSchema, acceleratorObjectSchema 
 
 import { itemSourceObjectSchema, overlayFloorObjectSchema } from "./block-sandbox";
 
-const classSchemaMap = new ClassMap<BlockType>({
+export const BlockHjsonSchema = new ClassMap<BlockType>({
 	// Power
-	Block: () => v.object({}),
-	PowerBlock: () => powerBlockObjectSchema,
-	PowerDistributor: () => powerDistributorObjectSchema,
-	PowerGenerator: () => powerGeneratorObjectSchema,
-	ConsumeGenerator: () => consumeGeneratorObjectSchema,
-	HeaterGenerator: () => heaterGeneratorObjectSchema,
-	SolarGenerator: () => v.object({}),
-	ThermalGenerator: () => thermalGeneratorObjectSchema,
-	NuclearReactor: () => nuclearReactorObjectSchema,
-	ImpactReactor: () => impactReactorObjectSchema,
-	VariableReactor: () => variableReactorObjectSchema,
-	Battery: () =>
-		v.object({
+	Block: () => ({}),
+	PowerBlock: () => powerBlockObjectSchema.entries,
+	PowerDistributor: () => powerDistributorObjectSchema.entries,
+	PowerGenerator: () => powerGeneratorObjectSchema.entries,
+	ConsumeGenerator: () => consumeGeneratorObjectSchema.entries,
+	HeaterGenerator: () => heaterGeneratorObjectSchema.entries,
+	SolarGenerator: () => ({}),
+	ThermalGenerator: () => thermalGeneratorObjectSchema.entries,
+	NuclearReactor: () => nuclearReactorObjectSchema.entries,
+	ImpactReactor: () => impactReactorObjectSchema.entries,
+	VariableReactor: () => variableReactorObjectSchema.entries,
+	Battery: () => ({
 			...powerDistributorObjectSchema.entries,
 		}),
-	PowerNode: () => powerNodeObjectSchema,
-	LongPowerNode: () => longPowerNodeObjectSchema,
-	BeamNode: () => beamNodeObjectSchema,
-	PowerDiode: () =>
-		v.object({
+	PowerNode: () => powerNodeObjectSchema.entries,
+	LongPowerNode: () => longPowerNodeObjectSchema.entries,
+	BeamNode: () => beamNodeObjectSchema.entries,
+	PowerDiode: () => ({
 			arrowTexture: TextureFieldSchema("@-arrow"),
 		}),
-	LightBlock: () => lightBlockObjectSchema,
-	PowerVoid: () => v.object({ ...powerBlockObjectSchema.entries }),
-	PowerSource: () => powerSourceObjectSchema,
+	LightBlock: () => lightBlockObjectSchema.entries,
+	PowerVoid: () => ({ ...powerBlockObjectSchema.entries }),
+	PowerSource: () => powerSourceObjectSchema.entries,
 	// Storage
-	StorageBlock: () => storageBlockObjectSchema,
-	CoreBlock: () => coreBlockObjectSchema,
-	Unloader: () => unloaderObjectSchema,
+	StorageBlock: () => storageBlockObjectSchema.entries,
+	CoreBlock: () => coreBlockObjectSchema.entries,
+	Unloader: () => unloaderObjectSchema.entries,
 	// Liquid
-	LiquidBlock: () => liquidBlockObjectSchema,
-	LiquidRouter: () => liquidRouterObjectSchema,
-	LiquidJunction: () => v.object({}),
-	Conduit: () => conduitObjectSchema,
-	ArmoredConduit: () =>
-		v.object({
+	LiquidBlock: () => liquidBlockObjectSchema.entries,
+	LiquidRouter: () => liquidRouterObjectSchema.entries,
+	LiquidJunction: () => ({}),
+	Conduit: () => conduitObjectSchema.entries,
+	ArmoredConduit: () => ({
 			...conduitObjectSchema.entries,
 		}),
-	LiquidBridge: () =>
-		v.object({
+	LiquidBridge: () => ({
 			...itemBridgeObjectSchema.entries,
 		}),
-	Pump: () => pumpObjectSchema,
-	SolidPump: () => solidPumpObjectSchema,
-	Fracker: () => frackerObjectSchema,
+	Pump: () => pumpObjectSchema.entries,
+	SolidPump: () => solidPumpObjectSchema.entries,
+	Fracker: () => frackerObjectSchema.entries,
 	// Production
-	GenericCrafter: (context) => genericCrafterObjectSchema(context),
-	HeatCrafter: (context) => heatCrafterObjectSchema(context),
-	AttributeCrafter: (context) => attributeCrafterObjectSchema(context),
-	Separator: (context) => separatorObjectSchema(context),
-	Drill: () => drillObjectSchema,
-	BurstDrill: () => burstDrillObjectSchema,
-	BeamDrill: () => beamDrillObjectSchema,
-	WallCrafter: () => wallCrafterObjectSchema,
-	ItemIncinerator: () => itemIncineratorObjectSchema,
-	Incinerator: () => v.object({}),
-	HeatProducer: (context) => heatProducerObjectSchema(context),
+	GenericCrafter: (context) => genericCrafterObjectSchema(context).entries,
+	HeatCrafter: (context) => heatCrafterObjectSchema(context).entries,
+	AttributeCrafter: (context) => attributeCrafterObjectSchema(context).entries,
+	Separator: (context) => separatorObjectSchema(context).entries,
+	Drill: () => drillObjectSchema.entries,
+	BurstDrill: () => burstDrillObjectSchema.entries,
+	BeamDrill: () => beamDrillObjectSchema.entries,
+	WallCrafter: () => wallCrafterObjectSchema.entries,
+	ItemIncinerator: () => itemIncineratorObjectSchema.entries,
+	Incinerator: () => ({}),
+	HeatProducer: (context) => heatProducerObjectSchema(context).entries,
 	// Defense
-	Wall: () => wallObjectSchema,
-	Thruster: () =>
-		v.object({
+	Wall: () => wallObjectSchema.entries,
+	Thruster: () => ({
 			topTexture: TextureFieldSchema("@-top"),
 			...wallObjectSchema.entries,
 		}),
-	ShieldWall: () => shieldWallObjectSchema,
-	Door: () => doorObjectSchema,
-	AutoDoor: () => autoDoorObjectSchema,
-	ShockwaveTower: () => shockwaveTowerObjectSchema,
-	ShockMine: () => shockMineObjectSchema,
-	RegenProjector: () => regenProjectorObjectSchema,
-	Radar: () => radarObjectSchema,
-	OverdriveProjector: () => overdriveProjectorObjectSchema,
-	MendProjector: () => mendProjectorObjectSchema,
-	ForceProjector: () => forceProjectorObjectSchema,
-	DirectionalForceProjector: () => directionalForceProjectorObjectSchema,
-	BaseShield: () => baseShieldObjectSchema,
-	ConstructBlock: () => v.object({}),
+	ShieldWall: () => shieldWallObjectSchema.entries,
+	Door: () => doorObjectSchema.entries,
+	AutoDoor: () => autoDoorObjectSchema.entries,
+	ShockwaveTower: () => shockwaveTowerObjectSchema.entries,
+	ShockMine: () => shockMineObjectSchema.entries,
+	RegenProjector: () => regenProjectorObjectSchema.entries,
+	Radar: () => radarObjectSchema.entries,
+	OverdriveProjector: () => overdriveProjectorObjectSchema.entries,
+	MendProjector: () => mendProjectorObjectSchema.entries,
+	ForceProjector: () => forceProjectorObjectSchema.entries,
+	DirectionalForceProjector: () => directionalForceProjectorObjectSchema.entries,
+	BaseShield: () => baseShieldObjectSchema.entries,
+	ConstructBlock: () => ({}),
 	// Turrets
-	BaseTurret: () => baseTurretObjectSchema,
-	ReloadTurret: () => reloadTurretObjectSchema,
-	Turret: (context) => turretObjectSchema(context),
-	PowerTurret: (context) => powerTurretObjectSchema(context),
-	LaserTurret: (context) => laserTurretObjectSchema(context),
-	ItemTurret: (context) =>
-		v.object({ ammoTypes: v.record(ItemFieldSchema(context), BulletHjsonSchema(context)), ...turretObjectSchema(context).entries }),
-	LiquidTurret: (context) =>
-		v.object({
-			ammoTypes: v.record(LiquidFieldSchema(context), BulletHjsonSchema(context)),
-			extinguish: v.optional(v.boolean(), true),
-			...turretObjectSchema(context).entries,
-		}),
-	ContinuousTurret: (context) => continuousTurretObjectSchema(context),
-	ContinuousLiquidTurret: (context) => continuousLiquidTurretObjectSchema(context),
-	PayloadAmmoTurret: (context) =>
-		v.object({
-			ammoTypes: v.record(ContentFieldSchema(context), BulletHjsonSchema(context)),
-			...turretObjectSchema(context).entries,
-		}),
-	PointDefenseTurret: () => pointDefenseTurretObjectSchema,
-	TractorBeamTurret: () => tractorBeamTurretObjectSchema,
-	BuildTurret: () => buildTurretObjectSchema,
+	BaseTurret: () => baseTurretObjectSchema.entries,
+	ReloadTurret: () => reloadTurretObjectSchema.entries,
+	Turret: (context) => turretObjectSchema(context).entries,
+	PowerTurret: (context) => powerTurretObjectSchema(context).entries,
+	LaserTurret: (context) => laserTurretObjectSchema(context).entries,
+	ItemTurret: (context) => ({
+		ammoTypes: v.record(ItemFieldSchema(context), BulletHjsonSchema(context)),
+		...turretObjectSchema(context).entries,
+	}),
+	LiquidTurret: (context) => ({
+		ammoTypes: v.record(LiquidFieldSchema(context), BulletHjsonSchema(context)),
+		extinguish: v.optional(v.boolean(), true),
+		...turretObjectSchema(context).entries,
+	}),
+	ContinuousTurret: (context) => continuousTurretObjectSchema(context).entries,
+	ContinuousLiquidTurret: (context) => continuousLiquidTurretObjectSchema(context).entries,
+	PayloadAmmoTurret: (context) => ({
+		ammoTypes: v.record(ContentFieldSchema(context), BulletHjsonSchema(context)),
+		...turretObjectSchema(context).entries,
+	}),
+	PointDefenseTurret: () => pointDefenseTurretObjectSchema.entries,
+	TractorBeamTurret: () => tractorBeamTurretObjectSchema.entries,
+	BuildTurret: () => buildTurretObjectSchema.entries,
 	// Distribution
-	Conveyor: () => conveyorObjectSchema,
-	ArmoredConveyor: () =>
-		v.object({
-			...conveyorObjectSchema.entries,
-		}),
-	StackConveyor: () => stackConveyorObjectSchema,
-	Router: () => routerObjectSchema,
-	Junction: () => junctionObjectSchema,
-	Sorter: () => sorterObjectSchema,
-	OverflowGate: () => overflowGateObjectSchema,
-	ItemBridge: () => itemBridgeObjectSchema,
-	BufferedItemBridge: () => bufferedItemBridgeObjectSchema,
-	DirectionBridge: () => directionBridgeObjectSchema,
-	DirectionLiquidBridge: () => directionLiquidBridgeObjectSchema,
-	DuctBridge: () => ductBridgeObjectSchema,
-	Duct: () => ductObjectSchema,
-	DuctRouter: () => ductRouterObjectSchema,
-	StackRouter: () => stackRouterObjectSchema,
-	DuctJunction: () => ductJunctionObjectSchema,
-	OverflowDuct: () => overflowDuctObjectSchema,
-	MassDriver: () => massDriverObjectSchema,
-	DirectionalUnloader: () => directionalUnloaderObjectSchema,
+	Conveyor: () => conveyorObjectSchema.entries,
+	ArmoredConveyor: () => ({
+		...conveyorObjectSchema.entries,
+	}),
+	StackConveyor: () => stackConveyorObjectSchema.entries,
+	Router: () => routerObjectSchema.entries,
+	Junction: () => junctionObjectSchema.entries,
+	Sorter: () => sorterObjectSchema.entries,
+	OverflowGate: () => overflowGateObjectSchema.entries,
+	ItemBridge: () => itemBridgeObjectSchema.entries,
+	BufferedItemBridge: () => bufferedItemBridgeObjectSchema.entries,
+	DirectionBridge: () => directionBridgeObjectSchema.entries,
+	DirectionLiquidBridge: () => directionLiquidBridgeObjectSchema.entries,
+	DuctBridge: () => ductBridgeObjectSchema.entries,
+	Duct: () => ductObjectSchema.entries,
+	DuctRouter: () => ductRouterObjectSchema.entries,
+	StackRouter: () => stackRouterObjectSchema.entries,
+	DuctJunction: () => ductJunctionObjectSchema.entries,
+	OverflowDuct: () => overflowDuctObjectSchema.entries,
+	MassDriver: () => massDriverObjectSchema.entries,
+	DirectionalUnloader: () => directionalUnloaderObjectSchema.entries,
 	// Payload
-	PayloadBlock: () => payloadBlockObjectSchema,
-	PayloadConveyor: () => payloadConveyorObjectSchema,
-	PayloadRouter: () => payloadRouterObjectSchema,
-	PayloadVoid: () => payloadVoidObjectSchema,
-	PayloadSource: () =>
-		v.object({
-			...payloadBlockObjectSchema.entries,
-		}),
-	PayloadMassDriver: () => payloadMassDriverObjectSchema,
-	PayloadLoader: () => payloadLoaderObjectSchema,
-	PayloadUnloader: () => payloadUnloaderObjectSchema,
-	PayloadDeconstructor: () => payloadDeconstructorObjectSchema,
-	BlockProducer: () => blockProducerObjectSchema,
-	Constructor: () => constructorObjectSchema,
-	SingleBlockProducer: () => singleBlockProducerObjectSchema,
+	PayloadBlock: () => payloadBlockObjectSchema.entries,
+	PayloadConveyor: () => payloadConveyorObjectSchema.entries,
+	PayloadRouter: () => payloadRouterObjectSchema.entries,
+	PayloadVoid: () => payloadVoidObjectSchema.entries,
+	PayloadSource: () => ({
+		...payloadBlockObjectSchema.entries,
+	}),
+	PayloadMassDriver: () => payloadMassDriverObjectSchema.entries,
+	PayloadLoader: () => payloadLoaderObjectSchema.entries,
+	PayloadUnloader: () => payloadUnloaderObjectSchema.entries,
+	PayloadDeconstructor: () => payloadDeconstructorObjectSchema.entries,
+	BlockProducer: () => blockProducerObjectSchema.entries,
+	Constructor: () => constructorObjectSchema.entries,
+	SingleBlockProducer: () => singleBlockProducerObjectSchema.entries,
 	// Unit
-	UnitBlock: () => unitBlockObjectSchema,
-	UnitFactory: (context) => unitFactoryObjectSchema(context),
-	Reconstructor: (context) => reconstructorObjectSchema(context),
-	UnitAssemblerModule: () => unitAssemblerModuleObjectSchema,
-	UnitAssembler: () => unitAssemblerObjectSchema,
-	UnitCargoUnloadPoint: () => unitCargoUnloadPointObjectSchema,
-	UnitCargoLoader: () => unitCargoLoaderObjectSchema,
-	RepairTurret: () => repairTurretObjectSchema,
-	RepairTower: () => repairTowerObjectSchema,
-	DroneCenter: () => droneCenterObjectSchema,
+	UnitBlock: () => unitBlockObjectSchema.entries,
+	UnitFactory: (context) => unitFactoryObjectSchema(context).entries,
+	Reconstructor: (context) => reconstructorObjectSchema(context).entries,
+	UnitAssemblerModule: () => unitAssemblerModuleObjectSchema.entries,
+	UnitAssembler: () => unitAssemblerObjectSchema.entries,
+	UnitCargoUnloadPoint: () => unitCargoUnloadPointObjectSchema.entries,
+	UnitCargoLoader: () => unitCargoLoaderObjectSchema.entries,
+	RepairTurret: () => repairTurretObjectSchema.entries,
+	RepairTower: () => repairTowerObjectSchema.entries,
+	DroneCenter: () => droneCenterObjectSchema.entries,
 	// Logic
-	LogicBlock: () => logicBlockObjectSchema,
-	LogicDisplay: () => logicDisplayObjectSchema,
-	TileableLogicDisplay: () => tileableLogicDisplayObjectSchema,
-	SwitchBlock: () =>
-		v.object({
-			onTexture: TextureFieldSchema("@-on"),
-		}),
-	MessageBlock: () => messageBlockObjectSchema,
-	MemoryBlock: () => memoryBlockObjectSchema,
-	CanvasBlock: () => canvasBlockObjectSchema,
+	LogicBlock: () => logicBlockObjectSchema.entries,
+	LogicDisplay: () => logicDisplayObjectSchema.entries,
+	TileableLogicDisplay: () => tileableLogicDisplayObjectSchema.entries,
+	SwitchBlock: () => ({
+		onTexture: TextureFieldSchema("@-on"),
+	}),
+	MessageBlock: () => messageBlockObjectSchema.entries,
+	MemoryBlock: () => memoryBlockObjectSchema.entries,
+	CanvasBlock: () => canvasBlockObjectSchema.entries,
 	// Heat
-	HeatConductor: () => heatConductorObjectSchema,
+	HeatConductor: () => heatConductorObjectSchema.entries,
 	// Environment
-	Floor: () => floorObjectSchema,
-	OverlayFloor: () => overlayFloorObjectSchema,
-	OreBlock: () =>
-		v.object({
-			...overlayFloorObjectSchema.entries,
-		}),
-	ColoredFloor: () => coloredFloorObjectSchema,
-	CharacterOverlay: () =>
-		v.object({
-			...overlayFloorObjectSchema.entries,
-			color: v.pipe(
-				MindustryHexColorSchema,
-				metadata({
-					name: "editor.block-character-overlay.color",
-					description: "editor.block-character-overlay.color-description",
-					category: "editor.block-character-overlay.category.visual",
-				}),
-			),
-		}),
-	EmptyFloor: () => v.object({}),
-	AirBlock: () => v.object({ ...floorObjectSchema.entries }),
-	Prop: () => v.object({}),
-	SeaBush: () =>
-		v.object({
-			botTexture: TextureFieldSchema("@-bot"),
-			centerTexture: TextureFieldSchema("@-center"),
-			lobesMin: v.optional(v.number(), 7),
-			botAngle: v.optional(v.number(), 60),
-			origin: v.optional(v.number(), 0.1),
-			sclMin: v.optional(v.number(), 30),
-			sclMax: v.optional(v.number(), 50),
-			magMin: v.optional(v.number(), 5),
-			magMax: v.optional(v.number(), 15),
-			timeRange: v.optional(v.number(), 40),
-			spread: v.optional(v.number(), 0),
-		}),
-	Seaweed: () => v.object({}),
-	StaticWall: () => staticWallObjectSchema,
-	TiledWall: () =>
-		v.object({
-			...staticWallObjectSchema.entries,
-			maxSize: v.optional(v.pipe(v.number(), v.integer()), 3),
-		}),
-	StaticTree: () =>
-		v.object({
-			...staticWallObjectSchema.entries,
-		}),
-	ColoredWall: () => coloredWallObjectSchema,
-	TreeBlock: () => treeBlockObjectSchema,
-	TallBlock: () => tallBlockObjectSchema,
-	RemoveWall: () => v.object({}),
-	Cliff: () => cliffObjectSchema,
+	Floor: () => floorObjectSchema.entries,
+	OverlayFloor: () => overlayFloorObjectSchema.entries,
+	OreBlock: () => ({
+		...overlayFloorObjectSchema.entries,
+	}),
+	ColoredFloor: () => coloredFloorObjectSchema.entries,
+	CharacterOverlay: () => ({
+		...overlayFloorObjectSchema.entries,
+		color: v.pipe(
+			MindustryHexColorSchema,
+			metadata({
+				name: "editor.block-character-overlay.color",
+				description: "editor.block-character-overlay.color-description",
+				category: "editor.block-character-overlay.category.visual",
+			}),
+		),
+	}),
+	EmptyFloor: () => ({}),
+	AirBlock: () => ({ ...floorObjectSchema.entries }),
+	Prop: () => ({}),
+	SeaBush: () => ({
+		botTexture: TextureFieldSchema("@-bot"),
+		centerTexture: TextureFieldSchema("@-center"),
+		lobesMin: v.optional(v.number(), 7),
+		botAngle: v.optional(v.number(), 60),
+		origin: v.optional(v.number(), 0.1),
+		sclMin: v.optional(v.number(), 30),
+		sclMax: v.optional(v.number(), 50),
+		magMin: v.optional(v.number(), 5),
+		magMax: v.optional(v.number(), 15),
+		timeRange: v.optional(v.number(), 40),
+		spread: v.optional(v.number(), 0),
+	}),
+	Seaweed: () => ({}),
+	StaticWall: () => staticWallObjectSchema.entries,
+	TiledWall: () => ({
+		...staticWallObjectSchema.entries,
+		maxSize: v.optional(v.pipe(v.number(), v.integer()), 3),
+	}),
+	StaticTree: () => ({
+		...staticWallObjectSchema.entries,
+	}),
+	ColoredWall: () => coloredWallObjectSchema.entries,
+	TreeBlock: () => treeBlockObjectSchema.entries,
+	TallBlock: () => tallBlockObjectSchema.entries,
+	RemoveWall: () => ({}),
+	Cliff: () => cliffObjectSchema.entries,
 	// Campaign
-	LaunchPad: () => launchPadObjectSchema,
-	LandingPad: () => landingPadObjectSchema,
-	Accelerator: () => acceleratorObjectSchema,
+	LaunchPad: () => launchPadObjectSchema.entries,
+	LandingPad: () => landingPadObjectSchema.entries,
+	Accelerator: () => acceleratorObjectSchema.entries,
 	// Sandbox
-	ItemSource: () => itemSourceObjectSchema,
-	ItemVoid: () => v.object({}),
-	LiquidSource: () =>
-		v.object({
-			crossTexture: TextureFieldSchema("@-cross"),
-		}),
-	LiquidVoid: () => v.object({}),
-	ShallowLiquid: (context) =>
-		v.object({
-			...floorObjectSchema.entries,
-			liquidBase: v.nullish(BlockFieldSchema(context)),
-			floorBase: v.nullish(BlockFieldSchema(context)),
-			liquidOpacity: v.optional(v.number(), 0.35),
-		}),
-	SteamVent: (context) =>
-		v.object({
-			...floorObjectSchema.entries,
-			parent: v.nullish(BlockFieldSchema(context)),
-			effect: v.nullish(EffectFieldSchema(context)),
-			effectSpacing: v.optional(v.number(), 15),
-			effectColor: v.optional(MindustryHexColorSchema),
-		}),
-	TiledFloor: () =>
-		v.object({
-			...floorObjectSchema.entries,
-			maxSize: v.optional(v.pipe(v.number(), v.integer()), 3),
-		}),
-});
-
-export const BlockFieldSchema: SchemaFn = CachedSchema((context) => {
-	return v.pipe(
-		v.string(),
-		v.transform((v) => v.replaceAll(context.name + "-", "")),
-		v.picklist(context.blocks.map((block) => block.name.replaceAll(context.name + "-", ""))),
-	);
-});
-
-export const BlockHjsonSchema = createClassHjsonSchema({
-	classMap: classSchemaMap,
+	ItemSource: () => itemSourceObjectSchema.entries,
+	ItemVoid: () => ({}),
+	LiquidSource: () => ({
+		crossTexture: TextureFieldSchema("@-cross"),
+	}),
+	LiquidVoid: () => ({}),
+	ShallowLiquid: (context) => ({
+		...floorObjectSchema.entries,
+		liquidBase: v.nullish(BlockFieldSchema(context)),
+		floorBase: v.nullish(BlockFieldSchema(context)),
+		liquidOpacity: v.optional(v.number(), 0.35),
+	}),
+	SteamVent: (context) => ({
+		...floorObjectSchema.entries,
+		parent: v.nullish(BlockFieldSchema(context)),
+		effect: v.nullish(EffectFieldSchema(context)),
+		effectSpacing: v.optional(v.number(), 15),
+		effectColor: v.optional(MindustryHexColorSchema),
+	}),
+	TiledFloor: () => ({
+		...floorObjectSchema.entries,
+		maxSize: v.optional(v.pipe(v.number(), v.integer()), 3),
+	}),
+}, {
 	baseSchema: blockObjectSchema,
 	type: "block",
 	extra: (context) => ({
@@ -476,4 +448,12 @@ export const BlockHjsonSchema = createClassHjsonSchema({
 			}),
 		),
 	}),
+}).schema;
+
+export const BlockFieldSchema: SchemaFn = CachedSchema((context) => {
+	return v.pipe(
+		v.string(),
+		v.transform((v) => v.replaceAll(context.name + "-", "")),
+		v.picklist(context.blocks.map((block) => block.name.replaceAll(context.name + "-", ""))),
+	);
 });

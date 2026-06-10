@@ -1,6 +1,7 @@
 import * as v from "valibot";
 import { metadata } from "./utils";
-import { ClassMap, classSchema, createClassHjsonSchema } from "./class";
+import type { SchemaFn } from "./utils";
+import { ClassMap, classSchema } from "./class";
 
 export const shootPatternTypes = [
 	"ShootPattern",
@@ -93,23 +94,19 @@ export const shootSummonObjectSchema = v.object({
 	spread: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.shoot-pattern.spread" })),
 });
 
-const classSchemaMap = new ClassMap<ShootPatternType>({
-	ShootAlternate: (_context) => shootAlternateObjectSchema,
-	ShootBarrel: (_context) => shootBarrelObjectSchema,
-	ShootHelix: (_context) => shootHelixObjectSchema,
-	ShootMulti: (context) =>
-		v.object({
-			source: ShootPatternHjsonSchema(context),
-			dest: v.array(ShootPatternHjsonSchema(context)),
-		}),
-	ShootSine: (_context) => shootSineObjectSchema,
-	ShootSpread: (_context) => shootSpreadObjectSchema,
-	ShootSummon: (_context) => shootSummonObjectSchema,
-	ShootPattern: (_context) => shootPatternBaseObjectSchema,
-});
-
-export const ShootPatternHjsonSchema = createClassHjsonSchema({
-	classMap: classSchemaMap,
+export const ShootPatternHjsonSchema: SchemaFn = new ClassMap<ShootPatternType>({
+	ShootAlternate: (_context) => shootAlternateObjectSchema.entries,
+	ShootBarrel: (_context) => shootBarrelObjectSchema.entries,
+	ShootHelix: (_context) => shootHelixObjectSchema.entries,
+	ShootMulti: (context) => ({
+		source: ShootPatternHjsonSchema(context),
+		dest: v.array(ShootPatternHjsonSchema(context)),
+	}),
+	ShootSine: (_context) => shootSineObjectSchema.entries,
+	ShootSpread: (_context) => shootSpreadObjectSchema.entries,
+	ShootSummon: (_context) => shootSummonObjectSchema.entries,
+	ShootPattern: (_context) => shootPatternBaseObjectSchema.entries,
+}, {
 	baseSchema: shootPatternBaseObjectSchema.entries,
 	type: "shoot-pattern",
-});
+}).schema;
