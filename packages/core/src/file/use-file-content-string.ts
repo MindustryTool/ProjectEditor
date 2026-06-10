@@ -8,7 +8,7 @@ export type UseFileStringResult = UseFileResult<string>;
 export function useFileString(path: string): {
 	data: string | null;
 	isLoading: boolean;
-	write: (content: string | ((prev: string | null) => string)) => void;
+	write: (content: string | ((prev: string | null) => string)) => string;
 } {
 	const result = useFile(path);
 	const projectId = useProjectSession((s) => s.projectContext?.project.id);
@@ -37,7 +37,9 @@ export function useFileString(path: string): {
 				content = contentOrUpdater;
 			}
 			const encoded = new TextEncoder().encode(content).buffer;
-			resultWrite(encoded);
+			resultWrite(encoded)
+            
+            return content;
 		},
 		[resultWrite, projectId, path],
 	);

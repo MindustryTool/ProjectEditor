@@ -128,6 +128,7 @@ function ArrayElement({
 				jsonPath={entryJsonPath}
 				getRenderer={getRenderer}
 				defaultValue={defaultValue}
+                nested
 			/>
 			<Button size="sm" className="text-destructive w-full" variant="destructive" onClick={handleRemove}>
 				<Trash2 />

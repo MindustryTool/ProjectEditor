@@ -174,14 +174,14 @@ const consumeLiquidsBoostSchema = (context: ProjectContents) =>
 	v.pipe(
 		v.lazy((input) => {
 			if (Array.isArray(input)) {
-				return v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ name: "array" })), ["all"]);
+				return v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ name: "array" })), []);
 			}
 			return v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ name: "multiple" })), { liquids: [] });
 		}),
 		metadata({
 			type: "variant",
 			options: [
-				v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ name: "array" })), ["all"]),
+				v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ name: "array" })), []),
 				v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ name: "multiple" })), { liquids: [] }),
 			],
 		}),

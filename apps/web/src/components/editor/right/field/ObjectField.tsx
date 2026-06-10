@@ -8,6 +8,7 @@ import { Button } from "#/components/ui/button";
 import { SchemaLabel } from "#/components/editor/right/field/SchemaLabel";
 import { FieldCategory } from "#/components/editor/right/field/FieldCategory";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
+import { cn } from "#/lib/utils";
 
 export const ObjectField = React.memo(function ObjectField({
 	name,
@@ -17,10 +18,13 @@ export const ObjectField = React.memo(function ObjectField({
 	entrySchema,
 	jsonPath,
 	getRenderer,
+	nested,
 }: SchemaRendererProps) {
 	const resolvedValue = useMemo(() => (value && typeof value === "object" ? value : {}), [value]);
 
 	const entries = getSchemaEntries(resolveSchema(entrySchema, resolvedValue));
+
+    console.log(nested)
 
 	return (
 		<Collapsible id={jsonPath}>
@@ -31,7 +35,11 @@ export const ObjectField = React.memo(function ObjectField({
 				</Button>
 			</CollapsibleTrigger>
 			<CollapsibleContent>
-				<div className="border-border grid gap-6 mt-2 p-2 border rounded-md">
+				<div
+					className={cn("grid gap-6 mt-2", {
+						"border-border p-2 border rounded-md bg-muted/50": !nested,
+					})}
+				>
 					{buildCategoryObjectFields(entries, resolvedValue, path, onChange, jsonPath, getRenderer)}
 				</div>
 			</CollapsibleContent>

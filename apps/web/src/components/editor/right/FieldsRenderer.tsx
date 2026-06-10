@@ -4,7 +4,7 @@ import { useFileString } from "@project/core";
 import type { HjsonNode } from "@project/hjson";
 import { HJSON } from "@project/hjson";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
-import React, { Suspense, useCallback, useEffect, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import {
 	resolveSchema,
 	detectSchemaType,
@@ -35,10 +35,11 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	const [render, setRender] = useState(30);
 	const [filter, setFilter] = useLocalStorage("property-filter", "");
 	const { t } = useTranslation();
+	const formatRef = useRef<NodeJS.Timeout>(null);
 
 	const onChange = useCallback(
 		(jsonPath: string, updater: (node: HjsonNode, original: string, key: string | number, root: HjsonNode) => string) => {
-			write((content: string | null) => {
+			const result = write((content: string | null) => {
 				if (content === null) {
 					throw new Error("Attempting to write into unloaded file");
 				}
@@ -119,6 +120,18 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 					return updater(parent, content, key, root);
 				}
 			});
+
+			if (formatRef.current) {
+				clearTimeout(formatRef.current);
+				formatRef.current = null;
+			}
+
+			formatRef.current = setTimeout(() => {
+				const formatted = HJSON.format(result);
+				if (formatted !== result) {
+					write(formatted);
+				}
+			}, 3000);
 		},
 		[write],
 	);

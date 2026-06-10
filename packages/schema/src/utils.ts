@@ -267,7 +267,7 @@ export function metadata<T>(meta: SchemaMetadata): v.MetadataAction<T, SchemaMet
 	return v.metadata(meta);
 }
 
-export function getSchemaMetadata(schema: AnySchema): SchemaMetadata | null {
+export function getSchemaMetadata(schema: AnySchema, pipe: boolean = true): SchemaMetadata | null {
 	const result: SchemaMetadata = {};
 	const visited = new WeakSet<object>();
 
@@ -288,7 +288,7 @@ export function getSchemaMetadata(schema: AnySchema): SchemaMetadata | null {
 			Object.assign(result, obj.metadata);
 		}
 
-		if (obj.pipe && Array.isArray(obj.pipe)) {
+		if (obj.pipe && Array.isArray(obj.pipe) && pipe) {
 			for (const item of obj.pipe) {
 				walk(item);
 			}

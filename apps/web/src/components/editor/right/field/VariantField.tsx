@@ -17,16 +17,14 @@ export const VariantField = React.memo(function VariantField({
 	path,
 	getRenderer,
 }: SchemaRendererProps) {
-	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
+	const fieldMetadata = useMemo(() => getSchemaMetadata(entrySchema, false), [entrySchema]);
 
-    console.log(metadata);
-
-	if (metadata!.type !== "variant") {
+	if (fieldMetadata!.type !== "variant") {
 		throw new Error("VariantField only works with variant schemas");
 	}
 
-	if (metadata?.options) {
-		const options = metadata.options
+	if (fieldMetadata?.options) {
+		const options = fieldMetadata.options
 			.map((option) => ({ schema: option, metadata: getSchemaMetadata(option) }))
 			.filter(({ metadata }) => metadata && metadata.name)
 			.map(({ schema, metadata }) => {
@@ -53,29 +51,29 @@ export const VariantField = React.memo(function VariantField({
 
 		if (options.length === 0) {
 			return (
-				<Field jsonPath={jsonPath} metadata={metadata}>
+				<Field jsonPath={jsonPath} metadata={fieldMetadata}>
 					<FieldLabel>
-						<SchemaLabel name={name} metadata={metadata} />
+						<SchemaLabel name={name} metadata={fieldMetadata} />
 					</FieldLabel>
-					<SchemaDescription metadata={metadata} />
+					<SchemaDescription metadata={fieldMetadata} />
 					{name} has no options
 				</Field>
 			);
 		}
 
 		if (options.length === 1) {
-			const { metadata, type, defaultValue, typeSchema, Renderer } = options[0]!;
+			const { type, defaultValue, typeSchema, Renderer } = options[0]!;
 
 			if (!Renderer) {
 				return <div>Renderer renderer not found for type {type}</div>;
 			}
 
 			return (
-				<Field jsonPath={jsonPath} metadata={metadata}>
+				<Field jsonPath={jsonPath} metadata={fieldMetadata}>
 					<FieldLabel>
-						<SchemaLabel name={name} metadata={metadata} />
+						<SchemaLabel name={name} metadata={fieldMetadata} />
 					</FieldLabel>
-					<SchemaDescription metadata={metadata} />
+					<SchemaDescription metadata={fieldMetadata} />
 					<Renderer
 						path={path}
 						name={name}
@@ -109,9 +107,9 @@ export const VariantField = React.memo(function VariantField({
 			const defaultTab = matched ?? name1;
 
 			return (
-				<Field jsonPath={jsonPath} metadata={metadata}>
+				<Field jsonPath={jsonPath} metadata={fieldMetadata}>
 					<Tabs
-						className="w-full"
+						className="w-full p-2 border rounded-md bg-muted"
 						defaultValue={defaultTab}
 						onValueChange={(tab) => {
 							if (tab === name1) {
@@ -122,12 +120,16 @@ export const VariantField = React.memo(function VariantField({
 						}}
 					>
 						<FieldLabel>
-							<SchemaLabel name={name} metadata={metadata} />
+							<SchemaLabel name={name} metadata={fieldMetadata} />
 						</FieldLabel>
-						<SchemaDescription metadata={metadata} />
-						<TabsList className="w-full" defaultValue={defaultTab}>
-							<TabsTrigger value={name1}>{name1}</TabsTrigger>
-							<TabsTrigger value={name2}>{name2}</TabsTrigger>
+						<SchemaDescription metadata={fieldMetadata} />
+						<TabsList className="w-full border p-0 overflow-hidden" defaultValue={defaultTab}>
+							<TabsTrigger className="border-none h-full rounded-none" value={name1}>
+								{name1}
+							</TabsTrigger>
+							<TabsTrigger className="border-none h-full rounded-none" value={name2}>
+								{name2}
+							</TabsTrigger>
 						</TabsList>
 						<TabsContent value={name1}>
 							<Renderer1
@@ -139,6 +141,7 @@ export const VariantField = React.memo(function VariantField({
 								jsonPath={jsonPath}
 								getRenderer={getRenderer}
 								defaultValue={defaultValue1}
+								nested
 							/>
 						</TabsContent>
 						<TabsContent value={name2}>
@@ -151,6 +154,7 @@ export const VariantField = React.memo(function VariantField({
 								jsonPath={jsonPath}
 								getRenderer={getRenderer}
 								defaultValue={defaultValue2}
+								nested
 							/>
 						</TabsContent>
 					</Tabs>
@@ -172,7 +176,11 @@ export const VariantField = React.memo(function VariantField({
 		}
 
 		return (
-			<Field jsonPath={jsonPath} metadata={metadata}>
+			<Field jsonPath={jsonPath} metadata={fieldMetadata} className="w-full p-2 border rounded-md bg-muted">
+				<FieldLabel>
+					<SchemaLabel name={name} metadata={fieldMetadata} />
+				</FieldLabel>
+				<SchemaDescription metadata={fieldMetadata} />
 				<Select
 					defaultValue={defaultTab}
 					onValueChange={(tab) => {
@@ -186,10 +194,6 @@ export const VariantField = React.memo(function VariantField({
 						}
 					}}
 				>
-					<FieldLabel>
-						<SchemaLabel name={name} metadata={metadata} />
-					</FieldLabel>
-					<SchemaDescription metadata={metadata} />
 					<SelectTrigger className="h-7 w-full">
 						<SelectValue />
 					</SelectTrigger>
@@ -210,6 +214,7 @@ export const VariantField = React.memo(function VariantField({
 					jsonPath={jsonPath}
 					getRenderer={getRenderer}
 					defaultValue={selecting.defaultValue}
+                    nested
 				/>
 			</Field>
 		);
