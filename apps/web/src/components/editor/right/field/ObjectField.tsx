@@ -1,6 +1,6 @@
 import { FieldControl, FieldLabel } from "#/components/editor/right/field/Field";
 import { getSchemaMetadata, getSchemaEntries, resolveSchema, detectSchemaType, getDefaults } from "@project/schema";
-import React from "react";
+import React, { useMemo } from "react";
 import type { AnySchema } from "@project/schema";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
@@ -18,14 +18,12 @@ export const ObjectField = React.memo(function ObjectField({
 	jsonPath,
 	getRenderer,
 }: SchemaRendererProps) {
-	if (typeof value !== "object" || value === null) {
-		return null;
-	}
+	const resolvedValue = useMemo(() => (value && typeof value === "object" ? value : {}), [value]);
 
-	const entries = getSchemaEntries(resolveSchema(entrySchema, value));
+	const entries = getSchemaEntries(resolveSchema(entrySchema, resolvedValue));
 
 	return (
-		<Collapsible>
+		<Collapsible id={jsonPath}>
 			<CollapsibleTrigger asChild>
 				<Button className="flex justify-between items-center w-full">
 					<SchemaLabel name={name} metadata={getSchemaMetadata(entrySchema)} />
@@ -34,7 +32,7 @@ export const ObjectField = React.memo(function ObjectField({
 			</CollapsibleTrigger>
 			<CollapsibleContent>
 				<div className="border-border grid gap-6 mt-2 p-2 border rounded-md">
-					{buildCategoryObjectFields(entries, value, path, onChange, jsonPath, getRenderer)}
+					{buildCategoryObjectFields(entries, resolvedValue, path, onChange, jsonPath, getRenderer)}
 				</div>
 			</CollapsibleContent>
 		</Collapsible>

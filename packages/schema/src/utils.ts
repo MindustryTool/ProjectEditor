@@ -25,8 +25,8 @@ export const types = [
 	"select",
 	"texture",
 	"textures",
-	"item-requirement",
-	"union",
+	"item-stack",
+	"variant",
 	"never",
 ] as const;
 
@@ -88,7 +88,6 @@ function getSchemaType(schema: AnySchema, value: unknown): { type: Type; schema:
 	if (s.type === "array") return { type: "array", schema };
 	if (s.type === "picklist") return { type: "picklist", schema };
 	if (s.type === "never") return { type: "never", schema };
-	if (s.type === "union") return { type: "union", schema };
 
 	if (s.kind === "schema") {
 		console.warn({ unknownType: s.type });
@@ -132,7 +131,23 @@ export function getDefaults(schema: AnySchema, value: unknown): unknown {
 		return getDefaults(s.getter(value), value);
 	}
 
-	return v.getDefaults(schema);
+	const result = v.getDefaults(schema);
+
+	if (result === undefined) {
+		schema = unwrapSchema(schema);
+
+		if (schema.type === "object") {
+			return {};
+		}
+
+		if (schema.type === "array") {
+			return [];
+		}
+
+		return "";
+	}
+
+	return result;
 }
 
 export function resolveSchema(schema: AnySchema, value: unknown): AnySchema {
@@ -159,7 +174,7 @@ export function resolveSchema(schema: AnySchema, value: unknown): AnySchema {
 				continue;
 			}
 
-			if (inner.type === "object" || inner.type === "array" || inner.type === "union") {
+			if (inner.type === "object" || inner.type === "array") {
 				return inner;
 			}
 
@@ -245,6 +260,7 @@ export type SchemaMetadata = {
 		value: unknown;
 	};
 	disabled?: boolean;
+	options?: AnySchema[];
 };
 
 export function metadata<T>(meta: SchemaMetadata): v.MetadataAction<T, SchemaMetadata> {
@@ -278,7 +294,7 @@ export function getSchemaMetadata(schema: AnySchema): SchemaMetadata | null {
 			}
 		}
 
-		if (obj.type === "array" || obj.type === "object" || obj.type === "union") {
+		if (obj.type === "array" || obj.type === "object") {
 			return;
 		}
 

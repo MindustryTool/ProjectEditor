@@ -34,7 +34,8 @@ export const ItemRequirementField = React.memo(function ItemRequirementField({
 		findContent,
 		contents: { items },
 	} = useProjectContext();
-	const addedReq = requirements.map((requirement: string) => requirement.split("/")[0]!);
+
+	const addedReq = requirements.map((requirement: string) => requirement?.split("/")[0] || "");
 
 	function handleRemoveReq(index: number) {
 		onChange(jsonPath, (node, original) => node.parent!.arrayNode().removeElement(original, index));
@@ -51,8 +52,13 @@ export const ItemRequirementField = React.memo(function ItemRequirementField({
 			</FieldLabel>
 			<SchemaDescription metadata={metadata} />
 			{requirements.map((requirement: string, index: number) => {
-				const parts = requirement.split("/");
-				const itemName = parts[0]!;
+				const parts = requirement?.split("/") || [];
+            
+                if (parts.length !== 2) {
+                    return null;
+                }
+
+				const itemName = parts[0] || "";
 				const reqNumber = Number(parts[1]);
 
 				const selectedItem = findContent(itemName, [items]);

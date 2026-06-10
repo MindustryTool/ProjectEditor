@@ -97,10 +97,42 @@ const consumeItemExplodeSchema = (context: ProjectContents) =>
 	});
 
 const consumeItemsSchema = (context: ProjectContents) =>
-	v.union([v.array(ItemStackSchema(context)), ItemStackSchema(context), v.object({ items: v.array(ItemStackSchema(context)) })]);
+	v.pipe(
+		v.lazy((input) => {
+			if (Array.isArray(input)) {
+				return v.optional(v.pipe(v.array(ItemStackSchema(context)), metadata({ name: "array" })), []);
+			}
+			if (typeof input === "string") {
+				return v.optional(v.pipe(ItemStackSchema(context), metadata({ name: "single" })), "");
+			}
+			return v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ name: "multiple" })), { items: [] });
+		}),
+		metadata({
+			type: "variant",
+			options: [
+				v.optional(v.pipe(v.array(ItemStackSchema(context)), metadata({ name: "array" })), []),
+				v.optional(v.pipe(ItemStackSchema(context), metadata({ name: "single" })), ""),
+				v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ name: "multiple" })), { items: [] }),
+			],
+		}),
+	);
 
 const consumeItemBoostSchema = (context: ProjectContents) =>
-	v.union([v.array(ItemStackSchema(context)), v.object({ items: v.array(ItemStackSchema(context)) })]);
+	v.pipe(
+		v.lazy((input) => {
+			if (Array.isArray(input)) {
+				return v.optional(v.pipe(v.array(ItemStackSchema(context)), metadata({ name: "array" })), []);
+			}
+			return v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ name: "multiple" })), { items: [] });
+		}),
+		metadata({
+			type: "variant",
+			options: [
+				v.optional(v.pipe(v.array(ItemStackSchema(context)), metadata({ name: "array" })), []),
+				v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ name: "multiple" })), { items: [] }),
+			],
+		}),
+	);
 
 const consumeLiquidBaseSchema = v.object({ ...consumeSchema.entries, amount: v.number() });
 
@@ -114,7 +146,21 @@ const comsumeLiquidSchema = (context: ProjectContents) =>
 	v.object({ ...consumeLiquidBaseSchema.entries, liquid: LiquidFieldSchema(context) });
 
 const consumeLiquidsSchema = (context: ProjectContents) =>
-	v.union([v.array(LiquidStackSchema(context)), v.object({ liquids: v.array(LiquidStackSchema(context)) })]);
+	v.pipe(
+		v.lazy((input) => {
+			if (Array.isArray(input)) {
+				return v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ name: "array" })), []);
+			}
+			return v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ name: "multiple" })), { liquids: [] });
+		}),
+		metadata({
+			type: "variant",
+			options: [
+				v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ name: "array" })), []),
+				v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ name: "multiple" })), { liquids: [] }),
+			],
+		}),
+	);
 
 const consumeCoolantSchema = v.object({
 	...consumeLiquidFilterSchema.entries,
@@ -125,32 +171,85 @@ const consumeCoolantSchema = v.object({
 });
 
 const consumeLiquidsBoostSchema = (context: ProjectContents) =>
-	v.union([v.array(LiquidStackSchema(context)), v.object({ liquids: v.array(LiquidStackSchema(context)) })]);
+	v.pipe(
+		v.lazy((input) => {
+			if (Array.isArray(input)) {
+				return v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ name: "array" })), ["all"]);
+			}
+			return v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ name: "multiple" })), { liquids: [] });
+		}),
+		metadata({
+			type: "variant",
+			options: [
+				v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ name: "array" })), ["all"]),
+				v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ name: "multiple" })), { liquids: [] }),
+			],
+		}),
+	);
 
-const consumePowerSchema = v.union([
-	v.number(),
-	v.object({
-		...consumeSchema.entries,
-		usage: v.optional(v.number(), 0),
-		capacity: v.optional(v.number(), 0),
-		buffered: v.optional(v.boolean(), false),
+const consumePowerSchema = v.pipe(
+	v.lazy((input) => {
+		if (typeof input === "number") {
+			return v.pipe(v.number(), metadata({ name: "single" }));
+		}
+		return v.pipe(
+			v.object({
+				...consumeSchema.entries,
+				usage: v.optional(v.number(), 0),
+				capacity: v.optional(v.number(), 0),
+				buffered: v.optional(v.boolean(), false),
+			}),
+			metadata({ name: "buffered" }),
+		);
 	}),
-]);
+	metadata({
+		type: "variant",
+		options: [
+			v.pipe(v.number(), metadata({ name: "single" })),
+			v.pipe(
+				v.object({
+					...consumeSchema.entries,
+					usage: v.optional(v.number(), 0),
+					capacity: v.optional(v.number(), 0),
+					buffered: v.optional(v.boolean(), false),
+				}),
+				metadata({ name: "buffered" }),
+			),
+		],
+	}),
+);
 
 export const ConsumesHjsonSchema = (context: ProjectContents) =>
 	v.pipe(
 		v.partial(
 			v.object({
 				remove: v.optional(
-					v.union([
-						v.picklist([...consumeTypes, "all"]),
-						v.pipe(
-							v.array(v.picklist([...consumeTypes, "all"])),
-							metadata({
-								name: "remove",
-							}),
-						),
-					]),
+					v.pipe(
+						v.lazy((input) => {
+							if (typeof input === "string") {
+								return v.picklist([...consumeTypes, "all"]);
+							}
+
+							return v.pipe(
+								v.array(v.picklist([...consumeTypes, "all"])),
+								metadata({
+									name: "remove",
+								}),
+							);
+						}),
+						metadata({
+							type: "variant",
+							options: [
+								v.picklist([...consumeTypes, "all"]),
+								v.pipe(
+									v.array(v.picklist([...consumeTypes, "all"])),
+									metadata({
+										name: "remove",
+									}),
+								),
+							],
+						}),
+					),
 				),
 				item: ItemFieldSchema(context),
 				itemCharged: consumeItemChargedSchema(context),

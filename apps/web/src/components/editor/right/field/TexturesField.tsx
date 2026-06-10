@@ -13,6 +13,7 @@ export const TexturesField = React.memo(function TexturesField({ name, path, ent
 	const [render, setRender] = useState(3);
 	const metadata = getSchemaMetadata(entrySchema);
 	const filename = path.split("/").pop();
+    
 	if (!filename) {
 		throw new Error("Texture field path must end with a file name");
 	}

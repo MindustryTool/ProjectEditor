@@ -7,6 +7,7 @@ import React, { useCallback, useMemo } from "react";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
+import { EMPTY_ARRAY } from "#/lib/utils";
 
 export const ArrayField = React.memo(function ArrayField({
 	path,
@@ -16,8 +17,9 @@ export const ArrayField = React.memo(function ArrayField({
 	entrySchema,
 	jsonPath,
 	getRenderer,
+	defaultValue,
 }: SchemaRendererProps) {
-	const arrayValue = Array.isArray(value) ? value : undefined;
+	const arrayValue: unknown[] = Array.isArray(value) ? value : Array.isArray(defaultValue) ? defaultValue : EMPTY_ARRAY;
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
 	const handleAdd = useCallback(() => {
@@ -48,10 +50,6 @@ export const ArrayField = React.memo(function ArrayField({
 			return parent.get(key).arrayNode().insertElement(original, arrayValue.length, defaultValue);
 		});
 	}, [arrayValue, entrySchema, onChange, jsonPath]);
-
-	if (!arrayValue) {
-		return null;
-	}
 
 	return (
 		<Field jsonPath={jsonPath} metadata={metadata}>

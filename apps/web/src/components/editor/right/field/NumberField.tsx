@@ -23,7 +23,7 @@ export const NumberField = React.memo(function NumberField({ name, value, onChan
 				return;
 			}
 
-			onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, String(newVal)));
+			onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, newVal));
 		},
 		[onChange, jsonPath, entrySchema, defaultValue],
 	);

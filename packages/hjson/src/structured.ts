@@ -635,7 +635,6 @@ export class HjsonArrayNode extends HjsonNode {
 		const commaEnd = start + 1;
 		return original.slice(0, commaEnd) + original.slice(el!.end.index);
 	}
-
 }
 
 export class HjsonValueNode<T = unknown> extends HjsonNode {
@@ -719,8 +718,8 @@ export class HjsonValueNode<T = unknown> extends HjsonNode {
 		return this.#end;
 	}
 
-	patchValue(original: string, newValue: unknown): string {
-		return original.slice(0, this.#start.index) + serializeValue(newValue) + original.slice(this.#end.index);
+	patchValue(_original: string, _key: string | number, _newValue: unknown): string {
+		throw new Error("Cannot patch value node");
 	}
 
 	detectIndent(): string {
@@ -734,10 +733,10 @@ export class HjsonMissingNode extends HjsonNode {
 	private constructor(parent?: HjsonNode) {
 		super(parent);
 	}
-    
-    patchValue(_original: string, _key: string | number, _newValue: unknown): string {
-        throw new Error("Cannot patch missing node");
-    }
+
+	patchValue(_original: string, _key: string | number, _newValue: unknown): string {
+		throw new Error("Cannot patch missing node");
+	}
 
 	isObject(): this is HjsonObjectNode {
 		return false;

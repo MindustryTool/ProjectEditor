@@ -1,5 +1,5 @@
 import { FileIcon } from "#/components/editor/FileIcon";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
 import { usePath } from "#/hooks/use-path";
 import { levenshtein } from "#/lib/utils";
@@ -66,14 +66,14 @@ function Content() {
 					levenshtein(treeSnapshot.getEntries(), (entry) => entry.path, filter)
 						.slice(0, cursor)
 						.map((item) => (
-							<div
+							<DialogClose
 								key={item.path}
 								className="w-full rounded-md border py-2 px-1 flex gap-2 items-center cursor-pointer bg-accent"
 								onClick={() => setPath(item.path)}
 							>
 								<FileIcon path={item.path} />
 								{item.path}
-							</div>
+							</DialogClose>
 						))}
 			</div>
 		</>

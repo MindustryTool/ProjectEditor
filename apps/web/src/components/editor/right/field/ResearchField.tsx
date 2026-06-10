@@ -111,7 +111,8 @@ const ResearchRequirementList = React.memo(function ResearchRequirementList({
 		findContent,
 		contents: { items },
 	} = useProjectContext();
-	const addedReq = requirements.map((requirement: string) => requirement.split("/")[0]!);
+
+	const addedReq = requirements.map((requirement: string) => requirement?.split("/")[0] || "");
 
 	function handleRemoveReq(index: number) {
 		onChange(requirements.filter((_: unknown, i: number) => i !== index));
@@ -122,7 +123,12 @@ const ResearchRequirementList = React.memo(function ResearchRequirementList({
 	}
 
 	return requirements.map((requirement: string, index: number) => {
-		const parts = requirement.split("/");
+		const parts = requirement?.split("/") || [];
+        
+        if (parts.length !== 2) {
+            return null;
+        }
+
 		const itemName = parts[0]!;
 		const reqNumber = Number(parts[1]);
 

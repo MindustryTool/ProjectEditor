@@ -7,22 +7,45 @@ import { ItemStackSchema } from "./item-stack";
 
 export const ResearchSchema: SchemaFn = CachedSchema((context) => {
 	return v.pipe(
-		v.lazy((input) => {
-			if (typeof input === "string") {
-				return ContentNameSchema;
-			}
-
-			return v.object({
-				parent: v.optional(ContentNameSchema),
-				requirements: v.optional(v.array(ItemStackSchema(context)), []),
-				objectives: v.optional(v.object({})),
-				planet: v.optional(v.string()),
-				robot: v.optional(v.boolean()),
-			});
-		}),
-		metadata({
-			type: "research",
-		}),
+		v.pipe(
+			v.lazy((input) => {
+				if (typeof input === "string") {
+					return v.pipe(v.optional(ContentNameSchema, ""), metadata({ name: "simple" }));
+				}
+				return v.pipe(
+					v.optional(
+						v.object({
+							parent: v.optional(ContentNameSchema),
+							requirements: v.optional(v.array(ItemStackSchema(context)), []),
+							objectives: v.optional(v.object({})),
+							planet: v.optional(v.string()),
+							robot: v.optional(v.boolean()),
+						}),
+						{},
+					),
+					metadata({ name: "complex" }),
+				);
+			}),
+			metadata({
+				type: "variant",
+				options: [
+					v.pipe(v.optional(ContentNameSchema, ""), metadata({ name: "simple" })),
+					v.pipe(
+						v.optional(
+							v.object({
+								parent: v.optional(ContentNameSchema),
+								requirements: v.optional(v.array(ItemStackSchema(context)), []),
+								objectives: v.optional(v.object({})),
+								planet: v.optional(v.string()),
+								robot: v.optional(v.boolean()),
+							}),
+							{},
+						),
+						metadata({ name: "complex" }),
+					),
+				],
+			}),
+		),
 		v.rawCheck(({ dataset, addIssue }) => {
 			if (dataset.typed) {
 				const value = dataset.value;

@@ -13,7 +13,7 @@ import { StringField } from "#/components/editor/right/field/StringField";
 import { TextureField } from "#/components/editor/right/field/TextureField";
 import { TexturesField } from "#/components/editor/right/field/TexturesField";
 import type { SchemaRenderer } from "#/components/editor/right/field/types";
-import { UnionField } from "#/components/editor/right/field/UnionField";
+import { VariantField } from "#/components/editor/right/field/VariantField";
 import type { Type } from "@project/schema";
 
 const renderers: Partial<Record<Type, SchemaRenderer>> = {
@@ -28,10 +28,10 @@ const renderers: Partial<Record<Type, SchemaRenderer>> = {
 	picklist: PickListField,
 	liquids: LiquidsListField,
 	select: SelectField,
-	"item-requirement": ItemRequirementField,
+	"item-stack": ItemRequirementField,
 	texture: TextureField,
 	textures: TexturesField,
-    union: UnionField,
+	variant: VariantField,
 };
 
 export function getRenderer(type: Type) {

@@ -30,6 +30,46 @@ describe("FieldInfo.replaceValue", () => {
 		const post = { version: 42 };
 		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
+
+	it("replaces with null", () => {
+		const pre = { name: "old" };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const field = root.field("name")!;
+		const result = field.replaceValue(text, null);
+		const post = { name: null };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
+
+	it("replaces with empty string", () => {
+		const pre = { name: "old" };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const field = root.field("name")!;
+		const result = field.replaceValue(text, "");
+		const post = { name: "" };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
+
+	it("replaces with empty array", () => {
+		const pre = { name: "old" };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const field = root.field("name")!;
+		const result = field.replaceValue(text, []);
+		const post = { name: [] };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
+
+	it("replaces with empty object", () => {
+		const pre = { name: "old" };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const field = root.field("name")!;
+		const result = field.replaceValue(text, {});
+		const post = { name: {} };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
 });
 
 describe("ElementInfo.replaceValue", () => {
@@ -54,6 +94,50 @@ describe("ElementInfo.replaceValue", () => {
 		const post = { data: [1, 2, 99] };
 		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
+
+	it("replaces element with null", () => {
+		const pre = { data: ["a", "b", "c"] };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const arr = root.get("data") as HjsonArrayNode;
+		const el = arr.at(1)!;
+		const result = el.replaceValue(text, null);
+		const post = { data: ["a", null, "c"] };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
+
+	it("replaces element with empty string", () => {
+		const pre = { data: ["a", "b", "c"] };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const arr = root.get("data") as HjsonArrayNode;
+		const el = arr.at(1)!;
+		const result = el.replaceValue(text, "");
+		const post = { data: ["a", "", "c"] };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
+
+	it("replaces element with empty array", () => {
+		const pre = { data: ["a", "b", "c"] };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const arr = root.get("data") as HjsonArrayNode;
+		const el = arr.at(1)!;
+		const result = el.replaceValue(text, []);
+		const post = { data: ["a", [], "c"] };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
+
+	it("replaces element with empty object", () => {
+		const pre = { data: ["a", "b", "c"] };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const arr = root.get("data") as HjsonArrayNode;
+		const el = arr.at(1)!;
+		const result = el.replaceValue(text, {});
+		const post = { data: ["a", {}, "c"] };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
 });
 
 // ---------------------------------------------------------------------------
@@ -76,6 +160,51 @@ describe("HjsonObjectNode.patchValue", () => {
 		const root = parseStructured(text);
 		const result = root.patchValue(text, "version", "1.0");
 		const post = { name: "test", version: "1.0" };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
+
+	it("replaces with null", () => {
+		const pre = { a: 1 };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const result = root.patchValue(text, "a", null);
+		const post = { a: null };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
+
+	it("inserts null field when key does not exist", () => {
+		const pre = { a: 1 };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const result = root.patchValue(text, "b", null);
+		const post = { a: 1, b: null };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
+
+	it("replaces with empty string", () => {
+		const pre = { a: 1 };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const result = root.patchValue(text, "a", "");
+		const post = { a: "" };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
+
+	it("replaces with empty array", () => {
+		const pre = { a: 1 };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const result = root.patchValue(text, "a", []);
+		const post = { a: [] };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
+
+	it("replaces with empty object", () => {
+		const pre = { a: 1 };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const result = root.patchValue(text, "a", {});
+		const post = { a: {} };
 		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
@@ -261,6 +390,46 @@ describe("HjsonArrayNode.patchValue", () => {
 		const arr = root.get("data") as HjsonArrayNode;
 		const result = arr.patchValue(text, 99, "x");
 		expect(result).toBe(HJSON.stringify(pre, null, 2));
+	});
+
+	it("replaces with null", () => {
+		const pre = { data: [1, 2, 3] };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const arr = root.get("data") as HjsonArrayNode;
+		const result = arr.patchValue(text, 1, null);
+		const post = { data: [1, null, 3] };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
+
+	it("replaces with empty string", () => {
+		const pre = { data: [1, 2, 3] };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const arr = root.get("data") as HjsonArrayNode;
+		const result = arr.patchValue(text, 1, "");
+		const post = { data: [1, "", 3] };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
+
+	it("replaces with empty array", () => {
+		const pre = { data: [1, 2, 3] };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const arr = root.get("data") as HjsonArrayNode;
+		const result = arr.patchValue(text, 1, []);
+		const post = { data: [1, [], 3] };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
+
+	it("replaces with empty object", () => {
+		const pre = { data: [1, 2, 3] };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const arr = root.get("data") as HjsonArrayNode;
+		const result = arr.patchValue(text, 1, {});
+		const post = { data: [1, {}, 3] };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 
 	it("throws when key is not a number", () => {
@@ -465,6 +634,56 @@ describe("HjsonValueNode.patchValue", () => {
 		const valueNode = el.value as HjsonValueNode;
 		const result = valueNode.patchValue(text, 42);
 		const post = { items: [42, 2, 3] };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
+
+	it("replaces value with null", () => {
+		const pre = { name: "hello" };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const valueNode = root.get("name") as HjsonValueNode;
+		const result = valueNode.patchValue(text, null);
+		const post = { name: null };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
+
+	it("replaces value with undefined", () => {
+		const pre = { name: "hello" };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const valueNode = root.get("name") as HjsonValueNode;
+		const result = valueNode.patchValue(text, undefined);
+		const expected = text.slice(0, valueNode.start.index) + text.slice(valueNode.end.index);
+		expect(result).toBe(expected);
+	});
+
+	it("replaces value with empty string", () => {
+		const pre = { name: "hello" };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const valueNode = root.get("name") as HjsonValueNode;
+		const result = valueNode.patchValue(text, "");
+		const post = { name: "" };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
+
+	it("replaces value with empty array", () => {
+		const pre = { name: "hello" };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const valueNode = root.get("name") as HjsonValueNode;
+		const result = valueNode.patchValue(text, []);
+		const post = { name: [] };
+		expect(result).toBe(HJSON.stringify(post, null, 2));
+	});
+
+	it("replaces value with empty object", () => {
+		const pre = { name: "hello" };
+		const text = HJSON.stringify(pre, null, 2);
+		const root = parseStructured(text);
+		const valueNode = root.get("name") as HjsonValueNode;
+		const result = valueNode.patchValue(text, {});
+		const post = { name: {} };
 		expect(result).toBe(HJSON.stringify(post, null, 2));
 	});
 });

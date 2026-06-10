@@ -49,15 +49,8 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 					.split(/[.\]\[]/)
 					.filter((s) => s.trim().length > 0)
 					.map((s) => {
-						try {
-							const num = parseInt(s);
-							if (isNaN(num)) {
-								return s;
-							}
-							return num;
-						} catch {
-							return s;
-						}
+						const num = Number(s);
+						return Number.isInteger(num) && String(num) === s ? num : s;
 					});
 
 				if (segments.length === 0) {
@@ -65,44 +58,66 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 				}
 
 				if (segments.length === 1) {
-					updater(root, content, segments[0]!, root);
+					return updater(root, content, segments[0]!, root);
 				}
 
-				const key = segments[segments.length - 1]!;
-				let parent = root;
+				while (true) {
+					let parent = root;
+					let modified = false;
 
-				for (let i = 0; i < segments.length - 1; i++) {
-					const currentKey = segments[i]!;
-					const child = parent.get(currentKey);
+					for (let i = 0; i < segments.length - 1; i++) {
+						const currentKey = segments[i]!;
+						const nextKey = segments[i + 1]!;
 
-					if (child.isMissing()) {
-						const nextKey = segments[i + 1];
-						if (nextKey !== undefined) {
-							const nextValue = typeof nextKey === "string" ? {} : [];
+						const child = parent.get(currentKey);
 
+						const container = typeof nextKey === "number" ? [] : {};
+
+						// -------------------------
+						// Missing node
+						// -------------------------
+						if (child.isMissing()) {
 							if (parent.isObject() && typeof currentKey === "string") {
-								content = parent.insertField(content!, currentKey, nextValue);
+								content = parent.insertField(content!, currentKey, container);
 							} else if (parent.isArray() && typeof currentKey === "number") {
-								content = parent.insertElement(content!, currentKey, nextValue);
+								content = parent.insertElement(content!, currentKey, container);
 							} else {
-								throw new Error(`Invalid key: ${currentKey} with parent type: ${parent.valueOf()}`);
+								throw new Error(`Invalid key '${currentKey}' for parent type '${parent.constructor.name}'`);
 							}
 
-							i = -1;
-							parent = HJSON.parseWithCache(content);
-							root = parent;
-							continue;
+							root = HJSON.parseWithCache(content);
+							modified = true;
+							break;
 						}
+
+						// -------------------------
+						// Value node in middle path
+						// -------------------------
+						if (child.isValue() && i < segments.length - 1) {
+							if (parent.isObject() && typeof currentKey === "string") {
+								content = parent.patchValue(content!, currentKey, container);
+							} else if (parent.isArray() && typeof currentKey === "number") {
+								content = parent.patchValue(content!, currentKey, container);
+							} else {
+								throw new Error(`Cannot replace value node at '${segments.slice(0, i + 1).join(".")}'`);
+							}
+
+							root = HJSON.parseWithCache(content);
+							modified = true;
+							break;
+						}
+
+						parent = child;
 					}
 
-					parent = child;
-				}
+					if (modified) {
+						continue;
+					}
 
-				if (parent.isMissing()) {
-					throw new Error(`Parent is not found: ${jsonPath}`);
-				}
+					const key = segments[segments.length - 1]!;
 
-				return updater(parent, content, key, root);
+					return updater(parent, content, key, root);
+				}
 			});
 		},
 		[write],
