@@ -12,9 +12,16 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:browser": "vitest run --project browser",
     "clean": "rm -rf dist"
   },
   "devDependencies": {
-    "typescript": "^5.7.0"
+    "@vitest/browser": "catalog:",
+    "@vitest/browser-playwright": "catalog:",
+    "playwright": "catalog:",
+    "typescript": "^5.7.0",
+    "vitest": "catalog:"
   }
 }
