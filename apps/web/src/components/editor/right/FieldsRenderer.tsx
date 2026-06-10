@@ -136,6 +136,12 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 		[write],
 	);
 
+	useEffect(() => {
+		if (filter) {
+			setRender(30);
+		}
+	}, [filter]);
+
 	if (isLoading || data === null) {
 		return null;
 	}
@@ -164,13 +170,13 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 					</InputGroupAddon>
 					<InputGroupInput value={filter} onChange={(e) => setFilter(e.target.value)} placeholder={t("editor.search")} />
 				</InputGroup>
-				<Child entries={filtered} node={node} path={path} onChange={onChange} render={render} setRender={setRender} />
+				<Children entries={filtered} node={node} path={path} onChange={onChange} render={render} setRender={setRender} />
 			</ErrorBoundary>
 		</Suspense>
 	);
 });
 
-function Child({
+function Children({
 	entries,
 	node,
 	path,
@@ -189,9 +195,8 @@ function Child({
 	const elements: React.ReactNode[] = [];
 	const seen = new Set<string>();
 	let lastCategory: string | undefined;
-	let count = 0;
 
-	for (const [name, entrySchema] of entries) {
+	for (const [name, entrySchema] of entries.slice(0, render)) {
 		const key = name + path;
 		const childNode = node.get(name);
 		const defaultValue = getDefaults(entrySchema, childNode.valueOf());
@@ -199,18 +204,22 @@ function Child({
 		const { type, schema } = detectSchemaType(entrySchema, value);
 		const metadata = getSchemaMetadata(entrySchema);
 
-		if (count > render) break;
-
-		count++;
-
 		if (metadata?.visibleWhen) {
 			const refNode = node.get(metadata.visibleWhen.field);
-			if (refNode.isMissing()) continue;
-			if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) continue;
+			if (refNode.isMissing()) {
+				continue;
+			}
+
+			if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) {
+				continue;
+			}
 		}
 
 		if (metadata?.category && metadata.category !== lastCategory) {
-			if (seen.has(metadata.category)) continue;
+			if (seen.has(metadata.category)) {
+				continue;
+			}
+
 			seen.add(metadata.category);
 			elements.push(<FieldCategory key={`cat-${metadata.category}`} category={metadata.category} />);
 			lastCategory = metadata.category;
@@ -245,7 +254,9 @@ function Child({
 
 	useEffect(() => {
 		const element = endRef.current;
-		if (!element) return;
+		if (!element) {
+			return;
+		}
 
 		const observer = new IntersectionObserver(
 			([entry]) => {

@@ -24,6 +24,12 @@ export const ObjectField = React.memo(function ObjectField({
 
 	const entries = getSchemaEntries(resolveSchema(entrySchema, resolvedValue));
 
+	if (entries.length < 5) {
+		return (
+			<Children entries={entries} value={resolvedValue} path={path} onChange={onChange} jsonPath={jsonPath} getRenderer={getRenderer} />
+		);
+	}
+
 	return (
 		<Collapsible id={jsonPath}>
 			<CollapsibleTrigger asChild>
@@ -38,21 +44,35 @@ export const ObjectField = React.memo(function ObjectField({
 						"border-border p-2 border rounded-md bg-muted/50": !nested,
 					})}
 				>
-					{buildCategoryObjectFields(entries, resolvedValue, path, onChange, jsonPath, getRenderer)}
+					<Children
+						entries={entries}
+						value={resolvedValue}
+						path={path}
+						onChange={onChange}
+						jsonPath={jsonPath}
+						getRenderer={getRenderer}
+					/>
 				</div>
 			</CollapsibleContent>
 		</Collapsible>
 	);
 });
 
-function buildCategoryObjectFields(
-	entries: [string, AnySchema][],
-	value: unknown,
-	path: string,
-	onChange: SchemaRendererProps["onChange"],
-	jsonPath: string,
-	getRenderer: SchemaRendererProps["getRenderer"],
-) {
+function Children({
+	entries,
+	value,
+	path,
+	jsonPath,
+	onChange,
+	getRenderer,
+}: {
+	entries: [string, AnySchema][];
+	value: unknown;
+	path: string;
+	onChange: SchemaRendererProps["onChange"];
+	jsonPath: string;
+	getRenderer: SchemaRendererProps["getRenderer"];
+}) {
 	const elements: React.ReactNode[] = [];
 	let lastCategory: string | undefined;
 

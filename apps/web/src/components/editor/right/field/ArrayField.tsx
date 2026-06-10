@@ -80,7 +80,6 @@ export const ArrayField = React.memo(function ArrayField({
 });
 
 function ArrayElement({
-	name,
 	index,
 	value,
 	itemSchema,
@@ -118,7 +117,7 @@ function ArrayElement({
 		<div key={index} className="flex flex-col gap-2 relative border p-2 rounded-md">
 			<Renderer
 				key={entryJsonPath}
-				name={`${index + 1} - ${name}`}
+				name={`${index + 1}`}
 				path={path}
 				value={value}
 				onChange={onChange}
@@ -128,7 +127,7 @@ function ArrayElement({
 				defaultValue={defaultValue}
 				nested
 			/>
-			<Button size="sm" className="text-destructive w-full" variant="destructive" onClick={handleRemove}>
+			<Button className="text-destructive w-full" variant="destructive" onClick={handleRemove}>
 				<Trash2 />
 			</Button>
 		</div>
