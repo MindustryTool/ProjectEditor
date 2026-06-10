@@ -17,6 +17,14 @@ async function createIsolatedRoot(): Promise<FileSystemDirectoryHandle> {
 	return testDir;
 }
 
+describe("createOPFSAdapter", () => {
+	it("returns an OPFSAdapter instance", async () => {
+		const root = await createIsolatedRoot();
+		const adapter = new OPFSAdapter(root);
+		expect(adapter).toBeInstanceOf(OPFSAdapter);
+	});
+});
+
 describe("OPFSAdapter", () => {
 	let adapter: OPFSAdapter;
 	let root: FileSystemDirectoryHandle;
@@ -64,6 +72,12 @@ describe("OPFSAdapter", () => {
 			await adapter.writeFile("binary.bin", buf);
 			const data = await adapter.readFile("binary.bin");
 			expect(new Uint8Array(data!)).toEqual(buf);
+		});
+
+		it("writes empty data", async () => {
+			await adapter.writeFile("empty.txt", new Uint8Array(0));
+			const data = await adapter.readFile("empty.txt");
+			expect(data!.byteLength).toBe(0);
 		});
 	});
 
@@ -122,6 +136,16 @@ describe("OPFSAdapter", () => {
 		it("throws on non-existent directory", async () => {
 			await expect(adapter.readdir("nope")).rejects.toThrow();
 		});
+
+		it("throws on file path", async () => {
+			await adapter.writeFile("afile.txt", strToBuf(""));
+			await expect(adapter.readdir("afile.txt")).rejects.toThrow();
+		});
+
+		it("mkdir on existing directory does not throw", async () => {
+			await adapter.mkdir("existing");
+			await expect(adapter.mkdir("existing")).resolves.toBeUndefined();
+		});
 	});
 
 	describe("stat", () => {
@@ -156,6 +180,12 @@ describe("OPFSAdapter", () => {
 		it("throws on non-existent path", async () => {
 			await expect(adapter.stat("ghost")).rejects.toThrow("not found");
 		});
+
+		it("stat after delete throws not found", async () => {
+			await adapter.writeFile("temp.txt", strToBuf("x"));
+			await adapter.delete("temp.txt");
+			await expect(adapter.stat("temp.txt")).rejects.toThrow("not found");
+		});
 	});
 
 	describe("exists", () => {
@@ -175,6 +205,12 @@ describe("OPFSAdapter", () => {
 		it("returns true for existing directory", async () => {
 			await adapter.mkdir("adir");
 			expect(await adapter.exists("adir")).toBe(true);
+		});
+
+		it("returns false after deletion", async () => {
+			await adapter.writeFile("gone.txt", strToBuf(""));
+			await adapter.delete("gone.txt");
+			expect(await adapter.exists("gone.txt")).toBe(false);
 		});
 	});
 
@@ -204,6 +240,14 @@ describe("OPFSAdapter", () => {
 		it("throws on non-existent source", async () => {
 			await expect(adapter.rename("ghost", "x")).rejects.toThrow();
 		});
+
+		it("overwrites existing destination", async () => {
+			await adapter.writeFile("src.txt", strToBuf("new"));
+			await adapter.writeFile("dst.txt", strToBuf("old"));
+			await adapter.rename("src.txt", "dst.txt");
+			expect(await adapter.readFile("src.txt")).toBeNull();
+			expect(await bufToStr((await adapter.readFile("dst.txt"))!)).toBe("new");
+		});
 	});
 
 	describe("move", () => {
@@ -219,6 +263,10 @@ describe("OPFSAdapter", () => {
 			await adapter.move("olddir", "newdir");
 			expect(await bufToStr((await adapter.readFile("newdir/x.txt"))!)).toBe("data");
 		});
+
+		it("throws on non-existent source", async () => {
+			await expect(adapter.move("ghost", "x")).rejects.toThrow();
+		});
 	});
 
 	describe("copy", () => {
@@ -231,6 +279,25 @@ describe("OPFSAdapter", () => {
 
 		it("throws when source does not exist", async () => {
 			await expect(adapter.copy("ghost", "x")).rejects.toThrow("Source not found");
+		});
+
+		it("overwrites existing destination", async () => {
+			await adapter.writeFile("src.txt", strToBuf("overwrite"));
+			await adapter.writeFile("dst.txt", strToBuf("original"));
+			await adapter.copy("src.txt", "dst.txt");
+			expect(await bufToStr((await adapter.readFile("dst.txt"))!)).toBe("overwrite");
+		});
+	});
+
+	describe("watch", () => {
+		it("returns an unsubscribe function", () => {
+			const unsub = adapter.watch(() => {});
+			expect(typeof unsub).toBe("function");
+		});
+
+		it("calling unsubscribe does not throw", () => {
+			const unsub = adapter.watch(() => {});
+			expect(() => unsub()).not.toThrow();
 		});
 	});
 });

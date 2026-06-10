@@ -36,6 +36,22 @@ describe("DefaultProjectFileTree", () => {
 		tree.walkTree((n) => visited.push(n.name));
 		expect(visited).toEqual([]);
 	});
+
+	it("walks a tree with a single file node", () => {
+		const tree = new DefaultProjectFileTree([
+			{ name: "readme.md", type: "file", path: "readme.md" },
+		]);
+		const visited: string[] = [];
+		tree.walkTree((n) => visited.push(n.name));
+		expect(visited).toEqual(["readme.md"]);
+	});
+
+	it("propagates errors from callback", () => {
+		const tree = new DefaultProjectFileTree([
+			{ name: "a", type: "folder", path: "a" },
+		]);
+		expect(() => tree.walkTree(() => { throw new Error("fail"); })).toThrow("fail");
+	});
 });
 
 describe("isDefaultPath", () => {
@@ -76,6 +92,16 @@ describe("isDefaultPath", () => {
 		expect(isDefaultPath(tree, "a/b/c")).toBe(true);
 		expect(isDefaultPath(tree, "a/b")).toBe(true);
 		expect(isDefaultPath(tree, "a")).toBe(true);
+	});
+
+	it("matches paths with leading / correctly", () => {
+		expect(isDefaultPath(jsonProjectTree, "/maps")).toBe(false);
+		expect(isDefaultPath(jsonProjectTree, "/content/blocks")).toBe(false);
+	});
+
+	it("is case-sensitive", () => {
+		expect(isDefaultPath(jsonProjectTree, "Maps")).toBe(false);
+		expect(isDefaultPath(jsonProjectTree, "Content/Blocks")).toBe(false);
 	});
 });
 
