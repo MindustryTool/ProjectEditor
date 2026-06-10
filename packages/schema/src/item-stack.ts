@@ -1,7 +1,7 @@
 import * as v from "valibot";
 import type { ProjectContents } from "@project/types";
 import { ContentNameSchema } from "./content";
-import { metadata } from "./utils";
+import { cached, metadata } from "./utils";
 
 export function ItemStackItemFieldSchema(context: ProjectContents) {
 	return v.pipe(
@@ -11,7 +11,7 @@ export function ItemStackItemFieldSchema(context: ProjectContents) {
 	);
 }
 
-export const ItemStackSchema = (context: ProjectContents) =>
+export const ItemStackSchema = cached((context: ProjectContents) =>
 	v.pipe(
 		v.lazy((input) => {
 			if (typeof input === "string") {
@@ -94,4 +94,5 @@ export const ItemStackSchema = (context: ProjectContents) =>
 				),
 			],
 		}),
-	);
+	),
+);

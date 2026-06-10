@@ -6,7 +6,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/component
 import { ChevronDown } from "lucide-react";
 import { Button } from "#/components/ui/button";
 import { SchemaLabel } from "#/components/editor/right/field/SchemaLabel";
-import { FieldCategory } from "#/components/editor/right/field/FieldCategory";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { cn } from "#/lib/utils";
 
@@ -74,7 +73,6 @@ function Children({
 	getRenderer: SchemaRendererProps["getRenderer"];
 }) {
 	const elements: React.ReactNode[] = [];
-	let lastCategory: string | undefined;
 
 	for (const [name, childSchema] of entries) {
 		const key = name;
@@ -86,11 +84,6 @@ function Children({
 		if (metadata?.visibleWhen && typeof value === "object" && value !== null) {
 			const refValue = (value as Record<string, unknown>)[metadata.visibleWhen.field];
 			if (refValue === undefined || refValue !== metadata.visibleWhen.value) continue;
-		}
-
-		if (metadata?.category && metadata.category !== lastCategory) {
-			elements.push(<FieldCategory key={`cat-${metadata.category}`} category={metadata.category} />);
-			lastCategory = metadata.category;
 		}
 
 		const Renderer = getRenderer(type);

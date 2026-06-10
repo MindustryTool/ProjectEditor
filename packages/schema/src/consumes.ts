@@ -1,12 +1,12 @@
 import * as v from "valibot";
 import { ItemFieldSchema } from "./item";
-import type { ProjectContents } from "@project/types";
 import { EffectFieldSchema } from "./effect";
 import { ItemStackSchema } from "./item-stack";
 import { LiquidStackSchema } from "./liquid-stack";
 import { LiquidFieldSchema } from "./liquid";
-import { metadata } from "./utils";
+import { cached, metadata } from "./utils";
 import { classSchema } from "./class";
+import type { ProjectContents } from "@project/types";
 
 export const consumeTypes = [
 	"Consume",
@@ -51,52 +51,52 @@ const consumeItemFilterSchema = v.object({
 	...consumeSchema.entries,
 });
 
-const consumeItemEfficiencySchema = (context: ProjectContents) =>
+const consumeItemEfficiencySchema = cached((context: ProjectContents) =>
 	v.object({
 		/** This has no effect on the consumer itself, but is used for stat display. */
 		itemDurationMultipliers: v.optional(v.record(ItemFieldSchema(context), v.number())),
-	});
+	}));
 
-const consumeItemChargedSchema = (context: ProjectContents) =>
+const consumeItemChargedSchema = cached((context: ProjectContents) =>
 	v.object({
 		...consumeItemEfficiencySchema(context).entries,
 		minCharge: v.number(),
-	});
+	}));
 
-const consumeItemFlammableSchema = (context: ProjectContents) =>
+const consumeItemFlammableSchema = cached((context: ProjectContents) =>
 	v.object({
 		...consumeItemEfficiencySchema(context).entries,
 		minFlammability: v.number(),
-	});
+	}));
 
-const consumeItemRadioactiveSchema = (context: ProjectContents) =>
+const consumeItemRadioactiveSchema = cached((context: ProjectContents) =>
 	v.object({
 		...consumeItemEfficiencySchema(context).entries,
 		minRadioactivity: v.number(),
-	});
+	}));
 
-const consumeItemExplosiveSchema = (context: ProjectContents) =>
+const consumeItemExplosiveSchema = cached((context: ProjectContents) =>
 	v.object({
 		...consumeItemEfficiencySchema(context).entries,
 		minExplosiveness: v.number(),
-	});
+	}));
 
-const consumeItemListSchema = (context: ProjectContents) =>
+const consumeItemListSchema = cached((context: ProjectContents) =>
 	v.object({
 		...consumeItemFilterSchema.entries,
 		itemMultipliers: v.record(ItemFieldSchema(context), v.number()),
-	});
+	}));
 
-const consumeItemExplodeSchema = (context: ProjectContents) =>
+const consumeItemExplodeSchema = cached((context: ProjectContents) =>
 	v.object({
 		...consumeItemFilterSchema.entries,
 		damage: v.optional(v.number(), 4),
 		threshold: v.optional(v.number(), 0),
 		baseChance: v.optional(v.number(), 0.06),
 		explodeEffect: EffectFieldSchema(context),
-	});
+	}));
 
-const consumeItemsSchema = (context: ProjectContents) =>
+const consumeItemsSchema = cached((context: ProjectContents) =>
 	v.pipe(
 		v.lazy((input) => {
 			if (Array.isArray(input)) {
@@ -115,9 +115,9 @@ const consumeItemsSchema = (context: ProjectContents) =>
 				v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ name: "multiple" })), { items: [] }),
 			],
 		}),
-	);
+	));
 
-const consumeItemBoostSchema = (context: ProjectContents) =>
+const consumeItemBoostSchema = cached((context: ProjectContents) =>
 	v.pipe(
 		v.lazy((input) => {
 			if (Array.isArray(input)) {
@@ -132,7 +132,7 @@ const consumeItemBoostSchema = (context: ProjectContents) =>
 				v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ name: "multiple" })), { items: [] }),
 			],
 		}),
-	);
+	));
 
 const consumeLiquidBaseSchema = v.object({ ...consumeSchema.entries, amount: v.number() });
 
@@ -142,10 +142,10 @@ const consumeLiquidFilterSchema = v.object({
 
 const consumeLiquidFlammableSchema = v.object({ ...consumeLiquidFilterSchema.entries, minFlammability: v.number() });
 
-const comsumeLiquidSchema = (context: ProjectContents) =>
-	v.object({ ...consumeLiquidBaseSchema.entries, liquid: LiquidFieldSchema(context) });
+const comsumeLiquidSchema = cached((context: ProjectContents) =>
+	v.object({ ...consumeLiquidBaseSchema.entries, liquid: LiquidFieldSchema(context) }));
 
-const consumeLiquidsSchema = (context: ProjectContents) =>
+const consumeLiquidsSchema = cached((context: ProjectContents) =>
 	v.pipe(
 		v.lazy((input) => {
 			if (Array.isArray(input)) {
@@ -160,7 +160,7 @@ const consumeLiquidsSchema = (context: ProjectContents) =>
 				v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ name: "multiple" })), { liquids: [] }),
 			],
 		}),
-	);
+	));
 
 const consumeCoolantSchema = v.object({
 	...consumeLiquidFilterSchema.entries,
@@ -170,7 +170,7 @@ const consumeCoolantSchema = v.object({
 	allowGas: v.optional(v.boolean(), false),
 });
 
-const consumeLiquidsBoostSchema = (context: ProjectContents) =>
+const consumeLiquidsBoostSchema = cached((context: ProjectContents) =>
 	v.pipe(
 		v.lazy((input) => {
 			if (Array.isArray(input)) {
@@ -185,7 +185,7 @@ const consumeLiquidsBoostSchema = (context: ProjectContents) =>
 				v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ name: "multiple" })), { liquids: [] }),
 			],
 		}),
-	);
+	));
 
 const consumePowerSchema = v.pipe(
 	v.lazy((input) => {
@@ -219,7 +219,7 @@ const consumePowerSchema = v.pipe(
 	}),
 );
 
-export const ConsumesHjsonSchema = (context: ProjectContents) =>
+export const ConsumesHjsonSchema = cached((context: ProjectContents) =>
 	v.pipe(
 		v.partial(
 			v.object({
@@ -270,4 +270,4 @@ export const ConsumesHjsonSchema = (context: ProjectContents) =>
 			}),
 		),
 		metadata({ type: "consumes" }),
-	);
+	));

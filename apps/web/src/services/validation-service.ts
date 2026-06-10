@@ -65,8 +65,6 @@ class ValidationService {
 		this.latestRequestIdByPath.set(path, requestId);
 
 		try {
-			useValidationStore.getState().setResults(path, []);
-
 			const content = await getContent();
 			const worker = await this.ensureWorker();
 			if (this._lang) {

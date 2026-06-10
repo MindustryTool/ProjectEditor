@@ -1,5 +1,5 @@
 import * as v from "valibot";
-import { CachedSchema } from "./utils";
+import { cached, CachedSchema } from "./utils";
 import { Interps } from "./interps";
 import { MindustryHexColorSchema } from "./mindustry-hex-color";
 import { SoundHjsonSchema } from "./sound";
@@ -73,7 +73,7 @@ const armorPlateAbilityObjectSchema = v.object({
 	),
 });
 
-const forceFieldAbilityObjectSchema = (context: ProjectContents) =>  v.object({
+const forceFieldAbilityObjectSchema = cached((context: ProjectContents) =>  v.object({
 	radius: v.pipe(
 		v.optional(v.number(), 60),
 		metadata({ name: "editor.ability.radius-force", description: "editor.ability.radius-force-description" }),
@@ -110,7 +110,7 @@ const forceFieldAbilityObjectSchema = (context: ProjectContents) =>  v.object({
 		v.optional(v.number(), 0.12),
 		metadata({ name: "editor.ability.hit-sound-volume-force", description: "editor.ability.hit-sound-volume-force-description" }),
 	),
-});
+}));
 
 const regenAbilityObjectSchema = v.object({
 	percentAmount: v.pipe(

@@ -3,7 +3,7 @@ import { MindustryHexColorSchema } from "./mindustry-hex-color";
 import { ResearchSchema } from "./research";
 import type { SchemaFn } from "./utils";
 import { EffectFieldSchema } from "./effect";
-import { metadata } from "./utils";
+import { cached, metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
 
 export const liquidBaseObjectSchema = v.object({
@@ -159,14 +159,15 @@ export const liquidBaseObjectSchema = v.object({
 	),
 });
 
-export const LiquidFieldSchema = (context: ProjectContents) =>
+export const LiquidFieldSchema = cached((context: ProjectContents) =>
 	v.pipe(
 		v.string(),
 		v.transform((v) => v.replaceAll(context.name + "-", "")),
 		v.picklist(context.liquids.map((liquid) => liquid.name.replaceAll(context.name + "-", ""))),
-	);
+	),
+);
 
-export const LiquidHjsonSchema: SchemaFn = (context) =>
+export const LiquidHjsonSchema: SchemaFn = cached((context: ProjectContents) =>
 	v.object({
 		...liquidBaseObjectSchema.entries,
 		effect: v.pipe(
@@ -202,4 +203,5 @@ export const LiquidHjsonSchema: SchemaFn = (context) =>
 			}),
 		),
 		research: v.optional(ResearchSchema(context)),
-	});
+	}),
+);

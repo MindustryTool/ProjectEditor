@@ -7,7 +7,7 @@ import { EffectFieldSchema } from "./effect";
 import { PartHjsonSchema } from "./part";
 import { ShootPatternHjsonSchema } from "./shoot-pattern";
 import { BulletHjsonSchema } from "./bullet";
-import { fixed, metadata } from "./utils";
+import { cached, fixed, metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
 import { ClassMap, classSchema } from "./class";
 
@@ -127,7 +127,7 @@ const pointDefenseBulletWeaponSchema = v.object({
 	targetInterval: fixed(weaponObjectSchema, "targetInterval", 5),
 });
 
-const pointDefenseWeaponSchema = (context: ProjectContents) =>
+const pointDefenseWeaponSchema = cached((context: ProjectContents) =>
 	v.object({
 		color: v.optional(MindustryHexColorSchema),
 		beamEffect: v.optional(EffectFieldSchema(context)),
@@ -137,9 +137,10 @@ const pointDefenseWeaponSchema = (context: ProjectContents) =>
 		rotate: fixed(weaponObjectSchema, "rotate", true),
 		useAttackRange: fixed(weaponObjectSchema, "useAttackRange", false),
 		targetInterval: fixed(weaponObjectSchema, "targetInterval", 10),
-	});
+	}),
+);
 
-const repairBeamWeaponSchema = (context: ProjectContents) =>
+const repairBeamWeaponSchema = cached((context: ProjectContents) =>
 	v.object({
 		targetBuildings: v.optional(v.boolean(), false),
 		targetUnits: v.optional(v.boolean(), true),
@@ -164,7 +165,8 @@ const repairBeamWeaponSchema = (context: ProjectContents) =>
 		recoil: fixed(weaponObjectSchema, "recoil", 0),
 		noAttack: fixed(weaponObjectSchema, "noAttack", true),
 		useAttackRange: fixed(weaponObjectSchema, "useAttackRange", false),
-	});
+	}),
+);
 
 const weaponTypeMap = new ClassMap<WeaponType>({
 	Weapon: () => v.object({}),

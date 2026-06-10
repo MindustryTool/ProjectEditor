@@ -3,7 +3,7 @@ import { useProjectSession, useCurrentProject } from "@project/core";
 import { useRecentFiles } from "./useRecentFiles";
 import { useRecentFileRecorder } from "./useRecentFileRecorder";
 import { RecentFileTab } from "./RecentFileTab";
-import { Trash } from "lucide-react";
+import { BrushCleaning } from "lucide-react";
 
 export function RecentlyOpenedFilesBar() {
 	const recentFiles = useRecentFiles();
@@ -50,22 +50,17 @@ export function RecentlyOpenedFilesBar() {
 
 	return (
 		<div className="flex items-center gap-1 overflow-x-auto min-h-8 max-h-8">
-			{recentFiles.map((entry) => (
-				<RecentFileTab
-					key={entry.path}
-					entry={entry}
-					onClick={handleTabClick}
-					onClose={handleClose}
-				/>
-			))}
 			{recentFiles.length > 2 && (
 				<button
-					className="h-full rounded flex aspect-square items-center gap-1 justify-center text-xs transition-colors bg-accent/40 text-destructive"
+					className="h-full rounded flex aspect-square items-center gap-1 justify-center text-xs transition-colors bg-accent cursor-pointer"
 					onClick={handleClear}
 				>
-					<Trash className="size-3" />
+					<BrushCleaning className="size-3" />
 				</button>
 			)}
+			{recentFiles.map((entry) => (
+				<RecentFileTab key={entry.path} entry={entry} onClick={handleTabClick} onClose={handleClose} />
+			))}
 		</div>
 	);
 }

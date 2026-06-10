@@ -50,7 +50,7 @@ export const bulletTypes = [
 
 export type BulletClass = (typeof bulletTypes)[number];
 
-const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>> = (context) => {
+const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>> = CachedSchema((context) => {
 	return v.object({
 		name: v.optional(v.string()),
 		description: v.optional(v.string()),
@@ -1543,7 +1543,7 @@ const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.E
 			}),
 		),
 	});
-};
+});
 
 const classSchemaMap = new ClassMap<BulletClass>({
 	ArtilleryBulletType: (_context) =>

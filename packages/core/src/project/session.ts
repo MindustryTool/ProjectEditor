@@ -157,7 +157,7 @@ function touchEntry(entries: RecentFileEntry[], path: string, now: number): Rece
 		updated[idx] = { ...updated[idx]!, lastAccessedAt: now };
 		return evictLRU(updated);
 	}
-	return evictLRU([...entries, { path, lastAccessedAt: now }]);
+	return evictLRU([{ path, lastAccessedAt: now }, ...entries]);
 }
 
 function removeEntry(entries: RecentFileEntry[], path: string): RecentFileEntry[] {
