@@ -6,7 +6,7 @@ import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
 import { Button } from "#/components/ui/button";
 import { Check, ChevronDown, Search } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
@@ -91,14 +91,16 @@ export const PickListField = React.memo(function PickListField({
 										<InputGroupInput value={filter} onChange={(event) => setFilter(event.currentTarget.value)} />
 									</InputGroup>
 									<div
-										className="max-h-[80dvh] flex flex-col md:max-h-[50dvh] overflow-y-auto border p-2 rounded-md"
+										className="max-h-[80dvh] flex flex-col md:max-h-[50dvh] overflow-y-auto border p-2 rounded-md gap-0.5"
 										onScroll={handleScroll}
 									>
 										{options.map((item) => (
-											<ToggleGroupItem className="justify-between" key={item} value={item}>
-												<span>{item}</span>
-												{stringValue === item && <Check />}
-											</ToggleGroupItem>
+											<DialogClose key={item} asChild>
+												<ToggleGroupItem className="justify-between" value={item}>
+													<span>{item}</span>
+													{stringValue === item && <Check />}
+												</ToggleGroupItem>
+											</DialogClose>
 										))}
 									</div>
 								</div>

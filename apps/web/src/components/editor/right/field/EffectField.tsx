@@ -31,6 +31,10 @@ export const EffectField = React.memo(function EffectField({
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 	const effects = useProjectContext().contents.effects;
 
+    if (metadata!.type !== "effect") {
+        throw new Error(`EffectField must be used with effect schema, got ${JSON.stringify(entrySchema)}`);
+    }
+
 	if (typeof value === "object" && value !== null) {
 		const typeValue = (value as Record<string, unknown>)?.type ?? "";
 

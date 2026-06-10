@@ -5,7 +5,8 @@ import type { ProjectContents } from "@project/types";
 export type AnySchema =
 	| v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>
 	| v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>
-	| v.TupleSchema<v.TupleItems, v.ErrorMessage<v.TupleIssue> | undefined>;
+	| v.TupleSchema<v.TupleItems, v.ErrorMessage<v.TupleIssue> | undefined>
+	| v.UnionSchema<v.UnionOptions, v.ErrorMessage<v.UnionIssue<v.BaseIssue<unknown>>> | undefined>;
 
 const WRAPPER_TYPES = new Set(["optional", "nullable", "optional", "undefinedable", "exact_optional"]);
 
@@ -271,13 +272,21 @@ export function getSchemaMetadata(schema: AnySchema): SchemaMetadata | null {
 			Object.assign(result, obj.metadata);
 		}
 
+		if (obj.pipe && Array.isArray(obj.pipe)) {
+			for (const item of obj.pipe) {
+				walk(item);
+			}
+		}
+
 		if (obj.type === "array" || obj.type === "object" || obj.type === "union") {
 			return;
 		}
 
 		for (const child of Object.values(obj)) {
 			if (Array.isArray(child)) {
-				for (const item of child) walk(item);
+				for (const item of child) {
+					walk(item);
+				}
 			} else {
 				walk(child);
 			}

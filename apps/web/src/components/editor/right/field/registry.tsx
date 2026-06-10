@@ -13,6 +13,7 @@ import { StringField } from "#/components/editor/right/field/StringField";
 import { TextureField } from "#/components/editor/right/field/TextureField";
 import { TexturesField } from "#/components/editor/right/field/TexturesField";
 import type { SchemaRenderer } from "#/components/editor/right/field/types";
+import { UnionField } from "#/components/editor/right/field/UnionField";
 import type { Type } from "@project/schema";
 
 const renderers: Partial<Record<Type, SchemaRenderer>> = {
@@ -30,6 +31,7 @@ const renderers: Partial<Record<Type, SchemaRenderer>> = {
 	"item-requirement": ItemRequirementField,
 	texture: TextureField,
 	textures: TexturesField,
+    union: UnionField,
 };
 
 export function getRenderer(type: Type) {

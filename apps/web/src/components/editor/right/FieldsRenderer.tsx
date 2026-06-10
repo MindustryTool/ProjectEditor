@@ -199,17 +199,18 @@ function Child({
 			);
 		} else {
 			elements.push(
-				<Renderer
-					key={key}
-					path={path}
-					name={name}
-					value={value}
-					onChange={onChange}
-					entrySchema={schema}
-					jsonPath={name}
-					getRenderer={getRenderer}
-					defaultValue={defaultValue}
-				/>,
+				<ErrorBoundary key={key}>
+					<Renderer
+						path={path}
+						name={name}
+						value={value}
+						onChange={onChange}
+						entrySchema={schema}
+						jsonPath={name}
+						getRenderer={getRenderer}
+						defaultValue={defaultValue}
+					/>
+				</ErrorBoundary>,
 			);
 		}
 	}

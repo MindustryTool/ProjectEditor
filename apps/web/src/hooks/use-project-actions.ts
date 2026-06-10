@@ -11,8 +11,8 @@ export function useProjectActions() {
 		if (!lang) {
 			throw new Error("lang is not set");
 		}
-		reset();
 		navigate({ to: `/$lang/projects`, params: { lang } });
+		reset();
 	}, [reset, navigate, lang]);
 
 	return { close };

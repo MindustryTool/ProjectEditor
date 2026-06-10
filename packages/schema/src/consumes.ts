@@ -141,7 +141,17 @@ export const ConsumesHjsonSchema = (context: ProjectContents) =>
 	v.pipe(
 		v.partial(
 			v.object({
-				remove: v.optional(v.union([v.picklist([...consumeTypes, "all"]), v.array(v.picklist([...consumeTypes, "all"]))])),
+				remove: v.optional(
+					v.union([
+						v.picklist([...consumeTypes, "all"]),
+						v.pipe(
+							v.array(v.picklist([...consumeTypes, "all"])),
+							metadata({
+								name: "remove",
+							}),
+						),
+					]),
+				),
 				item: ItemFieldSchema(context),
 				itemCharged: consumeItemChargedSchema(context),
 				itemFlammable: consumeItemFlammableSchema(context),
