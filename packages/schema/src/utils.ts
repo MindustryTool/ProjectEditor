@@ -3,10 +3,26 @@ import * as v from "valibot";
 import type { ProjectContents } from "@project/types";
 
 export type AnySchema =
-	| v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>
+    | v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>
 	| v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>
 	| v.TupleSchema<v.TupleItems, v.ErrorMessage<v.TupleIssue> | undefined>
-	| v.UnionSchema<v.UnionOptions, v.ErrorMessage<v.UnionIssue<v.BaseIssue<unknown>>> | undefined>;
+	| v.UnionSchema<v.UnionOptions, v.ErrorMessage<v.UnionIssue<v.BaseIssue<unknown>>> | undefined>
+	| v.PicklistSchema<v.PicklistOptions, v.ErrorMessage<v.PicklistIssue> | undefined>
+	| v.ArraySchema<v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>, v.ErrorMessage<v.ArrayIssue> | undefined>
+	| v.LazySchema<v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>>
+	| v.OptionalSchema<v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>, unknown>
+	| v.UndefinedableSchema<v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>, unknown>
+	| v.ExactOptionalSchema<v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>, unknown>
+	| v.NullableSchema<v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>, unknown>
+	| v.NullishSchema<v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>, unknown>
+	| v.StringSchema<v.ErrorMessage<v.StringIssue> | undefined>
+	| v.NumberSchema<v.ErrorMessage<v.NumberIssue> | undefined>
+	| v.BooleanSchema<v.ErrorMessage<v.BooleanIssue> | undefined>
+	| v.SchemaWithPipe<
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			readonly [v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>, ...v.PipeItem<any, unknown, v.BaseIssue<unknown>>[]]
+	  >
+	| v.AnySchema;
 
 const WRAPPER_TYPES = new Set(["optional", "nullable", "optional", "undefinedable", "exact_optional"]);
 
@@ -157,9 +173,14 @@ export function detectSchemaType(rawSchema: AnySchema, value: unknown): { type: 
  * returns a sensible fallback: {} for objects, [] for arrays, or "" for other types.
  */
 export function getDefaults(schema: AnySchema, value: unknown): unknown {
-	const s = schema as unknown as { type: string; getter?: (val: unknown) => AnySchema };
+	const s = schema
 
-	if (s.type === "lazy" && s.getter) {
+    if ('pipe' in s) {
+        const pipe = s.pipe[0];
+        return getDefaults(pipe, value);
+    }
+
+	if (v.isOfType('lazy', s) && s.getter) {
 		return getDefaults(s.getter(value), value);
 	}
 
@@ -168,13 +189,19 @@ export function getDefaults(schema: AnySchema, value: unknown): unknown {
 	if (result === undefined) {
 		schema = unwrapSchema(schema);
 
-		if (schema.type === "object") {
+		if (v.isOfType('object', s)) {
 			return {};
 		}
 
-		if (schema.type === "array") {
+		if (v.isOfType('array', s)) {
 			return [];
 		}
+
+		if (v.isOfType('picklist', s)) {
+			return s.options[0];
+		}
+
+		console.warn({ message: "No default value found", schema, value });
 
 		return "";
 	}

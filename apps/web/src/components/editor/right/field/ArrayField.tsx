@@ -23,10 +23,6 @@ export const ArrayField = React.memo(function ArrayField({
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
 	const handleAdd = useCallback(() => {
-		if (!arrayValue) {
-			return;
-		}
-
 		const nextItemSchema = getArrayItemSchema(entrySchema, arrayValue.length);
 
 		let defaultValue: unknown = getDefaults(nextItemSchema, arrayValue?.[arrayValue.length]);
