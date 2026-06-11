@@ -781,7 +781,6 @@ export const AbilityHjsonSchema = new ClassMap<AbilityClass>({
 		}),
 }, {
 	baseSchema: abilityBaseObjectSchema.entries,
-	type: "ability",
 }).schema;
 
 export const AbilityFieldSchema: SchemaFn = (context) =>

@@ -72,6 +72,31 @@ describe("Parser", () => {
       const result = parse("{int: 42, neg: -10, float: 3.14, exp: 5e2, hex: 0xFF}");
       expect(result).toEqual({ int: 42, neg: -10, float: 3.14, exp: 500, hex: 255 });
     });
+
+    it("parses leading-zero integers as strings", () => {
+      const result = parse("{a: 0023, b: 00042}");
+      expect(result).toEqual({ a: "0023", b: "00042" });
+    });
+
+    it("parses negative leading-zero integer as string", () => {
+      const result = parse("{val: -007}");
+      expect(result).toEqual({ val: "-007" });
+    });
+
+    it("parses leading-zero floats as numbers", () => {
+      const result = parse("{a: 0.5, b: 0.0}");
+      expect(result).toEqual({ a: 0.5, b: 0 });
+    });
+
+    it("parses single zero as number", () => {
+      const result = parse("{val: 0}");
+      expect(result).toEqual({ val: 0 });
+    });
+
+    it("parses hex as number", () => {
+      const result = parse("{val: 0xFF}");
+      expect(result).toEqual({ val: 255 });
+    });
   });
 
   describe("root braced object", () => {

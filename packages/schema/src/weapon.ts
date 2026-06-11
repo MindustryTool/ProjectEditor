@@ -176,7 +176,6 @@ export const WeaponHjsonSchema = new ClassMap<WeaponType>({
 	RepairBeamWeapon: (context) => repairBeamWeaponSchema(context).entries,
 }, {
 	baseSchema: weaponObjectSchema,
-	type: "weapon",
 	extra: (context) => ({
 		bullet: v.optional(BulletHjsonSchema(context)),
 		ejectEffect: v.optional(EffectFieldSchema(context)),

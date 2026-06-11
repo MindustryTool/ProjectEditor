@@ -2,6 +2,7 @@ import { ArrayField } from "#/components/editor/right/field/ArrayField";
 import { BooleanField } from "#/components/editor/right/field/BooleanField";
 import { ColorField } from "#/components/editor/right/field/ColorField";
 import { EffectField } from "#/components/editor/right/field/EffectField";
+import { EnvField } from "#/components/editor/right/field/EnvField";
 import { ItemRequirementField } from "#/components/editor/right/field/ItemRequirementField";
 import { LiquidsListField } from "#/components/editor/right/field/LiquidsListField";
 import { NumberField } from "#/components/editor/right/field/NumberField";
@@ -31,6 +32,7 @@ const renderers: Partial<Record<Type, SchemaRenderer>> = {
 	"item-stack": ItemRequirementField,
 	texture: TextureField,
 	textures: TexturesField,
+	env: EnvField,
 	variant: VariantField,
 };
 

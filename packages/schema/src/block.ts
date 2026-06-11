@@ -398,7 +398,6 @@ export const BlockHjsonSchema = new ClassMap<BlockType>({
 	}),
 }, {
 	baseSchema: blockObjectSchema,
-	type: "block",
 	extra: (context) => ({
 		consumes: v.optional(ConsumesHjsonSchema(context)),
 		requirements: v.optional(v.array(ItemStackSchema(context)), []),

@@ -105,24 +105,25 @@ function ArrayElement({
 
 	const Renderer = getRenderer(type);
 
-	if (Renderer === undefined) {
-		return <span className="text-red-400 text-sm">Unknown field type '{type}'</span>;
-	}
 
 	return (
 		<div key={index} className="flex flex-col gap-2 relative border p-2 rounded-md">
-			<Renderer
-				key={entryJsonPath}
-				name={`${index + 1}`}
-				path={path}
-				value={value}
-				onChange={onChange}
-				entrySchema={schema}
-				jsonPath={entryJsonPath}
-				getRenderer={getRenderer}
-				defaultValue={defaultValue}
-				nested
-			/>
+			{Renderer ? (
+				<Renderer
+					key={entryJsonPath}
+					name={`${index + 1}`}
+					path={path}
+					value={value}
+					onChange={onChange}
+					entrySchema={schema}
+					jsonPath={entryJsonPath}
+					getRenderer={getRenderer}
+					defaultValue={defaultValue}
+					nested
+				/>
+			) : (
+				<span className="text-red-400 text-sm">Unknown field type '{type}'</span>
+			)}
 			<Button className="text-destructive w-full" variant="destructive" onClick={handleRemove}>
 				<Trash2 />
 			</Button>

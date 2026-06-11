@@ -3,10 +3,9 @@ import * as v from "valibot";
 import type { ProjectContents } from "@project/types";
 
 export type AnySchema =
-    | v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>
+	| v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>
 	| v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>
 	| v.TupleSchema<v.TupleItems, v.ErrorMessage<v.TupleIssue> | undefined>
-	| v.UnionSchema<v.UnionOptions, v.ErrorMessage<v.UnionIssue<v.BaseIssue<unknown>>> | undefined>
 	| v.PicklistSchema<v.PicklistOptions, v.ErrorMessage<v.PicklistIssue> | undefined>
 	| v.ArraySchema<v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>, v.ErrorMessage<v.ArrayIssue> | undefined>
 	| v.LazySchema<v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>>
@@ -27,7 +26,8 @@ export type AnySchema =
 const WRAPPER_TYPES = new Set(["optional", "nullable", "optional", "undefinedable", "exact_optional"]);
 
 export const types = [
-	"color",
+	"env",
+    "color",
 	"research",
 	"effect",
 	"string",
@@ -173,35 +173,40 @@ export function detectSchemaType(rawSchema: AnySchema, value: unknown): { type: 
  * returns a sensible fallback: {} for objects, [] for arrays, or "" for other types.
  */
 export function getDefaults(schema: AnySchema, value: unknown): unknown {
-	const s = schema
+	if ("pipe" in schema) {
+		const pipe = schema.pipe[0];
+		return getDefaults(pipe, value);
+	}
 
-    if ('pipe' in s) {
-        const pipe = s.pipe[0];
-        return getDefaults(pipe, value);
-    }
-
-	if (v.isOfType('lazy', s) && s.getter) {
-		return getDefaults(s.getter(value), value);
+	if (v.isOfType("lazy", schema) && schema.getter) {
+		return getDefaults(schema.getter(value), value);
 	}
 
 	const result = v.getDefaults(schema);
 
+	if (hasNullableWrapper(schema)) {
+		return null;
+	}
+
 	if (result === undefined) {
 		schema = unwrapSchema(schema);
 
-		if (v.isOfType('object', s)) {
+		if ("pipe" in schema) {
+			const pipe = schema.pipe[0];
+			return getDefaults(pipe, value);
+		}
+
+		if (v.isOfType("lazy", schema) && schema.getter) {
+			return getDefaults(schema.getter(value), value);
+		}
+
+		if (v.isOfType("object", schema)) {
 			return {};
 		}
 
-		if (v.isOfType('array', s)) {
+		if (v.isOfType("array", schema)) {
 			return [];
 		}
-
-		if (v.isOfType('picklist', s)) {
-			return s.options[0];
-		}
-
-		console.warn({ message: "No default value found", schema, value });
 
 		return "";
 	}

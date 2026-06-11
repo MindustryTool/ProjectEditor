@@ -13,6 +13,11 @@ function hasNewline(value: string): boolean {
 	return value.includes("\n");
 }
 
+function isLeadingZeroString(value: string): boolean {
+	const stripped = value.replace(/^[+-]/, "");
+	return stripped.length >= 2 && !/^0x/i.test(stripped) && /^0\d/.test(stripped);
+}
+
 function getIndent(space: Space, depth: number): string {
 	if (typeof space === "number") {
 		return " ".repeat(Math.max(0, space) * depth);
@@ -69,6 +74,9 @@ function serializeValue(
 function serializeString(value: string, space: Space | undefined, _depth: number): string {
 	if (hasNewline(value)) {
 		return serializeMultilineString(value, space);
+	}
+	if (isLeadingZeroString(value)) {
+		return value;
 	}
 	if (needsQuotes(value)) {
 		return JSON.stringify(value);

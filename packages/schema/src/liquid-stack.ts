@@ -43,7 +43,7 @@ export const LiquidStackSchema = cached((context: ProjectContents) =>
 					liquid: LiquidFieldSchema(context),
 					amount: v.pipe(v.number(), v.integer(), v.minValue(0)),
 				}),
-				metadata({ name: "liquid-stack" }),
+				metadata({ option: "liquid-stack" }),
 			);
 		}),
 		metadata({
@@ -54,7 +54,7 @@ export const LiquidStackSchema = cached((context: ProjectContents) =>
 						liquid: LiquidFieldSchema(context),
 						amount: v.pipe(v.number(), v.integer(), v.minValue(0)),
 					}),
-					metadata({ name: "liquid-stack" }),
+					metadata({ option: "liquid-stack" }),
 				),
 				v.pipe(
 					v.string(),

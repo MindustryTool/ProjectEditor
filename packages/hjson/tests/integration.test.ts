@@ -105,6 +105,17 @@ describe("Integration: real-world scenarios", () => {
     expect(result.key).toBe("val");
   });
 
+  it("parses leading-zero numbers as strings and round-trips correctly", () => {
+    const input = "{id: 0023, code: -007, ratio: 0.5}";
+    const result = HJSON.parse(input) as Record<string, any>;
+    expect(result.id).toBe("0023");
+    expect(result.code).toBe("-007");
+    expect(result.ratio).toBe(0.5);
+    const serialized = HJSON.stringify(result, null, 2);
+    const reparsed = HJSON.parse(serialized);
+    expect(reparsed).toEqual(result);
+  });
+
   it("provides typed error with code, startLine, startColumn, index", () => {
     try {
       HJSON.parse("{invalid: @bad}");

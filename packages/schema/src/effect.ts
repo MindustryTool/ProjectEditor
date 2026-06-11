@@ -361,7 +361,6 @@ export const EffectHjsonSchema = new ClassMap<EffectType>({
 		}),
 }, {
 	baseSchema: effectBaseObjectSchema.entries,
-	type: "effect",
 }).schema;
 
 export const EffectFieldSchema: SchemaFn = CachedSchema((context) => {

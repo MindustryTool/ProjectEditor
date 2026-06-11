@@ -1625,5 +1625,4 @@ export const BulletHjsonSchema: SchemaFn = new ClassMap<BulletClass>({
 	SpaceLiquidBulletType: (_context) => ({}),
 }, {
 	baseSchema: (ctx) => createBulletBaseObjectSchema(ctx).entries,
-	type: "bullet",
 }).schema;

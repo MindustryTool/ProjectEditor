@@ -372,5 +372,4 @@ export const PartHjsonSchema: SchemaFn = new ClassMap<PartClass>({
 	ShapePart: (_context) => shapePartObjectSchema.entries,
 }, {
 	baseSchema: drawPartBaseObjectSchema.entries,
-	type: "part",
 }).schema;

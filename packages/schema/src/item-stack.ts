@@ -50,7 +50,7 @@ export const ItemStackSchema = cached((context: ProjectContents) =>
 					item: ItemStackItemFieldSchema(context),
 					amount: v.pipe(v.number(), v.integer(), v.minValue(0)),
 				}),
-				metadata({ name: "item-stack" }),
+				metadata({ option: "item-stack" }),
 			);
 		}),
 		metadata({
@@ -61,7 +61,7 @@ export const ItemStackSchema = cached((context: ProjectContents) =>
 						item: ItemStackItemFieldSchema(context),
 						amount: v.pipe(v.number(), v.integer(), v.minValue(0)),
 					}),
-					metadata({ name: "item-stack" }),
+					metadata({ option: "item-stack" }),
 				),
 				v.pipe(
 					v.string(),

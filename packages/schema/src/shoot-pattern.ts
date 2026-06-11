@@ -108,5 +108,4 @@ export const ShootPatternHjsonSchema: SchemaFn = new ClassMap<ShootPatternType>(
 	ShootPattern: (_context) => shootPatternBaseObjectSchema.entries,
 }, {
 	baseSchema: shootPatternBaseObjectSchema.entries,
-	type: "shoot-pattern",
 }).schema;

@@ -38,6 +38,16 @@ function isUnquotedStringBody(ch: string): boolean {
 	return isIdentPart(ch) || "+./".includes(ch);
 }
 
+function isLeadingZeroNumber(numStr: string): boolean {
+	let s = numStr;
+	if (s.startsWith("-") || s.startsWith("+")) {
+		s = s.slice(1);
+	}
+	if (s.length < 2) return false;
+	if (s.startsWith("0x") || s.startsWith("0X")) return false;
+	return s.startsWith("0") && isDigit(s[1]!);
+}
+
 export class Tokenizer {
 	private input: string;
 	private pos: number;
@@ -397,6 +407,9 @@ export class Tokenizer {
 					if (value.length > 0) {
 						return token("string", value, startRow, startCol, startIdx, this.pos);
 					}
+				}
+				if (isLeadingZeroNumber(numStr)) {
+					return token("string", numStr, startRow, startCol, startIdx, this.pos);
 				}
 				return token("number", numStr, startRow, startCol, startIdx, this.pos);
 			}

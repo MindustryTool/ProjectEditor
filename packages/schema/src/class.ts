@@ -45,7 +45,7 @@ export class ClassMap<K extends string> {
 		private readonly map: Record<K, (context: ProjectContents) => Record<string, AnySchema>>,
 		private readonly options: {
 			baseSchema: Record<string, AnySchema> | ((context: ProjectContents) => Record<string, AnySchema>);
-			type: string;
+			type?: string;
 			extra?: (context: ProjectContents) => Record<string, AnySchema>;
 		},
 	) {}
@@ -58,7 +58,8 @@ export class ClassMap<K extends string> {
 					const base = typeof this.options.baseSchema === "function" ? this.options.baseSchema(context) : this.options.baseSchema;
 					const entries = mergeEntries(base, variant);
 					const extraFields = this.options.extra?.(context) ?? {};
-					return v.pipe(v.object({ ...entries, ...extraFields }), metadata({ type: this.options.type }));
+                    const type = this.options.type;
+					return v.pipe(v.object({ ...entries, ...extraFields }), metadata({ type }));
 				}),
 			);
 		}

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
 	resolveSchema,
 	unwrapSchema,
+	getDefaults,
 	getSchemaEntries,
 	getArrayItemSchema,
 	getSchemaMetadata,
@@ -419,5 +420,176 @@ describe("Effect schema integration", () => {
 		// Step 3: getSchemaEntries from resolved schema
 		const entries = getSchemaEntries(resolved as AnySchema);
 		expect(entries.map(([k]) => k).sort()).toEqual(["colorFrom", "colorTo", "type"].sort());
+	});
+});
+
+describe("getDefaults", () => {
+	it("returns empty string for string schema (no default)", () => {
+		const schema = v.string();
+		expect(getDefaults(schema as AnySchema, undefined)).toBe("");
+	});
+
+	it("returns empty string for number schema (no default)", () => {
+		const schema = v.number();
+		expect(getDefaults(schema as AnySchema, undefined)).toBe("");
+	});
+
+	it("returns empty string for boolean schema (no default)", () => {
+		const schema = v.boolean();
+		expect(getDefaults(schema as AnySchema, undefined)).toBe("");
+	});
+
+	it("returns default values for object schema with optional entries", () => {
+		const schema = v.object({
+			name: v.optional(v.string(), "hello"),
+			count: v.optional(v.number(), 42),
+		});
+		expect(getDefaults(schema as AnySchema, {})).toEqual({ name: "hello", count: 42 });
+	});
+
+	it("returns empty object for empty object schema", () => {
+		const schema = v.object({});
+		expect(getDefaults(schema as AnySchema, {})).toEqual({});
+	});
+
+	it("returns empty array for array schema", () => {
+		const schema = v.array(v.string());
+		const result = getDefaults(schema as AnySchema, undefined);
+		expect(Array.isArray(result)).toBe(true);
+	});
+
+	it("returns empty string for picklist schema (fallback)", () => {
+		const schema = v.picklist(["a", "b", "c"] as const);
+		expect(getDefaults(schema as AnySchema, undefined)).toBe("");
+	});
+
+	it("returns tuple values for tuple schema with defaults", () => {
+		const schema = v.tuple([v.optional(v.string(), "x"), v.optional(v.number(), 1)]);
+		expect(getDefaults(schema as AnySchema, {})).toEqual(["x", 1]);
+	});
+
+	it("returns default from optional wrapper", () => {
+		const schema = v.optional(v.string(), "fallback");
+		expect(getDefaults(schema as AnySchema, undefined)).toBe("fallback");
+	});
+
+	it("returns null for nullable schema with null default", () => {
+		const schema = v.nullable(v.string(), null);
+		expect(getDefaults(schema as AnySchema, undefined)).toBeNull();
+	});
+
+	it("returns null for nullable schema regardless of explicit default", () => {
+		const schema = v.nullable(v.string(), "fallback");
+		expect(getDefaults(schema as AnySchema, undefined)).toBeNull();
+	});
+
+	it("returns null for nullish schema regardless of explicit default", () => {
+		const schema = v.nullish(v.string(), "fallback");
+		expect(getDefaults(schema as AnySchema, undefined)).toBeNull();
+	});
+
+	it("returns default value for undefinedable schema with explicit default", () => {
+		const schema = v.undefinedable(v.string(), 0);
+		expect(getDefaults(schema as AnySchema, undefined)).toBe(0);
+	});
+
+	it("resolves lazy schema and returns inner defaults", () => {
+		const schema = v.lazy(() => v.object({ x: v.optional(v.string(), "default") }));
+		expect(getDefaults(schema as AnySchema, {})).toEqual({ x: "default" });
+	});
+
+	it("handles pipe by recursing on first item", () => {
+		const inner = v.object({ x: v.optional(v.string(), "val") });
+		const schema = v.pipe(inner, v.minLength(1));
+		expect(getDefaults(schema as AnySchema, {})).toEqual({ x: "val" });
+	});
+
+	it("returns default from pipe with optional wrapper", () => {
+		const schema = v.pipe(v.optional(v.string(), "pipe-default"), v.minLength(1));
+		expect(getDefaults(schema as AnySchema, {})).toBe("pipe-default");
+	});
+
+	it("returns empty string for union schema without shared defaults", () => {
+		const schema = v.union([v.string(), v.number()]);
+		expect(getDefaults(schema as AnySchema, {})).toBe("");
+	});
+
+	it("returns empty string for unknown schema", () => {
+		const schema = v.unknown();
+		expect(getDefaults(schema as AnySchema, undefined)).toBe("");
+	});
+
+	it("returns empty string for valibot any schema", () => {
+		const schema = v.any();
+		expect(getDefaults(schema as AnySchema, undefined)).toBe("");
+	});
+
+	it("resolves lazy schema inside pipe", () => {
+		const schema = v.pipe(
+			v.lazy((input: unknown) => {
+				const val = input as Record<string, unknown>;
+				if (val.type === "a") return v.object({ key: v.optional(v.string(), "from-a") });
+				return v.object({ key: v.optional(v.string(), "from-b") });
+			}),
+			v.minLength(1),
+		);
+		expect(getDefaults(schema as AnySchema, { type: "a" })).toEqual({ key: "from-a" });
+		expect(getDefaults(schema as AnySchema, { type: "b" })).toEqual({ key: "from-b" });
+	});
+
+	describe("nested schemas", () => {
+		it("returns defaults for 2-level nested object", () => {
+			const schema = v.object({
+				outer: v.object({ inner: v.optional(v.string(), "deep") }),
+			});
+			expect(getDefaults(schema as AnySchema, {})).toEqual({ outer: { inner: "deep" } });
+		});
+
+		it("returns defaults for 3-level nested object", () => {
+			const schema = v.object({
+				l1: v.object({
+					l2: v.object({ value: v.optional(v.number(), 42) }),
+				}),
+			});
+			expect(getDefaults(schema as AnySchema, {})).toEqual({ l1: { l2: { value: 42 } } });
+		});
+
+		it("returns defaults for array nested inside object (valibot returns undefined items)", () => {
+			const schema = v.object({
+				items: v.array(v.object({ label: v.optional(v.string(), "item") })),
+			});
+			expect(getDefaults(schema as AnySchema, {})).toEqual({ items: undefined });
+		});
+
+		it("returns defaults for tuple with nested object", () => {
+			const schema = v.tuple([
+				v.object({ x: v.optional(v.number(), 1) }),
+				v.object({ y: v.optional(v.string(), "z") }),
+			]);
+			expect(getDefaults(schema as AnySchema, {})).toEqual([{ x: 1 }, { y: "z" }]);
+		});
+
+		it("returns null for nullable wrapping nested object", () => {
+			const schema = v.nullable(v.object({ x: v.optional(v.string(), "val") }), { x: "fallback" });
+			expect(getDefaults(schema as AnySchema, {})).toBeNull();
+		});
+
+		it("returns defaults for pipe wrapping nested object", () => {
+			const schema = v.pipe(
+				v.object({ nested: v.object({ key: v.optional(v.boolean(), true) }) }),
+				metadata({ type: "object" }),
+			);
+			expect(getDefaults(schema as AnySchema, {})).toEqual({ nested: { key: true } });
+		});
+
+		it("returns defaults for optional wrapping object with nested array", () => {
+			const schema = v.optional(
+				v.object({
+					tags: v.array(v.object({ name: v.optional(v.string(), "tag") })),
+				}),
+				{ tags: [] },
+			);
+			expect(getDefaults(schema as AnySchema, {})).toEqual({ tags: [] });
+		});
 	});
 });

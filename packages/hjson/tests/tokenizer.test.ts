@@ -173,6 +173,48 @@ describe("Tokenizer", () => {
       expect(toks[0]!.type).toBe("number");
       expect(toks[0]!.value).toBe("0xFF");
     });
+
+    it("reads leading-zero integer as string: 0023", () => {
+      const toks = tokens("0023");
+      expect(toks[0]!.type).toBe("string");
+      expect(toks[0]!.value).toBe("0023");
+    });
+
+    it("reads leading-zero integer as string: 00042", () => {
+      const toks = tokens("00042");
+      expect(toks[0]!.type).toBe("string");
+      expect(toks[0]!.value).toBe("00042");
+    });
+
+    it("reads negative leading-zero integer as string: -007", () => {
+      const toks = tokens("-007");
+      expect(toks[0]!.type).toBe("string");
+      expect(toks[0]!.value).toBe("-007");
+    });
+
+    it("reads positive leading-zero integer as string: +007", () => {
+      const toks = tokens("+007");
+      expect(toks[0]!.type).toBe("string");
+      expect(toks[0]!.value).toBe("+007");
+    });
+
+    it("reads leading-zero float as number: 0.5", () => {
+      const toks = tokens("0.5");
+      expect(toks[0]!.type).toBe("number");
+      expect(toks[0]!.value).toBe("0.5");
+    });
+
+    it("reads leading-zero float as number: 0.0", () => {
+      const toks = tokens("0.0");
+      expect(toks[0]!.type).toBe("number");
+      expect(toks[0]!.value).toBe("0.0");
+    });
+
+    it("reads single zero as number", () => {
+      const toks = tokens("0");
+      expect(toks[0]!.type).toBe("number");
+      expect(toks[0]!.value).toBe("0");
+    });
   });
 
   describe("keywords", () => {
