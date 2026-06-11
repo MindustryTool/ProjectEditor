@@ -1342,3 +1342,188 @@ describe("Structured pre/post round-trip", () => {
 		});
 	});
 });
+
+// ---------------------------------------------------------------------------
+// HJSON.patch() - high-level curried patching with path traversal
+// ---------------------------------------------------------------------------
+
+describe("HJSON.patch()", () => {
+	function mockWrite() {
+		let content = "";
+		const fn = (cb: string | ((prev: string | null) => string)) => {
+			if (typeof cb === "function") {
+				const result = cb(content || null);
+				content = result;
+				return result;
+			}
+			content = cb;
+			return cb;
+		};
+		fn.getContent = () => content;
+		fn.setContent = (c: string) => { content = c; };
+		return fn;
+	}
+
+	describe("basic top-level field patching", () => {
+		it("updates existing field value via dot path", () => {
+			const write = mockWrite();
+			write.setContent(HJSON.stringify({ name: "old" }, null, 2));
+			const result = HJSON.patch(write)("name", (node, original, key, root) => {
+				return node.patchValue(original, key, "new");
+			});
+			expect(result).toBe(HJSON.stringify({ name: "new" }, null, 2));
+			expect(write.getContent()).toBe(result);
+		});
+
+		it("updater receives correct node type for object field", () => {
+			const write = mockWrite();
+			write.setContent(HJSON.stringify({ a: 1 }, null, 2));
+			HJSON.patch(write)("a", (node, _original, key, root) => {
+				expect(node).toBe(root);
+				expect(key).toBe("a");
+				return node.patchValue(_original, key, 42);
+			});
+		});
+
+		it("updater receives correct parent node for nested path", () => {
+			const write = mockWrite();
+			write.setContent(HJSON.stringify({ outer: { inner: 1 } }, null, 2));
+			HJSON.patch(write)("outer.inner", (node, _original, key, root) => {
+				expect(node.isObject()).toBe(true);
+				expect(key).toBe("inner");
+				return node.patchValue(_original, key, 99);
+			});
+		});
+	});
+
+	describe("nested object patching", () => {
+		it("patches a deeply nested field (dot notation)", () => {
+			const write = mockWrite();
+			const data = { a: { b: { c: 1 } } };
+			write.setContent(HJSON.stringify(data, null, 2));
+			const result = HJSON.patch(write)("a.b.c", (node, original, key, root) => {
+				return node.patchValue(original, key, 99);
+			});
+			expect(result).toBe(HJSON.stringify({ a: { b: { c: 99 } } }, null, 2));
+		});
+
+		it("patches via bracket notation with numeric index", () => {
+			const write = mockWrite();
+			write.setContent(HJSON.stringify({ items: ["a", "b"] }, null, 2));
+			const result = HJSON.patch(write)("items[1]", (node, original, key) => {
+				return node.patchValue(original, key, "x");
+			});
+			expect(result).toBe(HJSON.stringify({ items: ["a", "x"] }, null, 2));
+		});
+
+		it("patches array element via numeric index in path", () => {
+			const write = mockWrite();
+			write.setContent(HJSON.stringify({ data: ["a", "b", "c"] }, null, 2));
+			const result = HJSON.patch(write)("data.1", (node, original, key) => {
+				return node.patchValue(original, key, "x");
+			});
+			expect(result).toBe(HJSON.stringify({ data: ["a", "x", "c"] }, null, 2));
+		});
+
+		it("patches element inside nested array via bracket notation", () => {
+			const write = mockWrite();
+			write.setContent(HJSON.stringify({ matrix: [[1, 2], [3, 4]] }, null, 2));
+			const result = HJSON.patch(write)("matrix[0][1]", (node, original, key) => {
+				return node.patchValue(original, key, 99);
+			});
+			expect(result).toBe(HJSON.stringify({ matrix: [[1, 99], [3, 4]] }, null, 2));
+		});
+	});
+
+	describe("auto-creation of missing intermediate nodes", () => {
+		it("inserts empty object for missing intermediate segment when parent is object and next key is string", () => {
+			const write = mockWrite();
+			write.setContent(HJSON.stringify({ a: 1 }, null, 2));
+			const result = HJSON.patch(write)("a.b.c", (node, original, key) => {
+				return node.patchValue(original, key, 42);
+			});
+			expect(result).toBe(HJSON.stringify({ a: { b: { c: 42 } } }, null, 2));
+		});
+
+		it("inserts empty array for missing intermediate segment when next key is numeric", () => {
+			const write = mockWrite();
+			write.setContent(HJSON.stringify({ items: [] }, null, 2));
+			const result = HJSON.patch(write)("items.0", (node, original, key) => {
+				return node.insertElement(original, 0, "first");
+			});
+			expect(result).toBe(HJSON.stringify({ items: ["first"] }, null, 2));
+		});
+	});
+
+	describe("value-to-container replacement", () => {
+		it("replaces intermediate value node with object when traversing deeper", () => {
+			const write = mockWrite();
+			write.setContent(HJSON.stringify({ a: "text" }, null, 2));
+			const result = HJSON.patch(write)("a.b", (node, original, key) => {
+				return node.patchValue(original, key, 42);
+			});
+			expect(result).toBe(HJSON.stringify({ a: { b: 42 } }, null, 2));
+		});
+
+		it("replaces intermediate value node with array when traversing with numeric key", () => {
+			const write = mockWrite();
+			write.setContent(HJSON.stringify({ a: "text" }, null, 2));
+			const result = HJSON.patch(write)("a.0", (node, original, key) => {
+				return node.insertElement(original, 0, "val");
+			});
+			expect(result).toBe(HJSON.stringify({ a: ["val"] }, null, 2));
+		});
+	});
+
+	describe("error handling", () => {
+		it("throws when content is null (unloaded file)", () => {
+			const write = (cb: string | ((prev: string | null) => string)) => {
+				if (typeof cb === "function") {
+					return cb(null);
+				}
+				return cb;
+			};
+			expect(() => HJSON.patch(write)("x", (node, original, key) => node.patchValue(original, key, 1))).toThrow("Attempting to write into unloaded file");
+		});
+
+		it("throws when jsonPath is empty", () => {
+			const write = mockWrite();
+			write.setContent(HJSON.stringify({ a: 1 }, null, 2));
+			expect(() => HJSON.patch(write)("", (node, original, key) => node.patchValue(original, key, 2))).toThrow("jsonPath is empty");
+		});
+
+		it("throws when path has only dot/whitespace", () => {
+			const write = mockWrite();
+			write.setContent(HJSON.stringify({ a: 1 }, null, 2));
+			expect(() => HJSON.patch(write)(". . .", (node, original, key) => node.patchValue(original, key, 2))).toThrow("jsonPath is empty");
+		});
+	});
+
+	describe("write function integration", () => {
+		it("returns the value from write function", () => {
+			const write = mockWrite();
+			write.setContent(HJSON.stringify({ x: 1 }, null, 2));
+			const result = HJSON.patch(write)("x", (node, original, key) => node.patchValue(original, key, 99));
+			expect(result).toBe(HJSON.stringify({ x: 99 }, null, 2));
+		});
+
+		it("stores result via write callback (file would be updated)", () => {
+			const write = mockWrite();
+			write.setContent(HJSON.stringify({ name: "old" }, null, 2));
+			HJSON.patch(write)("name", (node, original, key) => node.patchValue(original, key, "new"));
+			expect(write.getContent()).toBe(HJSON.stringify({ name: "new" }, null, 2));
+		});
+	});
+
+	describe("cache integration", () => {
+		it("re-parses after intermediate modifications (multiple passes work)", () => {
+			const write = mockWrite();
+			write.setContent(HJSON.stringify({ a: "text" }, null, 2));
+
+			const segments = "a.b.c".split(".");
+			HJSON.patch(write)("a.b.c", (node, original, key) => node.patchValue(original, key, 42));
+
+			expect(write.getContent()).toBe(HJSON.stringify({ a: { b: { c: 42 } } }, null, 2));
+		});
+	});
+});

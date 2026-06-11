@@ -4,7 +4,7 @@ import { useFileString } from "@project/core";
 import type { HjsonNode } from "@project/hjson";
 import { HJSON } from "@project/hjson";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
-import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useState } from "react";
 import {
 	resolveSchema,
 	detectSchemaType,
@@ -35,97 +35,10 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	const [render, setRender] = useState(30);
 	const [filter, setFilter] = useLocalStorage("property-filter", "");
 	const { t } = useTranslation();
-	const formatRef = useRef<NodeJS.Timeout>(null);
 
 	const onChange = useCallback(
 		(jsonPath: string, updater: (node: HjsonNode, original: string, key: string | number, root: HjsonNode) => string) => {
-			const result = write((content: string | null) => {
-				if (content === null) {
-					throw new Error("Attempting to write into unloaded file");
-				}
-
-				let root = HJSON.parseWithCache(content);
-
-				const segments = jsonPath
-					.split(/[.\]\[]/)
-					.filter((s) => s.trim().length > 0)
-					.map((s) => {
-						const num = Number(s);
-						return Number.isInteger(num) && String(num) === s ? num : s;
-					});
-
-				if (segments.length === 0) {
-					throw new Error(`jsonPath is empty: ${jsonPath}`);
-				}
-
-				if (segments.length === 1) {
-					return updater(root, content, segments[0]!, root);
-				}
-
-				while (true) {
-					let parent = root;
-					let modified = false;
-
-					for (let i = 0; i < segments.length - 1; i++) {
-						const currentKey = segments[i]!;
-						const nextKey = segments[i + 1]!;
-
-						const child = parent.get(currentKey);
-
-						const container = typeof nextKey === "number" ? [] : {};
-
-						if (child.isMissing()) {
-							if (parent.isObject() && typeof currentKey === "string") {
-								content = parent.insertField(content!, currentKey, container);
-							} else if (parent.isArray() && typeof currentKey === "number") {
-								content = parent.insertElement(content!, currentKey, container);
-							} else {
-								throw new Error(`Invalid key '${currentKey}' for parent type '${parent.constructor.name}'`);
-							}
-
-							root = HJSON.parseWithCache(content);
-							modified = true;
-							break;
-						}
-
-						if (child.isValue() && i < segments.length - 1) {
-							if (parent.isObject() && typeof currentKey === "string") {
-								content = parent.patchValue(content!, currentKey, container);
-							} else if (parent.isArray() && typeof currentKey === "number") {
-								content = parent.patchValue(content!, currentKey, container);
-							} else {
-								throw new Error(`Cannot replace value node at '${segments.slice(0, i + 1).join(".")}'`);
-							}
-
-							root = HJSON.parseWithCache(content);
-							modified = true;
-							break;
-						}
-
-						parent = child;
-					}
-
-					if (modified) {
-						continue;
-					}
-
-					const key = segments[segments.length - 1]!;
-
-					return updater(parent, content, key, root);
-				}
-			});
-
-			if (formatRef.current) {
-				clearTimeout(formatRef.current);
-				formatRef.current = null;
-			}
-
-			formatRef.current = setTimeout(() => {
-				const formatted = HJSON.format(result);
-				if (formatted !== result) {
-					write(formatted);
-				}
-			}, 3000);
+			HJSON.patch(write)(jsonPath, updater);
 		},
 		[write],
 	);
