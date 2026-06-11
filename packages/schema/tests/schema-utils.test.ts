@@ -489,7 +489,7 @@ describe("getDefaults", () => {
 	});
 
 	it("returns default value for undefinedable schema with explicit default", () => {
-		const schema = v.undefinedable(v.string(), 0);
+		const schema = v.undefinedable(v.number(), 0);
 		expect(getDefaults(schema as AnySchema, undefined)).toBe(0);
 	});
 
@@ -500,7 +500,7 @@ describe("getDefaults", () => {
 
 	it("handles pipe by recursing on first item", () => {
 		const inner = v.object({ x: v.optional(v.string(), "val") });
-		const schema = v.pipe(inner, v.minLength(1));
+		const schema = v.pipe(inner, metadata({ type: "object" }));
 		expect(getDefaults(schema as AnySchema, {})).toEqual({ x: "val" });
 	});
 
@@ -531,7 +531,7 @@ describe("getDefaults", () => {
 				if (val.type === "a") return v.object({ key: v.optional(v.string(), "from-a") });
 				return v.object({ key: v.optional(v.string(), "from-b") });
 			}),
-			v.minLength(1),
+			metadata({ type: "object" }),
 		);
 		expect(getDefaults(schema as AnySchema, { type: "a" })).toEqual({ key: "from-a" });
 		expect(getDefaults(schema as AnySchema, { type: "b" })).toEqual({ key: "from-b" });
