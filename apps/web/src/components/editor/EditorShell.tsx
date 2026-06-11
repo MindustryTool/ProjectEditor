@@ -24,7 +24,7 @@ import { usePath } from "#/hooks/use-path";
 import { RecentlyOpenedFilesBar } from "./recently-opened/RecentlyOpenedFilesBar";
 import { TextEditor } from "./TextEditor";
 import { BundleContent } from "./bundle/BundleContent";
-import { ImageWithSize } from "./ImageWithSize";
+const PixelEditor = lazy(() => import("./pixel-editor/PixelEditor").then((m) => ({ default: m.PixelEditor })));
 import { NoOpenedFileScreen } from "./NoOpenedFileScreen";
 import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -88,11 +88,7 @@ function matchEditorRoute(path: string | null, entry: { kind: string } | undefin
 		return { type: "msch", path };
 	}
 
-	if ([".json", ".hjson", ".md", ".txt"].some((k) => path.endsWith(k))) {
-		return { type: "text", path };
-	}
-
-	return { type: "empty" };
+	return { type: "text", path };
 }
 
 function matchPropertiesRoute(path: string | null): PropertiesRoute {
@@ -149,7 +145,17 @@ function EditorContent({ path }: { path: string }) {
 		case "mod":
 			return <TextEditor path={route.path} />;
 		case "image":
-			return <ImageWithSize path={route.path} />;
+			return (
+				<Suspense
+					fallback={
+						<div className="flex h-full w-full items-center justify-center">
+							<Spinner />
+						</div>
+					}
+				>
+					<PixelEditor path={route.path} />
+				</Suspense>
+			);
 		case "sprite":
 			return <UnitSpriteEditor striped={route.striped} />;
 		case "msav":
@@ -231,7 +237,9 @@ const EditorPanels = memo(function EditorPanels() {
 				<div className="flex min-h-0 flex-1 flex-col overflow-hidden h-full p-1 gap-1">
 					<RecentlyOpenedFilesBar />
 					<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-						<Suspense>{path ? <EditorContent path={path} /> : <NoOpenedFileScreen />}</Suspense>
+						<ErrorBoundary>
+							<Suspense>{path ? <EditorContent path={path} /> : <NoOpenedFileScreen />}</Suspense>
+						</ErrorBoundary>
 					</div>
 				</div>
 			</ResizablePanel>
