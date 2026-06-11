@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Tokenizer, type Token } from "@project/hjson";
+import { Tokenizer, HJSONError, type Token } from "@project/hjson";
 
 function tokens(input: string): Token[] {
   const t = new Tokenizer(input);
@@ -258,11 +258,11 @@ describe("Tokenizer", () => {
       let caught: unknown;
       try {
         t.next();
-      } catch (e: unknown) {
-        caught = e;
+      }       catch (e: unknown) {
+        caught = e as HJSONError;
       }
       expect(caught).toBeDefined();
-      expect(caught.inputFragment).toContain("@");
+      expect((caught as HJSONError).inputFragment).toContain("@");
     });
   });
 });

@@ -259,9 +259,9 @@ export class HjsonObjectNode extends HjsonNode {
 
 		const info = this.field(key);
 		if (info) {
-			return info.replaceValue(original, newValue);
+			return info.replaceValue(original, newValue!);
 		}
-		return this.insertField(original, key, newValue);
+		return this.insertField(original, key, newValue!);
 	}
 
 	removeField(original: string, key: string): string {
@@ -557,7 +557,7 @@ export class HjsonArrayNode extends HjsonNode {
 			return original;
 		}
 
-		return el.replaceValue(original, newValue);
+		return el.replaceValue(original, newValue!);
 	}
 
 	insertElement(original: string, index: number, newValue: unknown): string {
@@ -718,7 +718,11 @@ export class HjsonValueNode<T = unknown> extends HjsonNode {
 		return this.#end;
 	}
 
-	patchValue(original: string, key: string | number, newValue: unknown): string {
+	/** 2-arg form: patch value directly (no key needed) */
+	patchValue(original: string, newValue: unknown): string;
+	/** 3-arg form: standard patch with key context */
+	patchValue(original: string, key: string | number, newValue: unknown): string;
+	patchValue(original: string, key: string | number | unknown, newValue?: unknown): string {
 		const val = arguments.length <= 2 ? key : newValue;
 		if (val === undefined) {
 			return original.slice(0, this.#start.index) + original.slice(this.#end.index);

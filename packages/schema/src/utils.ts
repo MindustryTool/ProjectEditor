@@ -312,6 +312,7 @@ export type SchemaMetadata = {
 	};
 	disabled?: boolean;
 	options?: AnySchema[];
+	option?: string;
 };
 
 /**

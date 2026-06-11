@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DefaultProjectFileTree, isDefaultPath, jsonProjectTree, type TreeNode, type FileEntry, type FileStat } from "@project/fs";
+import { DefaultProjectFileTree, isDefaultPath, jsonProjectTree, type TreeNode } from "@project/fs";
 
 describe("DefaultProjectFileTree", () => {
 	it("walks every node in a flat tree", () => {

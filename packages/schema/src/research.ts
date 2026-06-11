@@ -10,7 +10,7 @@ export const ResearchSchema: SchemaFn = CachedSchema((context) => {
 		v.pipe(
 			v.lazy((input) => {
 				if (typeof input === "string") {
-					return v.pipe(v.optional(ContentNameSchema, ""), metadata({ name: "simple" }));
+					return v.pipe(v.optional(ContentNameSchema, ""), metadata({ option: "simple" }));
 				}
 				return v.pipe(
 					v.optional(
@@ -23,13 +23,13 @@ export const ResearchSchema: SchemaFn = CachedSchema((context) => {
 						}),
 						{},
 					),
-					metadata({ name: "complex" }),
+					metadata({ option: "complex" }),
 				);
 			}),
 			metadata({
 				type: "variant",
 				options: [
-					v.pipe(v.optional(ContentNameSchema, ""), metadata({ name: "simple" })),
+					v.pipe(v.optional(ContentNameSchema, ""), metadata({ option: "simple" })),
 					v.pipe(
 						v.optional(
 							v.object({
@@ -41,7 +41,7 @@ export const ResearchSchema: SchemaFn = CachedSchema((context) => {
 							}),
 							{},
 						),
-						metadata({ name: "complex" }),
+						metadata({ option: "complex" }),
 					),
 				],
 			}),

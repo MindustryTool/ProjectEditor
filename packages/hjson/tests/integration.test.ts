@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { HJSON } from "@project/hjson";
+import { HJSON, HJSONError } from "@project/hjson";
 
 describe("Integration: real-world scenarios", () => {
   it("parses a config file with comments, unquoted keys, trailing commas", () => {
@@ -24,7 +24,7 @@ describe("Integration: real-world scenarios", () => {
         ],
       }
     `;
-    const result = HJSON.parse(input);
+    const result = HJSON.parse(input) as Record<string, any>;
     expect(result.name).toBe("my-app");
     expect(result.version).toBe("2.0.0");
     expect(result.debug).toBe(false);
@@ -36,20 +36,20 @@ describe("Integration: real-world scenarios", () => {
 
   it("parses unquoted string values with spaces", () => {
     const input = '{description: hello world, status: active}';
-    const result = HJSON.parse(input);
+    const result = HJSON.parse(input) as Record<string, any>;
     expect(result.description).toBe("hello world");
     expect(result.status).toBe("active");
   });
 
   it("parses multi-line string values", () => {
     const input = "{\n  message: '''\n    Line 1\n    Line 2\n    Line 3\n    '''\n}";
-    const result = HJSON.parse(input);
+    const result = HJSON.parse(input) as Record<string, any>;
     expect(result.message).toBe("Line 1\nLine 2\nLine 3");
   });
 
   it("parses various number formats", () => {
     const input = '{int: 255, hex: 0xFF, float: -3.14, exp: 1.5e3}';
-    const result = HJSON.parse(input);
+    const result = HJSON.parse(input) as Record<string, any>;
     expect(result.int).toBe(255);
     expect(result.hex).toBe(255);
     expect(result.float).toBe(-3.14);
@@ -58,7 +58,7 @@ describe("Integration: real-world scenarios", () => {
 
   it("parses root-level object without braces (key-value pairs)", () => {
     const input = "host: server.example.com\nport: 8080\nssl: true";
-    const result = HJSON.parse(input);
+    const result = HJSON.parse(input) as Record<string, any>;
     expect(result.host).toBe("server.example.com");
     expect(result.port).toBe(8080);
     expect(result.ssl).toBe(true);
@@ -101,7 +101,7 @@ describe("Integration: real-world scenarios", () => {
 
   it("handles # line comments", () => {
     const input = "{ # this is a comment\n  key: val\n}";
-    const result = HJSON.parse(input);
+    const result = HJSON.parse(input) as Record<string, any>;
     expect(result.key).toBe("val");
   });
 
@@ -109,11 +109,12 @@ describe("Integration: real-world scenarios", () => {
     try {
       HJSON.parse("{invalid: @bad}");
     } catch (e: unknown) {
-      expect(e.code).toBeDefined();
-      expect(typeof e.startLine).toBe("number");
-      expect(typeof e.startColumn).toBe("number");
-      expect(typeof e.index).toBe("number");
-      expect(e.inputFragment).toBeDefined();
+      const err = e as HJSONError;
+      expect(err.code).toBeDefined();
+      expect(typeof err.startLine).toBe("number");
+      expect(typeof err.startColumn).toBe("number");
+      expect(typeof err.index).toBe("number");
+      expect(err.inputFragment).toBeDefined();
     }
   });
 });

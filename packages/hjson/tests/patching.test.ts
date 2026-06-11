@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { HJSON, HjsonMissingNode, HjsonObjectNode, HjsonArrayNode, HjsonValueNode } from "@project/hjson";
-import type { FieldInfo, ElementInfo, HjsonNode } from "@project/hjson";
+import { HJSON, HjsonMissingNode, HjsonValueNode, type HjsonObjectNode, type HjsonArrayNode } from "@project/hjson";
 
 function parseStructured(input: string) {
 	return HJSON.parseStructured(input) as HjsonObjectNode;
@@ -1347,18 +1346,25 @@ describe("Structured pre/post round-trip", () => {
 // HJSON.patch() - high-level curried patching with path traversal
 // ---------------------------------------------------------------------------
 
+type WriteCallback = (cb: string | ((prev: string | null) => string)) => string;
+
+interface MockWrite extends WriteCallback {
+	getContent(): string;
+	setContent(c: string): void;
+}
+
 describe("HJSON.patch()", () => {
-	function mockWrite() {
+	function mockWrite(): MockWrite {
 		let content = "";
-		const fn = (cb: string | ((prev: string | null) => string)) => {
+		const fn = ((cb: string | ((prev: string | null) => string)) => {
 			if (typeof cb === "function") {
 				const result = cb(content || null);
 				content = result;
 				return result;
 			}
-			content = cb;
-			return cb;
-		};
+			content = cb as string;
+			return cb as string;
+		}) as MockWrite;
 		fn.getContent = () => content;
 		fn.setContent = (c: string) => { content = c; };
 		return fn;
@@ -1368,7 +1374,7 @@ describe("HJSON.patch()", () => {
 		it("updates existing field value via dot path", () => {
 			const write = mockWrite();
 			write.setContent(HJSON.stringify({ name: "old" }, null, 2));
-			const result = HJSON.patch(write)("name", (node, original, key, root) => {
+			const result = HJSON.patch(write)("name", (node, original, key, _root) => {
 				return node.patchValue(original, key, "new");
 			});
 			expect(result).toBe(HJSON.stringify({ name: "new" }, null, 2));
@@ -1388,7 +1394,7 @@ describe("HJSON.patch()", () => {
 		it("updater receives correct parent node for nested path", () => {
 			const write = mockWrite();
 			write.setContent(HJSON.stringify({ outer: { inner: 1 } }, null, 2));
-			HJSON.patch(write)("outer.inner", (node, _original, key, root) => {
+			HJSON.patch(write)("outer.inner", (node, _original, key, _root) => {
 				expect(node.isObject()).toBe(true);
 				expect(key).toBe("inner");
 				return node.patchValue(_original, key, 99);
@@ -1401,7 +1407,7 @@ describe("HJSON.patch()", () => {
 			const write = mockWrite();
 			const data = { a: { b: { c: 1 } } };
 			write.setContent(HJSON.stringify(data, null, 2));
-			const result = HJSON.patch(write)("a.b.c", (node, original, key, root) => {
+			const result = HJSON.patch(write)("a.b.c", (node, original, key, _root) => {
 				return node.patchValue(original, key, 99);
 			});
 			expect(result).toBe(HJSON.stringify({ a: { b: { c: 99 } } }, null, 2));
@@ -1448,8 +1454,8 @@ describe("HJSON.patch()", () => {
 		it("inserts empty array for missing intermediate segment when next key is numeric", () => {
 			const write = mockWrite();
 			write.setContent(HJSON.stringify({ items: [] }, null, 2));
-			const result = HJSON.patch(write)("items.0", (node, original, key) => {
-				return node.insertElement(original, 0, "first");
+			const result = HJSON.patch(write)("items.0", (node, original, _key) => {
+				return (node as HjsonArrayNode).insertElement(original, 0, "first");
 			});
 			expect(result).toBe(HJSON.stringify({ items: ["first"] }, null, 2));
 		});
@@ -1468,8 +1474,8 @@ describe("HJSON.patch()", () => {
 		it("replaces intermediate value node with array when traversing with numeric key", () => {
 			const write = mockWrite();
 			write.setContent(HJSON.stringify({ a: "text" }, null, 2));
-			const result = HJSON.patch(write)("a.0", (node, original, key) => {
-				return node.insertElement(original, 0, "val");
+			const result = HJSON.patch(write)("a.0", (node, original, _key) => {
+				return (node as HjsonArrayNode).insertElement(original, 0, "val");
 			});
 			expect(result).toBe(HJSON.stringify({ a: ["val"] }, null, 2));
 		});
@@ -1520,7 +1526,6 @@ describe("HJSON.patch()", () => {
 			const write = mockWrite();
 			write.setContent(HJSON.stringify({ a: "text" }, null, 2));
 
-			const segments = "a.b.c".split(".");
 			HJSON.patch(write)("a.b.c", (node, original, key) => node.patchValue(original, key, 42));
 
 			expect(write.getContent()).toBe(HJSON.stringify({ a: { b: { c: 42 } } }, null, 2));

@@ -1,8 +1,8 @@
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import { OPFSAdapter, type FileEntry } from "@project/fs";
+import { OPFSAdapter } from "@project/fs";
 
-function strToBuf(s: string): Uint8Array {
-	return new TextEncoder().encode(s);
+function strToBuf(s: string): Uint8Array<ArrayBuffer> {
+	return new TextEncoder().encode(s) as unknown as Uint8Array<ArrayBuffer>;
 }
 
 async function bufToStr(buf: ArrayBuffer): Promise<string> {
@@ -194,7 +194,7 @@ describe("OPFSAdapter", () => {
 			expect(await adapter.exists("exists.txt")).toBe(true);
 		});
 
-		it("returns true for "/"", async () => {
+		it('returns true for "/"', async () => {
 			expect(await adapter.exists("/")).toBe(true);
 		});
 

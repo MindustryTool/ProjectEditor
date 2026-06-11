@@ -100,19 +100,19 @@ const consumeItemsSchema = cached((context: ProjectContents) =>
 	v.pipe(
 		v.lazy((input) => {
 			if (Array.isArray(input)) {
-				return v.optional(v.pipe(v.array(ItemStackSchema(context)), metadata({ name: "array" })), []);
+				return v.optional(v.pipe(v.array(ItemStackSchema(context)), metadata({ option: "array" })), []);
 			}
 			if (typeof input === "string") {
-				return v.optional(v.pipe(ItemStackSchema(context), metadata({ name: "single" })), "");
+				return v.optional(v.pipe(ItemStackSchema(context), metadata({ option: "single" })), "");
 			}
-			return v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ name: "multiple" })), { items: [] });
+			return v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ option: "multiple" })), { items: [] });
 		}),
 		metadata({
 			type: "variant",
 			options: [
-				v.optional(v.pipe(v.array(ItemStackSchema(context)), metadata({ name: "array" })), []),
-				v.optional(v.pipe(ItemStackSchema(context), metadata({ name: "single" })), ""),
-				v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ name: "multiple" })), { items: [] }),
+				v.optional(v.pipe(v.array(ItemStackSchema(context)), metadata({ option: "array" })), []),
+				v.optional(v.pipe(ItemStackSchema(context), metadata({ option: "single" })), ""),
+				v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ option: "multiple" })), { items: [] }),
 			],
 		}),
 	));
@@ -121,15 +121,15 @@ const consumeItemBoostSchema = cached((context: ProjectContents) =>
 	v.pipe(
 		v.lazy((input) => {
 			if (Array.isArray(input)) {
-				return v.optional(v.pipe(v.array(ItemStackSchema(context)), metadata({ name: "array" })), []);
+				return v.optional(v.pipe(v.array(ItemStackSchema(context)), metadata({ option: "array" })), []);
 			}
-			return v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ name: "multiple" })), { items: [] });
+			return v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ option: "multiple" })), { items: [] });
 		}),
 		metadata({
 			type: "variant",
 			options: [
-				v.optional(v.pipe(v.array(ItemStackSchema(context)), metadata({ name: "array" })), []),
-				v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ name: "multiple" })), { items: [] }),
+				v.optional(v.pipe(v.array(ItemStackSchema(context)), metadata({ option: "array" })), []),
+				v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ option: "multiple" })), { items: [] }),
 			],
 		}),
 	));
@@ -149,15 +149,15 @@ const consumeLiquidsSchema = cached((context: ProjectContents) =>
 	v.pipe(
 		v.lazy((input) => {
 			if (Array.isArray(input)) {
-				return v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ name: "array" })), []);
+				return v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ option: "array" })), []);
 			}
-			return v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ name: "multiple" })), { liquids: [] });
+			return v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ option: "multiple" })), { liquids: [] });
 		}),
 		metadata({
 			type: "variant",
 			options: [
-				v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ name: "array" })), []),
-				v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ name: "multiple" })), { liquids: [] }),
+				v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ option: "array" })), []),
+				v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ option: "multiple" })), { liquids: [] }),
 			],
 		}),
 	));
@@ -174,15 +174,15 @@ const consumeLiquidsBoostSchema = cached((context: ProjectContents) =>
 	v.pipe(
 		v.lazy((input) => {
 			if (Array.isArray(input)) {
-				return v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ name: "array" })), []);
+				return v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ option: "array" })), []);
 			}
-			return v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ name: "multiple" })), { liquids: [] });
+			return v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ option: "multiple" })), { liquids: [] });
 		}),
 		metadata({
 			type: "variant",
 			options: [
-				v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ name: "array" })), []),
-				v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ name: "multiple" })), { liquids: [] }),
+				v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ option: "array" })), []),
+				v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ option: "multiple" })), { liquids: [] }),
 			],
 		}),
 	));
@@ -190,7 +190,7 @@ const consumeLiquidsBoostSchema = cached((context: ProjectContents) =>
 const consumePowerSchema = v.pipe(
 	v.lazy((input) => {
 		if (typeof input === "number") {
-			return v.pipe(v.number(), metadata({ name: "single" }));
+			return v.pipe(v.number(), metadata({ option: "single" }));
 		}
 		return v.pipe(
 			v.object({
@@ -199,13 +199,13 @@ const consumePowerSchema = v.pipe(
 				capacity: v.optional(v.number(), 0),
 				buffered: v.optional(v.boolean(), false),
 			}),
-			metadata({ name: "buffered" }),
+			metadata({ option: "buffered" }),
 		);
 	}),
 	metadata({
 		type: "variant",
 		options: [
-			v.pipe(v.number(), metadata({ name: "single" })),
+			v.pipe(v.number(), metadata({ option: "single" })),
 			v.pipe(
 				v.object({
 					...consumeSchema.entries,
@@ -213,7 +213,7 @@ const consumePowerSchema = v.pipe(
 					capacity: v.optional(v.number(), 0),
 					buffered: v.optional(v.boolean(), false),
 				}),
-				metadata({ name: "buffered" }),
+				metadata({ option: "buffered" }),
 			),
 		],
 	}),
@@ -233,7 +233,7 @@ export const ConsumesHjsonSchema = cached((context: ProjectContents) =>
 							return v.pipe(
 								v.array(v.picklist([...consumeTypes, "all"])),
 								metadata({
-									name: "remove",
+									option: "remove",
 								}),
 							);
 						}),
@@ -244,7 +244,7 @@ export const ConsumesHjsonSchema = cached((context: ProjectContents) =>
 								v.pipe(
 									v.array(v.picklist([...consumeTypes, "all"])),
 									metadata({
-										name: "remove",
+										option: "remove",
 									}),
 								),
 							],
