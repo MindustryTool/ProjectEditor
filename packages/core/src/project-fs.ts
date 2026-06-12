@@ -41,11 +41,14 @@ export class ProjectFileSystem {
 	}
 
 	async readFile(path: string): Promise<ArrayBuffer | null> {
+		console.log("ProjectFS readFile", { path });
 		return this.vfs.readFile(this.scopePath(path));
 	}
 
 	async writeFile(path: string, data: BufferSource): Promise<void> {
+		console.log("ProjectFS writeFile start", { path });
 		await this.vfs.writeFile(this.scopePath(path), data);
+		console.log("ProjectFS writeFile done", { path });
 		this.events.emit("file:write", { path });
 
 		if (!this.files.some((f) => f.path === path)) {
@@ -57,10 +60,12 @@ export class ProjectFileSystem {
 		const BATCH_SIZE = 1000;
 
 		const dirs = new Set(entries.map((e) => e.name.split("/").slice(0, -1).join("/")).filter(Boolean));
+		console.log("ProjectFS writeFiles createDirs", { count: dirs.size });
 		await Promise.all([...dirs].map((d) => this.vfs.mkdir(this.scopePath(d))));
 
 		for (let i = 0; i < entries.length; i += BATCH_SIZE) {
 			const batch = entries.slice(i, i + BATCH_SIZE);
+			console.log("ProjectFS writeFiles batch", { batchIndex: Math.floor(i / BATCH_SIZE) + 1, batchSize: batch.length });
 			const results = await Promise.allSettled(
 				batch.map((entry) =>
 					this.vfs
@@ -82,12 +87,14 @@ export class ProjectFileSystem {
 	}
 
 	async delete(path: string): Promise<void> {
+		console.log("ProjectFS delete", { path });
 		await this.vfs.delete(this.scopePath(path));
 		this.events.emit("file:delete", { path });
 		await this.refreshTree();
 	}
 
 	async mkdir(path: string): Promise<void> {
+		console.log("ProjectFS mkdir", { path });
 		await this.vfs.mkdir(this.scopePath(path));
 		await this.refreshTree();
 		this.events.emit("file:mkdir", { path });
@@ -106,6 +113,7 @@ export class ProjectFileSystem {
 		return new Promise((resolve) => {
 			this.refreshTreeTimer = setTimeout(async () => {
 				this.refreshTreeTimer = null;
+				console.log("ProjectFS refreshTree scheduled");
 				resolve(await this.refreshTreeNow());
 			}, 150);
 		});

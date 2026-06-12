@@ -1,10 +1,5 @@
 import { useIsDesktop } from "#/hooks/use-is-desktop";
 import { NavigationGuardDialog } from "./NavigationGuardDialog";
-import { ProjectMenu } from "./toolbar/ProjectMenu";
-import { EditMenu } from "./toolbar/EditMenu";
-import { ViewMenu } from "./toolbar/ViewMenu";
-import { ExportMenu } from "./ExportMenu";
-import { LocalizationMenu } from "./toolbar/LocalizationMenu";
 import { Toolbar } from "./Toolbar";
 import { StatusBar } from "./StatusBar";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "#/components/ui/resizable";
@@ -26,11 +21,14 @@ import { TextEditor } from "./TextEditor";
 import { BundleContent } from "./bundle/BundleContent";
 const PixelEditor = lazy(() => import("./pixel-editor/PixelEditor").then((m) => ({ default: m.PixelEditor })));
 import { NoOpenedFileScreen } from "./NoOpenedFileScreen";
-import { ChevronDown } from "lucide-react";
+import { MenuIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Sheet, SheetContent, SheetTrigger } from "#/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import { SchematicMapPreview } from "#/components/editor/SchematicMapPreview";
+import { Button } from "#/components/ui/button";
+import { EditorMenuList } from "./toolbar/EditorMenuList";
+import { Separator } from "#/components/ui/separator";
 
 const ModHjsonPanel = lazy(() => import("./right/ModHjsonPanel").then((m) => ({ default: m.ModHjsonPanel })));
 const ItemPanel = lazy(() => import("./right/ItemPanel").then((m) => ({ default: m.ItemPanel })));
@@ -263,11 +261,7 @@ function EditorDesktopLayout() {
 	return (
 		<Fragment>
 			<Toolbar>
-				<ProjectMenu />
-				<EditMenu />
-				<ViewMenu />
-				<ExportMenu />
-				<LocalizationMenu />
+				<EditorMenuList />
 			</Toolbar>
 			<ResizablePanelGroup orientation="horizontal" className="flex min-h-0 flex-1">
 				<ResizablePanel defaultSize="30%" minSize="20%">
@@ -294,23 +288,29 @@ function EditorMobileLayout() {
 			<Toolbar>
 				<Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
 					<SheetTrigger asChild>
-						<button className="flex text-nowrap items-center gap-1 rounded px-2 py-1 text-xs font-medium text-foreground hover:bg-accent active:bg-accent">
-							{t("editor.files")}
-							<ChevronDown className="h-3 w-3 text-muted-foreground" />
-						</button>
+						<Button variant="ghost">
+							<MenuIcon className="size-4" />
+							{t("editor.menu")}
+						</Button>
 					</SheetTrigger>
-					<SheetContent side="left" showCloseButton={false} className="w-4/5 sm:max-w-sm max-h-dvh">
-						<FileExplorer />
+					<SheetContent side="bottom" className="h-[320px] p-0 gap-0 overflow-hidden">
+						<EditorMenuList onClose={() => setSheetOpen(false)} />
 					</SheetContent>
 				</Sheet>
-				<ProjectMenu />
-				<EditMenu />
-				<ViewMenu />
-				<ExportMenu />
-				<LocalizationMenu />
 			</Toolbar>
-			<Tabs defaultValue="right" className="flex min-h-0 flex-1 overflow-hidden w-full">
-				<TabsContent value="center" className="flex flex-1 overflow-hidden bg-background w-full p-1">
+			<Tabs defaultValue="properties" className="flex min-h-0 flex-1 overflow-hidden w-full">
+				<TabsContent value="file" className="flex flex-1 overflow-hidden bg-background w-full p-1">
+					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
+						<div className="flex flex-col flex-1 overflow-hidden bg-background w-full gap-1">
+							<ErrorBoundary>
+								<Suspense>
+									<FileExplorer />
+								</Suspense>
+							</ErrorBoundary>
+						</div>
+					</div>
+				</TabsContent>
+				<TabsContent value="editor" className="flex flex-1 overflow-hidden bg-background w-full p-1">
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
 						<div className="flex flex-col flex-1 overflow-hidden bg-background w-full gap-1">
 							<ErrorBoundary>
@@ -322,7 +322,7 @@ function EditorMobileLayout() {
 						</div>
 					</div>
 				</TabsContent>
-				<TabsContent value="right" className="flex flex-1 overflow-hidden bg-background w-full h-full p-1">
+				<TabsContent value="properties" className="flex flex-1 overflow-hidden bg-background w-full h-full p-1">
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
 						<div className="flex flex-1 overflow-hidden bg-background w-full">
 							<ErrorBoundary>
@@ -333,11 +333,16 @@ function EditorMobileLayout() {
 						</div>
 					</div>
 				</TabsContent>
-				<TabsList className="w-full justify-around rounded-none border-t bg-card shrink-0 min-h-10 max-h-10">
-					<TabsTrigger value="right" className="flex-1">
+				<TabsList className="w-full justify-around rounded-none border-t bg-card shrink-0 min-h-10 max-h-10 mt-auto p-0">
+					<TabsTrigger value="file" className="flex-1 p-0 h-full border-none rounded-none">
+						{t("editor.files")}
+					</TabsTrigger>
+					<Separator orientation="vertical" />
+					<TabsTrigger value="properties" className="flex-1 p-0 h-full border-none rounded-none">
 						{t("editor.properties")}
 					</TabsTrigger>
-					<TabsTrigger value="center" className="flex-1">
+					<Separator orientation="vertical" />
+					<TabsTrigger value="editor" className="flex-1 p-0 h-full border-none rounded-none">
 						{t("editor.editor")}
 					</TabsTrigger>
 				</TabsList>

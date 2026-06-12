@@ -3,7 +3,6 @@ import { useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { hasDefaultValidatorMatch, JsonExporter } from "@project/core";
 import { useProjectSession, useValidationStore } from "@project/core";
-import { cn } from "#/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "#/components/ui/dialog";
 import { Button } from "#/components/ui/button";
 import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from "#/components/ui/input-group";
@@ -12,15 +11,15 @@ import { ValidationErrorList, type ValidationFileError } from "#/components/edit
 import { usePath } from "#/hooks/use-path";
 import { validationService } from "#/services/validation-service";
 
-interface ExportMenuProps {
-	className?: string;
+interface ExportMenuContentProps {
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
 }
 
-export function ExportMenu({ className }: ExportMenuProps) {
+export function ExportMenuContent({ open, onOpenChange }: ExportMenuContentProps) {
 	const { t } = useTranslation();
 	const projectContext = useProjectSession((s) => s.projectContext);
 	const [, setPath] = usePath();
-	const [open, setOpen] = useState(false);
 	const [validationOpen, setValidationOpen] = useState(false);
 	const [filename, setFilename] = useState("");
 	const [warning, setWarning] = useState<string | null>(null);
@@ -51,15 +50,6 @@ export function ExportMenu({ className }: ExportMenuProps) {
 		[projectContext, t],
 	);
 
-	const handleOpen = useCallback(() => {
-		if (!projectContext) return;
-
-		const sanitized = sanitizeFilename(projectContext.project.name);
-		setFilename(sanitized);
-		setWarning(null);
-		setOpen(true);
-	}, [projectContext]);
-
 	const handleFilenameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
 		const raw = e.target.value.replace(/\.zip$/i, "");
 		setFilename(raw);
@@ -72,36 +62,40 @@ export function ExportMenu({ className }: ExportMenuProps) {
 	}, []);
 
 	const handleCancel = useCallback(() => {
-		setOpen(false);
-	}, []);
+		onOpenChange(false);
+	}, [onOpenChange]);
 
 	const handleExportAnyway = useCallback(() => {
 		setValidationOpen(false);
 		handleExport(filename);
-		setOpen(false);
-	}, [filename, handleExport]);
+		onOpenChange(false);
+	}, [filename, handleExport, onOpenChange]);
 
 	const handleNavigate = useCallback(
 		(filePath: string) => {
 			setValidationOpen(false);
-			setOpen(false);
+			onOpenChange(false);
 			setPath(filePath);
 		},
-		[setPath],
+		[setPath, onOpenChange],
+	);
+
+	const handleOpenChange = useCallback(
+		(newOpen: boolean) => {
+			if (newOpen) {
+				if (!projectContext) return;
+				const sanitized = sanitizeFilename(projectContext.project.name);
+				setFilename(sanitized);
+				setWarning(null);
+			}
+			onOpenChange(newOpen);
+		},
+		[projectContext, onOpenChange],
 	);
 
 	return (
 		<>
-			<button
-				onClick={handleOpen}
-				className={cn(
-					"inline-flex items-center text-nowrap gap-1 rounded px-2 py-1 text-xs font-medium text-foreground hover:bg-accent active:bg-accent",
-					className,
-				)}
-			>
-				{t("export-menu.label")}
-			</button>
-			<Dialog open={open} onOpenChange={setOpen}>
+			<Dialog open={open} onOpenChange={handleOpenChange}>
 				<DialogContent>
 					<ExportDialogContent
 						filename={filename}
@@ -314,3 +308,4 @@ export function sanitizeFilename(name: string): string {
 	result = result.slice(0, 200);
 	return result || "export";
 }
+

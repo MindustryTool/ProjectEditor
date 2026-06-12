@@ -1,28 +1,11 @@
 import { useTranslation } from "react-i18next";
-import { useNavigate, useLocation } from "@tanstack/react-router";
-import { useAppStore } from "@project/core";
 import {
 	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuRadioGroup,
-	DropdownMenuRadioItem,
-	DropdownMenuSub,
-	DropdownMenuSubContent,
-	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "#/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import { cn } from "#/lib/utils";
-import { SUPPORTED_LOCALES, type Locale } from "#/lib/locales";
-import { useTheme } from "#/components/ThemeProvider";
-
-type Theme = "light" | "dark" | "system";
-
-const locales = [
-	{ code: "en", label: "English" },
-	{ code: "vi", label: "Tiếng Việt" },
-];
+import { ViewMenuContent } from "./ViewMenuContent";
 
 interface ViewMenuProps {
 	className?: string;
@@ -30,25 +13,6 @@ interface ViewMenuProps {
 
 export function ViewMenu({ className }: ViewMenuProps) {
 	const { t } = useTranslation();
-	const navigate = useNavigate();
-	const location = useLocation();
-	const { theme, setTheme } = useTheme();
-	const updateSettings = useAppStore((s) => s.updateSettings);
-
-	function handleThemeChange(mode: Theme) {
-		setTheme(mode);
-		updateSettings({ theme: mode });
-	}
-
-	function handleLanguageChange(code: Locale) {
-		const segments = location.pathname.split("/").filter(Boolean);
-		if (SUPPORTED_LOCALES.includes(segments[0] as Locale)) {
-			segments[0] = code;
-		} else {
-			segments.unshift(code);
-		}
-		navigate({ to: `/${segments.join("/")}`, replace: true });
-	}
 
 	return (
 		<DropdownMenu>
@@ -63,29 +27,7 @@ export function ViewMenu({ className }: ViewMenuProps) {
 					<ChevronDown className="h-3 w-3 text-muted-foreground" />
 				</button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align="start" className="w-44">
-				<DropdownMenuSub>
-					<DropdownMenuSubTrigger>{t("view-menu.change-theme")}</DropdownMenuSubTrigger>
-					<DropdownMenuSubContent className="w-36">
-						<DropdownMenuRadioGroup value={theme} onValueChange={(value) => handleThemeChange(value as Theme)}>
-							<DropdownMenuRadioItem value="light">{t("view-menu.theme-light")}</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem value="dark">{t("view-menu.theme-dark")}</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem value="system">{t("view-menu.theme-auto")}</DropdownMenuRadioItem>
-						</DropdownMenuRadioGroup>
-					</DropdownMenuSubContent>
-				</DropdownMenuSub>
-
-				<DropdownMenuSub>
-					<DropdownMenuSubTrigger>{t("view-menu.change-language")}</DropdownMenuSubTrigger>
-					<DropdownMenuSubContent className="w-36">
-						{locales.map((locale) => (
-							<DropdownMenuItem key={locale.code} onClick={() => handleLanguageChange(locale.code as Locale)}>
-								{locale.label}
-							</DropdownMenuItem>
-						))}
-					</DropdownMenuSubContent>
-				</DropdownMenuSub>
-			</DropdownMenuContent>
+			<ViewMenuContent />
 		</DropdownMenu>
 	);
 }

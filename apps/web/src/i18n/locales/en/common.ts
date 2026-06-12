@@ -2,6 +2,7 @@ export const en = {
 	"app.title": "Project Editor",
 	"nav.home": "Home",
 	"nav.about": "About",
+    "editor.menu": "Menu",
 	"editor.select-file": "Select a file to start editing",
 	"editor.properties": "Properties",
 	"editor.properties-placeholder": "Select an element to view its properties.",

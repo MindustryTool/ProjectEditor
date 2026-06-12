@@ -66,7 +66,7 @@ export function FileExplorer({ className }: FileExplorerProps) {
 							if (!open) setContextMenu(null);
 						}}
 					>
-						<DropdownMenuContent side="right" sideOffset={0} style={{ position: "fixed", left: contextMenu.x, top: contextMenu.y }}>
+						<DropdownMenuContent side="left" sideOffset={0} style={{ position: "fixed", left: contextMenu.x, top: contextMenu.y }}>
 							<DropdownMenuItem
 								onClick={() => {
 									setEditingPath(contextMenu.path);
