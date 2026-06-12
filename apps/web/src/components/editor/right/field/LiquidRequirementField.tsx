@@ -13,7 +13,7 @@ import type { SchemaRendererProps } from "#/components/editor/right/field/types"
 import { getSchemaMetadata } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 
-export const ItemRequirementField = React.memo(function ItemRequirementField({
+export const LiquidRequirementField = React.memo(function LiquidRequirementField({
 	name,
 	value,
 	onChange,
@@ -22,20 +22,20 @@ export const ItemRequirementField = React.memo(function ItemRequirementField({
 }: SchemaRendererProps) {
 	const {
 		findContent,
-		contents: { items },
+		contents: { liquids },
 	} = useProjectContext();
 
 	const requirement = typeof value === "string" ? value : "";
 	const parts = requirement?.split("/") || [];
 	const itemName = parts[0] || "";
 	const reqNumber = Number(parts[1] ?? 0);
-	const selectedItem = findContent(itemName, [items]);
+	const selectedItem = findContent(itemName, [liquids]);
 
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
-    const handleChange = (name: string, amount: number) => {
-        onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, name + "/" + amount));
-    }
+	const handleChange = (name: string, amount: number) => {
+		onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, name + "/" + amount));
+	};
 
 	return (
 		<Field key={itemName} jsonPath={jsonPath} metadata={metadata}>
@@ -67,7 +67,7 @@ export const ItemRequirementField = React.memo(function ItemRequirementField({
 							asChild
 						>
 							<ItemGrid>
-								{items
+								{liquids
 									.filter((i) => i.name !== itemName)
 									.map((item) => (
 										<ToggleGroupItem key={item.name} value={item.name}>
@@ -79,7 +79,7 @@ export const ItemRequirementField = React.memo(function ItemRequirementField({
 					</DialogContent>
 				</Dialog>
 				<Input
-                    className="flex-1"
+					className="flex-1"
 					type="number"
 					value={reqNumber}
 					onChange={(v) => handleChange(itemName, Number(v.currentTarget.valueAsNumber))}

@@ -29,6 +29,7 @@ import { SchematicMapPreview } from "#/components/editor/SchematicMapPreview";
 import { Button } from "#/components/ui/button";
 import { EditorMenuList } from "./toolbar/EditorMenuList";
 import { Separator } from "#/components/ui/separator";
+import { useLocalStorage } from "usehooks-ts";
 
 const ModHjsonPanel = lazy(() => import("./right/ModHjsonPanel").then((m) => ({ default: m.ModHjsonPanel })));
 const ItemPanel = lazy(() => import("./right/ItemPanel").then((m) => ({ default: m.ItemPanel })));
@@ -282,6 +283,7 @@ function EditorMobileLayout() {
 	const [sheetOpen, setSheetOpen] = useState(false);
 	const [path] = usePath();
 	const propertiesRoute = path ? matchPropertiesRoute(path) : { type: "none" as const };
+	const [tab, setTab] = useLocalStorage("editor-tab", "editor");
 
 	return (
 		<Fragment>
@@ -298,7 +300,7 @@ function EditorMobileLayout() {
 					</SheetContent>
 				</Sheet>
 			</Toolbar>
-			<Tabs defaultValue="properties" className="flex min-h-0 flex-1 overflow-hidden w-full">
+			<Tabs value={tab} onValueChange={setTab} className="flex min-h-0 flex-1 overflow-hidden w-full">
 				<TabsContent value="file" className="flex flex-1 overflow-hidden bg-background w-full p-1">
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
 						<div className="flex flex-col flex-1 overflow-hidden bg-background w-full gap-1">
@@ -338,12 +340,12 @@ function EditorMobileLayout() {
 						{t("editor.files")}
 					</TabsTrigger>
 					<Separator orientation="vertical" />
-					<TabsTrigger value="properties" className="flex-1 p-0 h-full border-none rounded-none">
-						{t("editor.properties")}
-					</TabsTrigger>
-					<Separator orientation="vertical" />
 					<TabsTrigger value="editor" className="flex-1 p-0 h-full border-none rounded-none">
 						{t("editor.editor")}
+					</TabsTrigger>
+					<Separator orientation="vertical" />
+					<TabsTrigger value="properties" className="flex-1 p-0 h-full border-none rounded-none">
+						{t("editor.properties")}
 					</TabsTrigger>
 				</TabsList>
 			</Tabs>

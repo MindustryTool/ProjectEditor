@@ -17,6 +17,7 @@ export const ItemStackSchema = cached((context: ProjectContents) =>
 			if (typeof input === "string") {
 				return v.pipe(
 					v.string(),
+                    metadata({type: 'item-stack'}),
 					v.check((value) => {
 						if (!value.includes("/")) {
 							return false;
@@ -50,49 +51,7 @@ export const ItemStackSchema = cached((context: ProjectContents) =>
 					item: ItemStackItemFieldSchema(context),
 					amount: v.pipe(v.number(), v.integer(), v.minValue(0)),
 				}),
-				metadata({ option: "item-stack" }),
 			);
-		}),
-		metadata({
-			type: "variant",
-			options: [
-				v.pipe(
-					v.object({
-						item: ItemStackItemFieldSchema(context),
-						amount: v.pipe(v.number(), v.integer(), v.minValue(0)),
-					}),
-					metadata({ option: "item-stack" }),
-				),
-				v.pipe(
-					v.string(),
-					v.check((value) => {
-						if (!value.includes("/")) {
-							return false;
-						}
-
-						const parts = value.split("/");
-						if (parts.length !== 2) {
-							return false;
-						}
-
-						const [itemName, number] = parts;
-
-						if (!itemName || !number) {
-							return false;
-						}
-
-						if (!v.safeParse(ContentNameSchema, itemName).success) {
-							return false;
-						}
-
-						if (!v.safeParse(v.pipe(v.string(), v.toNumber(), v.minValue(0), v.integer()), number).success) {
-							return false;
-						}
-
-						return true;
-					}, "Invalid item requirement, must be in the format 'item/number'"),
-				),
-			],
 		}),
 	),
 );

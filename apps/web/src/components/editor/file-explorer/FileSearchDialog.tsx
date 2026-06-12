@@ -14,7 +14,7 @@ export function FileSearchDialog() {
 
 	return (
 		<Dialog>
-			<DialogTrigger className="w-full py-1">
+			<DialogTrigger className="w-full pb-1">
 				<InputGroup className="w-full h-8 rounded">
 					<InputGroupAddon>
 						<Search className="size-4" />
