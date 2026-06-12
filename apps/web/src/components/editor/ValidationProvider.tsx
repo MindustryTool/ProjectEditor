@@ -21,7 +21,8 @@ export function ValidationProvider() {
 
 	useEffect(() => {
 		validationService.lang = lang;
-	}, [lang]);
+		validationService.revalidateFiles(projectId);
+	}, [lang, projectId]);
 
 	useEffect(() => {
 		validationService.validationDelayMs = validationDelayMs;

@@ -1,123 +1,58 @@
 import * as v from "valibot";
-import { CachedSchema, findContent } from "./utils";
+import { CachedSchema } from "./utils";
 import { ContentFieldSchema } from "./content";
 import { metadata } from "./utils";
 import type { SchemaFn } from "./utils";
 import { ItemStackSchema } from "./item-stack";
+import type { ProjectContents } from "@project/types";
+
+const simpleSchema = (context: ProjectContents) => v.pipe(v.optional(ContentFieldSchema(context), ""), metadata({ option: "simple" }));
+
+const complexSchema = (context: ProjectContents) =>
+	v.pipe(
+		v.optional(
+			v.lazy((input) => {
+				if (input && typeof input === "object") {
+					if ("root" in input && input.root === true) {
+						return v.object({
+							root: v.optional(v.boolean(), false),
+							name: v.optional(v.string(), ""),
+							planet: v.optional(v.string()),
+							objectives: v.optional(v.object({})),
+						});
+					}
+
+					return v.object({
+						root: v.optional(v.boolean(), false),
+						parent: v.optional(ContentFieldSchema(context)),
+						planet: v.optional(v.string()),
+						requirements: v.optional(v.array(ItemStackSchema(context)), []),
+						objectives: v.optional(v.object({})),
+					});
+				}
+
+				return v.never();
+			}),
+			{},
+		),
+		metadata({ option: "complex" }),
+	);
 
 export const ResearchSchema: SchemaFn = CachedSchema((context) => {
 	return v.pipe(
 		v.pipe(
 			v.lazy((input) => {
 				if (typeof input === "string") {
-					return v.pipe(v.optional(ContentFieldSchema(context), ""), metadata({ option: "simple" }));
+					return simpleSchema(context);
 				}
-                
-				return v.pipe(
-					v.optional(
-						v.object({
-							parent: v.optional(ContentFieldSchema(context)),
-							requirements: v.optional(v.array(ItemStackSchema(context)), []),
-							objectives: v.optional(v.object({})),
-							planet: v.optional(v.string()),
-							robot: v.optional(v.boolean()),
-						}),
-						{},
-					),
-					metadata({ option: "complex" }),
-				);
+
+				return complexSchema(context);
 			}),
 			metadata({
-				type: "variant",
-				options: [
-					v.pipe(v.optional(ContentFieldSchema(context), ""), metadata({ option: "simple" })),
-					v.pipe(
-						v.optional(
-							v.object({
-								parent: v.optional(ContentFieldSchema(context)),
-								requirements: v.optional(v.array(ItemStackSchema(context)), []),
-								objectives: v.optional(v.object({})),
-								planet: v.optional(v.string()),
-								robot: v.optional(v.boolean()),
-							}),
-							{},
-						),
-						metadata({ option: "complex" }),
-					),
-				],
+				type: "options",
+				options: [simpleSchema(context), complexSchema(context)],
 			}),
 		),
-		v.rawCheck(({ dataset, addIssue }) => {
-			if (dataset.typed) {
-				const value = dataset.value;
-
-				if (typeof value === "string") {
-					const content = findContent(value, context);
-
-					if (!content) {
-						addIssue({
-							message: `Content ${value} not found`,
-						});
-					}
-				} else if (typeof value === "object") {
-					const parent = value.parent;
-
-					if (parent) {
-						const content = findContent(parent, context);
-
-						if (!content) {
-							addIssue({
-								message: `Content ${parent} not found`,
-								path: [
-									{
-										type: "object",
-										key: "parent",
-										origin: "value",
-										input: value,
-										value: parent,
-									},
-								],
-							});
-						}
-					}
-					const requirement = value.requirements;
-
-					if (requirement) {
-						const items = context.items;
-						for (let i = 0; i < requirement.length; i++) {
-							const req = requirement[i]!;
-							if (typeof req === "string") {
-								const parts = req.split("/");
-								const itemName = parts[0]!.replace(context.name + "-", "");
-								const item = items.find((i) => i.name.replaceAll(context.name + "-", "") === itemName);
-
-								if (!item) {
-									addIssue({
-										message: `Item ${itemName} not found`,
-										path: [
-											{
-												type: "object",
-												key: "requirements",
-												input: value,
-												origin: "value",
-												value: req,
-											},
-											{
-												type: "array",
-												key: i,
-												input: requirement,
-												origin: "value",
-												value: req,
-											},
-										],
-									});
-								}
-							}
-						}
-					}
-				}
-			}
-		}),
 	);
 });
 

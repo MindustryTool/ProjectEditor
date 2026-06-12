@@ -1,6 +1,6 @@
 import { FieldControl } from "#/components/editor/right/field/Field";
 import { getSchemaMetadata, getSchemaEntries, resolveSchema, detectSchemaType, getDefaults } from "@project/schema";
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import type { AnySchema } from "@project/schema";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
@@ -8,6 +8,7 @@ import { Button } from "#/components/ui/button";
 import { SchemaLabel } from "#/components/editor/right/field/SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { cn } from "#/lib/utils";
+import { selectIsExpanded, useProjectSession } from "@project/core";
 
 export const ObjectField = React.memo(function ObjectField({
 	name,
@@ -20,17 +21,35 @@ export const ObjectField = React.memo(function ObjectField({
 	nested,
 }: SchemaRendererProps) {
 	const resolvedValue = useMemo(() => (value && typeof value === "object" ? value : {}), [value]);
+	const openPath = `object-open-${jsonPath}`;
 
+	const isOpen = useProjectSession(selectIsExpanded(openPath));
+	const setOpen = useProjectSession((s) => s.setExpanded);
 	const entries = getSchemaEntries(resolveSchema(entrySchema, resolvedValue));
 
-	if (entries.length < 5) {
+	const handleOpen = useCallback((open: boolean) => setOpen(openPath, open), [openPath, setOpen]);
+
+	if (entries.length < 4) {
 		return (
-			<Children entries={entries} value={resolvedValue} path={path} onChange={onChange} jsonPath={jsonPath} getRenderer={getRenderer} />
+			<div
+				className={cn("grid gap-6 mt-2", {
+					"border-border p-2 border rounded-md bg-muted/50": !nested,
+				})}
+			>
+				<Children
+					entries={entries}
+					value={resolvedValue}
+					path={path}
+					onChange={onChange}
+					jsonPath={jsonPath}
+					getRenderer={getRenderer}
+				/>
+			</div>
 		);
 	}
 
 	return (
-		<Collapsible id={jsonPath}>
+		<Collapsible id={jsonPath} open={isOpen} onOpenChange={handleOpen}>
 			<CollapsibleTrigger asChild>
 				<Button className="flex justify-between items-center w-full">
 					<SchemaLabel name={name} metadata={getSchemaMetadata(entrySchema)} />

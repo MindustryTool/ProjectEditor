@@ -26,6 +26,7 @@ export const ContentFieldSchema = CachedSchema((context: ProjectContents) =>
 				...context.effects,
 				...context.sounds,
 			].map((item) => item.name.replaceAll(context.name + "-", "")),
+			"Invalid content name",
 		),
 		metadata({ type: "content" }),
 	),

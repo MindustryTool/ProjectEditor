@@ -118,7 +118,7 @@ const consumeItemsSchema = cached((context: ProjectContents) =>
 			);
 		}),
 		metadata({
-			type: "variant",
+			type: "options",
 			options: [
 				v.optional(v.pipe(v.array(ItemStackSchema(context)), metadata({ option: "array" })), []),
 				v.optional(v.pipe(ItemStackSchema(context), metadata({ option: "single" })), ""),
@@ -140,7 +140,7 @@ const consumeItemBoostSchema = cached((context: ProjectContents) =>
 			return v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ option: "multiple" })), { items: [] });
 		}),
 		metadata({
-			type: "variant",
+			type: "options",
 			options: [
 				v.optional(v.pipe(v.array(ItemStackSchema(context)), metadata({ option: "array" })), []),
 				v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ option: "multiple" })), { items: [] }),
@@ -177,7 +177,7 @@ const consumeLiquidsSchema = cached((context: ProjectContents) =>
 			);
 		}),
 		metadata({
-			type: "variant",
+			type: "options",
 			options: [
 				v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ option: "array" })), []),
 				v.optional(
@@ -214,7 +214,7 @@ const consumeLiquidsBoostSchema = cached((context: ProjectContents) =>
 			});
 		}),
 		metadata({
-			type: "variant",
+			type: "options",
 			options: [
 				v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ option: "array" })), []),
 				v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ option: "multiple" })), {
@@ -241,7 +241,7 @@ const consumePowerSchema = v.pipe(
 		);
 	}),
 	metadata({
-		type: "variant",
+		type: "options",
 		options: [
 			v.pipe(v.number(), metadata({ option: "single" })),
 			v.pipe(
@@ -276,7 +276,7 @@ export const ConsumesHjsonSchema = cached((context: ProjectContents) =>
 							);
 						}),
 						metadata({
-							type: "variant",
+							type: "options",
 							options: [
 								v.picklist([...consumeTypes, "all"]),
 								v.pipe(

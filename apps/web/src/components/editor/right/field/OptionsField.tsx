@@ -8,7 +8,7 @@ import { detectSchemaType, getDefaults, getSchemaMetadata } from "@project/schem
 import React, { useRef } from "react";
 import { useMemo } from "react";
 
-export const VariantField = React.memo(function VariantField({
+export const OptionsField = React.memo(function OptionsField({
 	name,
 	value,
 	onChange,
@@ -20,8 +20,8 @@ export const VariantField = React.memo(function VariantField({
 	const fieldMetadata = useMemo(() => getSchemaMetadata(entrySchema, false), [entrySchema]);
 	const lastRef = useRef<Record<string, unknown>>({});
 
-	if (fieldMetadata!.type !== "variant") {
-		throw new Error("VariantField only works with variant schemas");
+	if (fieldMetadata!.type !== "options") {
+		throw new Error("OptionsField only works with options schemas");
 	}
 
 	if (fieldMetadata?.options) {
@@ -64,7 +64,7 @@ export const VariantField = React.memo(function VariantField({
 			const { type, defaultValue, typeSchema, Renderer } = options[0]!;
 
 			if (!Renderer) {
-				return <div>Renderer renderer not found for type {type}</div>;
+				return <div>Renderer not found for type {type}</div>;
 			}
 
 			return (
@@ -89,14 +89,6 @@ export const VariantField = React.memo(function VariantField({
 			const { option: option1, type: type1, defaultValue: defaultValue1, typeSchema: typeSchema1, Renderer: Renderer1 } = options[0]!;
 
 			const { option: option2, type: type2, defaultValue: defaultValue2, typeSchema: typeSchema2, Renderer: Renderer2 } = options[1]!;
-
-			if (!Renderer1 || !Renderer2) {
-				return (
-					<div>
-						Renderer renderer not found for type {type1} or {type2}
-					</div>
-				);
-			}
 
 			const defaultTab = matched ?? option1;
 
@@ -130,30 +122,38 @@ export const VariantField = React.memo(function VariantField({
 							</TabsTrigger>
 						</TabsList>
 						<TabsContent value={option1}>
-							<Renderer1
-								path={path}
-								name={option1}
-								value={value}
-								onChange={onChange}
-								entrySchema={typeSchema1}
-								jsonPath={jsonPath}
-								getRenderer={getRenderer}
-								defaultValue={defaultValue1}
-								nested
-							/>
+							{Renderer1 ? (
+								<Renderer1
+									path={path}
+									name={option1}
+									value={value}
+									onChange={onChange}
+									entrySchema={typeSchema1}
+									jsonPath={jsonPath}
+									getRenderer={getRenderer}
+									defaultValue={defaultValue1}
+									nested
+								/>
+							) : (
+								<span>Renderer not found for type {type1}</span>
+							)}
 						</TabsContent>
 						<TabsContent value={option2}>
-							<Renderer2
-								path={path}
-								name={option2}
-								value={value}
-								onChange={onChange}
-								entrySchema={typeSchema2}
-								jsonPath={jsonPath}
-								getRenderer={getRenderer}
-								defaultValue={defaultValue2}
-								nested
-							/>
+							{Renderer2 ? (
+								<Renderer2
+									path={path}
+									name={option2}
+									value={value}
+									onChange={onChange}
+									entrySchema={typeSchema2}
+									jsonPath={jsonPath}
+									getRenderer={getRenderer}
+									defaultValue={defaultValue2}
+									nested
+								/>
+							) : (
+								<span>Renderer not found for type {type2}</span>
+							)}
 						</TabsContent>
 					</Tabs>
 				</Field>
@@ -170,7 +170,7 @@ export const VariantField = React.memo(function VariantField({
 		const { Renderer } = selecting;
 
 		if (Renderer === undefined) {
-			return <div>Renderer renderer not found for type {selecting.type}</div>;
+			return <div>Renderer not found for selected type {selecting.type}</div>;
 		}
 
 		return (

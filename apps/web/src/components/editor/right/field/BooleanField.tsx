@@ -32,7 +32,7 @@ export const BooleanField = React.memo(function BooleanField({
 
 	return (
 		<Field jsonPath={jsonPath} metadata={metadata}>
-			<FieldControl className="flex-row flex gap-1">
+			<FieldControl className="flex-row flex items-center gap-1 mt-2">
 				<Checkbox key={name} checked={checked} onCheckedChange={handleChange} />
 				<SchemaLabel name={name} metadata={metadata} />
 			</FieldControl>
