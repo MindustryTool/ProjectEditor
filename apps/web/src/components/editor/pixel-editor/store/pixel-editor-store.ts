@@ -1,5 +1,7 @@
 import { create } from "zustand";
 
+export type BrushShape = "square" | "circle" | "dither";
+
 export type ToolType =
   | "pencil"
   | "eraser"
@@ -22,16 +24,18 @@ export type ToolType =
   | "color-select"
   | "lasso"
   | "polygon"
+  | "scale"
   | "brush";
 
 export interface PixelEditorState {
-  width: number;
-  height: number;
   tool: ToolType;
   foregroundColor: string;
   backgroundColor: string;
   brushSize: number;
   brushOpacity: number;
+  brushFlow: number;
+  brushHardness: number;
+  brushShape: BrushShape;
   tolerance: number;
   sprayDensity: number;
   sprayRadius: number;
@@ -48,24 +52,30 @@ export interface PixelEditorState {
   dirty: boolean;
   showNewCanvasDialog: boolean;
   showResizeDialog: boolean;
-  palette: string[];
-  lockedColors: number[];
 }
 
 export interface PixelEditorActions {
-  setWidth: (width: number) => void;
-  setHeight: (height: number) => void;
   setTool: (tool: ToolType) => void;
   setForegroundColor: (color: string) => void;
   setBackgroundColor: (color: string) => void;
   setBrushSize: (size: number) => void;
   setBrushOpacity: (opacity: number) => void;
+  setBrushFlow: (flow: number) => void;
+  setBrushHardness: (hardness: number) => void;
+  setBrushShape: (shape: BrushShape) => void;
   setTolerance: (tolerance: number) => void;
   setSprayDensity: (density: number) => void;
   setSprayRadius: (radius: number) => void;
   setPixelPerfect: (on: boolean) => void;
   setSymmetry: (symmetry: "none" | "horizontal" | "vertical" | "radial") => void;
   setSymmetrySegments: (segments: number) => void;
+  setGridVisible: (visible: boolean) => void;
+  setPixelGridVisible: (visible: boolean) => void;
+  setRulersVisible: (visible: boolean) => void;
+  setGuidesVisible: (visible: boolean) => void;
+  setLayerBoundsVisible: (visible: boolean) => void;
+  setOnionSkinVisible: (visible: boolean) => void;
+  setCheckerboardVisible: (visible: boolean) => void;
   toggleGrid: () => void;
   togglePixelGrid: () => void;
   toggleRulers: () => void;
@@ -78,20 +88,7 @@ export interface PixelEditorActions {
   resetColors: () => void;
   setShowNewCanvasDialog: (show: boolean) => void;
   setShowResizeDialog: (show: boolean) => void;
-  resetCanvas: (width: number, height: number) => void;
-  addPaletteColor: (color: string) => void;
-  removePaletteColor: (index: number) => void;
-  reorderPalette: (from: number, to: number) => void;
-  toggleLockColor: (index: number) => void;
-  setPalette: (palette: string[]) => void;
-  setLockedColors: (locked: number[]) => void;
 }
-
-const DEFAULT_PALETTE = [
-  "#000000", "#ffffff", "#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#00ffff",
-  "#808080", "#c0c0c0", "#800000", "#008000", "#000080", "#808000", "#800080", "#008080",
-  "#ff8800", "#88ff00", "#0088ff", "#ff0088", "#8800ff", "#00ff88", "#ff4400", "#44ff00",
-];
 
 const defaultColors = {
   foregroundColor: "#000000",
@@ -99,11 +96,12 @@ const defaultColors = {
 };
 
 export const usePixelEditorStore = create<PixelEditorState & PixelEditorActions>()((set) => ({
-  width: 64,
-  height: 64,
   tool: "pencil",
   brushSize: 1,
   brushOpacity: 1,
+  brushFlow: 1,
+  brushHardness: 1,
+  brushShape: "circle",
   tolerance: 32,
   sprayDensity: 0.5,
   sprayRadius: 10,
@@ -120,24 +118,30 @@ export const usePixelEditorStore = create<PixelEditorState & PixelEditorActions>
   dirty: false,
   showNewCanvasDialog: false,
   showResizeDialog: false,
-  palette: [...DEFAULT_PALETTE],
-  lockedColors: [],
 
   ...defaultColors,
 
-  setWidth: (width) => set({ width }),
-  setHeight: (height) => set({ height }),
   setTool: (tool) => set({ tool }),
   setForegroundColor: (color) => set({ foregroundColor: color }),
   setBackgroundColor: (color) => set({ backgroundColor: color }),
   setBrushSize: (size) => set({ brushSize: Math.max(1, Math.min(100, size)) }),
   setBrushOpacity: (opacity) => set({ brushOpacity: Math.max(0, Math.min(1, opacity)) }),
+  setBrushFlow: (flow) => set({ brushFlow: Math.max(0, Math.min(1, flow)) }),
+  setBrushHardness: (hardness) => set({ brushHardness: Math.max(0, Math.min(1, hardness)) }),
+  setBrushShape: (shape) => set({ brushShape: shape }),
   setTolerance: (tolerance) => set({ tolerance: Math.max(0, Math.min(255, tolerance)) }),
   setSprayDensity: (density) => set({ sprayDensity: Math.max(0, Math.min(1, density)) }),
   setSprayRadius: (radius) => set({ sprayRadius: Math.max(1, Math.min(100, radius)) }),
   setPixelPerfect: (on) => set({ pixelPerfect: on }),
   setSymmetry: (symmetry) => set({ symmetry }),
   setSymmetrySegments: (segments) => set({ symmetrySegments: Math.max(2, Math.min(32, segments)) }),
+  setGridVisible: (visible: boolean) => set({ gridVisible: visible }),
+  setPixelGridVisible: (visible: boolean) => set({ pixelGridVisible: visible }),
+  setRulersVisible: (visible: boolean) => set({ rulersVisible: visible }),
+  setGuidesVisible: (visible: boolean) => set({ guidesVisible: visible }),
+  setLayerBoundsVisible: (visible: boolean) => set({ layerBoundsVisible: visible }),
+  setOnionSkinVisible: (visible: boolean) => set({ onionSkinVisible: visible }),
+  setCheckerboardVisible: (visible: boolean) => set({ checkerboardVisible: visible }),
   toggleGrid: () => set((s) => ({ gridVisible: !s.gridVisible })),
   togglePixelGrid: () => set((s) => ({ pixelGridVisible: !s.pixelGridVisible })),
   toggleRulers: () => set((s) => ({ rulersVisible: !s.rulersVisible })),
@@ -150,44 +154,4 @@ export const usePixelEditorStore = create<PixelEditorState & PixelEditorActions>
   resetColors: () => set(defaultColors),
   setShowNewCanvasDialog: (show) => set({ showNewCanvasDialog: show }),
   setShowResizeDialog: (show) => set({ showResizeDialog: show }),
-  resetCanvas: (width, height) => set({ width, height, dirty: false }),
-
-  addPaletteColor: (color) => set((s) => {
-    if (s.palette.length >= 64) return s;
-    return { palette: [...s.palette, color] };
-  }),
-
-  removePaletteColor: (index) => set((s) => {
-    if (s.lockedColors.includes(index)) return s;
-    const newPalette = s.palette.filter((_, i) => i !== index);
-    const newLocked = s.lockedColors
-      .filter((i) => i !== index)
-      .map((i) => (i > index ? i - 1 : i));
-    return { palette: newPalette, lockedColors: newLocked };
-  }),
-
-  reorderPalette: (from, to) => set((s) => {
-    const newPalette = [...s.palette];
-    const [moved] = newPalette.splice(from, 1);
-    newPalette.splice(to, 0, moved!);
-    const newLocked = s.lockedColors.map((i) => {
-      if (i === from) return to;
-      if (from < i && i <= to) return i - 1;
-      if (to <= i && i < from) return i + 1;
-      return i;
-    });
-    return { palette: newPalette, lockedColors: newLocked };
-  }),
-
-  toggleLockColor: (index) => set((s) => {
-    const isLocked = s.lockedColors.includes(index);
-    return {
-      lockedColors: isLocked
-        ? s.lockedColors.filter((i) => i !== index)
-        : [...s.lockedColors, index],
-    };
-  }),
-
-  setPalette: (palette) => set({ palette }),
-  setLockedColors: (locked) => set({ lockedColors: locked }),
 }));

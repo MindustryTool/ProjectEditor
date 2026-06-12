@@ -1,10 +1,17 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from "react";
-import { Stage, Layer, Image as KonvaImage, Rect } from "react-konva";
+import { Stage, Layer, Image as KonvaImage } from "react-konva";
 import type Konva from "konva";
 import { usePixelImage } from "../hooks/use-pixel-image";
 import { useCanvasNavigation } from "../hooks/use-canvas-navigation";
 import { usePixelEditorStore } from "../store/pixel-editor-store";
 import { useLayerStore } from "../store/layer-store";
+import { SelectionOverlay } from "./SelectionOverlay";
+import { PixelGridLayer } from "./PixelGridLayer";
+import { GridLayer } from "./GridLayer";
+import { OnionSkinOverlay } from "./OnionSkinOverlay";
+import { LayerBoundsOverlay } from "./LayerBoundsOverlay";
+import { TransformHandles } from "./TransformHandles";
+import { ZoomControls } from "./ZoomControls";
 
 interface DirtyRect {
   x: number;
@@ -28,7 +35,8 @@ export function PixelStage({ width, height, onPointerDown, onPointerMove, onPoin
   const internalStageRef = useRef<Konva.Stage>(null);
   const konvaImageRef = useRef<Konva.Image>(null);
   const [containerSize, setContainerSize] = useState({ w: 800, h: 600 });
-  const spacePressed = useRef(false);
+  const [spacePressed, setSpacePressed] = useState(false);
+  const spacePressedRef = useRef(false);
   const fittedRef = useRef(false);
 
   const {
@@ -44,10 +52,17 @@ export function PixelStage({ width, height, onPointerDown, onPointerMove, onPoin
 
   const checkerboardVisible = usePixelEditorStore((s) => s.checkerboardVisible);
   const gridVisible = usePixelEditorStore((s) => s.gridVisible);
+  const pixelGridVisible = usePixelEditorStore((s) => s.pixelGridVisible);
   const activeTool = usePixelEditorStore((s) => s.tool);
+  const onionSkinVisible = usePixelEditorStore((s) => s.onionSkinVisible);
+  const layerBoundsVisible = usePixelEditorStore((s) => s.layerBoundsVisible);
+  const [dashOffset, setDashOffset] = useState(0);
 
   const { getCanvas, updatePixels, updateRegion } = usePixelImage(width, height);
   const canvas = useLayerStore((s) => s.canvas);
+  const selectionBounds = canvas?.selectionBounds ?? null;
+  const selectionMask = canvas?.selectionMask ?? null;
+  const isTransforming = canvas?.isTransforming ?? false;
   const renderVersion = useLayerStore((s) => s.renderVersion);
 
   const renderDirtyRects = useCallback(
@@ -107,7 +122,9 @@ export function PixelStage({ width, height, onPointerDown, onPointerMove, onPoin
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.code === "Space") {
-        spacePressed.current = e.type === "keydown";
+        const pressed = e.type === "keydown";
+        spacePressedRef.current = pressed;
+        setSpacePressed(pressed);
       }
     };
     window.addEventListener("keydown", handler);
@@ -120,7 +137,8 @@ export function PixelStage({ width, height, onPointerDown, onPointerMove, onPoin
 
   const handlePointerDown = useCallback(
     (e: Konva.KonvaEventObject<PointerEvent>) => {
-      if (e.evt.button === 1 || spacePressed.current) return;
+      e.evt.preventDefault();
+      if (e.evt.button === 1 || spacePressedRef.current) return;
       const stage = internalStageRef.current;
       if (!stage) return;
       const pointer = stage.getPointerPosition();
@@ -134,7 +152,8 @@ export function PixelStage({ width, height, onPointerDown, onPointerMove, onPoin
 
   const handlePointerMove = useCallback(
     (e: Konva.KonvaEventObject<PointerEvent>) => {
-      if (spacePressed.current) return;
+      e.evt.preventDefault();
+      if (spacePressedRef.current) return;
       const stage = internalStageRef.current;
       if (!stage) return;
       if (!e.evt.buttons) return;
@@ -147,15 +166,27 @@ export function PixelStage({ width, height, onPointerDown, onPointerMove, onPoin
     [onPointerMove, scaleRef, posRef],
   );
 
-  const handlePointerUp = useCallback(() => {
-    onPointerUp?.();
-  }, [onPointerUp]);
+  const handlePointerUp = useCallback(
+    (e: Konva.KonvaEventObject<PointerEvent>) => {
+      e.evt.preventDefault();
+      onPointerUp?.();
+    },
+    [onPointerUp],
+  );
 
   const handleDragStart = useCallback(() => {
     posRef.current = { x: internalStageRef.current?.x() ?? 0, y: internalStageRef.current?.y() ?? 0 };
   }, [posRef]);
 
-  const isPanning = activeTool === "hand" || spacePressed.current;
+  const isPanning = activeTool === "hand" || spacePressed;
+
+  useEffect(() => {
+    if (!selectionMask) return;
+    const interval = setInterval(() => {
+      setDashOffset((o) => (o + 1) % 8);
+    }, 100);
+    return () => clearInterval(interval);
+  }, [selectionMask]);
 
   const canvasEl = getCanvas();
 
@@ -206,70 +237,28 @@ export function PixelStage({ width, height, onPointerDown, onPointerMove, onPoin
             />
           )}
           {canvasEl && <KonvaImage ref={konvaImageRef} image={canvasEl} x={0} y={0} listening={false} />}
+          {canvas && onionSkinVisible && <OnionSkinOverlay canvas={canvas} width={width} height={height} />}
+          {canvas && layerBoundsVisible && <LayerBoundsOverlay canvas={canvas} width={width} height={height} />}
+          {selectionBounds && (
+            <SelectionOverlay
+              bounds={selectionBounds}
+              width={width}
+              height={height}
+              dashOffset={dashOffset}
+            />
+          )}
+          {activeTool === "scale" && selectionBounds && !isTransforming && (
+            <TransformHandles bounds={selectionBounds} />
+          )}
           {gridVisible && scaleRef.current >= 4 && (
             <GridLayer width={width} height={height} scale={scaleRef.current} />
+          )}
+          {pixelGridVisible && scaleRef.current >= 6 && (
+            <PixelGridLayer width={width} height={height} scale={scaleRef.current} />
           )}
         </Layer>
       </Stage>
       <ZoomControls scale={scale} zoomIn={zoomIn} zoomOut={zoomOut} />
-    </div>
-  );
-}
-
-function GridLayer({ width, height, scale }: { width: number; height: number; scale: number }) {
-  const lines: React.ReactNode[] = [];
-  const step = scale >= 8 ? 1 : Math.ceil(8 / scale);
-  for (let x = 0; x <= width; x += step) {
-    lines.push(
-      <Rect
-        key={`v${x}`}
-        x={x}
-        y={0}
-        width={1 / scale}
-        height={height}
-        fill="rgba(0,0,0,0.15)"
-        listening={false}
-      />,
-    );
-  }
-  for (let y = 0; y <= height; y += step) {
-    lines.push(
-      <Rect
-        key={`h${y}`}
-        x={0}
-        y={y}
-        width={width}
-        height={1 / scale}
-        fill="rgba(0,0,0,0.15)"
-        listening={false}
-      />,
-    );
-  }
-  return <>{lines}</>;
-}
-
-import { ZoomIn, ZoomOut } from "lucide-react";
-
-function ZoomControls({ scale, zoomIn, zoomOut }: { scale: number; zoomIn: () => void; zoomOut: () => void }) {
-  return (
-    <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-md bg-card/90 backdrop-blur-sm border p-1 text-xs">
-      <button
-        className="rounded p-1 hover:bg-accent"
-        onClick={zoomIn}
-        title="Zoom In"
-      >
-        <ZoomIn className="h-3.5 w-3.5" />
-      </button>
-      <span className="min-w-12 text-center font-mono">
-        {Math.round(scale * 100)}%
-      </span>
-      <button
-        className="rounded p-1 hover:bg-accent"
-        onClick={zoomOut}
-        title="Zoom Out"
-      >
-        <ZoomOut className="h-3.5 w-3.5" />
-      </button>
     </div>
   );
 }

@@ -258,13 +258,11 @@ function handleWheelPick(e: React.PointerEvent, canvas: HTMLCanvasElement | null
   const dx = x - cx, dy = y - cy;
   const dist = Math.sqrt(dx * dx + dy * dy);
   if (dist > 75) return;
-  const angle = (Math.atan2(dy, dx) * 180 / Math.PI + 360 + 90) % 360;
-  const sat = Math.min(1, dist / 75);
   const getHsv = () => {
     const ctx2 = canvas.getContext("2d");
     if (ctx2) {
       const p = ctx2.getImageData(Math.round(x), Math.round(y), 1, 1).data;
-      if (p[3] > 0) return rgbToHex(p[0]!, p[1]!, p[2]!);
+      if (p[3]! > 0) return rgbToHex(p[0]!, p[1]!, p[2]!);
     }
     return null;
   };

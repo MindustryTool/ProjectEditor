@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { usePixelEditorStore } from "../store/pixel-editor-store";
 import { useLayerStore } from "../store/layer-store";
 import { useHistoryStore } from "../store/history-store";
-import { PixelCanvas, setPixel, getPixel } from "../utils/pixel-canvas";
+import { PixelCanvas } from "../utils/pixel-canvas";
 import { PixelToolbar } from "../components/PixelToolbar";
 import { NewCanvasDialog } from "../components/NewCanvasDialog";
-import { hexToRgba, rgbaToHex } from "../utils/drawing-tools";
+import { CanvasState, rgbaToUint32, uint32ToRgba, hexToRgba, rgbaToHex } from "../utils/canvas-state";
 
 vi.mock("react-konva", () => ({
   Stage: ({ children, ...props }: any) => <div data-testid="konva-stage" data-props={JSON.stringify(props)}>{children}</div>,
@@ -37,6 +38,16 @@ vi.mock("#/components/ui/label", () => ({
   Label: ({ children, ...props }: any) => <label {...props}>{children}</label>,
 }));
 
+const mockSelectionTools = {
+  deleteSelection: vi.fn(),
+  fillSelection: vi.fn(),
+  copySelection: vi.fn(),
+  cutSelection: vi.fn(),
+  pasteSelection: vi.fn(),
+  selectAll: vi.fn(),
+  deselect: vi.fn(),
+};
+
 vi.mock("../hooks/use-pixel-image", () => ({
   usePixelImage: () => ({
     getCanvas: () => document.createElement("canvas"),
@@ -62,7 +73,7 @@ describe("PixelToolbar", () => {
   });
 
   it("renders all 13 tool buttons + action buttons", () => {
-    render(<PixelToolbar onSave={vi.fn()} />);
+    render(<PixelToolbar onSave={vi.fn()} selectionTools={mockSelectionTools as any} />);
     expect(screen.getByTitle("Pencil")).toBeDefined();
     expect(screen.getByTitle("Eraser")).toBeDefined();
     expect(screen.getByTitle("Fill")).toBeDefined();
@@ -83,12 +94,12 @@ describe("PixelToolbar", () => {
   });
 
   it("pencil tool is active by default", () => {
-    render(<PixelToolbar onSave={vi.fn()} />);
+    render(<PixelToolbar onSave={vi.fn()} selectionTools={mockSelectionTools as any} />);
     expect(screen.getByTitle("Pencil").className).toContain("bg-accent");
   });
 
   it("changes tool on click", () => {
-    render(<PixelToolbar onSave={vi.fn()} />);
+    render(<PixelToolbar onSave={vi.fn()} selectionTools={mockSelectionTools as any} />);
     fireEvent.click(screen.getByTitle("Eraser"));
     expect(usePixelEditorStore.getState().tool).toBe("eraser");
     fireEvent.click(screen.getByTitle("Line"));
@@ -96,47 +107,47 @@ describe("PixelToolbar", () => {
   });
 
   it("undo button is disabled when no history", () => {
-    render(<PixelToolbar onSave={vi.fn()} />);
+    render(<PixelToolbar onSave={vi.fn()} selectionTools={mockSelectionTools as any} />);
     expect(screen.getByTitle("Undo (Ctrl+Z)").hasAttribute("disabled")).toBe(true);
     expect(screen.getByTitle("Redo (Ctrl+Shift+Z)").hasAttribute("disabled")).toBe(true);
   });
 
   it("undo button is enabled after pushing history", () => {
-    useHistoryStore.getState().pushCommand({ name: "Test", do: () => {}, undo: () => {} });
-    render(<PixelToolbar onSave={vi.fn()} />);
+    useHistoryStore.getState().pushEntry({ type: "pixel", id: "test", name: "Test", timestamp: Date.now(), changes: [], layerId: "layer1" });
+    render(<PixelToolbar onSave={vi.fn()} selectionTools={mockSelectionTools as any} />);
     expect(screen.getByTitle("Undo (Ctrl+Z)").hasAttribute("disabled")).toBe(false);
   });
 
   it("triggers undo on click", () => {
-    let undone = false;
-    useHistoryStore.getState().pushCommand({ name: "Test", do: () => {}, undo: () => { undone = true; } });
-    render(<PixelToolbar onSave={vi.fn()} />);
+    useHistoryStore.getState().pushEntry({ type: "pixel", id: "test", name: "Test", timestamp: Date.now(), changes: [], layerId: "layer1" });
+    render(<PixelToolbar onSave={vi.fn()} selectionTools={mockSelectionTools as any} />);
+    expect(useHistoryStore.getState().canUndo()).toBe(true);
     fireEvent.click(screen.getByTitle("Undo (Ctrl+Z)"));
-    expect(undone).toBe(true);
+    expect(useHistoryStore.getState().canUndo()).toBe(false);
   });
 
   it("calls onSave when save button clicked", () => {
     const onSave = vi.fn();
-    render(<PixelToolbar onSave={onSave} />);
+    render(<PixelToolbar onSave={onSave} selectionTools={mockSelectionTools as any} />);
     fireEvent.click(screen.getByTitle("Save (Ctrl+S)"));
     expect(onSave).toHaveBeenCalledTimes(1);
   });
 
   it("opens new canvas dialog", () => {
-    render(<PixelToolbar onSave={vi.fn()} />);
+    render(<PixelToolbar onSave={vi.fn()} selectionTools={mockSelectionTools as any} />);
     fireEvent.click(screen.getByTitle("New"));
     expect(usePixelEditorStore.getState().showNewCanvasDialog).toBe(true);
   });
 
   it("renders foreground and background color swatches", () => {
-    render(<PixelToolbar onSave={vi.fn()} />);
+    render(<PixelToolbar onSave={vi.fn()} selectionTools={mockSelectionTools as any} />);
     expect(screen.queryByTitle("Foreground Color")).toBeTruthy();
     expect(screen.queryByTitle("Background Color")).toBeTruthy();
   });
 
   it("swaps colors on swap button click", () => {
     usePixelEditorStore.setState({ foregroundColor: "#ff0000", backgroundColor: "#00ff00" });
-    render(<PixelToolbar onSave={vi.fn()} />);
+    render(<PixelToolbar onSave={vi.fn()} selectionTools={mockSelectionTools as any} />);
     fireEvent.click(screen.getByTitle("Swap (X)"));
     const state = usePixelEditorStore.getState();
     expect(state.foregroundColor).toBe("#00ff00");
@@ -144,7 +155,7 @@ describe("PixelToolbar", () => {
   });
 
   it("toggles grid visibility", () => {
-    render(<PixelToolbar onSave={vi.fn()} />);
+    render(<PixelToolbar onSave={vi.fn()} selectionTools={mockSelectionTools as any} />);
     fireEvent.click(screen.getByTitle("Toggle Grid"));
     expect(usePixelEditorStore.getState().gridVisible).toBe(true);
     fireEvent.click(screen.getByTitle("Toggle Grid"));
@@ -152,7 +163,7 @@ describe("PixelToolbar", () => {
   });
 
   it("toggles checkerboard visibility", () => {
-    render(<PixelToolbar onSave={vi.fn()} />);
+    render(<PixelToolbar onSave={vi.fn()} selectionTools={mockSelectionTools as any} />);
     fireEvent.click(screen.getByTitle("Toggle Transparency"));
     expect(usePixelEditorStore.getState().checkerboardVisible).toBe(false);
     fireEvent.click(screen.getByTitle("Toggle Transparency"));
@@ -160,7 +171,7 @@ describe("PixelToolbar", () => {
   });
 
   it("brush size slider updates brush size", () => {
-    render(<PixelToolbar onSave={vi.fn()} />);
+    render(<PixelToolbar onSave={vi.fn()} selectionTools={mockSelectionTools as any} />);
     const slider = document.querySelector('input[type="range"]') as HTMLInputElement;
     expect(slider).not.toBeNull();
     fireEvent.change(slider, { target: { value: "10" } });
@@ -171,7 +182,7 @@ describe("PixelToolbar", () => {
 describe("NewCanvasDialog", () => {
   afterEach(cleanup);
   beforeEach(() => {
-    usePixelEditorStore.setState({ showNewCanvasDialog: true, width: 64, height: 64 });
+    usePixelEditorStore.setState({ showNewCanvasDialog: true });
     useLayerStore.getState().setCanvas(new PixelCanvas(64, 64));
   });
 
@@ -216,9 +227,10 @@ describe("NewCanvasDialog", () => {
 
 describe("PixelCanvas core operations", () => {
   it("draws and reads back pixels", () => {
-    const data = new Uint8ClampedArray(8 * 8 * 4);
-    setPixel(data, 8, 3, 4, 255, 128, 64, 255);
-    const [r, g, b, a] = getPixel(data, 8, 3, 4);
+    const canvas = new CanvasState(8, 8);
+    canvas.setPixel(3, 4, rgbaToUint32(255, 128, 64, 255));
+    const pixel = canvas.getPixel(3, 4);
+    const { r, g, b, a } = uint32ToRgba(pixel);
     expect(r).toBe(255);
     expect(g).toBe(128);
     expect(b).toBe(64);
@@ -228,25 +240,25 @@ describe("PixelCanvas core operations", () => {
   it("serializes and deserializes canvas", () => {
     const canvas = new PixelCanvas(32, 32);
     canvas.addLayer("Colors");
-    setPixel(canvas.currentLayer.data, 32, 10, 10, 100, 150, 200, 255);
+    canvas.currentLayer.canvas.setPixel(10, 10, rgbaToUint32(100, 150, 200, 255));
     const serialized = canvas.serialize();
     const restored = PixelCanvas.deserialize(serialized);
     expect(restored.width).toBe(32);
     expect(restored.height).toBe(32);
     expect(restored.layerCount).toBe(2);
-    const [r] = getPixel(restored.currentLayer.data, 32, 10, 10);
+    const pixel = restored.currentLayer.canvas.getPixel(10, 10);
+    const { r } = uint32ToRgba(pixel);
     expect(r).toBe(100);
   });
 
   it("composites layers correctly", () => {
     const canvas = new PixelCanvas(4, 4);
-    setPixel(canvas.layers[0]!.data, 4, 0, 0, 255, 0, 0, 255);
+    canvas.layers[0]!.canvas.setPixel(0, 0, rgbaToUint32(255, 0, 0, 255));
     canvas.addLayer("Top");
-    setPixel(canvas.layers[1]!.data, 4, 0, 0, 0, 255, 0, 128);
+    canvas.layers[1]!.canvas.setPixel(0, 0, rgbaToUint32(0, 255, 0, 128));
     const composite = canvas.getCompositeData();
-    const [cr, cg] = getPixel(composite, 4, 0, 0);
-    expect(cr).toBeGreaterThan(0);
-    expect(cg).toBeGreaterThan(0);
+    expect(composite[0]).toBeGreaterThan(0);
+    expect(composite[1]).toBeGreaterThan(0);
   });
 });
 
@@ -303,35 +315,34 @@ describe("HistoryStore integration", () => {
   });
 
   it("pushes and undoes commands", () => {
-    let executed = false;
-    useHistoryStore.getState().pushCommand({ name: "Test", do: () => {}, undo: () => { executed = true; } });
+    useHistoryStore.getState().pushEntry({ type: "pixel", id: "test", name: "Test", timestamp: Date.now(), changes: [], layerId: "layer1" });
     expect(useHistoryStore.getState().canUndo()).toBe(true);
-    useHistoryStore.getState().undo();
-    expect(executed).toBe(true);
+    const entry = useHistoryStore.getState().undo();
+    expect(entry).not.toBeNull();
+    expect(entry!.name).toBe("Test");
   });
 
   it("redoes undone commands", () => {
-    let executed = false;
-    useHistoryStore.getState().pushCommand({ name: "Test", do: () => { executed = true; }, undo: () => {} });
+    useHistoryStore.getState().pushEntry({ type: "pixel", id: "test", name: "Test", timestamp: Date.now(), changes: [], layerId: "layer1" });
     useHistoryStore.getState().undo();
-    executed = false;
-    useHistoryStore.getState().redo();
-    expect(executed).toBe(true);
+    expect(useHistoryStore.getState().canRedo()).toBe(true);
+    const entry = useHistoryStore.getState().redo();
+    expect(entry).not.toBeNull();
   });
 
   it("clears redo stack on new command after undo", () => {
-    useHistoryStore.getState().pushCommand({ name: "A", do: () => {}, undo: () => {} });
-    useHistoryStore.getState().pushCommand({ name: "B", do: () => {}, undo: () => {} });
+    useHistoryStore.getState().pushEntry({ type: "pixel", id: "a", name: "A", timestamp: 1, changes: [], layerId: "layer1" });
+    useHistoryStore.getState().pushEntry({ type: "pixel", id: "b", name: "B", timestamp: 2, changes: [], layerId: "layer1" });
     useHistoryStore.getState().undo();
-    useHistoryStore.getState().pushCommand({ name: "C", do: () => {}, undo: () => {} });
+    useHistoryStore.getState().pushEntry({ type: "pixel", id: "c", name: "C", timestamp: 3, changes: [], layerId: "layer1" });
     expect(useHistoryStore.getState().canRedo()).toBe(false);
   });
 
   it("limits history to 50", () => {
     for (let i = 0; i < 60; i++) {
-      useHistoryStore.getState().pushCommand({ name: `C${i}`, do: () => {}, undo: () => {} });
+      useHistoryStore.getState().pushEntry({ type: "pixel", id: `c${i}`, name: `C${i}`, timestamp: i, changes: [], layerId: "layer1" });
     }
-    expect(useHistoryStore.getState().undoStack.length).toBe(50);
+    expect(useHistoryStore.getState().entries.length).toBe(50);
   });
 });
 

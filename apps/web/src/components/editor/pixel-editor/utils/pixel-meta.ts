@@ -1,4 +1,4 @@
-import type { SerializedCanvas, BlendMode } from "./pixel-canvas";
+import type { SerializedLayer, BlendMode, SerializedCanvas } from "./pixel-canvas";
 
 export interface MetaLayer {
   id: string;
@@ -24,11 +24,6 @@ export interface DeserializedMetaLayer {
   expanded: boolean;
 }
 
-export interface MetaHistoryEntry {
-  name: string;
-  snapshot: SerializedCanvas;
-}
-
 export interface MetaUiConfig {
   foregroundColor: string;
   backgroundColor: string;
@@ -48,34 +43,37 @@ export interface MetaUiConfig {
   layerBoundsVisible: boolean;
   onionSkinVisible: boolean;
   checkerboardVisible: boolean;
-  currentLayerIndex: number;
-  currentLayerId: string;
-  palette: string[];
-  lockedColors: number[];
+  brushFlow?: number;
+  brushHardness?: number;
+  brushShape?: string;
 }
 
 export interface CompanionFile {
   version: number;
   layers: MetaLayer[];
-  history: {
-    undoStack: MetaHistoryEntry[];
-    redoStack: MetaHistoryEntry[];
-  };
   uiConfig: MetaUiConfig;
 }
 
 export interface DeserializedCompanionFile {
   version: number;
   layers: DeserializedMetaLayer[];
-  history: {
-    undoStack: MetaHistoryEntry[];
-    redoStack: MetaHistoryEntry[];
-  };
   uiConfig: MetaUiConfig;
 }
 
-const CURRENT_VERSION = 1;
-const MAX_HISTORY = 50;
+const CURRENT_VERSION = 2;
+
+function uint32ToUint8ClampedArray(pixels: number[], width: number, height: number): Uint8ClampedArray {
+  const result = new Uint8ClampedArray(width * height * 4);
+  for (let i = 0; i < pixels.length; i++) {
+    const p = pixels[i]!;
+    const off = i * 4;
+    result[off] = p & 0xff;
+    result[off + 1] = (p >> 8) & 0xff;
+    result[off + 2] = (p >> 16) & 0xff;
+    result[off + 3] = (p >> 24) & 0xff;
+  }
+  return result;
+}
 
 function arrayBufferToBase64(data: Uint8ClampedArray): string {
   let binary = "";
@@ -96,11 +94,11 @@ function base64ToArrayBuffer(base64: string): Uint8ClampedArray {
   return new Uint8ClampedArray(bytes);
 }
 
-function serializeMetaLayer(l: SerializedCanvas["layers"][number]): MetaLayer {
+function serializeMetaLayer(l: SerializedLayer): MetaLayer {
   return {
     id: l.id,
     name: l.name,
-    pixelData: arrayBufferToBase64(new Uint8ClampedArray(l.data)),
+    pixelData: arrayBufferToBase64(uint32ToUint8ClampedArray(l.canvas.pixels, l.canvas.width, l.canvas.height)),
     visible: l.visible,
     opacity: l.opacity,
     blendMode: l.blendMode,
@@ -120,22 +118,11 @@ function deserializeMetaLayer(l: MetaLayer): DeserializedMetaLayer {
 
 export function serializeMeta(
   canvas: SerializedCanvas,
-  history: { undoStack: { name: string; snapshot: SerializedCanvas }[]; redoStack: { name: string; snapshot: SerializedCanvas }[] },
   uiConfig: MetaUiConfig,
 ): string {
   const file: CompanionFile = {
     version: CURRENT_VERSION,
     layers: canvas.layers.map((l) => serializeMetaLayer(l)),
-    history: {
-      undoStack: history.undoStack.slice(-MAX_HISTORY).map((e) => ({
-        name: e.name,
-        snapshot: e.snapshot,
-      })),
-      redoStack: history.redoStack.slice(-MAX_HISTORY).map((e) => ({
-        name: e.name,
-        snapshot: e.snapshot,
-      })),
-    },
     uiConfig,
   };
   return JSON.stringify(file);
@@ -151,7 +138,6 @@ export function deserializeMeta(json: string): DeserializedCompanionFile | null 
     const deserialized: DeserializedCompanionFile = {
       version: file.version,
       layers: file.layers.map((l) => deserializeMetaLayer(l)),
-      history: file.history,
       uiConfig: file.uiConfig,
     };
     return deserialized;

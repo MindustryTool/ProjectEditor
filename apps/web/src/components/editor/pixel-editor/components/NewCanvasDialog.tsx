@@ -11,6 +11,7 @@ import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { usePixelEditorStore } from "../store/pixel-editor-store";
 import { useLayerStore } from "../store/layer-store";
+import { CanvasState } from "../utils/canvas-state";
 import { PixelCanvas } from "../utils/pixel-canvas";
 
 const PRESETS = [
@@ -25,7 +26,6 @@ const PRESETS = [
 export function NewCanvasDialog() {
   const show = usePixelEditorStore((s) => s.showNewCanvasDialog);
   const setShow = usePixelEditorStore((s) => s.setShowNewCanvasDialog);
-  const setCanvasSize = usePixelEditorStore((s) => s.resetCanvas);
   const setCanvas = useLayerStore((s) => s.setCanvas);
   const [customW, setCustomW] = useState(64);
   const [customH, setCustomH] = useState(64);
@@ -35,10 +35,9 @@ export function NewCanvasDialog() {
     (w: number, h: number) => {
       const canvas = new PixelCanvas(w, h);
       setCanvas(canvas);
-      setCanvasSize(w, h);
       setShow(false);
     },
-    [setCanvas, setCanvasSize, setShow],
+    [setCanvas, setShow],
   );
 
   const handleFileImport = useCallback(
@@ -50,12 +49,11 @@ export function NewCanvasDialog() {
       const result = await decodePngToPixelData(buffer);
       const { width, height, data } = result;
       const canvas = new PixelCanvas(width, height);
-      canvas.layers[0]!.data = data;
+      canvas.layers[0]!.canvas = new CanvasState(width, height, data);
       setCanvas(canvas);
-      setCanvasSize(width, height);
       setShow(false);
     },
-    [setCanvas, setCanvasSize, setShow],
+    [setCanvas, setShow],
   );
 
   const handleClipboard = useCallback(async () => {
@@ -70,16 +68,15 @@ export function NewCanvasDialog() {
         const result = await decodePngToPixelData(buffer);
         const { width, height, data } = result;
         const canvas = new PixelCanvas(width, height);
-        canvas.layers[0]!.data = data;
+        canvas.layers[0]!.canvas = new CanvasState(width, height, data);
         setCanvas(canvas);
-        setCanvasSize(width, height);
         setShow(false);
         return;
       }
     } catch {
       console.warn("Clipboard read failed or no image in clipboard");
     }
-  }, [setCanvas, setCanvasSize, setShow]);
+  }, [setCanvas, setShow]);
 
   if (!show) return null;
 

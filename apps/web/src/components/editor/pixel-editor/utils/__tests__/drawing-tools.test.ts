@@ -1,5 +1,8 @@
-import { describe, expect, it } from "vitest";
-import { drawLine, floodFill, replaceColor, drawCircle, drawRectangle, drawEllipse, sprayPixels, hexToRgba, rgbaToHex } from "../drawing-tools";
+﻿import { describe, expect, it } from "vitest";
+import { drawLine, floodFill, replaceColor, drawCircle, drawRectangle, drawEllipse, sprayPixels, drawBrushStamp, getSymmetryPoints, drawBezier } from "../drawing-tools";
+import { CanvasState, hexToUint32, rgbaToUint32, uint32ToRgba, hexToRgba, rgbaToHex, TRANSPARENT } from "../canvas-state";
+
+const u = (n: number) => n >>> 0;
 
 describe("hexToRgba", () => {
   it("parses 6-digit hex", () => {
@@ -41,130 +44,185 @@ describe("rgbaToHex", () => {
 
 describe("drawLine", () => {
   it("draws a horizontal line", () => {
-    const data = new Uint8ClampedArray(16 * 16 * 4);
-    drawLine(data, 16, 2, 8, 10, 8, "#FF0000");
+    const canvas = new CanvasState(16, 16);
+    drawLine(canvas, 2, 8, 10, 8, "#FF0000");
     for (let x = 2; x <= 10; x++) {
-      const i = (8 * 16 + x) * 4;
-      expect(data[i]).toBe(255);
-      expect(data[i + 3]).toBe(255);
+      expect(canvas.getPixel(x, 8)).toBe(u(hexToUint32("#FF0000")));
     }
   });
 
   it("draws a vertical line", () => {
-    const data = new Uint8ClampedArray(16 * 16 * 4);
-    drawLine(data, 16, 8, 2, 8, 10, "#FF0000");
+    const canvas = new CanvasState(16, 16);
+    drawLine(canvas, 8, 2, 8, 10, "#FF0000");
     for (let y = 2; y <= 10; y++) {
-      const i = (y * 16 + 8) * 4;
-      expect(data[i]).toBe(255);
+      expect(canvas.getPixel(8, y)).toBe(u(hexToUint32("#FF0000")));
     }
   });
 
   it("draws a diagonal line", () => {
-    const data = new Uint8ClampedArray(10 * 10 * 4);
-    drawLine(data, 10, 0, 0, 9, 9, "#FF0000");
-    const i = (9 * 10 + 9) * 4;
-    expect(data[i]).toBe(255);
+    const canvas = new CanvasState(10, 10);
+    drawLine(canvas, 0, 0, 9, 9, "#FF0000");
+    expect(canvas.getPixel(9, 9)).toBe(u(hexToUint32("#FF0000")));
   });
 });
 
 describe("floodFill", () => {
   it("fills a contiguous area", () => {
-    const data = new Uint8ClampedArray(10 * 10 * 4);
-    data[0] = 255;
-    data[1] = 255;
-    data[2] = 255;
-    data[3] = 255;
-    floodFill(data, 10, 0, 0, "#FF0000", 10);
-    expect(data[0]).toBe(255);
-    expect(data[1]).toBe(0);
-    expect(data[2]).toBe(0);
+    const canvas = new CanvasState(10, 10);
+    canvas.setPixel(0, 0, rgbaToUint32(255, 255, 255, 255));
+    floodFill(canvas, 0, 0, "#FF0000", 10);
+    expect(canvas.getPixel(0, 0)).toBe(u(hexToUint32("#FF0000")));
   });
 
   it("does not fill across color boundaries with tolerance 0", () => {
-    const data = new Uint8ClampedArray(10 * 10 * 4);
-    data[0] = 255;
-    data[3] = 255;
-    data[4] = 128;
-    data[7] = 255;
-    floodFill(data, 10, 0, 0, "#FF0000", 0);
-    expect(data[0]).toBe(255);
-    expect(data[4]).toBe(128);
+    const canvas = new CanvasState(10, 10);
+    canvas.setPixel(0, 0, rgbaToUint32(255, 0, 0, 255));
+    canvas.setPixel(1, 0, rgbaToUint32(128, 0, 0, 255));
+    floodFill(canvas, 0, 0, "#FF0000", 0);
+    expect(canvas.getPixel(0, 0)).toBe(u(hexToUint32("#FF0000")));
+    expect(canvas.getPixel(1, 0)).toBe(u(rgbaToUint32(128, 0, 0, 255)));
   });
 });
 
 describe("replaceColor", () => {
   it("replaces all matching colors on the layer", () => {
-    const data = new Uint8ClampedArray(4 * 4 * 4);
-    data[0] = 255;
-    data[3] = 255;
-    data[(1 * 4 + 3) * 4] = 255;
-    data[(1 * 4 + 3) * 4 + 3] = 255;
-    replaceColor(data, 4, 0, 0, "#00FF00", 10);
-    expect(data[0]).toBe(0);
-    expect(data[1]).toBe(255);
-    expect(data[(1 * 4 + 3) * 4]).toBe(0);
-    expect(data[(1 * 4 + 3) * 4 + 1]).toBe(255);
+    const canvas = new CanvasState(4, 4);
+    canvas.setPixel(0, 0, rgbaToUint32(255, 0, 0, 255));
+    canvas.setPixel(3, 1, rgbaToUint32(255, 0, 0, 255));
+    replaceColor(canvas, 0, 0, "#00FF00", 10);
+    expect(canvas.getPixel(0, 0)).toBe(u(hexToUint32("#00FF00")));
+    expect(canvas.getPixel(3, 1)).toBe(u(hexToUint32("#00FF00")));
   });
 });
 
 describe("drawCircle", () => {
   it("draws a filled circle", () => {
-    const data = new Uint8ClampedArray(20 * 20 * 4);
-    drawCircle(data, 20, 10, 10, 5, "#FF0000", true);
-    const center = (10 * 20 + 10) * 4;
-    expect(data[center]).toBe(255);
-    const edge = (10 * 20 + 15) * 4;
-    expect(data[edge]).toBe(255);
+    const canvas = new CanvasState(20, 20);
+    drawCircle(canvas, 10, 10, 5, "#FF0000", true);
+    expect(canvas.getPixel(10, 10)).toBe(u(hexToUint32("#FF0000")));
+    expect(canvas.getPixel(15, 10)).toBe(u(hexToUint32("#FF0000")));
   });
 
   it("draws an outlined circle", () => {
-    const data = new Uint8ClampedArray(20 * 20 * 4);
-    drawCircle(data, 20, 10, 10, 5, "#FF0000", false);
-    const center = (10 * 20 + 10) * 4;
-    expect(data[center]).toBe(0);
-    const edge = (5 * 20 + 10) * 4;
-    expect(data[edge]).toBe(255);
+    const canvas = new CanvasState(20, 20);
+    drawCircle(canvas, 10, 10, 5, "#FF0000", false);
+    expect(canvas.getPixel(10, 10)).toBe(TRANSPARENT);
+    expect(canvas.getPixel(10, 5)).toBe(u(hexToUint32("#FF0000")));
   });
 });
 
 describe("drawRectangle", () => {
   it("draws a filled rectangle", () => {
-    const data = new Uint8ClampedArray(10 * 10 * 4);
-    drawRectangle(data, 10, 2, 2, 7, 7, "#FF0000", true);
-    const center = (4 * 10 + 4) * 4;
-    expect(data[center]).toBe(255);
+    const canvas = new CanvasState(10, 10);
+    drawRectangle(canvas, 2, 2, 7, 7, "#FF0000", true);
+    expect(canvas.getPixel(4, 4)).toBe(u(hexToUint32("#FF0000")));
   });
 
   it("draws an outlined rectangle", () => {
-    const data = new Uint8ClampedArray(10 * 10 * 4);
-    drawRectangle(data, 10, 2, 2, 7, 7, "#FF0000", false);
-    const center = (4 * 10 + 4) * 4;
-    expect(data[center]).toBe(0);
-    const edge = (2 * 10 + 2) * 4;
-    expect(data[edge]).toBe(255);
+    const canvas = new CanvasState(10, 10);
+    drawRectangle(canvas, 2, 2, 7, 7, "#FF0000", false);
+    expect(canvas.getPixel(4, 4)).toBe(TRANSPARENT);
+    expect(canvas.getPixel(2, 2)).toBe(u(hexToUint32("#FF0000")));
   });
 });
 
 describe("drawEllipse", () => {
   it("draws a filled ellipse", () => {
-    const data = new Uint8ClampedArray(20 * 20 * 4);
-    drawEllipse(data, 20, 10, 10, 5, 3, "#FF0000", true);
-    const center = (10 * 20 + 10) * 4;
-    expect(data[center]).toBe(255);
+    const canvas = new CanvasState(20, 20);
+    drawEllipse(canvas, 10, 10, 5, 3, "#FF0000", true);
+    expect(canvas.getPixel(10, 10)).toBe(u(hexToUint32("#FF0000")));
   });
 });
 
 describe("sprayPixels", () => {
   it("sprays pixels within radius", () => {
-    const data = new Uint8ClampedArray(20 * 20 * 4);
-    sprayPixels(data, 20, 10, 10, 5, 1, "#FF0000");
+    const canvas = new CanvasState(20, 20);
+    sprayPixels(canvas, 10, 10, 5, 1, "#FF0000");
     let hasRed = false;
     for (let y = 5; y <= 15; y++) {
       for (let x = 5; x <= 15; x++) {
-        const i = (y * 20 + x) * 4;
-        if (data[i] === 255) hasRed = true;
+        if (canvas.getPixel(x, y) === u(hexToUint32("#FF0000"))) hasRed = true;
       }
     }
     expect(hasRed).toBe(true);
+  });
+});
+
+describe("drawBrushStamp", () => {
+  it("draws square stamp of correct size", () => {
+    const canvas = new CanvasState(10, 10);
+    drawBrushStamp(canvas, 5, 5, 3, "#FF0000", "square");
+    expect(canvas.getPixel(5, 5)).toBe(u(hexToUint32("#FF0000")));
+    expect(canvas.getPixel(4, 5)).toBe(u(hexToUint32("#FF0000")));
+    expect(canvas.getPixel(6, 5)).toBe(u(hexToUint32("#FF0000")));
+    expect(canvas.getPixel(5, 4)).toBe(u(hexToUint32("#FF0000")));
+    expect(canvas.getPixel(5, 6)).toBe(u(hexToUint32("#FF0000")));
+    expect(canvas.getPixel(1, 1)).toBe(TRANSPARENT);
+  });
+
+  it("draws circle stamp within radius", () => {
+    const canvas = new CanvasState(10, 10);
+    drawBrushStamp(canvas, 5, 5, 5, "#00FF00", "circle");
+    expect(canvas.getPixel(5, 5)).toBe(u(hexToUint32("#00FF00")));
+    expect(canvas.getPixel(5, 3)).toBe(u(hexToUint32("#00FF00")));
+  });
+
+  it("respects opacity", () => {
+    const canvas = new CanvasState(4, 4);
+    drawBrushStamp(canvas, 2, 2, 1, "#FF0000", "square", 0.5);
+    const pixel = canvas.getPixel(2, 2);
+    const { a } = uint32ToRgba(pixel);
+    expect(a).toBe(128);
+  });
+});
+
+describe("getSymmetryPoints", () => {
+  it("returns horizontal mirror", () => {
+    const pts = getSymmetryPoints(2, 3, 10, 10, "horizontal", 0);
+    expect(pts.length).toBe(1);
+    expect(pts[0]).toEqual([7, 3]);
+  });
+
+  it("does not duplicate pixels on center axis", () => {
+    const pts = getSymmetryPoints(4, 3, 9, 9, "horizontal", 0);
+    expect(pts.length).toBe(0);
+  });
+
+  it("returns vertical mirror", () => {
+    const pts = getSymmetryPoints(2, 3, 10, 10, "vertical", 0);
+    expect(pts[0]).toEqual([2, 6]);
+  });
+
+  it("returns radial symmetry points within bounds", () => {
+    const pts = getSymmetryPoints(6, 3, 8, 8, "radial", 4);
+    expect(pts.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("returns empty for no symmetry", () => {
+    const pts = getSymmetryPoints(2, 3, 10, 10, "none", 0);
+    expect(pts.length).toBe(0);
+  });
+});
+
+describe("drawBezier", () => {
+  it("draws line for 2 points", () => {
+    const canvas = new CanvasState(10, 10);
+    drawBezier(canvas, [[1, 1], [5, 1]], "#FF0000");
+    expect(canvas.getPixel(1, 1)).toBe(u(hexToUint32("#FF0000")));
+    expect(canvas.getPixel(5, 1)).toBe(u(hexToUint32("#FF0000")));
+  });
+
+  it("draws curve through 3 control points", () => {
+    const canvas = new CanvasState(20, 20);
+    drawBezier(canvas, [[2, 10], [10, 2], [18, 10]], "#0000FF");
+    let hasBlue = false;
+    for (let y = 0; y < 20; y++) {
+      for (let x = 0; x < 20; x++) {
+        if (canvas.getPixel(x, y) === u(hexToUint32("#0000FF"))) {
+          hasBlue = true;
+        }
+      }
+    }
+    expect(hasBlue).toBe(true);
   });
 });

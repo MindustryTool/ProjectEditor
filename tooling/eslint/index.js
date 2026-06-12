@@ -13,8 +13,8 @@ export default tseslint.config(
 		rules: {
 			"no-var": "error",
 			"react-hooks/rules-of-hooks": "error",
-			"react-hooks/exhaustive-deps": "warn",
-			"@typescript-eslint/no-explicit-any": "warn",
+			"react-hooks/exhaustive-deps": "error",
+			"@typescript-eslint/no-explicit-any": "error",
 			"@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
 			"@typescript-eslint/consistent-type-imports": "error",
 			"no-restricted-imports": [

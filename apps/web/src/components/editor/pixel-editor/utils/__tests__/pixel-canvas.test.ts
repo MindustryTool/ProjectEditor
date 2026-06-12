@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { PixelCanvas, createLayer, cloneLayer, setPixel, getPixel, pixelIndex, clonePixelRegion, pastePixels, clearRegion } from "../pixel-canvas";
+import { PixelCanvas, createLayer, cloneLayer } from "../pixel-canvas";
+import { CanvasState, rgbaToUint32, uint32ToRgba, cloneRegion, pasteRegion, clearRegion, pixelIndex, TRANSPARENT } from "../canvas-state";
 
 describe("PixelCanvas", () => {
   it("creates a canvas with correct dimensions", () => {
@@ -41,11 +42,12 @@ describe("PixelCanvas", () => {
   it("duplicates a layer", () => {
     const canvas = new PixelCanvas(8, 8);
     const original = canvas.currentLayer;
-    setPixel(original.data, 8, 0, 0, 255, 0, 0, 255);
+    original.canvas.setPixel(0, 0, rgbaToUint32(255, 0, 0, 255));
     canvas.duplicateLayer(0);
     expect(canvas.layerCount).toBe(2);
     expect(canvas.currentLayerIndex).toBe(1);
-    const [r] = getPixel(canvas.currentLayer.data, 8, 0, 0);
+    const pixel = canvas.currentLayer.canvas.getPixel(0, 0);
+    const { r } = uint32ToRgba(pixel);
     expect(r).toBe(255);
   });
 
@@ -99,14 +101,15 @@ describe("PixelCanvas", () => {
   it("serializes and deserializes", () => {
     const canvas = new PixelCanvas(16, 16);
     canvas.addLayer("Layer 2");
-    setPixel(canvas.currentLayer.data, 16, 5, 5, 100, 150, 200, 255);
+    canvas.currentLayer.canvas.setPixel(5, 5, rgbaToUint32(100, 150, 200, 255));
     const serialized = canvas.serialize();
     const restored = PixelCanvas.deserialize(serialized);
     expect(restored.width).toBe(16);
     expect(restored.height).toBe(16);
     expect(restored.layerCount).toBe(2);
     expect(restored.currentLayerIndex).toBe(1);
-    const [r, g, b, a] = getPixel(restored.currentLayer.data, 16, 5, 5);
+    const pixel = restored.currentLayer.canvas.getPixel(5, 5);
+    const { r, g, b, a } = uint32ToRgba(pixel);
     expect(r).toBe(100);
     expect(g).toBe(150);
     expect(b).toBe(200);
@@ -115,21 +118,20 @@ describe("PixelCanvas", () => {
 
   it("composites visible layers correctly", () => {
     const canvas = new PixelCanvas(4, 4);
-    setPixel(canvas.layers[0]!.data, 4, 0, 0, 255, 0, 0, 255);
+    canvas.layers[0]!.canvas.setPixel(0, 0, rgbaToUint32(255, 0, 0, 255));
     canvas.addLayer("Layer 2");
-    setPixel(canvas.layers[1]!.data, 4, 0, 0, 0, 255, 0, 128);
+    canvas.layers[1]!.canvas.setPixel(0, 0, rgbaToUint32(0, 255, 0, 128));
     const composite = canvas.getCompositeData();
-    const [cr, cg] = getPixel(composite, 4, 0, 0);
-    expect(cr).toBeGreaterThan(0);
-    expect(cg).toBeGreaterThan(0);
+    expect(composite[0]).toBeGreaterThan(0);
+    expect(composite[1]).toBeGreaterThan(0);
   });
 });
 
 describe("createLayer", () => {
-  it("creates a layer with correct data size", () => {
+  it("creates a layer with correct canvas size", () => {
     const layer = createLayer(8, 8, "Test");
     expect(layer.name).toBe("Test");
-    expect(layer.data.length).toBe(8 * 8 * 4);
+    expect(layer.canvas.length).toBe(8 * 8);
     expect(layer.visible).toBe(true);
     expect(layer.opacity).toBe(1);
     expect(layer.locked).toBe(false);
@@ -139,22 +141,22 @@ describe("createLayer", () => {
 describe("cloneLayer", () => {
   it("creates an independent copy", () => {
     const layer = createLayer(4, 4);
-    setPixel(layer.data, 4, 0, 0, 255, 0, 0, 255);
+    layer.canvas.setPixel(0, 0, rgbaToUint32(255, 0, 0, 255));
     const copy = cloneLayer(layer);
     expect(copy.name).toBe(`${layer.name} copy`);
-    expect(copy.data.length).toBe(layer.data.length);
-    const [r] = getPixel(copy.data, 4, 0, 0);
-    expect(r).toBe(255);
-    copy.data[0] = 0;
-    expect(layer.data[0]).toBe(255);
+    expect(copy.canvas.length).toBe(layer.canvas.length);
+    expect(copy.canvas.getPixel(0, 0)).toBe(rgbaToUint32(255, 0, 0, 255) >>> 0);
+    copy.canvas.setPixelAtIndex(0, 0);
+    expect(layer.canvas.getPixelAtIndex(0)).toBe(rgbaToUint32(255, 0, 0, 255) >>> 0);
   });
 });
 
-describe("setPixel / getPixel", () => {
+describe("CanvasState setPixel / getPixel", () => {
   it("sets and gets pixel values", () => {
-    const data = new Uint8ClampedArray(16 * 16 * 4);
-    setPixel(data, 16, 5, 5, 100, 150, 200, 255);
-    const [r, g, b, a] = getPixel(data, 16, 5, 5);
+    const canvas = new CanvasState(16, 16);
+    canvas.setPixel(5, 5, rgbaToUint32(100, 150, 200, 255));
+    const pixel = canvas.getPixel(5, 5);
+    const { r, g, b, a } = uint32ToRgba(pixel);
     expect(r).toBe(100);
     expect(g).toBe(150);
     expect(b).toBe(200);
@@ -162,65 +164,56 @@ describe("setPixel / getPixel", () => {
   });
 
   it("ignores out-of-bounds coordinates", () => {
-    const data = new Uint8ClampedArray(8 * 8 * 4);
-    setPixel(data, 8, 100, 100, 255, 0, 0, 255);
-    const [r] = getPixel(data, 8, 100, 100);
-    expect(r).toBe(0);
+    const canvas = new CanvasState(8, 8);
+    canvas.setPixel(100, 100, rgbaToUint32(255, 0, 0, 255));
+    const pixel = canvas.getPixel(100, 100);
+    expect(pixel).toBe(TRANSPARENT);
   });
 
-  it("returns zero for out-of-bounds reads", () => {
-    const data = new Uint8ClampedArray(8 * 8 * 4);
-    const [r, g, b, a] = getPixel(data, 8, -1, 0);
-    expect(r).toBe(0);
-    expect(g).toBe(0);
-    expect(b).toBe(0);
-    expect(a).toBe(0);
+  it("returns transparent for out-of-bounds reads", () => {
+    const canvas = new CanvasState(8, 8);
+    const pixel = canvas.getPixel(-1, 0);
+    expect(pixel).toBe(TRANSPARENT);
   });
 });
 
 describe("pixelIndex", () => {
   it("computes correct index", () => {
     expect(pixelIndex(0, 0, 16)).toBe(0);
-    expect(pixelIndex(1, 0, 16)).toBe(4);
-    expect(pixelIndex(0, 1, 16)).toBe(64);
-    expect(pixelIndex(15, 15, 16)).toBe(1020);
+    expect(pixelIndex(1, 0, 16)).toBe(1);
+    expect(pixelIndex(0, 1, 16)).toBe(16);
+    expect(pixelIndex(15, 15, 16)).toBe(255);
   });
 });
 
-describe("clonePixelRegion", () => {
+describe("cloneRegion", () => {
   it("clones a rectangular region", () => {
-    const data = new Uint8ClampedArray(8 * 8 * 4);
-    setPixel(data, 8, 2, 2, 255, 0, 0, 255);
-    const region = clonePixelRegion(data, 8, 0, 0, 4, 4);
-    expect(region.length).toBe(4 * 4 * 4);
-    const [r] = getPixel(region, 4, 2, 2);
-    expect(r).toBe(255);
+    const canvas = new CanvasState(8, 8);
+    canvas.setPixel(2, 2, rgbaToUint32(255, 0, 0, 255));
+    const region = cloneRegion(canvas, 0, 0, 4, 4);
+    expect(region.length).toBe(4 * 4);
+    expect(region[pixelIndex(2, 2, 4)]).toBe(rgbaToUint32(255, 0, 0, 255) >>> 0);
   });
 });
 
-describe("pastePixels", () => {
+describe("pasteRegion", () => {
   it("pastes pixel data into destination", () => {
-    const dest = new Uint8ClampedArray(8 * 8 * 4);
-    const src = new Uint8ClampedArray(4 * 4 * 4);
-    setPixel(src, 4, 0, 0, 255, 0, 0, 255);
-    pastePixels(dest, 8, src, 4, 2, 2);
-    const [r] = getPixel(dest, 8, 2, 2);
-    expect(r).toBe(255);
+    const dest = new CanvasState(8, 8);
+    const src = new Uint32Array(4 * 4);
+    src[pixelIndex(0, 0, 4)] = rgbaToUint32(255, 0, 0, 255);
+    pasteRegion(dest, src, 4, 2, 2);
+    expect(dest.getPixel(2, 2)).toBe(rgbaToUint32(255, 0, 0, 255) >>> 0);
   });
 });
 
 describe("clearRegion", () => {
   it("clears a rectangular region", () => {
-    const data = new Uint8ClampedArray(8 * 8 * 4);
-    for (let i = 0; i < data.length; i++) {
-      data[i] = 255;
-    }
-    clearRegion(data, 8, 0, 0, 4, 4);
+    const canvas = new CanvasState(8, 8);
+    canvas.pixels.fill(0xffffffff);
+    clearRegion(canvas, 0, 0, 4, 4);
     for (let y = 0; y < 4; y++) {
       for (let x = 0; x < 4; x++) {
-        const [r, , , a] = getPixel(data, 8, x, y);
-        expect(r).toBe(0);
-        expect(a).toBe(0);
+        expect(canvas.getPixel(x, y)).toBe(TRANSPARENT);
       }
     }
   });

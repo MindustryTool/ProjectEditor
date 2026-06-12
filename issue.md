@@ -1,0 +1,3 @@
+- [ ] Undo/Redo still not working, it only remembers some actions, misses some actions
+- [ ] Drawing preview not working, when does it fail?
+- [ ] Brush size still not working

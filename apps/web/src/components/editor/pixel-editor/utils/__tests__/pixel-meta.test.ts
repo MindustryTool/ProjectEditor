@@ -1,16 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { serializeMeta, deserializeMeta, getMetaPath } from "../pixel-meta";
 import { PixelCanvas } from "../pixel-canvas";
+import { rgbaToUint32 } from "../canvas-state";
 import type { SerializedCanvas } from "../pixel-canvas";
 
 function makeTestCanvas(): SerializedCanvas {
   const canvas = new PixelCanvas(4, 4);
   canvas.addLayer("Test Layer");
-  const data = canvas.layers[0]!.data;
-  data[0] = 255;
-  data[1] = 0;
-  data[2] = 0;
-  data[3] = 255;
+  canvas.layers[0]!.canvas.setPixel(0, 0, rgbaToUint32(255, 0, 0, 255));
   return canvas.serialize();
 }
 
@@ -19,7 +16,6 @@ describe("pixel-meta", () => {
     const canvas = makeTestCanvas();
     const json = serializeMeta(
       canvas,
-      { undoStack: [], redoStack: [] },
       {
         foregroundColor: "#ff0000",
         backgroundColor: "#ffffff",
@@ -39,14 +35,12 @@ describe("pixel-meta", () => {
         layerBoundsVisible: false,
         onionSkinVisible: false,
         checkerboardVisible: true,
-        currentLayerIndex: 0,
-        currentLayerId: canvas.layers[0]?.id ?? "",
       },
     );
 
     const deserialized = deserializeMeta(json);
     expect(deserialized).not.toBeNull();
-    expect(deserialized!.version).toBe(1);
+    expect(deserialized!.version).toBe(2);
     expect(deserialized!.layers.length).toBe(2);
     expect(deserialized!.layers[1]!.name).toBe("Test Layer");
     expect(deserialized!.layers[0]!.pixelData[0]).toBe(255);
@@ -59,7 +53,6 @@ describe("pixel-meta", () => {
     const canvas = makeTestCanvas();
     const json = serializeMeta(
       canvas,
-      { undoStack: [], redoStack: [] },
       {
         foregroundColor: "#000000",
         backgroundColor: "#ffffff",
@@ -79,8 +72,6 @@ describe("pixel-meta", () => {
         layerBoundsVisible: false,
         onionSkinVisible: false,
         checkerboardVisible: true,
-        currentLayerIndex: 0,
-        currentLayerId: canvas.layers[0]?.id ?? "",
       },
     );
 
@@ -106,14 +97,10 @@ describe("pixel-meta", () => {
 
   it("round-trips pixel data accurately", () => {
     const canvas = makeTestCanvas();
-    canvas.layers[0]!.data[0] = 100;
-    canvas.layers[0]!.data[1] = 150;
-    canvas.layers[0]!.data[2] = 200;
-    canvas.layers[0]!.data[3] = 255;
+    canvas.layers[0]!.canvas.pixels[0] = rgbaToUint32(100, 150, 200, 255);
 
     const json = serializeMeta(
       canvas,
-      { undoStack: [], redoStack: [] },
       {
         foregroundColor: "#000000",
         backgroundColor: "#ffffff",
@@ -133,8 +120,6 @@ describe("pixel-meta", () => {
         layerBoundsVisible: false,
         onionSkinVisible: false,
         checkerboardVisible: true,
-        currentLayerIndex: 0,
-        currentLayerId: canvas.layers[0]?.id ?? "",
       },
     );
 
@@ -144,43 +129,6 @@ describe("pixel-meta", () => {
     expect(deserialized!.layers[0]!.pixelData[1]).toBe(150);
     expect(deserialized!.layers[0]!.pixelData[2]).toBe(200);
     expect(deserialized!.layers[0]!.pixelData[3]).toBe(255);
-  });
-
-  it("truncates history to 50 entries on serialize", () => {
-    const canvas = makeTestCanvas();
-    const undoStack = [];
-    for (let i = 0; i < 60; i++) {
-      undoStack.push({ name: `Entry ${i}`, snapshot: canvas });
-    }
-    const json = serializeMeta(
-      canvas,
-      { undoStack, redoStack: [] },
-      {
-        foregroundColor: "#000000",
-        backgroundColor: "#ffffff",
-        tool: "pencil",
-        brushSize: 1,
-        brushOpacity: 1,
-        tolerance: 0,
-        sprayDensity: 0.5,
-        sprayRadius: 10,
-        pixelPerfect: false,
-        symmetry: "none",
-        symmetrySegments: 4,
-        gridVisible: false,
-        pixelGridVisible: false,
-        rulersVisible: false,
-        guidesVisible: false,
-        layerBoundsVisible: false,
-        onionSkinVisible: false,
-        checkerboardVisible: true,
-        currentLayerIndex: 0,
-        currentLayerId: canvas.layers[0]?.id ?? "",
-      },
-    );
-
-    const parsed = JSON.parse(json);
-    expect(parsed.history.undoStack.length).toBeLessThanOrEqual(50);
   });
 
   it("getMetaPath returns correct sidecar path", () => {

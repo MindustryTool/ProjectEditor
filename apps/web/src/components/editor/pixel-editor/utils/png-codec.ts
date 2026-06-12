@@ -1,7 +1,9 @@
+import { CanvasState } from "./canvas-state";
+
 export async function decodePngToPixelData(buffer: ArrayBuffer): Promise<{
   width: number;
   height: number;
-  data: Uint8ClampedArray;
+  data: Uint32Array;
 }> {
   const blob = new Blob([buffer], { type: "image/png" });
   const url = URL.createObjectURL(blob);
@@ -14,10 +16,11 @@ export async function decodePngToPixelData(buffer: ArrayBuffer): Promise<{
     if (!ctx) throw new Error("Failed to get canvas 2d context");
     ctx.drawImage(img, 0, 0);
     const imageData = ctx.getImageData(0, 0, img.width, img.height);
+    const state = CanvasState.fromImageData(imageData);
     return {
-      width: img.width,
-      height: img.height,
-      data: new Uint8ClampedArray(imageData.data),
+      width: state.width,
+      height: state.height,
+      data: state.pixels,
     };
   } finally {
     URL.revokeObjectURL(url);
@@ -25,7 +28,7 @@ export async function decodePngToPixelData(buffer: ArrayBuffer): Promise<{
 }
 
 export async function encodePixelDataToPng(
-  data: Uint8ClampedArray,
+  data: Uint32Array,
   width: number,
   height: number,
 ): Promise<ArrayBuffer> {
@@ -34,9 +37,8 @@ export async function encodePixelDataToPng(
   canvas.height = height;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Failed to get canvas 2d context");
-  const clamped = new Uint8ClampedArray(data);
-  const imageData = new ImageData(clamped, width, height);
-  ctx.putImageData(imageData, 0, 0);
+  const state = new CanvasState(width, height, data);
+  ctx.putImageData(state.toImageData(), 0, 0);
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
@@ -61,25 +63,37 @@ function loadImage(url: string): Promise<HTMLImageElement> {
 }
 
 export function compositeLayers(
-  layers: { data: Uint8ClampedArray; visible: boolean; opacity: number }[],
+  layers: { data: Uint32Array; visible: boolean; opacity: number }[],
   width: number,
   height: number,
-): Uint8ClampedArray {
-  const result = new Uint8ClampedArray(width * height * 4);
+): Uint32Array {
+  const result = new Uint32Array(width * height);
   for (const layer of layers) {
     if (!layer.visible || layer.opacity === 0) continue;
     const src = layer.data;
     const opacity = layer.opacity;
-    for (let i = 0; i < result.length; i += 4) {
-      const sa = (src[i + 3]! / 255) * opacity;
+    for (let i = 0; i < result.length; i++) {
+      const sp = src[i]!;
+      const sa = ((sp >> 24) & 0xff) / 255 * opacity;
       if (sa === 0) continue;
-      const da = result[i + 3]! / 255;
+      const dp = result[i]!;
+      const da = ((dp >> 24) & 0xff) / 255;
       const outA = sa + da * (1 - sa);
       if (outA === 0) continue;
-      result[i] = (src[i]! * sa + result[i]! * da * (1 - sa)) / outA;
-      result[i + 1] = (src[i + 1]! * sa + result[i + 1]! * da * (1 - sa)) / outA;
-      result[i + 2] = (src[i + 2]! * sa + result[i + 2]! * da * (1 - sa)) / outA;
-      result[i + 3] = outA * 255;
+      const sr = sp & 0xff;
+      const sg = (sp >> 8) & 0xff;
+      const sb = (sp >> 16) & 0xff;
+      const dr = dp & 0xff;
+      const dg = (dp >> 8) & 0xff;
+      const db = (dp >> 16) & 0xff;
+      const outR = (sr * sa + dr * da * (1 - sa)) / outA;
+      const outG = (sg * sa + dg * da * (1 - sa)) / outA;
+      const outB = (sb * sa + db * da * (1 - sa)) / outA;
+      result[i] =
+        ((Math.round(outA * 255) & 0xff) << 24) |
+        ((Math.round(outB) & 0xff) << 16) |
+        ((Math.round(outG) & 0xff) << 8) |
+        (Math.round(outR) & 0xff);
     }
   }
   return result;

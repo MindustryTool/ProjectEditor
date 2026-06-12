@@ -45,48 +45,69 @@
 
 ## 3. Phase 3a: Selection
 
-- [ ] 3a.1 Implement rectangle selection tool: drag to create rectangular selection marquee
-- [ ] 3a.2 Implement ellipse selection tool: drag to create elliptical selection
-- [ ] 3a.3 Implement magic wand: click to select contiguous similar-color pixels with tolerance
-- [ ] 3a.4 Implement color select: click to select all similar-color pixels on layer (not just contiguous)
-- [ ] 3a.5 Implement lasso selection: freehand path enclosure
-- [ ] 3a.6 Implement polygon selection: click-to-place vertices, double-click/Enter to close
-- [ ] 3a.7 Implement selection modes: add to selection (Shift), remove from selection (Alt), intersect (Shift+Alt)
-- [ ] 3a.8 Implement selection operations: move selection marquee, move selection content, duplicate selection
-- [ ] 3a.9 Implement delete/fill/invert/expand/shrink/feather selection operations
-- [ ] 3a.10 Implement Select All, Deselect, Reselect
-- [ ] 3a.11 Implement clipboard: cut (Ctrl+X), copy (Ctrl+C), paste (Ctrl+V), paste in place, paste as new layer
-- [ ] 3a.12 Write unit tests for Phase 3a functions: selection algorithms (magic wand, color select, expand/shrink/feather), clipboard buffer operations
+- [x] 3a.1 Implement rectangle selection tool: drag to create rectangular selection marquee
+- [x] 3a.2 Implement ellipse selection tool: drag to create elliptical selection
+- [x] 3a.3 Implement magic wand: click to select contiguous similar-color pixels with tolerance
+- [x] 3a.4 Implement color select: click to select all similar-color pixels on layer (not just contiguous)
+- [x] 3a.5 Implement lasso selection: freehand path enclosure
+- [x] 3a.6 Implement polygon selection: click-to-place vertices, double-click/Enter to close
+- [x] 3a.7 Implement selection modes: add to selection (Shift), remove from selection (Alt), intersect (Shift+Alt)
+- [x] 3a.8 Implement selection operations: move selection marquee, move selection content, duplicate selection
+- [x] 3a.9 Implement delete/fill/invert/expand/shrink/feather selection operations
+- [x] 3a.10 Implement Select All, Deselect, Reselect
+- [x] 3a.11 Implement clipboard: cut (Ctrl+X), copy (Ctrl+C), paste (Ctrl+V), paste in place, paste as new layer
+- [x] 3a.12 Write unit tests for Phase 3a functions: selection algorithms (magic wand, color select, expand/shrink/feather), clipboard buffer operations
 
 ## 4. Phase 3b: Transform
 
-- [ ] 3b.1 Implement move tool: drag to translate layer or selection content
-- [ ] 3b.2 Implement scale: nearest-neighbor, integer factor snap, free scale; transform handles at corners/edges
-- [ ] 3b.3 Implement rotate: 90° CW/CCW, arbitrary angle input, rotation handle; pivot point with draggable indicator
-- [ ] 3b.4 Implement flip: horizontal and vertical
-- [ ] 3b.5 Implement auto-save: debounced save on idle (1s after last change), dirty state indicator, in-memory version history
-- [ ] 3b.6 Write unit tests for Phase 3b functions: transform math (scale, rotate, flip)
+- [x] 3b.1 Implement move tool: drag to translate layer or selection content
+- [x] 3b.2 Implement scale: nearest-neighbor, integer factor snap, free scale; transform handles at corners/edges
+- [x] 3b.3 Implement rotate: 90° CW/CCW, arbitrary angle input, rotation handle; pivot point with draggable indicator
+- [x] 3b.4 Implement flip: horizontal and vertical
+- [x] 3b.5 Implement auto-save: debounced save on idle (1s after last change), dirty state indicator, in-memory version history
+- [x] 3b.6 Write unit tests for Phase 3b functions: transform math (scale, rotate, flip)
 
 ## 5. Phase 4: Advanced Tools & Polish
 
-- [ ] 4.1 Build brush management UI: brush list, create from selection, save, delete, duplicate
-- [ ] 4.2 Implement brush settings: size slider, opacity slider, flow slider, hardness slider, rotation slider
-- [ ] 4.3 Implement pixel brush stamps: square, circle, dither, pattern, custom (from saved patterns)
-- [ ] 4.4 Implement curve (Bezier) tool: click to place control points, render pixel-perfect Bezier curve
-- [ ] 4.5 Implement spray tool: random pixel scattering with radius and density controls
-- [ ] 4.6 Implement symmetry: horizontal (mirror across vertical axis), vertical (mirror across horizontal axis), radial (repeat around center with configurable segments)
-- [ ] 4.7 Implement pixel-perfect mode: constrain pencil and brush to pixel boundaries, prevent sub-pixel rendering
-- [ ] 4.8 Implement view toggles: grid overlay, pixel grid, rulers with cursor tracking, draggable guides
-- [ ] 4.9 Implement onion skin: show layers below active layer at reduced opacity
-- [ ] 4.10 Implement transparency checkerboard pattern for transparent areas
-- [ ] 4.11 Implement layer bounds toggle: dashed outline around non-empty content on active layer
-- [ ] 4.12 Add translation keys for all pixel editor UI strings to `en` and `vi` locales
-- [ ] 4.13 Mobile responsiveness: ensure tool panels work in sheet/tab layout, touch-friendly tool buttons (min 44×44px), zoom slider for pinch-less zoom, magnified cursor preview
-- [ ] 4.14 Performance optimization: offload flood fill, selection expansion, and resize to web workers if profiling shows main-thread slowdown; region-based undo snapshots (store only changed areas instead of full layer)
-- [ ] 4.15 Write unit tests for Phase 4 functions: Bezier curve algorithm, brush stamp generation, symmetry mirroring, symmetry math
+- [x] 4.1 Build brush management UI: brush list, create from selection, save, delete, duplicate
+- [x] 4.2 Implement brush settings: size slider, opacity slider, flow slider, hardness slider, rotation slider
+- [x] 4.3 Implement pixel brush stamps: square, circle, dither, pattern, custom (from saved patterns)
+- [x] 4.4 Implement curve (Bezier) tool: click to place control points, render pixel-perfect Bezier curve
+- [x] 4.5 Implement spray tool: random pixel scattering with radius and density controls
+- [x] 4.6 Implement symmetry: horizontal (mirror across vertical axis), vertical (mirror across horizontal axis), radial (repeat around center with configurable segments)
+- [x] 4.7 Implement pixel-perfect mode: constrain pencil and brush to pixel boundaries, prevent sub-pixel rendering
+- [x] 4.8 Implement view toggles: grid overlay, pixel grid, rulers with cursor tracking, draggable guides
+- [x] 4.9 Implement onion skin: show layers below active layer at reduced opacity
+- [x] 4.10 Implement transparency checkerboard pattern for transparent areas (was already done)
+- [x] 4.11 Implement layer bounds toggle: dashed outline around non-empty content on active layer
+- [x] 4.12 Add translation keys for all pixel editor UI strings to `en` and `vi` locales
+- [x] 4.13 Mobile responsiveness: ensure tool panels work in sheet/tab layout, touch-friendly tool buttons (min 44×44px), zoom slider for pinch-less zoom, magnified cursor preview
+- [x] 4.14 Performance optimization: offload flood fill, selection expansion, and resize to web workers if profiling shows main-thread slowdown; region-based undo snapshots (store only changed areas instead of full layer)
+- [x] 4.15 Write unit tests for Phase 4 functions: Bezier curve algorithm, brush stamp generation, symmetry mirroring, symmetry math
 
-## 6. Polish & Refine
+## 6. Phase 5: Polish & Refine
 
-- [ ] 6.1 Redo UI with frontend-design skill, make sure UI work on mobile devices, make sure destructive action require confirmation
-- [ ] 6.2 Make sure component are small and self-contained, state are moved down to where its used, avoid rerender with useMemo, useCallback
-- [ ] 6.3 Run test lint typecheck and fix any errors
+- [x] 6.1 Redo UI with frontend-design skill, make sure UI work on mobile devices, make sure destructive action require confirmation, Make sure component are small, self-contained and have it own file dedicated to it, state are moved down to where its used, avoid rerender with useMemo, useCallback, logic should be extracted into testable unit
++ Organize code by feature, not by file type.
++ Keep data, logic, rendering, and side effects separated, and only rerender React when the UI actually needs to change.
++ Keep components small and focused on one responsibility.
++ Separate UI state from business/domain state.
++ Use store selectors to avoid unnecessary rerenders.
++ Don't store derived data; compute it from source state.
++ Use React.memo only for components that rerender frequently.
++ Use useMemo only for expensive computations or stable references.
++ Use useCallback only when reference stability actually matters.
++ Use useEffect only to synchronize with external systems.
++ Move reusable logic into custom hooks.
++ Keep high-frequency updates out of React state.
++ Treat React as the UI layer, not the rendering engine.
++ Use useRef for mutable values that shouldn't trigger rerenders.
++ Prefer unknown over any.
++ Use discriminated unions instead of stringly-typed objects.
++ Use clear names that describe intent, not implementation.
++ Virtualize large lists instead of rendering everything.
++ Batch expensive updates and use requestAnimationFrame for animations.
++ Move CPU-intensive work to Web Workers.
++ Avoid giant components, giant stores, and giant hooks.
+- [x] 6.2 Remove any unused code
+- [x] 6.3 Run test lint typecheck and fix any errors, warnings

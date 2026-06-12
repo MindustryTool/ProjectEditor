@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { type Layer, PixelCanvas, PixelDocument } from "../utils/pixel-canvas";
+import type { Layer, PixelCanvas } from "../utils/pixel-canvas";
+import type { PixelDocument } from "../utils/pixel-canvas";
 
 export interface LayerStore {
   canvas: PixelCanvas | null;
@@ -32,7 +33,7 @@ export const useLayerStore = create<LayerStore>()((set, get) => ({
   renderVersion: 0,
 
   setCanvas: (canvas) => set({ canvas, document: null, renderVersion: 0 }),
-  setDocument: (doc) => set({ document: doc, canvas: doc?.canvas ?? null, renderVersion: 0 }),
+  setDocument: (doc) => set({ document: doc, canvas: doc?.canvas ?? null, renderVersion: doc?.canvas.renderVersion ?? 0 }),
 
   forceRender: () => set((s) => ({ renderVersion: s.renderVersion + 1 })),
 
@@ -40,105 +41,120 @@ export const useLayerStore = create<LayerStore>()((set, get) => ({
     const { canvas } = get();
     if (!canvas) return;
     canvas.addLayer(name);
-    set({ canvas: cloneCanvas(canvas) });
+    canvas.bumpRender();
+    set({ renderVersion: canvas.renderVersion });
   },
 
   removeLayer: (index) => {
     const { canvas } = get();
     if (!canvas) return;
     canvas.removeLayer(index);
-    set({ canvas: cloneCanvas(canvas) });
+    canvas.bumpRender();
+    set({ renderVersion: canvas.renderVersion });
   },
 
   duplicateLayer: (index) => {
     const { canvas } = get();
     if (!canvas) return;
     canvas.duplicateLayer(index);
-    set({ canvas: cloneCanvas(canvas) });
+    canvas.bumpRender();
+    set({ renderVersion: canvas.renderVersion });
   },
 
   renameLayer: (index, name) => {
     const { canvas } = get();
     if (!canvas) return;
     canvas.renameLayer(index, name);
-    set({ canvas: cloneCanvas(canvas) });
+    canvas.bumpRender();
+    set({ renderVersion: canvas.renderVersion });
   },
 
   moveLayer: (from, to) => {
     const { canvas } = get();
     if (!canvas) return;
     canvas.moveLayer(from, to);
-    set({ canvas: cloneCanvas(canvas) });
+    canvas.bumpRender();
+    set({ renderVersion: canvas.renderVersion });
   },
 
   setCurrentLayer: (index) => {
     const { canvas } = get();
     if (!canvas) return;
     canvas.setCurrentLayer(index);
-    set({ canvas: cloneCanvas(canvas) });
+    canvas.bumpRender();
+    set({ renderVersion: canvas.renderVersion });
   },
 
   setCurrentLayerById: (id) => {
     const { canvas } = get();
     if (!canvas) return;
     canvas.setCurrentLayerById(id);
-    set({ canvas: cloneCanvas(canvas) });
+    canvas.bumpRender();
+    set({ renderVersion: canvas.renderVersion });
   },
 
   setLayerVisibility: (index, visible) => {
     const { canvas } = get();
     if (!canvas) return;
     canvas.setLayerVisibility(index, visible);
-    set({ canvas: cloneCanvas(canvas) });
+    canvas.bumpRender();
+    set({ renderVersion: canvas.renderVersion });
   },
 
   setLayerOpacity: (index, opacity) => {
     const { canvas } = get();
     if (!canvas) return;
     canvas.setLayerOpacity(index, opacity);
-    set({ canvas: cloneCanvas(canvas) });
+    canvas.bumpRender();
+    set({ renderVersion: canvas.renderVersion });
   },
 
   setLayerBlendMode: (index, mode) => {
     const { canvas } = get();
     if (!canvas) return;
     canvas.setLayerBlendMode(index, mode);
-    set({ canvas: cloneCanvas(canvas) });
+    canvas.bumpRender();
+    set({ renderVersion: canvas.renderVersion });
   },
 
   setLayerLocked: (index, locked) => {
     const { canvas } = get();
     if (!canvas) return;
     canvas.setLayerLocked(index, locked);
-    set({ canvas: cloneCanvas(canvas) });
+    canvas.bumpRender();
+    set({ renderVersion: canvas.renderVersion });
   },
 
   createGroup: (name) => {
     const { canvas } = get();
     if (!canvas) return;
     canvas.createGroup(name);
-    set({ canvas: cloneCanvas(canvas) });
+    canvas.bumpRender();
+    set({ renderVersion: canvas.renderVersion });
   },
 
   addLayerToGroup: (groupId, layerIndex) => {
     const { canvas } = get();
     if (!canvas) return;
     canvas.addLayerToGroup(groupId, layerIndex);
-    set({ canvas: cloneCanvas(canvas) });
+    canvas.bumpRender();
+    set({ renderVersion: canvas.renderVersion });
   },
 
   removeLayerFromGroup: (index) => {
     const { canvas } = get();
     if (!canvas) return;
     canvas.removeLayerFromGroup(index);
-    set({ canvas: cloneCanvas(canvas) });
+    canvas.bumpRender();
+    set({ renderVersion: canvas.renderVersion });
   },
 
   setLayerExpanded: (id, expanded) => {
     const { canvas } = get();
     if (!canvas) return;
     canvas.setLayerExpanded(id, expanded);
-    set({ canvas: cloneCanvas(canvas) });
+    canvas.bumpRender();
+    set({ renderVersion: canvas.renderVersion });
   },
 
   getCompositeData: () => {
@@ -147,8 +163,3 @@ export const useLayerStore = create<LayerStore>()((set, get) => ({
     return canvas.getCompositeData();
   },
 }));
-
-function cloneCanvas(canvas: PixelCanvas): PixelCanvas {
-  const clone = PixelCanvas.deserialize(canvas.serialize());
-  return clone;
-}

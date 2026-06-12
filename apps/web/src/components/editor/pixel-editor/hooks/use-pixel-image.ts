@@ -40,7 +40,9 @@ export function usePixelImage(width: number, height: number) {
       const canvas = getCanvas();
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
-      ctx.putImageData(new ImageData(data as Uint8ClampedArray<ArrayBuffer>, w, h), x, y);
+      const imageData = ctx.createImageData(w, h);
+      imageData.data.set(data);
+      ctx.putImageData(imageData, x, y);
     },
     [getCanvas],
   );
