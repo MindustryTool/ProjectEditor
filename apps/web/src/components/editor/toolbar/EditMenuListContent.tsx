@@ -24,13 +24,8 @@ export function EditMenuListContent({ onItemClick }: EditMenuListContentProps) {
 	}
 
 	return (
-		<div className="flex flex-col gap-1 p-2 w-full">
-			<Button
-				variant="ghost"
-				className="w-full justify-start text-xs h-9 px-3 font-normal"
-				onClick={handleClick}
-				disabled={!canFormat}
-			>
+		<div className="flex flex-col gap-1 p-1 w-full">
+			<Button variant="ghost" className="w-full justify-start text-xs h-9 px-3 font-normal" onClick={handleClick} disabled={!canFormat}>
 				{t("edit-menu.format")}
 			</Button>
 		</div>

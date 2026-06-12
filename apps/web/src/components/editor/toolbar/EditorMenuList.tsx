@@ -25,8 +25,8 @@ interface EditorMenuListProps {
 type MenuTab = "project" | "edit" | "view" | "export" | "localization";
 
 export function EditorMenuList({ className, onClose }: EditorMenuListProps) {
-	const [isDesktop] = useIsDesktop();
 	const { t } = useTranslation();
+	const [isDesktop] = useIsDesktop();
 	const [activeTab, setActiveTab] = useState<MenuTab>("project");
 	const [exportOpen, setExportOpen] = useState(false);
 	const projectContext = useProjectSession((s) => s.projectContext);
@@ -53,7 +53,6 @@ export function EditorMenuList({ className, onClose }: EditorMenuListProps) {
 
 	return (
 		<div className={cn("flex h-[280px] w-full bg-background overflow-hidden text-sm border-t border-border", className)}>
-			{/* Left Column: Menu Categories */}
 			<div className="w-[130px] border-r border-border flex flex-col p-1.5 bg-muted/20 shrink-0 gap-0.5">
 				{tabs.map((tab) => {
 					const isActive = activeTab === tab.id;
@@ -64,7 +63,7 @@ export function EditorMenuList({ className, onClose }: EditorMenuListProps) {
 							className={cn(
 								"w-full text-left text-xs h-9 px-2.5 rounded-sm transition-all flex items-center justify-between",
 								isActive
-									? "text-primary font-semibold bg-accent border-r-2 border-primary"
+									? "text-forground font-semibold bg-accent"
 									: "text-muted-foreground font-normal hover:bg-accent/40",
 							)}
 						>
@@ -75,7 +74,7 @@ export function EditorMenuList({ className, onClose }: EditorMenuListProps) {
 			</div>
 
 			{/* Right Column: Tab Content */}
-			<div className="flex-1 overflow-y-auto p-1.5 bg-background">
+			<div className="flex-1 overflow-y-auto bg-background">
 				{activeTab === "project" && <ProjectMenuListContent onItemClick={onClose} />}
 				{activeTab === "edit" && <EditMenuListContent onItemClick={onClose} />}
 				{activeTab === "view" && <ViewMenuListContent onItemClick={onClose} />}
@@ -99,8 +98,6 @@ export function EditorMenuList({ className, onClose }: EditorMenuListProps) {
 				)}
 				{activeTab === "localization" && <LocalizationMenuListContent onItemClick={onClose} />}
 			</div>
-
-			{/* Export Dialog */}
 			<ExportMenuContent open={exportOpen} onOpenChange={setExportOpen} />
 		</div>
 	);

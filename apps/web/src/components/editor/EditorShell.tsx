@@ -295,7 +295,7 @@ function EditorMobileLayout() {
 							{t("editor.menu")}
 						</Button>
 					</SheetTrigger>
-					<SheetContent side="bottom" className="h-[320px] p-0 gap-0 overflow-hidden">
+					<SheetContent side="bottom" className="h-[320px] p-0 gap-0 overflow-hidden" showCloseButton={false}>
 						<EditorMenuList onClose={() => setSheetOpen(false)} />
 					</SheetContent>
 				</Sheet>

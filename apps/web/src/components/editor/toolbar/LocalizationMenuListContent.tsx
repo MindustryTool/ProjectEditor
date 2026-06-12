@@ -16,12 +16,8 @@ export function LocalizationMenuListContent({ onItemClick }: LocalizationMenuLis
 	};
 
 	return (
-		<div className="flex flex-col gap-1 p-2 w-full">
-			<Button
-				variant="ghost"
-				className="w-full justify-start text-xs h-9 px-3 font-normal"
-				onClick={handleClick}
-			>
+		<div className="flex flex-col gap-1 p-1 w-full">
+			<Button variant="ghost" className="w-full justify-start text-xs h-9 px-3 font-normal" onClick={handleClick}>
 				{t("localization-menu.create-new-locale")}
 			</Button>
 			<Dialog open={open} onOpenChange={setOpen}>

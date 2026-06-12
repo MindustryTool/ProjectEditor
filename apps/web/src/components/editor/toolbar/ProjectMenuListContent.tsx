@@ -31,9 +31,9 @@ export function ProjectMenuListContent({ onItemClick }: ProjectMenuListContentPr
 	};
 
 	return (
-		<div className="flex flex-col gap-1 p-2 w-full">
+		<div className="flex flex-col gap-1 p-1 w-full">
 			<input ref={fileInputRef} type="file" accept=".zip" className="hidden" onChange={handleFileSelected} />
-			
+
 			<Button
 				variant="ghost"
 				className="w-full justify-start text-xs h-9 px-3 font-normal"
@@ -45,11 +45,7 @@ export function ProjectMenuListContent({ onItemClick }: ProjectMenuListContentPr
 			<ProjectPickerDialog
 				mode="create"
 				trigger={
-					<Button
-						variant="ghost"
-						className="w-full justify-start text-xs h-9 px-3 font-normal"
-						onClick={onItemClick}
-					>
+					<Button variant="ghost" className="w-full justify-start text-xs h-9 px-3 font-normal" onClick={onItemClick}>
 						{t("project-menu.create-project")}
 					</Button>
 				}
@@ -60,11 +56,7 @@ export function ProjectMenuListContent({ onItemClick }: ProjectMenuListContentPr
 			<ProjectPickerDialog
 				mode="open"
 				trigger={
-					<Button
-						variant="ghost"
-						className="w-full justify-start text-xs h-9 px-3 font-normal"
-						onClick={onItemClick}
-					>
+					<Button variant="ghost" className="w-full justify-start text-xs h-9 px-3 font-normal" onClick={onItemClick}>
 						{t("project-menu.open-project")}
 					</Button>
 				}
