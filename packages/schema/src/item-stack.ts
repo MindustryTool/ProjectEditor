@@ -5,7 +5,7 @@ import { cached, metadata } from "./utils";
 
 export function ItemStackItemFieldSchema(context: ProjectContents) {
 	return v.pipe(
-		v.string(),
+		v.undefinedable(v.string(), () => context.items[0]?.name.replaceAll(context.name + "-", "") || ""),
 		v.transform((v) => v.replaceAll(context.name + "-", "")),
 		v.picklist(context.items.map((item) => item.name.replaceAll(context.name + "-", ""))),
 	);
@@ -17,7 +17,7 @@ export const ItemStackSchema = cached((context: ProjectContents) =>
 			if (typeof input === "string") {
 				return v.pipe(
 					v.string(),
-                    metadata({type: 'item-stack'}),
+					metadata({ type: "item-stack" }),
 					v.check((value) => {
 						if (!value.includes("/")) {
 							return false;
@@ -49,7 +49,7 @@ export const ItemStackSchema = cached((context: ProjectContents) =>
 			return v.pipe(
 				v.object({
 					item: ItemStackItemFieldSchema(context),
-					amount: v.pipe(v.number(), v.integer(), v.minValue(0)),
+					amount: v.pipe(v.undefinedable(v.number(), 0), v.integer(), v.minValue(0)),
 				}),
 			);
 		}),
