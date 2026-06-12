@@ -52,7 +52,7 @@ export const ArrayField = React.memo(function ArrayField({
 			<SchemaLabel name={name} metadata={metadata} />
 			<SchemaDescription metadata={metadata} />
 			<FieldControl>
-				<div className="flex flex-col gap-2 border p-2 rounded-md border-dashed">
+				<div className="flex flex-col gap-2 border p-2 rounded-md border-dashed bg-muted/40">
 					{arrayValue.map((el, index) => (
 						<ArrayElement
 							name={name}
@@ -106,7 +106,7 @@ function ArrayElement({
 	const Renderer = getRenderer(type);
 
 	return (
-		<div key={index} className="flex flex-col gap-2 relative border p-2 rounded-md">
+		<div key={index} className="flex flex-col gap-2 relative border p-2 rounded-md bg-muted">
 			{Renderer ? (
 				<Renderer
 					key={entryJsonPath}
