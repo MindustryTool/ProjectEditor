@@ -61,17 +61,5 @@ export function ValidationProvider() {
 		}
 	}, [path, projectId]);
 
-	useEffect(() => {
-		const unsub = useValidationStore.persist.onFinishHydration((state) => {
-			for (const path of Object.keys(state.results.resultsByPath)) {
-				validationService.scheduleValidation(projectId, path);
-			}
-		});
-
-		return () => {
-			unsub();
-		};
-	}, [projectId]);
-
 	return null;
 }

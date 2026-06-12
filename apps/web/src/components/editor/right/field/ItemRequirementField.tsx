@@ -44,7 +44,7 @@ export const ItemRequirementField = React.memo(function ItemRequirementField({
 			<FieldControl className="flex gap-1">
 				<Dialog>
 					<DialogTrigger asChild>
-						<Button variant="outline" className="py-1 px-2 flex-1 justify-start">
+						<Button variant="outline" className="py-1 px-2 flex-1 justify-start overflow-hidden">
 							{selectedItem ? (
 								<span className="flex items-center gap-2">
 									<ContentImage className="size-5" entry={selectedItem} />

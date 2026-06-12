@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import type { ProjectFileSystem } from "../project-fs";
-import type { EventBus, ProjectEventMap } from "../types";
 
 const MAX_CACHE_ENTRIES = 10000;
 
@@ -62,7 +61,6 @@ export interface FileStore {
 	clearFile: (projectId: string, path: string) => void;
 	clearAllFiles: (projectId?: string) => void;
 	loadFile: (projectId: string, path: string, fs: ProjectFileSystem, force?: boolean) => void;
-	subscribeToEvents: (projectId: string, path: string, events: EventBus<ProjectEventMap>, fs: ProjectFileSystem) => () => void;
 	cleanup: (projectId: string, path: string) => void;
 }
 
@@ -93,7 +91,7 @@ function buildFiles(): Record<string, FileEntry> {
 	return obj;
 }
 
-export const useFileStore = create<FileStore>()((set, get) => ({
+export const useFileStore = create<FileStore>()((set) => ({
 	fileContents: {},
 	savingPaths: [],
 
@@ -298,47 +296,6 @@ export const useFileStore = create<FileStore>()((set, get) => ({
 			},
 		);
 	},
-
-	subscribeToEvents: (projectId, path, events, fs) => {
-		const key = cacheKey(projectId, path);
-		const prev = eventUnsubs.get(key);
-		if (prev) prev();
-
-		const unsubWrite = events.on("file:write", (event) => {
-			if (event.path !== path) return;
-			const current = lruMap.get(key);
-			if (current && current.currentVersion !== current.savedVersion) return;
-			get().loadFile(projectId, path, fs, true);
-		});
-
-		const unsubDelete = events.on("file:delete", (event) => {
-			if (event.path !== path) return;
-			get().clearFile(projectId, path);
-			get().cleanup(projectId, path);
-		});
-
-		const unsubRename = events.on("file:rename", (event) => {
-			if (event.oldPath === path) {
-				get().clearFile(projectId, path);
-				get().cleanup(projectId, path);
-				return;
-			}
-			if (event.newPath === path) {
-				const current = lruMap.get(key);
-				if (current && current.currentVersion !== current.savedVersion) return;
-				get().loadFile(projectId, path, fs, true);
-			}
-		});
-
-		const unsub = () => {
-			unsubWrite();
-			unsubDelete();
-			unsubRename();
-		};
-		eventUnsubs.set(key, unsub);
-		return unsub;
-	},
-
 	cleanup: (projectId, path) => {
 		const key = cacheKey(projectId, path);
 		const controller = abortMap.get(key);

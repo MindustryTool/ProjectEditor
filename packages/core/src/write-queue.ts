@@ -60,7 +60,6 @@ export class WriteQueue {
 		}
 
 		const batch = Array.from(this.pending.values());
-		console.log("WriteQueue flush", { batchSize: batch.length });
 		this.pending.clear();
 
 		for (const write of batch) {

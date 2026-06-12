@@ -105,7 +105,6 @@ function ArrayElement({
 
 	const Renderer = getRenderer(type);
 
-
 	return (
 		<div key={index} className="flex flex-col gap-2 relative border p-2 rounded-md">
 			{Renderer ? (
@@ -124,7 +123,7 @@ function ArrayElement({
 			) : (
 				<span className="text-red-400 text-sm">Unknown field type '{type}'</span>
 			)}
-			<Button className="text-destructive w-full" variant="destructive" onClick={handleRemove}>
+			<Button className="w-full" variant="destructive" onClick={handleRemove}>
 				<Trash2 />
 			</Button>
 		</div>

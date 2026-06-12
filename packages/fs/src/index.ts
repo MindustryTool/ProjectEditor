@@ -78,7 +78,6 @@ export class OPFSAdapter implements VirtualFileSystem {
 			const [dir, name] = await resolveHandle(this.root, path);
 			const fileHandle = await dir.getFileHandle(name);
 			const file = await fileHandle.getFile();
-			console.log("OPFS readFile", { path, size: file.size });
 			return file.arrayBuffer();
 		} catch (err) {
 			if (err instanceof DOMException && err.name === "NotFoundError") return null;
@@ -93,11 +92,8 @@ export class OPFSAdapter implements VirtualFileSystem {
 			const [dir, name] = await resolveHandle(this.root, path, true);
 			const fileHandle = await dir.getFileHandle(name, { create: true });
 			const writable = await fileHandle.createWritable();
-			const byteLen = (data as ArrayBuffer).byteLength ?? (data as Uint8Array).length ?? undefined;
-			console.log("OPFS writeFile start", { path, bytes: byteLen });
 			await writable.write(data);
 			await writable.close();
-			console.log("OPFS writeFile complete", { path, bytes: byteLen });
 		} catch (err) {
 			const message = err instanceof DOMException && err.name === "NotFoundError" ? "File not found" : "Error writing file";
 			console.error(message, path, err);
@@ -108,7 +104,6 @@ export class OPFSAdapter implements VirtualFileSystem {
 	async delete(path: string): Promise<void> {
 		try {
 			const [dir, name] = await resolveHandle(this.root, path);
-			console.log("OPFS delete", { path });
 			await dir.removeEntry(name, { recursive: true });
 		} catch (err) {
 			const message = err instanceof DOMException && err.name === "NotFoundError" ? "File not found" : "Error deleting file";
@@ -120,7 +115,6 @@ export class OPFSAdapter implements VirtualFileSystem {
 	async mkdir(path: string): Promise<void> {
 		try {
 			const [dir, name] = await resolveHandle(this.root, path, true);
-			console.log("OPFS mkdir", { path });
 			await dir.getDirectoryHandle(name, { create: true });
 		} catch (err) {
 			const message = err instanceof DOMException && err.name === "NotFoundError" ? "Directory not found" : "Error creating directory";
@@ -143,7 +137,6 @@ export class OPFSAdapter implements VirtualFileSystem {
 					kind: handle.kind as "file" | "directory",
 				});
 			}
-			console.log("OPFS readdir", { path, entries: entries.length });
 			return entries;
 		} catch (err) {
 			const message = err instanceof DOMException && err.name === "NotFoundError" ? "Directory not found" : "Error reading directory";
@@ -211,7 +204,6 @@ export class OPFSAdapter implements VirtualFileSystem {
 			if (oldPath === newPath) return;
 			const s = await this.stat(oldPath);
 			if (s.kind === "file") {
-				console.log("OPFS rename file (copy+delete)", { oldPath, newPath, size: s.size });
 				const data = await this.readFile(oldPath);
 				if (data !== null) {
 					await this.writeFile(newPath, data);

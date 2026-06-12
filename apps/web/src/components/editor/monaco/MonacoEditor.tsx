@@ -12,7 +12,6 @@ import { Spinner } from "#/components/ui/spinner";
 import { useEditorValidation } from "./useEditorValidation";
 import { useColorTagDecorations } from "./useColorTagDecorations";
 import { useColorTagPicker } from "./useColorTagPicker";
-import { useFileEventSubscription } from "./useFileEventSubscription";
 import { ColorTagPopover } from "./ColorTagPopover";
 
 interface MonacoEditorProps {
@@ -44,7 +43,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 	const onChangeRef = useRef(onChange);
 	onChangeRef.current = onChange;
 
-	const debouncedOnChange = useMemo(() => debounce((value: string) => onChangeRef.current(value), 100), []);
+	const debouncedOnChange = useMemo(() => debounce((value: string | undefined) => onChangeRef.current(value || ""), 100), []);
 	const theme = useMonacoTheme();
 	const fontSize = useAppStore((s) => s.settings.fontSize);
 	const tabSize = useAppStore((s) => s.settings.tabSize);
@@ -68,8 +67,6 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 		value,
 		language,
 	});
-
-	useFileEventSubscription(path);
 
 	const handleBeforeMount: BeforeMount = (monaco) => {
 		monacoRef.current = monaco;
@@ -105,7 +102,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 
 	const handleMount: OnMount = (editor) => {
 		editorRef.current = editor;
-		updateMarkers();
+		updateMarkers(monacoRef.current, editor);
 		updateColorDecorations();
 		editorDisposablesRef.current.forEach((d) => d.dispose());
 		editorDisposablesRef.current = setupColorTagDisposables(editor);
@@ -119,7 +116,7 @@ export function MonacoEditor({ value, onChange, language, readOnly, path }: Mona
 				theme={theme}
 				language={language}
 				value={value}
-				onChange={(newValue) => debouncedOnChange(newValue ?? "")}
+				onChange={debouncedOnChange}
 				beforeMount={handleBeforeMount}
 				onMount={handleMount}
 				options={{
