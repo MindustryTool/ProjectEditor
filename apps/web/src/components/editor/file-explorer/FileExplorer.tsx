@@ -47,9 +47,26 @@ export function FileExplorer({ className }: FileExplorerProps) {
 		return [rootNode];
 	}, [context.project.id, treeSnapshot]);
 
-	const handleContextMenu = useCallback((path: string, rect: DOMRect) => {
-		setContextMenu({ path, x: rect.right, y: rect.top });
-	}, []);
+	const handleContextMenu = useCallback(
+		(path: string, rect: DOMRect) => {
+			const menuWidth = 144;
+			const menuHeight = 80;
+
+			const isNearRightEdge = rect.right + menuWidth > window.innerWidth;
+			const isNearBottomEdge = rect.top + menuHeight > window.innerHeight;
+
+			const x = isNearRightEdge ? Math.max(8, rect.right - menuWidth) : rect.right;
+			const y = isNearBottomEdge ? Math.max(8, rect.bottom - menuHeight) : rect.top;
+
+			if (contextMenu?.path === path) {
+				setContextMenu(null);
+				return;
+			}
+
+			setContextMenu({ path, x, y });
+		},
+		[contextMenu?.path],
+	);
 
 	return (
 		<div ref={containerRef} className={cn("h-full w-full overflow-hidden flex-col flex", className)}>
@@ -66,7 +83,16 @@ export function FileExplorer({ className }: FileExplorerProps) {
 							if (!open) setContextMenu(null);
 						}}
 					>
-						<DropdownMenuContent side="left" sideOffset={0} style={{ position: "fixed", left: contextMenu.x, top: contextMenu.y }}>
+						<DropdownMenuContent
+							side="left"
+							sideOffset={0}
+							className="w-36"
+							style={{
+								position: "fixed",
+								left: contextMenu.x,
+								top: contextMenu.y,
+							}}
+						>
 							<DropdownMenuItem
 								onClick={() => {
 									setEditingPath(contextMenu.path);
