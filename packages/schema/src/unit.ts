@@ -13,14 +13,15 @@ import { EngineHjsonSchema } from "./engine";
 
 import { metadata } from "./utils";
 import { classSchema } from "./class";
+import { unlockableContentSchema } from "./content";
 
 const unitTypes = ["flying", "mech", "legs", "naval", "payload", "missile", "tank", "hover", "tether", "crawl"] as const;
 const unitTemplates = ["ErekirUnitType", "MissileUnitType", "NeoplasmUnitType", "TankUnitType", "UnitType"] as const;
 
 const unitObjectSchema = {
 	name: v.optional(v.string()),
-    description: v.optional(v.string()),
 	type: v.optional(v.picklist(unitTypes)),
+    ...unlockableContentSchema,
 	template: classSchema(unitTemplates, "UnitType"),
 	envRequired: v.pipe(
 		v.optional(EnvSchema, 0),

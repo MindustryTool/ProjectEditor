@@ -18,7 +18,7 @@ export const StringField = React.memo(function StringField({
 	path,
 	defaultValue,
 }: SchemaRendererProps) {
-	const stringValue = typeof value === "string" ? value : String(JSON.stringify(value) || defaultValue || "");
+	const stringValue = typeof value === "string" ? value : String(value ? JSON.stringify(value) : defaultValue || "");
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
 	const handleChange = useCallback(

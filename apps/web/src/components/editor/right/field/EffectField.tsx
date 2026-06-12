@@ -1,5 +1,5 @@
 import { Button } from "#/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
 import { Field } from "#/components/editor/right/field";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/components/ui/collapsible";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
@@ -151,9 +151,11 @@ function EffectDialogContent({
 					{effects
 						.filter((i) => i.name !== value && i.name.includes(filter))
 						.map((item) => (
-							<ToggleGroupItem key={item.name} value={item.name}>
-								{item.name}
-							</ToggleGroupItem>
+                            <DialogClose key={item.name} asChild>
+								<ToggleGroupItem value={item.name}>
+									{item.name}
+								</ToggleGroupItem>
+							</DialogClose>
 						))}
 				</div>
 			</div>

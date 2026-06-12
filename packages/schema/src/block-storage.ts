@@ -1,6 +1,8 @@
 import * as v from "valibot";
 import { TextureFieldSchema } from "./texture";
 import { metadata } from "./utils";
+import { UnitFieldSchema } from "./unit";
+import type { ProjectContents } from "@project/types";
 
 // Storage variant schemas
 export const storageBlockObjectSchema = v.object({
@@ -13,8 +15,9 @@ export const storageBlockObjectSchema = v.object({
 	),
 });
 
-export const coreBlockObjectSchema = v.object({
+export const coreBlockObjectSchema = (context: ProjectContents) => v.object({
 	...storageBlockObjectSchema.entries,
+    unitType: UnitFieldSchema(context),
 	thruster1Texture: TextureFieldSchema("@-thruster1", "clear-effect"),
 	thruster2Texture: TextureFieldSchema("@-thruster2", "clear-effect"),
 	thrusterLength: v.pipe(

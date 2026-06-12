@@ -55,37 +55,43 @@ const consumeItemEfficiencySchema = cached((context: ProjectContents) =>
 	v.object({
 		/** This has no effect on the consumer itself, but is used for stat display. */
 		itemDurationMultipliers: v.optional(v.record(ItemFieldSchema(context), v.number())),
-	}));
+	}),
+);
 
 const consumeItemChargedSchema = cached((context: ProjectContents) =>
 	v.object({
 		...consumeItemEfficiencySchema(context).entries,
 		minCharge: v.number(),
-	}));
+	}),
+);
 
 const consumeItemFlammableSchema = cached((context: ProjectContents) =>
 	v.object({
 		...consumeItemEfficiencySchema(context).entries,
 		minFlammability: v.number(),
-	}));
+	}),
+);
 
 const consumeItemRadioactiveSchema = cached((context: ProjectContents) =>
 	v.object({
 		...consumeItemEfficiencySchema(context).entries,
 		minRadioactivity: v.number(),
-	}));
+	}),
+);
 
 const consumeItemExplosiveSchema = cached((context: ProjectContents) =>
 	v.object({
 		...consumeItemEfficiencySchema(context).entries,
 		minExplosiveness: v.number(),
-	}));
+	}),
+);
 
 const consumeItemListSchema = cached((context: ProjectContents) =>
 	v.object({
 		...consumeItemFilterSchema.entries,
 		itemMultipliers: v.record(ItemFieldSchema(context), v.number()),
-	}));
+	}),
+);
 
 const consumeItemExplodeSchema = cached((context: ProjectContents) =>
 	v.object({
@@ -94,7 +100,8 @@ const consumeItemExplodeSchema = cached((context: ProjectContents) =>
 		threshold: v.optional(v.number(), 0),
 		baseChance: v.optional(v.number(), 0.06),
 		explodeEffect: EffectFieldSchema(context),
-	}));
+	}),
+);
 
 const consumeItemsSchema = cached((context: ProjectContents) =>
 	v.pipe(
@@ -105,17 +112,24 @@ const consumeItemsSchema = cached((context: ProjectContents) =>
 			if (typeof input === "string") {
 				return v.optional(v.pipe(ItemStackSchema(context), metadata({ option: "single" })), "");
 			}
-			return v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ option: "multiple" })), { items: [] });
+			return v.optional(
+				v.pipe(v.object({ items: v.array(ItemStackSchema(context)), ...consumeSchema.entries }), metadata({ option: "multiple" })),
+				{ items: [], type: "ConsumeItems" },
+			);
 		}),
 		metadata({
 			type: "variant",
 			options: [
 				v.optional(v.pipe(v.array(ItemStackSchema(context)), metadata({ option: "array" })), []),
 				v.optional(v.pipe(ItemStackSchema(context), metadata({ option: "single" })), ""),
-				v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ option: "multiple" })), { items: [] }),
+				v.optional(
+					v.pipe(v.object({ items: v.array(ItemStackSchema(context)), ...consumeSchema.entries }), metadata({ option: "multiple" })),
+					{ items: [], type: "ConsumeItems" },
+				),
 			],
 		}),
-	));
+	),
+);
 
 const consumeItemBoostSchema = cached((context: ProjectContents) =>
 	v.pipe(
@@ -132,7 +146,8 @@ const consumeItemBoostSchema = cached((context: ProjectContents) =>
 				v.optional(v.pipe(v.object({ items: v.array(ItemStackSchema(context)) }), metadata({ option: "multiple" })), { items: [] }),
 			],
 		}),
-	));
+	),
+);
 
 const consumeLiquidBaseSchema = v.object({ ...consumeSchema.entries, amount: v.number() });
 
@@ -143,7 +158,8 @@ const consumeLiquidFilterSchema = v.object({
 const consumeLiquidFlammableSchema = v.object({ ...consumeLiquidFilterSchema.entries, minFlammability: v.number() });
 
 const comsumeLiquidSchema = cached((context: ProjectContents) =>
-	v.object({ ...consumeLiquidBaseSchema.entries, liquid: LiquidFieldSchema(context) }));
+	v.object({ ...consumeLiquidBaseSchema.entries, liquid: LiquidFieldSchema(context) }),
+);
 
 const consumeLiquidsSchema = cached((context: ProjectContents) =>
 	v.pipe(
@@ -151,16 +167,33 @@ const consumeLiquidsSchema = cached((context: ProjectContents) =>
 			if (Array.isArray(input)) {
 				return v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ option: "array" })), []);
 			}
-			return v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ option: "multiple" })), { liquids: [] });
+
+			return v.optional(
+				v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)), ...consumeSchema.entries }), metadata({ option: "multiple" })),
+				{
+					liquids: [],
+					type: "ConsumeLiquids",
+				},
+			);
 		}),
 		metadata({
 			type: "variant",
 			options: [
 				v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ option: "array" })), []),
-				v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ option: "multiple" })), { liquids: [] }),
+				v.optional(
+					v.pipe(
+						v.object({ liquids: v.array(LiquidStackSchema(context)), ...consumeSchema.entries }),
+						metadata({ option: "multiple" }),
+					),
+					{
+						liquids: [],
+						type: "ConsumeLiquids",
+					},
+				),
 			],
 		}),
-	));
+	),
+);
 
 const consumeCoolantSchema = v.object({
 	...consumeLiquidFilterSchema.entries,
@@ -176,16 +209,21 @@ const consumeLiquidsBoostSchema = cached((context: ProjectContents) =>
 			if (Array.isArray(input)) {
 				return v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ option: "array" })), []);
 			}
-			return v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ option: "multiple" })), { liquids: [] });
+			return v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ option: "multiple" })), {
+				liquids: [],
+			});
 		}),
 		metadata({
 			type: "variant",
 			options: [
 				v.optional(v.pipe(v.array(LiquidStackSchema(context)), metadata({ option: "array" })), []),
-				v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ option: "multiple" })), { liquids: [] }),
+				v.optional(v.pipe(v.object({ liquids: v.array(LiquidStackSchema(context)) }), metadata({ option: "multiple" })), {
+					liquids: [],
+				}),
 			],
 		}),
-	));
+	),
+);
 
 const consumePowerSchema = v.pipe(
 	v.lazy((input) => {
@@ -270,4 +308,5 @@ export const ConsumesHjsonSchema = cached((context: ProjectContents) =>
 			}),
 		),
 		metadata({ type: "consumes" }),
-	));
+	),
+);

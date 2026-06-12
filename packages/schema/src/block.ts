@@ -189,7 +189,7 @@ export const BlockHjsonSchema = new ClassMap<BlockType>({
 	PowerSource: () => powerSourceObjectSchema.entries,
 	// Storage
 	StorageBlock: () => storageBlockObjectSchema.entries,
-	CoreBlock: () => coreBlockObjectSchema.entries,
+	CoreBlock: (context) => coreBlockObjectSchema(context).entries,
 	Unloader: () => unloaderObjectSchema.entries,
 	// Liquid
 	LiquidBlock: () => liquidBlockObjectSchema.entries,

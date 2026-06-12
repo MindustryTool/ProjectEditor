@@ -9,6 +9,7 @@ import { BulletHjsonSchema } from "./bullet";
 import { cached, fixed, metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
 import { ClassMap, classSchema } from "./class";
+import { unlockableContentSchema } from "./content";
 
 const weaponTypes = ["Weapon", "BuildWeapon", "MineWeapon", "PointDefenseBulletWeapon", "PointDefenseWeapon", "RepairBeamWeapon"] as const;
 
@@ -16,8 +17,8 @@ type WeaponType = (typeof weaponTypes)[number];
 
 const weaponObjectSchema = {
 	name: v.optional(v.string()),
-	description: v.optional(v.string()),
 	type: v.pipe(classSchema(weaponTypes, "Weapon"), metadata({ name: "editor.weapon.type" })),
+	...unlockableContentSchema,
 	shots: v.optional(v.number(), 1),
 	display: v.optional(v.boolean(), true),
 	mirror: v.optional(v.boolean(), true),

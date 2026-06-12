@@ -1,6 +1,6 @@
 import { ContentImage } from "#/components/editor/ContentImage";
 import { Button } from "#/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
 import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { Input } from "#/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
@@ -70,9 +70,11 @@ export const LiquidRequirementField = React.memo(function LiquidRequirementField
 								{liquids
 									.filter((i) => i.name !== itemName)
 									.map((item) => (
-										<ToggleGroupItem key={item.name} value={item.name}>
-											<ContentImage entry={item} />
-										</ToggleGroupItem>
+										<DialogClose key={item.name} asChild>
+											<ToggleGroupItem value={item.name}>
+												<ContentImage entry={item} />
+											</ToggleGroupItem>
+										</DialogClose>
 									))}
 							</ItemGrid>
 						</ToggleGroup>

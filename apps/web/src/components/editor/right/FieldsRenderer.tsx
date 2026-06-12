@@ -71,16 +71,21 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	return (
 		<Suspense>
 			<ErrorBoundary>
-				<InputGroup>
-					<InputGroupAddon>
-						<Search className="size-4" />
-					</InputGroupAddon>
-					<InputGroupInput //
-						value={filter}
-						onChange={(e) => setFilter(e.target.value)}
-						placeholder={t("editor.search")}
-					/>
-				</InputGroup>
+				<div className="grid gap-2">
+					<span className="first-letter:uppercase flex items-center gap-2 text-sm leading-none font-medium select-none">
+						{t("editor.search")}
+					</span>
+					<InputGroup>
+						<InputGroupAddon>
+							<Search className="size-4" />
+						</InputGroupAddon>
+						<InputGroupInput //
+							value={filter}
+							onChange={(e) => setFilter(e.target.value)}
+							placeholder={t("editor.search")}
+						/>
+					</InputGroup>
+				</div>
 				<Children
 					entries={filtered} //
 					node={node}

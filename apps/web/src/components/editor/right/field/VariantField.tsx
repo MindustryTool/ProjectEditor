@@ -5,7 +5,7 @@ import type { SchemaRendererProps } from "#/components/editor/right/field/types"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import { detectSchemaType, getDefaults, getSchemaMetadata } from "@project/schema";
-import React from "react";
+import React, { useRef } from "react";
 import { useMemo } from "react";
 
 export const VariantField = React.memo(function VariantField({
@@ -18,6 +18,7 @@ export const VariantField = React.memo(function VariantField({
 	getRenderer,
 }: SchemaRendererProps) {
 	const fieldMetadata = useMemo(() => getSchemaMetadata(entrySchema, false), [entrySchema]);
+	const lastRef = useRef<Record<string, unknown>>({});
 
 	if (fieldMetadata!.type !== "variant") {
 		throw new Error("VariantField only works with variant schemas");
@@ -105,10 +106,16 @@ export const VariantField = React.memo(function VariantField({
 						className="w-full p-2 border rounded-md bg-muted"
 						defaultValue={defaultTab}
 						onValueChange={(tab) => {
+							lastRef.current[defaultTab] = value;
+
 							if (tab === option1) {
-								onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, defaultValue1));
+								onChange(jsonPath, (parent, original, key) =>
+									parent.patchValue(original, key, lastRef.current[tab] ?? defaultValue1),
+								);
 							} else if (tab === option2) {
-								onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, defaultValue2));
+								onChange(jsonPath, (parent, original, key) =>
+									parent.patchValue(original, key, lastRef.current[tab] ?? defaultValue2),
+								);
 							}
 						}}
 					>
@@ -173,10 +180,12 @@ export const VariantField = React.memo(function VariantField({
 				<Select
 					defaultValue={defaultTab}
 					onValueChange={(tab) => {
+						lastRef.current[defaultTab] = value;
 						const option = options.find((option) => option.option === tab);
+
 						if (option) {
 							onChange(jsonPath, (parent, original, key) => {
-								return parent.patchValue(original, key, option.defaultValue);
+								return parent.patchValue(original, key, lastRef.current[tab] ?? option.defaultValue);
 							});
 						} else {
 							throw new Error(`Unknown option ${tab}`);

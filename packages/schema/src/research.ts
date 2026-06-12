@@ -1,6 +1,6 @@
 import * as v from "valibot";
 import { CachedSchema, findContent } from "./utils";
-import { ContentNameSchema } from "./content";
+import { ContentFieldSchema } from "./content";
 import { metadata } from "./utils";
 import type { SchemaFn } from "./utils";
 import { ItemStackSchema } from "./item-stack";
@@ -10,12 +10,13 @@ export const ResearchSchema: SchemaFn = CachedSchema((context) => {
 		v.pipe(
 			v.lazy((input) => {
 				if (typeof input === "string") {
-					return v.pipe(v.optional(ContentNameSchema, ""), metadata({ option: "simple" }));
+					return v.pipe(v.optional(ContentFieldSchema(context), ""), metadata({ option: "simple" }));
 				}
+                
 				return v.pipe(
 					v.optional(
 						v.object({
-							parent: v.optional(ContentNameSchema),
+							parent: v.optional(ContentFieldSchema(context)),
 							requirements: v.optional(v.array(ItemStackSchema(context)), []),
 							objectives: v.optional(v.object({})),
 							planet: v.optional(v.string()),
@@ -29,11 +30,11 @@ export const ResearchSchema: SchemaFn = CachedSchema((context) => {
 			metadata({
 				type: "variant",
 				options: [
-					v.pipe(v.optional(ContentNameSchema, ""), metadata({ option: "simple" })),
+					v.pipe(v.optional(ContentFieldSchema(context), ""), metadata({ option: "simple" })),
 					v.pipe(
 						v.optional(
 							v.object({
-								parent: v.optional(ContentNameSchema),
+								parent: v.optional(ContentFieldSchema(context)),
 								requirements: v.optional(v.array(ItemStackSchema(context)), []),
 								objectives: v.optional(v.object({})),
 								planet: v.optional(v.string()),

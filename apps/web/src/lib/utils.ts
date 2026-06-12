@@ -32,6 +32,7 @@ export function levenshtein<T>(items: T[], extractor: (item: T) => string, filte
 			score: levenshteinDistance(extractor(item), filter),
 			item,
 		}))
+		.filter((item) => item.score > -10)
 		.sort((a, b) => b.score - a.score)
 		.slice(0, limit)
 		.map((item) => item.item);

@@ -23,12 +23,12 @@ export type AnySchema =
 	  >
 	| v.AnySchema;
 
-const WRAPPER_TYPES = new Set(["optional", "nullable", "optional", "undefinedable", "exact_optional"]);
+const WRAPPER_TYPES = new Set(["optional", "nullable", "optional", "nullish", "undefinedable", "exact_optional"]);
 
 export const types = [
 	"env",
-    "color",
-	"research",
+	"color",
+	"content",
 	"effect",
 	"string",
 	"number",
@@ -42,7 +42,7 @@ export const types = [
 	"texture",
 	"textures",
 	"item-stack",
-    "liquid-stack",
+	"liquid-stack",
 	"variant",
 	"never",
 ] as const;
@@ -382,6 +382,10 @@ export function getSchemaMetadata(schema: AnySchema, pipe: boolean = true): Sche
 
 		if (obj.type === "metadata" && obj.metadata) {
 			Object.assign(result, obj.metadata);
+		}
+
+		if (obj.metadata && typeof obj.metadata === "object" && "type" in obj.metadata && obj.metadata?.type) {
+			return;
 		}
 
 		if (obj.pipe && Array.isArray(obj.pipe) && pipe) {

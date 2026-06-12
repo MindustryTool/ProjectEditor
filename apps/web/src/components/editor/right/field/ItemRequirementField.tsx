@@ -1,6 +1,6 @@
 import { ContentImage } from "#/components/editor/ContentImage";
 import { Button } from "#/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
 import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { Input } from "#/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
@@ -33,9 +33,9 @@ export const ItemRequirementField = React.memo(function ItemRequirementField({
 
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
-    const handleChange = (name: string, amount: number) => {
-        onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, name + "/" + amount));
-    }
+	const handleChange = (name: string, amount: number) => {
+		onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, name + "/" + amount));
+	};
 
 	return (
 		<Field key={itemName} jsonPath={jsonPath} metadata={metadata}>
@@ -70,16 +70,18 @@ export const ItemRequirementField = React.memo(function ItemRequirementField({
 								{items
 									.filter((i) => i.name !== itemName)
 									.map((item) => (
-										<ToggleGroupItem key={item.name} value={item.name}>
-											<ContentImage entry={item} />
-										</ToggleGroupItem>
+										<DialogClose key={item.name} asChild>
+											<ToggleGroupItem value={item.name}>
+												<ContentImage entry={item} />
+											</ToggleGroupItem>
+										</DialogClose>
 									))}
 							</ItemGrid>
 						</ToggleGroup>
 					</DialogContent>
 				</Dialog>
 				<Input
-                    className="flex-1"
+					className="flex-1"
 					type="number"
 					value={reqNumber}
 					onChange={(v) => handleChange(itemName, Number(v.currentTarget.valueAsNumber))}
