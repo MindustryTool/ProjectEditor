@@ -33,8 +33,6 @@ export const TextureField = React.memo(function TextureField({ name, path, entry
 	const defaultSpritePath = path.replace("content", "sprites").replace(filename, format.replace("@", contentName)) + ".png";
 	const spritePath = useProjectSession((s) => s.treeSnapshot.findContentSpritePath(format.replace("@", contentName)));
 
-	console.log({ spritePath, defaultSpritePath });
-
 	return (
 		<Field jsonPath={jsonPath} metadata={metadata}>
 			<SchemaLabel name={name} metadata={metadata} />

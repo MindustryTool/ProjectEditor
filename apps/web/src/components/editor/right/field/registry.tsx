@@ -17,6 +17,7 @@ import { TexturesField } from "#/components/editor/right/field/TexturesField";
 import type { SchemaRenderer } from "#/components/editor/right/field/types";
 import { OptionsField } from "#/components/editor/right/field/OptionsField";
 import type { Type } from "@project/schema";
+import { SoundField } from "#/components/editor/right/field/SoundField";
 
 const renderers: Partial<Record<Type, SchemaRenderer>> = {
 	string: StringField,
@@ -36,6 +37,7 @@ const renderers: Partial<Record<Type, SchemaRenderer>> = {
 	textures: TexturesField,
 	env: EnvField,
 	options: OptionsField,
+    sound: SoundField
 };
 
 export function getRenderer(type: Type) {

@@ -56,7 +56,7 @@ const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.E
 		return v.object({
 			name: v.optional(v.string()),
 			type: classSchema(bulletTypes, "BasicBulletType"),
-            ...unlockableContentSchema,
+			...unlockableContentSchema,
 			lifetime: v.pipe(
 				v.optional(v.number(), 40),
 				metadata({
@@ -300,7 +300,7 @@ const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.E
 				}),
 			),
 			shootSound: v.pipe(
-				v.optional(SoundHjsonSchema(context)),
+				v.optional(SoundHjsonSchema),
 				metadata({
 					name: "editor.bullet.shoot-sound",
 					description: "editor.bullet.shoot-sound-description",
@@ -308,7 +308,7 @@ const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.E
 				}),
 			),
 			hitSound: v.pipe(
-				v.optional(SoundHjsonSchema(context)),
+				v.optional(SoundHjsonSchema),
 				metadata({
 					name: "editor.bullet.hit-sound",
 					description: "editor.bullet.hit-sound-description",
@@ -316,7 +316,7 @@ const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.E
 				}),
 			),
 			despawnSound: v.pipe(
-				v.optional(SoundHjsonSchema(context)),
+				v.optional(SoundHjsonSchema),
 				metadata({
 					name: "editor.bullet.despawn-sound",
 					description: "editor.bullet.despawn-sound-description",
@@ -667,7 +667,7 @@ const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.E
 				}),
 			),
 			healSound: v.pipe(
-				v.optional(SoundHjsonSchema(context)),
+				v.optional(SoundHjsonSchema),
 				metadata({
 					name: "editor.bullet.heal-sound",
 					description: "editor.bullet.heal-sound-description",
@@ -1548,82 +1548,85 @@ const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.E
 	},
 );
 
-export const BulletHjsonSchema: SchemaFn = new ClassMap<BulletClass>({
-	ArtilleryBulletType: (_context) => ({
-		trailMult: v.optional(v.number(), 1),
-		trailSize: v.optional(v.number(), 4),
-	}),
-	BasicBulletType: (_context) => ({}),
-	BombBulletType: (_context) => ({}),
-	BulletType: (_context) => ({}),
-	ContinuousBulletType: (_context) => ({
-		length: v.optional(v.number(), 220),
-		damageInterval: v.optional(v.number(), 5),
-		continuous: v.optional(v.boolean(), true),
-	}),
-	ContinuousFlameBulletType: (_context) => ({}),
-	ContinuousLaserBulletType: (_context) => ({}),
-	EmpBulletType: (context) => ({
-		radius: v.optional(v.number(), 100),
-		timeIncrease: v.optional(v.number(), 2.5),
-		timeDuration: v.optional(v.number(), 600),
-		unitDamageScl: v.optional(v.number(), 0.7),
-		hitPowerEffect: v.optional(EffectFieldSchema(context)),
-		hitUnits: v.optional(v.boolean(), true),
-		powerDamageScl: v.optional(v.number(), 2),
-		powerSclDecrease: v.optional(v.number(), 0.2),
-		chainEffect: v.optional(EffectFieldSchema(context)),
-		applyEffect: v.optional(EffectFieldSchema(context)),
-	}),
-	EmptyBulletType: (_context) => ({}),
-	ExplosionBulletType: (_context) => ({}),
-	FireBulletType: (_context) => ({}),
-	FlakBulletType: (_context) => ({}),
-	InterceptorBulletType: (_context) => ({}),
-	LaserBoltBulletType: (_context) => ({}),
-	LaserBulletType: (_context) => ({
-		length: v.optional(v.number(), 160),
-		width: v.optional(v.number(), 15),
-		lengthFalloff: v.optional(v.number(), 0.5),
-		sideLength: v.optional(v.number(), 29),
-		sideWidth: v.optional(v.number(), 0.7),
-		lightningSpacing: v.optional(v.number(), -1),
-		colors: v.optional(v.array(MindustryHexColorSchema)),
-	}),
-	LightningBulletType: (_context) => ({}),
-	LiquidBulletType: (_context) => ({
-		puddleSize: v.optional(v.number(), 6),
-		orbSize: v.optional(v.number(), 3),
-		boilTime: v.optional(v.number(), 5),
-	}),
-	MassDriverBolt: (_context) => ({}),
-	MissileBulletType: (_context) => ({}),
-	MultiBulletType: (context) => ({
-		bullets: v.array(BulletHjsonSchema(context)),
-		repeat: v.optional(v.number(), 1),
-	}),
-	PointBulletType: (_context) => ({}),
-	PointLaserBulletType: (_context) => ({
-		oscScl: v.optional(v.number(), 2),
-		oscMag: v.optional(v.number(), 0.3),
-		damageInterval: v.optional(v.number(), 5),
-	}),
-	RailBulletType: (_context) => ({
-		length: v.optional(v.number(), 100),
-		pointEffectSpace: v.optional(v.number(), 20),
-	}),
-	SapBulletType: (_context) => ({
-		length: v.optional(v.number(), 100),
-		sapStrength: v.optional(v.number(), 0.5),
-		color: v.optional(MindustryHexColorSchema),
-	}),
-	ShrapnelBulletType: (_context) => ({
-		length: v.optional(v.number(), 100),
-		width: v.optional(v.number(), 20),
-		serrations: v.optional(v.number(), 7),
-		serrationSpacing: v.optional(v.number(), 8),
-	}),
-	SpaceLiquidBulletType: (_context) => ({}),
-}, {
-	baseSchema: (ctx) => createBulletBaseObjectSchema(ctx).entries,
-}).schema;
+export const BulletHjsonSchema: SchemaFn = new ClassMap<BulletClass>(
+	{
+		ArtilleryBulletType: (_context) => ({
+			trailMult: v.optional(v.number(), 1),
+			trailSize: v.optional(v.number(), 4),
+		}),
+		BasicBulletType: (_context) => ({}),
+		BombBulletType: (_context) => ({}),
+		BulletType: (_context) => ({}),
+		ContinuousBulletType: (_context) => ({
+			length: v.optional(v.number(), 220),
+			damageInterval: v.optional(v.number(), 5),
+			continuous: v.optional(v.boolean(), true),
+		}),
+		ContinuousFlameBulletType: (_context) => ({}),
+		ContinuousLaserBulletType: (_context) => ({}),
+		EmpBulletType: (context) => ({
+			radius: v.optional(v.number(), 100),
+			timeIncrease: v.optional(v.number(), 2.5),
+			timeDuration: v.optional(v.number(), 600),
+			unitDamageScl: v.optional(v.number(), 0.7),
+			hitPowerEffect: v.optional(EffectFieldSchema(context)),
+			hitUnits: v.optional(v.boolean(), true),
+			powerDamageScl: v.optional(v.number(), 2),
+			powerSclDecrease: v.optional(v.number(), 0.2),
+			chainEffect: v.optional(EffectFieldSchema(context)),
+			applyEffect: v.optional(EffectFieldSchema(context)),
+		}),
+		EmptyBulletType: (_context) => ({}),
+		ExplosionBulletType: (_context) => ({}),
+		FireBulletType: (_context) => ({}),
+		FlakBulletType: (_context) => ({}),
+		InterceptorBulletType: (_context) => ({}),
+		LaserBoltBulletType: (_context) => ({}),
+		LaserBulletType: (_context) => ({
+			length: v.optional(v.number(), 160),
+			width: v.optional(v.number(), 15),
+			lengthFalloff: v.optional(v.number(), 0.5),
+			sideLength: v.optional(v.number(), 29),
+			sideWidth: v.optional(v.number(), 0.7),
+			lightningSpacing: v.optional(v.number(), -1),
+			colors: v.optional(v.array(MindustryHexColorSchema)),
+		}),
+		LightningBulletType: (_context) => ({}),
+		LiquidBulletType: (_context) => ({
+			puddleSize: v.optional(v.number(), 6),
+			orbSize: v.optional(v.number(), 3),
+			boilTime: v.optional(v.number(), 5),
+		}),
+		MassDriverBolt: (_context) => ({}),
+		MissileBulletType: (_context) => ({}),
+		MultiBulletType: (context) => ({
+			bullets: v.array(BulletHjsonSchema(context)),
+			repeat: v.optional(v.number(), 1),
+		}),
+		PointBulletType: (_context) => ({}),
+		PointLaserBulletType: (_context) => ({
+			oscScl: v.optional(v.number(), 2),
+			oscMag: v.optional(v.number(), 0.3),
+			damageInterval: v.optional(v.number(), 5),
+		}),
+		RailBulletType: (_context) => ({
+			length: v.optional(v.number(), 100),
+			pointEffectSpace: v.optional(v.number(), 20),
+		}),
+		SapBulletType: (_context) => ({
+			length: v.optional(v.number(), 100),
+			sapStrength: v.optional(v.number(), 0.5),
+			color: v.optional(MindustryHexColorSchema),
+		}),
+		ShrapnelBulletType: (_context) => ({
+			length: v.optional(v.number(), 100),
+			width: v.optional(v.number(), 20),
+			serrations: v.optional(v.number(), 7),
+			serrationSpacing: v.optional(v.number(), 8),
+		}),
+		SpaceLiquidBulletType: (_context) => ({}),
+	},
+	{
+		baseSchema: (ctx) => createBulletBaseObjectSchema(ctx).entries,
+	},
+).schema;

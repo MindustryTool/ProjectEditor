@@ -1,6 +1,7 @@
 import * as v from "valibot";
 
 export const Envs = {
+	none: 0,
 	terrestrial: 1,
 	space: 1 << 1,
 	underwater: 1 << 2,
@@ -10,7 +11,6 @@ export const Envs = {
 	groundWater: 1 << 6,
 	oxygen: 1 << 7,
 	any: 0xffffffff,
-	none: 0,
 } as const satisfies Record<string, number>;
 
 export const EnvValues = Object.values(Envs);

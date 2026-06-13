@@ -1,7 +1,11 @@
 import * as v from "valibot";
-import { cached } from "./utils";
-import type { ProjectContents } from "@project/types";
+import { metadata } from "./utils";
 
-export const SoundHjsonSchema = cached((context: ProjectContents) =>
-	v.pipe(v.string(), v.minLength(1), v.maxLength(127), v.picklist(context.sounds.map((s) => s.name))),
+export const SoundHjsonSchema = v.pipe(
+	v.string(),
+	v.minLength(1),
+	v.maxLength(127),
+	metadata({
+		type: "sound",
+	}),
 );

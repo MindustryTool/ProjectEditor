@@ -95,8 +95,6 @@ function Children({
 }) {
 	const elements: React.ReactNode[] = [];
 
-	console.log(value);
-
 	for (const [name, childSchema] of entries) {
 		const key = name;
 		const childValue = (value as Record<string, unknown>)?.[name];

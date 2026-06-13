@@ -44,6 +44,7 @@ export const types = [
 	"item-stack",
 	"liquid-stack",
 	"options",
+	"sound",
 	"never",
 ] as const;
 

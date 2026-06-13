@@ -17,6 +17,10 @@ export const EnvField = React.memo(function EnvField({
 	path,
 	defaultValue,
 }: SchemaRendererProps) {
+	if (defaultValue && typeof defaultValue !== "number") {
+		throw new Error("EnvField defaultValue must be a number");
+	}
+
 	const envValue = typeof value === "number" ? value : EnvValues.includes(defaultValue as number) ? (defaultValue as number) : 0;
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 

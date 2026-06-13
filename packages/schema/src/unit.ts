@@ -1757,39 +1757,18 @@ export const UnitHjsonSchema: SchemaFn = (context) =>
 	v.object({
 		...unitObjectSchema,
 		baseRegion: TextureFieldSchema("@-base"),
-		legRegion: v.pipe(
-			TextureFieldSchema("@-lg"),
-			metadata({ visibleWhen: { field: "type", value: "legs" } }),
-		),
+		legRegion: v.pipe(TextureFieldSchema("@-lg"), metadata({ visibleWhen: { field: "type", value: "legs" } })),
 		previewRegion: TextureFieldSchema("@-preview"),
 		cellRegion: TextureFieldSchema("@-cell"),
-		jointRegion: v.pipe(
-			TextureFieldSchema("@-joint"),
-			metadata({ visibleWhen: { field: "type", value: "legs" } }),
-		),
+		jointRegion: v.pipe(TextureFieldSchema("@-joint"), metadata({ visibleWhen: { field: "type", value: "legs" } })),
 		footRegion: TextureFieldSchema("@-foot"),
-		legBaseRegion: v.pipe(
-			TextureFieldSchema("@-leg-base", "@-leg"),
-			metadata({ visibleWhen: { field: "type", value: "legs" } }),
-		),
-		baseJointRegion: v.pipe(
-			TextureFieldSchema("@-joint-base"),
-			metadata({ visibleWhen: { field: "type", value: "legs" } }),
-		),
+		legBaseRegion: v.pipe(TextureFieldSchema("@-leg-base", "@-leg"), metadata({ visibleWhen: { field: "type", value: "legs" } })),
+		baseJointRegion: v.pipe(TextureFieldSchema("@-joint-base"), metadata({ visibleWhen: { field: "type", value: "legs" } })),
 		outlineRegion: TextureFieldSchema("@-outline"),
-		treadRegion: v.pipe(
-			TextureFieldSchema("@-treads"),
-			metadata({ visibleWhen: { field: "type", value: "tank" } }),
-		),
+		treadRegion: v.pipe(TextureFieldSchema("@-treads"), metadata({ visibleWhen: { field: "type", value: "tank" } })),
 		wreckRegions: ArrayTextureSchema("@-wreck#", 3),
-		segmentRegions: v.pipe(
-			ArrayTextureSchema("@-segment#", 20),
-			metadata({ visibleWhen: { field: "type", value: "crawl" } }),
-		),
-		segmentCellRegions: v.pipe(
-			ArrayTextureSchema("@-segment-cell#", 20),
-			metadata({ visibleWhen: { field: "type", value: "crawl" } }),
-		),
+		segmentRegions: v.pipe(ArrayTextureSchema("@-segment#", 20), metadata({ visibleWhen: { field: "type", value: "crawl" } })),
+		segmentCellRegions: v.pipe(ArrayTextureSchema("@-segment-cell#", 20), metadata({ visibleWhen: { field: "type", value: "crawl" } })),
 		segmentOutlineRegions: v.pipe(
 			ArrayTextureSchema("@-segment-outline#", 20),
 			metadata({ visibleWhen: { field: "type", value: "crawl" } }),
@@ -1869,7 +1848,7 @@ export const UnitHjsonSchema: SchemaFn = (context) =>
 			}),
 		),
 		deathSound: v.pipe(
-			v.optional(SoundHjsonSchema(context)),
+			v.optional(SoundHjsonSchema),
 			metadata({
 				name: "editor.unit.death-sound",
 				description: "editor.unit.death-sound-description",
@@ -1877,7 +1856,7 @@ export const UnitHjsonSchema: SchemaFn = (context) =>
 			}),
 		),
 		wreckSound: v.pipe(
-			v.optional(SoundHjsonSchema(context)),
+			v.optional(SoundHjsonSchema),
 			metadata({
 				name: "editor.unit.wreck-sound",
 				description: "editor.unit.wreck-sound-description",
@@ -1886,7 +1865,7 @@ export const UnitHjsonSchema: SchemaFn = (context) =>
 			}),
 		),
 		loopSound: v.pipe(
-			v.optional(SoundHjsonSchema(context)),
+			v.optional(SoundHjsonSchema),
 			metadata({
 				name: "editor.unit.loop-sound",
 				description: "editor.unit.loop-sound-description",
@@ -1894,7 +1873,7 @@ export const UnitHjsonSchema: SchemaFn = (context) =>
 			}),
 		),
 		stepSound: v.pipe(
-			v.optional(SoundHjsonSchema(context)),
+			v.optional(SoundHjsonSchema),
 			metadata({
 				name: "editor.unit.step-sound",
 				description: "editor.unit.step-sound-description",
@@ -1902,7 +1881,7 @@ export const UnitHjsonSchema: SchemaFn = (context) =>
 			}),
 		),
 		tankMoveSound: v.pipe(
-			v.optional(SoundHjsonSchema(context)),
+			v.optional(SoundHjsonSchema),
 			metadata({
 				name: "editor.unit.tank-move-sound",
 				description: "editor.unit.tank-move-sound-description",
@@ -1910,7 +1889,7 @@ export const UnitHjsonSchema: SchemaFn = (context) =>
 			}),
 		),
 		moveSound: v.pipe(
-			v.optional(SoundHjsonSchema(context)),
+			v.optional(SoundHjsonSchema),
 			metadata({
 				name: "editor.unit.move-sound",
 				description: "editor.unit.move-sound-description",
@@ -1918,7 +1897,7 @@ export const UnitHjsonSchema: SchemaFn = (context) =>
 			}),
 		),
 		mineSound: v.pipe(
-			v.optional(SoundHjsonSchema(context)),
+			v.optional(SoundHjsonSchema),
 			metadata({
 				name: "editor.unit.mine-sound",
 				description: "editor.unit.mine-sound-description",

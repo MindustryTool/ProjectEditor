@@ -168,25 +168,28 @@ const repairBeamWeaponSchema = cached((context: ProjectContents) =>
 	}),
 );
 
-export const WeaponHjsonSchema = new ClassMap<WeaponType>({
-	Weapon: () => ({}),
-	BuildWeapon: () => buildWeaponSchema.entries,
-	MineWeapon: () => mineWeaponSchema.entries,
-	PointDefenseBulletWeapon: () => pointDefenseBulletWeaponSchema.entries,
-	PointDefenseWeapon: (context) => pointDefenseWeaponSchema(context).entries,
-	RepairBeamWeapon: (context) => repairBeamWeaponSchema(context).entries,
-}, {
-	baseSchema: weaponObjectSchema,
-	extra: (context) => ({
-		bullet: v.optional(BulletHjsonSchema(context)),
-		ejectEffect: v.optional(EffectFieldSchema(context)),
-		shoot: v.optional(ShootPatternHjsonSchema(context)),
-		shootStatus: v.optional(StatusStringSchema(context)),
-		shootOnDeathEffect: v.optional(EffectFieldSchema(context)),
-		parts: v.optional(v.array(PartHjsonSchema(context)), []),
-		activeSound: v.optional(SoundHjsonSchema(context)),
-		shootSound: v.optional(SoundHjsonSchema(context)),
-		initialShootSound: v.optional(SoundHjsonSchema(context)),
-		chargeSound: v.optional(SoundHjsonSchema(context)),
-	}),
-}).schema;
+export const WeaponHjsonSchema = new ClassMap<WeaponType>(
+	{
+		Weapon: () => ({}),
+		BuildWeapon: () => buildWeaponSchema.entries,
+		MineWeapon: () => mineWeaponSchema.entries,
+		PointDefenseBulletWeapon: () => pointDefenseBulletWeaponSchema.entries,
+		PointDefenseWeapon: (context) => pointDefenseWeaponSchema(context).entries,
+		RepairBeamWeapon: (context) => repairBeamWeaponSchema(context).entries,
+	},
+	{
+		baseSchema: weaponObjectSchema,
+		extra: (context) => ({
+			bullet: v.optional(BulletHjsonSchema(context)),
+			ejectEffect: v.optional(EffectFieldSchema(context)),
+			shoot: v.optional(ShootPatternHjsonSchema(context)),
+			shootStatus: v.optional(StatusStringSchema(context)),
+			shootOnDeathEffect: v.optional(EffectFieldSchema(context)),
+			parts: v.optional(v.array(PartHjsonSchema(context)), []),
+			activeSound: v.optional(SoundHjsonSchema),
+			shootSound: v.optional(SoundHjsonSchema),
+			initialShootSound: v.optional(SoundHjsonSchema),
+			chargeSound: v.optional(SoundHjsonSchema),
+		}),
+	},
+).schema;
