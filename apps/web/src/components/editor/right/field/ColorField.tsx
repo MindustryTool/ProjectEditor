@@ -16,8 +16,8 @@ export const ColorField = React.memo(function ColorField({
 	defaultValue,
 	metadata,
 }: SchemaRendererProps) {
-	let hexValue = typeof value === "string" ? value : (String(defaultValue ?? "333333") as string);
-	hexValue = useMemo(() => (hexValue?.startsWith("#") ? hexValue : "#" + hexValue), [hexValue]);
+	let hexValue = typeof value === "string" ? value : (String(defaultValue ?? "") as string);
+	hexValue = useMemo(() => (hexValue?.startsWith("#") ? hexValue : hexValue ? "#" + hexValue : ""), [hexValue]);
 
 	if (metadata!.type !== "color") {
 		throw new Error("ColorField type must be color type: " + JSON.stringify(metadata) + " value: " + JSON.stringify(value));
@@ -30,7 +30,7 @@ export const ColorField = React.memo(function ColorField({
 				<div className="flex items-center gap-2">
 					<Popover>
 						<PopoverTrigger
-							className="h-16 w-full relative cursor-pointer rounded border border-border bg-transparent p-0"
+							className="h-12 w-full relative cursor-pointer rounded border border-border bg-transparent p-0"
 							style={{ backgroundColor: hexValue }}
 						>
 							<span className="text-sm absolute left-1.5 bottom-1.5">{hexValue}</span>

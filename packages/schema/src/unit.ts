@@ -16,11 +16,18 @@ import { classSchema } from "./class";
 import { unlockableContentSchema } from "./content";
 import { TextureFieldSchema } from "./texture";
 import { ArrayTextureSchema } from "./textures";
+import { blockFlags } from "./block-flag";
+import { aiControllers } from "./ai-controller";
+import { unitCommands } from "./unit-command";
+import { unitStances } from "./unit-stance";
+import { ItemStackSchema } from "./item-stack";
+import type { ProjectContents } from "@project/types";
+import { rectSchema } from "./rect";
 
 const unitTypes = ["flying", "mech", "legs", "naval", "payload", "missile", "tank", "hover", "tether", "crawl"] as const;
 const unitTemplates = ["ErekirUnitType", "MissileUnitType", "NeoplasmUnitType", "TankUnitType", "UnitType"] as const;
 
-const unitObjectSchema = {
+const unitObjectSchema = (context: ProjectContents) => ({
 	name: v.optional(v.string()),
 	type: v.optional(v.picklist(unitTypes)),
 	...unlockableContentSchema,
@@ -1645,7 +1652,7 @@ const unitObjectSchema = {
 	),
 
 	aiController: v.pipe(
-		v.optional(v.unknown()),
+		v.optional(v.picklist(aiControllers)),
 		metadata({
 			name: "editor.unit.ai-controller",
 			description: "editor.unit.ai-controller-description",
@@ -1653,39 +1660,15 @@ const unitObjectSchema = {
 		}),
 	),
 	controller: v.pipe(
-		v.optional(v.unknown()),
+		v.optional(v.picklist(aiControllers)),
 		metadata({
 			name: "editor.unit.controller",
 			description: "editor.unit.controller-description",
 			category: "editor.unit.category.system-control",
 		}),
 	),
-	constructor: v.pipe(
-		v.optional(v.unknown()),
-		metadata({
-			name: "editor.unit.constructor",
-			description: "editor.unit.constructor-description",
-			category: "editor.unit.category.system-control",
-		}),
-	),
-	pathCost: v.pipe(
-		v.optional(v.unknown()),
-		metadata({
-			name: "editor.unit.path-cost",
-			description: "editor.unit.path-cost-description",
-			category: "editor.unit.category.system-control",
-		}),
-	),
-	sample: v.pipe(
-		v.optional(v.unknown()),
-		metadata({
-			name: "editor.unit.sample",
-			description: "editor.unit.sample-description",
-			category: "editor.unit.category.system-control",
-		}),
-	),
 	targetFlags: v.pipe(
-		v.optional(v.array(v.unknown())),
+		v.optional(v.array(v.picklist(blockFlags))),
 		metadata({
 			name: "editor.unit.target-flags",
 			description: "editor.unit.target-flags-description",
@@ -1693,7 +1676,7 @@ const unitObjectSchema = {
 		}),
 	),
 	commands: v.pipe(
-		v.optional(v.array(v.unknown())),
+		v.optional(v.array(v.picklist(unitCommands))),
 		metadata({
 			name: "editor.unit.commands",
 			description: "editor.unit.commands-description",
@@ -1701,7 +1684,7 @@ const unitObjectSchema = {
 		}),
 	),
 	defaultCommand: v.pipe(
-		v.optional(v.unknown()),
+		v.optional(v.picklist(unitCommands)),
 		metadata({
 			name: "editor.unit.default-command",
 			description: "editor.unit.default-command-description",
@@ -1709,7 +1692,7 @@ const unitObjectSchema = {
 		}),
 	),
 	stances: v.pipe(
-		v.optional(v.array(v.unknown())),
+		v.optional(v.array(v.picklist(unitStances))),
 		metadata({
 			name: "editor.unit.stances",
 			description: "editor.unit.stances-description",
@@ -1717,7 +1700,7 @@ const unitObjectSchema = {
 		}),
 	),
 	mineItems: v.pipe(
-		v.optional(v.array(v.unknown())),
+		v.optional(v.array(ItemStackSchema(context))),
 		metadata({
 			name: "editor.unit.mine-items",
 			description: "editor.unit.mine-items-description",
@@ -1725,7 +1708,7 @@ const unitObjectSchema = {
 		}),
 	),
 	treadRects: v.pipe(
-		v.optional(v.array(v.unknown())),
+		v.optional(v.array(rectSchema)),
 		metadata({
 			name: "editor.unit.tread-rects",
 			description: "editor.unit.tread-rects-description",
@@ -1734,7 +1717,7 @@ const unitObjectSchema = {
 		}),
 	),
 	segmentUnit: v.pipe(
-		v.optional(v.unknown()),
+		v.optional(UnitFieldSchema(context)),
 		metadata({
 			name: "editor.unit.segment-unit",
 			description: "editor.unit.segment-unit-description",
@@ -1743,7 +1726,7 @@ const unitObjectSchema = {
 		}),
 	),
 	segmentEndUnit: v.pipe(
-		v.optional(v.unknown()),
+		v.optional(UnitFieldSchema(context)),
 		metadata({
 			name: "editor.unit.segment-end-unit",
 			description: "editor.unit.segment-end-unit-description",
@@ -1751,7 +1734,7 @@ const unitObjectSchema = {
 			visibleWhen: { field: "type", value: "crawl" },
 		}),
 	),
-};
+});
 
 export const UnitHjsonSchema: SchemaFn = (context) =>
 	v.object({

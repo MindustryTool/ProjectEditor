@@ -1,0 +1,18 @@
+export const aiControllers = [
+	"AssemblerAI",
+	"BoostAI",
+	"BuilderAI",
+	"CargoAI",
+	"CommandAI",
+	"DefenderAI",
+	"FlyingAI",
+	"FlyingFollowAI",
+	"GroundAI",
+	"HugAI",
+	"LogicAI",
+	"MinerAI",
+	"MissileAI",
+	"PrebuildAI",
+	"RepairAI",
+	"SuicideAI",
+] as const;
