@@ -20,13 +20,18 @@ export const NumberField = React.memo(function NumberField({
 	const numValue = typeof value === "number" ? value : "";
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
+    console.log({ value, defaultValue });
+
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
 			const newVal = event.currentTarget.valueAsNumber;
 			const isDefault = newVal === defaultValue;
 			const isNullable = hasNullableWrapper(entrySchema);
+            const isNan = Number.isNaN(newVal);
 
-			if (Number.isNaN(newVal) || (isDefault && !isNullable)) {
+			console.log({ newVal, isDefault, isNullable, isNan });
+
+			if (isNan || (isDefault && !isNullable)) {
 				onChange(jsonPath, (parent, original, key) => parent.patchRemove(original, key));
 				return;
 			}

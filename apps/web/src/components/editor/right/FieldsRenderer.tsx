@@ -123,7 +123,7 @@ function Children({
 		const key = name + path;
 		const childNode = node.get(name);
 		const defaultValue = getDefaults(entrySchema, childNode.valueOf());
-		const value = childNode.isMissing() ? defaultValue : childNode.valueOf();
+		const value = childNode.isMissing() ? "" : childNode.valueOf();
 		const { type, schema } = detectSchemaType(entrySchema, value);
 		const metadata = getSchemaMetadata(entrySchema);
 

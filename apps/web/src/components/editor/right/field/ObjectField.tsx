@@ -120,7 +120,7 @@ function Children({
 					key={key}
 					path={path}
 					name={name}
-					value={childValue ?? defaultValue}
+					value={childValue}
 					onChange={onChange}
 					entrySchema={schema}
 					jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
