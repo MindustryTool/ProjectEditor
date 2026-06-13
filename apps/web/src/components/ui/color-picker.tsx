@@ -16,7 +16,10 @@ import {
 } from "react";
 import { Input } from "#/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
+import { Button } from "#/components/ui/button";
 import { cn } from "#/lib/utils";
+import { ClipboardPaste } from "lucide-react";
+import { toast } from "sonner";
 
 interface Ctx {
 	hue: number;
@@ -94,6 +97,7 @@ export const ColorPicker = ({ value, defaultValue = "#000000", onChange, classNa
 	const setHue = useCallback(
 		(h: number) => {
 			if (!isControlled) setHueState(h);
+            hueRef.current = h;
 			sync(h, saturationRef.current, lightnessRef.current, alphaRef.current);
 		},
 		[isControlled, sync],
@@ -102,6 +106,7 @@ export const ColorPicker = ({ value, defaultValue = "#000000", onChange, classNa
 	const setSaturation = useCallback(
 		(s: number) => {
 			if (!isControlled) setSaturationState(s);
+            saturationRef.current = s;
 			sync(hueRef.current, s, lightnessRef.current, alphaRef.current);
 		},
 		[isControlled, sync],
@@ -110,6 +115,7 @@ export const ColorPicker = ({ value, defaultValue = "#000000", onChange, classNa
 	const setLightness = useCallback(
 		(l: number) => {
 			if (!isControlled) setLightnessState(l);
+            lightnessRef.current = l;
 			sync(hueRef.current, saturationRef.current, l, alphaRef.current);
 		},
 		[isControlled, sync],
@@ -118,6 +124,7 @@ export const ColorPicker = ({ value, defaultValue = "#000000", onChange, classNa
 	const setAlpha = useCallback(
 		(a: number) => {
 			if (!isControlled) setAlphaState(a);
+            alphaRef.current = a;
 			sync(hueRef.current, saturationRef.current, lightnessRef.current, a);
 		},
 		[isControlled, sync],
@@ -294,15 +301,47 @@ const PercentInput = ({ className, ...props }: ComponentProps<typeof Input>) => 
 
 export type ColorPickerFormatProps = HTMLAttributes<HTMLDivElement>;
 
+const tryParseColor = (text: string) => {
+	try {
+		return Color(text);
+	} catch {
+		return Color("#" + text);
+	}
+};
+
 export const ColorPickerFormat = ({ className, ...props }: ColorPickerFormatProps) => {
-	const { hue, saturation, lightness, alpha, mode } = useCtx();
+	const { hue, saturation, lightness, alpha, mode, setHue, setSaturation, setLightness, setAlpha } = useCtx();
 	const c = Color.hsl(hue, saturation, lightness, alpha / 100);
+
+	const handlePaste = useCallback(async () => {
+		try {
+			const text = await navigator.clipboard.readText();
+			const parsed = tryParseColor(text);
+
+			setHue(parsed.hue() || 0);
+			setSaturation(parsed.saturationl() || 0);
+			setLightness(parsed.lightness() || 0);
+			setAlpha(Math.round(parsed.alpha() * 100));
+		} catch (e) {
+			toast.error(`Failed to paste color: ${e instanceof Error ? e.message : "Unknown error"}`);
+		}
+	}, [setHue, setSaturation, setLightness, setAlpha]);
 
 	if (mode === "hex") {
 		return (
 			<div className={cn("-space-x-px relative flex w-full items-center rounded-md shadow-sm", className)} {...props}>
 				<Input className="h-8 rounded-r-none bg-secondary px-2 text-xs shadow-none" readOnly type="text" value={c.hex()} />
 				<PercentInput value={alpha} />
+				<Button
+					variant="outline"
+					size="icon-sm"
+					onClick={handlePaste}
+					className="ml-1 border-input bg-secondary shadow-none"
+					title="Paste color"
+					type="button"
+				>
+					<ClipboardPaste />
+				</Button>
 			</div>
 		);
 	}
@@ -321,6 +360,16 @@ export const ColorPickerFormat = ({ className, ...props }: ColorPickerFormatProp
 					/>
 				))}
 				<PercentInput value={alpha} />
+				<Button
+					variant="outline"
+					size="icon-sm"
+					onClick={handlePaste}
+					className="ml-1 border-input bg-secondary shadow-none"
+					title="Paste color"
+					type="button"
+				>
+					<ClipboardPaste />
+				</Button>
 			</div>
 		);
 	}
@@ -328,13 +377,16 @@ export const ColorPickerFormat = ({ className, ...props }: ColorPickerFormatProp
 	if (mode === "css") {
 		const rgb = c.rgb().array().map(Math.round);
 		return (
-			<div className={cn("w-full rounded-md shadow-sm", className)} {...props}>
+			<div className={cn("flex w-full items-center gap-1 rounded-md shadow-sm", className)} {...props}>
 				<Input
-					className="h-8 w-full bg-secondary px-2 text-xs shadow-none"
+					className="h-8 flex-1 bg-secondary px-2 text-xs shadow-none"
 					readOnly
 					type="text"
 					value={`rgba(${rgb.join(", ")}, ${alpha}%)`}
 				/>
+				<Button variant="outline" size="icon-sm" onClick={handlePaste} title="Paste color" type="button">
+					<ClipboardPaste />
+				</Button>
 			</div>
 		);
 	}
@@ -353,6 +405,16 @@ export const ColorPickerFormat = ({ className, ...props }: ColorPickerFormatProp
 					/>
 				))}
 				<PercentInput value={alpha} />
+				<Button
+					variant="outline"
+					size="icon-sm"
+					onClick={handlePaste}
+					className="ml-1 border-input bg-secondary shadow-none"
+					title="Paste color"
+					type="button"
+				>
+					<ClipboardPaste />
+				</Button>
 			</div>
 		);
 	}
