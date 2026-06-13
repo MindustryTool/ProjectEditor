@@ -1,5 +1,6 @@
 import * as v from "valibot";
 import { CachedSchema, metadata } from "./utils";
+import { Order } from "./order";
 
 export const ArrayTextureSchema = CachedSchema((format: string, length: number | number[]) =>
 	v.nullish(
@@ -9,6 +10,7 @@ export const ArrayTextureSchema = CachedSchema((format: string, length: number |
 			v.maxLength(127),
 			metadata({
 				type: "textures",
+                order: Order.TEXTURE,
 			}),
 			v.metadata({ format, length }),
 		),

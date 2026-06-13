@@ -11,6 +11,6 @@ export const Order = {
     /** Texture of the content */
     TEXTURE: 3,
 
-    /** Main field of the content */
-    MAIN_FIELD: 4,
+    /** Important field of the content */
+    IMPORTANT_FIELD: 4,
 } as const
