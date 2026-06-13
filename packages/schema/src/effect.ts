@@ -366,19 +366,25 @@ export const EffectHjsonSchema = new ClassMap<EffectType>(
 	},
 ).schema;
 
+const stringSchema: SchemaFn = (context) =>
+	v.pipe(
+		v.string(),
+		v.transform((v) => v.replaceAll(context.name + "-", "")),
+		v.picklist(context.effects.map((effect) => effect.name.replaceAll(context.name + "-", ""))),
+        metadata({ option: "built-in" }),
+	);
+
+const objectSchema: SchemaFn = (context) => v.pipe( EffectHjsonSchema(context), metadata({ option: "custom" }));
+
 export const EffectFieldSchema: SchemaFn = CachedSchema((context) => {
 	return v.pipe(
 		v.lazy((input) => {
 			if (typeof input === "string") {
-				return v.pipe(
-					v.string(),
-					v.transform((v) => v.replaceAll(context.name + "-", "")),
-					v.picklist(context.effects.map((effect) => effect.name.replaceAll(context.name + "-", ""))),
-				);
+				return stringSchema(context);
 			}
 
-			return EffectHjsonSchema(context);
+			return objectSchema(context);
 		}),
-		metadata({ type: "effect" }),
+		metadata({ type: "options", options: [stringSchema(context), objectSchema(context)] }),
 	);
 });
