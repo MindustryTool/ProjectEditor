@@ -11,6 +11,7 @@ import type { ProjectContents } from "@project/types";
 import { ClassMap, classSchema } from "./class";
 import { unlockableContentSchema } from "./content";
 import { TextureFieldSchema } from "./texture";
+import { Order } from "./order";
 
 const weaponTypes = ["Weapon", "BuildWeapon", "MineWeapon", "PointDefenseBulletWeapon", "PointDefenseWeapon", "RepairBeamWeapon"] as const;
 
@@ -18,8 +19,8 @@ type WeaponType = (typeof weaponTypes)[number];
 
 const weaponObjectSchema = v.lazy((input) =>
 	v.object({
-		name: v.optional(v.string()),
-		type: v.pipe(classSchema(weaponTypes, "Weapon"), metadata({ name: "editor.weapon.type" })),
+		name: v.pipe(v.optional(v.string()), metadata({ order: Order.NAME })),
+		type: v.pipe(classSchema(weaponTypes, "Weapon"), metadata({ order: Order.TYPE })),
 		...unlockableContentSchema,
 		baseTexture: TextureFieldSchema((input as { name?: string })?.name || ''),
         heatTexture: TextureFieldSchema((input as { name?: string })?.name + "-heat"),

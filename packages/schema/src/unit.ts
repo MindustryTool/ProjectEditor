@@ -23,13 +23,14 @@ import { unitStances } from "./unit-stance";
 import { ItemStackSchema } from "./item-stack";
 import type { ProjectContents } from "@project/types";
 import { rectSchema } from "./rect";
+import { Order } from "./order";
 
 const unitTypes = ["flying", "mech", "legs", "naval", "payload", "missile", "tank", "hover", "tether", "crawl"] as const;
 const unitTemplates = ["ErekirUnitType", "MissileUnitType", "NeoplasmUnitType", "TankUnitType", "UnitType"] as const;
 
 const unitObjectSchema = (context: ProjectContents) => ({
-	name: v.optional(v.string()),
-	type: v.optional(v.picklist(unitTypes)),
+	name: v.pipe(v.optional(v.string()), metadata({  order: Order.NAME })),
+	type: v.pipe(v.optional(v.picklist(unitTypes)), metadata({ order: Order.TYPE })),
 	...unlockableContentSchema,
 	template: classSchema(unitTemplates, "UnitType"),
 	envRequired: v.pipe(

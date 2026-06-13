@@ -2,6 +2,7 @@ import * as v from "valibot";
 import { CachedSchema, metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
 import { CategorySchema } from "./category";
+import { Order } from "./order";
 
 export const ContentNameSchema = v.pipe(
 	v.string(),
@@ -35,47 +36,50 @@ export const ContentFieldSchema = CachedSchema((context: ProjectContents) =>
 export const unlockableContentSchema = {
 	localizedName: v.pipe(
 		v.optional(v.string()),
-		metadata({ name: "editor.content.localized-name", description: "editor.content.localized-name-description" }),
+		metadata({ name: "editor.content.localized-name", description: "editor.content.localized-name-description", order: Order.BASIC }),
 	),
 	description: v.pipe(
 		v.nullish(v.string(), ""),
-		metadata({ name: "editor.content.description", description: "editor.content.description-description" }),
+		metadata({ name: "editor.content.description", description: "editor.content.description-description", order: Order.BASIC }),
 	),
 	details: v.pipe(
 		v.nullish(v.string(), ""),
-		metadata({ multiline: true, name: "editor.content.details", description: "editor.content.details-description" }),
+		metadata({ multiline: true, name: "editor.content.details", description: "editor.content.details-description", order: Order.BASIC }),
 	),
-	credit: v.pipe(v.nullish(v.string(), ""), metadata({ name: "editor.content.credit", description: "editor.content.credit-description" })),
+	credit: v.pipe(
+		v.nullish(v.string(), ""),
+		metadata({ name: "editor.content.credit", description: "editor.content.credit-description", order: Order.BASIC }),
+	),
 	alwaysUnlocked: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "editor.content.always-unlocked", description: "editor.content.always-unlocked-description" }),
+		metadata({ name: "editor.content.always-unlocked", description: "editor.content.always-unlocked-description", order: Order.BASIC }),
 	),
 	inlineDescription: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "editor.content.inline-description", description: "editor.content.inline-description-description" }),
+		metadata({ name: "editor.content.inline-description", description: "editor.content.inline-description-description", order: Order.BASIC }),
 	),
 	hideDetails: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "editor.content.hide-details", description: "editor.content.hide-details-description" }),
+		metadata({ name: "editor.content.hide-details", description: "editor.content.hide-details-description", order: Order.BASIC }),
 	),
 	hideDatabase: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "editor.content.hide-database", description: "editor.content.hide-database-description" }),
+		metadata({ name: "editor.content.hide-database", description: "editor.content.hide-database-description", order: Order.BASIC }),
 	),
 	generateIcons: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "editor.content.generate-icons", description: "editor.content.generate-icons-description" }),
+		metadata({ name: "editor.content.generate-icons", description: "editor.content.generate-icons-description", order: Order.BASIC }),
 	),
 	selectionSize: v.pipe(
 		v.optional(v.number(), 24),
-		metadata({ name: "editor.content.selection-size", description: "editor.content.selection-size-description" }),
+		metadata({ name: "editor.content.selection-size", description: "editor.content.selection-size-description", order: Order.BASIC }),
 	),
 	allDatabaseTabs: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "editor.content.all-database-tabs", description: "editor.content.all-database-tabs-description" }),
+		metadata({ name: "editor.content.all-database-tabs", description: "editor.content.all-database-tabs-description", order: Order.BASIC }),
 	),
 	databaseTag: v.pipe(
 		v.nullish(v.pipe(CategorySchema, metadata({}))),
-		metadata({ name: "editor.content.database-tag", description: "editor.content.database-tag-description" }),
+		metadata({ name: "editor.content.database-tag", description: "editor.content.database-tag-description", order: Order.BASIC }),
 	),
 };

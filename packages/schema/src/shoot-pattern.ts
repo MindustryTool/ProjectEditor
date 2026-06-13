@@ -2,6 +2,7 @@ import * as v from "valibot";
 import { metadata } from "./utils";
 import type { SchemaFn } from "./utils";
 import { ClassMap, classSchema } from "./class";
+import { Order } from "./order";
 
 export const shootPatternTypes = [
 	"ShootPattern",
@@ -17,8 +18,8 @@ export const shootPatternTypes = [
 export type ShootPatternType = (typeof shootPatternTypes)[number];
 
 const shootPatternBaseObjectSchema = v.object({
-	name: v.pipe(v.optional(v.string()), metadata({ name: "editor.shoot-pattern.name" })),
-	type: v.pipe(classSchema(shootPatternTypes, "ShootPattern"), metadata({ name: "editor.shoot-pattern.type" })),
+	name: v.pipe(v.optional(v.string()), metadata({ order: Order.NAME })),
+	type: v.pipe(classSchema(shootPatternTypes, "ShootPattern"), metadata({ order: Order.TYPE })),
 	shots: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({ name: "editor.shoot-pattern.shots", description: "editor.shoot-pattern.shots-description" }),

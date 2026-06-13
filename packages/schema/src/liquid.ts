@@ -6,9 +6,10 @@ import { EffectFieldSchema } from "./effect";
 import { cached, metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
 import { unlockableContentSchema } from "./content";
+import { Order } from "./order";
 
 export const liquidBaseObjectSchema = v.object({
-	name: v.optional(v.string()),
+	name: v.pipe(v.optional(v.string()), metadata({ order: Order.NAME })),
     ...unlockableContentSchema,
 	gas: v.pipe(
 		v.optional(v.boolean(), false),

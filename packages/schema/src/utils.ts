@@ -264,8 +264,8 @@ export function getSchemaEntries(schema: AnySchema): [string, AnySchema][] {
 
 	if (s.type === "object" && s.entries) {
 		return (Object.entries(s.entries) as [string, AnySchema][]).sort(([, a], [, b]) => {
-			const aOrder = getSchemaMetadata(a)?.order || 0;
-			const bOrder = getSchemaMetadata(b)?.order || 0;
+			const aOrder = getSchemaMetadata(a)?.order || Number.MAX_SAFE_INTEGER;
+			const bOrder = getSchemaMetadata(b)?.order || Number.MAX_SAFE_INTEGER;
 
 			return aOrder - bOrder;
 		});

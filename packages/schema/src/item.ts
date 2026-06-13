@@ -5,9 +5,10 @@ import type { SchemaFn } from "./utils";
 import { metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
 import { unlockableContentSchema } from "./content";
+import { Order } from "./order";
 
 export const itemBaseObjectSchema = v.object({
-	name: v.optional(v.string()),
+	name: v.pipe(v.optional(v.string()), metadata({ order: Order.NAME })),
     ...unlockableContentSchema,
 	hardness: v.pipe(
 		v.optional(v.pipe(v.number(), v.minValue(0), v.integer())),

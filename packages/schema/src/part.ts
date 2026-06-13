@@ -4,6 +4,7 @@ import { EffectFieldSchema } from "./effect";
 import { metadata } from "./utils";
 import type { SchemaFn } from "./utils";
 import { ClassMap, classSchema } from "./class";
+import { Order } from "./order";
 
 export const partClasses = ["RegionPart", "DrawPart", "EffectSpawnerPart", "FlarePart", "HaloPart", "HoverPart", "ShapePart"] as const;
 
@@ -147,7 +148,7 @@ export const PartHjsonSchema: SchemaFn = new ClassMap<PartClass>({
 			),
 			name: v.pipe(
 				v.optional(v.string()),
-				metadata({ name: "editor.part.name", description: "editor.part.name-description" }),
+				metadata({ name: "editor.part.name", description: "editor.part.name-description", order: Order.NAME }),
 			),
 			mirror: v.pipe(
 				v.optional(v.boolean(), false),
