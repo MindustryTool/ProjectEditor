@@ -71,6 +71,8 @@ export const vi = {
 	"app-settings.font-size-description": "Kích thước phông chữ trình chỉnh sửa.",
 	"app-settings.tab-size-label": "Tab Size",
 	"app-settings.tab-size-description": "Độ rộng thụt đầu dòng (Tab).",
+	"app-settings.language-section": "Ngôn ngữ",
+	"app-settings.language-description": "Chọn ngôn ngữ ứng dụng.",
 	"app-settings.validation-section": "Hiệu suất & Xác thực",
 	"app-settings.validation-description": "Độ trễ kiểm tra tự động sau khi chỉnh sửa. Phạm vi: {{min}}-{{max}} ms",
 	"localization-menu.label": "Bản địa hóa",

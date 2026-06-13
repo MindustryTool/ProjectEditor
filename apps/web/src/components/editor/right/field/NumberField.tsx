@@ -17,7 +17,7 @@ export const NumberField = React.memo(function NumberField({
 	path,
 	defaultValue,
 }: SchemaRendererProps) {
-	const numValue = typeof value === "number" ? value : isNaN(Number(value)) ? Number(defaultValue || 0) : Number(value);
+	const numValue = typeof value === "number" ? value : "";
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
 	const handleChange = useCallback(
@@ -40,7 +40,7 @@ export const NumberField = React.memo(function NumberField({
 		<Field jsonPath={jsonPath} metadata={metadata}>
 			<SchemaLabel name={name} metadata={metadata} />
 			<FieldControl>
-				<Input key={name} value={numValue} onChange={handleChange} type="number" />
+				<Input key={name} value={numValue} onChange={handleChange} type="number" placeholder={defaultValue?.toString()} />
 			</FieldControl>
 			<SchemaDescription metadata={metadata} />
 			<FieldIssue path={path} jsonPath={jsonPath} />

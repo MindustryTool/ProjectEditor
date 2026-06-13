@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate, useLocation } from "@tanstack/react-router";
 import { useTheme } from "#/components/ThemeProvider";
 import { Button } from "#/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
@@ -9,7 +10,8 @@ import { Slider } from "#/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { useIsDesktop } from "#/hooks/use-is-desktop";
 import { useAppStore } from "@project/core";
-import { Code2, Gauge, Layout, Monitor, Moon, Settings, Sun } from "lucide-react";
+import { setLocale, SUPPORTED_LOCALES, type Locale } from "#/lib/locales";
+import { Code2, Gauge, Languages, Layout, Monitor, Moon, Settings, Sun } from "lucide-react";
 
 const FONT_SIZE_MIN = 8;
 const FONT_SIZE_MAX = 32;
@@ -60,7 +62,20 @@ export function AppSettingsDialog() {
 	const updateSettings = useAppStore((s) => s.updateSettings);
 	const { theme, setTheme } = useTheme();
 	const [isDesktop, setIsDesktop] = useIsDesktop();
-	const { t } = useTranslation();
+	const { t, i18n } = useTranslation();
+	const navigate = useNavigate();
+	const location = useLocation();
+
+	function handleLanguageChange(lang: string) {
+		setLocale(lang as Locale);
+		const segments = location.pathname.split("/").filter(Boolean);
+		if (SUPPORTED_LOCALES.includes(segments[0] as Locale)) {
+			segments[0] = lang;
+		} else {
+			segments.unshift(lang);
+		}
+		navigate({ to: `/${segments.join("/")}`, replace: true });
+	}
 
 	function handleThemeChange(nextTheme: string) {
 		const value = nextTheme as AppTheme;
@@ -173,6 +188,36 @@ export function AppSettingsDialog() {
 									</ToggleGroupItem>
 								</ToggleGroup>
 							</div>
+						</div>
+					</SectionCard>
+
+					<SectionCard
+						icon={<Languages className="size-3.5" />}
+						title={t("app-settings.language-section")}
+					>
+						<div className="grid gap-2">
+							<p className="text-sm text-muted-foreground">{t("app-settings.language-description")}</p>
+							<ToggleGroup
+								type="single"
+								value={i18n.language}
+								onValueChange={handleLanguageChange}
+								className="w-full"
+								spacing={0}
+								variant="outline"
+							>
+								<ToggleGroupItem
+									value="en"
+									className="flex-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:bg-primary"
+								>
+									🇺🇸 English
+								</ToggleGroupItem>
+								<ToggleGroupItem
+									value="vi"
+									className="flex-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:bg-primary"
+								>
+									🇻🇳 Tiếng Việt
+								</ToggleGroupItem>
+							</ToggleGroup>
 						</div>
 					</SectionCard>
 

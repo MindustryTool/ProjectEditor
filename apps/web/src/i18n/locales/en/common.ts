@@ -77,6 +77,8 @@ export const en = {
 	"app-settings.padding-description": "Padding for editor from screen edges.",
 	"app-settings.tab-size-label": "Tab Size",
 	"app-settings.tab-size-description": "Indentation width for editor tabs.",
+	"app-settings.language-section": "Language",
+	"app-settings.language-description": "Choose app language.",
 	"app-settings.validation-section": "Performance & Validation",
 	"app-settings.validation-description": "Delay automatic validation after edits. Range: {{min}}-{{max}} ms",
 	"view-menu.change-language": "Change Language",

@@ -165,6 +165,7 @@ const unitObjectSchema = {
 			name: "editor.unit.missile-accel-time",
 			description: "editor.unit.missile-accel-time-description",
 			category: "editor.unit.category.missile-units",
+			visibleWhen: { field: "type", value: "missile" },
 		}),
 	),
 	health: v.pipe(
@@ -699,6 +700,7 @@ const unitObjectSchema = {
 			name: "editor.unit.allow-leg-step",
 			description: "editor.unit.allow-leg-step-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	legPhysicsLayer: v.pipe(
@@ -707,6 +709,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-physics-layer",
 			description: "editor.unit.leg-physics-layer-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	hovering: v.pipe(
@@ -1148,6 +1151,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-count",
 			description: "editor.unit.leg-count-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	legGroupSize: v.pipe(
@@ -1156,6 +1160,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-group-size",
 			description: "editor.unit.leg-group-size-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 
@@ -1165,6 +1170,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-length",
 			description: "editor.unit.leg-length-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	legSpeed: v.pipe(
@@ -1173,6 +1179,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-speed",
 			description: "editor.unit.leg-speed-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	legForwardScl: v.pipe(
@@ -1181,6 +1188,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-forward-scl",
 			description: "editor.unit.leg-forward-scl-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	legBaseOffset: v.pipe(
@@ -1189,6 +1197,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-base-offset",
 			description: "editor.unit.leg-base-offset-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	legMoveSpace: v.pipe(
@@ -1197,6 +1206,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-move-space",
 			description: "editor.unit.leg-move-space-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	legExtension: v.pipe(
@@ -1205,6 +1215,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-extension",
 			description: "editor.unit.leg-extension-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	legPairOffset: v.pipe(
@@ -1213,6 +1224,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-pair-offset",
 			description: "editor.unit.leg-pair-offset-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	legLengthScl: v.pipe(
@@ -1221,6 +1233,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-length-scl",
 			description: "editor.unit.leg-length-scl-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	legStraightLength: v.pipe(
@@ -1229,6 +1242,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-straight-length",
 			description: "editor.unit.leg-straight-length-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	legMaxLength: v.pipe(
@@ -1237,6 +1251,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-max-length",
 			description: "editor.unit.leg-max-length-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	legMinLength: v.pipe(
@@ -1245,6 +1260,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-min-length",
 			description: "editor.unit.leg-min-length-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	legSplashDamage: v.pipe(
@@ -1253,6 +1269,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-splash-damage",
 			description: "editor.unit.leg-splash-damage-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	legSplashRange: v.pipe(
@@ -1261,6 +1278,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-splash-range",
 			description: "editor.unit.leg-splash-range-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	baseLegStraightness: v.pipe(
@@ -1269,6 +1287,7 @@ const unitObjectSchema = {
 			name: "editor.unit.base-leg-straightness",
 			description: "editor.unit.base-leg-straightness-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	legStraightness: v.pipe(
@@ -1277,6 +1296,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-straightness",
 			description: "editor.unit.leg-straightness-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 
@@ -1286,6 +1306,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-base-under",
 			description: "editor.unit.leg-base-under-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	lockLegBase: v.pipe(
@@ -1294,6 +1315,7 @@ const unitObjectSchema = {
 			name: "editor.unit.lock-leg-base",
 			description: "editor.unit.lock-leg-base-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	legContinuousMove: v.pipe(
@@ -1302,6 +1324,7 @@ const unitObjectSchema = {
 			name: "editor.unit.leg-continuous-move",
 			description: "editor.unit.leg-continuous-move-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	flipBackLegs: v.pipe(
@@ -1310,6 +1333,7 @@ const unitObjectSchema = {
 			name: "editor.unit.flip-back-legs",
 			description: "editor.unit.flip-back-legs-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	flipLegSide: v.pipe(
@@ -1318,6 +1342,7 @@ const unitObjectSchema = {
 			name: "editor.unit.flip-leg-side",
 			description: "editor.unit.flip-leg-side-description",
 			category: "editor.unit.category.leg-units",
+			visibleWhen: { field: "type", value: "legs" },
 		}),
 	),
 	emitWalkSound: v.pipe(
@@ -1343,6 +1368,7 @@ const unitObjectSchema = {
 			name: "editor.unit.mech-land-shake",
 			description: "editor.unit.mech-land-shake-description",
 			category: "editor.unit.category.mech-units",
+			visibleWhen: { field: "type", value: "mech" },
 		}),
 	),
 	mechSideSway: v.pipe(
@@ -1351,6 +1377,7 @@ const unitObjectSchema = {
 			name: "editor.unit.mech-side-sway",
 			description: "editor.unit.mech-side-sway-description",
 			category: "editor.unit.category.mech-units",
+			visibleWhen: { field: "type", value: "mech" },
 		}),
 	),
 	mechFrontSway: v.pipe(
@@ -1359,6 +1386,7 @@ const unitObjectSchema = {
 			name: "editor.unit.mech-front-sway",
 			description: "editor.unit.mech-front-sway-description",
 			category: "editor.unit.category.mech-units",
+			visibleWhen: { field: "type", value: "mech" },
 		}),
 	),
 	mechStride: v.pipe(
@@ -1367,6 +1395,7 @@ const unitObjectSchema = {
 			name: "editor.unit.mech-stride",
 			description: "editor.unit.mech-stride-description",
 			category: "editor.unit.category.mech-units",
+			visibleWhen: { field: "type", value: "mech" },
 		}),
 	),
 	mechStepParticles: v.pipe(
@@ -1375,6 +1404,7 @@ const unitObjectSchema = {
 			name: "editor.unit.mech-step-particles",
 			description: "editor.unit.mech-step-particles-description",
 			category: "editor.unit.category.mech-units",
+			visibleWhen: { field: "type", value: "mech" },
 		}),
 	),
 
@@ -1384,6 +1414,7 @@ const unitObjectSchema = {
 			name: "editor.unit.tread-frames",
 			description: "editor.unit.tread-frames-description",
 			category: "editor.unit.category.tank-units",
+			visibleWhen: { field: "type", value: "tank" },
 		}),
 	),
 	treadPullOffset: v.pipe(
@@ -1392,6 +1423,7 @@ const unitObjectSchema = {
 			name: "editor.unit.tread-pull-offset",
 			description: "editor.unit.tread-pull-offset-description",
 			category: "editor.unit.category.tank-units",
+			visibleWhen: { field: "type", value: "tank" },
 		}),
 	),
 	crushFragile: v.pipe(
@@ -1400,6 +1432,7 @@ const unitObjectSchema = {
 			name: "editor.unit.crush-fragile",
 			description: "editor.unit.crush-fragile-description",
 			category: "editor.unit.category.tank-units",
+			visibleWhen: { field: "type", value: "tank" },
 		}),
 	),
 
@@ -1409,6 +1442,7 @@ const unitObjectSchema = {
 			name: "editor.unit.segments",
 			description: "editor.unit.segments-description",
 			category: "editor.unit.category.segmented-crawl-units",
+			visibleWhen: { field: "type", value: "crawl" },
 		}),
 	),
 	segmentUnits: v.pipe(
@@ -1417,6 +1451,7 @@ const unitObjectSchema = {
 			name: "editor.unit.segment-units",
 			description: "editor.unit.segment-units-description",
 			category: "editor.unit.category.segmented-crawl-units",
+			visibleWhen: { field: "type", value: "crawl" },
 		}),
 	),
 	segmentLayerOrder: v.pipe(
@@ -1425,6 +1460,7 @@ const unitObjectSchema = {
 			name: "editor.unit.segment-layer-order",
 			description: "editor.unit.segment-layer-order-description",
 			category: "editor.unit.category.segmented-crawl-units",
+			visibleWhen: { field: "type", value: "crawl" },
 		}),
 	),
 
@@ -1434,6 +1470,7 @@ const unitObjectSchema = {
 			name: "editor.unit.segment-mag",
 			description: "editor.unit.segment-mag-description",
 			category: "editor.unit.category.segmented-crawl-units",
+			visibleWhen: { field: "type", value: "crawl" },
 		}),
 	),
 	segmentScl: v.pipe(
@@ -1442,6 +1479,7 @@ const unitObjectSchema = {
 			name: "editor.unit.segment-scl",
 			description: "editor.unit.segment-scl-description",
 			category: "editor.unit.category.segmented-crawl-units",
+			visibleWhen: { field: "type", value: "crawl" },
 		}),
 	),
 	segmentPhase: v.pipe(
@@ -1450,6 +1488,7 @@ const unitObjectSchema = {
 			name: "editor.unit.segment-phase",
 			description: "editor.unit.segment-phase-description",
 			category: "editor.unit.category.segmented-crawl-units",
+			visibleWhen: { field: "type", value: "crawl" },
 		}),
 	),
 	segmentRotSpeed: v.pipe(
@@ -1458,6 +1497,7 @@ const unitObjectSchema = {
 			name: "editor.unit.segment-rot-speed",
 			description: "editor.unit.segment-rot-speed-description",
 			category: "editor.unit.category.segmented-crawl-units",
+			visibleWhen: { field: "type", value: "crawl" },
 		}),
 	),
 	segmentMaxRot: v.pipe(
@@ -1466,6 +1506,7 @@ const unitObjectSchema = {
 			name: "editor.unit.segment-max-rot",
 			description: "editor.unit.segment-max-rot-description",
 			category: "editor.unit.category.segmented-crawl-units",
+			visibleWhen: { field: "type", value: "crawl" },
 		}),
 	),
 	segmentSpacing: v.pipe(
@@ -1474,6 +1515,7 @@ const unitObjectSchema = {
 			name: "editor.unit.segment-spacing",
 			description: "editor.unit.segment-spacing-description",
 			category: "editor.unit.category.segmented-crawl-units",
+			visibleWhen: { field: "type", value: "crawl" },
 		}),
 	),
 	segmentRotationRange: v.pipe(
@@ -1482,6 +1524,7 @@ const unitObjectSchema = {
 			name: "editor.unit.segment-rotation-range",
 			description: "editor.unit.segment-rotation-range-description",
 			category: "editor.unit.category.segmented-crawl-units",
+			visibleWhen: { field: "type", value: "crawl" },
 		}),
 	),
 	crawlSlowdown: v.pipe(
@@ -1490,6 +1533,7 @@ const unitObjectSchema = {
 			name: "editor.unit.crawl-slowdown",
 			description: "editor.unit.crawl-slowdown-description",
 			category: "editor.unit.category.segmented-crawl-units",
+			visibleWhen: { field: "type", value: "crawl" },
 		}),
 	),
 	crushDamage: v.pipe(
@@ -1498,6 +1542,7 @@ const unitObjectSchema = {
 			name: "editor.unit.crush-damage",
 			description: "editor.unit.crush-damage-description",
 			category: "editor.unit.category.segmented-crawl-units",
+			visibleWhen: { field: "type", value: "crawl" },
 		}),
 	),
 	crawlSlowdownFrac: v.pipe(
@@ -1506,6 +1551,7 @@ const unitObjectSchema = {
 			name: "editor.unit.crawl-slowdown-frac",
 			description: "editor.unit.crawl-slowdown-frac-description",
 			category: "editor.unit.category.segmented-crawl-units",
+			visibleWhen: { field: "type", value: "crawl" },
 		}),
 	),
 
@@ -1515,6 +1561,7 @@ const unitObjectSchema = {
 			name: "editor.unit.lifetime",
 			description: "editor.unit.lifetime-description",
 			category: "editor.unit.category.missile-units",
+			visibleWhen: { field: "type", value: "missile" },
 		}),
 	),
 	homingDelay: v.pipe(
@@ -1523,6 +1570,7 @@ const unitObjectSchema = {
 			name: "editor.unit.homing-delay",
 			description: "editor.unit.homing-delay-description",
 			category: "editor.unit.category.missile-units",
+			visibleWhen: { field: "type", value: "missile" },
 		}),
 	),
 
@@ -1590,6 +1638,7 @@ const unitObjectSchema = {
 			name: "editor.unit.mech-leg-color",
 			description: "editor.unit.mech-leg-color-description",
 			category: "editor.unit.category.mech-units",
+			visibleWhen: { field: "type", value: "mech" },
 		}),
 	),
 
@@ -1679,6 +1728,7 @@ const unitObjectSchema = {
 			name: "editor.unit.tread-rects",
 			description: "editor.unit.tread-rects-description",
 			category: "editor.unit.category.tank-units",
+			visibleWhen: { field: "type", value: "tank" },
 		}),
 	),
 	segmentUnit: v.pipe(
@@ -1687,6 +1737,7 @@ const unitObjectSchema = {
 			name: "editor.unit.segment-unit",
 			description: "editor.unit.segment-unit-description",
 			category: "editor.unit.category.segmented-crawl-units",
+			visibleWhen: { field: "type", value: "crawl" },
 		}),
 	),
 	segmentEndUnit: v.pipe(
@@ -1695,6 +1746,7 @@ const unitObjectSchema = {
 			name: "editor.unit.segment-end-unit",
 			description: "editor.unit.segment-end-unit-description",
 			category: "editor.unit.category.segmented-crawl-units",
+			visibleWhen: { field: "type", value: "crawl" },
 		}),
 	),
 };
