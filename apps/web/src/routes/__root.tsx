@@ -22,7 +22,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 			},
 			{ title: "Project Editor — Mindustry Mod Editor" },
 		],
-		links: [{ rel: "stylesheet", href: appCss }],
+		links: [
+			{ rel: "stylesheet", href: appCss },
+			{
+				rel: "stylesheet",
+				href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap",
+			},
+		],
 	}),
 	shellComponent: RootDocument,
 });

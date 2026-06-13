@@ -10,6 +10,7 @@ import React from "react";
 export const TextureField = React.memo(function TextureField({ name, path, entrySchema, jsonPath }: SchemaRendererProps) {
 	const metadata = getSchemaMetadata(entrySchema);
 	const filename = path.split("/").pop();
+
 	if (!filename) {
 		throw new Error("Texture field path must end with a file name");
 	}
@@ -29,13 +30,17 @@ export const TextureField = React.memo(function TextureField({ name, path, entry
 		throw new Error("Texture field format must contain @ placeholder");
 	}
 
-	const spritePath = path.replace("contents", "sprites").replace(filename, format.replace("@", contentName)) + ".png";
-	const exists = useProjectSession((s) => spritePath !== null && s.treeSnapshot.getEntry(spritePath) !== undefined);
+	const defaultSpritePath = path.replace("content", "sprites").replace(filename, format.replace("@", contentName)) + ".png";
+	const spritePath = useProjectSession((s) => s.treeSnapshot.findContentSpritePath(format.replace("@", contentName)));
+
+	console.log({ spritePath, defaultSpritePath });
 
 	return (
 		<Field jsonPath={jsonPath} metadata={metadata}>
 			<SchemaLabel name={name} metadata={metadata} />
-			<FieldControl>{exists ? <SpriteViewer path={spritePath} /> : <SpriteUploader path={spritePath} />}</FieldControl>
+			<FieldControl>
+				{spritePath !== null ? <SpriteViewer path={defaultSpritePath} /> : <SpriteUploader path={defaultSpritePath} />}
+			</FieldControl>
 			<SchemaDescription metadata={metadata} />
 		</Field>
 	);

@@ -8,6 +8,7 @@ import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { EMPTY_ARRAY } from "#/lib/utils";
+import { ErrorBoundary } from "#/components/ui/error-boundary";
 
 export const ArrayField = React.memo(function ArrayField({
 	path,
@@ -56,7 +57,7 @@ export const ArrayField = React.memo(function ArrayField({
 					{arrayValue.map((el, index) => (
 						<ArrayElement
 							name={name}
-							key={index}
+							key={jsonPath + index}
 							index={index}
 							value={el}
 							itemSchema={getArrayItemSchema(entrySchema, index)}
@@ -106,23 +107,24 @@ function ArrayElement({
 	const Renderer = getRenderer(type);
 
 	return (
-		<div key={index} className="flex flex-col gap-2 relative border p-2 rounded-md bg-muted">
-			{Renderer ? (
-				<Renderer
-					key={entryJsonPath}
-					name={`${index + 1}`}
-					path={path}
-					value={value}
-					onChange={onChange}
-					entrySchema={schema}
-					jsonPath={entryJsonPath}
-					getRenderer={getRenderer}
-					defaultValue={defaultValue}
-					nested
-				/>
-			) : (
-				<span className="text-red-400 text-sm">Unknown field type '{type}'</span>
-			)}
+		<div className="flex flex-col gap-2 relative border p-2 rounded-md bg-muted">
+			<ErrorBoundary>
+				{Renderer ? (
+					<Renderer
+						name={`${index + 1}`}
+						path={path}
+						value={value}
+						onChange={onChange}
+						entrySchema={schema}
+						jsonPath={entryJsonPath}
+						getRenderer={getRenderer}
+						defaultValue={defaultValue}
+						nested
+					/>
+				) : (
+					<span className="text-red-400 text-sm">Unknown field type '{type}'</span>
+				)}
+			</ErrorBoundary>
 			<Button className="w-full" variant="destructive" onClick={handleRemove}>
 				<Trash2 />
 			</Button>

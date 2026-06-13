@@ -1757,19 +1757,43 @@ export const UnitHjsonSchema: SchemaFn = (context) =>
 	v.object({
 		...unitObjectSchema,
 		baseRegion: TextureFieldSchema("@-base"),
-		legRegion: TextureFieldSchema("@-lg"),
+		legRegion: v.pipe(
+			TextureFieldSchema("@-lg"),
+			metadata({ visibleWhen: { field: "type", value: "legs" } }),
+		),
 		previewRegion: TextureFieldSchema("@-preview"),
 		cellRegion: TextureFieldSchema("@-cell"),
-		jointRegion: TextureFieldSchema("@-joint"),
+		jointRegion: v.pipe(
+			TextureFieldSchema("@-joint"),
+			metadata({ visibleWhen: { field: "type", value: "legs" } }),
+		),
 		footRegion: TextureFieldSchema("@-foot"),
-		legBaseRegion: TextureFieldSchema("@-leg-base", "@-leg"),
-		baseJointRegion: TextureFieldSchema("@-joint-base"),
+		legBaseRegion: v.pipe(
+			TextureFieldSchema("@-leg-base", "@-leg"),
+			metadata({ visibleWhen: { field: "type", value: "legs" } }),
+		),
+		baseJointRegion: v.pipe(
+			TextureFieldSchema("@-joint-base"),
+			metadata({ visibleWhen: { field: "type", value: "legs" } }),
+		),
 		outlineRegion: TextureFieldSchema("@-outline"),
-		treadRegion: TextureFieldSchema("@-treads"),
+		treadRegion: v.pipe(
+			TextureFieldSchema("@-treads"),
+			metadata({ visibleWhen: { field: "type", value: "tank" } }),
+		),
 		wreckRegions: ArrayTextureSchema("@-wreck#", 3),
-		segmentRegions: ArrayTextureSchema("@-segment#", 20),
-		segmentCellRegions: ArrayTextureSchema("@-segment-cell#", 20),
-		segmentOutlineRegions: ArrayTextureSchema("@-segment-outline#", 20),
+		segmentRegions: v.pipe(
+			ArrayTextureSchema("@-segment#", 20),
+			metadata({ visibleWhen: { field: "type", value: "crawl" } }),
+		),
+		segmentCellRegions: v.pipe(
+			ArrayTextureSchema("@-segment-cell#", 20),
+			metadata({ visibleWhen: { field: "type", value: "crawl" } }),
+		),
+		segmentOutlineRegions: v.pipe(
+			ArrayTextureSchema("@-segment-outline#", 20),
+			metadata({ visibleWhen: { field: "type", value: "crawl" } }),
+		),
 		abilities: v.pipe(
 			v.optional(v.array(AbilityFieldSchema(context)), []),
 			metadata({
