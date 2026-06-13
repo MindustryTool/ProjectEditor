@@ -9,6 +9,8 @@ import { SchemaLabel } from "#/components/editor/right/field/SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { cn } from "#/lib/utils";
 import { selectIsExpanded, useProjectSession } from "@project/core";
+import { ErrorBoundary } from "#/components/ui/error-boundary";
+import { ErrorDisplay } from "#/components/ui/error-display";
 
 export const ObjectField = React.memo(function ObjectField({
 	name,
@@ -93,6 +95,8 @@ function Children({
 }) {
 	const elements: React.ReactNode[] = [];
 
+	console.log(value);
+
 	for (const [name, childSchema] of entries) {
 		const key = name;
 		const childValue = (value as Record<string, unknown>)?.[name];
@@ -116,17 +120,26 @@ function Children({
 			);
 		} else {
 			elements.push(
-				<Renderer
+				<ErrorBoundary
 					key={key}
-					path={path}
-					name={name}
-					value={childValue}
-					onChange={onChange}
-					entrySchema={schema}
-					jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
-					getRenderer={getRenderer}
-					defaultValue={defaultValue}
-				/>,
+					fallback={({ error, reset }) => (
+						<FieldControl key={key}>
+							<SchemaLabel name={name} metadata={metadata} />
+							<ErrorDisplay message={error.message} onRetry={reset} />
+						</FieldControl>
+					)}
+				>
+					<Renderer
+						path={path}
+						name={name}
+						value={childValue}
+						onChange={onChange}
+						entrySchema={schema}
+						jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
+						getRenderer={getRenderer}
+						defaultValue={defaultValue}
+					/>
+				</ErrorBoundary>,
 			);
 		}
 	}

@@ -35,7 +35,7 @@ export const EffectField = React.memo(function EffectField({
 	}
 
 	if (typeof value === "object" && value !== null) {
-		const typeValue = (value as Record<string, unknown>)?.type ?? "";
+		const typeValue = String((value as Record<string, unknown>)?.type ?? "");
 
 		return (
 			<div className="grid gap-2">
@@ -56,7 +56,7 @@ export const EffectField = React.memo(function EffectField({
 					<Field jsonPath={jsonPath} metadata={metadata}>
 						<CollapsibleTrigger asChild>
 							<Button variant="outline" className="flex items-center justify-between w-full">
-								<span>{String(typeValue)}</span>
+								<span>{typeValue}</span>
 								<ChevronsUpDown className="size-4" />
 							</Button>
 						</CollapsibleTrigger>
@@ -103,7 +103,7 @@ export const EffectField = React.memo(function EffectField({
 				<Dialog>
 					<DialogTrigger asChild>
 						<Button className="w-full justify-between" variant="outline">
-							{stringValue || "None"}
+							{String(stringValue) || "None"}
 							<ChevronDown />
 						</Button>
 					</DialogTrigger>
@@ -151,10 +151,8 @@ function EffectDialogContent({
 					{effects
 						.filter((i) => i.name !== value && i.name.includes(filter))
 						.map((item) => (
-                            <DialogClose key={item.name} asChild>
-								<ToggleGroupItem value={item.name}>
-									{item.name}
-								</ToggleGroupItem>
+							<DialogClose key={item.name} asChild>
+								<ToggleGroupItem value={item.name}>{item.name}</ToggleGroupItem>
 							</DialogClose>
 						))}
 				</div>
