@@ -1548,7 +1548,13 @@ export const BulletHjsonSchema: SchemaFn = new ClassMap<BulletClass>(
 				}),
 			),
 			backSprite: v.pipe(
-				v.nullish(v.string()),
+				v.nullish(
+					v.pipe(
+						v.string(),
+						v.transform((v) => v.replaceAll(context.name + "-", "")),
+						v.picklist(context.sprites.map((sprite) => sprite.name.replaceAll(context.name + "-", ""))),
+					),
+				),
 				metadata({
 					name: "editor.bullet.back-sprite",
 					description: "editor.bullet.back-sprite-description",
