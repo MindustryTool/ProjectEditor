@@ -19,18 +19,15 @@ export const TextureField = React.memo(function TextureField({ name, path, jsonP
 		throw new Error("Texture field path must end with a file name");
 	}
 
-	const { format } = metadata as SchemaMetadata & { format: string; fallback?: string };
-
-	if (!format) {
-		throw new Error("Texture field format must be specified");
-	}
-
-	if (!format.includes("@")) {
-		throw new Error("Texture field format must contain @ placeholder");
-	}
+	let { format } = metadata as SchemaMetadata & { format?: string; fallback?: string };
+    format = format || "$";
 
 	const defaultSpritePath = path.replace("content", "sprites").replace(filename, format.replace("@", contentName)) + ".png";
 	const spritePath = useProjectSession((s) => s.treeSnapshot.findContentSpritePath(format.replace("@", contentName)));
+
+	if (format === "$") {
+		return null;
+	}
 
 	return (
 		<Field jsonPath={jsonPath} metadata={metadata}>

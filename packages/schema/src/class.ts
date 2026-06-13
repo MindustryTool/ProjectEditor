@@ -19,10 +19,7 @@ export const classSchema = <T extends string>(classTypes: readonly T[], defaultV
 				v.picklist(classTypes),
 			);
 
-export function mergeEntries(
-	base: Record<string, AnySchema>,
-	variant: Record<string, AnySchema>,
-): Record<string, AnySchema> {
+export function mergeEntries(base: Record<string, AnySchema>, variant: Record<string, AnySchema>): Record<string, AnySchema> {
 	const result = { ...base };
 	for (const [key, variantField] of Object.entries(variant)) {
 		if (variantField === undefined) continue;
@@ -44,7 +41,10 @@ export class ClassMap<K extends string> {
 	constructor(
 		private readonly map: Record<K, (context: ProjectContents) => Record<string, AnySchema>>,
 		private readonly options: {
-			baseSchema: Record<string, AnySchema> | ((context: ProjectContents) => Record<string, AnySchema>);
+			baseSchema:
+				| Record<string, AnySchema>
+				| ((context: ProjectContents) => Record<string, AnySchema>)
+				| ((context: ProjectContents) => v.LazySchema<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>);
 			type?: string;
 			extra?: (context: ProjectContents) => Record<string, AnySchema>;
 		},
@@ -55,10 +55,13 @@ export class ClassMap<K extends string> {
 			this._schema = CachedSchema((context) =>
 				v.lazy((input) => {
 					const variant = this.collect(input, context);
-					const base = typeof this.options.baseSchema === "function" ? this.options.baseSchema(context) : this.options.baseSchema;
+					let base = typeof this.options.baseSchema === "function" ? this.options.baseSchema(context) : this.options.baseSchema;
+					if ('getter' in base) {
+						base = (base as v.LazySchema<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>).getter(input).entries;
+					}
 					const entries = mergeEntries(base, variant);
 					const extraFields = this.options.extra?.(context) ?? {};
-                    const type = this.options.type;
+					const type = this.options.type;
 					return v.pipe(v.object({ ...entries, ...extraFields }), metadata({ type }));
 				}),
 			);

@@ -22,14 +22,13 @@ export const TexturesField = React.memo(function TexturesField({ name, path, jso
 		throw new Error("Texture field path must end with a file name");
 	}
 
-	const { format, length } = metadata as SchemaMetadata & { format: string; length: number[] | number };
+	let { format } = metadata as SchemaMetadata & { format?: string };
+	const { length } = metadata as SchemaMetadata & { length?: number[] | number };
 
-	if (!format) {
-		throw new Error("Texture field format must be specified");
-	}
+	format = format || "$";
 
-	if (!format.includes("#")) {
-		throw new Error("Texture field format must contain # placeholder");
+	if (!length) {
+		throw new Error("Texture field length must be specified");
 	}
 
 	const spritePath = path.replace("contents", "sprites").replace(filename, format.replace("@", contentName)) + ".png";
@@ -37,6 +36,14 @@ export const TexturesField = React.memo(function TexturesField({ name, path, jso
 	const spritePaths = Array.isArray(length)
 		? generatePattern(spritePath, length)
 		: Array.from({ length }).map((_, index) => spritePath.replace("#", index.toString()));
+
+	if (format === "$") {
+		return null;
+	}
+
+	if (!format.includes("#")) {
+		throw new Error("Texture field format must contain # placeholder");
+	}
 
 	return (
 		<Field jsonPath={jsonPath} metadata={metadata}>
@@ -64,7 +71,7 @@ function Item({ spritePath }: { spritePath: string }) {
 
 	return (
 		<div className="space-y-2">
-             <span className="text-xs">{filename}</span>
+			<span className="text-xs">{filename}</span>
 			{exists ? <SpriteViewer path={spritePath} /> : <SpriteUploader path={spritePath} />}
 		</div>
 	);

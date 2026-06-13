@@ -72,7 +72,7 @@ export function SpriteViewer({ path: spritePath }: { path: string }) {
 	return (
 		<div className="relative">
 			<img
-				className="object-contain p-2 w-full rounded-md border border-border [image-rendering:pixelated]"
+				className="object-contain p-2 w-full max-h-60 rounded-md border border-border [image-rendering:pixelated]"
 				src={objectUrl}
 				alt={spritePath}
 			/>
