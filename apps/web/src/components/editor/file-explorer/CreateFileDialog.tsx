@@ -1,11 +1,11 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "#/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 import { Button } from "#/components/ui/button";
 import { Label } from "#/components/ui/label";
 import { InputGroup, InputGroupInput, InputGroupAddon } from "#/components/ui/input-group";
 import { useCurrentProject } from "@project/core";
-import { TemplateSelector } from "#/components/editor/left/TemplateSelector";
 
 const contentTypes = new Set(["item", "block", "unit", "liquid", "status", "sector", "env-block", "effect"]);
 
@@ -22,6 +22,17 @@ const EXTENSION_MAP: Record<string, string> = {
 	effect: ".hjson",
 };
 
+const CONTENT_FOLDER_MAP: Record<string, string> = {
+	item: "content/items",
+	block: "content/blocks",
+	unit: "content/units",
+	liquid: "content/liquids",
+	status: "content/status",
+	sector: "content/sectors",
+	"env-block": "content/env-blocks",
+	effect: "content/effects",
+};
+
 interface CreateFileDialogProps {
 	targetPath: string | null;
 	onClose: () => void;
@@ -29,40 +40,103 @@ interface CreateFileDialogProps {
 }
 
 export function CreateFileDialog({ targetPath, onClose, onSuccess }: CreateFileDialogProps) {
+	const { t } = useTranslation();
 	const context = useCurrentProject();
 	const [name, setName] = useState("");
 	const [type, setType] = useState("file");
 	const [error, setError] = useState("");
+	const [selectedContentFolder, setSelectedContentFolder] = useState("");
+	const [folderOptions, setFolderOptions] = useState<string[]>([]);
+	const [foldersLoading, setFoldersLoading] = useState(false);
+	const fileInputRef = useRef<HTMLInputElement>(null);
+	const [importing, setImporting] = useState(false);
 
 	const isContentType = contentTypes.has(type);
-	const getTemplateContentRef = useRef<() => Promise<string>>(async () => "");
-	const handleGetTemplateContent = useCallback(async () => getTemplateContentRef.current(), []);
-	const handleSetTemplateContent = useCallback((fn: () => Promise<string>) => {
-		getTemplateContentRef.current = fn;
-	}, []);
+
+	useEffect(() => {
+		if (!isContentType) {
+			setSelectedContentFolder("");
+			setFolderOptions([]);
+			return;
+		}
+
+		const rootFolder = CONTENT_FOLDER_MAP[type];
+		if (!rootFolder) return;
+
+		let cancelled = false;
+
+		async function loadFolders() {
+			setFoldersLoading(true);
+			try {
+				const entries = await context.fs.readdir(rootFolder!);
+				if (cancelled) return;
+				const subdirs = entries
+					.filter((e) => e.kind === "directory")
+					.map((e) => `${rootFolder!}/${e.name}`);
+				const allFolders = [rootFolder!, ...subdirs];
+				setFolderOptions(allFolders);
+				if (allFolders.length === 1) {
+					setSelectedContentFolder(allFolders[0]!);
+				} else if (!allFolders.includes(selectedContentFolder)) {
+					setSelectedContentFolder("");
+				}
+			} catch {
+				if (cancelled) return;
+				setFolderOptions([rootFolder!]);
+				setSelectedContentFolder(rootFolder!);
+			} finally {
+				if (!cancelled) setFoldersLoading(false);
+			}
+		}
+
+		loadFolders();
+
+		return () => { cancelled = true; };
+	}, [type, isContentType, context.fs]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	async function handleCreate() {
 		const trimmed = name.trim();
 		if (!trimmed) {
-			setError("Name cannot be empty");
+			setError(t("export-menu.filename-empty"));
 			return;
 		}
 		setError("");
 
 		const ext = EXTENSION_MAP[type] ?? "";
-		const fullPath = `${targetPath || ""}/${trimmed}${ext}`;
+		const baseFolder = isContentType ? selectedContentFolder : (targetPath || "");
+		const fullPath = `${baseFolder}/${trimmed}${ext}`;
 
 		try {
 			if (type === "folder") {
 				await context.fs.mkdir(fullPath);
 				onSuccess(fullPath);
 			} else {
-				const content = await handleGetTemplateContent();
-				await context.fs.writeTextFile(fullPath, content);
+				await context.fs.writeTextFile(fullPath, "");
 				onSuccess(fullPath);
 			}
 		} catch (err) {
-			setError(err instanceof Error ? err.message : "Failed to create");
+			setError(err instanceof Error ? err.message : t("editor.file-explorer.create-dialog.create-failed"));
+		}
+	}
+
+	async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		setImporting(true);
+		setError("");
+
+		try {
+			const text = await file.text();
+			const baseFolder = isContentType ? selectedContentFolder : (targetPath || "");
+			const fullPath = `${baseFolder}/${file.name}`;
+			await context.fs.writeTextFile(fullPath, text);
+			onSuccess(fullPath);
+		} catch (err) {
+			setError(err instanceof Error ? err.message : t("editor.file-explorer.create-dialog.import-failed"));
+		} finally {
+			setImporting(false);
+			if (fileInputRef.current) fileInputRef.current.value = "";
 		}
 	}
 
@@ -75,44 +149,75 @@ export function CreateFileDialog({ targetPath, onClose, onSuccess }: CreateFileD
 		>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Create New</DialogTitle>
-					<DialogDescription>Create a new file or folder in {targetPath || "project root"}.</DialogDescription>
+					<DialogTitle>{t("editor.create-new-file")}</DialogTitle>
+					<DialogDescription>
+						{t("editor.create-new-content-dialog.description")}
+					</DialogDescription>
 				</DialogHeader>
 				<div className="space-y-4 h-full w-full">
 					<div className="space-y-2">
-						<Label htmlFor="name">Name</Label>
+						<Label htmlFor="name">{t("editor.file-explorer.create-dialog.name")}</Label>
 						<InputGroup>
-							<InputGroupInput id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter name" />
+							<InputGroupInput id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("editor.file-explorer.create-dialog.name-placeholder")} />
 							{isContentType && <InputGroupAddon align="inline-end">{EXTENSION_MAP[type]}</InputGroupAddon>}
 						</InputGroup>
 					</div>
 					<div className="space-y-2">
-						<Label htmlFor="type">Type</Label>
+						<Label htmlFor="type">{t("editor.file-explorer.create-dialog.type")}</Label>
 						<Select value={type} onValueChange={setType}>
 							<SelectTrigger className="w-full">
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="file">File</SelectItem>
-								<SelectItem value="folder">Folder</SelectItem>
-								<SelectItem value="item">Item</SelectItem>
-								<SelectItem value="block">Block</SelectItem>
-								<SelectItem value="unit">Unit</SelectItem>
-								<SelectItem value="liquid">Liquid</SelectItem>
-								<SelectItem value="status">Status</SelectItem>
-								<SelectItem value="sector">Sector</SelectItem>
-								<SelectItem value="env-block">Env Block</SelectItem>
-								<SelectItem value="effect">Effect</SelectItem>
+								<SelectItem value="file">{t("editor.file-explorer.create-dialog.type-file")}</SelectItem>
+								<SelectItem value="folder">{t("editor.file-explorer.create-dialog.type-folder")}</SelectItem>
+								<SelectItem value="item">{t("editor.file-explorer.create-dialog.type-item")}</SelectItem>
+								<SelectItem value="block">{t("editor.file-explorer.create-dialog.type-block")}</SelectItem>
+								<SelectItem value="unit">{t("editor.file-explorer.create-dialog.type-unit")}</SelectItem>
+								<SelectItem value="liquid">{t("editor.file-explorer.create-dialog.type-liquid")}</SelectItem>
+								<SelectItem value="status">{t("editor.file-explorer.create-dialog.type-status")}</SelectItem>
+								<SelectItem value="sector">{t("editor.file-explorer.create-dialog.type-sector")}</SelectItem>
+								<SelectItem value="env-block">{t("editor.file-explorer.create-dialog.type-env-block")}</SelectItem>
+								<SelectItem value="effect">{t("editor.file-explorer.create-dialog.type-effect")}</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
-					{isContentType && <TemplateSelector type={type} name={name} onContentReady={handleSetTemplateContent} />}
+					{isContentType && (
+						<div className="space-y-2">
+							<Label htmlFor="content-folder">{t("editor.file-explorer.create-dialog.target-folder")}</Label>
+							<Select value={selectedContentFolder} onValueChange={setSelectedContentFolder} disabled={foldersLoading}>
+								<SelectTrigger className="w-full">
+									<SelectValue placeholder={foldersLoading ? t("editor.file-explorer.create-dialog.loading") : t("editor.file-explorer.create-dialog.select-folder")} />
+								</SelectTrigger>
+								<SelectContent>
+									{folderOptions.map((folder) => (
+										<SelectItem key={folder} value={folder}>{folder}</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+					)}
 					{error && <p className="text-sm text-red-400">{error}</p>}
-					<DialogFooter>
-						<Button variant="outline" onClick={onClose}>
-							Cancel
+					<DialogFooter className="gap-2">
+						<input
+							ref={fileInputRef}
+							type="file"
+							className="hidden"
+							onChange={handleImportFile}
+						/>
+						<Button
+							variant="outline"
+							onClick={() => fileInputRef.current?.click()}
+							disabled={importing || (isContentType && !selectedContentFolder)}
+						>
+							{t("editor.file-explorer.create-dialog.import-file")}
 						</Button>
-						<Button onClick={handleCreate}>Create</Button>
+						<Button variant="outline" onClick={onClose}>
+							{t("editor.create-new-content-dialog.cancel")}
+						</Button>
+						<Button onClick={handleCreate} disabled={isContentType && !selectedContentFolder}>
+							{t("editor.create-new-content-dialog.create")}
+						</Button>
 					</DialogFooter>
 				</div>
 			</DialogContent>

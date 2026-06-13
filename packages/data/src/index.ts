@@ -7,4 +7,4 @@ export { baseSectors } from "./generated/sectors";
 export { baseEffects } from "./generated/effects";
 export { baseStatuses } from "./generated/statuses";
 export { baseSounds } from "./generated/sounds";
-export { baseSprites } from "./sprites";
+export { spriteAssets } from "./generated/sprites";

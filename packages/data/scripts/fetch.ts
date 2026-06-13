@@ -33,6 +33,28 @@ const ENDPOINTS: Endpoint[] = [
 	{ path: "/sounds", exportName: "baseSounds", typeName: "Sound", filterMod: false, fileName: "sounds" },
 ];
 
+const SPRITES_DIR = path.resolve(__dirname, "../../../apps/web/public/sprites");
+
+async function collectSpritePaths(): Promise<string[]> {
+	const paths: string[] = [];
+
+	async function walk(dir: string): Promise<void> {
+		const entries = await fs.readdir(dir, { withFileTypes: true });
+		for (const entry of entries) {
+			const fullPath = path.join(dir, entry.name);
+			if (entry.isDirectory()) {
+				await walk(fullPath);
+			} else if (entry.isFile()) {
+				const relative = path.relative(SPRITES_DIR, fullPath).replace(/\\/g, "/");
+				paths.push(relative);
+			}
+		}
+	}
+
+	await walk(SPRITES_DIR);
+	return paths.sort();
+}
+
 async function sleep(ms: number) {
 	return new Promise((r) => setTimeout(r, ms));
 }
@@ -78,6 +100,10 @@ function generateFileContent(endpoint: Endpoint, data: unknown[], imports: TypeI
 async function main() {
 	await fs.mkdir(GENERATED_DIR, { recursive: true });
 
+	console.log("Collecting sprite assets...");
+	const spritePaths = await collectSpritePaths();
+	console.log(`Found ${spritePaths.length} sprite assets`);
+
 	console.log("Fetching base game data from", API_BASE_URL);
 
 	const results = await Promise.all(
@@ -94,6 +120,10 @@ async function main() {
 		await fs.writeFile(filePath, content, "utf-8");
 		console.log(`Generated ${endpoint.fileName}.ts (${data.length} entries)`);
 	}
+
+	const spriteContent = `export const spriteAssets: readonly string[] = ${JSON.stringify(spritePaths, null, 2)} as const;\n`;
+	await fs.writeFile(path.join(GENERATED_DIR, "sprites.ts"), spriteContent, "utf-8");
+	console.log(`Generated sprites.ts (${spritePaths.length} entries)`);
 
 	console.log("All base game data fetched and generated successfully.");
 }

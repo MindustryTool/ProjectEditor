@@ -1,5 +1,5 @@
-import { baseSprites } from "@project/data";
+import { spriteAssets } from "@project/data";
 
 export function useBaseSprites() {
-	return baseSprites;
+	return spriteAssets;
 }

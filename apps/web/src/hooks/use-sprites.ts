@@ -9,12 +9,16 @@ export function useSprites(): ContentEntry[] {
 	const data = useBaseSprites();
 
 	return useMemo(() => {
-		const items: ContentEntry[] = data.map((i) => ({
-			name: i.name,
-			type: "base" as const,
-			path: `sprites/${i.name}`,
-			contentType: "sprites",
-		}));
+		const items: ContentEntry[] = data.map((i) => {
+			const name = i.split("/").pop()!;
+
+			return {
+				name,
+				type: "base" as const,
+				path: `sprites/${i}`,
+				contentType: "sprites",
+			};
+		});
 
 		projectItems.forEach((i) => {
 			if (i.name.endsWith(".png")) {
