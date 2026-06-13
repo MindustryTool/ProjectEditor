@@ -58,6 +58,7 @@ const readModMetadata = (json: string | null, hjson: string | null) => {
 		dependencies: [],
 		description: "",
 		displayName: "",
+        subtitle: "",
 		minGameVersion: "158",
 		name: "new-mod",
 		version: "",
@@ -83,6 +84,10 @@ const readModMetadata = (json: string | null, hjson: string | null) => {
 
 		if (object.get("description")) {
 			mod.description = object.get("description").asString() || "";
+		}
+
+        if (object.get("subtitle")) {
+			mod.subtitle = object.get("subtitle").asString() || "";
 		}
 
 		if (object.get("displayName")) {
