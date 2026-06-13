@@ -18,3 +18,4 @@ app.config.timestamp-*.js
 .xdg*
 
 openspec/changes/archive/
+trace-output/
