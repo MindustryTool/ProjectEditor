@@ -5,20 +5,19 @@ import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { Input } from "#/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { VisuallyHidden } from "radix-ui";
-import React, { useMemo } from "react";
+import React from "react";
 import { ItemGrid } from "./ItemGrid";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
-import { getSchemaMetadata } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 
 export const ItemRequirementField = React.memo(function ItemRequirementField({
 	name,
 	value,
 	onChange,
-	entrySchema,
 	jsonPath,
+	metadata,
 }: SchemaRendererProps) {
 	const {
 		findContent,
@@ -30,8 +29,6 @@ export const ItemRequirementField = React.memo(function ItemRequirementField({
 	const itemName = parts[0] || "";
 	const reqNumber = Number(parts[1] ?? 0);
 	const selectedItem = findContent(itemName, [items]);
-
-	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
 	const handleChange = (name: string, amount: number) => {
 		onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, name + "/" + amount));

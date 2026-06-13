@@ -1,6 +1,6 @@
 import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
-import { getSchemaMetadata, hasNullableWrapper, unwrapSchema } from "@project/schema";
+import { hasNullableWrapper, unwrapSchema } from "@project/schema";
 import React, { useCallback, useMemo, useState } from "react";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
@@ -22,9 +22,9 @@ export const PickListField = React.memo(function PickListField({
 	jsonPath,
 	path,
 	defaultValue,
+	metadata,
 }: SchemaRendererProps) {
 	const unwrappedSchema = unwrapSchema(entrySchema);
-	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 	const [render, setRender] = useState(30);
 
 	const [filter, setFilter] = useState("");

@@ -169,6 +169,7 @@ function Children({
 					jsonPath={name}
 					getRenderer={getRenderer}
 					defaultValue={defaultValue}
+					metadata={metadata}
 				/>,
 			);
 		}

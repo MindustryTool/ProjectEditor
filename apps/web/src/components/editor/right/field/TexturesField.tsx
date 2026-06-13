@@ -5,13 +5,12 @@ import type { SchemaRendererProps } from "#/components/editor/right/field/types"
 import { SpriteUploader, SpriteViewer } from "#/components/editor/right/SpritePicker";
 import { Button } from "#/components/ui/button";
 import { useProjectSession } from "@project/core";
-import { getSchemaMetadata, type SchemaMetadata } from "@project/schema";
+import { type SchemaMetadata } from "@project/schema";
 import React from "react";
 import { useState } from "react";
 
-export const TexturesField = React.memo(function TexturesField({ name, path, entrySchema, jsonPath }: SchemaRendererProps) {
+export const TexturesField = React.memo(function TexturesField({ name, path, jsonPath, metadata }: SchemaRendererProps) {
 	const [render, setRender] = useState(3);
-	const metadata = getSchemaMetadata(entrySchema);
 	const filename = path.split("/").pop();
 
 	if (!filename) {

@@ -1,10 +1,10 @@
 import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { Checkbox } from "#/components/ui/checkbox";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback } from "react";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
-import { getSchemaMetadata, hasNullableWrapper } from "@project/schema";
+import { hasNullableWrapper } from "@project/schema";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 
 export const BooleanField = React.memo(function BooleanField({
@@ -15,9 +15,9 @@ export const BooleanField = React.memo(function BooleanField({
 	jsonPath,
 	path,
 	defaultValue,
+	metadata,
 }: SchemaRendererProps) {
 	const checked = typeof value === "boolean" ? value : Boolean(defaultValue);
-	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
 	const handleChange = useCallback(
 		(val: boolean) => {

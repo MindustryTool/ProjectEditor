@@ -2,8 +2,8 @@ import { ContentImage } from "#/components/editor/ContentImage";
 import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
-import { getSchemaMetadata, unwrapSchema } from "@project/schema";
-import React, { useMemo } from "react";
+import { unwrapSchema } from "@project/schema";
+import React from "react";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
@@ -17,11 +17,11 @@ export const LiquidsListField = React.memo(function LiquidsListField({
 	jsonPath,
 	path,
 	defaultValue,
+	metadata,
 }: SchemaRendererProps) {
 	const stringValue = typeof value === "string" ? value : ((defaultValue ?? "") as string);
 	const context = useProjectContext();
 	const unwrappedSchema = unwrapSchema(entrySchema);
-	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
 	if ("options" in unwrappedSchema && Array.isArray(unwrappedSchema.options)) {
 		const options = unwrappedSchema.options

@@ -19,9 +19,9 @@ export const ArrayField = React.memo(function ArrayField({
 	jsonPath,
 	getRenderer,
 	defaultValue,
+	metadata,
 }: SchemaRendererProps) {
 	const arrayValue: unknown[] = Array.isArray(value) ? value : Array.isArray(defaultValue) ? defaultValue : EMPTY_ARRAY;
-	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
 	const handleAdd = useCallback(() => {
 		const nextItemSchema = getArrayItemSchema(entrySchema, arrayValue.length);
@@ -101,6 +101,7 @@ function ArrayElement({
 		[onChange, jsonPath, index],
 	);
 
+    const metadata = getSchemaMetadata(itemSchema);
 	const { type, schema } = useMemo(() => detectSchemaType(itemSchema, value), [itemSchema, value]);
 	const defaultValue = getDefaults(schema, value);
 
@@ -119,6 +120,7 @@ function ArrayElement({
 						jsonPath={entryJsonPath}
 						getRenderer={getRenderer}
 						defaultValue={defaultValue}
+						metadata={metadata}
 						nested
 					/>
 				) : (

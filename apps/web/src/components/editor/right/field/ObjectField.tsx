@@ -21,6 +21,7 @@ export const ObjectField = React.memo(function ObjectField({
 	jsonPath,
 	getRenderer,
 	nested,
+	metadata,
 }: SchemaRendererProps) {
 	const resolvedValue = useMemo(() => (value && typeof value === "object" ? value : {}), [value]);
 	const openPath = `object-open-${jsonPath}`;
@@ -54,7 +55,7 @@ export const ObjectField = React.memo(function ObjectField({
 		<Collapsible id={jsonPath} open={isOpen} onOpenChange={handleOpen}>
 			<CollapsibleTrigger asChild>
 				<Button className="flex justify-between items-center w-full">
-					<SchemaLabel name={name} metadata={getSchemaMetadata(entrySchema)} />
+					<SchemaLabel name={name} metadata={metadata} />
 					<ChevronDown className="size-5 mr-1" />
 				</Button>
 			</CollapsibleTrigger>
@@ -136,6 +137,7 @@ function Children({
 						jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
 						getRenderer={getRenderer}
 						defaultValue={defaultValue}
+						metadata={metadata}
 					/>
 				</ErrorBoundary>,
 			);

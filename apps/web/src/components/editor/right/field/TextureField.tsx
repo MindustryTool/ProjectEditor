@@ -4,11 +4,10 @@ import { SchemaLabel } from "#/components/editor/right/field/SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { SpriteUploader, SpriteViewer } from "#/components/editor/right/SpritePicker";
 import { useProjectSession } from "@project/core";
-import { getSchemaMetadata, type SchemaMetadata } from "@project/schema";
+import { type SchemaMetadata } from "@project/schema";
 import React from "react";
 
-export const TextureField = React.memo(function TextureField({ name, path, entrySchema, jsonPath }: SchemaRendererProps) {
-	const metadata = getSchemaMetadata(entrySchema);
+export const TextureField = React.memo(function TextureField({ name, path, jsonPath, metadata }: SchemaRendererProps) {
 	const filename = path.split("/").pop();
 
 	if (!filename) {

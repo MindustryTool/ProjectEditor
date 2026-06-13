@@ -1,10 +1,9 @@
 import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { Envs, EnvValues, hasNullableWrapper } from "@project/schema";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback } from "react";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
-import { getSchemaMetadata } from "@project/schema";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 
@@ -16,13 +15,13 @@ export const EnvField = React.memo(function EnvField({
 	jsonPath,
 	path,
 	defaultValue,
+	metadata,
 }: SchemaRendererProps) {
 	if (defaultValue && typeof defaultValue !== "number") {
 		throw new Error("EnvField defaultValue must be a number");
 	}
 
 	const envValue = typeof value === "number" ? value : EnvValues.includes(defaultValue as number) ? (defaultValue as number) : 0;
-	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
 	const handleChange = useCallback(
 		(value: string) => {

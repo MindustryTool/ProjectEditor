@@ -6,21 +6,18 @@ import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
-import { getSchemaMetadata } from "@project/schema";
 
 export const ColorField = React.memo(function ColorField({
 	name,
 	value,
 	onChange,
-	entrySchema,
 	jsonPath,
 	path,
 	defaultValue,
+	metadata,
 }: SchemaRendererProps) {
 	let hexValue = typeof value === "string" ? value : (String(defaultValue ?? "333333") as string);
 	hexValue = useMemo(() => (hexValue?.startsWith("#") ? hexValue : "#" + hexValue), [hexValue]);
-
-	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
 	if (metadata!.type !== "color") {
 		throw new Error("ColorField type must be color type: " + JSON.stringify(metadata) + " value: " + JSON.stringify(value));

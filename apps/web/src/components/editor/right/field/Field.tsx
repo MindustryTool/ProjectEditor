@@ -6,7 +6,7 @@ export function Field({
 	jsonPath,
 	metadata,
 	...props
-}: React.ComponentProps<"div"> & { jsonPath: string; metadata: SchemaMetadata | null }) {
+}: React.ComponentProps<"div"> & { jsonPath: string; metadata: SchemaMetadata | null | undefined }) {
 	return (
 		<div
 			id={jsonPath}

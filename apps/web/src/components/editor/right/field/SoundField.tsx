@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
-import { getSchemaMetadata } from "@project/schema";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
 import { Button } from "#/components/ui/button";
@@ -109,9 +108,9 @@ export const SoundField = React.memo(function SoundField({
 	jsonPath,
 	path,
 	defaultValue,
+	metadata,
 }: SchemaRendererProps) {
 	const soundValue = typeof value === "string" ? value : String(value ? JSON.stringify(value) : defaultValue || "");
-	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 	const sounds = useSounds();
 	const [filter, setFilter] = useState("");
 	const [dialogOpen, setDialogOpen] = useState(false);

@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import { detectSchemaType, getDefaults, getSchemaMetadata } from "@project/schema";
 import React, { useRef } from "react";
-import { useMemo } from "react";
 
 export const OptionsField = React.memo(function OptionsField({
 	name,
@@ -16,8 +15,8 @@ export const OptionsField = React.memo(function OptionsField({
 	jsonPath,
 	path,
 	getRenderer,
+	metadata: fieldMetadata,
 }: SchemaRendererProps) {
-	const fieldMetadata = useMemo(() => getSchemaMetadata(entrySchema, false), [entrySchema]);
 	const lastRef = useRef<Record<string, unknown>>({});
 
 	if (fieldMetadata!.type !== "options") {
@@ -61,7 +60,7 @@ export const OptionsField = React.memo(function OptionsField({
 		}
 
 		if (options.length === 1) {
-			const { type, defaultValue, typeSchema, Renderer } = options[0]!;
+			const { type, defaultValue, typeSchema, Renderer, metadata } = options[0]!;
 
 			if (!Renderer) {
 				return <div>Renderer not found for type {type}</div>;
@@ -80,15 +79,30 @@ export const OptionsField = React.memo(function OptionsField({
 						jsonPath={jsonPath}
 						getRenderer={getRenderer}
 						defaultValue={defaultValue}
+						metadata={metadata}
 					/>
 				</Field>
 			);
 		}
 
 		if (options.length === 2) {
-			const { option: option1, type: type1, defaultValue: defaultValue1, typeSchema: typeSchema1, Renderer: Renderer1 } = options[0]!;
+			const {
+				option: option1,
+				type: type1,
+				defaultValue: defaultValue1,
+				typeSchema: typeSchema1,
+				Renderer: Renderer1,
+				metadata: metadata1,
+			} = options[0]!;
 
-			const { option: option2, type: type2, defaultValue: defaultValue2, typeSchema: typeSchema2, Renderer: Renderer2 } = options[1]!;
+			const {
+				option: option2,
+				type: type2,
+				defaultValue: defaultValue2,
+				typeSchema: typeSchema2,
+				Renderer: Renderer2,
+				metadata: metadata2,
+			} = options[1]!;
 
 			const defaultTab = matched ?? option1;
 
@@ -132,6 +146,7 @@ export const OptionsField = React.memo(function OptionsField({
 									jsonPath={jsonPath}
 									getRenderer={getRenderer}
 									defaultValue={defaultValue1}
+									metadata={metadata1}
 									nested
 								/>
 							) : (
@@ -149,6 +164,7 @@ export const OptionsField = React.memo(function OptionsField({
 									jsonPath={jsonPath}
 									getRenderer={getRenderer}
 									defaultValue={defaultValue2}
+									metadata={metadata2}
 									nested
 								/>
 							) : (
@@ -167,7 +183,7 @@ export const OptionsField = React.memo(function OptionsField({
 			throw new Error(`Unknown option ${defaultTab}, options: ${JSON.stringify(options.map((opt) => opt.option))}`);
 		}
 
-		const { Renderer } = selecting;
+		const { Renderer, metadata } = selecting;
 
 		if (Renderer === undefined) {
 			return <div>Renderer not found for selected type {selecting.type}</div>;
@@ -212,6 +228,7 @@ export const OptionsField = React.memo(function OptionsField({
 					jsonPath={jsonPath}
 					getRenderer={getRenderer}
 					defaultValue={selecting.defaultValue}
+					metadata={metadata}
 					nested
 				/>
 			</Field>

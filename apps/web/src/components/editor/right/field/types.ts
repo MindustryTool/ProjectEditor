@@ -1,5 +1,5 @@
 import type { HjsonNode } from "@project/hjson";
-import type { AnySchema, Type } from "@project/schema";
+import type { AnySchema, SchemaMetadata, Type } from "@project/schema";
 
 export type SchemaRendererProps = {
 	name: string;
@@ -8,6 +8,7 @@ export type SchemaRendererProps = {
 	entrySchema: AnySchema;
 	jsonPath: string;
 	defaultValue: unknown;
+	metadata: SchemaMetadata | null;
 	nested?: boolean;
 	onChange: (jsonPath: string, updater: (parent: HjsonNode, original: string, key: string | number, root: HjsonNode) => string) => void;
 	getRenderer: (type: Type) => SchemaRenderer | undefined;

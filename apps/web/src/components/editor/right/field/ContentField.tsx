@@ -6,13 +6,13 @@ import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import { ChevronDown } from "lucide-react";
 import { VisuallyHidden } from "radix-ui";
-import React, { useMemo } from "react";
+import React from "react";
 import { ItemGrid } from "./ItemGrid";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
-import { getSchemaMetadata, hasNullableWrapper } from "@project/schema";
+import { hasNullableWrapper } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 
 export const ContentField = React.memo(function ContentField({
@@ -23,10 +23,9 @@ export const ContentField = React.memo(function ContentField({
 	jsonPath,
 	path,
 	defaultValue,
+	metadata,
 }: SchemaRendererProps) {
 	const parent = typeof value === "string" ? value : "";
-
-	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
 	return (
 		<>

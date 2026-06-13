@@ -7,14 +7,13 @@ import { Separator } from "#/components/ui/separator";
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 import { VisuallyHidden } from "radix-ui";
 import { ChevronDown, ChevronsUpDown, Search } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import { ObjectField } from "./ObjectField";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { FieldControl } from "#/components/editor/right/field/Field";
-import { getSchemaMetadata } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 
 export const EffectField = React.memo(function EffectField({
@@ -26,8 +25,8 @@ export const EffectField = React.memo(function EffectField({
 	jsonPath,
 	getRenderer,
 	defaultValue,
+	metadata,
 }: SchemaRendererProps) {
-	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 	const effects = useProjectContext().contents.effects;
 
 	if (metadata!.type !== "effect") {

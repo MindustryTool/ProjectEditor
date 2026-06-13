@@ -2,11 +2,10 @@ import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { Input } from "#/components/ui/input";
 import { Textarea } from "#/components/ui/textarea";
 import { hasNullableWrapper } from "@project/schema";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback } from "react";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
-import { getSchemaMetadata } from "@project/schema";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 
 export const StringField = React.memo(function StringField({
@@ -17,9 +16,9 @@ export const StringField = React.memo(function StringField({
 	jsonPath,
 	path,
 	defaultValue,
+	metadata,
 }: SchemaRendererProps) {
 	const stringValue = typeof value === "string" ? value : String(value ? JSON.stringify(value) : defaultValue || "");
-	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

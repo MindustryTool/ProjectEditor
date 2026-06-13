@@ -2,7 +2,7 @@ import type { SchemaMetadata } from "@project/schema";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-export const SchemaDescription = React.memo(function SchemaDescription({ metadata }: { metadata: SchemaMetadata | null }) {
+export const SchemaDescription = React.memo(function SchemaDescription({ metadata }: { metadata: SchemaMetadata | null | undefined }) {
 	const { t } = useTranslation("schema");
 
 	if (!metadata?.description) {
