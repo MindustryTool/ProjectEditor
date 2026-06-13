@@ -71,7 +71,7 @@ export const PickListField = React.memo(function PickListField({
 									const isDefault = v === String(defaultValue ?? "");
 									const isNullable = hasNullableWrapper(entrySchema);
 
-									if (v === "" || (isDefault && !isNullable)) {
+									if (v === undefined || v === "" || (isDefault && !isNullable)) {
 										return onChange(jsonPath, (parent, original, key) => parent.patchRemove(original, key));
 									}
 
@@ -121,7 +121,7 @@ export const PickListField = React.memo(function PickListField({
 								const isDefault = nextValue === String(defaultValue ?? "");
 								const isNullable = hasNullableWrapper(entrySchema);
 
-								if (nextValue === "" || (isDefault && !isNullable)) {
+								if (nextValue === undefined || nextValue === "" || (isDefault && !isNullable)) {
 									return parent.patchRemove(original, key);
 								}
 
