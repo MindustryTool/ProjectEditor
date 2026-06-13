@@ -9,7 +9,6 @@ export const TextureFieldSchema = CachedSchema((format: string, fallback?: strin
 			v.maxLength(127),
 			metadata({
 				type: "texture",
-				category: "texture",
 			}),
 			v.metadata({ format, fallback }),
 		),

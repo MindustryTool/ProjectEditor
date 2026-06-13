@@ -26,14 +26,13 @@ const drawPartBaseObjectSchema = v.object({
 	type: v.pipe(classSchema(partClasses, "RegionPart"), metadata({ name: "editor.part.type" })),
 	under: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "editor.part.under", description: "editor.part.under-description", category: "editor.part.category.behavior" }),
+		metadata({ name: "editor.part.under", description: "editor.part.under-description" }),
 	),
 	weaponIndex: v.pipe(
 		v.optional(v.number(), 0),
 		metadata({
 			name: "editor.part.weapon-index",
 			description: "editor.part.weapon-index-description",
-			category: "editor.part.category.behavior",
 		}),
 	),
 	recoilIndex: v.pipe(
@@ -41,7 +40,6 @@ const drawPartBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.part.recoil-index",
 			description: "editor.part.recoil-index-description",
-			category: "editor.part.category.behavior",
 		}),
 	),
 });
@@ -145,19 +143,17 @@ export const PartHjsonSchema: SchemaFn = new ClassMap<PartClass>({
 				metadata({
 					name: "editor.part.suffix",
 					description: "editor.part.suffix-description",
-					category: "editor.part.category.naming",
 				}),
 			),
 			name: v.pipe(
 				v.optional(v.string()),
-				metadata({ name: "editor.part.name", description: "editor.part.name-description", category: "editor.part.category.naming" }),
+				metadata({ name: "editor.part.name", description: "editor.part.name-description" }),
 			),
 			mirror: v.pipe(
 				v.optional(v.boolean(), false),
 				metadata({
 					name: "editor.part.mirror",
 					description: "editor.part.mirror-description",
-					category: "editor.part.category.rendering",
 				}),
 			),
 			outline: v.pipe(
@@ -165,7 +161,6 @@ export const PartHjsonSchema: SchemaFn = new ClassMap<PartClass>({
 				metadata({
 					name: "editor.part.outline",
 					description: "editor.part.outline-description",
-					category: "editor.part.category.rendering",
 				}),
 			),
 			replaceOutline: v.pipe(
@@ -173,7 +168,6 @@ export const PartHjsonSchema: SchemaFn = new ClassMap<PartClass>({
 				metadata({
 					name: "editor.part.replace-outline",
 					description: "editor.part.replace-outline-description",
-					category: "editor.part.category.rendering",
 				}),
 			),
 			drawRegion: v.pipe(
@@ -181,7 +175,6 @@ export const PartHjsonSchema: SchemaFn = new ClassMap<PartClass>({
 				metadata({
 					name: "editor.part.draw-region",
 					description: "editor.part.draw-region-description",
-					category: "editor.part.category.rendering",
 				}),
 			),
 			heatLight: v.pipe(
@@ -189,7 +182,6 @@ export const PartHjsonSchema: SchemaFn = new ClassMap<PartClass>({
 				metadata({
 					name: "editor.part.heat-light",
 					description: "editor.part.heat-light-description",
-					category: "editor.part.category.rendering",
 				}),
 			),
 			clampProgress: v.pipe(
@@ -197,7 +189,6 @@ export const PartHjsonSchema: SchemaFn = new ClassMap<PartClass>({
 				metadata({
 					name: "editor.part.clamp-progress",
 					description: "editor.part.clamp-progress-description",
-					category: "editor.part.category.progress",
 				}),
 			),
 			progress: v.pipe(
@@ -205,7 +196,6 @@ export const PartHjsonSchema: SchemaFn = new ClassMap<PartClass>({
 				metadata({
 					name: "editor.part.progress",
 					description: "editor.part.progress-description",
-					category: "editor.part.category.progress",
 				}),
 			),
 			growProgress: v.pipe(
@@ -213,7 +203,6 @@ export const PartHjsonSchema: SchemaFn = new ClassMap<PartClass>({
 				metadata({
 					name: "editor.part.grow-progress",
 					description: "editor.part.grow-progress-description",
-					category: "editor.part.category.progress",
 				}),
 			),
 			heatProgress: v.pipe(
@@ -221,44 +210,42 @@ export const PartHjsonSchema: SchemaFn = new ClassMap<PartClass>({
 				metadata({
 					name: "editor.part.heat-progress",
 					description: "editor.part.heat-progress-description",
-					category: "editor.part.category.progress",
 				}),
 			),
 			blending: v.pipe(
 				v.optional(v.picklist(BlendingModes), "normal"),
-				metadata({ name: "editor.part.blending", category: "editor.part.category.rendering" }),
+				metadata({ name: "editor.part.blending" }),
 			),
-			layer: v.pipe(v.optional(v.number(), -1), metadata({ name: "editor.part.layer", category: "editor.part.category.rendering" })),
+			layer: v.pipe(v.optional(v.number(), -1), metadata({ name: "editor.part.layer" })),
 			layerOffset: v.pipe(
 				v.optional(v.number(), 0),
-				metadata({ name: "editor.part.layer-offset", category: "editor.part.category.rendering" }),
+				metadata({ name: "editor.part.layer-offset" }),
 			),
 			heatLayerOffset: v.pipe(
 				v.optional(v.number(), 1),
-				metadata({ name: "editor.part.heat-layer-offset", category: "editor.part.category.rendering" }),
+				metadata({ name: "editor.part.heat-layer-offset" }),
 			),
 			turretHeatLayer: v.pipe(
 				v.optional(v.number(), 50),
-				metadata({ name: "editor.part.turret-heat-layer", category: "editor.part.category.rendering" }),
+				metadata({ name: "editor.part.turret-heat-layer" }),
 			),
 			outlineLayerOffset: v.pipe(
 				v.optional(v.number(), -0.001),
-				metadata({ name: "editor.part.outline-layer-offset", category: "editor.part.category.rendering" }),
+				metadata({ name: "editor.part.outline-layer-offset" }),
 			),
-			x: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.x", category: "editor.part.category.transform" })),
-			y: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.y", category: "editor.part.category.transform" })),
-			xScl: v.pipe(v.optional(v.number(), 1), metadata({ name: "editor.part.x-scl", category: "editor.part.category.transform" })),
-			yScl: v.pipe(v.optional(v.number(), 1), metadata({ name: "editor.part.y-scl", category: "editor.part.category.transform" })),
+			x: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.x" })),
+			y: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.y" })),
+			xScl: v.pipe(v.optional(v.number(), 1), metadata({ name: "editor.part.x-scl" })),
+			yScl: v.pipe(v.optional(v.number(), 1), metadata({ name: "editor.part.y-scl" })),
 			rotation: v.pipe(
 				v.optional(v.number(), 0),
-				metadata({ name: "editor.part.rotation", category: "editor.part.category.transform" }),
+				metadata({ name: "editor.part.rotation" }),
 			),
 			originX: v.pipe(
 				v.optional(v.number(), 0),
 				metadata({
 					name: "editor.part.origin-x",
 					description: "editor.part.origin-x-description",
-					category: "editor.part.category.transform",
 				}),
 			),
 			originY: v.pipe(
@@ -266,74 +253,72 @@ export const PartHjsonSchema: SchemaFn = new ClassMap<PartClass>({
 				metadata({
 					name: "editor.part.origin-y",
 					description: "editor.part.origin-y-description",
-					category: "editor.part.category.transform",
 				}),
 			),
-			moveX: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.move-x", category: "editor.part.category.transform" })),
-			moveY: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.move-y", category: "editor.part.category.transform" })),
-			growX: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.grow-x", category: "editor.part.category.transform" })),
-			growY: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.grow-y", category: "editor.part.category.transform" })),
-			moveRot: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.move-rot", category: "editor.part.category.transform" })),
+			moveX: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.move-x" })),
+			moveY: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.move-y" })),
+			growX: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.grow-x" })),
+			growY: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.grow-y" })),
+			moveRot: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.move-rot" })),
 			heatLightOpacity: v.pipe(
 				v.optional(v.number(), 0.3),
-				metadata({ name: "editor.part.heat-light-opacity", category: "editor.part.category.rendering" }),
+				metadata({ name: "editor.part.heat-light-opacity" }),
 			),
 			color: v.pipe(
 				v.optional(MindustryHexColorSchema),
-				metadata({ name: "editor.part.color", category: "editor.part.category.color" }),
+				metadata({ name: "editor.part.color" }),
 			),
 			colorTo: v.pipe(
 				v.optional(MindustryHexColorSchema),
-				metadata({ name: "editor.part.color-to", category: "editor.part.category.color" }),
+				metadata({ name: "editor.part.color-to" }),
 			),
 			mixColor: v.pipe(
 				v.optional(MindustryHexColorSchema),
-				metadata({ name: "editor.part.mix-color", category: "editor.part.category.color" }),
+				metadata({ name: "editor.part.mix-color" }),
 			),
 			mixColorTo: v.pipe(
 				v.optional(MindustryHexColorSchema),
-				metadata({ name: "editor.part.mix-color-to", category: "editor.part.category.color" }),
+				metadata({ name: "editor.part.mix-color-to" }),
 			),
 			heatColor: v.pipe(
 				v.optional(MindustryHexColorSchema),
-				metadata({ name: "editor.part.heat-color", category: "editor.part.category.color" }),
+				metadata({ name: "editor.part.heat-color" }),
 			),
 			children: v.pipe(
 				v.optional(PartHjsonSchema(context)),
-				metadata({ name: "editor.part.children", category: "editor.part.category.structure" }),
+				metadata({ name: "editor.part.children" }),
 			),
 			moves: v.pipe(
 				v.optional(v.array(partMoveSchema), []),
-				metadata({ name: "editor.part.moves", category: "editor.part.category.structure" }),
+				metadata({ name: "editor.part.moves" }),
 			),
 		}),
 	EffectSpawnerPart: (context) => ({
-			x: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.x", category: "editor.part.category.transform" })),
-			y: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.y", category: "editor.part.category.transform" })),
-			width: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.width", category: "editor.part.category.transform" })),
-			height: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.height", category: "editor.part.category.transform" })),
+			x: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.x" })),
+			y: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.y" })),
+			width: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.width" })),
+			height: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.part.height" })),
 			rotation: v.pipe(
 				v.optional(v.number(), 0),
-				metadata({ name: "editor.part.rotation", category: "editor.part.category.transform" }),
+				metadata({ name: "editor.part.rotation" }),
 			),
 			mirror: v.pipe(
 				v.optional(v.boolean(), false),
-				metadata({ name: "editor.part.mirror", category: "editor.part.category.transform" }),
+				metadata({ name: "editor.part.mirror" }),
 			),
 			effectRot: v.pipe(
 				v.optional(v.number(), 0),
-				metadata({ name: "editor.part.effect-rot", category: "editor.part.category.effect" }),
+				metadata({ name: "editor.part.effect-rot" }),
 			),
 			effectRandRot: v.pipe(
 				v.optional(v.number(), 0),
-				metadata({ name: "editor.part.effect-rand-rot", category: "editor.part.category.effect" }),
+				metadata({ name: "editor.part.effect-rand-rot" }),
 			),
 			effectInterval: v.pipe(
 				v.optional(v.number(), 0),
 				metadata({
 					name: "editor.part.effect-interval",
 					description: "editor.part.effect-interval-description",
-					category: "editor.part.category.effect",
 				}),
 			),
 			effectIntervalFrom: v.pipe(
@@ -341,29 +326,27 @@ export const PartHjsonSchema: SchemaFn = new ClassMap<PartClass>({
 				metadata({
 					name: "editor.part.effect-interval-from",
 					description: "editor.part.effect-interval-from-description",
-					category: "editor.part.category.effect",
 				}),
 			),
 			effectChance: v.pipe(
 				v.optional(v.number(), 0.1),
-				metadata({ name: "editor.part.effect-chance", category: "editor.part.category.effect" }),
+				metadata({ name: "editor.part.effect-chance" }),
 			),
-			effect: v.pipe(EffectFieldSchema(context), metadata({ name: "editor.part.effect", category: "editor.part.category.effect" })),
+			effect: v.pipe(EffectFieldSchema(context), metadata({ name: "editor.part.effect" })),
 			effectColor: v.pipe(
 				v.optional(MindustryHexColorSchema),
-				metadata({ name: "editor.part.effect-color", category: "editor.part.category.effect" }),
+				metadata({ name: "editor.part.effect-color" }),
 			),
 			useProgress: v.pipe(
 				v.optional(v.boolean(), true),
 				metadata({
 					name: "editor.part.use-progress",
 					description: "editor.part.use-progress-description",
-					category: "editor.part.category.effect",
 				}),
 			),
 			progress: v.pipe(
 				v.optional(v.picklist(PartProgresses), "warmup"),
-				metadata({ name: "editor.part.progress", category: "editor.part.category.progress" }),
+				metadata({ name: "editor.part.progress" }),
 			),
 		}),
 	FlarePart: (_context) => flarePartObjectSchema.entries,

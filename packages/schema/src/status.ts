@@ -11,7 +11,6 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.damage-multiplier",
 			description: "editor.status.damage-multiplier-description",
-			category: "editor.status.category.multipliers",
 		}),
 	),
 	healthMultiplier: v.pipe(
@@ -19,7 +18,6 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.health-multiplier",
 			description: "editor.status.health-multiplier-description",
-			category: "editor.status.category.multipliers",
 		}),
 	),
 	speedMultiplier: v.pipe(
@@ -27,7 +25,6 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.speed-multiplier",
 			description: "editor.status.speed-multiplier-description",
-			category: "editor.status.category.multipliers",
 		}),
 	),
 	reloadMultiplier: v.pipe(
@@ -35,7 +32,6 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.reload-multiplier",
 			description: "editor.status.reload-multiplier-description",
-			category: "editor.status.category.multipliers",
 		}),
 	),
 	buildSpeedMultiplier: v.pipe(
@@ -43,7 +39,6 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.build-speed-multiplier",
 			description: "editor.status.build-speed-multiplier-description",
-			category: "editor.status.category.multipliers",
 		}),
 	),
 	dragMultiplier: v.pipe(
@@ -51,7 +46,6 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.drag-multiplier",
 			description: "editor.status.drag-multiplier-description",
-			category: "editor.status.category.multipliers",
 		}),
 	),
 	transitionDamage: v.pipe(
@@ -59,7 +53,6 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.transition-damage",
 			description: "editor.status.transition-damage-description",
-			category: "editor.status.category.damage",
 		}),
 	),
 	disarm: v.pipe(
@@ -67,7 +60,6 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.disarm",
 			description: "editor.status.disarm-description",
-			category: "editor.status.category.behavior",
 		}),
 	),
 	damage: v.pipe(
@@ -75,7 +67,6 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.damage",
 			description: "editor.status.damage-description",
-			category: "editor.status.category.damage",
 		}),
 	),
 	intervalDamageTime: v.pipe(
@@ -83,7 +74,6 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.interval-damage-time",
 			description: "editor.status.interval-damage-time-description",
-			category: "editor.status.category.damage",
 		}),
 	),
 	intervalDamage: v.pipe(
@@ -91,7 +81,6 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.interval-damage",
 			description: "editor.status.interval-damage-description",
-			category: "editor.status.category.damage",
 		}),
 	),
 	intervalDamagePierce: v.pipe(
@@ -99,7 +88,6 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.interval-damage-pierce",
 			description: "editor.status.interval-damage-pierce-description",
-			category: "editor.status.category.damage",
 		}),
 	),
 	effectChance: v.pipe(
@@ -107,7 +95,6 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.effect-chance",
 			description: "editor.status.effect-chance-description",
-			category: "editor.status.category.visual",
 		}),
 	),
 	parentizeEffect: v.pipe(
@@ -115,7 +102,6 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.parentize-effect",
 			description: "editor.status.parentize-effect-description",
-			category: "editor.status.category.visual",
 		}),
 	),
 	permanent: v.pipe(
@@ -123,7 +109,6 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.permanent",
 			description: "editor.status.permanent-description",
-			category: "editor.status.category.behavior",
 		}),
 	),
 	reactive: v.pipe(
@@ -131,23 +116,21 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.reactive",
 			description: "editor.status.reactive-description",
-			category: "editor.status.category.behavior",
 		}),
 	),
 	show: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "editor.status.show", description: "editor.status.show-description", category: "editor.status.category.behavior" }),
+		metadata({ name: "editor.status.show", description: "editor.status.show-description" }),
 	),
 	color: v.pipe(
 		v.optional(MindustryHexColorSchema),
-		metadata({ name: "editor.status.color", description: "editor.status.color-description", category: "editor.status.category.visual" }),
+		metadata({ name: "editor.status.color", description: "editor.status.color-description" }),
 	),
 	applyExtend: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
 			name: "editor.status.apply-extend",
 			description: "editor.status.apply-extend-description",
-			category: "editor.status.category.visual",
 		}),
 	),
 	applyColor: v.pipe(
@@ -155,7 +138,6 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.apply-color",
 			description: "editor.status.apply-color-description",
-			category: "editor.status.category.visual",
 		}),
 	),
 	parentizeApplyEffect: v.pipe(
@@ -163,7 +145,6 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.parentize-apply-effect",
 			description: "editor.status.parentize-apply-effect-description",
-			category: "editor.status.category.visual",
 		}),
 	),
 	outline: v.pipe(
@@ -171,7 +152,6 @@ export const statusBaseObjectSchema = v.object({
 		metadata({
 			name: "editor.status.outline",
 			description: "editor.status.outline-description",
-			category: "editor.status.category.visual",
 		}),
 	),
 });
@@ -202,7 +182,6 @@ export const StatusHjsonSchema: SchemaFn = CachedSchema((context) =>
 				metadata({
 					name: "editor.status.effect",
 					description: "editor.status.effect-description",
-					category: "editor.status.category.visual",
 				}),
 			),
 			applyEffect: v.pipe(
@@ -210,7 +189,6 @@ export const StatusHjsonSchema: SchemaFn = CachedSchema((context) =>
 				metadata({
 					name: "editor.status.apply-effect",
 					description: "editor.status.apply-effect-description",
-					category: "editor.status.category.visual",
 				}),
 			),
 			affinities: v.pipe(
@@ -228,7 +206,6 @@ export const StatusHjsonSchema: SchemaFn = CachedSchema((context) =>
 				metadata({
 					name: "editor.status.affinities",
 					description: "editor.status.affinities-description",
-					category: "editor.status.category.affinity",
 				}),
 			),
 			opposites: v.pipe(
@@ -236,7 +213,6 @@ export const StatusHjsonSchema: SchemaFn = CachedSchema((context) =>
 				metadata({
 					name: "editor.status.opposites",
 					description: "editor.status.opposites-description",
-					category: "editor.status.category.affinity",
 				}),
 			),
 		}),

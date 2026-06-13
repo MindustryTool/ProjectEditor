@@ -136,13 +136,13 @@ describe("getSchemaMetadata", () => {
 
 	it("getSchemaMetadata with getSchemaEntries returns metadata for each entry", () => {
 		const schema = v.object({
-			a: v.pipe(v.string(), metadata({ category: "cat1", name: "Field A" })),
-			b: v.pipe(v.number(), metadata({ category: "cat2", name: "Field B" })),
+			a: v.pipe(v.string(), metadata({ name: "Field A" })),
+			b: v.pipe(v.number(), metadata({ name: "Field B" })),
 			c: v.string(),
 		});
 		const entries = getSchemaEntries(schema as AnySchema);
-		expect(getSchemaMetadata(entries[0]![1] as AnySchema)).toEqual({ category: "cat1", name: "Field A" });
-		expect(getSchemaMetadata(entries[1]![1] as AnySchema)).toEqual({ category: "cat2", name: "Field B" });
+		expect(getSchemaMetadata(entries[0]![1] as AnySchema)).toEqual({ name: "Field A" });
+		expect(getSchemaMetadata(entries[1]![1] as AnySchema)).toEqual({ name: "Field B" });
 		expect(getSchemaMetadata(entries[2]![1] as AnySchema)).toBeNull();
 	});
 
@@ -214,7 +214,6 @@ describe("getSchemaMetadata", () => {
 		expect(meta).toEqual({
 			name: "editor.unit.speed",
 			description: "editor.unit.speed-description",
-			category: "editor.unit.category.movement-physics",
 		});
 	});
 
@@ -257,22 +256,15 @@ describe("getSchemaMetadata", () => {
 		expect(meta).toEqual({ name: "inner", type: "color" });
 	});
 
-	it("getSchemaEntries sort respects categories when used with getSchemaMetadata", () => {
+	it("getSchemaEntries returns entries in insertion order", () => {
 		const schema = v.object({
-			zField: v.pipe(v.string(), metadata({ category: "advanced" })),
-			aField: v.pipe(v.string(), metadata({ category: "general" })),
-			mField: v.pipe(v.string(), metadata({ category: "advanced" })),
+			zField: v.pipe(v.string(), metadata({ name: "Z" })),
+			aField: v.pipe(v.string(), metadata({ name: "A" })),
+			mField: v.pipe(v.string(), metadata({ name: "M" })),
 			plainField: v.string(),
 		});
 		const entries = getSchemaEntries(schema as AnySchema);
-		const categories = entries.map(([, s]) => getSchemaMetadata(s as AnySchema)?.category);
-		const advIndices = categories.map((c, i) => (c === "advanced" ? i : -1)).filter((i) => i >= 0);
-		const genIndices = categories.map((c, i) => (c === "general" ? i : -1)).filter((i) => i >= 0);
-		const plainIndices = categories.map((c, i) => (c === undefined ? i : -1)).filter((i) => i >= 0);
-
-		expect(advIndices[0]!).toBeLessThan(advIndices[1]!);
-		expect(advIndices[0]!).toBeLessThan(genIndices[0]!);
-		expect(genIndices[0]!).toBeLessThan(plainIndices[0]!);
+		expect(entries.map(([k]) => k)).toEqual(["zField", "aField", "mField", "plainField"]);
 	});
 });
 

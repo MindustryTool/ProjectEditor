@@ -254,8 +254,7 @@ export function resolveSchema(schema: AnySchema, value: unknown): AnySchema {
 }
 
 /**
- * Retrieves the entries of an object schema, grouped by the `category` metadata field if present.
- * Categories appear as contiguous groups in the output, preserving insertion order within each group.
+ * Retrieves the entries of an object schema.
  * If the schema is not an object, recursively checks the first pipe item for entries.
  * Returns an empty array if no entries can be found.
  */
@@ -264,36 +263,12 @@ export function getSchemaEntries(schema: AnySchema): [string, AnySchema][] {
 	const s = schema as unknown as { type: string; entries?: Record<string, AnySchema>; pipe?: AnySchema[] };
 
 	if (s.type === "object" && s.entries) {
-		const raw = Object.entries(s.entries) as [string, AnySchema][];
-		const catMap = new Map<string, [string, AnySchema][]>();
-		const seen = new Set<string>();
-		const result: [string, AnySchema][] = [];
+		return (Object.entries(s.entries) as [string, AnySchema][]).sort(([, a], [, b]) => {
+			const aOrder = getSchemaMetadata(a)?.order || 0;
+			const bOrder = getSchemaMetadata(b)?.order || 0;
 
-		for (const [key, value] of raw) {
-			const cat = getSchemaMetadata(value)?.category;
-			if (cat) {
-				let group = catMap.get(cat);
-				if (!group) {
-					group = [];
-					catMap.set(cat, group);
-				}
-				group.push([key, value]);
-			}
-		}
-
-		for (const [key, value] of raw) {
-			const cat = getSchemaMetadata(value)?.category;
-			if (cat) {
-				if (!seen.has(cat)) {
-					seen.add(cat);
-					result.push(...catMap.get(cat)!);
-				}
-			} else {
-				result.push([key, value]);
-			}
-		}
-
-		return result;
+			return aOrder - bOrder;
+		});
 	}
 
 	if (Array.isArray(s.pipe) && s.pipe.length > 0) {
@@ -327,7 +302,6 @@ export type SchemaMetadata = {
 	type?: string;
 	name?: string;
 	description?: string;
-	category?: string;
 	multiline?: boolean;
 	visibleWhen?: {
 		field: string;
@@ -336,11 +310,12 @@ export type SchemaMetadata = {
 	disabled?: boolean;
 	options?: AnySchema[];
 	option?: string;
+	order?: number;
 };
 
 /**
  * Wraps valibot's metadata action with the SchemaMetadata type bound to the action.
- * Allows attaching custom metadata (type name, description, category, visibility, etc.)
+ * Allows attaching custom metadata (type name, description, visibility, etc.)
  * to any schema for later retrieval via getSchemaMetadata.
  */
 export function metadata<T>(meta: SchemaMetadata): v.MetadataAction<T, SchemaMetadata> {

@@ -9,7 +9,6 @@ export const ArrayTextureSchema = CachedSchema((format: string, length: number |
 			v.maxLength(127),
 			metadata({
 				type: "textures",
-				category: "texture",
 			}),
 			v.metadata({ format, length }),
 		),

@@ -21,7 +21,6 @@ export const overlayFloorObjectSchema = v.object({
 		metadata({
 			name: "editor.block-overlay-floor.color",
 			description: "editor.block-overlay-floor.color-description",
-			category: "editor.block-overlay-floor.category.visual",
 		}),
 	),
 });

@@ -335,7 +335,6 @@ export const BlockHjsonSchema = new ClassMap<BlockType>(
 				metadata({
 					name: "editor.block-character-overlay.color",
 					description: "editor.block-character-overlay.color-description",
-					category: "editor.block-character-overlay.category.visual",
 				}),
 			),
 		}),

@@ -55,7 +55,6 @@ export const coloredWallObjectSchema = v.object({
 		metadata({
 			name: "editor.block-wall.color",
 			description: "editor.block-wall.color-description",
-			category: "editor.block-wall.category.visual",
 		}),
 	),
 });
