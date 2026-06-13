@@ -23,13 +23,14 @@ export const ObjectField = React.memo(function ObjectField({
 	nested,
 	metadata,
 }: SchemaRendererProps) {
-	const resolvedValue = useMemo(() => (value && typeof value === "object" ? value : {}), [value]);
 	const openPath = `object-open-${jsonPath}`;
 
+	const resolvedValues = useMemo(() => (value && typeof value === "object" ? value : {}), [value]) as Record<string, unknown>;
 	const isOpen = useProjectSession(selectIsExpanded(openPath));
 	const setOpen = useProjectSession((s) => s.setExpanded);
-	const entries = getSchemaEntries(resolveSchema(entrySchema, resolvedValue));
+	const entries = getSchemaEntries(resolveSchema(entrySchema, resolvedValues));
 
+    const defaults = getDefaults(entrySchema, resolvedValues, true) as Record<string, unknown>;
 	const handleOpen = useCallback((open: boolean) => setOpen(openPath, open), [openPath, setOpen]);
 
 	if (entries.length < 4) {
@@ -43,11 +44,12 @@ export const ObjectField = React.memo(function ObjectField({
 					<Child
 						key={name}
 						name={name}
-						entrySchema={entrySchema}
-						value={resolvedValue}
 						path={path}
-						onChange={onChange}
+						entrySchema={entrySchema}
+						values={resolvedValues}
+						defaults={defaults}
 						jsonPath={jsonPath}
+						onChange={onChange}
 						getRenderer={getRenderer}
 					/>
 				))}
@@ -74,7 +76,8 @@ export const ObjectField = React.memo(function ObjectField({
 							key={name}
 							name={name}
 							entrySchema={entrySchema}
-							value={resolvedValue}
+							values={resolvedValues}
+                            defaults={defaults}
 							path={path}
 							onChange={onChange}
 							jsonPath={jsonPath}
@@ -90,32 +93,34 @@ export const ObjectField = React.memo(function ObjectField({
 function Child({
 	name,
 	entrySchema,
-	value,
 	path,
 	jsonPath,
+	values,
+	defaults,
 	onChange,
 	getRenderer,
 }: {
 	name: string;
 	entrySchema: AnySchema;
-	value: unknown;
 	path: string;
-	onChange: SchemaRendererProps["onChange"];
 	jsonPath: string;
+	values: Record<string, unknown>;
+	defaults: Record<string, unknown>;
+	onChange: SchemaRendererProps["onChange"];
 	getRenderer: SchemaRendererProps["getRenderer"];
 }) {
 	const key = name;
-	const childValue = (value as Record<string, unknown>)?.[name];
-	const defaultValue = getDefaults(entrySchema, childValue);
+	const childValue = values[name];
+	const defaultValue = defaults[name];
 	const { type, schema } = detectSchemaType(entrySchema, childValue);
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
-	if (metadata?.visibleWhen && typeof value === "object" && value !== null) {
-		const refValue = (value as Record<string, unknown>)[metadata.visibleWhen.field];
-		if (refValue === undefined || refValue !== metadata.visibleWhen.value) {
-			return null;
-		}
-	}
+    if (metadata?.visibleWhen) {
+        const conditionValue = values[metadata.visibleWhen.field] ?? defaults[metadata.visibleWhen.field];
+        if (conditionValue !== metadata.visibleWhen.value) {
+            return null;
+        }
+    }
 
 	const Renderer = getRenderer(type);
 

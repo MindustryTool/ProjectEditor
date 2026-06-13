@@ -87,15 +87,15 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 		return null;
 	}
 
-    const value = node.valueOf() as Record<string, unknown>;
+	const values = node.valueOf() as Record<string, unknown>;
+	if (!values || typeof values !== "object") {
+		return null;
+	}
 
-    if (!value || typeof value !== "object") {
-        return null;
-    }
-
-	const resolvedSchema = resolveSchema(typeof schema === "function" ? schema(contents) : schema, value);
+	const resolvedSchema = resolveSchema(typeof schema === "function" ? schema(contents) : schema, values)
 	const entries = getSchemaEntries(resolvedSchema);
 	const filtered = (filter ? levenshtein(entries, ([name]) => name, filter, 10) : entries).slice(0, render);
+	const defaults = getDefaults(resolvedSchema, values, true) as Record<string, unknown>;
 
 	return (
 		<Suspense>
@@ -122,7 +122,8 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 						entrySchema={entrySchema}
 						path={path}
 						onChange={onChange}
-                        value={value}
+						values={values}
+						defaults={defaults}
 					/>
 				))}
 				<div className="end w-full invisible" ref={endRef}></div>
@@ -134,25 +135,28 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 function Child({
 	name,
 	entrySchema,
-	value,
+	values,
 	path,
 	onChange,
+	defaults,
 }: {
 	name: string;
 	entrySchema: AnySchema;
-	value: Record<string, unknown>;
+	values: Record<string, unknown>;
+	defaults: Record<string, unknown>;
 	path: string;
 	onChange: SchemaRendererProps["onChange"];
 }) {
 	const key = name + path;
-	const childValue = value[name]
-	const defaultValue = getDefaults(entrySchema, childValue);
+	const childValue = values[name];
 	const { type, schema } = detectSchemaType(entrySchema, childValue);
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
+    const defaultValue = defaults[name];
 
 	if (metadata?.visibleWhen) {
-		if (childValue !== metadata.visibleWhen.value) {
-			return;
+		const conditionValue = values[metadata.visibleWhen.field] ?? defaults[metadata.visibleWhen.field];
+		if (conditionValue !== metadata.visibleWhen.value) {
+			return null;
 		}
 	}
 

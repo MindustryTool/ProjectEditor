@@ -119,9 +119,9 @@ function getSchemaType(schema: AnySchema, value: unknown): { type: Type; schema:
 		return { type: "never", schema };
 	}
 
-    if (types.includes(s.type as Type)){
-        return { type: s.type as Type, schema };
-    }
+	if (types.includes(s.type as Type)) {
+		return { type: s.type as Type, schema };
+	}
 
 	return { type: "never", schema };
 }
@@ -164,7 +164,7 @@ export function detectSchemaType(rawSchema: AnySchema, value: unknown): { type: 
  * Uses valibot's getDefaults internally. If no default is found (undefined), unwraps the schema and
  * returns a sensible fallback: {} for objects, [] for arrays, or "" for other types.
  */
-export function getDefaults(schema: AnySchema, value: unknown): unknown {
+export function getDefaults(schema: AnySchema, value: unknown, recursive?: boolean): unknown {
 	if ("pipe" in schema) {
 		const pipe = schema.pipe[0];
 		return getDefaults(pipe, value);
@@ -193,11 +193,11 @@ export function getDefaults(schema: AnySchema, value: unknown): unknown {
 		}
 
 		if (v.isOfType("object", schema)) {
-			return {};
+			return recursive ? v.getDefaults(schema) : {};
 		}
 
 		if (v.isOfType("array", schema)) {
-			return [];
+			return recursive ? v.getDefaults(schema) : [];
 		}
 
 		return "";
