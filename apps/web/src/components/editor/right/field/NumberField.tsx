@@ -1,6 +1,5 @@
 import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { Input } from "#/components/ui/input";
-import { hasNullableWrapper } from "@project/schema";
 import React, { useCallback } from "react";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
@@ -11,7 +10,6 @@ export const NumberField = React.memo(function NumberField({
 	name,
 	value,
 	onChange,
-	entrySchema,
 	jsonPath,
 	path,
 	defaultValue,
@@ -22,17 +20,16 @@ export const NumberField = React.memo(function NumberField({
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
 			const newVal = event.currentTarget.valueAsNumber;
-			const isNullable = hasNullableWrapper(entrySchema);
 			const isNan = Number.isNaN(newVal);
 
-			if (isNan || !isNullable) {
+			if (isNan) {
 				onChange(jsonPath, (parent, original, key) => parent.patchRemove(original, key));
 				return;
 			}
 
 			onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, newVal));
 		},
-		[onChange, jsonPath, entrySchema],
+		[onChange, jsonPath],
 	);
 
 	return (
