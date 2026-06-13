@@ -29,9 +29,13 @@ export function useProjectContext(): ProjectContextValue {
 	return ctx;
 }
 
-const readModMetadata = (json: string, hjson: string) => {
+const readModMetadata = (json: string | null, hjson: string | null) => {
 	let object = null;
 	try {
+		if (json === null) {
+			throw new Error("mod.json not exits");
+		}
+
 		object = HJSON.parseWithCache(json);
 
 		if (!(object instanceof HjsonObjectNode)) {
@@ -39,6 +43,10 @@ const readModMetadata = (json: string, hjson: string) => {
 		}
 	} catch (e1) {
 		try {
+			if (hjson === null) {
+				throw new Error("mod.hjson not exits");
+			}
+
 			object = HJSON.parseWithCache(hjson);
 		} catch (e2) {
 			console.error("Failed to read mod.(h)json " + e2 + " " + e1);
@@ -95,7 +103,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 
 	const projectId = useProjectSession((s) => s.projectContext?.project?.id);
 
-	const metadata = useMemo(() => readModMetadata(jsonText || "", hjsonText || ""), [jsonText, hjsonText]);
+	const metadata = useMemo(() => readModMetadata(jsonText, hjsonText), [jsonText, hjsonText]);
 
 	const items = useItems(metadata);
 	const blocks = useBlocks(metadata);
@@ -105,7 +113,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 	const units = useUnits(metadata);
 	const effects = useEffects(metadata);
 	const sprites = useSprites();
-    const sounds = useSounds();
+	const sounds = useSounds();
 
 	const contents = useMemo<ProjectContents>(
 		() => ({
@@ -118,7 +126,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 			units,
 			sprites,
 			effects,
-            sounds,
+			sounds,
 		}),
 		[items, blocks, liquids, sectors, statuses, units, sprites, effects, sounds, metadata.name],
 	);

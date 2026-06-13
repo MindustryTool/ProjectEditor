@@ -12,6 +12,8 @@ import { Separator } from "#/components/ui/separator";
 import { ProjectSettingsDialog } from "#/components/editor/toolbar/ProjectSettingsDialog";
 import { LANGUAGE_OPTIONS, LanguageBadge } from "./LanguageBadge";
 import { Spinner } from "#/components/ui/spinner";
+import { README } from "#/components/editor/example/readme";
+import { icon } from "#/components/editor/example/icon";
 
 interface ProjectPickerScreenProps {
 	onProjectSelected: (id: string) => void;
@@ -54,7 +56,8 @@ function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: s
 					},
 				});
 
-				await context.fs.writeTextFile("/README.md", "# This is an example mod");
+				await context.fs.writeTextFile("/README.md", README);
+				await context.fs.writeFile("/icon.png", Buffer.from(icon, "base64"));
 			} catch (e) {
 				toast.error(`Failed to create project ${e}`);
 			}

@@ -8,9 +8,9 @@ export type SchemaRendererProps = {
 	entrySchema: AnySchema;
 	jsonPath: string;
 	defaultValue: unknown;
+	nested?: boolean;
 	onChange: (jsonPath: string, updater: (parent: HjsonNode, original: string, key: string | number, root: HjsonNode) => string) => void;
 	getRenderer: (type: Type) => SchemaRenderer | undefined;
-	nested?: boolean;
 };
 
 export type SchemaRenderer = React.ComponentType<SchemaRendererProps>;
