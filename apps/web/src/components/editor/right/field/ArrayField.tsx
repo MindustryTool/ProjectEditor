@@ -97,11 +97,18 @@ function ArrayElement({
 	const entryJsonPath = jsonPath ? `${jsonPath}[${index}]` : `[${index}]`;
 
 	const handleRemove = useCallback(
-		() => onChange(jsonPath, (parent, original, key) => parent.get(key).patchRemove(original, index)),
+		() =>
+			onChange(jsonPath, (parent, original, key) => {
+				if (parent.get(key).arrayNode().elements().length <= 1) {
+					return parent.patchRemove(original, key);
+				}
+
+                return parent.get(key).patchRemove(original, index);
+			}),
 		[onChange, jsonPath, index],
 	);
 
-    const metadata = useMemo(() => getSchemaMetadata(itemSchema), [itemSchema]);
+	const metadata = useMemo(() => getSchemaMetadata(itemSchema), [itemSchema]);
 	const { type, schema } = useMemo(() => detectSchemaType(itemSchema, value), [itemSchema, value]);
 	const defaultValue = getDefaults(schema, value);
 
