@@ -33,46 +33,49 @@ export const ContentFieldSchema = CachedSchema((context: ProjectContents) =>
 );
 
 export const unlockableContentSchema = {
-	/** Localized, formal name. Never null. Set to internal name if not found in bundle. */
-	localizedName: v.optional(v.string()),
-	description: v.nullish(v.string(), ""),
-	/** Localized description & details. May be null. */
-	details: v.pipe(v.nullish(v.string(), ""), metadata({ multiline: true })),
-	credit: v.nullish(v.string(), ""),
-	/** Whether this content is always unlocked in the tech tree. */
-	alwaysUnlocked: v.optional(v.boolean(), false),
-	/** Whether to show the description in the research dialog preview. */
-	inlineDescription: v.optional(v.boolean(), true),
-	/** Whether details are hidden in custom games if this hasn't been unlocked in campaign mode. */
-	hideDetails: v.optional(v.boolean(), true),
-	/** Whether this is hidden from the Core Database. */
-	hideDatabase: v.optional(v.boolean(), false),
-	/** If false, all icon generation is disabled for this content; createIcons is not called. */
-	generateIcons: v.optional(v.boolean(), true),
-	/** How big the content appears in certain selection menus */
-	selectionSize: v.optional(v.number(), 24),
-	/** If true, this content will appear in all database tabs. */
-	allDatabaseTabs: v.optional(v.boolean(), false),
-	/**
-	 * Planets that this content is made for. If empty, a planet is decided based on item requirements.
-	 * Currently, this is only meaningful for blocks.
-	 * */
-	// public ObjectSet<Planet> shownPlanets = new ObjectSet<>();
-	/**
-	 * Content - usually a planet - that dictates which database tab(s) this content will appear in.
-	 * If nothing is defined, it will use the values in shownPlanets.
-	 * If shownPlanets is also empty, it will use Serpulo as the "default" tab.
-	 * */
-	// public ObjectSet<UnlockableContent> databaseTabs = new ObjectSet<>();
-	/**
-	 * Content category. Defines the primary category of content classification in core database.
-	 * For example, "block", "liquid", "unit".
-	 * Uses getContentType().name() as a fallback when the value is null or empty.
-	 * */
-	/**
-	 * Category tags. Secondary category of content classification in core database.
-	 * For example, "turret", "wall" under databaseCategory "block", "core-unit", "ground-unit" under databaseCategory "units".
-	 * Uses "default" as a fallback when the value is null or empty. When using "default", no extra tag label are displayed.
-	 * */
-	databaseTag: v.nullish(v.pipe(CategorySchema, metadata({}))),
+	localizedName: v.pipe(
+		v.optional(v.string()),
+		metadata({ name: "editor.content.localized-name", description: "editor.content.localized-name-description" }),
+	),
+	description: v.pipe(
+		v.nullish(v.string(), ""),
+		metadata({ name: "editor.content.description", description: "editor.content.description-description" }),
+	),
+	details: v.pipe(
+		v.nullish(v.string(), ""),
+		metadata({ multiline: true, name: "editor.content.details", description: "editor.content.details-description" }),
+	),
+	credit: v.pipe(v.nullish(v.string(), ""), metadata({ name: "editor.content.credit", description: "editor.content.credit-description" })),
+	alwaysUnlocked: v.pipe(
+		v.optional(v.boolean(), false),
+		metadata({ name: "editor.content.always-unlocked", description: "editor.content.always-unlocked-description" }),
+	),
+	inlineDescription: v.pipe(
+		v.optional(v.boolean(), true),
+		metadata({ name: "editor.content.inline-description", description: "editor.content.inline-description-description" }),
+	),
+	hideDetails: v.pipe(
+		v.optional(v.boolean(), true),
+		metadata({ name: "editor.content.hide-details", description: "editor.content.hide-details-description" }),
+	),
+	hideDatabase: v.pipe(
+		v.optional(v.boolean(), false),
+		metadata({ name: "editor.content.hide-database", description: "editor.content.hide-database-description" }),
+	),
+	generateIcons: v.pipe(
+		v.optional(v.boolean(), true),
+		metadata({ name: "editor.content.generate-icons", description: "editor.content.generate-icons-description" }),
+	),
+	selectionSize: v.pipe(
+		v.optional(v.number(), 24),
+		metadata({ name: "editor.content.selection-size", description: "editor.content.selection-size-description" }),
+	),
+	allDatabaseTabs: v.pipe(
+		v.optional(v.boolean(), false),
+		metadata({ name: "editor.content.all-database-tabs", description: "editor.content.all-database-tabs-description" }),
+	),
+	databaseTag: v.pipe(
+		v.nullish(v.pipe(CategorySchema, metadata({}))),
+		metadata({ name: "editor.content.database-tag", description: "editor.content.database-tag-description" }),
+	),
 };

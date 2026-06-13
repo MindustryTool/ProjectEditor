@@ -14,6 +14,8 @@ import { EngineHjsonSchema } from "./engine";
 import { metadata } from "./utils";
 import { classSchema } from "./class";
 import { unlockableContentSchema } from "./content";
+import { TextureFieldSchema } from "./texture";
+import { ArrayTextureSchema } from "./textures";
 
 const unitTypes = ["flying", "mech", "legs", "naval", "payload", "missile", "tank", "hover", "tether", "crawl"] as const;
 const unitTemplates = ["ErekirUnitType", "MissileUnitType", "NeoplasmUnitType", "TankUnitType", "UnitType"] as const;
@@ -21,7 +23,7 @@ const unitTemplates = ["ErekirUnitType", "MissileUnitType", "NeoplasmUnitType", 
 const unitObjectSchema = {
 	name: v.optional(v.string()),
 	type: v.optional(v.picklist(unitTypes)),
-    ...unlockableContentSchema,
+	...unlockableContentSchema,
 	template: classSchema(unitTemplates, "UnitType"),
 	envRequired: v.pipe(
 		v.optional(EnvSchema, 0),
@@ -1754,6 +1756,20 @@ const unitObjectSchema = {
 export const UnitHjsonSchema: SchemaFn = (context) =>
 	v.object({
 		...unitObjectSchema,
+		baseRegion: TextureFieldSchema("@-base"),
+		legRegion: TextureFieldSchema("@-lg"),
+		previewRegion: TextureFieldSchema("@-preview"),
+		cellRegion: TextureFieldSchema("@-cell"),
+		jointRegion: TextureFieldSchema("@-joint"),
+		footRegion: TextureFieldSchema("@-foot"),
+		legBaseRegion: TextureFieldSchema("@-leg-base", "@-leg"),
+		baseJointRegion: TextureFieldSchema("@-joint-base"),
+		outlineRegion: TextureFieldSchema("@-outline"),
+		treadRegion: TextureFieldSchema("@-treads"),
+		wreckRegions: ArrayTextureSchema("@-wreck#", 3),
+		segmentRegions: ArrayTextureSchema("@-segment#", 20),
+		segmentCellRegions: ArrayTextureSchema("@-segment-cell#", 20),
+		segmentOutlineRegions: ArrayTextureSchema("@-segment-outline#", 20),
 		abilities: v.pipe(
 			v.optional(v.array(AbilityFieldSchema(context)), []),
 			metadata({

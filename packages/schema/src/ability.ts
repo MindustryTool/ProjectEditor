@@ -38,7 +38,7 @@ const abilityBaseObjectSchema = v.object({
 	type: classSchema(abilityClasses, "Ability"),
 
 	display: v.optional(v.boolean(), true),
-	data: v.optional(v.number(), 0),
+	// data: v.optional(v.number(), 0),
 });
 
 const armorPlateAbilityObjectSchema = v.object({
