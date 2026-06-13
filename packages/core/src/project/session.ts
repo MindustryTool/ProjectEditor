@@ -21,8 +21,10 @@ interface ProjectSession {
 	treeSnapshot: TreeSnapshot;
 	recentlyOpenedFiles: Record<string, RecentFileEntry[]>;
 	selectedPath: string | null;
+    selectedTab: string;
 	expanded: Record<string, boolean>;
 
+    setSelectedTab: (tab: string) => void;
 	setExpanded: (path: string, isExpanded: boolean) => void;
 	toggleExpanded: (path: string) => void;
 	setManyExpanded: (updates: Record<string, boolean>) => void;
@@ -43,6 +45,12 @@ export const useProjectSession = create<ProjectSession>()(
 			recentlyOpenedFiles: {},
 			selectedPath: null,
 			expanded: { "/": true },
+            selectedTab: 'editor',
+
+
+            setSelectedTab: (tab) => {
+				set({ selectedTab: tab });
+			},
 
 			setExpanded: (path, isExpanded) => {
 				set((state) => ({

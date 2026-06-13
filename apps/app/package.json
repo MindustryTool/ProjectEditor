@@ -16,7 +16,7 @@
         "react-router-dom": "catalog:"
     },
     "devDependencies": {
-        "typescript": "^5.7.0",
+        "typescript": "catalog:",
         "vite": "^6.0.0",
         "@vitejs/plugin-react": "^4.3.0",
         "@types/react": "^19.0.0",

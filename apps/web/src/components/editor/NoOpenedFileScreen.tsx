@@ -2,6 +2,7 @@ import { memo } from "react";
 import { useTranslation } from "react-i18next";
 import { useProjectSession } from "@project/core";
 import { usePath } from "#/hooks/use-path";
+import { Separator } from "#/components/ui/separator";
 
 export const NoOpenedFileScreen = memo(function NoOpenedFileScreen() {
 	const { t } = useTranslation();
@@ -29,6 +30,7 @@ export const NoOpenedFileScreen = memo(function NoOpenedFileScreen() {
 							</span>
 						))}
 				</div>
+				<Separator />
 			</div>
 		</div>
 	);

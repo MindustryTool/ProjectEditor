@@ -62,6 +62,7 @@ export interface FileStore {
 	clearAllFiles: (projectId?: string) => void;
 	loadFile: (projectId: string, path: string, fs: ProjectFileSystem, force?: boolean) => void;
 	cleanup: (projectId: string, path: string) => void;
+    hasDirtyFiles: () => boolean;
 }
 
 const lruMap = new Map<string, FileEntry>();
@@ -121,6 +122,10 @@ export const useFileStore = create<FileStore>()((set) => ({
 	},
 
 	getEntry: (projectId, path) => lruMap.get(cacheKey(projectId, path)),
+
+    hasDirtyFiles: () => {
+        return Array.from(lruMap.values()).some((entry) => isDirty(entry));
+    },
 
 	markPersisted: (projectId, path) => {
 		const key = cacheKey(projectId, path);

@@ -62,4 +62,5 @@ catalog:
   playwright: ^1.52.0
   vitest: ^4.1.5
   wrangler: ^4.94.0
+  typescript: ^6.0.2
   zustand: ^5.0.0

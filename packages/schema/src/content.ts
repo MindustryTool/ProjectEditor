@@ -33,11 +33,15 @@ export const ContentFieldSchema = CachedSchema((context: ProjectContents) =>
 );
 
 export const unlockableContentSchema = {
+	/** Localized, formal name. Never null. Set to internal name if not found in bundle. */
 	localizedName: v.optional(v.string()),
 	description: v.nullish(v.string(), ""),
-	details: v.nullish(v.string(), ""),
+	/** Localized description & details. May be null. */
+	details: v.pipe(v.nullish(v.string(), ""), metadata({ multiline: true })),
 	credit: v.nullish(v.string(), ""),
+	/** Whether this content is always unlocked in the tech tree. */
 	alwaysUnlocked: v.optional(v.boolean(), false),
+	/** Whether to show the description in the research dialog preview. */
 	inlineDescription: v.optional(v.boolean(), true),
 	/** Whether details are hidden in custom games if this hasn't been unlocked in campaign mode. */
 	hideDetails: v.optional(v.boolean(), true),

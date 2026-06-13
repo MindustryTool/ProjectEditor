@@ -22,6 +22,7 @@ export const TreeNodeRow = React.memo(function TreeNodeRow({ node, depth, expand
 	const currentPath = node.path === "/" ? "" : node.path;
 	const isSelected = useProjectSession((s) => s.selectedPath === currentPath);
 	const setSelectedPath = useProjectSession((s) => s.setSelectedPath);
+    const setSelectedTab = useProjectSession((s) => s.setSelectedTab);
 	const isFolder = node.type === "folder";
 	const isRoot = depth === 0 && currentPath === "";
 
@@ -30,8 +31,9 @@ export const TreeNodeRow = React.memo(function TreeNodeRow({ node, depth, expand
 			onToggle?.();
 		} else {
 			setSelectedPath(currentPath);
+            setSelectedTab("editor");
 		}
-	}, [isFolder, onToggle, setSelectedPath, currentPath]);
+	}, [isFolder, onToggle, setSelectedPath, setSelectedTab, currentPath]);
 
 	return (
 		<div>

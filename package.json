@@ -22,7 +22,7 @@
         "playwright": "catalog:",
         "prettier": "catalog:",
         "turbo": "catalog:",
-        "typescript": "^5.7.0",
+        "typescript": "catalog:",
         "dependency-cruiser": "catalog:"
     }
 }

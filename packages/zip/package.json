@@ -18,6 +18,6 @@
     "fflate": "catalog:"
   },
   "devDependencies": {
-    "typescript": "^5.7.0"
+    "typescript": "catalog:"
   }
 }

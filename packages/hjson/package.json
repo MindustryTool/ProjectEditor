@@ -17,7 +17,7 @@
     "clean": "rm -rf dist"
   },
   "devDependencies": {
-    "typescript": "^5.7.0",
+    "typescript": "catalog:",
     "vitest": "catalog:"
   }
 }
