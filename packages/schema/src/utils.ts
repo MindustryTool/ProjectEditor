@@ -104,12 +104,12 @@ function getSchemaType(schema: AnySchema, value: unknown): { type: Type; schema:
 
 	if (s.pipe && s.pipe.length > 0) {
 		for (let i = s.pipe.length - 1; i >= 0; i--) {
-			const { type } = detectSchemaType(s.pipe[i] as AnySchema, value);
-			if (type === "never") {
+			const result = detectSchemaType(s.pipe[i] as AnySchema, value);
+			if (result.type === "never") {
 				continue;
 			}
 
-			return { type, schema: s.pipe[i] as AnySchema };
+			return { type: result.type, schema: s.pipe[i] as AnySchema };
 		}
 		console.warn({ unknownTypeInPipe: s.type });
 		return { type: "never", schema };
@@ -119,17 +119,9 @@ function getSchemaType(schema: AnySchema, value: unknown): { type: Type; schema:
 		return { type: "never", schema };
 	}
 
-	if (s.type === "string") return { type: "string", schema };
-	if (s.type === "number") return { type: "number", schema };
-	if (s.type === "boolean") return { type: "boolean", schema };
-	if (s.type === "object") return { type: "object", schema };
-	if (s.type === "array") return { type: "array", schema };
-	if (s.type === "picklist") return { type: "picklist", schema };
-	if (s.type === "never") return { type: "never", schema };
-
-	if (s.kind === "schema") {
-		console.warn({ unknownType: s.type });
-	}
+    if (types.includes(s.type as Type)){
+        return { type: s.type as Type, schema };
+    }
 
 	return { type: "never", schema };
 }
@@ -150,7 +142,7 @@ export function detectSchemaType(rawSchema: AnySchema, value: unknown): { type: 
 		wrapped?: AnySchema;
 	} & AnySchema;
 
-	let metadataType = getTypeFromMetadata(unwrapped);
+	const metadataType = getTypeFromMetadata(unwrapped);
 
 	if (metadataType) {
 		return { type: metadataType, schema: unwrapped };
@@ -159,8 +151,6 @@ export function detectSchemaType(rawSchema: AnySchema, value: unknown): { type: 
 	if (unwrapped.type === "lazy" && unwrapped.getter) {
 		return detectSchemaType(unwrapped.getter(value), value);
 	}
-
-	metadataType = getTypeFromMetadata(unwrapped);
 
 	if (metadataType) {
 		return { type: metadataType, schema: unwrapped };

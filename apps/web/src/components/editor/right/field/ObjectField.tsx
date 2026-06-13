@@ -39,14 +39,18 @@ export const ObjectField = React.memo(function ObjectField({
 					"border-border p-2 border rounded-md bg-muted/50": !nested,
 				})}
 			>
-				<Children
-					entries={entries}
-					value={resolvedValue}
-					path={path}
-					onChange={onChange}
-					jsonPath={jsonPath}
-					getRenderer={getRenderer}
-				/>
+				{entries.map(([name, entrySchema]) => (
+					<Child
+						key={name}
+						name={name}
+						entrySchema={entrySchema}
+						value={resolvedValue}
+						path={path}
+						onChange={onChange}
+						jsonPath={jsonPath}
+						getRenderer={getRenderer}
+					/>
+				))}
 			</div>
 		);
 	}
@@ -65,84 +69,86 @@ export const ObjectField = React.memo(function ObjectField({
 						"border-border p-2 border rounded-md bg-muted/50": !nested,
 					})}
 				>
-					<Children
-						entries={entries}
-						value={resolvedValue}
-						path={path}
-						onChange={onChange}
-						jsonPath={jsonPath}
-						getRenderer={getRenderer}
-					/>
+					{entries.map(([name, entrySchema]) => (
+						<Child
+							key={name}
+							name={name}
+							entrySchema={entrySchema}
+							value={resolvedValue}
+							path={path}
+							onChange={onChange}
+							jsonPath={jsonPath}
+							getRenderer={getRenderer}
+						/>
+					))}
 				</div>
 			</CollapsibleContent>
 		</Collapsible>
 	);
 });
 
-function Children({
-	entries,
+function Child({
+	name,
+	entrySchema,
 	value,
 	path,
 	jsonPath,
 	onChange,
 	getRenderer,
 }: {
-	entries: [string, AnySchema][];
+	name: string;
+	entrySchema: AnySchema;
 	value: unknown;
 	path: string;
 	onChange: SchemaRendererProps["onChange"];
 	jsonPath: string;
 	getRenderer: SchemaRendererProps["getRenderer"];
 }) {
-	const elements: React.ReactNode[] = [];
+	const key = name;
+	const childValue = (value as Record<string, unknown>)?.[name];
+	const defaultValue = getDefaults(entrySchema, childValue);
+	const { type, schema } = detectSchemaType(entrySchema, childValue);
+	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 
-	for (const [name, childSchema] of entries) {
-		const key = name;
-		const childValue = (value as Record<string, unknown>)?.[name];
-		const defaultValue = getDefaults(childSchema, childValue);
-		const { type, schema } = detectSchemaType(childSchema, childValue);
-		const metadata = getSchemaMetadata(childSchema);
-
-		if (metadata?.visibleWhen && typeof value === "object" && value !== null) {
-			const refValue = (value as Record<string, unknown>)[metadata.visibleWhen.field];
-			if (refValue === undefined || refValue !== metadata.visibleWhen.value) continue;
-		}
-
-		const Renderer = getRenderer(type);
-
-		if (Renderer === undefined) {
-			elements.push(
-				<FieldControl key={key}>
-					<SchemaLabel name={name} metadata={metadata} />
-					<span className="text-red-400 text-sm">Unknown field type '{type}'</span>
-				</FieldControl>,
-			);
-		} else {
-			elements.push(
-				<ErrorBoundary
-					key={key}
-					fallback={({ error, reset }) => (
-						<FieldControl key={key}>
-							<SchemaLabel name={name} metadata={metadata} />
-							<ErrorDisplay message={error.message} onRetry={reset} />
-						</FieldControl>
-					)}
-				>
-					<Renderer
-						path={path}
-						name={name}
-						value={childValue}
-						onChange={onChange}
-						entrySchema={schema}
-						jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
-						getRenderer={getRenderer}
-						defaultValue={defaultValue}
-						metadata={metadata}
-					/>
-				</ErrorBoundary>,
-			);
+	if (metadata?.visibleWhen && typeof value === "object" && value !== null) {
+		const refValue = (value as Record<string, unknown>)[metadata.visibleWhen.field];
+		if (refValue === undefined || refValue !== metadata.visibleWhen.value) {
+			return null;
 		}
 	}
 
-	return elements;
+	const Renderer = getRenderer(type);
+
+	if (Renderer === undefined) {
+		return (
+			<FieldControl key={key}>
+				<SchemaLabel name={name} metadata={metadata} />
+				<span className="text-red-400 text-sm">Unknown field type '{type}'</span>
+			</FieldControl>
+		);
+	}
+
+	return (
+		<ErrorBoundary
+			key={key}
+			fallback={({ error, reset }) => (
+				<FieldControl key={key}>
+					<SchemaLabel name={name} metadata={metadata} />
+					<ErrorDisplay message={error.message} onRetry={reset} />
+				</FieldControl>
+			)}
+		>
+			<Renderer
+				path={path}
+				name={name}
+				value={childValue}
+				onChange={onChange}
+				entrySchema={schema}
+				jsonPath={jsonPath ? `${jsonPath}.${name}` : name}
+				getRenderer={getRenderer}
+				defaultValue={defaultValue}
+				metadata={metadata}
+			/>
+		</ErrorBoundary>
+	);
 }

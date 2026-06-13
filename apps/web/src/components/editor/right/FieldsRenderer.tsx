@@ -4,7 +4,7 @@ import { useFileString } from "@project/core";
 import type { HjsonNode } from "@project/hjson";
 import { HJSON } from "@project/hjson";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
-import React, { Suspense, useCallback, useEffect, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import {
 	resolveSchema,
 	detectSchemaType,
@@ -15,7 +15,6 @@ import {
 	getDefaults,
 } from "@project/schema";
 
-import { FieldCategory } from "#/components/editor/right/field/FieldCategory";
 import { getRenderer } from "#/components/editor/right/field/registry";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
 import { Search } from "lucide-react";
@@ -30,11 +29,12 @@ interface FieldsRendererProps {
 }
 
 export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema }: FieldsRendererProps) {
+	const { t } = useTranslation();
 	const { data, isLoading, write } = useFileString(path);
-	const { contents } = useProjectContext();
 	const [render, setRender] = useState(30);
 	const [filter, setFilter] = useLocalStorage("property-filter", "");
-	const { t } = useTranslation();
+	const { contents } = useProjectContext();
+	const endRef = React.useRef<HTMLDivElement>(null);
 
 	const onChange = useCallback(
 		(jsonPath: string, updater: (node: HjsonNode, original: string, key: string | number, root: HjsonNode) => string) => {
@@ -48,132 +48,6 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 			setRender(30);
 		}
 	}, [filter]);
-
-	if (isLoading || data === null) {
-		return null;
-	}
-
-	let node = null;
-	try {
-		node = HJSON.parseWithCache(data);
-	} catch (error) {
-		return String(error);
-	}
-
-	if (!node.isObject()) {
-		return null;
-	}
-
-	const resolvedSchema = resolveSchema(typeof schema === "function" ? schema(contents) : schema, node.valueOf());
-	const entries = getSchemaEntries(resolvedSchema);
-	const filtered = filter ? levenshtein(entries, ([name]) => name, filter, 10) : entries;
-
-	return (
-		<Suspense>
-			<ErrorBoundary>
-				<div className="grid gap-2">
-					<span className="first-letter:uppercase flex items-center gap-2 text-sm leading-none font-medium select-none">
-						{t("editor.search")}
-					</span>
-					<InputGroup>
-						<InputGroupAddon>
-							<Search className="size-4" />
-						</InputGroupAddon>
-						<InputGroupInput //
-							value={filter}
-							onChange={(e) => setFilter(e.target.value)}
-							placeholder={t("editor.search")}
-						/>
-					</InputGroup>
-				</div>
-				<Children
-					entries={filtered} //
-					node={node}
-					path={path}
-					onChange={onChange}
-					render={render}
-					setRender={setRender}
-				/>
-			</ErrorBoundary>
-		</Suspense>
-	);
-});
-
-function Children({
-	entries,
-	node,
-	path,
-	onChange,
-	render,
-	setRender,
-}: {
-	entries: [string, AnySchema][];
-	node: HjsonNode;
-	path: string;
-	onChange: SchemaRendererProps["onChange"];
-	render: number;
-	setRender: (callback: (render: number) => number) => void;
-}) {
-	const endRef = React.useRef<HTMLDivElement>(null);
-	const elements: React.ReactNode[] = [];
-	const seen = new Set<string>();
-	let lastCategory: string | undefined;
-
-	for (const [name, entrySchema] of entries.slice(0, render)) {
-		const key = name + path;
-		const childNode = node.get(name);
-		const defaultValue = getDefaults(entrySchema, childNode.valueOf());
-		const value = childNode.isMissing() ? undefined : childNode.valueOf();
-		const { type, schema } = detectSchemaType(entrySchema, value);
-		const metadata = getSchemaMetadata(entrySchema);
-
-		if (metadata?.visibleWhen) {
-			const refNode = node.get(metadata.visibleWhen.field);
-			if (refNode.isMissing()) {
-				continue;
-			}
-
-			if (refNode.isValue() && refNode.valueOf() !== metadata.visibleWhen.value) {
-				continue;
-			}
-		}
-
-		if (metadata?.category && metadata.category !== lastCategory) {
-			if (seen.has(metadata.category)) {
-				continue;
-			}
-
-			seen.add(metadata.category);
-			elements.push(<FieldCategory key={`cat-${metadata.category}`} category={metadata.category} />);
-			lastCategory = metadata.category;
-		}
-
-		const Renderer = getRenderer(type);
-
-		if (Renderer === undefined) {
-			elements.push(
-				<FormControl key={key}>
-					<FormLabel>{name}</FormLabel>
-					<span className="text-yellow-400 text-sm">Unknown field type '{type}'</span>
-				</FormControl>,
-			);
-		} else {
-			elements.push(
-				<Renderer
-					key={key}
-					path={path}
-					name={name}
-					value={value}
-					onChange={onChange}
-					entrySchema={schema}
-					jsonPath={name}
-					getRenderer={getRenderer}
-					defaultValue={defaultValue}
-					metadata={metadata}
-				/>,
-			);
-		}
-	}
 
 	useEffect(() => {
 		const element = endRef.current;
@@ -198,10 +72,113 @@ function Children({
 		return () => observer.disconnect();
 	}, [setRender]);
 
+	if (isLoading || data === null) {
+		return null;
+	}
+
+	let node = null;
+	try {
+		node = HJSON.parseWithCache(data);
+	} catch (error) {
+		return String(error);
+	}
+
+	if (!node.isObject()) {
+		return null;
+	}
+
+    const value = node.valueOf() as Record<string, unknown>;
+
+    if (!value || typeof value !== "object") {
+        return null;
+    }
+
+	const resolvedSchema = resolveSchema(typeof schema === "function" ? schema(contents) : schema, value);
+	const entries = getSchemaEntries(resolvedSchema);
+	const filtered = (filter ? levenshtein(entries, ([name]) => name, filter, 10) : entries).slice(0, render);
+
 	return (
-		<>
-			{elements}
-			<div className="end w-full invisible" ref={endRef}></div>
-		</>
+		<Suspense>
+			<ErrorBoundary>
+				<div className="grid gap-2">
+					<span className="first-letter:uppercase flex items-center gap-2 text-sm leading-none font-medium select-none">
+						{t("editor.search")}
+					</span>
+					<InputGroup>
+						<InputGroupAddon>
+							<Search className="size-4" />
+						</InputGroupAddon>
+						<InputGroupInput //
+							value={filter}
+							onChange={(e) => setFilter(e.target.value)}
+							placeholder={t("editor.search")}
+						/>
+					</InputGroup>
+				</div>
+				{filtered.map(([name, entrySchema]) => (
+					<Child
+						key={name}
+						name={name}
+						entrySchema={entrySchema}
+						path={path}
+						onChange={onChange}
+                        value={value}
+					/>
+				))}
+				<div className="end w-full invisible" ref={endRef}></div>
+			</ErrorBoundary>
+		</Suspense>
+	);
+});
+
+function Child({
+	name,
+	entrySchema,
+	value,
+	path,
+	onChange,
+}: {
+	name: string;
+	entrySchema: AnySchema;
+	value: Record<string, unknown>;
+	path: string;
+	onChange: SchemaRendererProps["onChange"];
+}) {
+	const key = name + path;
+	const childValue = value[name]
+	const defaultValue = getDefaults(entrySchema, childValue);
+	const { type, schema } = detectSchemaType(entrySchema, childValue);
+	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
+
+	if (metadata?.visibleWhen) {
+		if (childValue !== metadata.visibleWhen.value) {
+			return;
+		}
+	}
+
+	const Renderer = getRenderer(type);
+
+	if (Renderer === undefined) {
+		return (
+			<FormControl key={key}>
+				<FormLabel>{name}</FormLabel>
+				<span className="text-yellow-400 text-sm">Unknown field type '{type}'</span>
+			</FormControl>
+		);
+	}
+
+	return (
+		<Renderer
+			key={key}
+			path={path}
+			name={name}
+			value={childValue}
+			onChange={onChange}
+			entrySchema={schema}
+			jsonPath={name}
+			getRenderer={getRenderer}
+			defaultValue={defaultValue}
+			metadata={metadata}
+		/>
 	);
 }

@@ -101,7 +101,7 @@ function ArrayElement({
 		[onChange, jsonPath, index],
 	);
 
-    const metadata = getSchemaMetadata(itemSchema);
+    const metadata = useMemo(() => getSchemaMetadata(itemSchema), [itemSchema]);
 	const { type, schema } = useMemo(() => detectSchemaType(itemSchema, value), [itemSchema, value]);
 	const defaultValue = getDefaults(schema, value);
 
