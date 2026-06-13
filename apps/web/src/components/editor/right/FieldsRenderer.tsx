@@ -38,7 +38,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 
 	const onChange = useCallback(
 		(jsonPath: string, updater: (node: HjsonNode, original: string, key: string | number, root: HjsonNode) => string) => {
-			HJSON.patch(write)(jsonPath, updater);
+			return HJSON.patch(write)(jsonPath, updater);
 		},
 		[write],
 	);
@@ -123,7 +123,7 @@ function Children({
 		const key = name + path;
 		const childNode = node.get(name);
 		const defaultValue = getDefaults(entrySchema, childNode.valueOf());
-		const value = childNode.isMissing() ? "" : childNode.valueOf();
+		const value = childNode.isMissing() ? undefined : childNode.valueOf();
 		const { type, schema } = detectSchemaType(entrySchema, value);
 		const metadata = getSchemaMetadata(entrySchema);
 

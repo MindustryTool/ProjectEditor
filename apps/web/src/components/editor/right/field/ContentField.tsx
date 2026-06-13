@@ -12,10 +12,18 @@ import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
-import { getSchemaMetadata } from "@project/schema";
+import { getSchemaMetadata, hasNullableWrapper } from "@project/schema";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 
-export const ContentField = React.memo(function ContentField({ name, value, onChange, entrySchema, jsonPath, path }: SchemaRendererProps) {
+export const ContentField = React.memo(function ContentField({
+	name,
+	value,
+	onChange,
+	entrySchema,
+	jsonPath,
+	path,
+	defaultValue,
+}: SchemaRendererProps) {
 	const parent = typeof value === "string" ? value : "";
 
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
@@ -35,13 +43,16 @@ export const ContentField = React.memo(function ContentField({ name, value, onCh
 							<ResearchParentToggleGroup
 								value={parent}
 								onValueChange={(v) =>
-									onChange(jsonPath, (parent, original, key) =>
-										parent.patchValue(
-											original,
-											key,
-											onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, v)),
-										),
-									)
+									onChange(jsonPath, (parent, original, key) => {
+										const isDefault = v === String(defaultValue ?? "");
+										const isNullable = hasNullableWrapper(entrySchema);
+
+										if (v === undefined || v === "" || (isDefault && !isNullable)) {
+											return parent.patchRemove(original, key);
+										}
+
+										return parent.patchValue(original, key, v);
+									})
 								}
 							/>
 						</DialogContent>

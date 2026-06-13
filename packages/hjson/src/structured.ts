@@ -2,6 +2,7 @@
 
 function serializeValue(v: unknown, baseIndent?: string): string {
 	const text = hjsonStringify(v, null, 2);
+	if (text == null) return "";
 	if (baseIndent && text.includes("\n")) {
 		return reindentSerialized(text, baseIndent);
 	}
