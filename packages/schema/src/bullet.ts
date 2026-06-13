@@ -113,20 +113,6 @@ const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.E
 					category: "editor.bullet.category.core-stats",
 				}),
 			),
-			sprite: v.pipe(
-				v.optional(
-					v.pipe(
-						v.string(),
-						v.transform((v) => v.replaceAll(context.name + "-", "")),
-						v.picklist(context.sprites.map((sprite) => sprite.name.replaceAll(context.name + "-", ""))),
-					),
-				),
-				metadata({
-					name: "editor.bullet.sprite",
-					description: "editor.bullet.sprite-description",
-					category: "editor.bullet.category.visuals",
-				}),
-			),
 			hitSize: v.pipe(
 				v.optional(v.number(), 4),
 				metadata({
@@ -1528,14 +1514,6 @@ const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.E
 					category: "editor.bullet.category.visuals",
 				}),
 			),
-			backSprite: v.pipe(
-				v.optional(v.string()),
-				metadata({
-					name: "editor.bullet.back-sprite",
-					description: "editor.bullet.back-sprite-description",
-					category: "editor.bullet.category.visuals",
-				}),
-			),
 			shrinkInterp: v.pipe(
 				v.optional(v.picklist(Interps), "linear"),
 				metadata({
@@ -1554,7 +1532,30 @@ export const BulletHjsonSchema: SchemaFn = new ClassMap<BulletClass>(
 			trailMult: v.optional(v.number(), 1),
 			trailSize: v.optional(v.number(), 4),
 		}),
-		BasicBulletType: (_context) => ({}),
+		BasicBulletType: (context) => ({
+			sprite: v.pipe(
+				v.optional(
+					v.pipe(
+						v.string(),
+						v.transform((v) => v.replaceAll(context.name + "-", "")),
+						v.picklist(context.sprites.map((sprite) => sprite.name.replaceAll(context.name + "-", ""))),
+					),
+				),
+				metadata({
+					name: "editor.bullet.sprite",
+					description: "editor.bullet.sprite-description",
+					category: "editor.bullet.category.visuals",
+				}),
+			),
+			backSprite: v.pipe(
+				v.nullish(v.string()),
+				metadata({
+					name: "editor.bullet.back-sprite",
+					description: "editor.bullet.back-sprite-description",
+					category: "editor.bullet.category.visuals",
+				}),
+			),
+		}),
 		BombBulletType: (_context) => ({}),
 		BulletType: (_context) => ({}),
 		ContinuousBulletType: (_context) => ({
