@@ -7,20 +7,16 @@ import type { ModHjsonData } from "@project/schema";
 export function useSectors(metadata: ModHjsonData): ContentEntry[] {
 	const projectItems = useProjectSession((s) => s.treeSnapshot.sectors);
 
-	const { data } = useBaseSectors();
+	const data = useBaseSectors();
 
 	return useMemo(() => {
-		const items: ContentEntry[] = [];
-		if (data) {
-			items.push(
-				...data.map((i) => ({
-					name: i.name,
-					type: "base" as const,
-					path: `sectors/${i.name}`,
-					contentType: "sectors",
-				})),
-			);
-		}
+		const items: ContentEntry[] = data.map((i) => ({
+			name: i.name,
+			type: "base" as const,
+			path: `sectors/${i.name}`,
+			contentType: "sectors",
+		}));
+
 		items.push(
 			...projectItems.map((i) => ({
 				name: metadata.name + "-" + i.name.replace(".json", ""),

@@ -1,0 +1,10 @@
+export { baseItems } from "./generated/items";
+export { baseBlocks } from "./generated/blocks";
+export { baseEnvBlocks } from "./generated/env-blocks";
+export { baseLiquids } from "./generated/liquids";
+export { baseUnits } from "./generated/units";
+export { baseSectors } from "./generated/sectors";
+export { baseEffects } from "./generated/effects";
+export { baseStatuses } from "./generated/statuses";
+export { baseSounds } from "./generated/sounds";
+export { baseSprites } from "./sprites";

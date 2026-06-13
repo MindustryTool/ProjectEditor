@@ -7,20 +7,15 @@ import type { ModHjsonData } from "@project/schema";
 export function useItems(metadata: ModHjsonData): ContentEntry[] {
 	const projectItems = useProjectSession((s) => s.treeSnapshot.items);
 
-	const { data } = useBaseItems();
+	const data = useBaseItems();
 
 	return useMemo(() => {
-		const items: ContentEntry[] = [];
-		if (data) {
-			items.push(
-				...(data?.map((i) => ({
-					name: i.name,
-					type: "base" as const,
-					path: `items/${i.name}`,
-					contentType: "items",
-				})) || []),
-			);
-		}
+		const items: ContentEntry[] = data.map((i) => ({
+			name: i.name,
+			type: "base" as const,
+			path: `items/${i.name}`,
+			contentType: "items",
+		}));
 
 		items.push(
 			...projectItems.map((i) => ({

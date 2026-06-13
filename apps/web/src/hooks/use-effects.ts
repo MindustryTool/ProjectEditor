@@ -1,13 +1,7 @@
-import { apiClient } from "@project/api";
-import { useQuery } from "@tanstack/react-query";
+import { baseEffects } from "@project/data";
 import type { Effect } from "@project/api";
 import type { ModHjsonData } from "@project/schema";
 
-export function useEffects(_metadata: ModHjsonData): Effect[]{
-	const data = useQuery({
-		queryKey: ["effects"],
-		queryFn: () => apiClient.getEffects(),
-	});
-
-	return data.data || [];
+export function useEffects(_metadata: ModHjsonData): Effect[] {
+	return baseEffects as Effect[];
 }

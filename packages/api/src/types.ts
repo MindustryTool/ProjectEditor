@@ -61,4 +61,5 @@ export interface Effect {
 
 export interface Sound {
   name: string;
+  path?: string | null;
  }

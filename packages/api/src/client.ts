@@ -1,8 +1,6 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from "axios";
 import { API_BASE_URL } from "@project/config";
 import { ApiError } from "./errors";
-import type { Block, Effect, EnvBlock, Item, Liquid, Sector, Sound, Status, Unit } from "./types";
-
 type RequestOptions = {
 	signal?: AbortSignal;
 };
@@ -44,42 +42,6 @@ export class MindustryApiClient {
 				return Promise.reject(new ApiError(0, "An unexpected error occurred"));
 			},
 		);
-	}
-
-	getItems(options?: RequestOptions): Promise<Item[]> {
-		return this.get<Item[]>("/items", options);
-	}
-
-	getBlocks(options?: RequestOptions): Promise<Block[]> {
-		return this.get<Block[]>("/blocks", options);
-	}
-
-	getEnvBlocks(options?: RequestOptions): Promise<EnvBlock[]> {
-		return this.get<EnvBlock[]>("/env-blocks", options);
-	}
-
-	getLiquids(options?: RequestOptions): Promise<Liquid[]> {
-		return this.get<Liquid[]>("/liquids", options);
-	}
-
-	getUnits(options?: RequestOptions): Promise<Unit[]> {
-		return this.get<Unit[]>("/units", options);
-	}
-
-	getSectors(options?: RequestOptions): Promise<Sector[]> {
-		return this.get<Sector[]>("/sectors", options);
-	}
-
-	getEffects(options?: RequestOptions): Promise<Effect[]> {
-		return this.get<Effect[]>("/effects", options);
-	}
-
-	getStatuses(options?: RequestOptions): Promise<Status[]> {
-		return this.get<Status[]>("/statuses", options);
-	}
-
-	getSounds(options?: RequestOptions): Promise<Sound[]> {
-		return this.get<Sound[]>("/sounds", options);
 	}
 
 	getSchematicPreview(buffer: ArrayBuffer){

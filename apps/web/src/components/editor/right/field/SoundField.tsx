@@ -1,6 +1,6 @@
 import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { hasNullableWrapper } from "@project/schema";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
@@ -13,8 +13,9 @@ import { useSounds } from "#/hooks/use-sounds";
 import type { ContentEntry } from "@project/types";
 import { ChevronDown, Play, Search } from "lucide-react";
 import { useProjectSession } from "@project/core";
-import { cn, levenshtein } from "#/lib/utils";
+import { levenshtein } from "#/lib/utils";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
+import { Progress } from "#/components/ui/progress";
 
 export const SoundField = React.memo(function SoundField({
 	name,
@@ -29,6 +30,29 @@ export const SoundField = React.memo(function SoundField({
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 	const sounds = useSounds();
 	const [filter, setFilter] = useState("");
+	const [dialogOpen, setDialogOpen] = useState(false);
+	const [playingName, setPlayingName] = useState<string | null>(null);
+	const [progress, setProgress] = useState(0);
+	const audioRef = useRef<HTMLAudioElement | null>(null);
+	const playIdRef = useRef(0);
+
+	useEffect(() => {
+		return () => {
+			if (audioRef.current) {
+				audioRef.current.pause();
+				audioRef.current.src = "";
+				audioRef.current = null;
+			}
+		};
+	}, []);
+
+	useEffect(() => {
+		if (dialogOpen && soundValue) {
+			requestAnimationFrame(() => {
+				document.getElementById(`sound-${soundValue}`)?.scrollIntoView({ block: "nearest" });
+			});
+		}
+	}, [dialogOpen, soundValue]);
 
 	const handleChange = useCallback(
 		(name: string) => {
@@ -45,19 +69,55 @@ export const SoundField = React.memo(function SoundField({
 	);
 
 	const handlePlaySound = useCallback(async (sound: ContentEntry) => {
+		const id = ++playIdRef.current;
+		if (audioRef.current) {
+			audioRef.current.pause();
+			audioRef.current.src = "";
+			audioRef.current.onended = null;
+			audioRef.current.ontimeupdate = null;
+			audioRef.current = null;
+		}
+		setProgress(0);
+		setPlayingName(sound.name);
+
+		const audio = new Audio();
+
+		audio.ontimeupdate = () => {
+			if (audio.duration && isFinite(audio.duration)) {
+				setProgress((audio.currentTime / audio.duration) * 100);
+			}
+		};
+		audio.onended = () => {
+			if (playIdRef.current !== id) return;
+			setPlayingName(null);
+			setProgress(0);
+			audioRef.current = null;
+		};
+
 		if (sound.type === "project") {
 			const file = await useProjectSession.getState().projectContext?.fs.readFile(sound.path);
+			if (id !== playIdRef.current) return;
 			if (file) {
 				const blob = new Blob([file], { type: "audio/mp3" });
 				const audioUrl = URL.createObjectURL(blob);
-				const audio = new Audio();
 				audio.src = audioUrl;
-
+				audioRef.current = audio;
 				audio.play();
 				audio.onended = () => {
 					URL.revokeObjectURL(audioUrl);
+					if (playIdRef.current !== id) return;
+					setPlayingName(null);
+					setProgress(0);
+					audioRef.current = null;
 				};
+			} else {
+				setPlayingName(null);
 			}
+		} else {
+			const downloadUrl = `https://raw.githubusercontent.com/Anuken/Mindustry/master/core/assets/${sound.path}`;
+			audio.src = downloadUrl;
+			audioRef.current = audio;
+			audio.play();
 		}
 	}, []);
 
@@ -73,7 +133,7 @@ export const SoundField = React.memo(function SoundField({
 		<Field jsonPath={jsonPath} metadata={metadata}>
 			<SchemaLabel name={name} metadata={metadata} />
 			<FieldControl>
-				<Dialog>
+				<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 					<DialogTrigger asChild>
 						<Button className="w-full justify-between" variant="outline">
 							<span>{soundValue || <span className="text-muted-foreground">None</span>}</span>
@@ -101,24 +161,28 @@ export const SoundField = React.memo(function SoundField({
 							<div className="overflow-y-auto space-y-1 h-full">
 								{filteredSounds.map((sound) => (
 									<DialogClose key={sound.name} asChild>
-										<div
-											className={cn("flex items-center justify-between gap-2 cursor-pointer px-3 py-0.5 border rounded-md", {
-												"bg-emerald-400/50": sound.type === "project",
-												"bg-purple-400/50": sound.type === "base",
-											})}
-											onClick={() => handleChange(sound.name)}
-										>
-											<span>{sound.name}</span>
-											<Button
-												onClick={(event) => {
-													event.stopPropagation();
-													event.preventDefault();
-													handlePlaySound(sound);
-												}}
-												variant="ghost"
+										<div id={`sound-${sound.name}`} className="border rounded-md">
+											<div
+												className="flex items-center justify-between gap-2 cursor-pointer px-3 py-0.5 hover:bg-accent"
+												onClick={() => handleChange(sound.name)}
 											>
-												<Play className="size-4" />
-											</Button>
+												<span>{sound.name}</span>
+												<Button
+													onClick={(event) => {
+														event.stopPropagation();
+														event.preventDefault();
+														handlePlaySound(sound);
+													}}
+													variant="ghost"
+												>
+													<Play className="size-4" />
+												</Button>
+											</div>
+											{playingName === sound.name && (
+												<div className="px-3 pb-1.5">
+													<Progress value={progress} className="h-0.5" />
+												</div>
+											)}
 										</div>
 									</DialogClose>
 								))}

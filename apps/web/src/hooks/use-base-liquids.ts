@@ -1,9 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@project/api";
+import { baseLiquids } from "@project/data";
 
 export function useBaseLiquids() {
-	return useQuery({
-		queryKey: ["liquids"],
-		queryFn: () => apiClient.getLiquids().then((res) => res.filter((i) => i.mod === null)),
-	});
+	return baseLiquids;
 }

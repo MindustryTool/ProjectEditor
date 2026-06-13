@@ -6,22 +6,15 @@ import type { ContentEntry } from "@project/types";
 export function useSprites(): ContentEntry[] {
 	const projectItems = useProjectSession((s) => s.treeSnapshot.sprites);
 
-	const { data } = useBaseSprites();
-
+	const data = useBaseSprites();
 
 	return useMemo(() => {
-		const items: ContentEntry[] = [];
-
-		if (data) {
-			items.push(
-				...data.map((i) => ({
-					name: i.name,
-					type: "base" as const,
-					path: `sprites/${i.name}`,
-					contentType: "sprites",
-				})),
-			);
-		}
+		const items: ContentEntry[] = data.map((i) => ({
+			name: i.name,
+			type: "base" as const,
+			path: `sprites/${i.name}`,
+			contentType: "sprites",
+		}));
 
 		projectItems.forEach((i) => {
 			if (i.name.endsWith(".png")) {

@@ -1,9 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import { apiClient, type Sound } from "@project/api";
+import { baseSounds } from "@project/data";
+import type { Sound } from "@project/api";
 
-export function useBaseSounds() {
-	return useQuery<Sound[]>({
-		queryKey: ["sounds"],
-		queryFn: () => apiClient.getSounds(),
-	});
+export function useBaseSounds(): Sound[] {
+	return baseSounds as Sound[];
 }

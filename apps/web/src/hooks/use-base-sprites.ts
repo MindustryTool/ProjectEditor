@@ -1,9 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { baseSprites } from "@project/data";
 
 export function useBaseSprites() {
-	return useQuery({
-		queryKey: ["sprites"],
-        // TODO: Api mpl
-		queryFn: () => [] as { name: string }[],
-	});
+	return baseSprites;
 }

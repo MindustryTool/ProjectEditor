@@ -70,3 +70,21 @@ The system SHALL add an `API_BASE_URL` constant exported from `@project/config` 
 #### Scenario: API_BASE_URL is available
 - **WHEN** `import { API_BASE_URL } from "@project/config"` is used
 - **THEN** the value SHALL be `"https://content.mindustry-tool.com/api/v2/"`
+
+### Requirement: Runtime base content GET endpoints removed
+The `MindustryApiClient` class SHALL remove runtime methods for base content GET endpoints (getItems, getBlocks, getEnvBlocks, getLiquids, getUnits, getSectors, getEffects, getStatuses, getSounds).
+
+#### Scenario: Base content methods are no longer callable
+- **WHEN** code attempts to call `apiClient.getItems()`
+- **THEN** the call SHALL produce a TypeScript compilation error
+
+### Requirement: Runtime POST endpoints for preview remain
+The `MindustryApiClient` class SHALL retain `getSchematicPreview()` and `getMapPreview()` POST methods for runtime use.
+
+#### Scenario: Schematic preview is still callable
+- **WHEN** `apiClient.getSchematicPreview(buffer)` is called at runtime
+- **THEN** it SHALL make a POST request to `/schematics/image`
+
+#### Scenario: Map preview is still callable
+- **WHEN** `apiClient.getMapPreview(buffer)` is called at runtime
+- **THEN** it SHALL make a POST request to `/maps/image`

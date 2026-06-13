@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { deleteProjectFiles } from "@project/core";
 import { useAppStore, useProjectSession } from "@project/core";
@@ -126,30 +125,32 @@ function DeleteProject({ projectId: propId, onDeleted }: { projectId?: string; o
 	const projectContext = useProjectSession((s) => s.projectContext);
 	const { close } = useProjectActions();
 	const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+	const [isDeleting, setIsDeleting] = useState(false);
 	const effectiveId = propId ?? projectContext?.project.id;
 
-	const deleteMutation = useMutation({
-		mutationFn: async (projectId: string) => {
-			await useAppStore.getState().deleteProject(projectId);
+	const handleDelete = useCallback(async () => {
+		if (!effectiveId) return;
+		setIsDeleting(true);
+		try {
+			await useAppStore.getState().deleteProject(effectiveId);
 			try {
-				await deleteProjectFiles(projectId);
+				await deleteProjectFiles(effectiveId);
 			} catch (err) {
 				toast.error(`Failed to delete project files: ${err instanceof Error ? err.message : "Unknown error"}`);
 			}
-		},
-		onSuccess: () => {
 			setDeleteConfirmOpen(false);
 			if (propId) {
 				onDeleted?.();
 			} else {
 				close();
 			}
-		},
-		onError: (err) => {
+		} catch (err) {
 			toast.error(`Failed to delete project: ${err instanceof Error ? err.message : "Unknown error"}`);
 			setDeleteConfirmOpen(false);
-		},
-	});
+		} finally {
+			setIsDeleting(false);
+		}
+	}, [effectiveId, propId, onDeleted, close]);
 
 	return (
 		<AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
@@ -168,11 +169,11 @@ function DeleteProject({ projectId: propId, onDeleted }: { projectId?: string; o
 						onClick={(event) => {
 							event.stopPropagation();
 							event.preventDefault();
-							if (effectiveId) deleteMutation.mutate(effectiveId);
+							void handleDelete();
 						}}
-						disabled={deleteMutation.isPending}
+						disabled={isDeleting}
 					>
-						{deleteMutation.isPending ? <Spinner /> : t("project-settings.confirm-delete")}
+						{isDeleting ? <Spinner /> : t("project-settings.confirm-delete")}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

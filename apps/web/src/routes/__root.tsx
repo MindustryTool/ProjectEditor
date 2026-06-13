@@ -7,10 +7,9 @@ import i18n from "#/i18n/i18n";
 import { PostHogProvider } from "@posthog/react";
 
 import appCss from "#/styles.css?url";
-import { createRootRouteWithContext } from "@tanstack/react-router";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createRootRoute } from "@tanstack/react-router";
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+export const Route = createRootRoute({
 	head: () => ({
 		meta: [
 			{ charSet: "utf-8" },
@@ -33,8 +32,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 	shellComponent: RootDocument,
 });
 
-const queryClient = new QueryClient();
-
 function RootDocument({ children }: { children: React.ReactNode }) {
 	const lang = i18n.language?.startsWith("vi") ? "vi" : "en";
 
@@ -55,11 +52,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 							defaults: "2026-01-30",
 						}}
 					>
-						<QueryClientProvider client={queryClient}>
-							<ThemeProvider defaultTheme="system" storageKey="theme">
-								{children}
-							</ThemeProvider>
-						</QueryClientProvider>
+						<ThemeProvider defaultTheme="system" storageKey="theme">
+							{children}
+						</ThemeProvider>
 					</PostHogProvider>
 				</main>
 				<Toaster />

@@ -1,12 +1,12 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env.*local"],
-  "tasks": {
-    "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**"],
-      "inputs": ["src/**", "tsconfig.json", "package.json"]
-    },
+	"tasks": {
+		"build": {
+			"dependsOn": ["^build"],
+			"outputs": ["dist/**", ".next/**", "src/generated/**"],
+			"inputs": ["src/**", "tsconfig.json", "package.json"]
+		},
     "dev": {
       "cache": false,
       "persistent": true

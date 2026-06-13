@@ -7,20 +7,16 @@ import { useMemo } from "react";
 export function useBlocks(metadata: ModHjsonData): ContentEntry[] {
 	const projectItems = useProjectSession((s) => s.treeSnapshot.blocks);
 
-	const { data } = useBaseBlocks();
+	const data = useBaseBlocks();
 
 	return useMemo(() => {
-		const items: ContentEntry[] = [];
-		if (data) {
-			items.push(
-				...data.map((i) => ({
-					name: i.name,
-					type: "base" as const,
-					path: `blocks/${i.name}`,
-					contentType: "blocks",
-				})),
-			);
-		}
+		const items: ContentEntry[] = data.map((i) => ({
+			name: i.name,
+			type: "base" as const,
+			path: `blocks/${i.name}`,
+			contentType: "blocks",
+		}));
+
 		items.push(
 			...projectItems.map((i) => ({
 				name: metadata.name + "-" + i.name.replace(".json", ""),

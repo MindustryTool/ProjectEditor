@@ -1,9 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@project/api";
+import { baseBlocks } from "@project/data";
 
 export function useBaseBlocks() {
-	return useQuery({
-		queryKey: ["blocks"],
-		queryFn: () => apiClient.getBlocks().then((res) => res.filter((i) => i.mod === null)),
-	});
+	return baseBlocks;
 }
