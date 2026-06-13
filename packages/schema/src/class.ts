@@ -8,6 +8,7 @@ export const classSchema = <T extends string>(classTypes: readonly T[], defaultV
 		? v.optional(
 				v.pipe(
 					v.string(),
+					v.transform((input) => input.slice(input.lastIndexOf(".") + 1)),
 					v.transform((input) => input.slice(0, 1).toUpperCase() + input.slice(1)),
 					v.picklist(classTypes),
 				),
@@ -56,8 +57,10 @@ export class ClassMap<K extends string> {
 				v.lazy((input) => {
 					const variant = this.collect(input, context);
 					let base = typeof this.options.baseSchema === "function" ? this.options.baseSchema(context) : this.options.baseSchema;
-					if ('getter' in base) {
-						base = (base as v.LazySchema<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>).getter(input).entries;
+					if ("getter" in base) {
+						base = (base as v.LazySchema<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>).getter(
+							input,
+						).entries;
 					}
 					const entries = mergeEntries(base, variant);
 					const extraFields = this.options.extra?.(context) ?? {};
@@ -72,7 +75,8 @@ export class ClassMap<K extends string> {
 	private collect(object: unknown, context: ProjectContents): Record<string, AnySchema> {
 		const result: Record<string, AnySchema> = {};
 		if (object && typeof object === "object" && "type" in object && typeof object.type === "string") {
-			const key = (object.type.slice(0, 1).toUpperCase() + object.type.slice(1)) as K;
+            const className = object.type.slice(object.type.lastIndexOf(".") + 1);
+			const key = (className.slice(0, 1).toUpperCase() + className.slice(1)) as K;
 			const visit = new Set<K>();
 
 			const resolveKey = (key: K) => {
