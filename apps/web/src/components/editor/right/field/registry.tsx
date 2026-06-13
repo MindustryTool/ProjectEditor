@@ -1,7 +1,6 @@
 import { ArrayField } from "#/components/editor/right/field/ArrayField";
 import { BooleanField } from "#/components/editor/right/field/BooleanField";
 import { ColorField } from "#/components/editor/right/field/ColorField";
-import { EffectField } from "#/components/editor/right/field/EffectField";
 import { EnvField } from "#/components/editor/right/field/EnvField";
 import { ItemRequirementField } from "#/components/editor/right/field/ItemRequirementField";
 import { LiquidRequirementField } from "#/components/editor/right/field/LiquidRequirementField";
@@ -27,7 +26,6 @@ const renderers: Partial<Record<Type, SchemaRenderer>> = {
 	array: ArrayField,
 	color: ColorField,
 	content: ContentField,
-	effect: EffectField,
 	picklist: PickListField,
 	liquids: LiquidsListField,
 	select: SelectField,

@@ -252,9 +252,9 @@ describe("getSchemaMetadata", () => {
 
 	it("getTypeFromMetadata extracts type from merged metadata", () => {
 		const inner = v.pipe(v.string(), metadata({ name: "inner" }));
-		const schema = v.pipe(inner, metadata({ type: "effect" }));
+		const schema = v.pipe(inner, metadata({ type: "color" }));
 		const meta = getSchemaMetadata(schema as AnySchema);
-		expect(meta).toEqual({ name: "inner", type: "effect" });
+		expect(meta).toEqual({ name: "inner", type: "color" });
 	});
 
 	it("getSchemaEntries sort respects categories when used with getSchemaMetadata", () => {
@@ -310,7 +310,7 @@ describe("resolveSchema", () => {
 			if ((input as Record<string, unknown>)?.x) return v.object({ y: v.string() });
 			return v.object({ z: v.number() });
 		});
-		const piped = v.pipe(inner, metadata({ type: "effect" }));
+		const piped = v.pipe(inner, metadata({ type: "color" }));
 		const resolved = resolveSchema(piped as AnySchema, { x: true });
 		expect(getSchemaEntries(resolved as AnySchema).map(([k]) => k)).toEqual(["y"]);
 	});
@@ -340,86 +340,16 @@ describe("getSchemaEntries with valibot pipe structure", () => {
 	});
 
 	it("extracts entries from v.pipe(string, metadata) - returns none", () => {
-		const piped = v.pipe(v.string(), metadata({ type: "effect" }));
+		const piped = v.pipe(v.string(), metadata({ type: "color" }));
 		expect(getSchemaEntries(piped as AnySchema)).toEqual([]);
 	});
 
 	it("extracts entries from piped lazy after resolveSchema", () => {
 		const lazy = v.lazy(() => v.object({ x: v.string() }));
-		const piped = v.pipe(lazy, metadata({ type: "effect" }));
+		const piped = v.pipe(lazy, metadata({ type: "color" }));
 		const resolved = resolveSchema(piped as AnySchema, {});
 		const entries = getSchemaEntries(resolved as AnySchema);
 		expect(entries.map(([k]) => k)).toEqual(["x"]);
-	});
-});
-
-describe("Effect schema integration", () => {
-	it("resolves effect union with correct type dispatching", () => {
-		const effectBaseObjectSchema = v.object({
-			type: v.picklist(["ParticleEffect", "MultiEffect"] as const),
-			lifetime: v.optional(v.number(), 50),
-		});
-		const classSchemaMap: Record<string, () => ReturnType<typeof v.object>> = {
-			ParticleEffect: () => v.object({ colorFrom: v.optional(v.string()) }),
-			MultiEffect: () =>
-				v.object({
-					effects: v.array(
-						v.pipe(
-							v.lazy(() => effectItemUnionSchema),
-							metadata({ type: "effect" }),
-						),
-					),
-				}),
-		};
-		const effectItemUnionSchema = v.pipe(
-			v.lazy((input) => {
-				if (typeof input === "object" && input !== null && "type" in input) {
-					const type = (input as Record<string, unknown>).type as string;
-					const fn = classSchemaMap[type];
-					if (fn) return v.object({ ...effectBaseObjectSchema.entries, ...fn().entries });
-				}
-				return v.pipe(v.string(), v.minLength(1), v.maxLength(127));
-			}),
-			metadata({ type: "effect" }),
-		);
-
-		// Test resolution with ParticleEffect
-		const resolvedParticle = resolveSchema(effectItemUnionSchema as AnySchema, { type: "ParticleEffect", colorFrom: "ff0000" });
-		const particleEntries = getSchemaEntries(resolvedParticle as AnySchema);
-		expect(particleEntries.map(([k]) => k)).toContain("colorFrom");
-		expect(particleEntries.map(([k]) => k)).toContain("lifetime");
-
-		// Test resolution with MultiEffect
-		const resolvedMulti = resolveSchema(effectItemUnionSchema as AnySchema, {
-			type: "MultiEffect",
-			effects: [{ type: "ParticleEffect" }],
-		});
-		const multiEntries = getSchemaEntries(resolvedMulti as AnySchema);
-		expect(multiEntries.map(([k]) => k)).toContain("effects");
-		expect(multiEntries.map(([k]) => k)).toContain("type");
-	});
-
-	it("simulates FieldRenderer entry schema flow for effect fields", () => {
-		// This mirrors how FieldsRenderer/ObjectField process entry schemas
-		const effectSchema = v.pipe(
-			v.lazy((input) => {
-				if (typeof input === "object" && input !== null && "type" in input) {
-					const type = (input as Record<string, unknown>).type;
-					if (type === "ParticleEffect") {
-						return v.object({ type: v.string(), colorFrom: v.optional(v.string()), colorTo: v.optional(v.string()) });
-					}
-				}
-				return v.pipe(v.string(), v.minLength(1), v.maxLength(127));
-			}),
-			metadata({ type: "effect" }),
-		);
-
-		// Step 2: resolveSchema with node value
-		const resolved = resolveSchema(effectSchema as AnySchema, { type: "ParticleEffect", colorFrom: "ff0000" });
-
-		// Step 3: getSchemaEntries from resolved schema
-		const entries = getSchemaEntries(resolved as AnySchema);
-		expect(entries.map(([k]) => k).sort()).toEqual(["colorFrom", "colorTo", "type"].sort());
 	});
 });
 

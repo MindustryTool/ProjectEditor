@@ -29,7 +29,6 @@ export const types = [
 	"env",
 	"color",
 	"content",
-	"effect",
 	"string",
 	"number",
 	"boolean",
