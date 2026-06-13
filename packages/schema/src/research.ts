@@ -6,7 +6,11 @@ import type { SchemaFn } from "./utils";
 import { ItemStackSchema } from "./item-stack";
 import type { ProjectContents } from "@project/types";
 
-const simpleSchema = (context: ProjectContents) => v.pipe(v.optional(ContentFieldSchema(context), ""), metadata({ option: "simple" }));
+const simpleSchema = (context: ProjectContents) =>
+	v.pipe(
+		v.optional(ContentFieldSchema(context), () => context.items[0]?.name || ""),
+		metadata({ option: "simple" }),
+	);
 
 const complexSchema = (context: ProjectContents) =>
 	v.pipe(

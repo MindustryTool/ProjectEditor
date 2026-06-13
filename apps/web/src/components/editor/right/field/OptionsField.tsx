@@ -98,7 +98,7 @@ export const OptionsField = React.memo(function OptionsField({
 						className="w-full p-2 border rounded-md bg-muted"
 						value={defaultTab}
 						onValueChange={(tab) => {
-							lastRef.current[defaultTab] = value;
+							lastRef.current[defaultTab] = value || undefined;
 
 							if (tab === option1) {
 								onChange(jsonPath, (parent, original, key) =>
@@ -113,7 +113,7 @@ export const OptionsField = React.memo(function OptionsField({
 					>
 						<SchemaLabel name={name} metadata={fieldMetadata} />
 						<SchemaDescription metadata={fieldMetadata} />
-						<TabsList className="w-full border p-0 overflow-hidden" >
+						<TabsList className="w-full border p-0 overflow-hidden">
 							<TabsTrigger className="border-none h-full rounded-none" value={option1}>
 								{option1}
 							</TabsTrigger>
@@ -180,7 +180,7 @@ export const OptionsField = React.memo(function OptionsField({
 				<Select
 					value={defaultTab}
 					onValueChange={(tab) => {
-						lastRef.current[defaultTab] = value;
+						lastRef.current[defaultTab] = value || undefined;
 						const option = options.find((option) => option.option === tab);
 
 						if (option) {
