@@ -42,7 +42,7 @@ export const LiquidStackSchema = cached((context: ProjectContents) =>
 			return v.pipe(
 				v.object({
 					liquid: LiquidFieldSchema(context),
-					amount: v.pipe(v.number(), v.integer(), v.minValue(0)),
+					amount: v.pipe(v.number(), v.minValue(0)),
 				}),
 			);
 		}),
