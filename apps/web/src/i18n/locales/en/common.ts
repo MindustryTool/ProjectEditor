@@ -243,4 +243,9 @@ export const en = {
 	"pixel-editor.load-error": "Failed to load image",
 	"pixel-editor.loading": "Loading pixel editor...",
 	"pixel-editor.image-too-large": "The image is too large or in an unsupported format.",
+
+	"editor.array-field.remove-title": "Remove item?",
+	"editor.array-field.remove-description": "Are you sure you want to remove item #{{index}}?",
+	"editor.array-field.remove-confirm": "Remove",
+	"editor.array-field.remove-cancel": "Cancel",
 } as const satisfies Record<string, string>;

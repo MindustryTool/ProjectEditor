@@ -1,9 +1,20 @@
 import { Button } from "#/components/ui/button";
 import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { detectSchemaType, getArrayItemSchema, getDefaults, getSchemaMetadata, unwrapSchema, type AnySchema } from "@project/schema";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "#/components/ui/alert-dialog";
 
 import { Plus, Trash2 } from "lucide-react";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
@@ -94,7 +105,9 @@ function ArrayElement({
 	jsonPath: string;
 	getRenderer: Parameters<typeof ArrayField>[0]["getRenderer"];
 }) {
+	const { t } = useTranslation();
 	const entryJsonPath = jsonPath ? `${jsonPath}[${index}]` : `[${index}]`;
+	const [removeOpen, setRemoveOpen] = useState(false);
 
 	const handleRemove = useCallback(
 		() =>
@@ -134,9 +147,25 @@ function ArrayElement({
 					<span className="text-red-400 text-sm">Unknown field type '{type}'</span>
 				)}
 			</ErrorBoundary>
-			<Button className="w-full" variant="destructive" onClick={handleRemove}>
-				<Trash2 />
-			</Button>
+			<AlertDialog open={removeOpen} onOpenChange={setRemoveOpen}>
+				<Button className="w-full" variant="destructive" onClick={() => setRemoveOpen(true)}>
+					<Trash2 />
+				</Button>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>{t("editor.array-field.remove-title", "Remove item?")}</AlertDialogTitle>
+						<AlertDialogDescription>
+							{t("editor.array-field.remove-description", "Are you sure you want to remove item #{{index}}?", { index: index + 1 })}
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>{t("editor.array-field.remove-cancel", "Cancel")}</AlertDialogCancel>
+						<AlertDialogAction variant="destructive" onClick={handleRemove}>
+							{t("editor.array-field.remove-confirm", "Remove")}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	);
 }

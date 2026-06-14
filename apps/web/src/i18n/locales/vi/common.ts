@@ -234,4 +234,9 @@ export const vi = {
 	"pixel-editor.load-error": "Không thể tải ảnh",
 	"pixel-editor.loading": "Đang tải pixel editor...",
 	"pixel-editor.image-too-large": "Ảnh quá lớn hoặc định dạng không được hỗ trợ.",
+
+	"editor.array-field.remove-title": "Xóa mục?",
+	"editor.array-field.remove-description": "Bạn có chắc muốn xóa mục #{{index}}?",
+	"editor.array-field.remove-confirm": "Xóa",
+	"editor.array-field.remove-cancel": "Hủy",
 } as const satisfies Record<string, string>;
