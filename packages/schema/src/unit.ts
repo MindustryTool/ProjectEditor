@@ -264,7 +264,7 @@ const unitObjectSchema = (context: ProjectContents) => ({
 	),
 
 	groundLayer: v.pipe(
-		v.optional(v.number()),
+		v.optional(v.number(), 60),
 		metadata({
 			name: "editor.unit.ground-layer",
 			description: "editor.unit.ground-layer-description",

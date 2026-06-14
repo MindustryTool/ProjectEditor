@@ -17,6 +17,11 @@ export type AnySchema =
 	| v.StringSchema<v.ErrorMessage<v.StringIssue> | undefined>
 	| v.NumberSchema<v.ErrorMessage<v.NumberIssue> | undefined>
 	| v.BooleanSchema<v.ErrorMessage<v.BooleanIssue> | undefined>
+	| v.RecordSchema<
+			v.BaseSchema<string, string | number | symbol, v.BaseIssue<unknown>>,
+			v.BaseSchema<string, string | number | symbol, v.BaseIssue<unknown>>,
+			v.ErrorMessage<v.RecordIssue> | undefined
+	  >
 	| v.SchemaWithPipe<
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			readonly [v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>, ...v.PipeItem<any, unknown, v.BaseIssue<unknown>>[]]
@@ -44,6 +49,7 @@ export const types = [
 	"liquid-stack",
 	"options",
 	"sound",
+	"record",
 	"never",
 ] as const;
 

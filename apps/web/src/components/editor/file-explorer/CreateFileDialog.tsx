@@ -127,10 +127,10 @@ export function CreateFileDialog({ targetPath, onClose, onSuccess }: CreateFileD
 		setError("");
 
 		try {
-			const text = await file.text();
+			const bytes = await file.arrayBuffer()
 			const baseFolder = isContentType ? selectedContentFolder : (targetPath || "");
 			const fullPath = `${baseFolder}/${file.name}`;
-			await context.fs.writeTextFile(fullPath, text);
+			await context.fs.writeFile(fullPath, bytes);
 			onSuccess(fullPath);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : t("editor.file-explorer.create-dialog.import-failed"));

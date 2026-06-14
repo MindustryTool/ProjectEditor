@@ -7,6 +7,8 @@ import { BulletHjsonSchema } from "./bullet";
 import { TargetPriority } from "./target-priority";
 import type { ProjectContents } from "@project/types";
 import { blockObjectSchema } from "./block-object";
+import { MindustryHexColorSchema } from "./mindustry-hex-color";
+import { SoundHjsonSchema } from "./sound";
 
 // Turret variant schemas
 export const baseTurretObjectSchema = v.object({
@@ -399,6 +401,12 @@ export const turretObjectSchema = (context: ProjectContents) =>
 				description: "editor.block-turret.shake-description",
 			}),
 		),
+		heatColor: v.optional(MindustryHexColorSchema),
+		shootEffect: v.optional(EffectFieldSchema(context)),
+		smokeEffect: v.optional(EffectFieldSchema(context)),
+		shootSound: v.optional(SoundHjsonSchema),
+		chargeSound: v.optional(SoundHjsonSchema),
+		loopSound: v.optional(SoundHjsonSchema),
 	});
 
 export const powerTurretObjectSchema = (context: ProjectContents) =>
