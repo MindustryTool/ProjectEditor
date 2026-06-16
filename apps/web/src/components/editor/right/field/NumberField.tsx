@@ -21,10 +21,10 @@ export const NumberField = React.memo(function NumberField({
 
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
-			const newVal = event.currentTarget.valueAsNumber;
+			const newVal = Number(event.currentTarget.value);
 			const isNan = Number.isNaN(newVal);
 
-			if (isNan) {
+			if (isNan || event.target.value === "") {
 				onChange(jsonPath, (parent, original, key) => parent.patchRemove(original, key));
 				return;
 			}
@@ -44,7 +44,7 @@ export const NumberField = React.memo(function NumberField({
 			<FieldControl>
 				<InputGroup>
 					<InputGroupInput key={name} value={numValue} onChange={handleChange} placeholder={defaultValue?.toString()} />
-					{!isDefault && (
+					{!isDefault && ( 
 						<InputGroupButton onClick={handleReset}>
 							<RotateCcw />
 						</InputGroupButton>

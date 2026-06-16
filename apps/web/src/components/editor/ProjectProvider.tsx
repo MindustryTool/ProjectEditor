@@ -41,16 +41,14 @@ const readModMetadata = (json: string | null, hjson: string | null) => {
 		if (!(object instanceof HjsonObjectNode)) {
 			throw new Error("Invalid mod.json");
 		}
-	} catch (e1) {
+	} catch {
 		try {
 			if (hjson === null) {
 				throw new Error("mod.hjson not exits");
 			}
 
 			object = HJSON.parseWithCache(hjson);
-		} catch (e2) {
-			console.error("Failed to read mod.(h)json " + e2 + " " + e1);
-		}
+		} catch {}
 	}
 
 	const mod: ModHjsonData = {
@@ -58,7 +56,7 @@ const readModMetadata = (json: string | null, hjson: string | null) => {
 		dependencies: [],
 		description: "",
 		displayName: "",
-        subtitle: "",
+		subtitle: "",
 		minGameVersion: "158",
 		name: "new-mod",
 		version: "",
@@ -86,7 +84,7 @@ const readModMetadata = (json: string | null, hjson: string | null) => {
 			mod.description = object.get("description").asString() || "";
 		}
 
-        if (object.get("subtitle")) {
+		if (object.get("subtitle")) {
 			mod.subtitle = object.get("subtitle").asString() || "";
 		}
 
