@@ -23,7 +23,7 @@ interface FileExplorerProps {
 export function FileExplorer({ className }: FileExplorerProps) {
 	const context = useCurrentProject();
 	const treeSnapshot = useProjectSession((state) => state.treeSnapshot);
-	const setEditingPath = useFileExplorerStore((s) => s.setEditingPath);
+	const setRenameTargetPath = useFileExplorerStore((s) => s.setRenameTargetPath);
 	const setDeleteTargetPath = useFileExplorerStore((s) => s.setDeleteTargetPath);
 
 	const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
@@ -95,7 +95,7 @@ export function FileExplorer({ className }: FileExplorerProps) {
 						>
 							<DropdownMenuItem
 								onClick={() => {
-									setEditingPath(contextMenu.path);
+									setRenameTargetPath(contextMenu.path);
 									setContextMenu(null);
 								}}
 							>

@@ -244,18 +244,18 @@ export const BlockHjsonSchema = new ClassMap<BlockType>(
 		PowerTurret: (context) => powerTurretObjectSchema(context).entries,
 		LaserTurret: (context) => laserTurretObjectSchema(context).entries,
 		ItemTurret: (context) => ({
-			ammoTypes: v.record(ItemFieldSchema(context), BulletHjsonSchema(context)),
+			ammoTypes: v.optional(v.record(ItemFieldSchema(context), BulletHjsonSchema(context))),
 			...turretObjectSchema(context).entries,
 		}),
 		LiquidTurret: (context) => ({
-			ammoTypes: v.record(LiquidFieldSchema(context), BulletHjsonSchema(context)),
+			ammoTypes: v.optional(v.record(LiquidFieldSchema(context), BulletHjsonSchema(context))),
 			extinguish: v.optional(v.boolean(), true),
 			...turretObjectSchema(context).entries,
 		}),
 		ContinuousTurret: (context) => continuousTurretObjectSchema(context).entries,
 		ContinuousLiquidTurret: (context) => continuousLiquidTurretObjectSchema(context).entries,
 		PayloadAmmoTurret: (context) => ({
-			ammoTypes: v.record(ContentFieldSchema(context), BulletHjsonSchema(context)),
+			ammoTypes: v.optional(v.record(ContentFieldSchema(context), BulletHjsonSchema(context))),
 			...turretObjectSchema(context).entries,
 		}),
 		PointDefenseTurret: () => pointDefenseTurretObjectSchema.entries,

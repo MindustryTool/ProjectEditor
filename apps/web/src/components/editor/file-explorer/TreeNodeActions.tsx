@@ -18,8 +18,6 @@ export function TreeNodeActions({ currentPath, depth, isFolder, isSelected, onCo
 	const isDefault = isDefaultPath(context.fs.defaultProjectTree, currentPath);
 	const isRoot = depth === 0 && currentPath === "";
 	const setCreateTargetPath = useFileExplorerStore((s) => s.setCreateTargetPath);
-	const editingPath = useFileExplorerStore((s) => s.editingPath);
-	const isEditing = editingPath === currentPath;
 
 	const handleCreateClick = useCallback(
 		(e: React.MouseEvent) => {
@@ -36,8 +34,6 @@ export function TreeNodeActions({ currentPath, depth, isFolder, isSelected, onCo
 		},
 		[currentPath, onContextMenu],
 	);
-
-	if (isEditing) return null;
 
 	return (
 		<div className={cn("flex items-center gap-0.5 ml-auto", !isSelected && "md:invisible group-hover:visible", isSelected && "visible")}>

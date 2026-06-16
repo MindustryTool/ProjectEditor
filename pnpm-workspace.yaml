@@ -43,6 +43,10 @@ catalog:
   monaco-editor: ^0.52.2
   prettier: ^3.5.0
   radix-ui: ^1.4.3
+  react-dnd: ^16.0.1
+  react-dnd-html5-backend: ^16.0.1
+  react-dnd-multi-backend: ^9.0.0
+  react-dnd-touch-backend: ^16.0.1
   react-i18next: ^17.0.8
   react-router-dom: ^7.0.0
   shadcn: ^4.8.0

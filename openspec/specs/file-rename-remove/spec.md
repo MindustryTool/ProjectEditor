@@ -13,8 +13,8 @@ The create button SHALL be positioned alongside the existing rename and remove a
 
 ## MODIFIED Requirements
 
-### Requirement: File rename via inline edit
-The system SHALL allow users to rename a file or folder by clicking a rename action button, entering a new name inline, and confirming the change. The rename button SHALL NOT be shown on default project tree items.
+### Requirement: File rename via dialog
+The system SHALL allow users to rename a file or folder by clicking a rename action button, entering a new name in a modal dialog, and confirming the change. The rename button SHALL NOT be shown on default project tree items.
 
 #### Scenario: Rename button visible on hover (desktop)
 - **WHEN** the user hovers over a non-default file or folder row in the file explorer on a desktop device
@@ -32,21 +32,17 @@ The system SHALL allow users to rename a file or folder by clicking a rename act
 - **WHEN** the user hovers over or selects a default project tree folder (e.g., `content`, `maps`)
 - **THEN** the row SHALL NOT show the Pencil rename button
 
-#### Scenario: Clicking rename enters inline edit mode
+#### Scenario: Clicking rename opens dialog
 - **WHEN** the user clicks the rename button on a non-default file or folder row
-- **THEN** the filename text SHALL be replaced by an `<input>` element pre-filled with the current name, and the input SHALL be focused
+- **THEN** a rename dialog SHALL open instead of inline edit mode; the input SHALL be pre-filled with the current name
 
-#### Scenario: Confirm rename with Enter
-- **WHEN** the user presses Enter while in inline rename mode
-- **THEN** the system SHALL call `project.fs.rename(oldPath, newPath)` and on success exit inline mode with the new name displayed; if the new path already exists, SHALL show an error toast
+#### Scenario: Confirm rename via dialog Save button
+- **WHEN** the user clicks Save in the rename dialog
+- **THEN** the system SHALL call `project.fs.rename(oldPath, newPath)` and on success close the dialog; if the new path already exists or the name is invalid, SHALL show an inline validation error
 
-#### Scenario: Confirm rename on blur
-- **WHEN** the user clicks outside the rename input (blur)
-- **THEN** the system SHALL confirm the rename (same as Enter behavior)
-
-#### Scenario: Cancel rename with Escape
-- **WHEN** the user presses Escape while in inline rename mode
-- **THEN** the system SHALL cancel the rename and restore the original filename
+#### Scenario: Cancel rename dismisses dialog
+- **WHEN** the user clicks Cancel, presses Escape, or clicks outside the rename dialog
+- **THEN** the dialog SHALL close without renaming
 
 #### Scenario: Rename applies extension changes
 - **WHEN** the user renames a file and the provided new name changes, adds, or removes the file extension
@@ -54,11 +50,11 @@ The system SHALL allow users to rename a file or folder by clicking a rename act
 
 #### Scenario: Rename folder name
 - **WHEN** the user renames a folder
-- **THEN** the `<input>` SHALL be pre-filled with the full folder name (folders have no extension)
+- **THEN** the input SHALL be pre-filled with the full folder name (folders have no extension)
 
 #### Scenario: Selected path updates on rename
 - **WHEN** the currently opened file is renamed successfully
-- **THEN** the `?path=` URL query parameter SHALL update to reflect the new path
+- **THEN** the selected path in the project session SHALL update to reflect the new path
 
 ### Requirement: File/folder remove with confirmation
 The system SHALL allow users to delete a file or folder by clicking a remove button, confirming the action, then executing the delete. The remove button SHALL NOT be shown on default project tree items.

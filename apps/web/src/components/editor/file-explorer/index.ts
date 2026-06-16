@@ -8,7 +8,7 @@ export { useFileExplorerStore } from "./useFileExplorerState";
 export type { FileExplorerStore } from "./useFileExplorerState";
 export { buildFileTree, getIcon } from "./file-tree";
 export { RootName } from "./RootName";
-export { TreeNodeRenameInput } from "./TreeNodeRenameInput";
+export { RenameDialog } from "./RenameDialog";
 export { TreeNodeLabel } from "./TreeNodeLabel";
 export { TreeNodeActions } from "./TreeNodeActions";
 export { TreeNodeStatus } from "./TreeNodeStatus";
