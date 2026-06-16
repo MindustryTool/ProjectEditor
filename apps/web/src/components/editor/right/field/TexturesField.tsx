@@ -70,7 +70,7 @@ function Item({ spritePath }: { spritePath: string }) {
 	}
 
 	return (
-		<div className="space-y-2">
+		<div className="grid gap-1">
 			<span className="text-xs">{filename}</span>
 			{exists ? <SpriteViewer path={spritePath} /> : <SpriteUploader path={spritePath} />}
 		</div>

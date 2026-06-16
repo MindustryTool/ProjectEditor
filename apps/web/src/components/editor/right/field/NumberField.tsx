@@ -43,7 +43,7 @@ export const NumberField = React.memo(function NumberField({
 			<SchemaLabel name={name} metadata={metadata} />
 			<FieldControl>
 				<InputGroup>
-					<InputGroupInput key={name} value={numValue} onChange={handleChange} placeholder={defaultValue?.toString()} />
+					<InputGroupInput key={name} defaultValue={numValue} onChange={handleChange} placeholder={defaultValue?.toString()} />
 					{!isDefault && ( 
 						<InputGroupButton onClick={handleReset}>
 							<RotateCcw />
