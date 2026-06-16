@@ -326,7 +326,7 @@ function EditorMobileLayout() {
 				</TabsContent>
 				<TabsContent value="property" className="flex flex-1 overflow-hidden bg-background w-full h-full p-1">
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
-						<div className="flex flex-1 overflow-hidden bg-background w-full">
+						<div className="flex flex-1 overflow-hidden bg-background w-full flex-col">
 							<ErrorBoundary>
 								<Suspense>
 									<PropertiesPanel route={propertiesRoute} />

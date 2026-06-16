@@ -37,7 +37,6 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	const [render, setRender] = useState(30);
 	const [filter, setFilter] = useLocalStorage("property-filter", "");
 	const { contents } = useProjectContext();
-	const endRef = React.useRef<HTMLDivElement>(null);
 	const currentJsonPath = useProjectSession(selectCurrentJsonPath);
 	const setCurrentJsonPath = useProjectSession((s) => s.setCurrentJsonPath);
 	const fileName = useFileName();
@@ -49,33 +48,15 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 		[write],
 	);
 
+	const handleScroll = useCallback((event: React.UIEvent) => {
+		if (event.currentTarget.scrollTop + event.currentTarget.clientHeight >= event.currentTarget.scrollHeight - 300) {
+			setRender((prev) => prev + 30);
+		}
+	}, []);
+
 	useEffect(() => {
 		setFilter("");
 	}, [setFilter, currentJsonPath]);
-
-	useEffect(() => {
-		const element = endRef.current;
-
-		if (!element) {
-			return;
-		}
-
-		const observer = new IntersectionObserver(
-			([entry]) => {
-				if (entry?.isIntersecting) {
-					setRender((prev) => prev + 30);
-				}
-			},
-			{
-				root: null,
-				threshold: 0.00001,
-			},
-		);
-
-		observer.observe(element);
-
-		return () => observer.disconnect();
-	}, [setRender]);
 
 	const result = useMemo(() => {
 		if (isLoading || data === null) {
@@ -130,7 +111,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	const { activeValues, breadcrumbSegments, filtered, activeDefaults } = result;
 
 	return (
-		<div className="space-y-4 h-full w-full overflow-y-auto relative">
+		<div className="space-y-4 h-full w-full overflow-y-auto relative pb-6" onScroll={handleScroll}>
 			<Suspense>
 				<ErrorBoundary>
 					{breadcrumbSegments.length > 0 && (
@@ -204,7 +185,6 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 								/>
 							);
 						})}
-						<div className="end w-full invisible h-2" ref={endRef}></div>
 					</div>
 				</ErrorBoundary>
 			</Suspense>
