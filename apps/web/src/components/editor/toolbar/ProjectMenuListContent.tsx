@@ -49,7 +49,7 @@ export function ProjectMenuListContent({ onItemClick }: ProjectMenuListContentPr
 			<ProjectPickerDialog
 				mode="create"
 				trigger={
-					<Button variant="ghost" className="w-full justify-start text-xs h-9 px-3 font-normal" onClick={onItemClick}>
+					<Button variant="ghost" className="w-full justify-start text-xs h-9 px-3 font-normal" onClick={(e) => e.stopPropagation()}>
 						{t("project-menu.create-project")}
 					</Button>
 				}
@@ -60,7 +60,7 @@ export function ProjectMenuListContent({ onItemClick }: ProjectMenuListContentPr
 			<ProjectPickerDialog
 				mode="open"
 				trigger={
-					<Button variant="ghost" className="w-full justify-start text-xs h-9 px-3 font-normal" onClick={onItemClick}>
+					<Button variant="ghost" className="w-full justify-start text-xs h-9 px-3 font-normal" onClick={(e) => e.stopPropagation()}>
 						{t("project-menu.open-project")}
 					</Button>
 				}
@@ -75,7 +75,7 @@ export function ProjectMenuListContent({ onItemClick }: ProjectMenuListContentPr
 						variant="ghost"
 						className="w-full justify-start text-xs h-9 px-3 font-normal"
 						disabled={!hasProject}
-						onClick={onItemClick}
+						onClick={(e) => e.stopPropagation()}
 					>
 						{t("project-menu.change-project")}
 					</Button>
@@ -90,7 +90,7 @@ export function ProjectMenuListContent({ onItemClick }: ProjectMenuListContentPr
 						variant="ghost"
 						className="w-full justify-start text-xs h-9 px-3 font-normal"
 						disabled={!hasProject}
-						onClick={onItemClick}
+						onClick={(e) => e.stopPropagation()}
 					>
 						{t("project-menu.project-settings")}
 					</Button>

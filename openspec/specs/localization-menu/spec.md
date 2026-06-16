@@ -7,9 +7,14 @@ The system SHALL display a "Localization" dropdown menu in the editor toolbar, p
 - **WHEN** the editor page renders
 - **THEN** the toolbar SHALL contain a "Localization" dropdown trigger button after the Export menu
 
-#### Scenario: Localization menu opens with no items
+#### Scenario: Localization menu opens with items
 - **WHEN** the user clicks the "Localization" trigger button
-- **THEN** a dropdown SHALL open with no actionable items (placeholder state)
+- **THEN** a dropdown SHALL open with a "Create New Locale" item
+
+#### Scenario: Create Locale opens dialog without closing menu
+- **WHEN** user clicks "Create New Locale" in the Localization menu
+- **THEN** a dialog SHALL open for creating a new locale
+- **THEN** the menu SHALL NOT close
 
 ### Requirement: Translation keys for Localization menu
 The system SHALL provide translation entries for the Localization menu label in both English and Vietnamese locale files.

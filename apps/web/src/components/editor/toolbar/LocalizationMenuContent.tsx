@@ -9,7 +9,7 @@ export function LocalizationMenuContent() {
 	return (
 		<>
 			<DropdownMenuContent align="start" className="w-44">
-				<DropdownMenuItem onClick={handleCreateNewLocale}>{t("localization-menu.create-new-locale")}</DropdownMenuItem>
+				<DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={handleCreateNewLocale}>{t("localization-menu.create-new-locale")}</DropdownMenuItem>
 			</DropdownMenuContent>
 			<Dialog open={open} onOpenChange={setOpen}>
 				<DialogContent>

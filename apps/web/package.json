@@ -44,6 +44,7 @@
         "class-variance-authority": "catalog:",
         "clsx": "catalog:",
         "color": "catalog:",
+        "framer-motion": "^12.40.0",
         "i18next": "catalog:",
         "i18next-browser-languagedetector": "catalog:",
         "i18next-resources-to-backend": "^1.2.1",

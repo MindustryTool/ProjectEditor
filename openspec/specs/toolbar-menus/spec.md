@@ -15,6 +15,11 @@ The Toolbar component SHALL render a horizontal bar at the top with localized "P
 - **WHEN** a menu is open and user clicks outside it
 - **THEN** the menu SHALL close
 
+#### Scenario: Menu stays open when dialog trigger is clicked
+- **WHEN** a menu is open and user clicks a dialog-triggering item (e.g., "Create Project", "Open Project")
+- **THEN** the dialog SHALL open
+- **THEN** the menu SHALL NOT close
+
 ### Requirement: Project menu items
 The Project menu SHALL contain items for project actions: Create Project, Open Project, Change Project, Project Settings, and Close Project, with labels rendered via translation keys.
 

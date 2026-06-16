@@ -54,9 +54,10 @@ The ExportMenu SHALL render a button that opens an export dialog, allowing the u
 - **WHEN** the toolbar is rendered
 - **THEN** a single "Export" button SHALL be visible (no dropdown chevron)
 
-#### Scenario: Clicking export opens dialog instead of immediate download
+#### Scenario: Clicking export opens dialog without closing parent
 - **WHEN** the user clicks the Export button
 - **THEN** a dialog SHALL open with a filename input pre-filled with a sanitized version of the project name, a Download button, and a Cancel button
+- **THEN** the parent menu SHALL NOT close
 - **THEN** no download SHALL occur until the user clicks Download in the dialog
 
 #### Scenario: Filename input shows validation feedback

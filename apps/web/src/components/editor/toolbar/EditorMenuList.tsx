@@ -87,7 +87,9 @@ export function EditorMenuList({ className, onClose }: EditorMenuListProps) {
 						</p>
 						<Button
 							size="sm"
-							onClick={() => {
+							onClick={(event) => {
+								event.stopPropagation();
+								event.preventDefault();
 								if (!projectContext) return;
 								setExportOpen(true);
 							}}

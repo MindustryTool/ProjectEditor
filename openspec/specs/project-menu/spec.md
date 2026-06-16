@@ -7,17 +7,20 @@ The ProjectMenu component SHALL render a dropdown with items for Create Project,
 - **WHEN** the ProjectMenu is rendered
 - **THEN** it SHALL display a button labeled via `t("projectMenu.label")` that opens a dropdown with items: "Create Project", "Open Project", "Change Project", "Project Settings", "Close Project"
 
-#### Scenario: Create Project opens creation dialog
+#### Scenario: Create Project opens creation dialog without closing menu
 - **WHEN** user clicks "Create Project" in the ProjectMenu dropdown
 - **THEN** the system SHALL open a dialog prompting for a project name
+- **THEN** the menu SHALL NOT close
 
-#### Scenario: Open Project opens project picker dialog
+#### Scenario: Open Project opens project picker dialog without closing menu
 - **WHEN** user clicks "Open Project" in the ProjectMenu dropdown
 - **THEN** the system SHALL open the project picker dialog listing saved projects
+- **THEN** the menu SHALL NOT close
 
-#### Scenario: Change Project opens project picker dialog
+#### Scenario: Change Project opens project picker dialog without closing menu
 - **WHEN** user clicks "Change Project" in the ProjectMenu dropdown
 - **THEN** the system SHALL open the project picker dialog listing saved projects
+- **THEN** the menu SHALL NOT close
 
 #### Scenario: Close Project closes current project
 - **WHEN** user clicks "Close Project" in the ProjectMenu dropdown

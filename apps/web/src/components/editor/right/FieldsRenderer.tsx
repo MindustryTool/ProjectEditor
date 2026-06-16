@@ -198,7 +198,7 @@ function Child({
 }) {
 	const key = name + path;
 	const childValue = values[name];
-	const { type, schema } = detectSchemaType(entrySchema, childValue);
+	const { type, schema } = useMemo(() => detectSchemaType(entrySchema, childValue), [entrySchema, childValue]);
 	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
 	const defaultValue = defaults[name];
 
