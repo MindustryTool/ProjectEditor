@@ -16,15 +16,19 @@ export const ModHjsonSchema = v.object({
 		v.maxLength(127),
 		metadata({ name: "editor.mod-hjson.author", description: "editor.mod-hjson.author-description" }),
 	),
-	description: v.pipe(
-		v.string(),
-		v.maxLength(9999),
-		metadata({ name: "editor.mod-hjson.description", description: "editor.mod-hjson.description-description", multiline: true }),
+	description: v.optional(
+		v.pipe(
+			v.string(),
+			v.maxLength(9999),
+			metadata({ name: "editor.mod-hjson.description", description: "editor.mod-hjson.description-description", multiline: true }),
+		),
 	),
-    subtitle: v.pipe(
-		v.string(),
-		v.maxLength(127),
-		metadata({ name: "editor.mod-hjson.subtitle", description: "editor.mod-hjson.subtitle-description" }),
+	subtitle: v.optional(
+		v.pipe(
+			v.string(),
+			v.maxLength(127),
+			metadata({ name: "editor.mod-hjson.subtitle", description: "editor.mod-hjson.subtitle-description" }),
+		),
 	),
 	version: v.pipe(
 		v.string(),
