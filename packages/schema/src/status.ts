@@ -4,8 +4,10 @@ import { MindustryHexColorSchema } from "./mindustry-hex-color";
 import type { SchemaFn } from "./utils";
 import { EffectFieldSchema } from "./effect";
 import { metadata } from "./utils";
+import { TextureFieldSchema } from "./texture";
 
 export const statusBaseObjectSchema = v.object({
+    texture: TextureFieldSchema("@"),
 	damageMultiplier: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({

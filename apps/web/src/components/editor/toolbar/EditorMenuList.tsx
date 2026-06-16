@@ -59,12 +59,14 @@ export function EditorMenuList({ className, onClose }: EditorMenuListProps) {
 					return (
 						<button
 							key={tab.id}
-							onClick={() => setActiveTab(tab.id)}
+							onClick={(event) => {
+								setActiveTab(tab.id);
+                                event.stopPropagation();
+                                event.preventDefault();
+							}}
 							className={cn(
 								"w-full text-left text-xs h-9 px-2.5 rounded-sm transition-all flex items-center justify-between",
-								isActive
-									? "text-forground font-semibold bg-accent"
-									: "text-muted-foreground font-normal hover:bg-accent/40",
+								isActive ? "text-forground font-semibold bg-accent" : "text-muted-foreground font-normal hover:bg-accent/40",
 							)}
 						>
 							{tab.label}

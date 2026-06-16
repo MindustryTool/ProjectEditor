@@ -44,6 +44,7 @@ export {
 	findContent,
 	getArrayItemSchema,
 	getSchemaEntries,
+	getSchemaFromPath,
 	getSchemaMetadata,
 	hasNullableWrapper,
 	metadata,

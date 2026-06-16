@@ -18,8 +18,9 @@ import { useTranslation } from "react-i18next";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
-import { EMPTY_ARRAY } from "#/lib/utils";
+import { cn, EMPTY_ARRAY } from "#/lib/utils";
 import { ErrorBoundary } from "#/components/ui/error-boundary";
+import { object } from "valibot";
 
 export const ArrayField = React.memo(function ArrayField({
 	path,
@@ -78,7 +79,7 @@ export const ArrayField = React.memo(function ArrayField({
 							getRenderer={getRenderer}
 						/>
 					))}
-					<Button type="button" size="sm" onClick={handleAdd}>
+					<Button className="border border-input" type="button" variant="secondary" size="sm" onClick={handleAdd}>
 						<Plus /> Add
 					</Button>
 				</div>
@@ -116,7 +117,7 @@ function ArrayElement({
 					return parent.patchRemove(original, key);
 				}
 
-                return parent.get(key).patchRemove(original, index);
+				return parent.get(key).patchRemove(original, index);
 			}),
 		[onChange, jsonPath, index],
 	);
@@ -125,14 +126,36 @@ function ArrayElement({
 	const { type, schema } = useMemo(() => detectSchemaType(itemSchema, value), [itemSchema, value]);
 	const defaultValue = getDefaults(schema, value);
 
+	const displayName = useMemo(() => {
+		if (typeof value !== "object" || value === null) {
+			return `${index + 1}`;
+		}
+
+		if ("name" in value) {
+			return `${index + 1}.${String(value.name)}`;
+		}
+
+		if ("type" in value) {
+			return `${index + 1}.${String(value.type)}`;
+		}
+
+		return `${index + 1}`;
+	}, [value, index]);
+
 	const Renderer = getRenderer(type);
+    
+	const isObject = type === "object";
 
 	return (
-		<div className="flex flex-col gap-2 relative border p-2 rounded-md bg-muted">
+		<div
+			className={cn("flex gap-1 relative", {
+				"flex-col border p-2 rounded-md bg-muted": !isObject,
+			})}
+		>
 			<ErrorBoundary>
 				{Renderer ? (
 					<Renderer
-						name={`${index + 1}`}
+						name={displayName}
 						path={path}
 						value={value}
 						onChange={onChange}
@@ -148,7 +171,7 @@ function ArrayElement({
 				)}
 			</ErrorBoundary>
 			<AlertDialog open={removeOpen} onOpenChange={setRemoveOpen}>
-				<Button className="w-full" variant="destructive" onClick={() => setRemoveOpen(true)}>
+				<Button className="flex-1" variant="destructive" onClick={() => setRemoveOpen(true)}>
 					<Trash2 />
 				</Button>
 				<AlertDialogContent>

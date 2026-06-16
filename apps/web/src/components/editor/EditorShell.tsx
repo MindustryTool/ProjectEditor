@@ -19,7 +19,6 @@ import { usePath } from "#/hooks/use-path";
 import { RecentlyOpenedFilesBar } from "./recently-opened/RecentlyOpenedFilesBar";
 import { TextEditor } from "./TextEditor";
 import { BundleContent } from "./bundle/BundleContent";
-const PixelEditor = lazy(() => import("./pixel-editor/PixelEditor").then((m) => ({ default: m.PixelEditor })));
 import { NoOpenedFileScreen } from "./NoOpenedFileScreen";
 import { MenuIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -30,6 +29,7 @@ import { Button } from "#/components/ui/button";
 import { EditorMenuList } from "./toolbar/EditorMenuList";
 import { Separator } from "#/components/ui/separator";
 
+const PixelEditor = lazy(() => import("./pixel-editor/PixelEditor").then((m) => ({ default: m.PixelEditor })));
 const ModHjsonPanel = lazy(() => import("./right/ModHjsonPanel").then((m) => ({ default: m.ModHjsonPanel })));
 const ItemPanel = lazy(() => import("./right/ItemPanel").then((m) => ({ default: m.ItemPanel })));
 const LiquidPanel = lazy(() => import("./right/LiquidPanel").then((m) => ({ default: m.LiquidPanel })));
@@ -245,7 +245,7 @@ const EditorPanels = memo(function EditorPanels() {
 				<>
 					<ResizableHandle withHandle />
 					<ResizablePanel defaultSize="30%" minSize="20%">
-						<div className="h-full overflow-y-auto bg-card">
+						<div className="h-full overflow-hidden bg-card flex flex-col">
 							<Suspense>
 								<PropertiesPanel route={propertiesRoute} />
 							</Suspense>

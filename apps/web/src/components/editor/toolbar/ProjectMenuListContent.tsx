@@ -37,7 +37,11 @@ export function ProjectMenuListContent({ onItemClick }: ProjectMenuListContentPr
 			<Button
 				variant="ghost"
 				className="w-full justify-start text-xs h-9 px-3 font-normal"
-				onClick={() => wrapClick(handleImportProject)}
+				onClick={(event) => {
+					event.stopPropagation();
+					event.preventDefault();
+					return wrapClick(handleImportProject);
+				}}
 			>
 				{t("project-menu.import-project")}
 			</Button>

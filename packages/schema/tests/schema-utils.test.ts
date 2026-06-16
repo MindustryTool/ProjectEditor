@@ -7,6 +7,7 @@ import {
 	getSchemaEntries,
 	getArrayItemSchema,
 	getSchemaMetadata,
+	getSchemaFromPath,
 	type AnySchema,
 	MindustryHexColorSchema,
 	metadata,
@@ -513,5 +514,95 @@ describe("getDefaults", () => {
 			);
 			expect(getDefaults(schema as AnySchema, {})).toEqual({ tags: [] });
 		});
+	});
+});
+
+describe("getSchemaFromPath", () => {
+	it("resolves top-level property", () => {
+		const schema = v.object({ name: v.string(), count: v.number() });
+		const result = getSchemaFromPath("name", schema as AnySchema);
+		expect(result).not.toBeNull();
+		expect((result!.schema as unknown as { type: string }).type).toBe("string");
+	});
+
+	it("resolves nested property", () => {
+		const schema = v.object({
+			config: v.object({ display: v.object({ width: v.number() }) }),
+		});
+		const result = getSchemaFromPath("config.display", schema as AnySchema);
+		expect(result).not.toBeNull();
+		const entries = getSchemaEntries(result!.schema);
+		expect(entries.map(([k]) => k)).toEqual(["width"]);
+	});
+
+	it("preserves wrapper schemas from parent entries", () => {
+		const inner = v.pipe(v.string(), metadata({ name: "wrapped-field" }));
+		const schema = v.object({ field: v.optional(inner, "default") });
+		const result = getSchemaFromPath("field", schema as AnySchema);
+		expect(result).not.toBeNull();
+		const r = result!.schema as unknown as { type: string; wrapped: unknown };
+		expect(r.type).toBe("optional");
+		expect(getSchemaMetadata(result!.schema)).toEqual({ name: "wrapped-field" });
+	});
+
+	it("resolves array item by index", () => {
+		const item = v.object({ label: v.string() });
+		const schema = v.object({ items: v.array(item) });
+		const result = getSchemaFromPath("items[0]", schema as AnySchema);
+		expect(result).not.toBeNull();
+		const entries = getSchemaEntries(result!.schema);
+		expect(entries.map(([k]) => k)).toEqual(["label"]);
+	});
+
+	it("resolves nested property after array index", () => {
+		const schema = v.object({ items: v.array(v.object({ name: v.string() })) });
+		const result = getSchemaFromPath("items[0].name", schema as AnySchema);
+		expect(result).not.toBeNull();
+		expect((result!.schema as unknown as { type: string }).type).toBe("string");
+	});
+
+	it("returns null for invalid array index", () => {
+		const schema = v.object({ items: v.array(v.string()) });
+		expect(getSchemaFromPath("items[abc]", schema as AnySchema)).toBeNull();
+	});
+
+	it("returns null for non-existent property", () => {
+		const schema = v.object({ name: v.string() });
+		expect(getSchemaFromPath("unknown", schema as AnySchema)).toBeNull();
+	});
+
+	it("returns null for non-traversable intermediate schema", () => {
+		const schema = v.object({ name: v.string() });
+		expect(getSchemaFromPath("name.foo", schema as AnySchema)).toBeNull();
+	});
+
+	it("returns resolved root for empty path", () => {
+		const schema = v.object({ x: v.string() });
+		const result = getSchemaFromPath("", schema as AnySchema);
+		expect(result).not.toBeNull();
+		const resolved = resolveSchema(schema as AnySchema, undefined);
+		expect(result!.schema).toEqual(resolved);
+	});
+
+	it("resolves through optional wrapper to nested property", () => {
+		const schema = v.object({
+			nested: v.optional(v.object({ field: v.string() })),
+		});
+		const result = getSchemaFromPath("nested.field", schema as AnySchema);
+		expect(result).not.toBeNull();
+		expect((result!.schema as unknown as { type: string }).type).toBe("string");
+	});
+
+	it("resolves lazy schema with value parameter", () => {
+		const schema = v.object({
+			dynamic: v.lazy((input: unknown) => {
+				const val = input as Record<string, unknown>;
+				if (val.type === "a") return v.object({ aField: v.string() });
+				return v.object({ bField: v.number() });
+			}),
+		});
+		const result = getSchemaFromPath("dynamic.aField", schema as AnySchema, { dynamic: { type: "a" } });
+		expect(result).not.toBeNull();
+		expect((result!.schema as unknown as { type: string }).type).toBe("string");
 	});
 });

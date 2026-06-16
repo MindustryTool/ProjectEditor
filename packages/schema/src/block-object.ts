@@ -184,6 +184,7 @@ export type BlockType = (typeof blockTypes)[number];
 export const blockObjectSchema = {
 	name: v.pipe(v.optional(v.string()), metadata({ order: Order.NAME })),
 	type: classSchema(blockTypes, "Block"),
+    texture: TextureFieldSchema("@"),
 	...unlockableContentSchema,
 	shadowTexture: TextureFieldSchema("@-shadow"),
 	teamTexture: TextureFieldSchema("@-team"),

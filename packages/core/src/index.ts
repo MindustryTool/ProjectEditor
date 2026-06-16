@@ -21,7 +21,7 @@ export { importProject } from "./importer.js";
 export * from "./types";
 
 export { useAppStore } from "./project/store.js";
-export { useProjectSession, useCurrentProject, selectIsExpanded } from "./project/session.js";
+export { useProjectSession, useCurrentProject, selectIsExpanded, selectCurrentJsonPath } from "./project/session.js";
 
 export { useFileStore, isDirty, isError, getEntry, selectEntry, exists, selectIsSaving } from "./file/store.js";
 

@@ -33,6 +33,7 @@ const unitObjectSchema = (context: ProjectContents) => ({
 	type: v.pipe(v.optional(v.picklist(unitTypes)), metadata({ order: Order.TYPE })),
 	...unlockableContentSchema,
 	template: classSchema(unitTemplates, "UnitType"),
+    texture: TextureFieldSchema("@"),
 	envRequired: v.pipe(
 		v.optional(EnvSchema, 0),
 		metadata({

@@ -23,6 +23,7 @@ interface ProjectSession {
 	selectedPath: string | null;
     selectedTab: string;
 	expanded: Record<string, boolean>;
+	currentJsonPath: string | null;
 
     setSelectedTab: (tab: string) => void;
 	setExpanded: (path: string, isExpanded: boolean) => void;
@@ -35,6 +36,7 @@ interface ProjectSession {
 	removeFromRecentFiles: (projectId: string, path: string) => void;
 	clearRecentFiles: (projectId: string) => void;
 	setSelectedPath: (path: string | null) => void;
+	setCurrentJsonPath: (path: string | null) => void;
 }
 
 export const useProjectSession = create<ProjectSession>()(
@@ -46,6 +48,7 @@ export const useProjectSession = create<ProjectSession>()(
 			selectedPath: null,
 			expanded: { "/": true },
             selectedTab: 'editor',
+			currentJsonPath: null,
 
 
             setSelectedTab: (tab) => {
@@ -126,6 +129,10 @@ export const useProjectSession = create<ProjectSession>()(
 			setSelectedPath: (path) => {
 				set({ selectedPath: path });
 			},
+
+			setCurrentJsonPath: (path) => {
+				set({ currentJsonPath: path });
+			},
 		}),
 		{
 			name: "project-session",
@@ -150,6 +157,10 @@ export function useCurrentProject() {
 
 export function selectIsExpanded(path: string) {
 	return (state: ProjectSession) => Boolean(state.expanded[path] || false);
+}
+
+export function selectCurrentJsonPath(state: ProjectSession) {
+	return state.currentJsonPath;
 }
 
 function evictLRU(entries: RecentFileEntry[]): RecentFileEntry[] {

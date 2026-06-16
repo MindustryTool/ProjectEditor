@@ -281,7 +281,7 @@ export function getSchemaEntries(schema: AnySchema): [string, AnySchema][] {
 		return getSchemaEntries(s.pipe[0] as AnySchema);
 	}
 
-	return [];
+	throw new Error("Schema must be an object or have a pipe array");
 }
 
 /**
@@ -516,6 +516,76 @@ export function cached<TArgs extends readonly unknown[], TResult>(fn: (...args: 
 }
 
 export const CachedSchema = cached;
+
+interface PathSegment {
+	name: string;
+	arrayIndex?: number;
+}
+
+function parseJsonPath(path: string): PathSegment[] | null {
+	if (!path) return [];
+	const segments: PathSegment[] = [];
+	const parts = path.split(".");
+	for (const part of parts) {
+		const match = part.match(/^([^\[]+)(?:\[(\d+)\])?$/);
+		if (!match) return null;
+		segments.push({
+			name: match[1]!,
+			arrayIndex: match[2] !== undefined ? Number.parseInt(match[2], 10) : undefined,
+		});
+	}
+	return segments;
+}
+
+export function getSchemaFromPath(
+	path: string,
+	schema: AnySchema,
+	value?: unknown,
+): { schema: AnySchema; value: unknown } | null {
+	const segments = parseJsonPath(path);
+	if (segments === null) return null;
+	if (segments.length === 0) return { schema: resolveSchema(schema, value), value };
+
+	let current: AnySchema = schema;
+	let currentValue: unknown = value;
+
+	for (const segment of segments) {
+		const resolved = resolveSchema(current, currentValue);
+		const r = resolved as unknown as { type: string; entries?: Record<string, AnySchema> };
+
+		if (segment.arrayIndex !== undefined) {
+			if (r.type !== "object" || !r.entries) return null;
+			const entrySchema = r.entries[segment.name];
+			if (!entrySchema) return null;
+
+			const resolvedEntry = resolveSchema(
+				entrySchema,
+				currentValue ? (currentValue as Record<string, unknown>)[segment.name] : undefined,
+			);
+			const re = resolvedEntry as unknown as { type: string };
+			if (re.type !== "array") return null;
+
+			current = getArrayItemSchema(resolvedEntry, segment.arrayIndex);
+			currentValue = currentValue
+				? (currentValue as Record<string, unknown>)[segment.name]
+				: undefined;
+			currentValue = currentValue
+				? (currentValue as unknown[])[segment.arrayIndex]
+				: undefined;
+		} else {
+			if (r.type !== "object" || !r.entries) return null;
+			const entrySchema = r.entries[segment.name];
+			if (!entrySchema) return null;
+
+			current = entrySchema;
+			currentValue = currentValue
+				? (currentValue as Record<string, unknown>)[segment.name]
+				: undefined;
+		}
+	}
+
+	return { schema: current, value: currentValue };
+}
 
 /**
  * Searches for a named entry across all content categories in a ProjectContents context.
