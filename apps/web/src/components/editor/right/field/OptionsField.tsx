@@ -77,7 +77,7 @@ export const OptionsField = React.memo(function OptionsField({
 		}
 
 		return (
-			<Field jsonPath={jsonPath} metadata={fieldMetadata}>
+			<Field className="flex flex-col" jsonPath={jsonPath} metadata={fieldMetadata}>
 				<SchemaLabel name={name} metadata={fieldMetadata} />
 				<SchemaDescription metadata={fieldMetadata} />
 				<Renderer
@@ -141,7 +141,7 @@ export const OptionsField = React.memo(function OptionsField({
 							{option2}
 						</TabsTrigger>
 					</TabsList>
-					<TabsContent value={option1}>
+					<TabsContent className="flex flex-col" value={option1}>
 						{Renderer1 ? (
 							<Renderer1
 								path={path}
@@ -159,7 +159,7 @@ export const OptionsField = React.memo(function OptionsField({
 							<span>Renderer not found for type {type1}</span>
 						)}
 					</TabsContent>
-					<TabsContent value={option2}>
+					<TabsContent className="flex flex-col" value={option2}>
 						{Renderer2 ? (
 							<Renderer2
 								path={path}
@@ -196,7 +196,7 @@ export const OptionsField = React.memo(function OptionsField({
 	}
 
 	return (
-		<Field jsonPath={jsonPath} metadata={fieldMetadata} className="w-full p-2 border rounded-md bg-muted">
+		<Field jsonPath={jsonPath} metadata={fieldMetadata} className="w-full flex flex-col p-2 border rounded-md bg-muted">
 			<SchemaLabel name={name} metadata={fieldMetadata} />
 			<SchemaDescription metadata={fieldMetadata} />
 			<Select

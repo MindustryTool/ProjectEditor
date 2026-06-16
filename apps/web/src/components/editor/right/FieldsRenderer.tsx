@@ -108,6 +108,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 		const breadcrumbSegments = currentJsonPath !== null ? currentJsonPath.split(".") : [];
 
 		return {
+			entries,
 			activeValues,
 			breadcrumbSegments,
 			filtered,
@@ -123,7 +124,9 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 		return result;
 	}
 
-	const { activeValues, breadcrumbSegments, filtered, activeDefaults } = result;
+	const { entries, activeValues, breadcrumbSegments, filtered, activeDefaults } = result;
+
+	const showSearchBar = entries.length > 10;
 
 	return (
 		<div className="space-y-4 h-full w-full overflow-y-auto relative pb-6" onScroll={handleScroll} ref={scrollRef}>
@@ -157,24 +160,26 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 						</div>
 					)}
 					{fileName !== null && <div className="text-lg font-bold px-2">{fileName}</div>}
-					<div className="grid gap-2 px-2">
-						<span className="first-letter:uppercase flex items-center gap-2 text-sm leading-none font-medium select-none">
-							{t("editor.search")}
-						</span>
-						<InputGroup>
-							<InputGroupAddon>
-								<Search className="size-4" />
-							</InputGroupAddon>
-							<InputGroupInput //
-								value={filter}
-								onChange={(e) => {
-									setFilter(e.target.value);
-									setRender(30);
-								}}
-								placeholder={t("editor.search")}
-							/>
-						</InputGroup>
-					</div>
+					{showSearchBar && (
+						<div className="grid gap-2 px-2">
+							<span className="first-letter:uppercase flex items-center gap-2 text-sm leading-none font-medium select-none">
+								{t("editor.search")}
+							</span>
+							<InputGroup>
+								<InputGroupAddon>
+									<Search className="size-4" />
+								</InputGroupAddon>
+								<InputGroupInput //
+									value={filter}
+									onChange={(e) => {
+										setFilter(e.target.value);
+										setRender(30);
+									}}
+									placeholder={t("editor.search")}
+								/>
+							</InputGroup>
+						</div>
+					)}
 					<div className="px-2 flex flex-col gap-6">
 						{filtered.map(([name, entrySchema]) => {
 							const metadata = getSchemaMetadata(entrySchema);

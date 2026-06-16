@@ -16,22 +16,23 @@ export const NumberField = React.memo(function NumberField({
 	defaultValue,
 	metadata,
 }: SchemaRendererProps) {
-	const numValue = typeof value === "number" ? value : "";
+	const numValue = value === undefined ? "" : typeof value === "number" ? value : typeof value === "string" ? value : "";
 	const isDefault = value === undefined || numValue === defaultValue;
 
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
-			const newVal = Number(event.currentTarget.value);
-			const isNan = Number.isNaN(newVal);
+			const numValue = Number(event.target.value);
+			const isNaN = Number.isNaN(numValue);
+			const isDefault = numValue === defaultValue;
 
-			if (isNan || event.target.value === "") {
+			if (isDefault || event.target.value === "") {
 				onChange(jsonPath, (parent, original, key) => parent.patchRemove(original, key));
 				return;
 			}
 
-			onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, newVal));
+			onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, isNaN ? event.currentTarget.value : numValue));
 		},
-		[onChange, jsonPath],
+		[onChange, jsonPath, defaultValue],
 	);
 
 	const handleReset = useCallback(() => {
@@ -43,8 +44,8 @@ export const NumberField = React.memo(function NumberField({
 			<SchemaLabel name={name} metadata={metadata} />
 			<FieldControl>
 				<InputGroup>
-					<InputGroupInput key={name} defaultValue={numValue} onChange={handleChange} placeholder={defaultValue?.toString()} />
-					{!isDefault && ( 
+					<InputGroupInput key={name} value={numValue} onChange={handleChange} placeholder={defaultValue?.toString()} />
+					{!isDefault && (
 						<InputGroupButton onClick={handleReset}>
 							<RotateCcw />
 						</InputGroupButton>
