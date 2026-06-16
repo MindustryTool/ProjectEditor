@@ -7,9 +7,10 @@ import { Label } from "#/components/ui/label";
 import { InputGroup, InputGroupInput, InputGroupAddon } from "#/components/ui/input-group";
 import { useCurrentProject } from "@project/core";
 
-const contentTypes = new Set(["item", "block", "unit", "liquid", "status", "sector", "env-block", "effect"]);
+const contentTypes = ["item", "block", "unit", "liquid", "status", "sector", "effect", "planet", "weather"] as const;
+type ContentType = (typeof contentTypes)[number];
 
-const EXTENSION_MAP: Record<string, string> = {
+const EXTENSION_MAP: Record<ContentType | string, string> = {
 	file: "",
 	folder: "",
 	item: ".hjson",
@@ -18,21 +19,21 @@ const EXTENSION_MAP: Record<string, string> = {
 	liquid: ".hjson",
 	status: ".hjson",
 	sector: ".hjson",
-	"env-block": ".hjson",
 	effect: ".hjson",
+	planet: ".hjson",
+	weather: ".hjson",
 };
 
-const CONTENT_FOLDER_MAP: Record<string, string> = {
+const CONTENT_FOLDER_MAP: Record<ContentType, string> = {
 	item: "content/items",
 	block: "content/blocks",
 	unit: "content/units",
 	liquid: "content/liquids",
 	status: "content/status",
 	sector: "content/sectors",
-	"env-block": "content/env-blocks",
 	effect: "content/effects",
-	planets: "content/planets",
-    weathers: "content/weathers",
+	planet: "content/planets",
+	weather: "content/weathers",
 };
 
 interface CreateFileDialogProps {
@@ -53,7 +54,7 @@ export function CreateFileDialog({ targetPath, onClose, onSuccess }: CreateFileD
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [importing, setImporting] = useState(false);
 
-	const isContentType = contentTypes.has(type);
+	const isContentType = contentTypes.includes(type as ContentType);
 
 	useEffect(() => {
 		if (!isContentType) {
@@ -62,19 +63,17 @@ export function CreateFileDialog({ targetPath, onClose, onSuccess }: CreateFileD
 			return;
 		}
 
-		const rootFolder = CONTENT_FOLDER_MAP[type];
+		const rootFolder = CONTENT_FOLDER_MAP[type as ContentType];
 		if (!rootFolder) return;
 
-		let cancelled = false;
+		let cancelled = false;  
 
 		async function loadFolders() {
 			setFoldersLoading(true);
 			try {
 				const entries = await context.fs.readdir(rootFolder!);
 				if (cancelled) return;
-				const subdirs = entries
-					.filter((e) => e.kind === "directory")
-					.map((e) => `${rootFolder!}/${e.name}`);
+				const subdirs = entries.filter((e) => e.kind === "directory").map((e) => `${rootFolder!}/${e.name}`);
 				const allFolders = [rootFolder!, ...subdirs];
 				setFolderOptions(allFolders);
 				if (allFolders.length === 1) {
@@ -93,7 +92,9 @@ export function CreateFileDialog({ targetPath, onClose, onSuccess }: CreateFileD
 
 		loadFolders();
 
-		return () => { cancelled = true; };
+		return () => {
+			cancelled = true;
+		};
 	}, [type, isContentType, context.fs]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	async function handleCreate() {
@@ -105,7 +106,7 @@ export function CreateFileDialog({ targetPath, onClose, onSuccess }: CreateFileD
 		setError("");
 
 		const ext = EXTENSION_MAP[type] ?? "";
-		const baseFolder = isContentType ? selectedContentFolder : (targetPath || "");
+		const baseFolder = isContentType ? selectedContentFolder : targetPath || "";
 		const fullPath = `${baseFolder}/${trimmed}${ext}`;
 
 		try {
@@ -129,8 +130,8 @@ export function CreateFileDialog({ targetPath, onClose, onSuccess }: CreateFileD
 		setError("");
 
 		try {
-			const bytes = await file.arrayBuffer()
-			const baseFolder = isContentType ? selectedContentFolder : (targetPath || "");
+			const bytes = await file.arrayBuffer();
+			const baseFolder = isContentType ? selectedContentFolder : targetPath || "";
 			const fullPath = `${baseFolder}/${file.name}`;
 			await context.fs.writeFile(fullPath, bytes);
 			onSuccess(fullPath);
@@ -152,16 +153,19 @@ export function CreateFileDialog({ targetPath, onClose, onSuccess }: CreateFileD
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>{t("editor.create-new-file")}</DialogTitle>
-					<DialogDescription>
-						{t("editor.create-new-content-dialog.description")}
-					</DialogDescription>
+					<DialogDescription>{t("editor.create-new-content-dialog.description")}</DialogDescription>
 				</DialogHeader>
 				<div className="space-y-4 h-full w-full">
 					<div className="space-y-2">
 						<Label htmlFor="name">{t("editor.file-explorer.create-dialog.name")}</Label>
 						<InputGroup>
-							<InputGroupInput id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("editor.file-explorer.create-dialog.name-placeholder")} />
-							{isContentType && <InputGroupAddon align="inline-end">{EXTENSION_MAP[type]}</InputGroupAddon>}
+							<InputGroupInput
+								id="name"
+								value={name}
+								onChange={(e) => setName(e.target.value)}
+								placeholder={t("editor.file-explorer.create-dialog.name-placeholder")}
+							/>
+							{isContentType && <InputGroupAddon align="inline-end">{EXTENSION_MAP[type as ContentType]}</InputGroupAddon>}
 						</InputGroup>
 					</div>
 					<div className="space-y-2">
@@ -179,8 +183,9 @@ export function CreateFileDialog({ targetPath, onClose, onSuccess }: CreateFileD
 								<SelectItem value="liquid">{t("editor.file-explorer.create-dialog.type-liquid")}</SelectItem>
 								<SelectItem value="status">{t("editor.file-explorer.create-dialog.type-status")}</SelectItem>
 								<SelectItem value="sector">{t("editor.file-explorer.create-dialog.type-sector")}</SelectItem>
-								<SelectItem value="env-block">{t("editor.file-explorer.create-dialog.type-env-block")}</SelectItem>
 								<SelectItem value="effect">{t("editor.file-explorer.create-dialog.type-effect")}</SelectItem>
+                                <SelectItem value="planet">{t("editor.file-explorer.create-dialog.type-planet")}</SelectItem>
+                                <SelectItem value="weather">{t("editor.file-explorer.create-dialog.type-weather")}</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
@@ -189,11 +194,19 @@ export function CreateFileDialog({ targetPath, onClose, onSuccess }: CreateFileD
 							<Label htmlFor="content-folder">{t("editor.file-explorer.create-dialog.target-folder")}</Label>
 							<Select value={selectedContentFolder} onValueChange={setSelectedContentFolder} disabled={foldersLoading}>
 								<SelectTrigger className="w-full">
-									<SelectValue placeholder={foldersLoading ? t("editor.file-explorer.create-dialog.loading") : t("editor.file-explorer.create-dialog.select-folder")} />
+									<SelectValue
+										placeholder={
+											foldersLoading
+												? t("editor.file-explorer.create-dialog.loading")
+												: t("editor.file-explorer.create-dialog.select-folder")
+										}
+									/>
 								</SelectTrigger>
 								<SelectContent>
 									{folderOptions.map((folder) => (
-										<SelectItem key={folder} value={folder}>{folder}</SelectItem>
+										<SelectItem key={folder} value={folder}>
+											{folder}
+										</SelectItem>
 									))}
 								</SelectContent>
 							</Select>
@@ -201,12 +214,7 @@ export function CreateFileDialog({ targetPath, onClose, onSuccess }: CreateFileD
 					)}
 					{error && <p className="text-sm text-red-400">{error}</p>}
 					<DialogFooter className="gap-2">
-						<input
-							ref={fileInputRef}
-							type="file"
-							className="hidden"
-							onChange={handleImportFile}
-						/>
+						<input ref={fileInputRef} type="file" className="hidden" onChange={handleImportFile} />
 						<Button
 							variant="outline"
 							onClick={() => fileInputRef.current?.click()}
