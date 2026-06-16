@@ -4,14 +4,12 @@ import React, { useCallback } from "react";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
-import { hasNullableWrapper } from "@project/schema";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 
 export const BooleanField = React.memo(function BooleanField({
 	name,
 	value,
 	onChange,
-	entrySchema,
 	jsonPath,
 	path,
 	defaultValue,
@@ -21,13 +19,14 @@ export const BooleanField = React.memo(function BooleanField({
 
 	const handleChange = useCallback(
 		(val: boolean) => {
-			if (val === defaultValue && !hasNullableWrapper(entrySchema)) {
+			console.log({ val, defaultValue, jsonPath });
+			if (val === defaultValue) {
 				onChange(jsonPath, (parent, original, key) => parent.patchRemove(original, key));
 				return;
 			}
 			onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, val));
 		},
-		[onChange, jsonPath, entrySchema, defaultValue],
+		[onChange, jsonPath, defaultValue],
 	);
 
 	return (

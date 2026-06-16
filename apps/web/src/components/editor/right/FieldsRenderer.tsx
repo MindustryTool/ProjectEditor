@@ -4,7 +4,7 @@ import { useFileString, useProjectSession, selectCurrentJsonPath } from "@projec
 import type { HjsonNode } from "@project/hjson";
 import { HJSON } from "@project/hjson";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
 	resolveSchema,
 	detectSchemaType,
@@ -21,7 +21,6 @@ import { getRenderer } from "#/components/editor/right/field/registry";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
 import { Search, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useLocalStorage } from "usehooks-ts";
 import { cn, levenshtein } from "#/lib/utils";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { useFileName } from "#/hooks/use-path";
@@ -35,11 +34,13 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	const { t } = useTranslation();
 	const { data, isLoading, write } = useFileString(path);
 	const [render, setRender] = useState(30);
-	const [filter, setFilter] = useLocalStorage("property-filter", "");
+	const [filters, setFilters] = useState<Record<string, string>>({});
 	const { contents } = useProjectContext();
+	const fileName = useFileName();
+	const scrollTopRef = useRef<Map<string | null, number>>(new Map());
+	const scrollRef = useRef<HTMLDivElement>(null);
 	const currentJsonPath = useProjectSession(selectCurrentJsonPath);
 	const setCurrentJsonPath = useProjectSession((s) => s.setCurrentJsonPath);
-	const fileName = useFileName();
 
 	const onChange = useCallback(
 		(jsonPath: string, updater: (node: HjsonNode, original: string, key: string | number, root: HjsonNode) => string) => {
@@ -48,15 +49,29 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 		[write],
 	);
 
-	const handleScroll = useCallback((event: React.UIEvent) => {
-		if (event.currentTarget.scrollTop + event.currentTarget.clientHeight >= event.currentTarget.scrollHeight - 300) {
-			setRender((prev) => prev + 30);
-		}
-	}, []);
+	const filter = filters[currentJsonPath || ""] || "";
+	const setFilter = useCallback(
+		(val: string) => {
+			setFilters((prev) => ({ ...prev, [currentJsonPath || ""]: val }));
+		},
+		[currentJsonPath],
+	);
+
+	const handleScroll = useCallback(
+		(event: React.UIEvent) => {
+			if (event.currentTarget.scrollTop + event.currentTarget.clientHeight >= event.currentTarget.scrollHeight - 300) {
+				setRender((prev) => prev + 30);
+			}
+			scrollTopRef.current.set(currentJsonPath, event.currentTarget.scrollTop);
+		},
+		[currentJsonPath],
+	);
 
 	useEffect(() => {
-		setFilter("");
-	}, [setFilter, currentJsonPath]);
+		if (scrollRef.current) {
+			scrollRef.current.scrollTop = scrollTopRef.current.get(currentJsonPath) || 0;
+		}
+	}, [currentJsonPath]);
 
 	const result = useMemo(() => {
 		if (isLoading || data === null) {
@@ -111,7 +126,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	const { activeValues, breadcrumbSegments, filtered, activeDefaults } = result;
 
 	return (
-		<div className="space-y-4 h-full w-full overflow-y-auto relative pb-6" onScroll={handleScroll}>
+		<div className="space-y-4 h-full w-full overflow-y-auto relative pb-6" onScroll={handleScroll} ref={scrollRef}>
 			<Suspense>
 				<ErrorBoundary>
 					{breadcrumbSegments.length > 0 && (
@@ -160,7 +175,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 							/>
 						</InputGroup>
 					</div>
-					<div className="px-2 space-y-6">
+					<div className="px-2 flex flex-col gap-6">
 						{filtered.map(([name, entrySchema]) => {
 							const metadata = getSchemaMetadata(entrySchema);
 
