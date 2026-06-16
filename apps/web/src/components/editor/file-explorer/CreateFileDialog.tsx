@@ -31,6 +31,8 @@ const CONTENT_FOLDER_MAP: Record<string, string> = {
 	sector: "content/sectors",
 	"env-block": "content/env-blocks",
 	effect: "content/effects",
+	planets: "content/planets",
+    weathers: "content/weathers",
 };
 
 interface CreateFileDialogProps {
