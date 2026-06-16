@@ -20,7 +20,6 @@ import { SchemaLabel } from "./SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { cn, EMPTY_ARRAY } from "#/lib/utils";
 import { ErrorBoundary } from "#/components/ui/error-boundary";
-import { object } from "valibot";
 
 export const ArrayField = React.memo(function ArrayField({
 	path,

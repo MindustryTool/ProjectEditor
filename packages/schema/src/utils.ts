@@ -281,7 +281,7 @@ export function getSchemaEntries(schema: AnySchema): [string, AnySchema][] {
 		return getSchemaEntries(s.pipe[0] as AnySchema);
 	}
 
-	throw new Error("Schema must be an object or have a pipe array");
+    return [];
 }
 
 /**
@@ -328,6 +328,8 @@ export function metadata<T>(meta: SchemaMetadata): v.MetadataAction<T, SchemaMet
 	return v.metadata(meta);
 }
 
+const metadataCache = new WeakMap<AnySchema, SchemaMetadata | null>();
+
 /**
  * Deeply walks a schema (and its unwrapped form) to collect all metadata actions into a single
  * SchemaMetadata object. Visits nested pipes and child schemas to merge metadata.
@@ -335,6 +337,10 @@ export function metadata<T>(meta: SchemaMetadata): v.MetadataAction<T, SchemaMet
  * Returns null if no metadata is found.
  */
 export function getSchemaMetadata(schema: AnySchema, pipe: boolean = true): SchemaMetadata | null {
+    if (metadataCache.has(schema)) {
+        return metadataCache.get(schema)!;
+    }
+
 	const result: SchemaMetadata = {};
 	const visited = new WeakSet<object>();
 
@@ -383,7 +389,9 @@ export function getSchemaMetadata(schema: AnySchema, pipe: boolean = true): Sche
 	walk(schema);
 	walk(unwrapSchema(schema));
 
-	return Object.keys(result).length ? result : null;
+	const metadata = Object.keys(result).length ? result : null;
+	metadataCache.set(schema, metadata);
+	return metadata;
 }
 
 /**

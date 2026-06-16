@@ -11,7 +11,7 @@ import { EffectHjsonSchema } from "./effect";
 import { PartHjsonSchema } from "./part";
 import { EngineHjsonSchema } from "./engine";
 
-import { metadata } from "./utils";
+import { cached, metadata } from "./utils";
 import { classSchema } from "./class";
 import { unlockableContentSchema } from "./content";
 import { TextureFieldSchema } from "./texture";
@@ -21,19 +21,18 @@ import { aiControllers } from "./ai-controller";
 import { unitCommands } from "./unit-command";
 import { unitStances } from "./unit-stance";
 import { ItemStackSchema } from "./item-stack";
-import type { ProjectContents } from "@project/types";
 import { rectSchema } from "./rect";
 import { Order } from "./order";
 
 const unitTypes = ["flying", "mech", "legs", "naval", "payload", "missile", "tank", "hover", "tether", "crawl"] as const;
 const unitTemplates = ["ErekirUnitType", "MissileUnitType", "NeoplasmUnitType", "TankUnitType", "UnitType"] as const;
 
-const unitObjectSchema = (context: ProjectContents) => ({
-	name: v.pipe(v.optional(v.string()), metadata({  order: Order.NAME })),
+const unitObjectSchema = {
+	name: v.pipe(v.optional(v.string()), metadata({ order: Order.NAME })),
 	type: v.pipe(v.optional(v.picklist(unitTypes)), metadata({ order: Order.TYPE })),
 	...unlockableContentSchema,
 	template: classSchema(unitTemplates, "UnitType"),
-    texture: TextureFieldSchema("@"),
+	texture: TextureFieldSchema("@"),
 	envRequired: v.pipe(
 		v.optional(EnvSchema, 0),
 		metadata({
@@ -724,10 +723,7 @@ const unitObjectSchema = (context: ProjectContents) => ({
 			description: "editor.unit.bounded-description",
 		}),
 	),
-	naval: v.pipe(
-		v.optional(v.boolean(), false),
-		metadata({ name: "editor.unit.naval", description: "editor.unit.naval-description" }),
-	),
+	naval: v.pipe(v.optional(v.boolean(), false), metadata({ name: "editor.unit.naval", description: "editor.unit.naval-description" })),
 	autoFindTarget: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
@@ -1504,13 +1500,6 @@ const unitObjectSchema = (context: ProjectContents) => ({
 			description: "editor.unit.stances-description",
 		}),
 	),
-	mineItems: v.pipe(
-		v.optional(v.array(ItemStackSchema(context))),
-		metadata({
-			name: "editor.unit.mine-items",
-			description: "editor.unit.mine-items-description",
-		}),
-	),
 	treadRects: v.pipe(
 		v.optional(v.array(rectSchema)),
 		metadata({
@@ -1519,27 +1508,11 @@ const unitObjectSchema = (context: ProjectContents) => ({
 			visibleWhen: { field: "type", value: "tank" },
 		}),
 	),
-	segmentUnit: v.pipe(
-		v.optional(UnitFieldSchema(context)),
-		metadata({
-			name: "editor.unit.segment-unit",
-			description: "editor.unit.segment-unit-description",
-			visibleWhen: { field: "type", value: "crawl" },
-		}),
-	),
-	segmentEndUnit: v.pipe(
-		v.optional(UnitFieldSchema(context)),
-		metadata({
-			name: "editor.unit.segment-end-unit",
-			description: "editor.unit.segment-end-unit-description",
-			visibleWhen: { field: "type", value: "crawl" },
-		}),
-	),
-});
+};
 
-export const UnitHjsonSchema: SchemaFn = (context) =>
+export const UnitHjsonSchema: SchemaFn = cached((context) =>
 	v.object({
-		...unitObjectSchema(context),
+		...unitObjectSchema,
 		baseRegion: TextureFieldSchema("@-base"),
 		legRegion: v.pipe(TextureFieldSchema("@-lg"), metadata({ visibleWhen: { field: "type", value: "legs" } })),
 		previewRegion: TextureFieldSchema("@-preview"),
@@ -1608,6 +1581,13 @@ export const UnitHjsonSchema: SchemaFn = (context) =>
 				description: "editor.unit.tread-effect-description",
 			}),
 		),
+		mineItems: v.pipe(
+			v.optional(v.array(ItemStackSchema(context))),
+			metadata({
+				name: "editor.unit.mine-items",
+				description: "editor.unit.mine-items-description",
+			}),
+		),
 		parts: v.pipe(
 			v.optional(v.array(PartHjsonSchema(context)), []),
 			metadata({
@@ -1673,7 +1653,24 @@ export const UnitHjsonSchema: SchemaFn = (context) =>
 			}),
 		),
 		research: v.optional(ResearchSchema(context)),
-	});
+		segmentUnit: v.pipe(
+			v.optional(UnitFieldSchema(context)),
+			metadata({
+				name: "editor.unit.segment-unit",
+				description: "editor.unit.segment-unit-description",
+				visibleWhen: { field: "type", value: "crawl" },
+			}),
+		),
+		segmentEndUnit: v.pipe(
+			v.optional(UnitFieldSchema(context)),
+			metadata({
+				name: "editor.unit.segment-end-unit",
+				description: "editor.unit.segment-end-unit-description",
+				visibleWhen: { field: "type", value: "crawl" },
+			}),
+		),
+	}),
+);
 
 export const UnitFieldSchema: SchemaFn = (context) =>
 	v.pipe(

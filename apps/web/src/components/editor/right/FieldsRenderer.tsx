@@ -9,11 +9,12 @@ import {
 	resolveSchema,
 	detectSchemaType,
 	getSchemaEntries,
-	getSchemaMetadata,
 	getSchemaFromPath,
 	type AnySchema,
 	type SchemaFn,
 	getDefaults,
+	type SchemaMetadata,
+	getSchemaMetadata,
 } from "@project/schema";
 
 import { getRenderer } from "#/components/editor/right/field/registry";
@@ -76,37 +77,57 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 		return () => observer.disconnect();
 	}, [setRender]);
 
-	if (isLoading || data === null) {
+	const result = useMemo(() => {
+		if (isLoading || data === null) {
+			return null;
+		}
+
+		let node = null;
+		try {
+			node = HJSON.parseWithCache(data);
+		} catch (error) {
+			return String(error);
+		}
+
+		if (!node.isObject()) {
+			return null;
+		}
+
+		const values = node.valueOf() as Record<string, unknown>;
+
+		if (!values || typeof values !== "object") {
+			return null;
+		}
+
+		const rootSchema = typeof schema === "function" ? schema(contents) : schema;
+		const resolvedRoot = resolveSchema(rootSchema, values);
+
+		const resolved = currentJsonPath !== null ? getSchemaFromPath(currentJsonPath, resolvedRoot, values) : null;
+		const activeSchema = resolved?.schema !== undefined ? resolveSchema(resolved.schema, resolved.value) : resolvedRoot;
+		const activeValues = (resolved?.value as Record<string, unknown>) ?? values;
+		const entries = getSchemaEntries(activeSchema);
+		const filtered = (filter ? levenshtein(entries, ([name]) => name, filter, 10) : entries).slice(0, render);
+		const activeDefaults = getDefaults(activeSchema, activeValues, true) as Record<string, unknown>;
+
+		const breadcrumbSegments = currentJsonPath !== null ? currentJsonPath.split(".") : [];
+
+		return {
+			activeValues,
+			breadcrumbSegments,
+			filtered,
+			activeDefaults,
+		};
+	}, [contents, currentJsonPath, data, filter, isLoading, render, schema]);
+
+	if (result === null) {
 		return null;
 	}
 
-	let node = null;
-	try {
-		node = HJSON.parseWithCache(data);
-	} catch (error) {
-		return String(error);
+	if (typeof result === "string") {
+		return result;
 	}
 
-	if (!node.isObject()) {
-		return null;
-	}
-
-	const values = node.valueOf() as Record<string, unknown>;
-	if (!values || typeof values !== "object") {
-		return null;
-	}
-
-	const rootSchema = typeof schema === "function" ? schema(contents) : schema;
-	const resolvedRoot = resolveSchema(rootSchema, values);
-
-	const resolved = currentJsonPath !== null ? getSchemaFromPath(currentJsonPath, resolvedRoot, values) : null;
-	const activeSchema = resolved?.schema !== undefined ? resolveSchema(resolved.schema, resolved.value) : resolvedRoot;
-	const activeValues = (resolved?.value as Record<string, unknown>) ?? values;
-	const entries = getSchemaEntries(activeSchema);
-	const filtered = (filter ? levenshtein(entries, ([name]) => name, filter, 10) : entries).slice(0, render);
-	const activeDefaults = getDefaults(activeSchema, activeValues, true) as Record<string, unknown>;
-
-	const breadcrumbSegments = currentJsonPath !== null ? currentJsonPath.split(".") : [];
+	const { activeValues, breadcrumbSegments, filtered, activeDefaults } = result;
 
 	return (
 		<div className="space-y-4 h-full w-full overflow-y-auto relative">
@@ -159,18 +180,30 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 						</InputGroup>
 					</div>
 					<div className="px-2 space-y-6">
-						{filtered.map(([name, entrySchema]) => (
-							<Child
-								key={name}
-								name={name}
-								entrySchema={entrySchema}
-								path={path}
-								onChange={onChange}
-								values={activeValues}
-								defaults={activeDefaults}
-								jsonPathBase={currentJsonPath ?? ""}
-							/>
-						))}
+						{filtered.map(([name, entrySchema]) => {
+							const metadata = getSchemaMetadata(entrySchema);
+
+							if (metadata?.visibleWhen) {
+								const conditionValue = activeValues[metadata.visibleWhen.field] ?? activeDefaults[metadata.visibleWhen.field];
+								if (conditionValue !== metadata.visibleWhen.value) {
+									return null;
+								}
+							}
+
+							return (
+								<Child
+									key={name}
+									name={name}
+									entrySchema={entrySchema}
+									path={path}
+									onChange={onChange}
+									value={activeValues[name]}
+									defaultValue={activeDefaults[name]}
+									metadata={metadata}
+									jsonPathBase={currentJsonPath ?? ""}
+								/>
+							);
+						})}
 						<div className="end w-full invisible h-2" ref={endRef}></div>
 					</div>
 				</ErrorBoundary>
@@ -179,35 +212,27 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	);
 });
 
-function Child({
+const Child = React.memo(function Child({
 	name,
 	entrySchema,
-	values,
+	value,
 	path,
 	onChange,
-	defaults,
+	defaultValue,
 	jsonPathBase,
+	metadata,
 }: {
 	name: string;
 	entrySchema: AnySchema;
-	values: Record<string, unknown>;
-	defaults: Record<string, unknown>;
+	value: unknown;
+	defaultValue: unknown;
 	path: string;
 	onChange: SchemaRendererProps["onChange"];
+	metadata: SchemaMetadata | null;
 	jsonPathBase: string;
 }) {
 	const key = name + path;
-	const childValue = values[name];
-	const { type, schema } = useMemo(() => detectSchemaType(entrySchema, childValue), [entrySchema, childValue]);
-	const metadata = useMemo(() => getSchemaMetadata(entrySchema), [entrySchema]);
-	const defaultValue = defaults[name];
-
-	if (metadata?.visibleWhen) {
-		const conditionValue = values[metadata.visibleWhen.field] ?? defaults[metadata.visibleWhen.field];
-		if (conditionValue !== metadata.visibleWhen.value) {
-			return null;
-		}
-	}
+	const { type, schema } = useMemo(() => detectSchemaType(entrySchema, value), [entrySchema, value]);
 
 	const Renderer = getRenderer(type);
 
@@ -227,7 +252,7 @@ function Child({
 			key={key}
 			path={path}
 			name={name}
-			value={childValue}
+			value={value}
 			onChange={onChange}
 			entrySchema={schema}
 			jsonPath={fullJsonPath}
@@ -236,4 +261,4 @@ function Child({
 			metadata={metadata}
 		/>
 	);
-}
+});
