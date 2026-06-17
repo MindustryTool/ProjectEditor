@@ -144,9 +144,30 @@ function SpriteCanvas({ path, schema }: { path: string; schema: AnySchema | Sche
 }
 
 function CoordsDisplay({ x, y }: { x: number; y: number }) {
+	const [position, setPosition] = useState({ x: 0, y: 0 });
+
+	useEffect(() => {
+		const handleMouseMove = (event: MouseEvent) => {
+			setPosition({ x: event.clientX, y: event.clientY });
+		};
+
+		window.addEventListener("mousemove", handleMouseMove);
+
+		// Clean up listener on component unmount
+		return () => {
+			window.removeEventListener("mousemove", handleMouseMove);
+		};
+	}, []);
+
 	return (
 		<div className="absolute top-1 left-1 text-muted-foreground text-xs">
-			x={Math.round(x)}, y={Math.round(y)}
+			({Math.round(x)}, {Math.round(y)})
+			{position.x !== 0 && position.y !== 0 && (
+				<span>
+					{", "}
+					mouse ({Math.round(position.x)}, {Math.round(position.y)})
+				</span>
+			)}
 		</div>
 	);
 }

@@ -127,18 +127,18 @@ function ArrayElement({
 
 	const displayName = useMemo(() => {
 		if (typeof value !== "object" || value === null) {
-			return `${index + 1}`;
+			return index.toString();
 		}
 
 		if ("name" in value) {
-			return `${index + 1}.${String(value.name)}`;
+			return `${index}.${String(value.name)}`;
 		}
 
 		if ("type" in value) {
-			return `${index + 1}.${String(value.type)}`;
+			return `${index}.${String(value.type)}`;
 		}
 
-		return `${index + 1}`;
+		return index.toString();
 	}, [value, index]);
 
 	const Renderer = getRenderer(type);
@@ -177,7 +177,7 @@ function ArrayElement({
 					<AlertDialogHeader>
 						<AlertDialogTitle>{t("editor.array-field.remove-title", "Remove item?")}</AlertDialogTitle>
 						<AlertDialogDescription>
-							{t("editor.array-field.remove-description", "Are you sure you want to remove item #{{index}}?", { index: index + 1 })}
+							{t("editor.array-field.remove-description", "Are you sure you want to remove item #{{index}}?", { index })}
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
