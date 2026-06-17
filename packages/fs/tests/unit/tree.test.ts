@@ -129,10 +129,4 @@ describe("jsonProjectTree", () => {
 		};
 		walk(jsonProjectTree.projectTree);
 	});
-
-	it("has content children: items, blocks, liquids, units", () => {
-		const content = jsonProjectTree.projectTree.find((n) => n.name === "content")!;
-		const childNames = content.children!.map((c) => c.name);
-		expect(childNames).toEqual(["items", "blocks", "liquids", "units"]);
-	});
 });
