@@ -140,45 +140,46 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 
 	const { entries, activeValues, breadcrumbSegments, filtered, activeDefaults } = result;
 
-	const showSearchIcon = entries.length > 10;
+	const showSearch = entries.length > 10;
 
 	return (
-		<div className="h-full w-full overflow-y-auto overflow-x-hidden relative flex flex-col gap-4" onScroll={handleScroll} ref={scrollRef}>
+		<div className="h-full w-full overflow-y-auto overflow-x-hidden relative flex flex-col" onScroll={handleScroll} ref={scrollRef}>
 			<Suspense>
 				<ErrorBoundary>
-					<div className="sticky flex items-center top-0 bg-card/50 backdrop-blur-xs z-50 border-b p-2">
-						{searchOpen && (
-							<InputGroup>
-								<InputGroupAddon>
-									<Search className="size-4" />
-								</InputGroupAddon>
-								<InputGroupInput //
-									ref={inputRef}
-									value={filter}
-									onChange={(e) => {
-										setFilter(e.target.value);
-										setRender(30);
-									}}
-									onBlur={() => {
-										if (!filter) {
-											setSearchOpen(false);
-										}
-									}}
-									placeholder={t("editor.search")}
-								/>
-								<InputGroupButton onClick={handleClearFilter}>
-									<X className="size-4" />
-								</InputGroupButton>
-							</InputGroup>
-						)}
-						{showSearchIcon && !searchOpen && (
-							<button className="h-auto text-muted-foreground hover:text-foreground" onClick={() => setSearchOpen(true)}>
-								<Search className="size-5" />
-							</button>
-						)}
-					</div>
+					{showSearch && (
+						<div className="sticky flex items-center top-0 bg-card/50 backdrop-blur-xs z-50 border-b p-2">
+							{searchOpen ? (
+								<InputGroup>
+									<InputGroupAddon>
+										<Search className="size-4" />
+									</InputGroupAddon>
+									<InputGroupInput //
+										ref={inputRef}
+										value={filter}
+										onChange={(e) => {
+											setFilter(e.target.value);
+											setRender(30);
+										}}
+										onBlur={() => {
+											if (!filter) {
+												setSearchOpen(false);
+											}
+										}}
+										placeholder={t("editor.search")}
+									/>
+									<InputGroupButton onClick={handleClearFilter}>
+										<X className="size-4" />
+									</InputGroupButton>
+								</InputGroup>
+							) : (
+								<button className="h-auto text-muted-foreground hover:text-foreground" onClick={() => setSearchOpen(true)}>
+									<Search className="size-5" />
+								</button>
+							)}
+						</div>
+					)}
 					<FieldProvider name={(activeValues["name"] as string) ?? ""}>
-						<div className="px-2 flex flex-col gap-6 pb-6">
+						<div className="px-2 flex flex-col gap-6 pb-6 pt-4">
 							{filtered.map(([name, entrySchema]) => {
 								const metadata = getSchemaMetadata(entrySchema);
 
