@@ -133,10 +133,25 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 		<div className="space-y-4 h-full w-full overflow-y-auto relative pb-6" onScroll={handleScroll} ref={scrollRef}>
 			<Suspense>
 				<ErrorBoundary>
-					{breadcrumbSegments.length > 0 && (
-						<div className="flex items-center gap-1 text-sm flex-wrap sticky top-0 bg-card z-50 border-b p-2">
+					<div className="grid gap-1 sticky top-0 bg-card z-50 border-b p-2">
+						{showSearchBar && (
+							<InputGroup>
+								<InputGroupAddon>
+									<Search className="size-4" />
+								</InputGroupAddon>
+								<InputGroupInput //
+									value={filter}
+									onChange={(e) => {
+										setFilter(e.target.value);
+										setRender(30);
+									}}
+									placeholder={t("editor.search")}
+								/>
+							</InputGroup>
+						)}
+						<div className="flex items-center gap-1 text-sm flex-wrap">
 							<button className="h-auto py-0.5 text-muted-foreground hover:text-foreground" onClick={() => setCurrentJsonPath(null)}>
-								Root
+								{fileName ?? "Root"}
 							</button>
 							{breadcrumbSegments.map((segment, index) => {
 								const prefix = breadcrumbSegments.slice(0, index + 1).join(".");
@@ -159,28 +174,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 								);
 							})}
 						</div>
-					)}
-					{fileName !== null && <div className="text-lg font-bold px-2">{fileName}</div>}
-					{showSearchBar && (
-						<div className="grid gap-2 px-2">
-							<span className="first-letter:uppercase flex items-center gap-2 text-sm leading-none font-medium select-none">
-								{t("editor.search")}
-							</span>
-							<InputGroup>
-								<InputGroupAddon>
-									<Search className="size-4" />
-								</InputGroupAddon>
-								<InputGroupInput //
-									value={filter}
-									onChange={(e) => {
-										setFilter(e.target.value);
-										setRender(30);
-									}}
-									placeholder={t("editor.search")}
-								/>
-							</InputGroup>
-						</div>
-					)}
+					</div>
 					<FieldProvider name={(activeValues["name"] as string) ?? ""}>
 						<div className="px-2 flex flex-col gap-6">
 							{filtered.map(([name, entrySchema]) => {

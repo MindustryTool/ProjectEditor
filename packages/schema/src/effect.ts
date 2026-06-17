@@ -371,10 +371,10 @@ const stringSchema: SchemaFn = (context) =>
 		v.string(),
 		v.transform((v) => v.replaceAll(context.name + "-", "")),
 		v.picklist(context.effects.map((effect) => effect.name.replaceAll(context.name + "-", ""))),
-        metadata({ option: "built-in" }),
+		metadata({ option: "built-in" }),
 	);
 
-const objectSchema: SchemaFn = (context) => v.pipe( EffectHjsonSchema(context), metadata({ option: "custom" }));
+const objectSchema: SchemaFn = (context) => v.pipe(EffectHjsonSchema(context), metadata({ option: "custom" }));
 
 export const EffectFieldSchema: SchemaFn = CachedSchema((context) => {
 	return v.pipe(
