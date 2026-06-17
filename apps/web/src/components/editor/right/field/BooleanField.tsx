@@ -19,7 +19,6 @@ export const BooleanField = React.memo(function BooleanField({
 
 	const handleChange = useCallback(
 		(val: boolean) => {
-			console.log({ val, defaultValue, jsonPath });
 			if (val === defaultValue) {
 				onChange(jsonPath, (parent, original, key) => parent.patchRemove(original, key));
 				return;

@@ -36,7 +36,6 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	const { data, isLoading, write } = useFileString(path);
 	const [render, setRender] = useState(30);
 	const [filters, setFilters] = useState<Record<string, string>>({});
-	const [searchOpen, setSearchOpen] = useState(false);
 	const { contents } = useProjectContext();
 	const fileName = useFileName();
 	const scrollTopRef = useRef<Map<string | null, number>>(new Map());
@@ -62,8 +61,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 
 	const handleClearFilter = useCallback(() => {
 		setFilter("");
-		setSearchOpen(false);
-	}, [setFilter, setSearchOpen]);
+	}, [setFilter]);
 
 	const handleScroll = useCallback(
 		(event: React.UIEvent) => {
@@ -80,12 +78,6 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 			scrollRef.current.scrollTop = scrollTopRef.current.get(currentJsonPath) || 0;
 		}
 	}, [currentJsonPath]);
-
-	useEffect(() => {
-		if (searchOpen && inputRef.current) {
-			inputRef.current.focus();
-		}
-	}, [searchOpen]);
 
 	const result = useMemo(() => {
 		if (isLoading || data === null) {
@@ -148,34 +140,25 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 				<ErrorBoundary>
 					{showSearch && (
 						<div className="sticky flex items-center top-0 bg-card/50 backdrop-blur-xs z-50 border-b p-2">
-							{searchOpen ? (
-								<InputGroup>
-									<InputGroupAddon>
-										<Search className="size-4" />
-									</InputGroupAddon>
-									<InputGroupInput //
-										ref={inputRef}
-										value={filter}
-										onChange={(e) => {
-											setFilter(e.target.value);
-											setRender(30);
-										}}
-										onBlur={() => {
-											if (!filter) {
-												setSearchOpen(false);
-											}
-										}}
-										placeholder={t("editor.search")}
-									/>
+							<InputGroup>
+								<InputGroupAddon>
+									<Search className="size-4" />
+								</InputGroupAddon>
+								<InputGroupInput //
+									ref={inputRef}
+									value={filter}
+									onChange={(e) => {
+										setFilter(e.target.value);
+										setRender(30);
+									}}
+									placeholder={t("editor.search")}
+								/>
+								{filter && (
 									<InputGroupButton onClick={handleClearFilter}>
-										<X className="size-4" />
+										<X className="size-4 text-destructive" />
 									</InputGroupButton>
-								</InputGroup>
-							) : (
-								<button className="h-auto text-muted-foreground hover:text-foreground" onClick={() => setSearchOpen(true)}>
-									<Search className="size-5" />
-								</button>
-							)}
+								)}
+							</InputGroup>
 						</div>
 					)}
 					<FieldProvider name={(activeValues["name"] as string) ?? ""}>
