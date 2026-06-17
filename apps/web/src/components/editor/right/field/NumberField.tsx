@@ -21,15 +21,19 @@ export const NumberField = React.memo(function NumberField({
 
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
-			const numValue = Number(event.target.value);
-			const isNaN = Number.isNaN(numValue);
+			const numValue = Number(event.currentTarget.value);
+			const isValidNumber = !Number.isNaN(numValue) && String(numValue) === event.currentTarget.value;
 
-			if (event.target.value === "") {
+			if (event.currentTarget.value === "") {
 				onChange(jsonPath, (parent, original, key) => parent.patchRemove(original, key));
 				return;
 			}
 
-			onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, isNaN ? event.currentTarget.value : numValue));
+            console.log(isValidNumber, event.currentTarget.value);
+
+			onChange(jsonPath, (parent, original, key) =>
+				parent.patchValue(original, key, isValidNumber ? numValue : event.currentTarget.value),
+			);
 		},
 		[onChange, jsonPath],
 	);
