@@ -137,6 +137,8 @@ export const useProjectSession = create<ProjectSession>()(
 		{
 			name: "project-session",
 			partialize: (state) => ({
+                currentJsonPath: state.currentJsonPath,
+                selectedTab: state.selectedTab,
 				recentlyOpenedFiles: state.recentlyOpenedFiles,
 				selectedPath: state.selectedPath,
 				expanded: state.expanded,

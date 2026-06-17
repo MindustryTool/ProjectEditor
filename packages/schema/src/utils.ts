@@ -50,6 +50,7 @@ export const types = [
 	"options",
 	"sound",
 	"record",
+	"barrels",
 	"never",
 ] as const;
 

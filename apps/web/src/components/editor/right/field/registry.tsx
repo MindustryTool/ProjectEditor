@@ -17,6 +17,7 @@ import type { SchemaRenderer } from "#/components/editor/right/field/types";
 import { OptionsField } from "#/components/editor/right/field/OptionsField";
 import type { Type } from "@project/schema";
 import { SoundField } from "#/components/editor/right/field/SoundField";
+import { BarrelsField } from "#/components/editor/right/field/BarrelsField";
 
 const renderers: Partial<Record<Type, SchemaRenderer>> = {
 	string: StringField,
@@ -30,12 +31,13 @@ const renderers: Partial<Record<Type, SchemaRenderer>> = {
 	liquids: LiquidsListField,
 	select: SelectField,
 	"item-stack": ItemRequirementField,
-    'liquid-stack': LiquidRequirementField,
+	"liquid-stack": LiquidRequirementField,
 	texture: TextureField,
 	textures: TexturesField,
 	env: EnvField,
 	options: OptionsField,
-    sound: SoundField,
+	sound: SoundField,
+	"barrels": BarrelsField,
 };
 
 export function getRenderer(type: Type) {

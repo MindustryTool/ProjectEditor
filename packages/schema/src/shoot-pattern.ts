@@ -55,7 +55,7 @@ export const shootAlternateObjectSchema = v.object({
 
 export const shootBarrelObjectSchema = v.object({
 	barrels: v.pipe(
-		v.optional(v.array(v.number())),
+		v.optional(v.pipe(v.array(v.number()), metadata({ type: "barrels" }))),
 		metadata({ name: "editor.shoot-pattern.barrels", description: "editor.shoot-pattern.barrels-description" }),
 	),
 	barrelOffset: v.pipe(
@@ -95,18 +95,21 @@ export const shootSummonObjectSchema = v.object({
 	spread: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.shoot-pattern.spread" })),
 });
 
-export const ShootPatternHjsonSchema: SchemaFn = new ClassMap<ShootPatternType>({
-	ShootAlternate: (_context) => shootAlternateObjectSchema.entries,
-	ShootBarrel: (_context) => shootBarrelObjectSchema.entries,
-	ShootHelix: (_context) => shootHelixObjectSchema.entries,
-	ShootMulti: (context) => ({
-		source: ShootPatternHjsonSchema(context),
-		dest: v.array(ShootPatternHjsonSchema(context)),
-	}),
-	ShootSine: (_context) => shootSineObjectSchema.entries,
-	ShootSpread: (_context) => shootSpreadObjectSchema.entries,
-	ShootSummon: (_context) => shootSummonObjectSchema.entries,
-	ShootPattern: (_context) => shootPatternBaseObjectSchema.entries,
-}, {
-	baseSchema: shootPatternBaseObjectSchema.entries,
-}).schema;
+export const ShootPatternHjsonSchema: SchemaFn = new ClassMap<ShootPatternType>(
+	{
+		ShootAlternate: (_context) => shootAlternateObjectSchema.entries,
+		ShootBarrel: (_context) => shootBarrelObjectSchema.entries,
+		ShootHelix: (_context) => shootHelixObjectSchema.entries,
+		ShootMulti: (context) => ({
+			source: ShootPatternHjsonSchema(context),
+			dest: v.array(ShootPatternHjsonSchema(context)),
+		}),
+		ShootSine: (_context) => shootSineObjectSchema.entries,
+		ShootSpread: (_context) => shootSpreadObjectSchema.entries,
+		ShootSummon: (_context) => shootSummonObjectSchema.entries,
+		ShootPattern: (_context) => shootPatternBaseObjectSchema.entries,
+	},
+	{
+		baseSchema: shootPatternBaseObjectSchema.entries,
+	},
+).schema;
