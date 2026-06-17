@@ -7,7 +7,7 @@ import type { SchemaFn } from "./utils";
 import { AbilityFieldSchema } from "./ability";
 import { WeaponHjsonSchema } from "./weapon";
 import { StatusStringSchema } from "./status";
-import { EffectHjsonSchema } from "./effect";
+import { EffectFieldSchema } from "./effect";
 import { PartHjsonSchema } from "./part";
 import { EngineHjsonSchema } from "./engine";
 
@@ -1552,7 +1552,7 @@ export const UnitHjsonSchema: SchemaFn = cached((context) =>
 			}),
 		),
 		fallEffect: v.pipe(
-			v.optional(EffectHjsonSchema(context)),
+			v.optional(EffectFieldSchema(context)),
 			metadata({
 				name: "editor.unit.fall-effect",
 				description: "editor.unit.fall-effect-description",
@@ -1560,7 +1560,7 @@ export const UnitHjsonSchema: SchemaFn = cached((context) =>
 			}),
 		),
 		fallEngineEffect: v.pipe(
-			v.optional(EffectHjsonSchema(context)),
+			v.optional(EffectFieldSchema(context)),
 			metadata({
 				name: "editor.unit.fall-engine-effect",
 				description: "editor.unit.fall-engine-effect-description",
@@ -1568,14 +1568,14 @@ export const UnitHjsonSchema: SchemaFn = cached((context) =>
 			}),
 		),
 		deathExplosionEffect: v.pipe(
-			v.optional(EffectHjsonSchema(context)),
+			v.optional(EffectFieldSchema(context)),
 			metadata({
 				name: "editor.unit.death-explosion-effect",
 				description: "editor.unit.death-explosion-effect-description",
 			}),
 		),
 		treadEffect: v.pipe(
-			v.optional(EffectHjsonSchema(context)),
+			v.optional(EffectFieldSchema(context)),
 			metadata({
 				name: "editor.unit.tread-effect",
 				description: "editor.unit.tread-effect-description",
