@@ -53,6 +53,8 @@ export {
 	getDefaults,
 } from "./utils";
 export type { AnySchema, SchemaFn, SchemaMetadata, SpriteData, Type } from "./utils";
+export { DrawFieldSchema, DrawHjsonSchema, drawClasses } from "./draw";
+export type { DrawClass } from "./draw";
 export { WeaponHjsonSchema } from "./weapon";
 export { ClassMap, classSchema } from "./class";
 export { Envs, EnvValues } from "./envs";
