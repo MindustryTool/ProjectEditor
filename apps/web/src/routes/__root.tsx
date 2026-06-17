@@ -43,7 +43,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 					<script crossOrigin="anonymous" src="//unpkg.com/react-scan/dist/auto.global.js"></script>
 				)}
 			</head>
-			<body className="flex min-h-screen flex-col font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)]">
+			<body className="flex flex-col font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)]">
 				<main className="flex flex-1 flex-col">
 					<PostHogProvider
 						apiKey={"phc_pErvtJqBMrt9QtSCztsLPdUhmaKnz6UEjNCRSYJR3o7Y"}

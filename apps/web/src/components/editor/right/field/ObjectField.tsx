@@ -54,7 +54,7 @@ export const ObjectField = React.memo(function ObjectField({
 
 	return (
 		<div className="grid gap-1 w-full">
-			<Button variant="secondary" className="flex border border-input justify-start items-center gap-2 flex-99 min-h-9" asChild>
+			<Button variant="secondary" className="flex border border-input justify-start items-center gap-2 flex-99 min-h-9 pr-1" asChild>
 				<div onClick={() => setCurrentJsonPath(jsonPath)}>
 					<ChevronRight className="size-4 shrink-0" />
 					<SchemaLabel name={name} metadata={metadata} />

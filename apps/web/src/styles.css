@@ -123,10 +123,10 @@
 	}
 
 	body {
-		@apply bg-background text-foreground overflow-hidden m-0;
+		@apply bg-background text-foreground overflow-hidden m-0 h-full;
 	}
     html {
-        @apply font-sans overflow-hidden m-0;
+        @apply font-sans overflow-hidden m-0 h-full;
 	}
 }
 

@@ -20,11 +20,12 @@ import {
 import { FieldProvider } from "#/components/editor/right/field/FieldContext";
 import { getRenderer } from "#/components/editor/right/field/registry";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "#/components/ui/input-group";
-import { Search, ChevronRight, X } from "lucide-react";
+import { Search, ChevronRight, X, ChevronLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn, levenshtein } from "#/lib/utils";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
 import { useFileName } from "#/hooks/use-path";
+import { Button } from "#/components/ui/button";
 
 interface FieldsRendererProps {
 	path: string;
@@ -132,6 +133,15 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 
 	const { entries, activeValues, breadcrumbSegments, filtered, activeDefaults } = result;
 
+	const handleBack = () => {
+		const segments = breadcrumbSegments.slice(0, -1);
+		if (segments.length > 0) {
+			setCurrentJsonPath(segments.join("."));
+		} else {
+			setCurrentJsonPath(null);
+		}
+	};
+
 	const showSearch = entries.length > 10;
 
 	return (
@@ -163,6 +173,16 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 					)}
 					<FieldProvider name={(activeValues["name"] as string) ?? ""}>
 						<div className="px-2 flex flex-col gap-6 pb-6 pt-4">
+							{breadcrumbSegments.length > 0 && (
+								<Button
+									className="justify-start"
+									variant="outline"
+									onClick={handleBack}
+								>
+									<ChevronLeft className="size-4" />
+									Back
+								</Button>
+							)}
 							{filtered.map(([name, entrySchema]) => {
 								const metadata = getSchemaMetadata(entrySchema);
 
