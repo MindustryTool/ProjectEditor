@@ -29,8 +29,6 @@ export const NumberField = React.memo(function NumberField({
 				return;
 			}
 
-            console.log(isValidNumber, event.currentTarget.value);
-
 			onChange(jsonPath, (parent, original, key) =>
 				parent.patchValue(original, key, isValidNumber ? numValue : event.currentTarget.value),
 			);
