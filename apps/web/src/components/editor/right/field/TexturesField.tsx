@@ -8,6 +8,7 @@ import { useProjectSession } from "@project/core";
 import { type SchemaMetadata } from "@project/schema";
 import React from "react";
 import { useState } from "react";
+import { useFieldContext } from "#/components/editor/right/field/FieldContext";
 
 export const TexturesField = React.memo(function TexturesField({ name, path, jsonPath, metadata }: SchemaRendererProps) {
 	const [render, setRender] = useState(3);
@@ -17,10 +18,7 @@ export const TexturesField = React.memo(function TexturesField({ name, path, jso
 		throw new Error("Texture field path must end with a file name");
 	}
 
-	const contentName = filename.split(".")[0];
-	if (!contentName) {
-		throw new Error("Texture field path must end with a file name");
-	}
+	const { name: contentName } = useFieldContext();
 
 	let { format } = metadata as SchemaMetadata & { format?: string };
 	const { length } = metadata as SchemaMetadata & { length?: number[] | number };

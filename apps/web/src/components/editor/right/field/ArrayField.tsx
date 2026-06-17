@@ -142,7 +142,7 @@ function ArrayElement({
 	}, [value, index]);
 
 	const Renderer = getRenderer(type);
-    
+
 	const isObject = type === "object";
 
 	return (
@@ -170,7 +170,7 @@ function ArrayElement({
 				)}
 			</ErrorBoundary>
 			<AlertDialog open={removeOpen} onOpenChange={setRemoveOpen}>
-				<Button className="flex-1" variant="destructive" onClick={() => setRemoveOpen(true)}>
+				<Button className="flex-1 min-h-9" variant="destructive" onClick={() => setRemoveOpen(true)}>
 					<Trash2 />
 				</Button>
 				<AlertDialogContent>

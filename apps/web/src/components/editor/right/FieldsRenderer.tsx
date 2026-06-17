@@ -17,6 +17,7 @@ import {
 	getSchemaMetadata,
 } from "@project/schema";
 
+import { FieldProvider } from "#/components/editor/right/field/FieldContext";
 import { getRenderer } from "#/components/editor/right/field/registry";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
 import { Search, ChevronRight } from "lucide-react";
@@ -180,32 +181,34 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 							</InputGroup>
 						</div>
 					)}
-					<div className="px-2 flex flex-col gap-6">
-						{filtered.map(([name, entrySchema]) => {
-							const metadata = getSchemaMetadata(entrySchema);
+					<FieldProvider name={(activeValues["name"] as string) ?? ""}>
+						<div className="px-2 flex flex-col gap-6">
+							{filtered.map(([name, entrySchema]) => {
+								const metadata = getSchemaMetadata(entrySchema);
 
-							if (metadata?.visibleWhen) {
-								const conditionValue = activeValues[metadata.visibleWhen.field] ?? activeDefaults[metadata.visibleWhen.field];
-								if (conditionValue !== metadata.visibleWhen.value) {
-									return null;
+								if (metadata?.visibleWhen) {
+									const conditionValue = activeValues[metadata.visibleWhen.field] ?? activeDefaults[metadata.visibleWhen.field];
+									if (conditionValue !== metadata.visibleWhen.value) {
+										return null;
+									}
 								}
-							}
 
-							return (
-								<Child
-									key={name}
-									name={name}
-									entrySchema={entrySchema}
-									path={path}
-									onChange={onChange}
-									value={activeValues[name]}
-									defaultValue={activeDefaults[name]}
-									metadata={metadata}
-									jsonPathBase={currentJsonPath ?? ""}
-								/>
-							);
-						})}
-					</div>
+								return (
+									<Child
+										key={name}
+										name={name}
+										entrySchema={entrySchema}
+										path={path}
+										onChange={onChange}
+										value={activeValues[name]}
+										defaultValue={activeDefaults[name]}
+										metadata={metadata}
+										jsonPathBase={currentJsonPath ?? ""}
+									/>
+								);
+							})}
+						</div>
+					</FieldProvider>
 				</ErrorBoundary>
 			</Suspense>
 		</div>

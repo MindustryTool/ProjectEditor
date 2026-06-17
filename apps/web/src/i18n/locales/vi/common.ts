@@ -239,4 +239,14 @@ export const vi = {
 	"editor.array-field.remove-description": "Bạn có chắc muốn xóa mục #{{index}}?",
 	"editor.array-field.remove-confirm": "Xóa",
 	"editor.array-field.remove-cancel": "Hủy",
+
+	"editor.search": "Tìm kiếm",
+	"editor.no-opened-file": "Chưa có tệp nào được mở",
+	"editor.create-new-file": "Tạo tệp mới",
+	"sprite-editor.open": "Mở Sprite Editor",
+	"sprite-editor.close": "Đóng Sprite Editor",
+	"app-settings.padding-label": "Khoảng đệm",
+	"app-settings.padding-description": "Khoảng đệm cho trình soạn thảo từ mép màn hình.",
+	"project-picker-screen.language": "Ngôn ngữ",
+	"project-picker-dialog.language": "Ngôn ngữ",
 } as const satisfies Record<string, string>;

@@ -7,6 +7,8 @@ import { useProjectSession } from "@project/core";
 import { type SchemaMetadata } from "@project/schema";
 import React from "react";
 
+import { useFieldContext } from "#/components/editor/right/field/FieldContext";
+
 export const TextureField = React.memo(function TextureField({ name, path, jsonPath, metadata }: SchemaRendererProps) {
 	const filename = path.split("/").pop();
 
@@ -14,10 +16,7 @@ export const TextureField = React.memo(function TextureField({ name, path, jsonP
 		throw new Error("Texture field path must end with a file name");
 	}
 
-	const contentName = filename.split(".")[0];
-	if (!contentName) {
-		throw new Error("Texture field path must end with a file name");
-	}
+	const { name: contentName } = useFieldContext();
 
 	let { format } = metadata as SchemaMetadata & { format?: string; fallback?: string };
     format = format || "$";

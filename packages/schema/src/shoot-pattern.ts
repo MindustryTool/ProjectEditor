@@ -55,7 +55,7 @@ export const shootAlternateObjectSchema = v.object({
 
 export const shootBarrelObjectSchema = v.object({
 	barrels: v.pipe(
-		v.optional(v.array(v.number()), [0, 0, 0]),
+		v.optional(v.array(v.number())),
 		metadata({ name: "editor.shoot-pattern.barrels", description: "editor.shoot-pattern.barrels-description" }),
 	),
 	barrelOffset: v.pipe(
