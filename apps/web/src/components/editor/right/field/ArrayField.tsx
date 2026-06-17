@@ -127,7 +127,7 @@ function ArrayElement({
 
 	const displayName = useMemo(() => {
 		if (typeof value !== "object" || value === null) {
-			return index.toString();
+			return `${index}.`;
 		}
 
 		if ("name" in value) {
@@ -138,7 +138,7 @@ function ArrayElement({
 			return `${index}.${String(value.type)}`;
 		}
 
-		return index.toString();
+		return `${index}.`;
 	}, [value, index]);
 
 	const Renderer = getRenderer(type);
