@@ -8,10 +8,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from "sonner";
 import { HJSON } from "@project/hjson";
 import * as v from "valibot";
+import { FieldIssue } from "#/components/editor/right/field/FieldIssue";
 
 export const ObjectField = React.memo(function ObjectField({
 	name,
 	jsonPath,
+	path,
 	metadata,
 	value,
 	entrySchema,
@@ -51,28 +53,31 @@ export const ObjectField = React.memo(function ObjectField({
 	);
 
 	return (
-		<Button variant="secondary" className="flex border border-input justify-start items-center gap-2 flex-99 min-h-9" asChild>
-			<div onClick={() => setCurrentJsonPath(jsonPath)}>
-				<ChevronRight className="size-4 shrink-0" />
-				<SchemaLabel name={name} metadata={metadata} />
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button className="ml-auto" variant="ghost" size="icon" onClick={handleEllipsisClick}>
-							<MoreHorizontal />
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent>
-						<DropdownMenuItem onClick={handleCopy}>
-							<Copy />
-							Copy
-						</DropdownMenuItem>
-						<DropdownMenuItem onClick={handlePaste}>
-							<Clipboard />
-							Paste
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
-			</div>
-		</Button>
+		<div className="grid gap-1 w-full">
+			<Button variant="secondary" className="flex border border-input justify-start items-center gap-2 flex-99 min-h-9" asChild>
+				<div onClick={() => setCurrentJsonPath(jsonPath)}>
+					<ChevronRight className="size-4 shrink-0" />
+					<SchemaLabel name={name} metadata={metadata} />
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button className="ml-auto" variant="ghost" size="icon" onClick={handleEllipsisClick}>
+								<MoreHorizontal />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent>
+							<DropdownMenuItem onClick={handleCopy}>
+								<Copy />
+								Copy
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={handlePaste}>
+								<Clipboard />
+								Paste
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				</div>
+			</Button>
+			<FieldIssue path={path} jsonPath={jsonPath} showChildErrors />
+		</div>
 	);
 });

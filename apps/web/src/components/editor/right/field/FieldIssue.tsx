@@ -4,10 +4,22 @@ import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
 import { EMPTY_ARRAY } from "#/lib/utils";
 
-export const FieldIssue = React.memo(function FieldIssue({ path, jsonPath }: { path: string; jsonPath: string }) {
+export const FieldIssue = React.memo(function FieldIssue({
+	path,
+	jsonPath,
+	showChildErrors,
+}: {
+	path: string;
+	jsonPath: string;
+	showChildErrors?: boolean;
+}) {
 	const { t } = useTranslation();
 	const issues = useValidationStore(
-		useShallow((state) => (state.results.resultsByPath[path] || EMPTY_ARRAY).filter((issue) => issue.field === jsonPath)),
+		useShallow((state) =>
+			(state.results.resultsByPath[path] || EMPTY_ARRAY).filter((issue) =>
+				showChildErrors ? issue.field?.startsWith(jsonPath) : issue.field === jsonPath,
+			),
+		),
 	);
 
 	if (issues.length === 0) return null;
