@@ -155,8 +155,6 @@ export function detectSchemaType(rawSchema: AnySchema, value: unknown): { type: 
 
 	const metadataType = getTypeFromMetadata(unwrapped);
 
-	console.log(rawSchema, metadataType);
-
 	if (metadataType) {
 		return { type: metadataType, schema: unwrapped };
 	}
