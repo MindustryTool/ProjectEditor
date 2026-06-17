@@ -14,7 +14,7 @@ export const SchemaLabel = React.memo(function SchemaLabel({
 
 	return (
 		<span className="flex items-center gap-2 text-sm leading-none font-medium select-none">
-			{name} ({translatedName})
+			{name} {translatedName !== name && `(${translatedName})`}
 		</span>
 	);
 });

@@ -146,7 +146,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 		<div className="h-full w-full overflow-y-auto overflow-x-hidden relative flex flex-col gap-4" onScroll={handleScroll} ref={scrollRef}>
 			<Suspense>
 				<ErrorBoundary>
-					<div className="sticky top-0 bg-card/50 backdrop-blur-xs z-50 border-b p-2">
+					<div className="sticky flex items-center top-0 bg-card/50 backdrop-blur-xs z-50 border-b p-2">
 						{searchOpen && (
 							<InputGroup>
 								<InputGroupAddon>
@@ -173,8 +173,8 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 							</InputGroup>
 						)}
 						{showSearchIcon && !searchOpen && (
-							<button className="h-auto py-0.5 text-muted-foreground hover:text-foreground" onClick={() => setSearchOpen(true)}>
-								<Search className="size-4" />
+							<button className="h-auto text-muted-foreground hover:text-foreground" onClick={() => setSearchOpen(true)}>
+								<Search className="size-5" />
 							</button>
 						)}
 					</div>

@@ -69,7 +69,7 @@ export function FileExplorer({ className }: FileExplorerProps) {
 	);
 
 	return (
-		<div ref={containerRef} className={cn("h-full w-full overflow-hidden flex-col flex", className)}>
+		<div ref={containerRef} className={cn("h-full w-full overflow-hidden flex-col flex p-1", className)}>
 			<FileSearchDialog />
 			<Separator />
 			<div className="h-full w-full overflow-y-auto pb-10 pt-0 px-1">

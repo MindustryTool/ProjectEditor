@@ -336,15 +336,15 @@ function EditorMobileLayout() {
 					</div>
 				</TabsContent>
 				<TabsList className="w-full justify-around rounded-none border-t bg-card shrink-0 min-h-10 max-h-10 mt-auto p-0">
-					<TabsTrigger value="file" className="flex-1 p-1 h-full border-none rounded-none text-sm">
+					<TabsTrigger value="file" className="flex-1 px-2 h-full border-none rounded-none text-sm">
 						{t("editor.files")}
 					</TabsTrigger>
 					<Separator orientation="vertical" />
-					<TabsTrigger value="editor" className="flex-1 p-1 h-full border-none rounded-none text-sm">
+					<TabsTrigger value="editor" className="flex-1 px-2 h-full border-none rounded-none text-sm">
 						{t("editor.editor")}
 					</TabsTrigger>
 					<Separator orientation="vertical" />
-					<TabsTrigger value="property" className="flex-1 p-1 h-full border-none rounded-none text-sm">
+					<TabsTrigger value="property" className="flex-1 px-2 h-full border-none rounded-none text-sm">
 						{t("editor.properties")}
 					</TabsTrigger>
 				</TabsList>
