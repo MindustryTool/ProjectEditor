@@ -165,10 +165,6 @@ function EditorContent({ path }: { path: string }) {
 	}
 }
 
-const EditorLeftPanel = memo(function EditorLeftPanel() {
-	return <FileExplorer />;
-});
-
 const panelFallback = (
 	<div className="flex h-full w-full items-center justify-center">
 		<Spinner />
@@ -266,13 +262,17 @@ function EditorDesktopLayout() {
 			<ResizablePanelGroup orientation="horizontal" className="flex min-h-0 flex-1">
 				<ResizablePanel defaultSize="30%" minSize="20%">
 					<ErrorBoundary>
-						<EditorLeftPanel />
+						<Suspense>
+							<FileExplorer />
+						</Suspense>
 					</ErrorBoundary>
 				</ResizablePanel>
 				<ResizableHandle withHandle />
 				<EditorPanels />
 			</ResizablePanelGroup>
-			<StatusBar left={<StatusBarLeft />} center={<StatusBarCenter />} right={<StatusBarRight />} />
+			<Suspense>
+				<StatusBar left={<StatusBarLeft />} center={<StatusBarCenter />} right={<StatusBarRight />} />
+			</Suspense>
 		</Fragment>
 	);
 }

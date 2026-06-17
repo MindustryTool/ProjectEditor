@@ -4,7 +4,7 @@ import React, { useCallback } from "react";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
-import type { SchemaRendererProps } from "#/components/editor/right/field/types";
+import { handleNumber, type SchemaRendererProps } from "#/components/editor/right/field/types";
 import { EMPTY_ARRAY } from "#/lib/utils";
 import { FieldLabel } from "#/components/ui/field";
 import { Button } from "#/components/ui/button";
@@ -33,11 +33,7 @@ export const BarrelsField = React.memo(function BarrelsField({ name, value, onCh
 			newValue[itemIndex * 3 + 1] = array[itemIndex * 3 + 1];
 			newValue[itemIndex * 3 + 2] = array[itemIndex * 3 + 2];
 
-			const numValue = Number(event.currentTarget.value);
-
-			const isValidNumber = !Number.isNaN(numValue) && String(numValue) === event.currentTarget.value;
-
-			newValue[index] = isValidNumber ? numValue : event.currentTarget.value;
+			newValue[index] = handleNumber(event);
 
 			onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, newValue));
 		},

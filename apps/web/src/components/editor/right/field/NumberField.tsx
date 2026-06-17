@@ -3,7 +3,7 @@ import React, { useCallback } from "react";
 import { FieldIssue } from "./FieldIssue";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
-import type { SchemaRendererProps } from "#/components/editor/right/field/types";
+import { handleNumber, type SchemaRendererProps } from "#/components/editor/right/field/types";
 import { InputGroup, InputGroupButton, InputGroupInput } from "#/components/ui/input-group";
 import { RotateCcw } from "lucide-react";
 
@@ -21,17 +21,14 @@ export const NumberField = React.memo(function NumberField({
 
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
-			const numValue = Number(event.currentTarget.value);
-			const isValidNumber = !Number.isNaN(numValue) && String(numValue) === event.currentTarget.value;
+			const newValue = handleNumber(event);
 
 			if (event.currentTarget.value === "") {
 				onChange(jsonPath, (parent, original, key) => parent.patchRemove(original, key));
 				return;
 			}
 
-			onChange(jsonPath, (parent, original, key) =>
-				parent.patchValue(original, key, isValidNumber ? numValue : event.currentTarget.value),
-			);
+			onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, newValue));
 		},
 		[onChange, jsonPath],
 	);
