@@ -41,7 +41,11 @@ export const BarrelsField = React.memo(function BarrelsField({ name, value, onCh
 	);
 
 	const handleAdd = useCallback(() => {
-		const newValue = [...array, 0, 0, 0];
+		const newValue = [...array];
+		newValue.push(0);
+		while (newValue.length % 3 !== 0) {
+			newValue.push(0);
+		}
 		onChange(jsonPath, (parent, original, key) => parent.patchValue(original, key, newValue));
 	}, [array, jsonPath, onChange]);
 
