@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { HJSON } from "@project/hjson";
 import * as v from "valibot";
 import { FieldIssue } from "#/components/editor/right/field/FieldIssue";
+import { SchemaDescription } from "#/components/editor/right/field/SchemaDescription";
 
 export const ObjectField = React.memo(function ObjectField({
 	name,
@@ -54,7 +55,11 @@ export const ObjectField = React.memo(function ObjectField({
 
 	return (
 		<div className="grid gap-1 w-full">
-			<Button variant="secondary" className="flex border border-input justify-start items-center gap-2 flex-99 min-h-9 pr-1" asChild>
+			<Button
+				variant="secondary"
+				className="flex border border-input justify-start items-center gap-0 flex-99 min-h-9 px-1 overflow-hidden text-ellipsis"
+				asChild
+			>
 				<div onClick={() => setCurrentJsonPath(jsonPath)}>
 					<ChevronRight className="size-4 shrink-0" />
 					<SchemaLabel name={name} metadata={metadata} />
@@ -77,6 +82,7 @@ export const ObjectField = React.memo(function ObjectField({
 					</DropdownMenu>
 				</div>
 			</Button>
+			<SchemaDescription metadata={metadata} />
 			<FieldIssue path={path} jsonPath={jsonPath} showChildErrors />
 		</div>
 	);

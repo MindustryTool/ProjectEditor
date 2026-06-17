@@ -13,7 +13,7 @@ export const SchemaLabel = React.memo(function SchemaLabel({
 	const translatedName = metadata?.name ? t(metadata.name) : name;
 
 	return (
-		<span className="flex items-center gap-2 text-sm leading-none font-medium select-none">
+		<span className="flex items-center gap-2 text-sm leading-none font-medium select-none w-full overflow-hidden text-ellipsis">
 			{name} {translatedName !== name && `(${translatedName})`}
 		</span>
 	);
