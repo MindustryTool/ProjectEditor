@@ -300,8 +300,8 @@ function EditorMobileLayout() {
 					</SheetContent>
 				</Sheet>
 			</Toolbar>
-			<Tabs value={tab} onValueChange={setTab} className="flex min-h-0 flex-1 overflow-hidden w-full">
-				<TabsContent value="file" className="flex flex-1 overflow-hidden bg-background w-full p-1">
+			<Tabs value={tab} onValueChange={setTab} className="flex min-h-0 flex-1 overflow-hidden w-full gap-0">
+				<TabsContent value="file" className="flex flex-1 overflow-hidden bg-background w-full">
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
 						<div className="flex flex-col flex-1 overflow-hidden bg-background w-full gap-1">
 							<ErrorBoundary>
@@ -312,7 +312,7 @@ function EditorMobileLayout() {
 						</div>
 					</div>
 				</TabsContent>
-				<TabsContent value="editor" className="flex flex-1 overflow-hidden bg-background w-full p-1">
+				<TabsContent value="editor" className="flex flex-1 overflow-hidden bg-background w-full">
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
 						<div className="flex flex-col flex-1 overflow-hidden bg-background w-full gap-1">
 							<ErrorBoundary>
@@ -324,7 +324,7 @@ function EditorMobileLayout() {
 						</div>
 					</div>
 				</TabsContent>
-				<TabsContent value="property" className="flex flex-1 overflow-hidden bg-background w-full h-full p-1">
+				<TabsContent value="property" className="flex flex-1 overflow-hidden bg-background w-full h-full">
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
 						<div className="flex flex-1 overflow-hidden bg-background w-full flex-col">
 							<ErrorBoundary>
@@ -336,20 +336,19 @@ function EditorMobileLayout() {
 					</div>
 				</TabsContent>
 				<TabsList className="w-full justify-around rounded-none border-t bg-card shrink-0 min-h-10 max-h-10 mt-auto p-0">
-					<TabsTrigger value="file" className="flex-1 p-0 h-full border-none rounded-none">
+					<TabsTrigger value="file" className="flex-1 p-1 h-full border-none rounded-none text-sm">
 						{t("editor.files")}
 					</TabsTrigger>
 					<Separator orientation="vertical" />
-					<TabsTrigger value="editor" className="flex-1 p-0 h-full border-none rounded-none">
+					<TabsTrigger value="editor" className="flex-1 p-1 h-full border-none rounded-none text-sm">
 						{t("editor.editor")}
 					</TabsTrigger>
 					<Separator orientation="vertical" />
-					<TabsTrigger value="property" className="flex-1 p-0 h-full border-none rounded-none">
+					<TabsTrigger value="property" className="flex-1 p-1 h-full border-none rounded-none text-sm">
 						{t("editor.properties")}
 					</TabsTrigger>
 				</TabsList>
 			</Tabs>
-			<StatusBar left={<StatusBarLeft />} center={<StatusBarCenter />} right={<StatusBarRight />} />
 		</Fragment>
 	);
 }

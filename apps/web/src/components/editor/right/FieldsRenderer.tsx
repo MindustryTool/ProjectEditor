@@ -19,8 +19,8 @@ import {
 
 import { FieldProvider } from "#/components/editor/right/field/FieldContext";
 import { getRenderer } from "#/components/editor/right/field/registry";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
-import { Search, ChevronRight } from "lucide-react";
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "#/components/ui/input-group";
+import { Search, ChevronRight, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn, levenshtein } from "#/lib/utils";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
@@ -36,10 +36,12 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	const { data, isLoading, write } = useFileString(path);
 	const [render, setRender] = useState(30);
 	const [filters, setFilters] = useState<Record<string, string>>({});
+	const [searchOpen, setSearchOpen] = useState(false);
 	const { contents } = useProjectContext();
 	const fileName = useFileName();
 	const scrollTopRef = useRef<Map<string | null, number>>(new Map());
 	const scrollRef = useRef<HTMLDivElement>(null);
+	const inputRef = useRef<HTMLInputElement>(null);
 	const currentJsonPath = useProjectSession(selectCurrentJsonPath);
 	const setCurrentJsonPath = useProjectSession((s) => s.setCurrentJsonPath);
 
@@ -58,6 +60,11 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 		[currentJsonPath],
 	);
 
+	const handleClearFilter = useCallback(() => {
+		setFilter("");
+		setSearchOpen(false);
+	}, [setFilter, setSearchOpen]);
+
 	const handleScroll = useCallback(
 		(event: React.UIEvent) => {
 			if (event.currentTarget.scrollTop + event.currentTarget.clientHeight >= event.currentTarget.scrollHeight - 300) {
@@ -73,6 +80,12 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 			scrollRef.current.scrollTop = scrollTopRef.current.get(currentJsonPath) || 0;
 		}
 	}, [currentJsonPath]);
+
+	useEffect(() => {
+		if (searchOpen && inputRef.current) {
+			inputRef.current.focus();
+		}
+	}, [searchOpen]);
 
 	const result = useMemo(() => {
 		if (isLoading || data === null) {
@@ -127,56 +140,46 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 
 	const { entries, activeValues, breadcrumbSegments, filtered, activeDefaults } = result;
 
-	const showSearchBar = entries.length > 10;
+	const showSearchIcon = entries.length > 10;
 
 	return (
-		<div className="space-y-4 h-full w-full overflow-y-auto relative pb-6" onScroll={handleScroll} ref={scrollRef}>
+		<div className="h-full w-full overflow-y-auto overflow-x-hidden relative flex flex-col gap-4" onScroll={handleScroll} ref={scrollRef}>
 			<Suspense>
 				<ErrorBoundary>
-					<div className="grid gap-1 sticky top-0 bg-card z-50 border-b p-2">
-						{showSearchBar && (
+					<div className="sticky top-0 bg-card/50 backdrop-blur-xs z-50 border-b p-2">
+						{searchOpen && (
 							<InputGroup>
 								<InputGroupAddon>
 									<Search className="size-4" />
 								</InputGroupAddon>
 								<InputGroupInput //
+									className="text-sm"
+									ref={inputRef}
 									value={filter}
 									onChange={(e) => {
 										setFilter(e.target.value);
 										setRender(30);
 									}}
+									onBlur={() => {
+										if (!filter) {
+											setSearchOpen(false);
+										}
+									}}
 									placeholder={t("editor.search")}
 								/>
+								<InputGroupButton onClick={handleClearFilter}>
+									<X className="size-4" />
+								</InputGroupButton>
 							</InputGroup>
 						)}
-						<div className="flex items-center gap-1 text-sm flex-wrap">
-							<button className="h-auto py-0.5 text-muted-foreground hover:text-foreground" onClick={() => setCurrentJsonPath(null)}>
-								{fileName ?? "Root"}
+						{showSearchIcon && !searchOpen && (
+							<button className="h-auto py-0.5 text-muted-foreground hover:text-foreground" onClick={() => setSearchOpen(true)}>
+								<Search className="size-4" />
 							</button>
-							{breadcrumbSegments.map((segment, index) => {
-								const prefix = breadcrumbSegments.slice(0, index + 1).join(".");
-								return (
-									<React.Fragment key={prefix}>
-										<ChevronRight
-											className={cn("size-3 text-muted-foreground", {
-												"text-foreground": index === breadcrumbSegments.length - 1,
-											})}
-										/>
-										<button
-											className={cn("h-auto py-0.5 text-muted-foreground hover:text-foreground", {
-												"text-foreground": index === breadcrumbSegments.length - 1,
-											})}
-											onClick={() => setCurrentJsonPath(prefix)}
-										>
-											{segment}
-										</button>
-									</React.Fragment>
-								);
-							})}
-						</div>
+						)}
 					</div>
 					<FieldProvider name={(activeValues["name"] as string) ?? ""}>
-						<div className="px-2 flex flex-col gap-6">
+						<div className="px-2 flex flex-col gap-6 pb-6">
 							{filtered.map(([name, entrySchema]) => {
 								const metadata = getSchemaMetadata(entrySchema);
 
@@ -203,6 +206,33 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 							})}
 						</div>
 					</FieldProvider>
+					<div className="sticky bottom-0 bg-card/50 backdrop-blur-xs z-50 border-t p-2 mt-auto">
+						<div className="flex items-center gap-1 text-sm flex-wrap">
+							<button className="h-auto py-0.5 text-muted-foreground hover:text-foreground" onClick={() => setCurrentJsonPath(null)}>
+								{fileName ?? "Root"}
+							</button>
+							{breadcrumbSegments.map((segment, index) => {
+								const prefix = breadcrumbSegments.slice(0, index + 1).join(".");
+								return (
+									<React.Fragment key={prefix}>
+										<ChevronRight
+											className={cn("size-3 text-muted-foreground", {
+												"text-foreground": index === breadcrumbSegments.length - 1,
+											})}
+										/>
+										<button
+											className={cn("h-auto py-0.5 text-muted-foreground hover:text-foreground", {
+												"text-foreground": index === breadcrumbSegments.length - 1,
+											})}
+											onClick={() => setCurrentJsonPath(prefix)}
+										>
+											{segment}
+										</button>
+									</React.Fragment>
+								);
+							})}
+						</div>
+					</div>
 				</ErrorBoundary>
 			</Suspense>
 		</div>
