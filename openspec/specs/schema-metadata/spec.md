@@ -1,5 +1,6 @@
+## Purpose
+Schema metadata extraction utilities for valibot pipe schemas, enabling annotation-based field metadata.
 ## Requirements
-
 ### Requirement: Extract metadata from pipe schema
 
 The system SHALL provide a function `getSchemaMetadata(schema)` that extracts metadata annotations from a valibot pipe schema.
@@ -48,3 +49,13 @@ detection**.
 
 - **WHEN** `v.pipe(MindustryHexColorSchema, metadata({ visibleWhen: { field: "gas", value: true } }))` is passed to `detectSchemaType`
 - **THEN** the returned type SHALL be `"color"` (inner schema's metadata type takes precedence)
+
+### Requirement: Weapon schema metadata extractable
+
+The `getSchemaMetadata` function SHALL work on weapon schema fields wrapped with `metadata()`.
+
+#### Scenario: Weapon field metadata extraction
+
+- **WHEN** a weapon schema field with `metadata({ name: "editor.weapon.reload", description: "editor.weapon.reload-description" })` is passed to `getSchemaMetadata`
+- **THEN** the returned metadata SHALL contain `{ name: "editor.weapon.reload", description: "editor.weapon.reload-description" }`
+

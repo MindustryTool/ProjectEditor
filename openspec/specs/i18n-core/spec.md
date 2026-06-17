@@ -1,5 +1,6 @@
-## MODIFIED Requirements
-
+## Purpose
+Internationalization (i18n) framework for the mod editor, providing locale loading, switching, routing, and translation key management.
+## Requirements
 ### Requirement: Translation framework initialized
 
 The system SHALL initialize i18next with `react-i18next` on app startup, loading locale `.ts` files, registering both `common` and `schema` namespaces, and setting the active language.
@@ -104,8 +105,22 @@ The system SHALL set the `<html lang>` attribute to match the current locale fro
 - **WHEN** the user visits `/en/about`
 - **THEN** the `<html>` element SHALL have `lang="en"`
 
-## REMOVED Requirements
+### Requirement: Weapon translation keys in schema namespace
 
-### Requirement: Loads locale file
-**Reason**: Replaced by .ts file loading
-**Migration**: JSON import replaced with .ts import in `i18n.ts`
+The `schema` namespace SHALL contain `editor.weapon.*` translation keys in both `en` and `vi` locale files.
+
+#### Scenario: English weapon keys available
+
+- **WHEN** `t("editor.weapon.reload", { ns: "schema" })` is called with English locale
+- **THEN** it SHALL return the string `"Reload"`
+
+#### Scenario: Vietnamese weapon keys available
+
+- **WHEN** `t("editor.weapon.reload", { ns: "schema" })` is called with Vietnamese locale
+- **THEN** it SHALL return the string `"Nạp đạn"`
+
+#### Scenario: All weapon fields have translation keys
+
+- **WHEN** the `schema` namespace is loaded for either locale
+- **THEN** every field in `weaponObjectSchema` with metadata SHALL have a corresponding `editor.weapon.<field>` key and `editor.weapon.<field>-description` key in the translation file
+
