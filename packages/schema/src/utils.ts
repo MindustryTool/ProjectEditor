@@ -140,6 +140,11 @@ function getSchemaType(schema: AnySchema, value: unknown): { type: Type; schema:
  * Returns the detected type and the relevant schema (unwrapped or resolved).
  */
 export function detectSchemaType(rawSchema: AnySchema, value: unknown): { type: Type; schema: AnySchema } {
+	const rawMetadataType = getTypeFromMetadata(rawSchema);
+	if (rawMetadataType) {
+		return { type: rawMetadataType, schema: rawSchema };
+	}
+
 	const unwrapped = unwrapSchema(rawSchema) as unknown as {
 		kind: string;
 		type: string;
@@ -149,6 +154,8 @@ export function detectSchemaType(rawSchema: AnySchema, value: unknown): { type: 
 	} & AnySchema;
 
 	const metadataType = getTypeFromMetadata(unwrapped);
+
+	console.log(rawSchema, metadataType);
 
 	if (metadataType) {
 		return { type: metadataType, schema: unwrapped };
@@ -282,7 +289,7 @@ export function getSchemaEntries(schema: AnySchema): [string, AnySchema][] {
 		return getSchemaEntries(s.pipe[0] as AnySchema);
 	}
 
-    return [];
+	return [];
 }
 
 /**
@@ -338,9 +345,9 @@ const metadataCache = new WeakMap<AnySchema, SchemaMetadata | null>();
  * Returns null if no metadata is found.
  */
 export function getSchemaMetadata(schema: AnySchema, pipe: boolean = true): SchemaMetadata | null {
-    if (metadataCache.has(schema)) {
-        return metadataCache.get(schema)!;
-    }
+	if (metadataCache.has(schema)) {
+		return metadataCache.get(schema)!;
+	}
 
 	const result: SchemaMetadata = {};
 	const visited = new WeakSet<object>();
@@ -546,11 +553,7 @@ function parseJsonPath(path: string): PathSegment[] | null {
 	return segments;
 }
 
-export function getSchemaFromPath(
-	path: string,
-	schema: AnySchema,
-	value?: unknown,
-): { schema: AnySchema; value: unknown } | null {
+export function getSchemaFromPath(path: string, schema: AnySchema, value?: unknown): { schema: AnySchema; value: unknown } | null {
 	const segments = parseJsonPath(path);
 	if (segments === null) return null;
 	if (segments.length === 0) return { schema: resolveSchema(schema, value), value };
@@ -575,21 +578,15 @@ export function getSchemaFromPath(
 			if (re.type !== "array") return null;
 
 			current = getArrayItemSchema(resolvedEntry, segment.arrayIndex);
-			currentValue = currentValue
-				? (currentValue as Record<string, unknown>)[segment.name]
-				: undefined;
-			currentValue = currentValue
-				? (currentValue as unknown[])[segment.arrayIndex]
-				: undefined;
+			currentValue = currentValue ? (currentValue as Record<string, unknown>)[segment.name] : undefined;
+			currentValue = currentValue ? (currentValue as unknown[])[segment.arrayIndex] : undefined;
 		} else {
 			if (r.type !== "object" || !r.entries) return null;
 			const entrySchema = r.entries[segment.name];
 			if (!entrySchema) return null;
 
 			current = entrySchema;
-			currentValue = currentValue
-				? (currentValue as Record<string, unknown>)[segment.name]
-				: undefined;
+			currentValue = currentValue ? (currentValue as Record<string, unknown>)[segment.name] : undefined;
 		}
 	}
 

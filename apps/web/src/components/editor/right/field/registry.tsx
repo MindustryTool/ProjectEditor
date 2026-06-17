@@ -37,7 +37,7 @@ const renderers: Partial<Record<Type, SchemaRenderer>> = {
 	env: EnvField,
 	options: OptionsField,
 	sound: SoundField,
-	"barrels": BarrelsField,
+	barrels: BarrelsField,
 };
 
 export function getRenderer(type: Type) {
