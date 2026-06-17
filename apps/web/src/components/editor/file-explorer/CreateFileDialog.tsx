@@ -216,7 +216,7 @@ export function CreateFileDialog({ targetPath, onClose, onSuccess }: CreateFileD
 					<DialogFooter className="gap-2">
 						<input ref={fileInputRef} type="file" className="hidden" onChange={handleImportFile} />
 						<Button
-							variant="outline"
+                            className="mr-auto"
 							onClick={() => fileInputRef.current?.click()}
 							disabled={importing || (isContentType && !selectedContentFolder)}
 						>

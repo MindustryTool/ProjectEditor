@@ -20,6 +20,7 @@ interface ProjectSession {
 	projectContext: ProjectContext | null;
 	treeSnapshot: TreeSnapshot;
 	recentlyOpenedFiles: Record<string, RecentFileEntry[]>;
+    //TODO: use object {path: string, type: 'text' | "editor", jsonPath: string | null}
 	selectedPath: string | null;
     selectedTab: string;
 	expanded: Record<string, boolean>;
@@ -127,7 +128,7 @@ export const useProjectSession = create<ProjectSession>()(
 			},
 
 			setSelectedPath: (path) => {
-				set({ selectedPath: path });
+				set({ selectedPath: path, currentJsonPath: null });
 			},
 
 			setCurrentJsonPath: (path) => {
