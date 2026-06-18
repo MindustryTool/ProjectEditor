@@ -9,7 +9,10 @@ function computeNonTransparentBounds(imageData: ImageData) {
 	const data = imageData.data;
 	const w = imageData.width;
 	const h = imageData.height;
-	let minX = w, minY = h, maxX = 0, maxY = 0;
+	let minX = w,
+		minY = h,
+		maxX = 0,
+		maxY = 0;
 
 	for (let y = 0; y < h; y++) {
 		for (let x = 0; x < w; x++) {
@@ -87,34 +90,40 @@ export function PositionImage({
 		return hitBounds.y - image.height / 2;
 	}, [hitBounds, image]);
 
-	const handleDragMove = useCallback((event: Konva.KonvaEventObject<DragEvent>) => {
-		event.cancelBubble = true;
-		setLocalX(event.target.x() - hitRectOffX);
-		setLocalY(event.target.y() - hitRectOffY);
-	}, [hitRectOffX, hitRectOffY]);
+	const handleDragMove = useCallback(
+		(event: Konva.KonvaEventObject<DragEvent>) => {
+			event.cancelBubble = true;
+			setLocalX(event.target.x() - hitRectOffX);
+			setLocalY(event.target.y() - hitRectOffY);
+		},
+		[hitRectOffX, hitRectOffY],
+	);
 
 	const handleDragEnd = useCallback(
 		(event: Konva.KonvaEventObject<DragEvent>) => {
 			event.cancelBubble = true;
-			const dragX = Math.round(((event.target.x() - hitRectOffX) / 4) * 100) / 100;
-			const dragY = Math.round(((event.target.y() - hitRectOffY) / 4) * 100) / 100;
+			const dragX = (event.target.x() - hitRectOffX) / 4;
+			const dragY = (event.target.y() - hitRectOffY) / 4;
 			if (!onDrag) return;
 			onDrag(dragX, -dragY);
 		},
 		[onDrag, hitRectOffX, hitRectOffY],
 	);
 
-	const mirrorHandleDragMove = useCallback((event: Konva.KonvaEventObject<DragEvent>) => {
-		event.cancelBubble = true;
-		setLocalX(-event.target.x() + hitRectOffX);
-		setLocalY(event.target.y() - hitRectOffY);
-	}, [hitRectOffX, hitRectOffY]);
+	const mirrorHandleDragMove = useCallback(
+		(event: Konva.KonvaEventObject<DragEvent>) => {
+			event.cancelBubble = true;
+			setLocalX(-event.target.x() + hitRectOffX);
+			setLocalY(event.target.y() - hitRectOffY);
+		},
+		[hitRectOffX, hitRectOffY],
+	);
 
 	const mirrorHandleDragEnd = useCallback(
 		(event: Konva.KonvaEventObject<DragEvent>) => {
 			event.cancelBubble = true;
-			const dragX = Math.round(((event.target.x() - hitRectOffX) / 4) * 100) / 100;
-			const dragY = Math.round(((event.target.y() - hitRectOffY) / 4) * 100) / 100;
+			const dragX = (event.target.x() - hitRectOffX) / 4;
+			const dragY = (event.target.y() - hitRectOffY) / 4;
 			if (!onDrag) return;
 			onDrag(-dragX, -dragY);
 		},
@@ -128,14 +137,7 @@ export function PositionImage({
 
 	return (
 		<>
-			<KonvaImage
-				listening={false}
-				image={image}
-				x={localX}
-				y={localY}
-				offsetX={image.width / 2}
-				offsetY={image.height / 2}
-			/>
+			<KonvaImage listening={false} image={image} x={localX} y={localY} offsetX={image.width / 2} offsetY={image.height / 2} />
 			<Rect
 				x={localX + hitRectOffX}
 				y={localY + hitRectOffY}

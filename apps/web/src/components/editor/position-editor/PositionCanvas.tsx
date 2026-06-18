@@ -100,7 +100,7 @@ export function PositionCanvas({ path }: { path: string }) {
 						x={posRef.current.x}
 						y={posRef.current.y}
 					>
-						<Layer>
+						<Layer imageSmoothingEnabled={false}>
 							{baseSprite && <PositionImage path={baseSprite} x={0} y={0} mirror={false} />}
 							{sprites.map((region) =>
 								region.type === "shoot" ? (

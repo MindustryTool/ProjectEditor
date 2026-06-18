@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { ChevronRight, Clipboard, Copy, MoreHorizontal } from "lucide-react";
+import { ChevronRight, Clipboard, Copy, Delete, MoreHorizontal } from "lucide-react";
 import { Button } from "#/components/ui/button";
 import { SchemaLabel } from "#/components/editor/right/field/SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
@@ -54,6 +54,14 @@ export const ObjectField = React.memo(function ObjectField({
 		[entrySchema, jsonPath, onChange],
 	);
 
+    const handleDelete = useCallback(
+        (event: React.MouseEvent<HTMLDivElement>) => {
+            event.stopPropagation();
+            onChange(jsonPath, (parent, original, key) => parent.patchRemove(original, key));
+        },
+        [jsonPath, onChange],
+    );
+
 	return (
 		<div className="grid gap-1 w-full">
 			<Button
@@ -79,6 +87,10 @@ export const ObjectField = React.memo(function ObjectField({
 								<Clipboard />
 								Paste
 							</DropdownMenuItem>
+                            <DropdownMenuItem variant="destructive" onClick={handleDelete}>
+                                <Delete />
+                                Delete
+                            </DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</div>

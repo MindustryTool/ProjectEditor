@@ -2,11 +2,19 @@ import type Konva from "konva";
 import { useCallback } from "react";
 import type { ShootPositionData } from "@project/schema";
 import { updatePositionData } from "#/components/editor/position-editor/utils";
-import { Group, Line } from "react-konva";
+import { Circle, Group, Line } from "react-konva";
 
-const SIZE = 16;
+const SIZE = 10;
+const WIDTH = 80;
+const STROKE = 1;
 
-export function ShootItem({ region, write }: { region: ShootPositionData; write: (data: string | ((prev: string | null) => string)) => string }) {
+export function ShootItem({
+	region,
+	write,
+}: {
+	region: ShootPositionData;
+	write: (data: string | ((prev: string | null) => string)) => string;
+}) {
 	const weaponX = region.weaponPosition.x.value;
 	const weaponY = region.weaponPosition.y.value;
 	const shootOffsetX = region.position.x.value;
@@ -21,10 +29,10 @@ export function ShootItem({ region, write }: { region: ShootPositionData; write:
 	const handleDragEnd = useCallback(
 		(event: Konva.KonvaEventObject<DragEvent>) => {
 			event.cancelBubble = true;
-			const x = Math.round(event.target.x() / 4);
-			const y = Math.round(event.target.y() / 4);
-			const offsetX = Math.round((x - weaponX) * 100) / 100;
-			const offsetY = Math.round((-y - weaponY) * 100) / 100;
+			const x = event.target.x() / 4;
+			const y = event.target.y() / 4;
+			const offsetX = x - weaponX;
+			const offsetY = -y - weaponY;
 			write((prev) => updatePositionData(prev ?? "", region.position.x.path, region.position.y.path, offsetX, offsetY) ?? prev ?? "");
 		},
 		[weaponX, weaponY, region.position.x.path, region.position.y.path, write],
@@ -33,10 +41,10 @@ export function ShootItem({ region, write }: { region: ShootPositionData; write:
 	const handleMirrorDragEnd = useCallback(
 		(event: Konva.KonvaEventObject<DragEvent>) => {
 			event.cancelBubble = true;
-			const x = Math.round(event.target.x() / 4);
-			const y = Math.round(event.target.y() / 4);
-			const offsetX = Math.round((-x - weaponX) * 100) / 100;
-			const offsetY = Math.round((-y - weaponY) * 100) / 100;
+			const x = event.target.x() / 4;
+			const y = event.target.y() / 4;
+			const offsetX = -x - weaponX;
+			const offsetY = -y - weaponY;
 			write((prev) => updatePositionData(prev ?? "", region.position.x.path, region.position.y.path, offsetX, offsetY) ?? prev ?? "");
 		},
 		[weaponX, weaponY, region.position.x.path, region.position.y.path, write],
@@ -44,26 +52,16 @@ export function ShootItem({ region, write }: { region: ShootPositionData; write:
 
 	return (
 		<>
-			<Group
-				x={displayX}
-				y={displayY}
-				draggable
-				onDragMove={handleDragMove}
-				onDragEnd={handleDragEnd}
-			>
-				<Line points={[-SIZE, -SIZE, SIZE, SIZE]} stroke="#ef4444" strokeWidth={3} />
-				<Line points={[SIZE, -SIZE, -SIZE, SIZE]} stroke="#ef4444" strokeWidth={3} />
+			<Group x={displayX} y={displayY} draggable onDragMove={handleDragMove} onDragEnd={handleDragEnd}>
+				<Circle radius={SIZE} stroke="#ef4444" strokeWidth={STROKE} />
+				<Line points={[-SIZE, -SIZE, SIZE, SIZE]} fill="#ef4444" stroke="#000000" width={WIDTH} strokeWidth={STROKE} />
+				<Line points={[SIZE, -SIZE, -SIZE, SIZE]} fill="#ef4444" stroke="#000000" width={WIDTH} strokeWidth={STROKE} />
 			</Group>
 			{region.mirror && (
-				<Group
-					x={-displayX}
-					y={displayY}
-					draggable
-					onDragMove={handleDragMove}
-					onDragEnd={handleMirrorDragEnd}
-				>
-					<Line points={[-SIZE, -SIZE, SIZE, SIZE]} stroke="#ef4444" strokeWidth={3} />
-					<Line points={[SIZE, -SIZE, -SIZE, SIZE]} stroke="#ef4444" strokeWidth={3} />
+				<Group x={-displayX} y={displayY} draggable onDragMove={handleDragMove} onDragEnd={handleMirrorDragEnd}>
+					<Circle radius={SIZE} stroke="#ef4444" strokeWidth={STROKE} />
+					<Line points={[-SIZE, -SIZE, SIZE, SIZE]} fill="#ef4444" stroke="#000000" width={WIDTH} strokeWidth={STROKE} />
+					<Line points={[SIZE, -SIZE, -SIZE, SIZE]} fill="#ef4444" stroke="#000000" width={WIDTH} strokeWidth={STROKE} />
 				</Group>
 			)}
 		</>
