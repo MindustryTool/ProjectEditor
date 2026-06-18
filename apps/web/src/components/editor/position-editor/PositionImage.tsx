@@ -98,9 +98,7 @@ export function PositionImage({
 			event.cancelBubble = true;
 			const dragX = Math.round(((event.target.x() - hitRectOffX) / 4) * 100) / 100;
 			const dragY = Math.round(((event.target.y() - hitRectOffY) / 4) * 100) / 100;
-
 			if (!onDrag) return;
-
 			onDrag(dragX, -dragY);
 		},
 		[onDrag, hitRectOffX, hitRectOffY],
@@ -117,9 +115,7 @@ export function PositionImage({
 			event.cancelBubble = true;
 			const dragX = Math.round(((event.target.x() - hitRectOffX) / 4) * 100) / 100;
 			const dragY = Math.round(((event.target.y() - hitRectOffY) / 4) * 100) / 100;
-
 			if (!onDrag) return;
-
 			onDrag(-dragX, -dragY);
 		},
 		[onDrag, hitRectOffX, hitRectOffY],
