@@ -3,10 +3,8 @@ import { metadata } from "./utils";
 import { ResearchSchema } from "./research";
 import type { SchemaFn } from "./utils";
 import { unlockableContentSchema } from "./content";
-import { Order } from "./order";
 
 export const sectorBaseObjectSchema = v.object({
-	name: v.pipe(v.optional(v.string()), metadata({ order: Order.NAME })),
 	...unlockableContentSchema,
 	captureWave: v.pipe(v.optional(v.pipe(v.number(), v.integer()), 0), metadata({ name: "editor.sector.capture-wave" })),
 	difficulty: v.pipe(

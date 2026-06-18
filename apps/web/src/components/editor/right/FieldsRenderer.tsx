@@ -38,8 +38,8 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	const [render, setRender] = useState(30);
 	const [filters, setFilters] = useState<Record<string, string>>({});
 	const { contents } = useProjectContext();
-	const fileName = useFileName();
-	const filenameWithoutExtension = fileName?.split(".")[0] || "";
+	const filename = useFileName();
+	const filenameWithoutExt = filename?.split(".")[0] || "";
 	const scrollTopRef = useRef<Map<string | null, number>>(new Map());
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -146,6 +146,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	};
 
 	const showSearch = entries.length > 10;
+    const name = currentJsonPath === null ? filenameWithoutExt : ((activeValues["name"] as string) ?? "");
 
 	return (
 		<div className="h-full w-full overflow-y-auto overflow-x-hidden relative flex flex-col" onScroll={handleScroll} ref={scrollRef}>
@@ -174,7 +175,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 							</InputGroup>
 						</div>
 					)}
-					<FieldProvider name={filenameWithoutExtension}>
+					<FieldProvider name={name}>
 						<div className="px-2 flex flex-col gap-6 pb-6 pt-4">
 							{breadcrumbSegments.length > 0 && (
 								<Button className="justify-start" variant="outline" onClick={handleBack}>
@@ -210,8 +211,11 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 					</FieldProvider>
 					<div className="sticky bottom-0 bg-card/50 backdrop-blur-xs z-50 border-t p-2 mt-auto">
 						<div className="flex items-center gap-1 text-sm flex-wrap">
-							<button className="h-auto py-0.5 text-muted-foreground hover:text-foreground" onClick={() => selectedPath && setSelectedPath({ ...selectedPath, jsonPath: null })}>
-								{fileName ?? "Root"}
+							<button
+								className="h-auto py-0.5 text-muted-foreground hover:text-foreground"
+								onClick={() => selectedPath && setSelectedPath({ ...selectedPath, jsonPath: null })}
+							>
+								{filename ?? "Root"}
 							</button>
 							{breadcrumbSegments.map((segment, index) => {
 								const prefix = breadcrumbSegments.slice(0, index + 1).join(".");

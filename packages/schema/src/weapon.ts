@@ -18,9 +18,8 @@ const weaponTypes = ["Weapon", "BuildWeapon", "MineWeapon", "PointDefenseBulletW
 type WeaponType = (typeof weaponTypes)[number];
 
 const weaponObjectSchema = v.object({
-	name: v.pipe(v.optional(v.string()), metadata({ order: Order.NAME })),
-	type: v.pipe(classSchema(weaponTypes, "Weapon"), metadata({ order: Order.TYPE })),
 	...unlockableContentSchema,
+	type: v.pipe(classSchema(weaponTypes, "Weapon"), metadata({ order: Order.TYPE })),
 	baseTexture: TextureFieldSchema("@"),
 	heatTexture: TextureFieldSchema("@-heat"),
 	cellTexture: TextureFieldSchema("@-cell"),

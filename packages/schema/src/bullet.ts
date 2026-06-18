@@ -55,9 +55,8 @@ export type BulletClass = (typeof bulletTypes)[number];
 const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>> = CachedSchema(
 	(context) => {
 		return v.object({
-			name: v.pipe(v.optional(v.string()), metadata({ order: Order.NAME })),
-			type: v.pipe(classSchema(bulletTypes, "BasicBulletType"), metadata({ order: Order.TYPE })),
 			...unlockableContentSchema,
+			type: v.pipe(classSchema(bulletTypes, "BasicBulletType"), metadata({ order: Order.TYPE })),
 			lifetime: v.pipe(
 				v.optional(v.number(), 40),
 				metadata({

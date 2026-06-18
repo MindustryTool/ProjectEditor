@@ -28,9 +28,8 @@ const unitTypes = ["flying", "mech", "legs", "naval", "payload", "missile", "tan
 const unitTemplates = ["ErekirUnitType", "MissileUnitType", "NeoplasmUnitType", "TankUnitType", "UnitType"] as const;
 
 const unitObjectSchema = {
-	name: v.pipe(v.optional(v.string()), metadata({ order: Order.NAME })),
-	type: v.pipe(v.optional(v.picklist(unitTypes)), metadata({ order: Order.TYPE })),
 	...unlockableContentSchema,
+	type: v.pipe(v.optional(v.picklist(unitTypes)), metadata({ order: Order.TYPE })),
 	template: classSchema(unitTemplates, "UnitType"),
 	texture: TextureFieldSchema("@"),
 	envRequired: v.pipe(

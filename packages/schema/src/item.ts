@@ -5,13 +5,11 @@ import type { SchemaFn } from "./utils";
 import { metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
 import { unlockableContentSchema } from "./content";
-import { Order } from "./order";
 import { TextureFieldSchema } from "./texture";
 
 export const itemBaseObjectSchema = v.object({
-	name: v.pipe(v.optional(v.string()), metadata({ order: Order.NAME })),
-    texture: TextureFieldSchema("@"),
     ...unlockableContentSchema,
+    texture: TextureFieldSchema("@"),
 	hardness: v.pipe(
 		v.optional(v.pipe(v.number(), v.minValue(0), v.integer())),
 		metadata({ name: "editor.item.hardness", description: "editor.item.hardness-description" }),

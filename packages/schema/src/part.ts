@@ -139,16 +139,16 @@ export const shapePartObjectSchema = v.object({
 export const PartHjsonSchema: SchemaFn = new ClassMap<PartClass>({
 	DrawPart: (_context) => ({}),
 	RegionPart: (context) => ({
+			name: v.pipe(
+				v.optional(v.string()),
+				metadata({ name: "editor.part.name", description: "editor.part.name-description", order: Order.NAME }),
+			),
 			suffix: v.pipe(
 				v.optional(v.string(), ""),
 				metadata({
 					name: "editor.part.suffix",
 					description: "editor.part.suffix-description",
 				}),
-			),
-			name: v.pipe(
-				v.optional(v.string()),
-				metadata({ name: "editor.part.name", description: "editor.part.name-description", order: Order.NAME }),
 			),
 			mirror: v.pipe(
 				v.optional(v.boolean(), false),

@@ -13,7 +13,6 @@ import { TargetPriority } from "./target-priority";
 import { Envs, EnvSchema } from "./envs";
 import { classSchema } from "./class";
 import { unlockableContentSchema } from "./content";
-import { Order } from "./order";
 
 export const blockTypes = [
 	// Power
@@ -182,10 +181,9 @@ export const blockTypes = [
 export type BlockType = (typeof blockTypes)[number];
 
 export const blockObjectSchema = {
-	name: v.pipe(v.optional(v.string()), metadata({ order: Order.NAME })),
+	...unlockableContentSchema,
 	type: classSchema(blockTypes, "Block"),
     texture: TextureFieldSchema("@"),
-	...unlockableContentSchema,
 	shadowTexture: TextureFieldSchema("@-shadow"),
 	teamTexture: TextureFieldSchema("@-team"),
 	// Items

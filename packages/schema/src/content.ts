@@ -6,7 +6,7 @@ import { Order } from "./order";
 
 export const ContentNameSchema = v.pipe(
 	v.string(),
-	v.regex(/^[a-zA-Z0-9-]*$/, "Must be lowercase letters, digits, hyphens"),
+	v.regex(/^[a-zA-Z0-9.-]*$/, "Must be letters, digits, hyphens, dot"),
 	v.minLength(2),
 	v.maxLength(127),
 );
@@ -34,6 +34,7 @@ export const ContentFieldSchema = CachedSchema((context: ProjectContents) =>
 );
 
 export const unlockableContentSchema = {
+	name: v.pipe(ContentNameSchema, metadata({ order: Order.NAME })),
 	localizedName: v.pipe(
 		v.optional(v.string()),
 		metadata({ name: "editor.content.localized-name", description: "editor.content.localized-name-description", order: Order.BASIC }),
@@ -56,7 +57,11 @@ export const unlockableContentSchema = {
 	),
 	inlineDescription: v.pipe(
 		v.optional(v.boolean(), true),
-		metadata({ name: "editor.content.inline-description", description: "editor.content.inline-description-description", order: Order.BASIC }),
+		metadata({
+			name: "editor.content.inline-description",
+			description: "editor.content.inline-description-description",
+			order: Order.BASIC,
+		}),
 	),
 	hideDetails: v.pipe(
 		v.optional(v.boolean(), true),
@@ -76,7 +81,11 @@ export const unlockableContentSchema = {
 	),
 	allDatabaseTabs: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "editor.content.all-database-tabs", description: "editor.content.all-database-tabs-description", order: Order.BASIC }),
+		metadata({
+			name: "editor.content.all-database-tabs",
+			description: "editor.content.all-database-tabs-description",
+			order: Order.BASIC,
+		}),
 	),
 	databaseTag: v.pipe(
 		v.nullish(v.pipe(CategorySchema, metadata({}))),
