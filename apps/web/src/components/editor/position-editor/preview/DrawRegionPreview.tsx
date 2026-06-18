@@ -24,7 +24,7 @@ export function DrawRegionPreview({
 			onClick={() => posEdit.scrollTo(sprite.position.x.path)}
 			footer={<PositionInputs {...posEdit} />}
 		>
-			<span className="absolute top-1 left-1 text-xs text-muted-foreground">
+			<span className="text-xs text-muted-foreground">
 				[draw-region] {sprite.name ?? ""} {sprite.suffix ?? ""}
 			</span>
 			<div className="text-muted-foreground text-sm">draw-region</div>

@@ -24,8 +24,7 @@ export function EnginePreview({
 			onClick={() => posEdit.scrollTo(sprite.position.x.path)}
 			footer={<PositionInputs {...posEdit} />}
 		>
-			<span className="absolute top-1 left-1 text-xs text-muted-foreground">[engine]</span>
-			<div className="text-muted-foreground text-sm">
+			<div className="text-muted-foreground text-xs">
 				r={sprite.radius.value} rot={sprite.rotation.value}
 			</div>
 		</PreviewContainer>
