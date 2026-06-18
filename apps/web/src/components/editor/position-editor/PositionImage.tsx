@@ -52,6 +52,11 @@ export function PositionImage({
 	const [localY, setLocalY] = useState(y);
 
 	useEffect(() => {
+		setLocalX(x);
+		setLocalY(y);
+	}, [x, y]);
+
+	useEffect(() => {
 		if (!data) return;
 		const url = getImageUrl(data);
 		const img = new window.Image();

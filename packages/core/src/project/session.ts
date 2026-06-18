@@ -29,10 +29,10 @@ interface ProjectSession {
 	treeSnapshot: TreeSnapshot;
 	recentlyOpenedFiles: Record<string, RecentFileEntry[]>;
 	selectedPath: PathEntry | null;
-    selectedTab: string;
+    selectedTab: 'editor' | 'file' | 'property';
 	expanded: Record<string, boolean>;
 
-    setSelectedTab: (tab: string) => void;
+    setSelectedTab: (tab: 'editor' | 'file' | 'property') => void;
 	setExpanded: (path: string, isExpanded: boolean) => void;
 	toggleExpanded: (path: string) => void;
 	setManyExpanded: (updates: Record<string, boolean>) => void;

@@ -3,6 +3,7 @@ import { usePath } from "#/hooks/use-path";
 import { UnitHjsonSchema } from "@project/schema";
 import { Button } from "#/components/ui/button";
 import { useTranslation } from "react-i18next";
+import { useProjectSession } from "@project/core";
 
 interface UnitPanelProps {
 	path: string;
@@ -11,6 +12,7 @@ interface UnitPanelProps {
 export function UnitPanel({ path }: UnitPanelProps) {
 	const { t } = useTranslation();
 	const [entry, setPath] = usePath();
+	const setTab = useProjectSession((s) => s.setSelectedTab);
 
 	const isSpriteEditor = entry?.type === "sprite";
 
@@ -22,7 +24,13 @@ export function UnitPanel({ path }: UnitPanelProps) {
 						{t("position-editor.close")}
 					</Button>
 				) : (
-					<Button className="w-full" onClick={() => setPath({ path, type: "sprite", jsonPath: null })}>
+					<Button
+						className="w-full"
+						onClick={() => {
+							setTab("editor");
+							setPath({ path, type: "sprite", jsonPath: null });
+						}}
+					>
 						{t("position-editor.open")}
 					</Button>
 				)}

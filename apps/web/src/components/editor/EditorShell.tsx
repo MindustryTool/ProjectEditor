@@ -38,7 +38,9 @@ const SectorPanel = lazy(() => import("./right/SectorPanel").then((m) => ({ defa
 const StatusPanel = lazy(() => import("./right/StatusPanel").then((m) => ({ default: m.StatusPanel })));
 const UnitPanel = lazy(() => import("./right/UnitPanel").then((m) => ({ default: m.UnitPanel })));
 const BlockPanel = lazy(() => import("./right/BlockPanel").then((m) => ({ default: m.BlockPanel })));
-const UnitPositionEditor = lazy(() => import("#/components/editor/position-editor/UnitPositionEditor").then((mod) => ({ default: mod.UnitPositionEditor })));
+const UnitPositionEditor = lazy(() =>
+	import("#/components/editor/position-editor/UnitPositionEditor").then((mod) => ({ default: mod.UnitPositionEditor })),
+);
 
 type EditorRoute =
 	| { type: "empty" }
@@ -307,7 +309,11 @@ function EditorMobileLayout() {
 					<ChevronDown className="size-4" />
 				</ExportMenu>
 			</Toolbar>
-			<Tabs value={tab} onValueChange={setTab} className="flex min-h-0 flex-1 overflow-hidden w-full gap-0">
+			<Tabs
+				value={tab}
+				onValueChange={(v) => setTab(v as "editor" | "file" | "property")}
+				className="flex min-h-0 flex-1 overflow-hidden w-full gap-0"
+			>
 				<TabsContent value="file" className="flex flex-1 overflow-hidden bg-background w-full">
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
 						<div className="flex flex-col flex-1 overflow-hidden bg-background w-full gap-1">

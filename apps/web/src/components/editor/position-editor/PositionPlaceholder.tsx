@@ -1,6 +1,6 @@
 import type { EnginePositionData, PositionData, ShootPositionData } from "@project/schema";
 import type Konva from "konva";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Arc, Circle, Group, Line, Rect, Text } from "react-konva";
 
 const REGION_COLORS: Record<string, string> = {
@@ -14,6 +14,11 @@ type DragHandler = (x: number, y: number) => void;
 export function useDragHandling(initX: number, initY: number, onDrag?: DragHandler) {
 	const [localX, setLocalX] = useState(initX);
 	const [localY, setLocalY] = useState(initY);
+
+	useEffect(() => {
+		setLocalX(initX);
+		setLocalY(initY);
+	}, [initX, initY]);
 
 	const handleDragMove = useCallback((event: Konva.KonvaEventObject<DragEvent>) => {
 		event.cancelBubble = true;

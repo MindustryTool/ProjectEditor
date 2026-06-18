@@ -4,7 +4,7 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "#/componen
 import { useFileString, useProjectSession } from "@project/core";
 import { HJSON } from "@project/hjson";
 import { collectUnitPositions, type PositionData } from "@project/schema";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Layer, Stage } from "react-konva";
 import { PositionImage } from "./PositionImage";
 import { CoordsDisplay } from "./CoordsDisplay";
@@ -15,6 +15,19 @@ import { PositionSidebar } from "./PositionSidebar";
 export function PositionCanvas({ path }: { path: string }) {
 	const canvasRef = useRef<HTMLDivElement>(null);
 	const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
+	const [hiddenSprites, setHiddenSprites] = useState<Set<string>>(new Set());
+
+	const toggleSprite = useCallback((key: string) => {
+		setHiddenSprites((prev) => {
+			const next = new Set(prev);
+			if (next.has(key)) {
+				next.delete(key);
+			} else {
+				next.add(key);
+			}
+			return next;
+		});
+	}, []);
 
 	useEffect(() => {
 		const el = canvasRef.current;
@@ -102,13 +115,15 @@ export function PositionCanvas({ path }: { path: string }) {
 					>
 						<Layer imageSmoothingEnabled={false}>
 							{baseSprite && <PositionImage path={baseSprite} x={0} y={0} mirror={false} />}
-							{sprites.map((region) =>
-								region.type === "shoot" ? (
-									<ShootItem key={region.position.x.path} region={region} write={write} />
+							{sprites.map((region) => {
+								const key = region.position.x.path;
+								if (hiddenSprites.has(key)) return null;
+								return region.type === "shoot" ? (
+									<ShootItem key={key} region={region} write={write} />
 								) : (
-									<SpriteItem key={region.position.x.path} region={region} write={write} />
-								),
-							)}
+									<SpriteItem key={key} region={region} write={write} />
+								);
+							})}
 						</Layer>
 					</Stage>
 				</div>
@@ -117,7 +132,14 @@ export function PositionCanvas({ path }: { path: string }) {
 				<>
 					<ResizableHandle withHandle />
 					<ResizablePanel defaultSize="25%" minSize="15%" maxSize="40%">
-						<PositionSidebar sprites={sprites} />
+						<PositionSidebar
+							sprites={sprites}
+							path={path}
+							data={data}
+							write={write}
+							hiddenSprites={hiddenSprites}
+							onToggleSprite={toggleSprite}
+						/>
 					</ResizablePanel>
 				</>
 			)}
