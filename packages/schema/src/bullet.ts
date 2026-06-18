@@ -11,7 +11,7 @@ import { StatusFieldSchema } from "./status";
 import { LiquidFieldSchema } from "./liquid";
 import { metadata } from "./utils";
 import { ClassMap, classSchema } from "./class";
-import { unlockableContentSchema } from "./content";
+import { ContentNameSchema, unlockableContentSchema } from "./content";
 import { Order } from "./order";
 
 const BulletUnitFieldSchema: SchemaFn = (context) =>
@@ -56,6 +56,7 @@ const createBulletBaseObjectSchema: SchemaFn<v.ObjectSchema<v.ObjectEntries, v.E
 	(context) => {
 		return v.object({
 			...unlockableContentSchema,
+			name: v.optional(v.pipe(ContentNameSchema, metadata({ order: Order.NAME }))),
 			type: v.pipe(classSchema(bulletTypes, "BasicBulletType"), metadata({ order: Order.TYPE })),
 			lifetime: v.pipe(
 				v.optional(v.number(), 40),
