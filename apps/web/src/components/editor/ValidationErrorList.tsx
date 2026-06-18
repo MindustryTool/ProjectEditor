@@ -7,7 +7,7 @@ export type ValidationFileError = ValidationResult & { filePath: string };
 
 interface ValidationErrorListProps {
 	items: ValidationFileError[];
-	onNavigate: (path: string) => void;
+	onNavigate: (path: string, jsonPath: string | null) => void;
 	className?: string;
 }
 
@@ -47,7 +47,7 @@ export function ValidationErrorList({ items, onNavigate, className }: Validation
 						<button
 							type="button"
 							className="shrink-0 font-medium underline-offset-2 hover:underline cursor-pointer text-left text-sm"
-							onClick={() => onNavigate(err.filePath)}
+							onClick={() => onNavigate(err.filePath, err.field ?? null)}
 							title={err.filePath}
 						>
 							{err.filePath}

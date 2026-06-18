@@ -72,10 +72,10 @@ export function ExportMenuContent({ open, onOpenChange }: ExportMenuContentProps
 	}, [filename, handleExport, onOpenChange]);
 
 	const handleNavigate = useCallback(
-		(filePath: string) => {
+		(filePath: string, jsonPath: string | null) => {
 			setValidationOpen(false);
 			onOpenChange(false);
-			setPath({ path: filePath, type: "text", jsonPath: null });
+			setPath({ path: filePath, type: "text", jsonPath });
 		},
 		[setPath, onOpenChange],
 	);
@@ -272,7 +272,7 @@ function ValidationDialogContent({
 	onExportAnyway,
 }: {
 	onClose: () => void;
-	onNavigate: (filePath: string) => void;
+	onNavigate: (filePath: string, jsonPath: string | null) => void;
 	onExportAnyway: () => void;
 }) {
 	const { t } = useTranslation();

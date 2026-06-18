@@ -20,15 +20,28 @@ export function PositionPreview({
 }) {
 	switch (sprite.type) {
 		case "sprite":
-			return <SpritePreview sprite={sprite} onPositionChange={onPositionChange} hidden={hidden} onToggleVisibility={onToggleVisibility} />;
+			return (
+				<SpritePreview sprite={sprite} onPositionChange={onPositionChange} hidden={hidden} onToggleVisibility={onToggleVisibility} />
+			);
 		case "engine":
-			return <EnginePreview sprite={sprite} onPositionChange={onPositionChange} hidden={hidden} onToggleVisibility={onToggleVisibility} />;
+			return (
+				<EnginePreview sprite={sprite} onPositionChange={onPositionChange} hidden={hidden} onToggleVisibility={onToggleVisibility} />
+			);
 		case "shoot":
-			return <ShootPreview sprite={sprite} onPositionChange={onPositionChange} hidden={hidden} onToggleVisibility={onToggleVisibility} />;
+			return (
+				<ShootPreview sprite={sprite} onPositionChange={onPositionChange} hidden={hidden} onToggleVisibility={onToggleVisibility} />
+			);
 		case "part":
 			return <PartPreview sprite={sprite} onPositionChange={onPositionChange} hidden={hidden} onToggleVisibility={onToggleVisibility} />;
 		case "draw-region":
-			return <DrawRegionPreview sprite={sprite} onPositionChange={onPositionChange} hidden={hidden} onToggleVisibility={onToggleVisibility} />;
+			return (
+				<DrawRegionPreview
+					sprite={sprite}
+					onPositionChange={onPositionChange}
+					hidden={hidden}
+					onToggleVisibility={onToggleVisibility}
+				/>
+			);
 		default:
 			return (
 				<div className="w-full border p-8 rounded bg-card relative flex items-center justify-center">
