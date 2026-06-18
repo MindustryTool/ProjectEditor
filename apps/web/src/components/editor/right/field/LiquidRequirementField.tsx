@@ -10,7 +10,7 @@ import { ItemGrid } from "./ItemGrid";
 import { SchemaDescription } from "./SchemaDescription";
 import { SchemaLabel } from "./SchemaLabel";
 import type { SchemaRendererProps } from "#/components/editor/right/field/types";
-import { useProjectContext } from "#/components/editor/ProjectProvider";
+import { useProjectContext } from "#/components/editor/ProjectContext";
 
 export const LiquidRequirementField = React.memo(function LiquidRequirementField({
 	name,

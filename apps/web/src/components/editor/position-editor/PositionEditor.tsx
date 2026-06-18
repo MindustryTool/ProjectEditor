@@ -1,26 +1,25 @@
 import { useCanvasInteraction } from "#/components/editor/position-editor/use-canvas-interaction";
-import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { Spinner } from "#/components/ui/spinner";
 import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "#/components/ui/resizable";
 import { useFileString, useProjectSession } from "@project/core";
 import { HJSON } from "@project/hjson";
-import { collectPositionData, type AnySchema, type PositionData, type SchemaFn } from "@project/schema";
+import { collectUnitPositions, type PositionData } from "@project/schema";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Layer, Stage } from "react-konva";
 import { updatePositionData } from "#/components/editor/position-editor/utils";
 import { PositionImage } from "./PositionImage";
 import { EnginePositionPlaceholder, PositionPlaceholder, ShootPositionPlaceholder } from "./PositionPlaceholder";
 
-export function PositionEditor({ path, schema }: { path: string; schema: AnySchema | SchemaFn }) {
+export function PositionEditor({ path }: { path: string }) {
 	return (
 		<div className="w-full h-full overflow-hidden relative flex border rounded mb-1.5">
-			<PositionCanvas path={path} schema={schema} />
+			<PositionCanvas path={path} />
 		</div>
 	);
 }
 
-function PositionCanvas({ path, schema }: { path: string; schema: AnySchema | SchemaFn }) {
+function PositionCanvas({ path }: { path: string }) {
 	const canvasRef = useRef<HTMLDivElement>(null);
 	const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
 
@@ -39,7 +38,6 @@ function PositionCanvas({ path, schema }: { path: string; schema: AnySchema | Sc
 		return () => observer.disconnect();
 	}, []);
 
-	const { contents } = useProjectContext();
 	const { data, isLoading, write } = useFileString(path);
 	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
 	const baseSprite = useMemo(() => treeSnapshot.findContentSpritePath(path), [path, treeSnapshot]);
@@ -60,13 +58,10 @@ function PositionCanvas({ path, schema }: { path: string; schema: AnySchema | Sc
 				return { sprites: [], error: "Not an object" };
 			}
 
-			const resolvedSchema = typeof schema === "function" ? schema(contents) : schema;
-
 			return {
-				sprites: collectPositionData(
+				sprites: collectUnitPositions(
 					(filename) => treeSnapshot.getEntries().find((item) => item.name === filename)?.path,
 					node,
-					resolvedSchema,
 				),
 				error: null,
 			};
@@ -74,7 +69,7 @@ function PositionCanvas({ path, schema }: { path: string; schema: AnySchema | Sc
 			console.error(e);
 			return { sprites: [], error: String(e) };
 		}
-	}, [data, schema, contents, treeSnapshot, isLoading]);
+	}, [data, treeSnapshot, isLoading]);
 
 	return (
 		<ResizablePanelGroup orientation="horizontal" className="flex-1">

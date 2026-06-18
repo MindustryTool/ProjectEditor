@@ -39,7 +39,10 @@ export { ArrayTextureSchema } from "./textures";
 export { UnitHjsonSchema } from "./unit";
 export {
 	CachedSchema,
-	collectPositionData,
+	collectEnginePositions,
+	collectPartPositions,
+	collectUnitPositions,
+	collectWeaponPositions,
 	detectSchemaType,
 	findContent,
 	getArrayItemSchema,
@@ -48,7 +51,6 @@ export {
 	getSchemaMetadata,
 	hasNullableWrapper,
 	metadata,
-	resolvePositionType,
 	resolveSchema,
 	unwrapSchema,
 	getDefaults,

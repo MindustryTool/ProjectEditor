@@ -3,7 +3,7 @@ import { FormControl, FormLabel } from "#/components/ui/form";
 import { useFileString, useProjectSession, selectJsonPath } from "@project/core";
 import type { HjsonNode } from "@project/hjson";
 import { HJSON } from "@project/hjson";
-import { useProjectContext } from "#/components/editor/ProjectProvider";
+import { useProjectContext } from "#/components/editor/ProjectContext";
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
 	resolveSchema,

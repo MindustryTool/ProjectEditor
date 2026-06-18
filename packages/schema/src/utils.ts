@@ -468,146 +468,112 @@ export type UnknownPositionData = {
 
 export type PositionData = SpritePositionData | EnginePositionData | ShootPositionData | PartPositionData | DrawPositionData | UnknownPositionData;
 
-/**
- * Derives a position type string from a schema-validated object.
- * Checks schema metadata for a `positionType` key first, then falls back
- * to known shape patterns, and returns "unknown" as default.
- */
-export function resolvePositionType(value: Record<string, unknown>, schema: AnySchema): string {
-	const meta = getSchemaMetadata(schema);
-	if (meta && typeof (meta as Record<string, unknown>).regionType === "string") {
-		return (meta as Record<string, unknown>).regionType as string;
-	}
-	if (typeof value.radius === "number" && typeof value.rotation === "number" && !("name" in value)) {
-		return "engine";
-	}
-	if (typeof value.shots === "number" && typeof value.spread === "number" && !("rotation" in value) && !("mirror" in value)) {
-		return "shoot";
-	}
-	if (typeof value.suffix === "string" && typeof value.name === "string") {
-		return "draw-region";
-	}
-	if (typeof value.mirror === "boolean" && typeof value.sides !== "undefined") {
-		return "part";
-	}
-	return "unknown";
+export function collectEnginePositions(
+	basePath: string,
+	engines: unknown[] | undefined,
+): EnginePositionData[] {
+	if (!engines) return [];
+	return engines.map((e, i) => {
+		const obj = e as Record<string, unknown>;
+		const path = `${basePath}[${i}]`;
+		return {
+			type: "engine",
+			position: {
+				x: { value: (obj.x as number) ?? 0, path: `${path}.x` },
+				y: { value: (obj.y as number) ?? 0, path: `${path}.y` },
+			},
+			radius: { value: (obj.radius as number) ?? 0, path: `${path}.radius` },
+			rotation: { value: (obj.rotation as number) ?? 0, path: `${path}.rotation` },
+		};
+	});
 }
 
-const EXCLUDED_POSITION_FIELDS = new Set([
-	"shadowElevation", "shadowElevationScl", "rippleScale",
-	"waveTrailX", "waveTrailY", "circleTargetRadius", "outlineRadius",
-	"trailLength", "trailScl", "xRand", "yRand", "heatColor",
-	"inaccuracy", "shootCone", "layerOffset", "heatLayerOffset",
-	"turretHeatLayer", "outlineLayerOffset", "blending", "moves",
-]);
-
-/**
- * Traverses an HJSON object tree guided by valibot schemas to collect all position data entries.
- * For each object node that has name (string), x (number), y (number) properties and a matching
- * file (via findFileWithName), it records the position name, file path, mirror flag, type, and position paths.
- * Recursively visits nested objects and arrays, building dot-separated paths.
- * Returns an array of all collected PositionData objects.
- */
-export function collectPositionData(
+export function collectWeaponPositions(
 	findFileWithName: (filename: string) => string | undefined,
-	node: HjsonObjectNode,
-	schema: AnySchema,
+	basePath: string,
+	weapons: unknown[] | undefined,
 ): PositionData[] {
+	if (!weapons) return [];
 	const result: PositionData[] = [];
+	for (let i = 0; i < weapons.length; i++) {
+		const w = weapons[i] as Record<string, unknown>;
+		const path = `${basePath}[${i}]`;
+		const name = typeof w.name === "string" ? (w.name as string) : undefined;
+		const pngPath = name ? findFileWithName(`${name}.png`) : undefined;
 
-	function visit(value: unknown, currentSchema: AnySchema, currentPath: string) {
-		currentSchema = resolveSchema(currentSchema, value);
+		result.push({
+			type: "shoot",
+			position: {
+				x: { value: (w.shootX as number) ?? 0, path: `${path}.shootX` },
+				y: { value: (w.shootY as number) ?? 0, path: `${path}.shootY` },
+			},
+		});
 
-		if (value && typeof value === "object" && !Array.isArray(value)) {
-			const entries = getSchemaEntries(currentSchema);
-
-			const obj = value as Record<string, unknown>;
-
-			const hasName = typeof obj.name === "string";
-			const hasX = typeof obj.x === "number";
-			const hasY = typeof obj.y === "number";
-			const mirror = obj.mirror === true;
-
-			if (hasX && hasY) {
-				const parentKey = currentPath.split(".").pop()?.split("[")[0] ?? "";
-				if (EXCLUDED_POSITION_FIELDS.has(parentKey)) {
-					return;
-				}
-				const positionType = resolvePositionType(obj as Record<string, unknown>, currentSchema);
-				const filename = hasName ? `${obj.name}.png` : "";
-				const filePath = filename ? findFileWithName(filename) : undefined;
-				const pos: BasePosition = {
-					x: {
-						value: obj.x as number,
-						path: currentPath ? `${currentPath}.x` : "x",
-					},
-					y: {
-						value: obj.y as number,
-						path: currentPath ? `${currentPath}.y` : "y",
-					},
-				};
-
-				if (hasName && filePath) {
-					result.push({
-						type: "sprite",
-						name: obj.name as string,
-						path: filePath,
-						mirror,
-						position: pos,
-					});
-				} else if (positionType === "engine") {
-					result.push({
-						type: "engine",
-						radius: {
-							value: obj.radius as number,
-							path: currentPath ? `${currentPath}.radius` : "radius",
-						},
-						rotation: {
-							value: obj.rotation as number,
-							path: currentPath ? `${currentPath}.rotation` : "rotation",
-						},
-						position: pos,
-					});
-				} else if (positionType === "shoot") {
-					result.push({ type: "shoot", position: pos });
-				} else if (positionType === "part") {
-					result.push({
-						type: "part",
-						name: hasName ? (obj.name as string) : undefined,
-						mirror: mirror || undefined,
-						position: pos,
-					});
-				} else if (positionType === "draw-region") {
-					result.push({
-						type: "draw-region",
-						name: hasName ? (obj.name as string) : undefined,
-						position: pos,
-					});
-				} else {
-					result.push({ type: "unknown", position: pos });
-				}
-			}
-
-			for (const [key, childSchema] of entries) {
-				if (!(key in obj)) continue;
-
-				visit(obj[key], childSchema, currentPath ? `${currentPath}.${key}` : key);
-			}
-
-			return;
-		}
-
-		if (Array.isArray(value)) {
-			if ((currentSchema as unknown as { type: string }).type !== "array") return;
-			for (let i = 0; i < value.length; i++) {
-				visit(value[i], getArrayItemSchema(currentSchema, i), `${currentPath}[${i}]`);
-			}
+		if (pngPath) {
+			result.push({
+				type: "sprite",
+				name: name ?? "",
+				path: pngPath,
+				mirror: w.mirror === true,
+				position: {
+					x: { value: (w.x as number) ?? 0, path: `${path}.x` },
+					y: { value: (w.y as number) ?? 0, path: `${path}.y` },
+				},
+			});
+		} else {
+			result.push({
+				type: "sprite",
+				name: name ?? "",
+				path: "",
+				mirror: w.mirror === true,
+				position: {
+					x: { value: (w.x as number) ?? 0, path: `${path}.x` },
+					y: { value: (w.y as number) ?? 0, path: `${path}.y` },
+				},
+			});
 		}
 	}
-
-	visit(node.valueOf(), schema, "");
-
 	return result;
+}
+
+export function collectPartPositions(
+	findFileWithName: (filename: string) => string | undefined,
+	basePath: string,
+	parts: unknown[] | undefined,
+): PartPositionData[] {
+	if (!parts) return [];
+	return parts.map((p, i) => {
+		const obj = p as Record<string, unknown>;
+		const path = `${basePath}[${i}]`;
+		const name = typeof obj.name === "string" ? (obj.name as string) : undefined;
+		const pngPath = name ? findFileWithName(`${name}.png`) : undefined;
+		return {
+			type: "part",
+			name,
+			path: pngPath,
+			mirror: obj.mirror === true || undefined,
+			position: {
+				x: { value: (obj.x as number) ?? 0, path: `${path}.x` },
+				y: { value: (obj.y as number) ?? 0, path: `${path}.y` },
+			},
+		};
+	});
+}
+
+export function collectUnitPositions(
+	findFileWithName: (filename: string) => string | undefined,
+	node: HjsonObjectNode,
+): PositionData[] {
+	const raw = node.valueOf() as Record<string, unknown>;
+	const engines = raw.engines as unknown[] | undefined;
+	const weapons = raw.weapons as unknown[] | undefined;
+	const parts = raw.parts as unknown[] | undefined;
+
+	return [
+		...collectEnginePositions("engines", engines),
+		...collectWeaponPositions(findFileWithName, "weapons", weapons),
+		...collectPartPositions(findFileWithName, "parts", parts),
+	];
 }
 
 /**

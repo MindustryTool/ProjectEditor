@@ -2,7 +2,7 @@ import { lazy, memo, Suspense, useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useProjectSession } from "@project/core";
 import { TextEditor } from "#/components/editor/TextEditor";
-import { useProjectContext } from "#/components/editor/ProjectProvider";
+import { useProjectContext } from "#/components/editor/ProjectContext";
 
 const BundleGrid = lazy(() => import("#/components/editor/bundle/BundleGrid").then((mod) => ({ default: mod.BundleGrid })));
 

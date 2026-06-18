@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useValidationStore, useAppStore, useCurrentProject } from "@project/core";
 import { useShallow } from "zustand/react/shallow";
 import { usePath } from "#/hooks/use-path";
-import { useProjectContext } from "#/components/editor/ProjectProvider";
+import { useProjectContext } from "#/components/editor/ProjectContext";
 import { useParams } from "@tanstack/react-router";
 import { validationService } from "#/services/validation-service";
 

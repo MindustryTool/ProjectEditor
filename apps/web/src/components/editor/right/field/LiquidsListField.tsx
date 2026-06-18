@@ -1,7 +1,7 @@
 import { ContentImage } from "#/components/editor/ContentImage";
 import { FieldControl, Field } from "#/components/editor/right/field/Field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
-import { useProjectContext } from "#/components/editor/ProjectProvider";
+import { useProjectContext } from "#/components/editor/ProjectContext";
 import { unwrapSchema } from "@project/schema";
 import React from "react";
 import { FieldIssue } from "./FieldIssue";

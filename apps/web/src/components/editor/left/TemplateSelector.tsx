@@ -12,7 +12,7 @@ import {
 import { Label } from "#/components/ui/label";
 import { ContentImage } from "#/components/editor/ContentImage";
 import type { ContentEntry } from "@project/types";
-import { useProjectContext } from "#/components/editor/ProjectProvider";
+import { useProjectContext } from "#/components/editor/ProjectContext";
 
 const NONE = "none";
 

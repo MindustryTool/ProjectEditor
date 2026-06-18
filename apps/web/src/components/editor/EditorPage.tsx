@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { Progress } from "#/components/ui/progress";
 import { useInterval } from "usehooks-ts";
 import { toast } from "sonner";
-import { ErrorBoundary } from "#/components/ui/error-boundary";
 
 export function EditorPage() {
 	const [isLoading, setIsLoading] = useState(true);
@@ -87,11 +86,7 @@ export function EditorPage() {
 		return null;
 	}
 
-	return (
-		<ErrorBoundary>
-			<EditorShell />
-		</ErrorBoundary>
-	);
+	return <EditorShell />;
 }
 
 function LoadingDot() {
