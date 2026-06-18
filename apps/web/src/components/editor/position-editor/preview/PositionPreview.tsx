@@ -4,8 +4,7 @@ import { EnginePreview } from "./EnginePreview";
 import { ShootPreview } from "./ShootPreview";
 import { PartPreview } from "./PartPreview";
 import { DrawRegionPreview } from "./DrawRegionPreview";
-
-export type PositionEditHandler = (xPath: string, yPath: string, x: number, y: number) => void;
+import type { PositionEditHandler } from "./types";
 
 export function PositionPreview({
 	sprite,

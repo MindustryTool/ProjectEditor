@@ -1,7 +1,7 @@
 import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
 import type { SpritePositionData } from "@project/schema";
 import { useCallback, useState } from "react";
-import type { PositionEditHandler } from "./PositionPreview";
+import type { PositionEditHandler } from "./types";
 import { usePositionEdit } from "./usePositionEdit";
 import { PreviewContainer } from "./PreviewContainer";
 import { PositionInputs } from "./PositionInputs";

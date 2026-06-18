@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { PositionEditHandler } from "./PositionPreview";
+import type { PositionEditHandler } from "./types";
 
 export function usePositionEdit(
 	position: { x: { value: number; path: string }; y: { value: number; path: string } },

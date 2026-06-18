@@ -1,9 +1,10 @@
 import { usePath } from "#/hooks/use-path";
 import { Button } from "#/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { PositionPreview, type PositionEditHandler } from "./preview/PositionPreview";
+import { type PositionEditHandler } from "./preview/types";
 import { updatePositionData } from "./utils";
 import type { PositionData } from "@project/schema";
+import { PositionPreview } from "#/components/editor/position-editor/preview";
 
 export function PositionSidebar({
 	sprites,
@@ -32,12 +33,7 @@ export function PositionSidebar({
 
 	return (
 		<div className="h-full flex flex-col gap-2">
-			<Button
-				variant="outline"
-				size="sm"
-				className="shrink-0"
-				onClick={() => setPath({ path, type: "text", jsonPath: null })}
-			>
+			<Button variant="outline" size="sm" className="shrink-0" onClick={() => setPath({ path, type: "text", jsonPath: null })}>
 				<ArrowLeft className="h-4 w-4 mr-1" />
 				Back to text editor
 			</Button>

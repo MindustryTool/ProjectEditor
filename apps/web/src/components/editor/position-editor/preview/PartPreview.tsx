@@ -1,5 +1,5 @@
 import type { PartPositionData } from "@project/schema";
-import type { PositionEditHandler } from "./PositionPreview";
+import type { PositionEditHandler } from "./types";
 import { usePositionEdit } from "./usePositionEdit";
 import { PreviewContainer } from "./PreviewContainer";
 import { PositionInputs } from "./PositionInputs";
