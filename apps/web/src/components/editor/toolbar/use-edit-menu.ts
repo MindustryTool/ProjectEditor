@@ -7,7 +7,8 @@ import { canFormatFilePath, formatFileContent } from "#/lib/format-file-content"
 
 export function useEditMenu() {
 	const { t } = useTranslation();
-	const [path] = usePath();
+	const [pathEntry] = usePath();
+	const path = pathEntry?.path ?? null;
 	const { data, write } = useFileString(path ?? "");
 	const settings = useAppStore((s) => s.settings);
 	const projectId = useProjectSession((s) => s.projectContext?.project.id);

@@ -1,6 +1,6 @@
 import { ErrorBoundary } from "#/components/ui/error-boundary";
 import { FormControl, FormLabel } from "#/components/ui/form";
-import { useFileString, useProjectSession, selectCurrentJsonPath } from "@project/core";
+import { useFileString, useProjectSession, selectJsonPath } from "@project/core";
 import type { HjsonNode } from "@project/hjson";
 import { HJSON } from "@project/hjson";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
@@ -43,8 +43,9 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	const scrollTopRef = useRef<Map<string | null, number>>(new Map());
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
-	const currentJsonPath = useProjectSession(selectCurrentJsonPath);
-	const setCurrentJsonPath = useProjectSession((s) => s.setCurrentJsonPath);
+	const currentJsonPath = useProjectSession(selectJsonPath);
+	const setSelectedPath = useProjectSession((s) => s.setSelectedPath);
+	const selectedPath = useProjectSession((s) => s.selectedPath);
 
 	const onChange = useCallback(
 		(jsonPath: string, updater: (node: HjsonNode, original: string, key: string | number, root: HjsonNode) => string) => {
@@ -135,11 +136,12 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	const { entries, activeValues, breadcrumbSegments, filtered, activeDefaults } = result;
 
 	const handleBack = () => {
+		if (!selectedPath) return;
 		const segments = breadcrumbSegments.slice(0, -1);
 		if (segments.length > 0) {
-			setCurrentJsonPath(segments.join("."));
+			setSelectedPath({ ...selectedPath, jsonPath: segments.join(".") });
 		} else {
-			setCurrentJsonPath(null);
+			setSelectedPath({ ...selectedPath, jsonPath: null });
 		}
 	};
 
@@ -208,7 +210,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 					</FieldProvider>
 					<div className="sticky bottom-0 bg-card/50 backdrop-blur-xs z-50 border-t p-2 mt-auto">
 						<div className="flex items-center gap-1 text-sm flex-wrap">
-							<button className="h-auto py-0.5 text-muted-foreground hover:text-foreground" onClick={() => setCurrentJsonPath(null)}>
+							<button className="h-auto py-0.5 text-muted-foreground hover:text-foreground" onClick={() => selectedPath && setSelectedPath({ ...selectedPath, jsonPath: null })}>
 								{fileName ?? "Root"}
 							</button>
 							{breadcrumbSegments.map((segment, index) => {
@@ -224,7 +226,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 											className={cn("h-auto py-0.5 text-muted-foreground hover:text-foreground", {
 												"text-foreground": index === breadcrumbSegments.length - 1,
 											})}
-											onClick={() => setCurrentJsonPath(prefix)}
+											onClick={() => selectedPath && setSelectedPath({ ...selectedPath, jsonPath: prefix })}
 										>
 											{segment}
 										</button>

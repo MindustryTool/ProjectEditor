@@ -28,7 +28,7 @@ export const NoOpenedFileScreen = memo(function NoOpenedFileScreen() {
 					{files
 						.filter((file) => treeSnapshot.contains(file))
 						.map((file) => (
-							<span key={file} className="text-sm text-muted-foreground underline cursor-pointer" onClick={() => setPath(file)}>
+							<span key={file} className="text-sm text-muted-foreground underline cursor-pointer" onClick={() => setPath({ path: file, type: "text", jsonPath: null })}>
 								{file}
 							</span>
 						))}
@@ -41,9 +41,9 @@ export const NoOpenedFileScreen = memo(function NoOpenedFileScreen() {
 			<CreateFileDialog
 				targetPath={dialogTarget}
 				onClose={() => setDialogTarget(null)}
-				onSuccess={(path) => {
+				onSuccess={(newPath) => {
 					setDialogTarget(null);
-					setPath(path);
+					setPath({ path: newPath, type: "text", jsonPath: null });
 				}}
 			/>
 		</div>

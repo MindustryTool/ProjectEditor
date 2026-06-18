@@ -9,8 +9,8 @@ export function useRecentFileRecorder() {
 	useEffect(() => {
 		if (!path) return;
 		const state = useProjectSession.getState();
-		if (state.projectContext && state.treeSnapshot.contains(path)) {
-			state.recordFileAccess(context.project.id, path);
+		if (state.projectContext && state.treeSnapshot.contains(path.path)) {
+			state.recordFileAccess(context.project.id, path.path, path.type, path.jsonPath);
 		}
 	}, [path, context.project.id]);
 }

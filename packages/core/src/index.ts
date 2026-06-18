@@ -1,7 +1,7 @@
 export type * from "./project/store.js";
 export type { Exporter, ExportContext, ExportFs } from "./exporter.js";
 export type { ImportResult } from "./importer.js";
-export type { ProjectContext, RecentFileEntry } from "./project/session.js";
+export type { ProjectContext, RecentFileEntry, PathEntry } from "./project/session.js";
 export type { FileEntry, FileStore } from "./file/store.js";
 export type { UseFileResult } from "./file/use-file-content.js";
 export type { UseFileStringResult } from "./file/use-file-content-string.js";
@@ -21,7 +21,7 @@ export { importProject } from "./importer.js";
 export * from "./types";
 
 export { useAppStore } from "./project/store.js";
-export { useProjectSession, useCurrentProject, selectIsExpanded, selectCurrentJsonPath } from "./project/session.js";
+export { useProjectSession, useCurrentProject, selectIsExpanded, selectJsonPath } from "./project/session.js";
 
 export { useFileStore, isDirty, isError, getEntry, selectEntry, exists, selectIsSaving } from "./file/store.js";
 

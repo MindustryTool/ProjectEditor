@@ -24,7 +24,7 @@ export function FileExplorerProvider({ children }: { children: ReactNode }) {
 
 	const handleCreateSuccess = useCallback(
 		(newPath: string) => {
-			setSelectedPath(newPath);
+			setSelectedPath({ path: newPath, type: "text", jsonPath: null });
 			setCreateTargetPath(null);
 		},
 		[setSelectedPath, setCreateTargetPath],
@@ -43,7 +43,8 @@ export function FileExplorerProvider({ children }: { children: ReactNode }) {
 
 function PathListener() {
 	const setManyExpanded = useProjectSession((s) => s.setManyExpanded);
-	const path = useProjectSession((s) => s.selectedPath);
+	const selectedPath = useProjectSession((s) => s.selectedPath);
+	const path = selectedPath?.path;
 
 	useEffect(() => {
 		if (path) {

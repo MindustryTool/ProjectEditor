@@ -57,10 +57,10 @@ export function ValidationProvider() {
 	}, [projectContext, projectId]);
 
 	useEffect(() => {
-		if (path && projectId) {
-			validationService.scheduleValidation(projectId, path);
+		if (path?.path && projectId) {
+			validationService.scheduleValidation(projectId, path.path);
 		}
-	}, [path, projectId]);
+	}, [path?.path, projectId]);
 
 	return null;
 }

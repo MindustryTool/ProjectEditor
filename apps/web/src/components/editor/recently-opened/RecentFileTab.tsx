@@ -12,7 +12,7 @@ interface RecentFileTabProps {
 
 export function RecentFileTab({ entry, onClick, onClose }: RecentFileTabProps) {
 	const name = entry.path.split("/").pop() ?? entry.path;
-	const isActive = useProjectSession((s) => s.selectedPath === entry.path);
+	const isActive = useProjectSession((s) => s.selectedPath?.path === entry.path);
 	const isMissing = useProjectSession((s) => !s.treeSnapshot.contains(entry.path));
 
 	return (

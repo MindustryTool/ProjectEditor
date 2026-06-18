@@ -18,7 +18,7 @@ export type SchemaRenderer = React.ComponentType<SchemaRendererProps>;
 
 export function handleNumber(event: React.ChangeEvent<HTMLInputElement>) {
 	const numValue = Number(event.currentTarget.value);
-	const isValidNumber = !Number.isNaN(numValue) && String(numValue) === event.currentTarget.value.replace(/^0+/, "");
+	const isValidNumber = /^-?\d+(\.\d+)?$/.test(event.currentTarget.value);
 
 	return isValidNumber ? numValue : event.currentTarget.value;
 }

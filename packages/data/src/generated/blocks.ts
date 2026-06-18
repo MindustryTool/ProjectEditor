@@ -184,13 +184,6 @@ export const baseBlocks: readonly Block[] = [
     "className": "mindustry.content.Blocks$151"
   },
   {
-    "id": 207,
-    "name": "small-heat-redirector",
-    "mod": null,
-    "image": true,
-    "className": "mindustry.content.Blocks$152"
-  },
-  {
     "id": 208,
     "name": "heat-router",
     "mod": null,
@@ -1038,13 +1031,6 @@ export const baseBlocks: readonly Block[] = [
     "className": "mindustry.content.Blocks$279"
   },
   {
-    "id": 334,
-    "name": "large-cliff-crusher",
-    "mod": null,
-    "image": true,
-    "className": "mindustry.content.Blocks$280"
-  },
-  {
     "id": 335,
     "name": "plasma-bore",
     "mod": null,
@@ -1577,27 +1563,6 @@ export const baseBlocks: readonly Block[] = [
     "className": "mindustry.content.Blocks$365"
   },
   {
-    "id": 426,
-    "name": "advanced-launch-pad",
-    "mod": null,
-    "image": true,
-    "className": "mindustry.content.Blocks$370"
-  },
-  {
-    "id": 427,
-    "name": "landing-pad",
-    "mod": null,
-    "image": true,
-    "className": "mindustry.content.Blocks$371"
-  },
-  {
-    "id": 428,
-    "name": "interplanetary-accelerator",
-    "mod": null,
-    "image": true,
-    "className": "mindustry.content.Blocks$372"
-  },
-  {
     "id": 429,
     "name": "message",
     "mod": null,
@@ -1661,25 +1626,11 @@ export const baseBlocks: readonly Block[] = [
     "className": "mindustry.content.Blocks$381"
   },
   {
-    "id": 438,
-    "name": "tile-logic-display",
-    "mod": null,
-    "image": true,
-    "className": "mindustry.content.Blocks$382"
-  },
-  {
     "id": 439,
     "name": "canvas",
     "mod": null,
     "image": true,
     "className": "mindustry.content.Blocks$383"
-  },
-  {
-    "id": 440,
-    "name": "large-canvas",
-    "mod": null,
-    "image": true,
-    "className": "mindustry.content.Blocks$384"
   },
   {
     "id": 441,

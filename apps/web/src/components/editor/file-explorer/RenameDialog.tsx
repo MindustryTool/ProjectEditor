@@ -89,7 +89,7 @@ export function RenameDialog({ targetPath, onClose }: RenameDialogProps) {
 
 		try {
 			await context.fs.rename(targetPath!, newPath);
-			if (selectedPath === targetPath) setSelectedPath(newPath);
+			if (selectedPath?.path === targetPath) setSelectedPath({ path: newPath, type: selectedPath.type, jsonPath: selectedPath.jsonPath });
 			onClose();
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Rename failed");

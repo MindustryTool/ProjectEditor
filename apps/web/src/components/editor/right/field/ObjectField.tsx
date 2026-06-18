@@ -20,7 +20,8 @@ export const ObjectField = React.memo(function ObjectField({
 	entrySchema,
 	onChange,
 }: SchemaRendererProps) {
-	const setCurrentJsonPath = useProjectSession((s) => s.setCurrentJsonPath);
+	const setSelectedPath = useProjectSession((s) => s.setSelectedPath);
+	const selectedPath = useProjectSession((s) => s.selectedPath);
 
 	const handleEllipsisClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
 		event.stopPropagation();
@@ -60,7 +61,7 @@ export const ObjectField = React.memo(function ObjectField({
 				className="flex border border-input justify-start items-center gap-0 flex-99 min-h-9 px-1 overflow-hidden text-ellipsis"
 				asChild
 			>
-				<div onClick={() => setCurrentJsonPath(jsonPath)}>
+				<div onClick={() => selectedPath && setSelectedPath({ ...selectedPath, jsonPath })}>
 					<ChevronRight className="size-4 shrink-0" />
 					<SchemaLabel name={name} metadata={metadata} />
 					<DropdownMenu>

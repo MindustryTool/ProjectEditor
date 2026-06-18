@@ -10,19 +10,19 @@ interface UnitPanelProps {
 
 export function UnitPanel({ path }: UnitPanelProps) {
 	const { t } = useTranslation();
-	const [originalPath, setPath] = usePath();
+	const [entry, setPath] = usePath();
 
-	const isSpriteEditor = originalPath!.startsWith("sprite:");
+	const isSpriteEditor = entry?.type === "sprite";
 
 	return (
 		<>
 			<div className="p-2 border-b">
 				{isSpriteEditor ? (
-					<Button className="w-full" onClick={() => setPath(path)}>
+					<Button className="w-full" onClick={() => setPath({ path, type: "text", jsonPath: null })}>
 						{t("sprite-editor.close")}
 					</Button>
 				) : (
-					<Button className="w-full" onClick={() => setPath(`sprite:${path}`)}>
+					<Button className="w-full" onClick={() => setPath({ path, type: "sprite", jsonPath: null })}>
 						{t("sprite-editor.open")}
 					</Button>
 				)}

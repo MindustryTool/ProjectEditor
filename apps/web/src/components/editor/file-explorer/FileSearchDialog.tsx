@@ -69,7 +69,7 @@ function Content() {
 							<DialogClose
 								key={item.path}
 								className="w-full rounded-md border py-2 px-1 flex gap-2 items-center cursor-pointer bg-accent"
-								onClick={() => setPath(item.path)}
+								onClick={() => setPath({ path: item.path, type: "text", jsonPath: null })}
 							>
 								<FileIcon path={item.path} />
 								{item.path}

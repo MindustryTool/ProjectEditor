@@ -12,7 +12,7 @@ import { ErrorBoundary } from "#/components/ui/error-boundary";
 import { ProjectProvider } from "#/components/editor/ProjectProvider";
 import { lazy, memo, Suspense, useState } from "react";
 import { FileExplorerProvider } from "./file-explorer/FileExplorerProvider";
-import { useAppStore, useProjectSession, isBundleFilename } from "@project/core";
+import { useAppStore, useProjectSession, isBundleFilename, type PathEntry } from "@project/core";
 import { FileExplorer } from "#/components/editor/file-explorer";
 import { Spinner } from "#/components/ui/spinner";
 import { usePath } from "#/hooks/use-path";
@@ -44,7 +44,7 @@ type EditorRoute =
 	| { type: "bundle"; path: string }
 	| { type: "mod"; path: string }
 	| { type: "image"; path: string }
-	| { type: "sprite"; path: string; striped: string }
+	| { type: "sprite"; path: string }
 	| { type: "text"; path: string }
 	| { type: "msav"; path: string }
 	| { type: "msch"; path: string };
@@ -59,8 +59,14 @@ type PropertiesRoute =
 	| { type: "unit"; path: string }
 	| { type: "block"; path: string };
 
-function matchEditorRoute(path: string | null, entry: { kind: string } | undefined): EditorRoute {
-	if (path === null || entry === undefined) return { type: "empty" };
+function matchEditorRoute(entry: PathEntry | null, treeEntry: { kind: string } | undefined): EditorRoute {
+	if (entry === null || treeEntry === undefined) return { type: "empty" };
+
+	if (entry.type === "sprite") {
+		return { type: "sprite", path: entry.path };
+	}
+
+	const path = entry.path;
 
 	if (path.startsWith("bundles/") && isBundleFilename(path.split("/").pop() ?? "")) {
 		return { type: "bundle", path };
@@ -74,10 +80,6 @@ function matchEditorRoute(path: string | null, entry: { kind: string } | undefin
 		return { type: "image", path };
 	}
 
-	if (path.startsWith("sprite:")) {
-		return { type: "sprite", path, striped: path.replace("sprite:", "") };
-	}
-
 	if (path.endsWith(".msav")) {
 		return { type: "msav", path };
 	}
@@ -89,10 +91,12 @@ function matchEditorRoute(path: string | null, entry: { kind: string } | undefin
 	return { type: "text", path };
 }
 
-function matchPropertiesRoute(path: string | null): PropertiesRoute {
-	if (path === null) return { type: "none" };
+function matchPropertiesRoute(entry: PathEntry | null): PropertiesRoute {
+	if (entry === null) return { type: "none" };
 
-	if (path.startsWith("sprite:")) return { type: "none" };
+	if (entry.type === "sprite") return { type: "none" };
+
+	const path = entry.path;
 
 	if (path === "mod.hjson" || path === "mod.json") {
 		return { type: "mod", path };
@@ -129,11 +133,10 @@ function matchPropertiesRoute(path: string | null): PropertiesRoute {
 	return { type: "none" };
 }
 
-function EditorContent({ path }: { path: string }) {
+function EditorContent({ entry }: { entry: PathEntry }) {
 	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
-	const striped = path.replace("sprite:", "");
-	const entry = treeSnapshot.getEntry(striped);
-	const route = matchEditorRoute(path, entry);
+	const treeEntry = treeSnapshot.getEntry(entry.path);
+	const route = matchEditorRoute(entry, treeEntry);
 
 	switch (route.type) {
 		case "empty":
@@ -155,7 +158,7 @@ function EditorContent({ path }: { path: string }) {
 				</Suspense>
 			);
 		case "sprite":
-			return <UnitSpriteEditor striped={route.striped} />;
+			return <UnitSpriteEditor striped={route.path} />;
 		case "msav":
 			return <SchematicMapPreview path={route.path} type="map" />;
 		case "msch":
@@ -222,8 +225,8 @@ function PropertiesPanel({ route }: { route: PropertiesRoute }) {
 }
 
 const EditorPanels = memo(function EditorPanels() {
-	const [path] = usePath();
-	const propertiesRoute = path ? matchPropertiesRoute(path) : { type: "none" as const };
+	const [entry] = usePath();
+	const propertiesRoute = entry ? matchPropertiesRoute(entry) : { type: "none" as const };
 
 	return (
 		<>
@@ -232,7 +235,7 @@ const EditorPanels = memo(function EditorPanels() {
 					<RecentlyOpenedFilesBar />
 					<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
 						<ErrorBoundary>
-							<Suspense>{path ? <EditorContent path={path} /> : <NoOpenedFileScreen />}</Suspense>
+							<Suspense>{entry ? <EditorContent entry={entry} /> : <NoOpenedFileScreen />}</Suspense>
 						</ErrorBoundary>
 					</div>
 				</div>
@@ -280,8 +283,8 @@ function EditorDesktopLayout() {
 function EditorMobileLayout() {
 	const { t } = useTranslation();
 	const [sheetOpen, setSheetOpen] = useState(false);
-	const [path] = usePath();
-	const propertiesRoute = path ? matchPropertiesRoute(path) : { type: "none" as const };
+	const [entry] = usePath();
+	const propertiesRoute = entry ? matchPropertiesRoute(entry) : { type: "none" as const };
 	const tab = useProjectSession((s) => s.selectedTab);
 	const setTab = useProjectSession((s) => s.setSelectedTab);
 
@@ -318,7 +321,7 @@ function EditorMobileLayout() {
 							<ErrorBoundary>
 								<Suspense>
 									<RecentlyOpenedFilesBar />
-									{path ? <EditorContent path={path} /> : <NoOpenedFileScreen />}
+									{entry ? <EditorContent entry={entry} /> : <NoOpenedFileScreen />}
 								</Suspense>
 							</ErrorBoundary>
 						</div>

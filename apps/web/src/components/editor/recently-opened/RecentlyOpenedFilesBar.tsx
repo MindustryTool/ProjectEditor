@@ -14,10 +14,13 @@ export function RecentlyOpenedFilesBar() {
 	const handleTabClick = useCallback(
 		(filePath: string) => {
 			const state = useProjectSession.getState();
+			const existing = state.recentlyOpenedFiles[projectId]?.find((e) => e.path === filePath);
+			const type = existing?.type ?? "text";
+			const jsonPath = existing?.jsonPath ?? null;
 			if (state.treeSnapshot.contains(filePath)) {
-				state.recordFileAccess(projectId, filePath);
+				state.recordFileAccess(projectId, filePath, type, jsonPath);
 			}
-			state.setSelectedPath(filePath);
+			state.setSelectedPath({ path: filePath, type, jsonPath });
 		},
 		[projectId],
 	);
@@ -26,12 +29,12 @@ export function RecentlyOpenedFilesBar() {
 		(filePath: string) => {
 			const state = useProjectSession.getState();
 			state.removeFromRecentFiles(projectId, filePath);
-			const currentPath = state.selectedPath;
+			const currentPath = state.selectedPath?.path;
 			if (filePath.trim() === currentPath?.trim()) {
 				const files = state.recentlyOpenedFiles[projectId] ?? [];
 				const first = files.filter((e) => e.path !== filePath)[0];
 				if (first) {
-					state.setSelectedPath(first.path);
+					state.setSelectedPath({ path: first.path, type: first.type, jsonPath: first.jsonPath });
 				} else {
 					state.setSelectedPath(null);
 				}

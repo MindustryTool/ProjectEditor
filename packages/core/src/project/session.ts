@@ -9,8 +9,16 @@ export interface ProjectContext {
 	events: EventBus<ProjectEventMap>;
 }
 
+export interface PathEntry {
+	path: string;
+	type: "text" | "sprite";
+	jsonPath: string | null;
+}
+
 export interface RecentFileEntry {
 	path: string;
+	type: "text" | "sprite";
+	jsonPath: string | null;
 	lastAccessedAt: number;
 }
 
@@ -20,11 +28,9 @@ interface ProjectSession {
 	projectContext: ProjectContext | null;
 	treeSnapshot: TreeSnapshot;
 	recentlyOpenedFiles: Record<string, RecentFileEntry[]>;
-    //TODO: use object {path: string, type: 'text' | "editor", jsonPath: string | null}
-	selectedPath: string | null;
+	selectedPath: PathEntry | null;
     selectedTab: string;
 	expanded: Record<string, boolean>;
-	currentJsonPath: string | null;
 
     setSelectedTab: (tab: string) => void;
 	setExpanded: (path: string, isExpanded: boolean) => void;
@@ -33,11 +39,10 @@ interface ProjectSession {
 	setCurrentProject: (context: ProjectContext | null) => void;
 	updateCurrentProject: (patch: Partial<ProjectInfo>) => void;
 	reset: () => void;
-	recordFileAccess: (projectId: string, path: string) => void;
+	recordFileAccess: (projectId: string, path: string, type?: "text" | "sprite", jsonPath?: string | null) => void;
 	removeFromRecentFiles: (projectId: string, path: string) => void;
 	clearRecentFiles: (projectId: string) => void;
-	setSelectedPath: (path: string | null) => void;
-	setCurrentJsonPath: (path: string | null) => void;
+	setSelectedPath: (entry: PathEntry | null) => void;
 }
 
 export const useProjectSession = create<ProjectSession>()(
@@ -49,8 +54,6 @@ export const useProjectSession = create<ProjectSession>()(
 			selectedPath: null,
 			expanded: { "/": true },
             selectedTab: 'editor',
-			currentJsonPath: null,
-
 
             setSelectedTab: (tab) => {
 				set({ selectedTab: tab });
@@ -95,13 +98,13 @@ export const useProjectSession = create<ProjectSession>()(
 				set({ projectContext: null, treeSnapshot: new TreeSnapshot([]) });
 			},
 
-			recordFileAccess: (projectId, path) => {
+			recordFileAccess: (projectId, path, type = "text", jsonPath = null) => {
 				set((state) => {
 					const projectFiles = state.recentlyOpenedFiles[projectId] ?? [];
 					return {
 						recentlyOpenedFiles: {
 							...state.recentlyOpenedFiles,
-							[projectId]: touchEntry(projectFiles, path, Date.now()),
+							[projectId]: touchEntry(projectFiles, path, type, jsonPath, Date.now()),
 						},
 					};
 				});
@@ -127,18 +130,40 @@ export const useProjectSession = create<ProjectSession>()(
 				});
 			},
 
-			setSelectedPath: (path) => {
-				set({ selectedPath: path, currentJsonPath: null });
-			},
-
-			setCurrentJsonPath: (path) => {
-				set({ currentJsonPath: path });
+			setSelectedPath: (entry) => {
+				set({ selectedPath: entry });
 			},
 		}),
 		{
 			name: "project-session",
+			version: 1,
+			migrate: (persisted: unknown) => {
+				const state = persisted as Record<string, unknown>;
+				if (typeof state.selectedPath === "string" || state.selectedPath === null) {
+					const oldPath = state.selectedPath as string | null;
+					const oldJsonPath = state.currentJsonPath as string | null ?? null;
+					if (oldPath && oldPath.startsWith("sprite:")) {
+						state.selectedPath = { path: oldPath.slice(7), type: "sprite", jsonPath: null };
+					} else if (oldPath) {
+						state.selectedPath = { path: oldPath, type: "text", jsonPath: oldJsonPath };
+					}
+					delete state.currentJsonPath;
+				}
+				const recentFiles = state.recentlyOpenedFiles as Record<string, unknown[]> | undefined;
+				if (recentFiles) {
+					for (const key of Object.keys(recentFiles)) {
+						recentFiles[key] = recentFiles[key]!.map((entry: unknown) => {
+							const e = entry as Record<string, unknown>;
+							if (e.type === undefined) {
+								return { ...e, type: "text", jsonPath: null };
+							}
+							return e;
+						});
+					}
+				}
+				return state as unknown as ProjectSession;
+			},
 			partialize: (state) => ({
-                currentJsonPath: state.currentJsonPath,
                 selectedTab: state.selectedTab,
 				recentlyOpenedFiles: state.recentlyOpenedFiles,
 				selectedPath: state.selectedPath,
@@ -162,8 +187,8 @@ export function selectIsExpanded(path: string) {
 	return (state: ProjectSession) => Boolean(state.expanded[path] || false);
 }
 
-export function selectCurrentJsonPath(state: ProjectSession) {
-	return state.currentJsonPath;
+export function selectJsonPath(state: ProjectSession) {
+	return state.selectedPath?.jsonPath ?? null;
 }
 
 function evictLRU(entries: RecentFileEntry[]): RecentFileEntry[] {
@@ -172,14 +197,14 @@ function evictLRU(entries: RecentFileEntry[]): RecentFileEntry[] {
 	return sorted.slice(0, MAX_RECENT_FILES);
 }
 
-function touchEntry(entries: RecentFileEntry[], path: string, now: number): RecentFileEntry[] {
+function touchEntry(entries: RecentFileEntry[], path: string, type: "text" | "sprite", jsonPath: string | null, now: number): RecentFileEntry[] {
 	const idx = entries.findIndex((e) => e.path === path);
 	if (idx >= 0) {
 		const updated = [...entries];
-		updated[idx] = { ...updated[idx]!, lastAccessedAt: now };
+		updated[idx] = { ...updated[idx]!, type, jsonPath, lastAccessedAt: now };
 		return evictLRU(updated);
 	}
-	return evictLRU([{ path, lastAccessedAt: now }, ...entries]);
+	return evictLRU([{ path, type, jsonPath, lastAccessedAt: now }, ...entries]);
 }
 
 function removeEntry(entries: RecentFileEntry[], path: string): RecentFileEntry[] {

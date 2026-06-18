@@ -27,7 +27,7 @@ export function StatusBarRight() {
 	const handleNavigate = useCallback(
 		(filePath: string) => {
 			setDialogOpen(false);
-			setPath(filePath);
+			setPath({ path: filePath, type: "text", jsonPath: null });
 		},
 		[setPath],
 	);

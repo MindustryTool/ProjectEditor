@@ -75,7 +75,7 @@ export function ExportMenuContent({ open, onOpenChange }: ExportMenuContentProps
 		(filePath: string) => {
 			setValidationOpen(false);
 			onOpenChange(false);
-			setPath(filePath);
+			setPath({ path: filePath, type: "text", jsonPath: null });
 		},
 		[setPath, onOpenChange],
 	);

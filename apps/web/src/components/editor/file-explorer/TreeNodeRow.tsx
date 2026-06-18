@@ -30,7 +30,7 @@ interface TreeNodeRowProps {
 export const TreeNodeRow = React.memo(function TreeNodeRow({ node, depth, expanded, onToggle, onContextMenu }: TreeNodeRowProps) {
 	const context = useCurrentProject();
 	const currentPath = node.path === "/" ? "" : node.path;
-	const isSelected = useProjectSession((s) => s.selectedPath === currentPath);
+	const isSelected = useProjectSession((s) => s.selectedPath?.path === currentPath);
 	const setSelectedPath = useProjectSession((s) => s.setSelectedPath);
 	const setSelectedTab = useProjectSession((s) => s.setSelectedTab);
 	const isFolder = node.type === "folder";
@@ -61,8 +61,8 @@ export const TreeNodeRow = React.memo(function TreeNodeRow({ node, depth, expand
 			const targetBase = currentPath || "";
 			const targetPath = targetBase ? `${targetBase}/${item.name}` : item.name;
 			context.fs.rename(item.path, targetPath).then(() => {
-				if (selectedPath === item.path) {
-					setSelectedPath(targetPath);
+				if (selectedPath?.path === item.path) {
+					setSelectedPath({ path: targetPath, type: "text", jsonPath: null });
 				}
 			}).catch((err: unknown) => {
 				toast.error(`Move failed: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -83,7 +83,7 @@ export const TreeNodeRow = React.memo(function TreeNodeRow({ node, depth, expand
 		if (isFolder) {
 			onToggle?.();
 		} else {
-			setSelectedPath(currentPath);
+			setSelectedPath({ path: currentPath, type: "text", jsonPath: null });
 			setSelectedTab("editor");
 		}
 	}, [isFolder, onToggle, setSelectedPath, setSelectedTab, currentPath]);
