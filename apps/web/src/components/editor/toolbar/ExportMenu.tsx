@@ -1,14 +1,16 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useProjectSession } from "@project/core";
 import { cn } from "#/lib/utils";
 import { ExportMenuContent } from "./ExportMenuContent";
+import { Button } from "#/components/ui/button";
 
 interface ExportMenuProps {
 	className?: string;
+    children?: ReactNode;
 }
 
-export function ExportMenu({ className }: ExportMenuProps) {
+export function ExportMenu({ className, children }: ExportMenuProps) {
 	const { t } = useTranslation();
 	const projectContext = useProjectSession((s) => s.projectContext);
 	const [open, setOpen] = useState(false);
@@ -20,15 +22,16 @@ export function ExportMenu({ className }: ExportMenuProps) {
 
 	return (
 		<>
-			<button
+			<Button
+                variant="ghost"
 				onClick={handleOpen}
 				className={cn(
-					"inline-flex items-center text-nowrap gap-1 rounded px-2 py-1 text-xs font-medium text-foreground hover:bg-accent active:bg-accent",
 					className,
 				)}
 			>
 				{t("export-menu.label")}
-			</button>
+                {children}
+			</Button>
 			<ExportMenuContent open={open} onOpenChange={setOpen} />
 		</>
 	);

@@ -20,7 +20,7 @@ import { RecentlyOpenedFilesBar } from "./recently-opened/RecentlyOpenedFilesBar
 import { TextEditor } from "./TextEditor";
 import { BundleContent } from "./bundle/BundleContent";
 import { NoOpenedFileScreen } from "./NoOpenedFileScreen";
-import { MenuIcon } from "lucide-react";
+import { ChevronDown, MenuIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Sheet, SheetContent, SheetTrigger } from "#/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
@@ -28,6 +28,7 @@ import { SchematicMapPreview } from "#/components/editor/SchematicMapPreview";
 import { Button } from "#/components/ui/button";
 import { EditorMenuList } from "./toolbar/EditorMenuList";
 import { Separator } from "#/components/ui/separator";
+import { ExportMenu } from "#/components/editor/toolbar/ExportMenu";
 
 const PixelEditor = lazy(() => import("./pixel-editor/PixelEditor").then((m) => ({ default: m.PixelEditor })));
 const ModHjsonPanel = lazy(() => import("./right/ModHjsonPanel").then((m) => ({ default: m.ModHjsonPanel })));
@@ -302,6 +303,9 @@ function EditorMobileLayout() {
 						<EditorMenuList onClose={() => setSheetOpen(false)} />
 					</SheetContent>
 				</Sheet>
+				<ExportMenu>
+					<ChevronDown className="size-4" />
+				</ExportMenu>
 			</Toolbar>
 			<Tabs value={tab} onValueChange={setTab} className="flex min-h-0 flex-1 overflow-hidden w-full gap-0">
 				<TabsContent value="file" className="flex flex-1 overflow-hidden bg-background w-full">
