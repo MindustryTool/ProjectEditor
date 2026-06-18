@@ -11,7 +11,7 @@ export function Field({
 		<div
 			id={jsonPath}
 			className={cn(
-				"space-y-2",
+				"flex flex-col gap-2",
 				{
 					"opacity-50": metadata?.disabled,
 				},

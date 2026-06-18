@@ -19,7 +19,7 @@ export const TextureField = React.memo(function TextureField({ name, path, jsonP
 	const { name: contentName } = useFieldContext();
 
 	let { format } = metadata as SchemaMetadata & { format?: string; fallback?: string };
-    format = format || "$";
+	format = format || "$";
 
 	const defaultSpritePath = path.replace("content", "sprites").replace(filename, format.replace("@", contentName)) + ".png";
 	const spritePath = useProjectSession((s) => s.treeSnapshot.findContentSpritePath(format.replace("@", contentName)));
@@ -31,8 +31,9 @@ export const TextureField = React.memo(function TextureField({ name, path, jsonP
 	return (
 		<Field jsonPath={jsonPath} metadata={metadata}>
 			<SchemaLabel name={name} metadata={metadata} />
+			<span className="text-muted-foreground text-xs">{spritePath ?? defaultSpritePath}</span>
 			<FieldControl>
-				{spritePath !== null ? <SpriteViewer path={defaultSpritePath} /> : <SpriteUploader path={defaultSpritePath} />}
+				{spritePath !== null ? <SpriteViewer path={spritePath} /> : <SpriteUploader path={defaultSpritePath} />}
 			</FieldControl>
 			<SchemaDescription metadata={metadata} />
 		</Field>

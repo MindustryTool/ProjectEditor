@@ -39,6 +39,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	const [filters, setFilters] = useState<Record<string, string>>({});
 	const { contents } = useProjectContext();
 	const fileName = useFileName();
+	const filenameWithoutExtension = fileName?.split(".")[0] || "";
 	const scrollTopRef = useRef<Map<string | null, number>>(new Map());
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -171,14 +172,10 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 							</InputGroup>
 						</div>
 					)}
-					<FieldProvider name={(activeValues["name"] as string) ?? ""}>
+					<FieldProvider name={filenameWithoutExtension}>
 						<div className="px-2 flex flex-col gap-6 pb-6 pt-4">
 							{breadcrumbSegments.length > 0 && (
-								<Button
-									className="justify-start"
-									variant="outline"
-									onClick={handleBack}
-								>
+								<Button className="justify-start" variant="outline" onClick={handleBack}>
 									<ChevronLeft className="size-4" />
 									Back
 								</Button>

@@ -8,6 +8,7 @@ const FieldContext = createContext<FieldContextValue | null>(null);
 
 export function FieldProvider({ name, children }: { name: string; children: React.ReactNode }) {
 	const value = useMemo(() => ({ name }), [name]);
+    
 	return <FieldContext.Provider value={value}>{children}</FieldContext.Provider>;
 }
 
