@@ -3,9 +3,9 @@ import { useFile } from "@project/core";
 import type Konva from "konva";
 import { useCallback, useEffect, useState } from "react";
 import { Image as KonvaImage } from "react-konva";
-import { applyOutline } from "#/components/editor/sprite/sprite-utils";
+import { applyOutline } from "#/components/editor/position-editor/utils";
 
-export function SpriteImage({
+export function PositionImage({
 	x,
 	y,
 	path,
@@ -53,8 +53,8 @@ export function SpriteImage({
 	const handleDragEnd = useCallback(
 		(event: Konva.KonvaEventObject<DragEvent>) => {
 			event.cancelBubble = true;
-			const x = Math.round(event.target.x() / 4);
-			const y = Math.round(event.target.y() / 4);
+			const x = Math.round((event.target.x() / 4) * 100) / 100;
+			const y = Math.round((event.target.y() / 4) * 100) / 100;
 
 			if (!onDrag) return;
 
@@ -72,8 +72,8 @@ export function SpriteImage({
 	const mirrorHandleDragEnd = useCallback(
 		(event: Konva.KonvaEventObject<DragEvent>) => {
 			event.cancelBubble = true;
-			const x = Math.round(event.target.x() / 4);
-			const y = Math.round(event.target.y() / 4);
+			const x = Math.round((event.target.x() / 4) * 100) / 100;
+			const y = Math.round((event.target.y() / 4) * 100) / 100;
 
 			if (!onDrag) return;
 

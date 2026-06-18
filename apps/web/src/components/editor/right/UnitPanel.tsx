@@ -19,11 +19,11 @@ export function UnitPanel({ path }: UnitPanelProps) {
 			<div className="p-2 border-b">
 				{isSpriteEditor ? (
 					<Button className="w-full" onClick={() => setPath({ path, type: "text", jsonPath: null })}>
-						{t("sprite-editor.close")}
+						{t("position-editor.close")}
 					</Button>
 				) : (
 					<Button className="w-full" onClick={() => setPath({ path, type: "sprite", jsonPath: null })}>
-						{t("sprite-editor.open")}
+						{t("position-editor.open")}
 					</Button>
 				)}
 			</div>

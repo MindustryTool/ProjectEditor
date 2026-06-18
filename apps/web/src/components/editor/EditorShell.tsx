@@ -38,7 +38,7 @@ const SectorPanel = lazy(() => import("./right/SectorPanel").then((m) => ({ defa
 const StatusPanel = lazy(() => import("./right/StatusPanel").then((m) => ({ default: m.StatusPanel })));
 const UnitPanel = lazy(() => import("./right/UnitPanel").then((m) => ({ default: m.UnitPanel })));
 const BlockPanel = lazy(() => import("./right/BlockPanel").then((m) => ({ default: m.BlockPanel })));
-const UnitSpriteEditor = lazy(() => import("#/components/editor/sprite/UnitSpritEdior").then((mod) => ({ default: mod.UnitSpriteEditor })));
+const UnitPositionEditor = lazy(() => import("#/components/editor/position-editor/UnitPositionEditor").then((mod) => ({ default: mod.UnitPositionEditor })));
 
 type EditorRoute =
 	| { type: "empty" }
@@ -159,7 +159,7 @@ function EditorContent({ entry }: { entry: PathEntry }) {
 				</Suspense>
 			);
 		case "sprite":
-			return <UnitSpriteEditor striped={route.path} />;
+			return <UnitPositionEditor striped={route.path} />;
 		case "msav":
 			return <SchematicMapPreview path={route.path} type="map" />;
 		case "msch":
@@ -370,14 +370,12 @@ export function EditorShell() {
 			<ValidationProvider />
 			<NavigationGuardDialog projectId={projectId} />
 			<FileExplorerProvider>
-				<ErrorBoundary>
-					<div
-						className="flex min-h-0 flex-1 flex-col bg-background text-foreground overflow-hidden w-full h-dvh max-h-dvh"
-						style={{ padding }}
-					>
-						{isDesktop ? <EditorDesktopLayout /> : <EditorMobileLayout />}
-					</div>
-				</ErrorBoundary>
+				<div
+					className="flex min-h-0 flex-1 flex-col bg-background text-foreground overflow-hidden w-full h-dvh max-h-dvh"
+					style={{ padding }}
+				>
+					{isDesktop ? <EditorDesktopLayout /> : <EditorMobileLayout />}
+				</div>
 			</FileExplorerProvider>
 		</ProjectProvider>
 	);

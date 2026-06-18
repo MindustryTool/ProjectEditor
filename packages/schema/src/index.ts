@@ -39,7 +39,7 @@ export { ArrayTextureSchema } from "./textures";
 export { UnitHjsonSchema } from "./unit";
 export {
 	CachedSchema,
-	collectSpriteData,
+	collectPositionData,
 	detectSchemaType,
 	findContent,
 	getArrayItemSchema,
@@ -48,11 +48,25 @@ export {
 	getSchemaMetadata,
 	hasNullableWrapper,
 	metadata,
+	resolvePositionType,
 	resolveSchema,
 	unwrapSchema,
 	getDefaults,
 } from "./utils";
-export type { AnySchema, SchemaFn, SchemaMetadata, SpriteData, Type } from "./utils";
+export type {
+	AnySchema,
+	BasePosition,
+	DrawPositionData,
+	EnginePositionData,
+	PartPositionData,
+	PositionData,
+	SchemaFn,
+	SchemaMetadata,
+	ShootPositionData,
+	SpritePositionData,
+	Type,
+	UnknownPositionData,
+} from "./utils";
 export { DrawFieldSchema, DrawHjsonSchema, drawClasses } from "./draw";
 export type { DrawClass } from "./draw";
 export { WeaponHjsonSchema } from "./weapon";

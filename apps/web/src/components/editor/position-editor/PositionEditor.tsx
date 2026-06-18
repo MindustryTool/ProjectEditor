@@ -1,25 +1,26 @@
-import { useCanvasInteraction } from "#/components/editor/sprite/use-canvas-interaction";
+import { useCanvasInteraction } from "#/components/editor/position-editor/use-canvas-interaction";
 import { useProjectContext } from "#/components/editor/ProjectProvider";
 import { Spinner } from "#/components/ui/spinner";
 import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "#/components/ui/resizable";
 import { useFileString, useProjectSession } from "@project/core";
 import { HJSON } from "@project/hjson";
-import { collectSpriteData, type AnySchema, type SchemaFn, type SpriteData } from "@project/schema";
+import { collectPositionData, type AnySchema, type PositionData, type SchemaFn } from "@project/schema";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Layer, Stage } from "react-konva";
-import { updateSpritePosition } from "#/components/editor/sprite/sprite-utils";
-import { SpriteImage } from "./SpriteImage";
+import { updatePositionData } from "#/components/editor/position-editor/utils";
+import { PositionImage } from "./PositionImage";
+import { EnginePositionPlaceholder, PositionPlaceholder, ShootPositionPlaceholder } from "./PositionPlaceholder";
 
-export function SpriteEditor({ path, schema }: { path: string; schema: AnySchema | SchemaFn }) {
+export function PositionEditor({ path, schema }: { path: string; schema: AnySchema | SchemaFn }) {
 	return (
 		<div className="w-full h-full overflow-hidden relative flex border rounded mb-1.5">
-			<SpriteCanvas path={path} schema={schema} />
+			<PositionCanvas path={path} schema={schema} />
 		</div>
 	);
 }
 
-function SpriteCanvas({ path, schema }: { path: string; schema: AnySchema | SchemaFn }) {
+function PositionCanvas({ path, schema }: { path: string; schema: AnySchema | SchemaFn }) {
 	const canvasRef = useRef<HTMLDivElement>(null);
 	const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
 
@@ -46,10 +47,10 @@ function SpriteCanvas({ path, schema }: { path: string; schema: AnySchema | Sche
 	const { stageRef, posRef, scaleRef, handleWheel, handleDragEnd } = useCanvasInteraction(canvasDimensions.width, canvasDimensions.height);
 
 	const { sprites, error } = useMemo(() => {
-		if (isLoading) return { sprites: [] as SpriteData[], error: null };
+		if (isLoading) return { sprites: [] as PositionData[], error: null };
 
 		if (!data) {
-			return { sprites: [] as SpriteData[], error: null as string | null };
+			return { sprites: [] as PositionData[], error: null as string | null };
 		}
 
 		try {
@@ -62,7 +63,7 @@ function SpriteCanvas({ path, schema }: { path: string; schema: AnySchema | Sche
 			const resolvedSchema = typeof schema === "function" ? schema(contents) : schema;
 
 			return {
-				sprites: collectSpriteData(
+				sprites: collectPositionData(
 					(filename) => treeSnapshot.getEntries().find((item) => item.name === filename)?.path,
 					node,
 					resolvedSchema,
@@ -106,27 +107,58 @@ function SpriteCanvas({ path, schema }: { path: string; schema: AnySchema | Sche
 						y={posRef.current.y}
 					>
 						<Layer>
-							{baseSprite && <SpriteImage path={baseSprite} x={0} y={0} mirror={false} />}
-							{sprites.map((sprite) => (
-								<SpriteImage
-									key={sprite.position.x.path}
-									path={sprite.path}
-									x={sprite.position.x.value * 4}
-									y={-sprite.position.y.value * 4}
-									mirror={sprite.mirror}
-									onDrag={(x, y) => {
-										if (!data) {
-											throw new Error("No data");
-										}
+							{baseSprite && <PositionImage path={baseSprite} x={0} y={0} mirror={false} />}
+							{sprites.map((region) => {
+								const handleDrag = (x: number, y: number) => {
+									if (!data) {
+										throw new Error("No data");
+									}
 
-										const result = updateSpritePosition(data, sprite.position.x.path, sprite.position.y.path, x, y);
+									const result = updatePositionData(data, region.position.x.path, region.position.y.path, x, y);
 
-										if (result) {
-											write(result);
-										}
-									}}
-								/>
-							))}
+									if (result) {
+										write(result);
+									}
+								};
+
+								switch (region.type) {
+									case "sprite":
+										return (
+											<PositionImage
+												key={region.position.x.path}
+												path={region.path}
+												x={region.position.x.value * 4}
+												y={-region.position.y.value * 4}
+												mirror={region.mirror}
+												onDrag={handleDrag}
+											/>
+										);
+									case "engine":
+										return (
+											<EnginePositionPlaceholder
+												key={region.position.x.path}
+												region={region}
+												onDrag={handleDrag}
+											/>
+										);
+									case "shoot":
+										return (
+											<ShootPositionPlaceholder
+												key={region.position.x.path}
+												region={region}
+												onDrag={handleDrag}
+											/>
+										);
+									default:
+										return (
+											<PositionPlaceholder
+												key={region.position.x.path}
+												region={region}
+												onDrag={handleDrag}
+											/>
+										);
+								}
+							})}
 						</Layer>
 					</Stage>
 				</div>
@@ -135,7 +167,7 @@ function SpriteCanvas({ path, schema }: { path: string; schema: AnySchema | Sche
 				<>
 					<ResizableHandle withHandle />
 					<ResizablePanel defaultSize="25%" minSize="15%" maxSize="40%">
-						<SpriteSidebar sprites={sprites} />
+						<PositionSidebar sprites={sprites} />
 					</ResizablePanel>
 				</>
 			)}
@@ -144,45 +176,24 @@ function SpriteCanvas({ path, schema }: { path: string; schema: AnySchema | Sche
 }
 
 function CoordsDisplay({ x, y }: { x: number; y: number }) {
-	const [position, setPosition] = useState({ x: 0, y: 0 });
-
-	useEffect(() => {
-		const handleMouseMove = (event: MouseEvent) => {
-			setPosition({ x: event.clientX, y: event.clientY });
-		};
-
-		window.addEventListener("mousemove", handleMouseMove);
-
-		// Clean up listener on component unmount
-		return () => {
-			window.removeEventListener("mousemove", handleMouseMove);
-		};
-	}, []);
-
 	return (
 		<div className="absolute top-1 left-1 text-muted-foreground text-xs">
-			({Math.round(x)}, {Math.round(y)})
-			{position.x !== 0 && position.y !== 0 && (
-				<span>
-					{", "}
-					mouse ({Math.round(position.x)}, {Math.round(position.y)})
-				</span>
-			)}
+			({Math.round(x / 4)}, {Math.round(y / 4)})
 		</div>
 	);
 }
 
-function SpriteSidebar({ sprites }: { sprites: SpriteData[] }) {
+function PositionSidebar({ sprites }: { sprites: PositionData[] }) {
 	return (
 		<div className="p-2 h-full flex flex-col overflow-y-auto gap-2">
 			{sprites.map((sprite) => (
-				<SpritePreview key={sprite.position.x.path} sprite={sprite} />
+				<PositionPreview key={sprite.position.x.path} sprite={sprite} />
 			))}
 		</div>
 	);
 }
 
-function SpritePreview({ sprite }: { sprite: SpriteData }) {
+function PositionPreview({ sprite }: { sprite: PositionData }) {
 	const [size, setSize] = useState([0, 0]);
 	const handleSize = useCallback((width: number, height: number) => setSize([width, height]), []);
 
@@ -202,15 +213,27 @@ function SpritePreview({ sprite }: { sprite: SpriteData }) {
 			}
 		});
 
+	const label = `[${sprite.type}] ${sprite.type === "sprite" ? sprite.name : ""}`;
+	const extra =
+		sprite.type === "engine" ? ` r=${sprite.radius.value} rot=${sprite.rotation.value}` :
+		sprite.type === "sprite" ? "" :
+		"";
+
 	return (
 		<div
 			className="w-full border p-8 rounded bg-card relative flex items-center justify-center"
 			onClick={() => scrollTo(sprite.position.x.path)}
 		>
 			<span className="absolute top-1 left-1 text-xs text-muted-foreground">
-				{sprite.name} ({size[0]}x{size[1]})
+				{label} ({size[0]}x{size[1]})
 			</span>
-			<ImageFilePreview className="object-contain" path={sprite.path} onSize={handleSize} />
+			{sprite.type === "sprite" ? (
+				<ImageFilePreview className="object-contain" path={sprite.path} onSize={handleSize} />
+			) : (
+				<div className="text-muted-foreground text-sm">
+					{sprite.type}{extra}
+				</div>
+			)}
 			<div className="absolute bottom-0.5 backdrop-blur-xs backdrop-brightness-75 p-0.5 left-0.5 text-xs text-muted-foreground">
 				x={sprite.position.x.value}, y={sprite.position.y.value}
 			</div>

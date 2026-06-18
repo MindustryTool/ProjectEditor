@@ -57,6 +57,9 @@ const drawBaseObjectSchema = v.object({
 	),
 });
 
+// x/y fields: x (number, default 0), y (number, default 0) — draw region offset
+// Related data: suffix (string), name (string), rotation (number), color
+// Region type: "draw-region"
 const drawRegionSchema = v.object({
 	suffix: v.pipe(v.optional(v.string(), ""), metadata({ name: "editor.draw.suffix" })),
 	x: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.draw.x" })),
