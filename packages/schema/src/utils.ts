@@ -444,6 +444,8 @@ export type EnginePositionData = {
 export type ShootPositionData = {
 	type: "shoot";
 	position: BasePosition;
+	weaponPosition: BasePosition;
+	mirror: boolean;
 };
 
 export type PartPositionData = {
@@ -494,7 +496,7 @@ export function collectWeaponPositions(
 	weapons: unknown[] | undefined,
 ): PositionData[] {
 	if (!weapons) return [];
-	const result: PositionData[] = [];
+		const result: PositionData[] = [];
 	for (let i = 0; i < weapons.length; i++) {
 		const w = weapons[i] as Record<string, unknown>;
 		const path = `${basePath}[${i}]`;
@@ -507,6 +509,11 @@ export function collectWeaponPositions(
 				x: { value: (w.shootX as number) ?? 0, path: `${path}.shootX` },
 				y: { value: (w.shootY as number) ?? 0, path: `${path}.shootY` },
 			},
+			weaponPosition: {
+				x: { value: (w.x as number) ?? 0, path: `${path}.x` },
+				y: { value: (w.y as number) ?? 0, path: `${path}.y` },
+			},
+			mirror: w.mirror === true,
 		});
 
 		if (pngPath) {

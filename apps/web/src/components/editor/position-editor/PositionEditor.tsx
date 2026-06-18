@@ -4,8 +4,8 @@ import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "#/components/ui/resizable";
 import { useFileString, useProjectSession } from "@project/core";
 import { HJSON } from "@project/hjson";
-import { collectUnitPositions, type PositionData } from "@project/schema";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { collectUnitPositions, type PositionData, type ShootPositionData } from "@project/schema";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Layer, Stage } from "react-konva";
 import { updatePositionData } from "#/components/editor/position-editor/utils";
 import { PositionImage } from "./PositionImage";
@@ -44,30 +44,41 @@ function PositionCanvas({ path }: { path: string }) {
 
 	const { stageRef, posRef, scaleRef, handleWheel, handleDragEnd } = useCanvasInteraction(canvasDimensions.width, canvasDimensions.height);
 
-	const { sprites, error } = useMemo(() => {
-		if (isLoading) return { sprites: [] as PositionData[], error: null };
+	const { sprites, shootSprites, error } = useMemo(() => {
+		if (isLoading) return { sprites: [] as PositionData[], shootSprites: [] as ShootPositionData[], error: null };
 
 		if (!data) {
-			return { sprites: [] as PositionData[], error: null as string | null };
+			return { sprites: [] as PositionData[], shootSprites: [] as ShootPositionData[], error: null as string | null };
 		}
 
 		try {
 			const node = HJSON.parseWithCache(data);
 
 			if (!node.isObject()) {
-				return { sprites: [], error: "Not an object" };
+				return { sprites: [], shootSprites: [], error: "Not an object" };
+			}
+
+			const findFileName = (filename: string) => treeSnapshot.getEntries().find((item) => item.name === filename)?.path;
+			const all = collectUnitPositions(findFileName, node);
+			const shoot: ShootPositionData[] = [];
+			const rest: PositionData[] = [];
+
+			for (const s of all) {
+				if (s.type === "shoot") {
+					shoot.push(s);
+				} else {
+					rest.push(s);
+				}
 			}
 
 			return {
-				sprites: collectUnitPositions(
-					(filename) => treeSnapshot.getEntries().find((item) => item.name === filename)?.path,
-					node,
-				),
+				sprites: rest,
+				shootSprites: shoot,
 				error: null,
 			};
 		} catch (e) {
 			console.error(e);
-			return { sprites: [], error: String(e) };
+			return { sprites: [], shootSprites: [], error: String(e) };
 		}
 	}, [data, treeSnapshot, isLoading]);
 
@@ -129,30 +140,51 @@ function PositionCanvas({ path }: { path: string }) {
 											/>
 										);
 									case "engine":
-										return (
-											<EnginePositionPlaceholder
-												key={region.position.x.path}
-												region={region}
-												onDrag={handleDrag}
-											/>
-										);
-									case "shoot":
-										return (
-											<ShootPositionPlaceholder
-												key={region.position.x.path}
-												region={region}
-												onDrag={handleDrag}
-											/>
-										);
+										return <EnginePositionPlaceholder key={region.position.x.path} region={region} onDrag={handleDrag} />;
 									default:
-										return (
-											<PositionPlaceholder
-												key={region.position.x.path}
-												region={region}
-												onDrag={handleDrag}
-											/>
-										);
+										return <PositionPlaceholder key={region.position.x.path} region={region} onDrag={handleDrag} />;
 								}
+							})}
+							{shootSprites.map((region) => {
+								const weaponX = region.weaponPosition.x.value;
+								const weaponY = region.weaponPosition.y.value;
+								const shootOffsetX = region.position.x.value;
+								const shootOffsetY = region.position.y.value;
+								const displayX = (weaponX + shootOffsetX) * 4;
+								const displayY = -(weaponY + shootOffsetY) * 4;
+
+								const handleShootDrag = (x: number, y: number) => {
+									if (!data) throw new Error("No data");
+
+									const offsetX = x - weaponX;
+									const offsetY = y - weaponY;
+									const result = updatePositionData(data, region.position.x.path, region.position.y.path, offsetX, offsetY);
+
+									if (result) write(result);
+								};
+
+								const handleMirrorShootDrag = (x: number, y: number) => {
+									handleShootDrag(-x, y);
+								};
+
+								return (
+									<React.Fragment key={region.position.x.path}>
+										<ShootPositionPlaceholder
+											region={region}
+											onDrag={handleShootDrag}
+											initX={displayX}
+											initY={displayY}
+										/>
+										{region.mirror && (
+											<ShootPositionPlaceholder
+												region={region}
+												onDrag={handleMirrorShootDrag}
+												initX={-displayX}
+												initY={displayY}
+											/>
+										)}
+									</React.Fragment>
+								);
 							})}
 						</Layer>
 					</Stage>
@@ -209,10 +241,7 @@ function PositionPreview({ sprite }: { sprite: PositionData }) {
 		});
 
 	const label = `[${sprite.type}] ${sprite.type === "sprite" ? sprite.name : ""}`;
-	const extra =
-		sprite.type === "engine" ? ` r=${sprite.radius.value} rot=${sprite.rotation.value}` :
-		sprite.type === "sprite" ? "" :
-		"";
+	const extra = sprite.type === "engine" ? ` r=${sprite.radius.value} rot=${sprite.rotation.value}` : sprite.type === "sprite" ? "" : "";
 
 	return (
 		<div
@@ -226,7 +255,8 @@ function PositionPreview({ sprite }: { sprite: PositionData }) {
 				<ImageFilePreview className="object-contain" path={sprite.path} onSize={handleSize} />
 			) : (
 				<div className="text-muted-foreground text-sm">
-					{sprite.type}{extra}
+					{sprite.type}
+					{extra}
 				</div>
 			)}
 			<div className="absolute bottom-0.5 backdrop-blur-xs backdrop-brightness-75 p-0.5 left-0.5 text-xs text-muted-foreground">

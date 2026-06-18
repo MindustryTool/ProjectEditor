@@ -73,13 +73,17 @@ export function EnginePositionPlaceholder({
 export function ShootPositionPlaceholder({
 	region,
 	onDrag,
+	initX,
+	initY,
 }: {
 	region: ShootPositionData;
 	onDrag?: DragHandler;
+	initX?: number;
+	initY?: number;
 }) {
 	const { localX, localY, handleDragMove, handleDragEnd } = useDragHandling(
-		region.position.x.value * 4,
-		-region.position.y.value * 4,
+		initX ?? region.position.x.value * 4,
+		initY ?? -region.position.y.value * 4,
 		onDrag,
 	);
 	const size = 16;
