@@ -4,9 +4,9 @@ import type { ShootPositionData } from "@project/schema";
 import { updatePositionData } from "#/components/editor/position-editor/utils";
 import { Circle, Group, Line } from "react-konva";
 
-const SIZE = 10;
-const WIDTH = 80;
-const STROKE = 1;
+const SIZE = 8;
+const WIDTH = 2;
+const STROKE = 0.5;
 
 export function ShootItem({
 	region,
@@ -53,15 +53,37 @@ export function ShootItem({
 	return (
 		<>
 			<Group x={displayX} y={displayY} draggable onDragMove={handleDragMove} onDragEnd={handleDragEnd}>
-				<Circle radius={SIZE} stroke="#ef4444" strokeWidth={STROKE} />
-				<Line points={[-SIZE, -SIZE, SIZE, SIZE]} fill="#ef4444" stroke="#000000" width={WIDTH} strokeWidth={STROKE} />
-				<Line points={[SIZE, -SIZE, -SIZE, SIZE]} fill="#ef4444" stroke="#000000" width={WIDTH} strokeWidth={STROKE} />
+				<Line
+					points={[-SIZE - STROKE / 2, -SIZE - STROKE / 2, SIZE + STROKE / 2, SIZE + STROKE / 2]}
+					stroke="#000000"
+					strokeWidth={WIDTH + STROKE * 2}
+				/>
+				<Line
+					points={[SIZE + STROKE / 2, -SIZE - STROKE / 2, -SIZE - STROKE / 2, SIZE + STROKE / 2]}
+					stroke="#000000"
+					strokeWidth={WIDTH + STROKE * 2}
+				/>
+				<Line points={[-SIZE, -SIZE, SIZE, SIZE]} stroke="#ef4444" strokeWidth={WIDTH} />
+				<Line points={[SIZE, -SIZE, -SIZE, SIZE]} stroke="#ef4444" strokeWidth={WIDTH} />
+				<Circle radius={SIZE} stroke="#000000" strokeWidth={WIDTH + STROKE * 2} />
+				<Circle radius={SIZE} stroke="#ef4444" strokeWidth={WIDTH} />
 			</Group>
 			{region.mirror && (
 				<Group x={-displayX} y={displayY} draggable onDragMove={handleDragMove} onDragEnd={handleMirrorDragEnd}>
-					<Circle radius={SIZE} stroke="#ef4444" strokeWidth={STROKE} />
-					<Line points={[-SIZE, -SIZE, SIZE, SIZE]} fill="#ef4444" stroke="#000000" width={WIDTH} strokeWidth={STROKE} />
-					<Line points={[SIZE, -SIZE, -SIZE, SIZE]} fill="#ef4444" stroke="#000000" width={WIDTH} strokeWidth={STROKE} />
+					<Line
+						points={[-SIZE - STROKE / 2, -SIZE - STROKE / 2, SIZE + STROKE / 2, SIZE + STROKE / 2]}
+						stroke="#000000"
+						strokeWidth={WIDTH + STROKE * 2}
+					/>
+					<Line
+						points={[SIZE + STROKE / 2, -SIZE - STROKE / 2, -SIZE - STROKE / 2, SIZE + STROKE / 2]}
+						stroke="#000000"
+						strokeWidth={WIDTH + STROKE * 2}
+					/>
+					<Line points={[-SIZE, -SIZE, SIZE, SIZE]} stroke="#ef4444" strokeWidth={WIDTH} />
+					<Line points={[SIZE, -SIZE, -SIZE, SIZE]} stroke="#ef4444" strokeWidth={WIDTH} />
+					<Circle radius={SIZE} stroke="#000000" strokeWidth={WIDTH + STROKE * 2} />
+					<Circle radius={SIZE} stroke="#ef4444" strokeWidth={WIDTH} />
 				</Group>
 			)}
 		</>

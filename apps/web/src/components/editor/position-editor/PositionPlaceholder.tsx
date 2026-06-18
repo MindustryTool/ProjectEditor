@@ -78,6 +78,7 @@ export function ShootPositionPlaceholder({
 		initY ?? -region.position.y.value * 4,
 		onDrag,
 	);
+    
 	const size = 6;
 
 	return (
