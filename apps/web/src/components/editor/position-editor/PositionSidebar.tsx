@@ -31,7 +31,7 @@ export function PositionSidebar({
 	};
 
 	return (
-		<div className="p-2 h-full flex flex-col gap-2">
+		<div className="h-full flex flex-col gap-2">
 			<Button
 				variant="outline"
 				size="sm"

@@ -445,6 +445,7 @@ export type ShootPositionData = {
 	type: "shoot";
 	position: BasePosition;
 	weaponPosition: BasePosition;
+    weaponName: string;
 	mirror: boolean;
 };
 
@@ -513,6 +514,7 @@ export function collectWeaponPositions(
 				x: { value: (w.x as number) ?? 0, path: `${path}.x` },
 				y: { value: (w.y as number) ?? 0, path: `${path}.y` },
 			},
+            weaponName: name ?? "",
 			mirror: w.mirror === true,
 		});
 

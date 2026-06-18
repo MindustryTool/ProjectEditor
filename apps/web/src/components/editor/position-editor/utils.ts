@@ -1,9 +1,19 @@
 import { HJSON } from "@project/hjson";
 
+function precision(value: number, precision: number) {
+	return Math.round(value * 10 ** precision) / 10 ** precision;
+}
+
 export function updatePositionData(data: string, xPath: string, yPath: string, x: number, y: number): string | null {
-	const result = HJSON.parseWithCache(data).path(xPath)?.replaceValue(data, x);
+	const result = HJSON.parseWithCache(data)
+		.path(xPath)
+		?.replaceValue(data, precision(x, 4));
 	if (!result) return null;
-	return HJSON.parseWithCache(result).path(yPath)?.replaceValue(result, y) ?? null;
+	return (
+		HJSON.parseWithCache(result)
+			.path(yPath)
+			?.replaceValue(result, precision(y, 4)) ?? null
+	);
 }
 
 export function applyOutline(imageData: ImageData) {

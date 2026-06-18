@@ -11,11 +11,16 @@ import { CoordsDisplay } from "./CoordsDisplay";
 import { SpriteItem } from "./SpriteItem";
 import { ShootItem } from "./ShootItem";
 import { PositionSidebar } from "./PositionSidebar";
+import { useIsDesktop } from "#/hooks/use-is-desktop";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
+import { Button } from "#/components/ui/button";
 
 export function PositionCanvas({ path }: { path: string }) {
 	const canvasRef = useRef<HTMLDivElement>(null);
 	const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
 	const [hiddenSprites, setHiddenSprites] = useState<Set<string>>(new Set());
+	const [isDesktop] = useIsDesktop();
 
 	const toggleSprite = useCallback((key: string) => {
 		setHiddenSprites((prev) => {
@@ -126,12 +131,33 @@ export function PositionCanvas({ path }: { path: string }) {
 							})}
 						</Layer>
 					</Stage>
+					{!isDesktop && (
+						<div className="absolute top-0 left-0 right-0">
+							<Collapsible className="space-y-2">
+								<CollapsibleTrigger asChild>
+									<Button className="sticky top-0 m-2 bg-card border border-border">
+										<ChevronDown className="size-4" />
+									</Button>
+								</CollapsibleTrigger>
+								<CollapsibleContent className="bg-background p-2 pt-0">
+									<PositionSidebar
+										sprites={sprites}
+										path={path}
+										data={data}
+										write={write}
+										hiddenSprites={hiddenSprites}
+										onToggleSprite={toggleSprite}
+									/>
+								</CollapsibleContent>
+							</Collapsible>
+						</div>
+					)}
 				</div>
 			</ResizablePanel>
-			{sprites.length > 0 && (
+			{sprites.length > 0 && isDesktop && (
 				<>
 					<ResizableHandle withHandle />
-					<ResizablePanel defaultSize="25%" minSize="15%" maxSize="40%">
+					<ResizablePanel defaultSize="25%" minSize="15%" maxSize="40%" className="p-2">
 						<PositionSidebar
 							sprites={sprites}
 							path={path}
