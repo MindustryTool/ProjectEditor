@@ -1,8 +1,9 @@
 import * as v from "valibot";
-import { metadata } from "./utils";
+import { cached, metadata } from "./utils";
 import { ResearchSchema } from "./research";
 import type { SchemaFn } from "./utils";
 import { unlockableContentSchema } from "./content";
+import type { ProjectContents } from "@project/types";
 
 export const sectorBaseObjectSchema = v.object({
 	...unlockableContentSchema,
@@ -83,3 +84,11 @@ export const SectorHjsonSchema: SchemaFn = (context) =>
 		...sectorBaseObjectSchema.entries,
 		research: v.optional(ResearchSchema(context)),
 	});
+
+export const SectorFieldSchema = cached((context: ProjectContents) =>
+	v.pipe(
+		v.string(),
+		v.transform((v) => v.replaceAll(context.name + "-", "")),
+		v.picklist(context.sectors.map((sector) => sector.name.replaceAll(context.name + "-", ""))),
+	),
+);
