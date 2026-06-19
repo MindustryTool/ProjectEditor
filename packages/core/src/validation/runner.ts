@@ -1,5 +1,5 @@
 import type { ProjectContents } from "@project/types";
-import type { ValidationResult, ValidatorRegistry } from "./types";
+import { ValidationCode, type ValidationResult, type ValidatorRegistry } from "./types";
 
 export interface ValidationRunner {
 	validate(path: string, content: () => Promise<string>, context: ProjectContents): Promise<ValidationResult[]>;
@@ -20,6 +20,7 @@ export function createValidationRunner(registry: ValidatorRegistry): ValidationR
 				{
 					path,
 					severity: "error",
+					code: ValidationCode.INTERNAL_ERROR,
 					messageKey: err instanceof Error ? err.message : "Unknown error",
 					startLine: 1,
 					startColumn: 1,
@@ -43,6 +44,7 @@ export function createValidationRunner(registry: ValidatorRegistry): ValidationR
 					path,
 					severity: "error",
 					messageKey: "validation.internal.validator-error",
+					code: ValidationCode.INTERNAL_ERROR,
 					messageParams: { name: v.name, error: String(err) },
 					startLine: 1,
 					startColumn: 1,

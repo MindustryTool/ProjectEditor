@@ -1,4 +1,4 @@
-import type { ValidationResult, ValidatorFn, ValidatorRegistration } from "./types";
+import { ValidationCode, type ValidationResult, type ValidatorFn, type ValidatorRegistration } from "./types";
 import { createValidatorRegistry } from "./registry";
 import { HJSON, HJSONError, HjsonObjectNode } from "@project/hjson";
 import * as v from "valibot";
@@ -82,6 +82,7 @@ async function jsonSyntaxValidator({ path, content }: Parameters<ValidatorFn>[0]
 				{
 					path,
 					severity: "error",
+					code: ValidationCode.INVALID_FIELD,
 					messageKey: "validation.content.invalid-json",
 					messageParams: { error: `${code}: ${message}` },
 					startLine,
@@ -114,6 +115,7 @@ async function jsonSyntaxValidator({ path, content }: Parameters<ValidatorFn>[0]
 			{
 				path,
 				severity: "error",
+				code: ValidationCode.INVALID_FIELD,
 				messageKey: "validation.content.invalid-json",
 				messageParams: { error: message },
 				startLine,
@@ -173,6 +175,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 				problems.push({
 					path,
 					severity: "error",
+					code: ValidationCode.INVALID_FIELD,
 					messageKey: "validation.content.invalid-field",
 					field,
 					messageParams: { field, error: issue.message },
@@ -208,6 +211,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 						problems.push({
 							path,
 							severity: "error",
+                            code: ValidationCode.INVALID_FIELD,
 							messageKey: "validation.content.invalid-field",
 							field,
 							messageParams: { field, error: subIssue.message },
@@ -232,6 +236,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 					path,
 					severity: "warning",
 					messageKey: "validation.content.unknown-field",
+					code: ValidationCode.UNKNOWN_FIELD,
 					messageParams: { error: path },
 					startLine: field?.start.row ?? 1,
 					startColumn: field?.start.col ?? 1,

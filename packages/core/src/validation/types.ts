@@ -11,9 +11,16 @@ export function isErrorOrWarning(level: string): boolean {
 	return level === "error" || level === "warning";
 }
 
+export enum ValidationCode {
+	UNKNOWN_FIELD,
+    INVALID_FIELD,
+    INTERNAL_ERROR,
+}
+
 export interface ValidationResult<Tkey extends string = string> {
 	path: string;
-	severity: string;
+	severity: SeverityLevel;
+    code: ValidationCode;
 	messageKey: Tkey;
 	messageParams?: Record<string, unknown>;
 	startLine: number;
