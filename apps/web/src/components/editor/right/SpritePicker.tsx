@@ -3,12 +3,13 @@ import { useCurrentProject, useProjectSession, useFile } from "@project/core";
 import { Button } from "#/components/ui/button";
 import { FormControl, FormField, FormLabel } from "#/components/ui/form";
 import { resolveContentSprite } from "@project/utils";
-import { File, FileIcon, Search, Trash2, Upload } from "lucide-react";
+import { File, Search, Trash2, Upload } from "lucide-react";
 import { getImageUrl, levenshtein } from "#/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "#/components/ui/dropdown-menu";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group";
 import { VisuallyHidden } from "radix-ui";
+import { FileIcon } from "#/components/editor/FileIcon";
 
 interface SpritePickerProps {
 	path: string;
@@ -201,9 +202,7 @@ function SelectFileDialog({ onSelect }: { onSelect: (path: string) => void }) {
 							}}
 						>
 							<FileIcon path={item.path} />
-                            <span className="w-full overflow-hidden text-ellipsis text-start text-xs">
-							{item.path}
-                            </span>
+							<span className="w-full overflow-hidden text-ellipsis text-start text-xs">{item.path}</span>
 						</DialogClose>
 					))}
 			</div>
