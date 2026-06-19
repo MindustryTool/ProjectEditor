@@ -6,17 +6,17 @@ export function PreviewContainer({
 	hidden,
 	onToggleVisibility,
 	onClick,
-	footer,
 	children,
+	isSelected,
 }: {
 	hidden?: boolean;
 	onToggleVisibility?: () => void;
 	onClick?: () => void;
-	footer?: ReactNode;
 	children: ReactNode;
+	isSelected?: boolean;
 }) {
 	return (
-		<div className={`w-full border rounded bg-card ${hidden ? "opacity-40" : ""}`}>
+		<div className={`w-full border rounded bg-card ${hidden ? "opacity-40" : ""} ${isSelected ? "ring-2 ring-primary" : ""}`}>
 			<div className="relative flex p-2 flex-col" onClick={onClick}>
 				<Button
 					variant="ghost"
@@ -31,7 +31,6 @@ export function PreviewContainer({
 				</Button>
 				{children}
 			</div>
-			{footer && <div className="border-t p-2 text-xs text-muted-foreground flex flex-col gap-1">{footer}</div>}
 		</div>
 	);
 }

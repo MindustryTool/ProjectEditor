@@ -1269,13 +1269,6 @@ export const baseEnvBlocks: readonly EnvBlock[] = [
     "className": "mindustry.content.Blocks$125"
   },
   {
-    "id": 207,
-    "name": "small-heat-redirector",
-    "mod": null,
-    "image": true,
-    "className": "mindustry.content.Blocks$152"
-  },
-  {
     "id": 211,
     "name": "slag-centrifuge",
     "mod": null,
@@ -1309,13 +1302,6 @@ export const baseEnvBlocks: readonly EnvBlock[] = [
     "mod": null,
     "image": true,
     "className": "mindustry.content.Blocks$202"
-  },
-  {
-    "id": 334,
-    "name": "large-cliff-crusher",
-    "mod": null,
-    "image": true,
-    "className": "mindustry.content.Blocks$280"
   },
   {
     "id": 410,
@@ -1421,41 +1407,6 @@ export const baseEnvBlocks: readonly EnvBlock[] = [
     "mod": null,
     "image": true,
     "className": "mindustry.content.Blocks$369"
-  },
-  {
-    "id": 426,
-    "name": "advanced-launch-pad",
-    "mod": null,
-    "image": true,
-    "className": "mindustry.content.Blocks$370"
-  },
-  {
-    "id": 427,
-    "name": "landing-pad",
-    "mod": null,
-    "image": true,
-    "className": "mindustry.content.Blocks$371"
-  },
-  {
-    "id": 428,
-    "name": "interplanetary-accelerator",
-    "mod": null,
-    "image": true,
-    "className": "mindustry.content.Blocks$372"
-  },
-  {
-    "id": 438,
-    "name": "tile-logic-display",
-    "mod": null,
-    "image": true,
-    "className": "mindustry.content.Blocks$382"
-  },
-  {
-    "id": 440,
-    "name": "large-canvas",
-    "mod": null,
-    "image": true,
-    "className": "mindustry.content.Blocks$384"
   },
   {
     "id": 442,

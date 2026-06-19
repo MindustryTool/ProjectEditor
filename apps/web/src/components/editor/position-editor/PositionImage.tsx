@@ -38,12 +38,18 @@ export function PositionImage({
 	path,
 	mirror,
 	onDrag,
+	onSelect,
+	selectKey,
+	isSelected,
 }: {
 	path: string;
 	x: number;
 	y: number;
 	mirror: boolean;
 	onDrag?: (x: number, y: number) => void;
+	onSelect?: (key: string) => void;
+	selectKey?: string;
+	isSelected?: boolean;
 }) {
 	const { data } = useFile(path);
 	const [image, setImage] = useState<HTMLImageElement | null>(null);
@@ -135,6 +141,18 @@ export function PositionImage({
 		[onDrag, hitRectOffX, hitRectOffY],
 	);
 
+	const handleClick = useCallback(() => {
+		if (onSelect && selectKey) {
+			onSelect(selectKey);
+		}
+	}, [onSelect, selectKey]);
+
+	const handleMirrorClick = useCallback(() => {
+		if (onSelect && selectKey) {
+			onSelect(selectKey);
+		}
+	}, [onSelect, selectKey]);
+
 	if (!image) return null;
 
 	const hitW = hitBounds?.width ?? image.width;
@@ -149,10 +167,14 @@ export function PositionImage({
 				width={hitW}
 				height={hitH}
 				fill="transparent"
-				strokeEnabled={false}
+				stroke={isSelected ? "#eab308" : undefined}
+				strokeWidth={isSelected ? 2 : 0}
+				dash={isSelected ? [4, 4] : undefined}
 				draggable={!!onDrag}
 				onDragMove={handleDragMove}
 				onDragEnd={handleDragEnd}
+				onClick={handleClick}
+				onTap={handleClick}
 			/>
 			{mirror && (
 				<>
@@ -171,10 +193,14 @@ export function PositionImage({
 						width={hitW}
 						height={hitH}
 						fill="transparent"
-						strokeEnabled={false}
+						stroke={isSelected ? "#eab308" : undefined}
+						strokeWidth={isSelected ? 2 : 0}
+						dash={isSelected ? [4, 4] : undefined}
 						draggable={!!onDrag}
 						onDragMove={mirrorHandleDragMove}
 						onDragEnd={mirrorHandleDragEnd}
+						onClick={handleMirrorClick}
+						onTap={handleMirrorClick}
 					/>
 				</>
 			)}

@@ -11,9 +11,13 @@ const STROKE = 0.5;
 export function ShootItem({
 	region,
 	write,
+	onSelect,
+	isSelected,
 }: {
 	region: ShootPositionData;
 	write: (data: string | ((prev: string | null) => string)) => string;
+	onSelect?: (key: string) => void;
+	isSelected?: boolean;
 }) {
 	const weaponX = region.weaponPosition.x.value;
 	const weaponY = region.weaponPosition.y.value;
@@ -50,9 +54,16 @@ export function ShootItem({
 		[weaponX, weaponY, region.position.x.path, region.position.y.path, write],
 	);
 
+	const handleSelectClick = useCallback(() => {
+		onSelect?.(region.position.x.path);
+	}, [onSelect, region.position.x.path]);
+
 	return (
 		<>
-			<Group x={displayX} y={displayY} draggable onDragMove={handleDragMove} onDragEnd={handleDragEnd}>
+			<Group x={displayX} y={displayY} draggable onDragMove={handleDragMove} onDragEnd={handleDragEnd} onClick={handleSelectClick} onTap={handleSelectClick}>
+				{isSelected && (
+					<Circle radius={SIZE + 4} stroke="#eab308" strokeWidth={2} dash={[4, 4]} />
+				)}
 				<Line
 					points={[-SIZE - STROKE / 2, -SIZE - STROKE / 2, SIZE + STROKE / 2, SIZE + STROKE / 2]}
 					stroke="#000000"
@@ -69,7 +80,10 @@ export function ShootItem({
 				<Circle radius={SIZE} stroke="#ef4444" strokeWidth={WIDTH} />
 			</Group>
 			{region.mirror && (
-				<Group x={-displayX} y={displayY} draggable onDragMove={handleDragMove} onDragEnd={handleMirrorDragEnd}>
+				<Group x={-displayX} y={displayY} draggable onDragMove={handleDragMove} onDragEnd={handleMirrorDragEnd} onClick={handleSelectClick} onTap={handleSelectClick}>
+					{isSelected && (
+						<Circle radius={SIZE + 4} stroke="#eab308" strokeWidth={2} dash={[4, 4]} />
+					)}
 					<Line
 						points={[-SIZE - STROKE / 2, -SIZE - STROKE / 2, SIZE + STROKE / 2, SIZE + STROKE / 2]}
 						stroke="#000000"

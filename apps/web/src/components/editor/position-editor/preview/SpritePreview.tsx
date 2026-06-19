@@ -1,32 +1,27 @@
 import { ImageFilePreview } from "#/components/editor/ImageFilePreview";
 import type { SpritePositionData } from "@project/schema";
 import { useCallback, useState } from "react";
-import type { PositionEditHandler } from "./types";
-import { usePositionEdit } from "./usePositionEdit";
 import { PreviewContainer } from "./PreviewContainer";
-import { PositionInputs } from "./PositionInputs";
 
 export function SpritePreview({
 	sprite,
-	onPositionChange,
 	hidden,
 	onToggleVisibility,
+	isSelected,
 }: {
 	sprite: SpritePositionData;
-	onPositionChange?: PositionEditHandler;
 	hidden?: boolean;
 	onToggleVisibility?: () => void;
+	isSelected?: boolean;
 }) {
 	const [size, setSize] = useState([0, 0]);
 	const handleSize = useCallback((width: number, height: number) => setSize([width, height]), []);
-	const posEdit = usePositionEdit(sprite.position, onPositionChange);
 
 	return (
 		<PreviewContainer
 			hidden={hidden}
 			onToggleVisibility={onToggleVisibility}
-			onClick={() => posEdit.scrollTo(sprite.position.x.path)}
-			footer={<PositionInputs {...posEdit} />}
+			isSelected={isSelected}
 		>
 			<span className="text-xs text-muted-foreground flex gap-1">
 				<span>

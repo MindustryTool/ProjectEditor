@@ -40,7 +40,17 @@ export function useDragHandling(initX: number, initY: number, onDrag?: DragHandl
 	return { localX, localY, handleDragMove, handleDragEnd };
 }
 
-export function EnginePositionPlaceholder({ region, onDrag }: { region: EnginePositionData; onDrag?: DragHandler }) {
+export function EnginePositionPlaceholder({
+	region,
+	onDrag,
+	onSelect,
+	isSelected,
+}: {
+	region: EnginePositionData;
+	onDrag?: DragHandler;
+	onSelect?: (key: string) => void;
+	isSelected?: boolean;
+}) {
 	const { localX, localY, handleDragMove, handleDragEnd } = useDragHandling(
 		region.position.x.value * 4,
 		-region.position.y.value * 4,
@@ -48,8 +58,15 @@ export function EnginePositionPlaceholder({ region, onDrag }: { region: EnginePo
 	);
 	const r = region.radius.value * 4;
 
+	const handleClick = useCallback(() => {
+		onSelect?.(region.position.x.path);
+	}, [onSelect, region.position.x.path]);
+
 	return (
-		<Group x={localX} y={localY} draggable={!!onDrag} onDragMove={handleDragMove} onDragEnd={handleDragEnd}>
+		<Group x={localX} y={localY} draggable={!!onDrag} onDragMove={handleDragMove} onDragEnd={handleDragEnd} onClick={handleClick} onTap={handleClick}>
+			{isSelected && (
+				<Circle radius={Math.max(r, 16) + 4} stroke="#eab308" strokeWidth={2} dash={[4, 4]} />
+			)}
 			<Circle radius={Math.max(r, 16)} fill="#eab308" stroke="#a16207" strokeWidth={2} opacity={0.7} />
 			<Arc angle={region.rotation.value} innerRadius={0} outerRadius={Math.max(r, 16)} fill="#fef08a" opacity={0.5} />
 			<Text
@@ -94,7 +111,17 @@ export function ShootPositionPlaceholder({
 	);
 }
 
-export function PositionPlaceholder({ region, onDrag }: { region: PositionData; onDrag?: DragHandler }) {
+export function PositionPlaceholder({
+	region,
+	onDrag,
+	onSelect,
+	isSelected,
+}: {
+	region: PositionData;
+	onDrag?: DragHandler;
+	onSelect?: (key: string) => void;
+	isSelected?: boolean;
+}) {
 	const color = REGION_COLORS[region.type] ?? DEFAULT_COLOR;
 	const { localX, localY, handleDragMove, handleDragEnd } = useDragHandling(
 		region.position.x.value * 4,
@@ -103,8 +130,15 @@ export function PositionPlaceholder({ region, onDrag }: { region: PositionData; 
 	);
 	const label = region.type;
 
+	const handleClick = useCallback(() => {
+		onSelect?.(region.position.x.path);
+	}, [onSelect, region.position.x.path]);
+
 	return (
-		<Group x={localX} y={localY} draggable={!!onDrag} onDragMove={handleDragMove} onDragEnd={handleDragEnd} offsetX={0} offsetY={0}>
+		<Group x={localX} y={localY} draggable={!!onDrag} onDragMove={handleDragMove} onDragEnd={handleDragEnd} offsetX={0} offsetY={0} onClick={handleClick} onTap={handleClick}>
+			{isSelected && (
+				<Rect x={-2} y={-2} width={44} height={44} stroke="#eab308" strokeWidth={2} dash={[4, 4]} />
+			)}
 			<Rect width={40} height={40} fill={color} stroke="white" strokeWidth={1} opacity={0.8} />
 			<Text text={label} fontSize={9} fill="white" width={40} height={40} align="center" verticalAlign="middle" />
 		</Group>

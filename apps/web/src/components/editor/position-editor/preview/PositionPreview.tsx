@@ -4,46 +4,45 @@ import { EnginePreview } from "./EnginePreview";
 import { ShootPreview } from "./ShootPreview";
 import { PartPreview } from "./PartPreview";
 import { DrawRegionPreview } from "./DrawRegionPreview";
-import type { PositionEditHandler } from "./types";
 
 export function PositionPreview({
 	sprite,
-	onPositionChange,
 	hidden,
 	onToggleVisibility,
+	isSelected,
 }: {
 	sprite: PositionData;
-	onPositionChange?: PositionEditHandler;
 	hidden?: boolean;
 	onToggleVisibility?: () => void;
+	isSelected?: boolean;
 }) {
 	switch (sprite.type) {
 		case "sprite":
 			return (
-				<SpritePreview sprite={sprite} onPositionChange={onPositionChange} hidden={hidden} onToggleVisibility={onToggleVisibility} />
+				<SpritePreview sprite={sprite} hidden={hidden} onToggleVisibility={onToggleVisibility} isSelected={isSelected} />
 			);
 		case "engine":
 			return (
-				<EnginePreview sprite={sprite} onPositionChange={onPositionChange} hidden={hidden} onToggleVisibility={onToggleVisibility} />
+				<EnginePreview sprite={sprite} hidden={hidden} onToggleVisibility={onToggleVisibility} isSelected={isSelected} />
 			);
 		case "shoot":
 			return (
-				<ShootPreview sprite={sprite} onPositionChange={onPositionChange} hidden={hidden} onToggleVisibility={onToggleVisibility} />
+				<ShootPreview sprite={sprite} hidden={hidden} onToggleVisibility={onToggleVisibility} isSelected={isSelected} />
 			);
 		case "part":
-			return <PartPreview sprite={sprite} onPositionChange={onPositionChange} hidden={hidden} onToggleVisibility={onToggleVisibility} />;
+			return <PartPreview sprite={sprite} hidden={hidden} onToggleVisibility={onToggleVisibility} isSelected={isSelected} />;
 		case "draw-region":
 			return (
 				<DrawRegionPreview
 					sprite={sprite}
-					onPositionChange={onPositionChange}
 					hidden={hidden}
 					onToggleVisibility={onToggleVisibility}
+					isSelected={isSelected}
 				/>
 			);
 		default:
 			return (
-				<div className="w-full border p-8 rounded bg-card relative flex items-center justify-center">
+				<div className={`w-full border p-8 rounded bg-card relative flex items-center justify-center ${isSelected ? "ring-2 ring-primary" : ""}`}>
 					<span className="text-xs text-muted-foreground">[{sprite.type}]</span>
 				</div>
 			);

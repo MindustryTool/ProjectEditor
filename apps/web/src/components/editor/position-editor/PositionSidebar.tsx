@@ -1,35 +1,23 @@
 import { usePath } from "#/hooks/use-path";
 import { Button } from "#/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { type PositionEditHandler } from "./preview/types";
-import { updatePositionData } from "./utils";
 import type { PositionData } from "@project/schema";
 import { PositionPreview } from "#/components/editor/position-editor/preview";
 
 export function PositionSidebar({
 	sprites,
 	path,
-	data,
-	write,
 	hiddenSprites,
 	onToggleSprite,
+	selectedPath,
 }: {
 	sprites: PositionData[];
 	path: string;
-	data: string | null | undefined;
-	write: (data: string | ((prev: string | null) => string)) => string;
 	hiddenSprites: Set<string>;
 	onToggleSprite: (key: string) => void;
+	selectedPath?: string | null;
 }) {
 	const [, setPath] = usePath();
-
-	const handlePositionChange: PositionEditHandler = (xPath, yPath, x, y) => {
-		if (!data) return;
-		const result = updatePositionData(data, xPath, yPath, x, y);
-		if (result) {
-			write(result);
-		}
-	};
 
 	return (
 		<div className="h-full flex flex-col gap-2">
@@ -42,9 +30,9 @@ export function PositionSidebar({
 					<PositionPreview
 						key={sprite.position.x.path}
 						sprite={sprite}
-						onPositionChange={handlePositionChange}
 						hidden={hiddenSprites.has(sprite.position.x.path)}
 						onToggleVisibility={() => onToggleSprite(sprite.position.x.path)}
+						isSelected={selectedPath === sprite.position.x.path}
 					/>
 				))}
 			</div>

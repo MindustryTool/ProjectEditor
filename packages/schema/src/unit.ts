@@ -1512,13 +1512,8 @@ const unitObjectSchema = {
 export const UnitHjsonSchema: SchemaFn = cached((context) =>
 	v.object({
 		...unitObjectSchema,
-		// x/y-bearing sub-schemas reachable from UnitHjsonSchema:
-		//   engines → EngineHjsonSchema: x, y, radius, rotation (type: "engine")
-		//   parts → PartHjsonSchema variants: x, y, name, mirror, rotation (type: "part")
-		//   weapons → WeaponHjsonSchema → shoot patterns: x, y (type: "weapon")
-		//   draw (via BlockHjsonSchema) → DrawRegion: x, y, suffix, name, rotation (type: "draw-region")
 		baseRegion: TextureFieldSchema("@-base"),
-		legRegion: v.pipe(TextureFieldSchema("@-lg"), metadata({ visibleWhen: { field: "type", value: "legs" } })),
+		legRegion: v.pipe(TextureFieldSchema("@-leg"), metadata({ visibleWhen: { field: "type", value: "legs" } })),
 		previewRegion: TextureFieldSchema("@-preview"),
 		cellRegion: TextureFieldSchema("@-cell"),
 		jointRegion: v.pipe(TextureFieldSchema("@-joint"), metadata({ visibleWhen: { field: "type", value: "legs" } })),

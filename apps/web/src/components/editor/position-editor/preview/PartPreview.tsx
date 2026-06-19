@@ -1,28 +1,22 @@
 import type { PartPositionData } from "@project/schema";
-import type { PositionEditHandler } from "./types";
-import { usePositionEdit } from "./usePositionEdit";
 import { PreviewContainer } from "./PreviewContainer";
-import { PositionInputs } from "./PositionInputs";
 
 export function PartPreview({
 	sprite,
-	onPositionChange,
 	hidden,
 	onToggleVisibility,
+	isSelected,
 }: {
 	sprite: PartPositionData;
-	onPositionChange?: PositionEditHandler;
 	hidden?: boolean;
 	onToggleVisibility?: () => void;
+	isSelected?: boolean;
 }) {
-	const posEdit = usePositionEdit(sprite.position, onPositionChange);
-
 	return (
 		<PreviewContainer
 			hidden={hidden}
 			onToggleVisibility={onToggleVisibility}
-			onClick={() => posEdit.scrollTo(sprite.position.x.path)}
-			footer={<PositionInputs {...posEdit} />}
+			isSelected={isSelected}
 		>
 			<span className="text-xs text-muted-foreground">
 				[part] {sprite.name ?? ""}
