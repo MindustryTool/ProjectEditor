@@ -1,7 +1,7 @@
 import type { TreeSnapshot, ValidationBatchFile, ValidationResult } from "@project/core";
 import { useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { hasDefaultValidatorMatch, JsonExporter } from "@project/core";
+import { hasDefaultValidatorMatch, JsonExporter, ValidationCode } from "@project/core";
 import { useProjectSession, useValidationStore } from "@project/core";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "#/components/ui/dialog";
 import { Button } from "#/components/ui/button";
@@ -144,6 +144,7 @@ async function loadAndValidateAll(
 		} catch (err) {
 			useValidationStore.getState().setResults(entry.path, [
 				{
+					code: ValidationCode.INTERNAL_ERROR,
 					path: entry.path,
 					severity: "error",
 					messageKey: err instanceof Error ? err.message : "Unknown error",

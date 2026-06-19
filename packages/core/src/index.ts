@@ -32,7 +32,7 @@ export { WriteQueue, getWriteQueue, disposeWriteQueue } from "./write-queue.js";
 export { useFile } from "./file/use-file-content.js";
 export { useFileString } from "./file/use-file-content-string.js";
 
-export { severityLabel, isErrorOrWarning } from "./validation/types";
+export { severityLabel, isErrorOrWarning, ValidationCode } from "./validation/types";
 export { findUnknownProperties } from "./validation/utils";
 export { createValidatorRegistry } from "./validation/registry";
 export { createValidationRunner } from "./validation/runner";
