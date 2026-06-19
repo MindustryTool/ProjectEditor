@@ -7,7 +7,7 @@ import { Button } from "#/components/ui/button";
 
 interface ExportMenuProps {
 	className?: string;
-    children?: ReactNode;
+	children?: ReactNode;
 }
 
 export function ExportMenu({ className, children }: ExportMenuProps) {
@@ -22,15 +22,9 @@ export function ExportMenu({ className, children }: ExportMenuProps) {
 
 	return (
 		<>
-			<Button
-                variant="ghost"
-				onClick={handleOpen}
-				className={cn(
-					className,
-				)}
-			>
+			<Button variant="ghost" onClick={handleOpen} className={cn("text-xs", className)}>
 				{t("export-menu.label")}
-                {children}
+				{children}
 			</Button>
 			<ExportMenuContent open={open} onOpenChange={setOpen} />
 		</>

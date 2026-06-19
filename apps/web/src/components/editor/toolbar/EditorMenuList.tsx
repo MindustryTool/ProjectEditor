@@ -16,6 +16,7 @@ import { ViewMenuListContent } from "./ViewMenuListContent";
 import { LocalizationMenuListContent } from "./LocalizationMenuListContent";
 import { ExportMenuContent } from "./ExportMenuContent";
 import { useProjectSession } from "@project/core";
+import { ChevronDown } from "lucide-react";
 
 interface EditorMenuListProps {
 	className?: string;
@@ -37,7 +38,9 @@ export function EditorMenuList({ className, onClose }: EditorMenuListProps) {
 				<ProjectMenu />
 				<EditMenu />
 				<ViewMenu />
-				<ExportMenu />
+				<ExportMenu className="px-2 py-1 text-xs font-medium text-foreground">
+					<ChevronDown className="h-3 w-3 text-muted-foreground" />
+				</ExportMenu>
 				<LocalizationMenu />
 			</div>
 		);
@@ -61,8 +64,8 @@ export function EditorMenuList({ className, onClose }: EditorMenuListProps) {
 							key={tab.id}
 							onClick={(event) => {
 								setActiveTab(tab.id);
-                                event.stopPropagation();
-                                event.preventDefault();
+								event.stopPropagation();
+								event.preventDefault();
 							}}
 							className={cn(
 								"w-full text-left text-xs h-9 px-2.5 rounded-sm transition-all flex items-center justify-between",

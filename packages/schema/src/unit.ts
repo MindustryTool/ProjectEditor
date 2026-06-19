@@ -31,7 +31,7 @@ const unitObjectSchema = {
 	...unlockableContentSchema,
 	type: v.pipe(v.optional(v.picklist(unitTypes)), metadata({ order: Order.TYPE })),
 	template: classSchema(unitTemplates, "UnitType"),
-	texture: TextureFieldSchema("@"),
+	region: TextureFieldSchema("@"),
 	envRequired: v.pipe(
 		v.optional(EnvSchema, 0),
 		metadata({
@@ -1513,12 +1513,12 @@ export const UnitHjsonSchema: SchemaFn = cached((context) =>
 	v.object({
 		...unitObjectSchema,
 		baseRegion: TextureFieldSchema("@-base"),
-		legRegion: v.pipe(TextureFieldSchema("@-leg"), metadata({ visibleWhen: { field: "type", value: "legs" } })),
+		legRegion: v.pipe(TextureFieldSchema("@-leg")),
 		previewRegion: TextureFieldSchema("@-preview"),
 		cellRegion: TextureFieldSchema("@-cell"),
 		jointRegion: v.pipe(TextureFieldSchema("@-joint"), metadata({ visibleWhen: { field: "type", value: "legs" } })),
 		footRegion: TextureFieldSchema("@-foot"),
-		legBaseRegion: v.pipe(TextureFieldSchema("@-leg-base", "@-leg"), metadata({ visibleWhen: { field: "type", value: "legs" } })),
+		legBaseRegion: v.pipe(TextureFieldSchema("@-leg-base", "@-leg")),
 		baseJointRegion: v.pipe(TextureFieldSchema("@-joint-base"), metadata({ visibleWhen: { field: "type", value: "legs" } })),
 		outlineRegion: TextureFieldSchema("@-outline"),
 		treadRegion: v.pipe(TextureFieldSchema("@-treads"), metadata({ visibleWhen: { field: "type", value: "tank" } })),

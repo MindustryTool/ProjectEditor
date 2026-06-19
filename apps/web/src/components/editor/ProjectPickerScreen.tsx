@@ -46,6 +46,7 @@ function CreateProjectSection({ onProjectSelected }: { onProjectSelected: (id: s
 				});
 
 				await context.fs.writeJsonFile("/content/items/test-item.hjson", {
+                    name: 'test-item',
 					hardness: 8,
 					cost: 7,
 					charge: 0.9,
