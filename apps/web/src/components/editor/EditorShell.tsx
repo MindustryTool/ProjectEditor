@@ -29,6 +29,7 @@ import { Button } from "#/components/ui/button";
 import { EditorMenuList } from "./toolbar/EditorMenuList";
 import { Separator } from "#/components/ui/separator";
 import { ExportMenu } from "#/components/editor/toolbar/ExportMenu";
+import { EditMenu } from "#/components/editor/toolbar/EditMenu";
 
 const PixelEditor = lazy(() => import("./pixel-editor/PixelEditor").then((m) => ({ default: m.PixelEditor })));
 const ModHjsonPanel = lazy(() => import("./right/ModHjsonPanel").then((m) => ({ default: m.ModHjsonPanel })));
@@ -305,8 +306,9 @@ function EditorMobileLayout() {
 						<EditorMenuList onClose={() => setSheetOpen(false)} />
 					</SheetContent>
 				</Sheet>
+				<EditMenu />
 				<ExportMenu>
-					<ChevronDown className="size-4" />
+					<ChevronDown className="size-3 text-muted-foreground" />
 				</ExportMenu>
 			</Toolbar>
 			<Tabs
@@ -327,7 +329,7 @@ function EditorMobileLayout() {
 				</TabsContent>
 				<TabsContent value="editor" className="flex flex-1 overflow-hidden bg-background w-full">
 					<div className="flex min-h-0 flex-1 overflow-hidden w-full">
-						<div className="flex flex-col flex-1 overflow-hidden bg-background w-full gap-1">
+						<div className="flex flex-col flex-1 overflow-hidden bg-background w-full gap-1 pt-1 px-1">
 							<ErrorBoundary>
 								<Suspense>
 									<RecentlyOpenedFilesBar />

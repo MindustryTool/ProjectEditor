@@ -2,11 +2,11 @@ import * as v from "valibot";
 import { cached, metadata } from "./utils";
 import { ResearchSchema } from "./research";
 import type { SchemaFn } from "./utils";
-import { unlockableContentSchema } from "./content";
+import { databaseContent } from "./content";
 import type { ProjectContents } from "@project/types";
 
 export const sectorBaseObjectSchema = v.object({
-	...unlockableContentSchema,
+	...databaseContent,
 	captureWave: v.pipe(v.optional(v.pipe(v.number(), v.integer()), 0), metadata({ name: "editor.sector.capture-wave" })),
 	difficulty: v.pipe(
 		v.optional(v.pipe(v.number(), v.minValue(0), v.maxValue(10)), 0),

@@ -50,7 +50,6 @@ export function EditorMenuList({ className, onClose }: EditorMenuListProps) {
 		{ id: "project", label: t("project-menu.label", "Project") },
 		{ id: "edit", label: t("edit-menu.label", "Edit") },
 		{ id: "view", label: t("view-menu.label", "View") },
-		{ id: "export", label: t("export-menu.label", "Export") },
 		{ id: "localization", label: t("localization-menu.label", "Localization") },
 	];
 

@@ -66,6 +66,8 @@ export const vi = {
 	"export-menu.validating": "Đang xác thực...",
 	"export-menu.cancel": "Hủy",
 	"edit-menu.label": "Chỉnh sửa",
+	"edit-menu.undo": "Hoàn tác",
+	"edit-menu.redo": "Làm lại",
 	"edit-menu.format": "Định dạng",
 	"edit-menu.format-failed": "Không thể định dạng tệp: {{error}}",
 	"view-menu.label": "Xem",

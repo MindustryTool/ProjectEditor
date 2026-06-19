@@ -12,7 +12,7 @@ import { TeamSchema } from "./team";
 import { TargetPriority } from "./target-priority";
 import { Envs, EnvSchema } from "./envs";
 import { classSchema } from "./class";
-import { unlockableContentSchema } from "./content";
+import { databaseContent } from "./content";
 
 export const blockTypes = [
 	// Power
@@ -181,7 +181,7 @@ export const blockTypes = [
 export type BlockType = (typeof blockTypes)[number];
 
 export const blockObjectSchema = {
-	...unlockableContentSchema,
+	...databaseContent,
 	type: classSchema(blockTypes, "Block"),
     texture: TextureFieldSchema("@"),
 	shadowTexture: TextureFieldSchema("@-shadow"),

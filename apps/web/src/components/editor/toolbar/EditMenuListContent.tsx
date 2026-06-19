@@ -8,10 +8,20 @@ interface EditMenuListContentProps {
 
 export function EditMenuListContent({ onItemClick }: EditMenuListContentProps) {
 	const { t } = useTranslation();
-	const { path, canFormat, handleFormat } = useEditMenu();
+	const { path, canFormat, canUndo, canRedo, handleUndo, handleRedo, handleFormat } = useEditMenu();
 
-	const handleClick = () => {
+	const handleFormatClick = () => {
 		handleFormat();
+		onItemClick?.();
+	};
+
+	const handleUndoClick = () => {
+		handleUndo();
+		onItemClick?.();
+	};
+
+	const handleRedoClick = () => {
+		handleRedo();
 		onItemClick?.();
 	};
 
@@ -25,7 +35,16 @@ export function EditMenuListContent({ onItemClick }: EditMenuListContentProps) {
 
 	return (
 		<div className="flex flex-col gap-1 p-1 w-full">
-			<Button variant="ghost" className="w-full justify-start text-xs h-9 px-3 font-normal" onClick={handleClick} disabled={!canFormat}>
+			<Button variant="ghost" className="w-full justify-start text-xs h-9 px-3 font-normal" onClick={handleUndoClick} disabled={!canUndo}>
+				{t("edit-menu.undo")}
+				<span className="ml-auto text-xs text-muted-foreground">Ctrl+Z</span>
+			</Button>
+			<Button variant="ghost" className="w-full justify-start text-xs h-9 px-3 font-normal" onClick={handleRedoClick} disabled={!canRedo}>
+				{t("edit-menu.redo")}
+				<span className="ml-auto text-xs text-muted-foreground">Ctrl+Shift+Z</span>
+			</Button>
+			<div className="h-px bg-border my-1" />
+			<Button variant="ghost" className="w-full justify-start text-xs h-9 px-3 font-normal" onClick={handleFormatClick} disabled={!canFormat}>
 				{t("edit-menu.format")}
 			</Button>
 		</div>

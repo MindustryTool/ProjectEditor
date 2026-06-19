@@ -13,7 +13,7 @@ import { EngineHjsonSchema } from "./engine";
 
 import { cached, metadata } from "./utils";
 import { classSchema } from "./class";
-import { unlockableContentSchema } from "./content";
+import { databaseContent } from "./content";
 import { TextureFieldSchema } from "./texture";
 import { ArrayTextureSchema } from "./textures";
 import { blockFlags } from "./block-flag";
@@ -27,7 +27,7 @@ const unitTypes = ["flying", "mech", "legs", "naval", "payload", "missile", "tan
 const unitTemplates = ["ErekirUnitType", "MissileUnitType", "NeoplasmUnitType", "TankUnitType", "UnitType"] as const;
 
 const unitObjectSchema = {
-	...unlockableContentSchema,
+	...databaseContent,
 	type: v.pipe(v.optional(v.picklist(unitTypes)), metadata({ order: Order.TYPE })),
 	template: classSchema(unitTemplates, "UnitType"),
 	region: TextureFieldSchema("@"),

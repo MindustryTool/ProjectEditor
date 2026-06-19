@@ -34,7 +34,7 @@ export const ContentFieldSchema = CachedSchema((context: ProjectContents) =>
 	),
 );
 
-export const unlockableContentSchema = {
+export const baseContent = {
 	name: v.pipe(ContentNameSchema, metadata({ order: Order.NAME })),
 	localizedName: v.pipe(
 		v.optional(v.string()),
@@ -46,17 +46,30 @@ export const unlockableContentSchema = {
 	),
 	details: v.pipe(
 		v.nullish(v.string(), ""),
-		metadata({ multiline: true, name: "editor.content.details", description: "editor.content.details-description", order: Order.BASIC }),
+		metadata({
+			multiline: true,
+			name: "editor.content.details",
+			description: "editor.content.details-description",
+			order: Order.BASIC,
+		}),
 	),
 	credit: v.pipe(
 		v.nullish(v.string(), ""),
 		metadata({ name: "editor.content.credit", description: "editor.content.credit-description", order: Order.BASIC }),
 	),
-    uiIcon: TextureFieldSchema("@-ui"),
-    fullIcon: TextureFieldSchema("@-full"),
+} as const;
+
+export const databaseContent = {
+    ...baseContent,
+	uiIcon: TextureFieldSchema("@-ui"),
+	fullIcon: TextureFieldSchema("@-full"),
 	alwaysUnlocked: v.pipe(
 		v.optional(v.boolean(), false),
-		metadata({ name: "editor.content.always-unlocked", description: "editor.content.always-unlocked-description", order: Order.BASIC }),
+		metadata({
+			name: "editor.content.always-unlocked",
+			description: "editor.content.always-unlocked-description",
+			order: Order.BASIC,
+		}),
 	),
 	inlineDescription: v.pipe(
 		v.optional(v.boolean(), true),

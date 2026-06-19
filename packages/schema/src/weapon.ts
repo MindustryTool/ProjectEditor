@@ -9,7 +9,7 @@ import { BulletHjsonSchema } from "./bullet";
 import { cached, metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
 import { ClassMap, classSchema } from "./class";
-import { unlockableContentSchema } from "./content";
+import { baseContent } from "./content";
 import { TextureFieldSchema } from "./texture";
 import { Order } from "./order";
 
@@ -18,7 +18,7 @@ const weaponTypes = ["Weapon", "BuildWeapon", "MineWeapon", "PointDefenseBulletW
 type WeaponType = (typeof weaponTypes)[number];
 
 const weaponObjectSchema = v.object({
-	...unlockableContentSchema,
+	...baseContent,
 	type: v.pipe(classSchema(weaponTypes, "Weapon"), metadata({ order: Order.TYPE })),
 	baseTexture: TextureFieldSchema("@"),
 	heatTexture: TextureFieldSchema("@-heat"),

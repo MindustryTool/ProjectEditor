@@ -25,6 +25,9 @@ export { useProjectSession, useCurrentProject, selectIsExpanded, selectJsonPath 
 
 export { useFileStore, isDirty, isError, getEntry, selectEntry, exists, selectIsSaving } from "./file/store.js";
 
+export { useUndoRedoStore } from "./file/undo-redo-store.js";
+export type { UndoRedoEntry } from "./file/undo-redo-store.js";
+
 export { WriteQueue, getWriteQueue, disposeWriteQueue } from "./write-queue.js";
 export { useFile } from "./file/use-file-content.js";
 export { useFileString } from "./file/use-file-content-string.js";

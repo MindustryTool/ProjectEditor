@@ -5,11 +5,11 @@ import type { SchemaFn } from "./utils";
 import { EffectFieldSchema } from "./effect";
 import { cached, metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
-import { unlockableContentSchema } from "./content";
+import { databaseContent } from "./content";
 import { TextureFieldSchema } from "./texture";
 
 export const liquidBaseObjectSchema = v.object({
-    ...unlockableContentSchema,
+    ...databaseContent,
     texture: TextureFieldSchema("@"),
 	gas: v.pipe(
 		v.optional(v.boolean(), false),

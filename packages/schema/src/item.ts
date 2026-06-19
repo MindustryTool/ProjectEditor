@@ -4,11 +4,11 @@ import { ResearchSchema } from "./research";
 import type { SchemaFn } from "./utils";
 import { metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
-import { unlockableContentSchema } from "./content";
+import { databaseContent } from "./content";
 import { TextureFieldSchema } from "./texture";
 
 export const itemBaseObjectSchema = v.object({
-    ...unlockableContentSchema,
+    ...databaseContent,
     texture: TextureFieldSchema("@"),
 	hardness: v.pipe(
 		v.optional(v.pipe(v.number(), v.minValue(0), v.integer())),

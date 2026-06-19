@@ -71,6 +71,8 @@ export const en = {
 	"export-menu.validating": "Validating...",
 	"export-menu.cancel": "Cancel",
 	"edit-menu.label": "Edit",
+	"edit-menu.undo": "Undo",
+	"edit-menu.redo": "Redo",
 	"edit-menu.format": "Format",
 	"edit-menu.format-failed": "Failed to format file: {{error}}",
 	"view-menu.label": "View",

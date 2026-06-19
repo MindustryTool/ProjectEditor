@@ -1,5 +1,5 @@
 import * as v from "valibot";
-import { unlockableContentSchema } from "./content";
+import { databaseContent } from "./content";
 import { cached, metadata } from "./utils";
 import { SectorFieldSchema } from "./sector";
 import type { ProjectContents } from "@project/types";
@@ -23,7 +23,7 @@ const meshSchema = v.pipe(
 
 export const PlanetSchema = cached((context: ProjectContents) =>
 	v.object({
-		...unlockableContentSchema,
+		...databaseContent,
 		mesh: v.optional(meshSchema),
 		cloudMesh: v.optional(meshSchema),
 		radius: v.optional(v.pipe(v.number(), v.gtValue(0)), 1),

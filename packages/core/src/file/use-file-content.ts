@@ -4,6 +4,7 @@ import { useProjectSession } from "../project/session";
 import { getWriteQueue } from "../write-queue";
 import { useStoreWithEqualityFn } from "zustand/traditional";
 import { shallow } from "zustand/shallow";
+import { useUndoRedoStore } from "../file/undo-redo-store";
 
 export interface UseFileResult<T> {
 	data: T | null;
@@ -34,6 +35,11 @@ export function useFile(path: string): UseFileResult<ArrayBuffer> {
 	const write = useCallback(
 		(content: ArrayBuffer | string | ((prev: ArrayBuffer | null) => ArrayBuffer)) => {
 			if (!projectId || !fs) return;
+
+			const currentData = getEntry(projectId, path)?.data;
+			if (currentData !== null && currentData !== undefined) {
+				useUndoRedoStore.getState().pushSnapshot(projectId, path, currentData);
+			}
 
 			const resolved = typeof content === "function" ? content(getEntry(projectId, path)?.data ?? null) : content;
 			const store = useFileStore.getState();
