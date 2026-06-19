@@ -7,19 +7,19 @@ export function EditMenuContent() {
 	const { path, canFormat, canUndo, canRedo, handleUndo, handleRedo, handleFormat } = useEditMenu();
 
 	return (
-		<DropdownMenuContent align="start" className="w-44">
+		<DropdownMenuContent align="start" className="w-fit">
 			{path && (
 				<>
-					<DropdownMenuItem onClick={handleUndo} disabled={!canUndo}>
+					<DropdownMenuItem className="text-nowrap" onClick={handleUndo} disabled={!canUndo}>
 						{t("edit-menu.undo")}
 						<DropdownMenuShortcut>Ctrl+Z</DropdownMenuShortcut>
 					</DropdownMenuItem>
-					<DropdownMenuItem onClick={handleRedo} disabled={!canRedo}>
+					<DropdownMenuItem className="text-nowrap" onClick={handleRedo} disabled={!canRedo}>
 						{t("edit-menu.redo")}
 						<DropdownMenuShortcut>Ctrl+Shift+Z</DropdownMenuShortcut>
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
-					<DropdownMenuItem onClick={handleFormat} disabled={!canFormat}>
+					<DropdownMenuItem className="text-nowrap" onClick={handleFormat} disabled={!canFormat}>
 						{t("edit-menu.format")}
 					</DropdownMenuItem>
 				</>
