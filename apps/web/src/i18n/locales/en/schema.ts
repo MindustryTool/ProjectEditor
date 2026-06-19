@@ -452,8 +452,6 @@
 	"editor.unit.path-cost": "Path Cost",
 	"editor.unit.path-cost-description":
 		'Function used for calculating cost of moving with ControlPathfinder. Does not affect "normal" flow field pathfinding.',
-	"editor.unit.sample": "Sample",
-	"editor.unit.sample-description": "A sample of the unit that this type creates. Do not modify!",
 	"editor.unit.target-flags": "Target Flags",
 	"editor.unit.target-flags-description":
 		"Flags to target based on priority. Null indicates that the closest target should be found. The closest enemy core is used as a fallback.",

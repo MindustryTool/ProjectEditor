@@ -3,6 +3,7 @@ import { CachedSchema, metadata } from "./utils";
 import type { ProjectContents } from "@project/types";
 import { CategorySchema } from "./category";
 import { Order } from "./order";
+import { TextureFieldSchema } from "./texture";
 
 export const ContentNameSchema = v.pipe(
 	v.string(),
@@ -51,6 +52,8 @@ export const unlockableContentSchema = {
 		v.nullish(v.string(), ""),
 		metadata({ name: "editor.content.credit", description: "editor.content.credit-description", order: Order.BASIC }),
 	),
+    uiIcon: TextureFieldSchema("@-ui"),
+    fullIcon: TextureFieldSchema("@-full"),
 	alwaysUnlocked: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({ name: "editor.content.always-unlocked", description: "editor.content.always-unlocked-description", order: Order.BASIC }),
