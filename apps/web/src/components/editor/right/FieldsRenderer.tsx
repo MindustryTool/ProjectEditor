@@ -39,10 +39,10 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	const [filters, setFilters] = useState<Record<string, string>>({});
 	const { contents } = useProjectContext();
 	const filename = useFileName();
-	const filenameWithoutExt = filename?.split(".")[0] || "";
 	const scrollTopRef = useRef<Map<string | null, number>>(new Map());
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
+	const modName = useProjectContext().metadata.name;
 	const currentJsonPath = useProjectSession(selectJsonPath);
 	const setSelectedPath = useProjectSession((s) => s.setSelectedPath);
 	const selectedPath = useProjectSession((s) => s.selectedPath);
@@ -146,7 +146,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	};
 
 	const showSearch = entries.length > 10;
-    const name = currentJsonPath === null ? filenameWithoutExt : ((activeValues["name"] as string) ?? "");
+	const name = modName + "-" + String(activeValues["name"] ?? "");
 
 	return (
 		<div className="h-full w-full overflow-y-auto overflow-x-hidden relative flex flex-col" onScroll={handleScroll} ref={scrollRef}>
