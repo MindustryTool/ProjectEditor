@@ -172,7 +172,6 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 									<Search className="size-4" />
 								</InputGroupAddon>
 								<InputGroupInput //
-									className="text-base"
 									ref={inputRef}
 									value={filter}
 									onChange={(e) => {

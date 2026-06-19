@@ -124,6 +124,7 @@
 
 	body {
 		@apply bg-background text-foreground overflow-hidden m-0 h-dvh;
+        -webkit-text-size-adjust: 100%;
 	}
     html {
         @apply font-sans overflow-hidden m-0 h-dvh;
