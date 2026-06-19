@@ -274,7 +274,7 @@ export class HjsonObjectNode extends HjsonNode {
 		const totalFields = fields.length;
 
 		if (totalFields === 1) {
-			if (this.#start && this.#end) {
+			if (this.#start && this.#end && original[this.#start.index] === "{") {
 				const openIdx = this.#start.index + 1;
 				const closeIdx = this.#end.index;
 				return original.slice(0, openIdx) + original.slice(closeIdx - 1);

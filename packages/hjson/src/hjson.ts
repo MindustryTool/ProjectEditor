@@ -13,7 +13,7 @@ const cache: { content: string; node: HjsonNode; hit: number; time: number }[] =
 
 export const HJSON = {
 	parseWithCache(content: string) {
-		content = content || "{}";
+		content = content.trim() || "{}";
 		let existing = undefined;
 
 		for (let i = cache.length - 1; i >= 0; i--) {
@@ -32,7 +32,7 @@ export const HJSON = {
 		const node = HJSON.parseStructured(content);
 		cache.push({ content, node, hit: 0, time: Date.now() });
 
-		if (cache.length > 1000) {
+		if (cache.length > 100) {
 			cache.sort((a, b) => {
 				if (a.hit !== b.hit) {
 					return b.hit - a.hit;

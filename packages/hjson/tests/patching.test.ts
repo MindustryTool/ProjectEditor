@@ -708,6 +708,14 @@ describe("HjsonValueNode.patchRemove", () => {
 		const result = standalone.patchRemove(src, "");
 		expect(result).toBe("");
 	});
+
+	it("removes field with unquoted string value (aiuhdwiu)", () => {
+		const text = "name: aiuhdwiu";
+		const root = HJSON.parseStructured(text) as HjsonObjectNode;
+		const nameNode = root.get("name") as HjsonValueNode;
+		const result = nameNode.patchRemove(text, "name");
+		expect(result).toBe("");
+	});
 });
 
 // ---------------------------------------------------------------------------
@@ -1530,5 +1538,135 @@ describe("HJSON.patch()", () => {
 
 			expect(write.getContent()).toBe(HJSON.stringify({ a: { b: { c: 42 } } }, null, 2));
 		});
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Edge cases: quoted keys and comments
+// ---------------------------------------------------------------------------
+
+describe("removeField with quoted keys", () => {
+	it("removes single field with quoted key", () => {
+		const text = '{ "name": "aiuhdwiu" }';
+		const root = HJSON.parseStructured(text) as HjsonObjectNode;
+		const result = root.removeField(text, "name");
+		expect(HJSON.parse(result)).toEqual({});
+	});
+
+	it("removes first field when keys are quoted", () => {
+		const text = '{ "a": 1, "b": 2, "c": 3 }';
+		const root = HJSON.parseStructured(text) as HjsonObjectNode;
+		const result = root.removeField(text, "a");
+		expect(HJSON.parse(result)).toEqual({ b: 2, c: 3 });
+	});
+
+	it("removes middle field when keys are quoted", () => {
+		const text = '{ "a": 1, "b": 2, "c": 3 }';
+		const root = HJSON.parseStructured(text) as HjsonObjectNode;
+		const result = root.removeField(text, "b");
+		expect(HJSON.parse(result)).toEqual({ a: 1, c: 3 });
+	});
+
+	it("removes last field when keys are quoted", () => {
+		const text = '{ "a": 1, "b": 2, "c": 3 }';
+		const root = HJSON.parseStructured(text) as HjsonObjectNode;
+		const result = root.removeField(text, "c");
+		expect(HJSON.parse(result)).toEqual({ a: 1, b: 2 });
+	});
+});
+
+describe("removeField with comments", () => {
+	it("removes field after single-line // comment", () => {
+		const text = "{\n  // comment\n  a: 1\n}";
+		const root = HJSON.parseStructured(text) as HjsonObjectNode;
+		const result = root.removeField(text, "a");
+		expect(HJSON.parse(result)).toEqual({});
+	});
+
+	it("removes field after # comment", () => {
+		const text = "{\n  # keep this\n  a: 1,\n  b: 2\n}";
+		const root = HJSON.parseStructured(text) as HjsonObjectNode;
+		const result = root.removeField(text, "a");
+		expect(HJSON.parse(result)).toEqual({ b: 2 });
+	});
+
+	it("removes field after block /* */ comment", () => {
+		const text = "{\n  /* block */\n  a: 1\n}";
+		const root = HJSON.parseStructured(text) as HjsonObjectNode;
+		const result = root.removeField(text, "a");
+		expect(HJSON.parse(result)).toEqual({});
+	});
+
+	it("preserves unrelated comments when removing a field", () => {
+		const text = "{\n  # keep this\n  a: 1,\n  # also keep\n  b: 2\n}";
+		const root = HJSON.parseStructured(text) as HjsonObjectNode;
+		const result = root.removeField(text, "a");
+		expect(HJSON.parse(result)).toEqual({ b: 2 });
+	});
+
+	it("removes last field preserving preceding comment", () => {
+		const text = "{\n  # first\n  a: 1,\n  # second\n  b: 2\n}";
+		const root = HJSON.parseStructured(text) as HjsonObjectNode;
+		const result = root.removeField(text, "b");
+		expect(HJSON.parse(result)).toEqual({ a: 1 });
+	});
+});
+
+describe("patchValue with quoted keys and comments", () => {
+	it("updates field with quoted key", () => {
+		const text = '{ "name": "old" }';
+		const root = HJSON.parseStructured(text) as HjsonObjectNode;
+		const result = root.patchValue(text, "name", "new");
+		expect(HJSON.parse(result)).toEqual({ name: "new" });
+	});
+
+	it("updates field value when comment is present before field", () => {
+		const text = "{\n  // comment\n  name: old\n}";
+		const root = HJSON.parseStructured(text) as HjsonObjectNode;
+		const result = root.patchValue(text, "name", "new");
+		expect(HJSON.parse(result)).toEqual({ name: "new" });
+	});
+
+	it("inserts field into braced object that has comments", () => {
+		const text = "{\n  # header\n  name: test\n}";
+		const root = HJSON.parseStructured(text) as HjsonObjectNode;
+		const result = root.insertField(text, "version", 2);
+		expect(HJSON.parse(result)).toEqual({ name: "test", version: 2 });
+	});
+});
+
+describe("patchRemove with quoted keys and comments", () => {
+	it("removes field with quoted key via value node patchRemove", () => {
+		const text = '{ "name": "aiuhdwiu" }';
+		const root = HJSON.parseStructured(text) as HjsonObjectNode;
+		const nameNode = root.get("name") as HjsonValueNode;
+		const result = nameNode.patchRemove(text, "name");
+		expect(HJSON.parse(result)).toEqual({});
+	});
+
+	it("removes field with preceding comment via value node patchRemove", () => {
+		const text = "{\n  // comment\n  name: val\n}";
+		const root = HJSON.parseStructured(text) as HjsonObjectNode;
+		const nameNode = root.get("name") as HjsonValueNode;
+		const result = nameNode.patchRemove(text, "name");
+		expect(HJSON.parse(result)).toEqual({});
+	});
+});
+
+describe("FieldInfo.replaceValue with quoted keys and comments", () => {
+	it("replaces value of field with quoted key", () => {
+		const text = '{ "name": "old" }';
+		const root = HJSON.parseStructured(text) as HjsonObjectNode;
+		const field = root.field("name")!;
+		const result = field.replaceValue(text, "new");
+		expect(HJSON.parse(result)).toEqual({ name: "new" });
+	});
+
+	it("replaces value of field with preceding comment", () => {
+		const text = "{\n  # comment\n  name: old\n}";
+		const root = HJSON.parseStructured(text) as HjsonObjectNode;
+		const field = root.field("name")!;
+		const result = field.replaceValue(text, "new");
+		expect(HJSON.parse(result)).toEqual({ name: "new" });
 	});
 });

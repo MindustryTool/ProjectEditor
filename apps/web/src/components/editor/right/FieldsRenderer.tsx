@@ -1,6 +1,6 @@
 import { ErrorBoundary } from "#/components/ui/error-boundary";
 import { FormControl, FormLabel } from "#/components/ui/form";
-import { useFileString, useProjectSession, selectJsonPath } from "@project/core";
+import { useFileString, useProjectSession, selectJsonPath, useUndoRedoStore } from "@project/core";
 import type { HjsonNode } from "@project/hjson";
 import { HJSON } from "@project/hjson";
 import { useProjectContext } from "#/components/editor/ProjectContext";
@@ -130,7 +130,20 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	}
 
 	if (typeof result === "string") {
-		return result;
+		return (
+			<div className="p-2 grid gap-2">
+				<span className="text-destructive text-sm">{result}</span>
+				<Button
+					variant="outline"
+					onClick={() => useUndoRedoStore.getState().undo(useProjectSession.getState().projectContext!.project.id, path)}
+				>
+					Undo
+				</Button>
+				<Button variant="destructive" onClick={() => write("")}>
+					Reset
+				</Button>
+			</div>
+		);
 	}
 
 	const { entries, activeValues, breadcrumbSegments, filtered, activeDefaults } = result;
