@@ -19,7 +19,6 @@ import { ArrayTextureSchema } from "./textures";
 import { blockFlags } from "./block-flag";
 import { aiControllers } from "./ai-controller";
 import { unitCommands } from "./unit-command";
-import { unitStances } from "./unit-stance";
 import { ItemStackSchema } from "./item-stack";
 import { rectSchema } from "./rect";
 import { Order } from "./order";
@@ -223,13 +222,6 @@ const unitObjectSchema = {
 			name: "editor.unit.wreck-health-multiplier",
 			description: "editor.unit.wreck-health-multiplier-description",
 			visibleWhen: { field: "flying", value: true },
-		}),
-	),
-	dpsEstimate: v.pipe(
-		v.optional(v.number(), -1),
-		metadata({
-			name: "editor.unit.dps-estimate",
-			description: "editor.unit.dps-estimate-description",
 		}),
 	),
 	clipSize: v.pipe(
@@ -665,13 +657,6 @@ const unitObjectSchema = {
 			description: "editor.unit.heal-flash-description",
 		}),
 	),
-	canHeal: v.pipe(
-		v.optional(v.boolean(), false),
-		metadata({
-			name: "editor.unit.can-heal",
-			description: "editor.unit.can-heal-description",
-		}),
-	),
 	singleTarget: v.pipe(
 		v.optional(v.boolean(), false),
 		metadata({
@@ -722,7 +707,6 @@ const unitObjectSchema = {
 			description: "editor.unit.bounded-description",
 		}),
 	),
-	naval: v.pipe(v.optional(v.boolean(), false), metadata({ name: "editor.unit.naval", description: "editor.unit.naval-description" })),
 	autoFindTarget: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
@@ -925,14 +909,6 @@ const unitObjectSchema = {
 			description: "editor.unit.flowfield-path-type-description",
 		}),
 	),
-	pathCostId: v.pipe(
-		v.optional(v.number()),
-		metadata({
-			name: "editor.unit.path-cost-id",
-			description: "editor.unit.path-cost-id-description",
-		}),
-	),
-
 	allowChangeCommands: v.pipe(
 		v.optional(v.boolean(), true),
 		metadata({
@@ -1478,27 +1454,13 @@ const unitObjectSchema = {
 			description: "editor.unit.target-flags-description",
 		}),
 	),
-	commands: v.pipe(
-		v.optional(v.array(v.picklist(unitCommands))),
-		metadata({
-			name: "editor.unit.commands",
-			description: "editor.unit.commands-description",
-		}),
-	),
 	defaultCommand: v.pipe(
 		v.optional(v.picklist(unitCommands)),
 		metadata({
 			name: "editor.unit.default-command",
 			description: "editor.unit.default-command-description",
 		}),
-	),
-	stances: v.pipe(
-		v.optional(v.array(v.picklist(unitStances))),
-		metadata({
-			name: "editor.unit.stances",
-			description: "editor.unit.stances-description",
-		}),
-	),
+	),  
 	treadRects: v.pipe(
 		v.optional(v.array(rectSchema)),
 		metadata({
