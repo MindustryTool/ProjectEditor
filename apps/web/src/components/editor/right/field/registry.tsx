@@ -9,7 +9,6 @@ import { NumberField } from "#/components/editor/right/field/NumberField";
 import { ObjectField } from "#/components/editor/right/field/ObjectField";
 import { PickListField } from "#/components/editor/right/field/PickListField";
 import { ContentField } from "#/components/editor/right/field/ContentField";
-import { SelectField } from "#/components/editor/right/field/SelectField";
 import { StringField } from "#/components/editor/right/field/StringField";
 import { TextureField } from "#/components/editor/right/field/TextureField";
 import { TexturesField } from "#/components/editor/right/field/TexturesField";
@@ -29,7 +28,6 @@ const renderers: Partial<Record<Type, SchemaRenderer>> = {
 	content: ContentField,
 	picklist: PickListField,
 	liquids: LiquidsListField,
-	select: SelectField,
 	"item-stack": ItemRequirementField,
 	"liquid-stack": LiquidRequirementField,
 	texture: TextureField,

@@ -108,8 +108,8 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 		const resolvedRoot = resolveSchema(rootSchema, values);
 
 		const resolved = currentJsonPath !== null ? getSchemaFromPath(currentJsonPath, resolvedRoot, values) : null;
-		const activeSchema = resolved?.schema !== undefined ? resolveSchema(resolved.schema, resolved.value) : resolvedRoot;
-		const activeValues = (resolved?.value as Record<string, unknown>) ?? values;
+		const activeSchema = resolved !== null ? resolveSchema(resolved.schema, resolved.value) : resolvedRoot;
+		const activeValues = resolved !== null ? resolved.value : values;
 		const entries = getSchemaEntries(activeSchema);
 		const filtered = (filter ? levenshtein(entries, ([name]) => name, filter, 10) : entries).slice(0, render);
 		const activeDefaults = getDefaults(activeSchema, activeValues, true) as Record<string, unknown>;
@@ -146,7 +146,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 	};
 
 	const showSearch = entries.length > 10;
-    const name = currentJsonPath === null ? filenameWithoutExt : ((activeValues["name"] as string) ?? "");
+	const name = currentJsonPath === null ? filenameWithoutExt : ((activeValues["name"] as string) ?? "");
 
 	return (
 		<div className="h-full w-full overflow-y-auto overflow-x-hidden relative flex flex-col" onScroll={handleScroll} ref={scrollRef}>
@@ -159,7 +159,7 @@ export const FieldsRenderer = React.memo(function FieldsRenderer({ path, schema 
 									<Search className="size-4" />
 								</InputGroupAddon>
 								<InputGroupInput //
-                                    className="text-base"
+									className="text-base"
 									ref={inputRef}
 									value={filter}
 									onChange={(e) => {

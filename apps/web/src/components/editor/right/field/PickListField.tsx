@@ -53,7 +53,7 @@ export const PickListField = React.memo(function PickListField({
 					<Dialog>
 						<DialogTrigger asChild>
 							<Button className="w-full justify-between" variant="outline">
-								{stringValue ? <span>{stringValue}</span> : <span className="text-muted-foreground">{String(defaultValue)}</span>}
+								{!!stringValue ? <span>{stringValue}</span> : <span className="text-muted-foreground">{String(defaultValue)}</span>}
 								<ChevronDown />
 							</Button>
 						</DialogTrigger>

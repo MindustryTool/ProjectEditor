@@ -42,7 +42,6 @@ export const types = [
 	"unknown",
 	"picklist",
 	"liquids",
-	"select",
 	"texture",
 	"textures",
 	"item-stack",
@@ -445,7 +444,7 @@ export type ShootPositionData = {
 	type: "shoot";
 	position: BasePosition;
 	weaponPosition: BasePosition;
-    weaponName: string;
+	weaponName: string;
 	mirror: boolean;
 };
 
@@ -469,12 +468,15 @@ export type UnknownPositionData = {
 	position: BasePosition;
 };
 
-export type PositionData = SpritePositionData | EnginePositionData | ShootPositionData | PartPositionData | DrawPositionData | UnknownPositionData;
+export type PositionData =
+	| SpritePositionData
+	| EnginePositionData
+	| ShootPositionData
+	| PartPositionData
+	| DrawPositionData
+	| UnknownPositionData;
 
-export function collectEnginePositions(
-	basePath: string,
-	engines: unknown[] | undefined,
-): EnginePositionData[] {
+export function collectEnginePositions(basePath: string, engines: unknown[] | undefined): EnginePositionData[] {
 	if (!engines) return [];
 	return engines.map((e, i) => {
 		const obj = e as Record<string, unknown>;
@@ -497,7 +499,7 @@ export function collectWeaponPositions(
 	weapons: unknown[] | undefined,
 ): PositionData[] {
 	if (!weapons) return [];
-		const result: PositionData[] = [];
+	const result: PositionData[] = [];
 	for (let i = 0; i < weapons.length; i++) {
 		const w = weapons[i] as Record<string, unknown>;
 		const path = `${basePath}[${i}]`;
@@ -514,7 +516,7 @@ export function collectWeaponPositions(
 				x: { value: (w.x as number) ?? 0, path: `${path}.x` },
 				y: { value: (w.y as number) ?? 0, path: `${path}.y` },
 			},
-            weaponName: name ?? "",
+			weaponName: name ?? "",
 			mirror: w.mirror === true,
 		});
 
@@ -569,10 +571,7 @@ export function collectPartPositions(
 	});
 }
 
-export function collectUnitPositions(
-	findFileWithName: (filename: string) => string | undefined,
-	node: HjsonObjectNode,
-): PositionData[] {
+export function collectUnitPositions(findFileWithName: (filename: string) => string | undefined, node: HjsonObjectNode): PositionData[] {
 	const raw = node.valueOf() as Record<string, unknown>;
 	const engines = raw.engines as unknown[] | undefined;
 	const weapons = raw.weapons as unknown[] | undefined;
@@ -629,10 +628,14 @@ function parseJsonPath(path: string): PathSegment[] | null {
 	return segments;
 }
 
-export function getSchemaFromPath(path: string, schema: AnySchema, value?: unknown): { schema: AnySchema; value: unknown } | null {
+export function getSchemaFromPath(
+	path: string,
+	schema: AnySchema,
+	value?: Record<string, unknown>,
+): { schema: AnySchema; value: Record<string, unknown> } | null {
 	const segments = parseJsonPath(path);
 	if (segments === null) return null;
-	if (segments.length === 0) return { schema: resolveSchema(schema, value), value };
+	if (segments.length === 0) return { schema: resolveSchema(schema, value), value: value ?? {} };
 
 	let current: AnySchema = schema;
 	let currentValue: unknown = value;
@@ -666,7 +669,7 @@ export function getSchemaFromPath(path: string, schema: AnySchema, value?: unkno
 		}
 	}
 
-	return { schema: current, value: currentValue };
+	return { schema: current, value: (currentValue as Record<string, unknown>) ?? {} };
 }
 
 /**
