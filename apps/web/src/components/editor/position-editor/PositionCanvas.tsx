@@ -30,7 +30,7 @@ export function PositionCanvas({ path }: { path: string }) {
 	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
 	const baseSprite = useMemo(() => treeSnapshot.findContentSpritePath(path), [path, treeSnapshot]);
 
-	const { stageRef, posRef, scaleRef, handleWheel, handleDragEnd } = useCanvasInteraction(canvasDimensions.width, canvasDimensions.height);
+	const { stageRef, posRef, scaleRef, handleWheel, handleDragMove, handleDragEnd, handleTouchStart, handleTouchMove, handleTouchEnd } = useCanvasInteraction(canvasDimensions.width, canvasDimensions.height);
 
 	const { sprites, error } = useMemo(() => {
 		if (isLoading) return { sprites: [] as PositionData[], error: null };
@@ -115,7 +115,7 @@ export function PositionCanvas({ path }: { path: string }) {
 	return (
 		<ResizablePanelGroup orientation="horizontal" className="flex-1">
 			<ResizablePanel defaultSize="75%" minSize="50%">
-				<div ref={canvasRef} className="h-full relative">
+				<div ref={canvasRef} className="h-full relative" style={{ touchAction: "none" }}>
 					{error && (
 						<div className="absolute top-1 left-1 text-red-400/70 font-mono text-xs text-ellipsis w-full text-nowrap overflow-hidden">
 							{error}
@@ -136,7 +136,11 @@ export function PositionCanvas({ path }: { path: string }) {
 						offsetX={-canvasDimensions.width / 2}
 						offsetY={-canvasDimensions.height / 2}
 						onWheel={handleWheel}
+						onDragMove={handleDragMove}
 						onDragEnd={handleDragEnd}
+						onTouchStart={handleTouchStart}
+						onTouchMove={handleTouchMove}
+						onTouchEnd={handleTouchEnd}
 						scaleX={scaleRef.current}
 						scaleY={scaleRef.current}
 						x={posRef.current.x}

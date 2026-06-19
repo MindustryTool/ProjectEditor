@@ -21,7 +21,7 @@ export function PositionSidebar({
 
 	return (
 		<div className="h-full flex flex-col gap-2">
-			<Button variant="outline" size="sm" className="shrink-0" onClick={() => setPath({ path, type: "text", jsonPath: null })}>
+			<Button variant="secondary" size="sm" className="shrink-0" onClick={() => setPath({ path, type: "text", jsonPath: null })}>
 				<ArrowLeft className="h-4 w-4 mr-1" />
 				Back to text editor
 			</Button>
