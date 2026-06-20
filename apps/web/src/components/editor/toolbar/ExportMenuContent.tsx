@@ -10,6 +10,7 @@ import { Progress } from "#/components/ui/progress";
 import { ValidationErrorList, type ValidationFileError } from "#/components/editor/ValidationErrorList";
 import { usePath } from "#/hooks/use-path";
 import { validationService } from "#/services/validation-service";
+import { useProjectContext } from "#/components/editor/ProjectContext";
 
 interface ExportMenuContentProps {
 	open: boolean;
@@ -18,10 +19,11 @@ interface ExportMenuContentProps {
 
 export function ExportMenuContent({ open, onOpenChange }: ExportMenuContentProps) {
 	const { t } = useTranslation();
+	const metadata = useProjectContext();
 	const projectContext = useProjectSession((s) => s.projectContext);
 	const [, setPath] = usePath();
 	const [validationOpen, setValidationOpen] = useState(false);
-	const [filename, setFilename] = useState("");
+	const [filename, setFilename] = useState(metadata.metadata.name + "-" + new Date().toISOString());
 	const [warning, setWarning] = useState<string | null>(null);
 
 	const handleExport = useCallback(
@@ -309,4 +311,3 @@ export function sanitizeFilename(name: string): string {
 	result = result.slice(0, 200);
 	return result || "export";
 }
-
