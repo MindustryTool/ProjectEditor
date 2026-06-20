@@ -23,7 +23,11 @@ export function ExportMenuContent({ open, onOpenChange }: ExportMenuContentProps
 	const projectContext = useProjectSession((s) => s.projectContext);
 	const [, setPath] = usePath();
 	const [validationOpen, setValidationOpen] = useState(false);
-	const [filename, setFilename] = useState(metadata.metadata.name + "-" + new Date().toISOString());
+	const [filename, setFilename] = useState(() => {
+		const now = new Date();
+		const datestring = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}-${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
+		return metadata.metadata.name + "-" + datestring;
+	});
 	const [warning, setWarning] = useState<string | null>(null);
 
 	const handleExport = useCallback(
