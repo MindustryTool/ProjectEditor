@@ -36,7 +36,7 @@ export const unitFactoryObjectSchema = (context: ProjectContents) =>
 export const reconstructorObjectSchema = (context: ProjectContents) =>
 	v.object({
 		...unitBlockObjectSchema.entries,
-		upgrades: v.array(v.array(UnitFieldSchema(context))),
+		upgrades: v.array(v.pipe(v.array(UnitFieldSchema(context)), v.length(2))),
 		constructTime: v.pipe(
 			v.optional(v.number(), 120),
 			metadata({
