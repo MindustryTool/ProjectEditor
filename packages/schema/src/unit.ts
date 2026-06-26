@@ -389,7 +389,7 @@ const unitObjectSchema = {
 		metadata({
 			name: "editor.unit.wave-trail-x",
 			description: "editor.unit.wave-trail-x-description",
-			visibleWhen: { field: "naval", value: true },
+			visibleWhen: { field: "type", value: "naval" },
 		}),
 	),
 	waveTrailY: v.pipe(
@@ -397,7 +397,7 @@ const unitObjectSchema = {
 		metadata({
 			name: "editor.unit.wave-trail-y",
 			description: "editor.unit.wave-trail-y-description",
-			visibleWhen: { field: "naval", value: true },
+			visibleWhen: { field: "type", value: "naval" },
 		}),
 	),
 	trailScl: v.pipe(
