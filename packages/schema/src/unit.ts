@@ -194,7 +194,7 @@ const unitObjectSchema = {
 		}),
 	),
 	buildRange: v.pipe(
-		v.optional(v.number()),
+		v.optional(v.number(), 220),
 		metadata({
 			name: "editor.unit.build-range",
 			description: "editor.unit.build-range-description",

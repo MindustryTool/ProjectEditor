@@ -257,6 +257,9 @@ const consumePowerSchema = v.pipe(
 	}),
 );
 
+const removeSingleSchema = v.pipe(v.picklist([...consumeTypes, "all"]), metadata({ option: "single" }));
+const removeMultipleSchema = v.pipe(v.array(v.picklist([...consumeTypes, "all"])), metadata({ option: "multiple" }));
+
 export const ConsumesHjsonSchema = cached((context: ProjectContents) =>
 	v.pipe(
 		v.partial(
@@ -265,27 +268,14 @@ export const ConsumesHjsonSchema = cached((context: ProjectContents) =>
 					v.pipe(
 						v.lazy((input) => {
 							if (typeof input === "string") {
-								return v.picklist([...consumeTypes, "all"]);
+								return removeSingleSchema;
 							}
 
-							return v.pipe(
-								v.array(v.picklist([...consumeTypes, "all"])),
-								metadata({
-									option: "remove",
-								}),
-							);
+							return removeMultipleSchema;
 						}),
 						metadata({
 							type: "options",
-							options: [
-								v.picklist([...consumeTypes, "all"]),
-								v.pipe(
-									v.array(v.picklist([...consumeTypes, "all"])),
-									metadata({
-										option: "remove",
-									}),
-								),
-							],
+							options: [removeSingleSchema, removeMultipleSchema],
 						}),
 					),
 				),
