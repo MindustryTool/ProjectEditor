@@ -42,6 +42,7 @@ export {
 	collectEnginePositions,
 	collectPartPositions,
 	collectUnitPositions,
+	collectWaveTrailPositions,
 	collectWeaponPositions,
 	detectSchemaType,
 	findContent,
@@ -68,7 +69,9 @@ export type {
 	SpritePositionData,
 	Type,
 	UnknownPositionData,
+	WaveTrailPositionData,
 } from "./utils";
+
 export { DrawFieldSchema, DrawHjsonSchema, drawClasses } from "./draw";
 export type { DrawClass } from "./draw";
 export { WeaponHjsonSchema } from "./weapon";

@@ -2,6 +2,7 @@ import type { PositionData } from "@project/schema";
 import { updatePositionData } from "#/components/editor/position-editor/utils";
 import { PositionImage } from "./PositionImage";
 import { EnginePositionPlaceholder, PositionPlaceholder } from "./PositionPlaceholder";
+import { WaveTrailItem } from "./WaveTrailItem";
 
 export function SpriteItem({
 	region,
@@ -42,6 +43,16 @@ export function SpriteItem({
 					key={key}
 					region={region}
 					onDrag={handleDrag}
+					onSelect={onSelect}
+					isSelected={isSelected}
+				/>
+			);
+		case "wave-trail":
+			return (
+				<WaveTrailItem
+					key={key}
+					region={region}
+					write={write}
 					onSelect={onSelect}
 					isSelected={isSelected}
 				/>

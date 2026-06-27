@@ -30,7 +30,8 @@ export function PositionCanvas({ path }: { path: string }) {
 	const treeSnapshot = useProjectSession((s) => s.treeSnapshot);
 	const baseSprite = useMemo(() => treeSnapshot.findContentSpritePath(path), [path, treeSnapshot]);
 
-	const { stageRef, posRef, scaleRef, handleWheel, handleDragMove, handleDragEnd, handleTouchStart, handleTouchMove, handleTouchEnd } = useCanvasInteraction(canvasDimensions.width, canvasDimensions.height);
+	const { stageRef, posRef, scaleRef, handleWheel, handleDragMove, handleDragEnd, handleTouchStart, handleTouchMove, handleTouchEnd } =
+		useCanvasInteraction(canvasDimensions.width, canvasDimensions.height);
 
 	const { sprites, error } = useMemo(() => {
 		if (isLoading) return { sprites: [] as PositionData[], error: null };
@@ -164,31 +165,38 @@ export function PositionCanvas({ path }: { path: string }) {
 								return region.type === "shoot" ? (
 									<ShootItem key={key} region={region} write={write} onSelect={handleSelect} isSelected={selectedPath === key} />
 								) : (
-									<SpriteItem key={key} region={region} write={write} onSelect={handleSelect} selectedKey={selectedPath === key ? key : null} />
+									<SpriteItem
+										key={key}
+										region={region}
+										write={write}
+										onSelect={handleSelect}
+										selectedKey={selectedPath === key ? key : null}
+									/>
 								);
 							})}
 						</Layer>
 					</Stage>
-					{selectedData && (() => {
-						const stage = stageRef.current;
-						if (!stage) return null;
-						const scale = scaleRef.current;
-						const stagePos = stage.position();
-						const konvaX = selectedData.position.x.value * 4;
-						const konvaY = -(selectedData.position.y.value * 4);
-						const fp = {
-							x: (konvaX + canvasDimensions.width / 2) * scale + stagePos.x,
-							y: (konvaY + canvasDimensions.height / 2) * scale + stagePos.y,
-						};
-						return (
-							<PositionFloatingInput
-								position={selectedData.position}
-								onPositionChange={handleFloatingChange}
-								floatingPos={fp}
-								containerWidth={canvasDimensions.width}
-							/>
-						);
-					})()}
+					{selectedData &&
+						(() => {
+							const stage = stageRef.current;
+							if (!stage) return null;
+							const scale = scaleRef.current;
+							const stagePos = stage.position();
+							const konvaX = selectedData.position.x.value * 4;
+							const konvaY = -(selectedData.position.y.value * 4);
+							const fp = {
+								x: (konvaX + canvasDimensions.width / 2) * scale + stagePos.x,
+								y: (konvaY + canvasDimensions.height / 2) * scale + stagePos.y,
+							};
+							return (
+								<PositionFloatingInput
+									position={selectedData.position}
+									onPositionChange={handleFloatingChange}
+									floatingPos={fp}
+									containerWidth={canvasDimensions.width}
+								/>
+							);
+						})()}
 					{!isDesktop && (
 						<div className="absolute top-0 left-0 right-0">
 							<Collapsible className="space-y-2">
