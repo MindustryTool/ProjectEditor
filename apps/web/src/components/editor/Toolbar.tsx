@@ -8,6 +8,8 @@ import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { useFileStore } from "@project/core";
 import { cn } from "#/lib/utils";
+import { StatusBarRight } from "#/components/editor/statusbar/StatusBarRight";
+import { useIsDesktop } from "#/hooks/use-is-desktop";
 
 interface ToolbarProps {
 	children: ReactNode;
@@ -15,10 +17,12 @@ interface ToolbarProps {
 }
 
 export function Toolbar({ children, className }: ToolbarProps) {
+	const [isDesktop] = useIsDesktop();
 	return (
 		<div className={cn("flex h-9 min-h-9 max-h-9 border-b bg-card text-sm overflow-x-auto w-full", className)}>
 			<div className="flex items-center gap-1 px-2">{children}</div>
 			<div className="ml-auto pr-1 items-center flex gap-1">
+				{!isDesktop && <StatusBarRight mobile />}
 				<HelpMenu />
 				<AppSettingsDialog />
 			</div>

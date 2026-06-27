@@ -1,12 +1,12 @@
 import { useState, useCallback } from "react";
 import { useValidationStore } from "@project/core";
 import { useTranslation } from "react-i18next";
-import { FileJson, Image } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "#/components/ui/dialog";
 import { ValidationErrorList, type ValidationFileError } from "#/components/editor/ValidationErrorList";
 import { usePath } from "#/hooks/use-path";
+import { CircleXIcon, TriangleAlertIcon } from "lucide-react";
 
-export function StatusBarRight() {
+export function StatusBarRight({ mobile }: { mobile?: boolean }) {
 	const { t } = useTranslation();
 	const validationSummary = useValidationStore((s) => s.results.summary);
 	const [, setPath] = usePath();
@@ -40,10 +40,16 @@ export function StatusBarRight() {
 
 	return (
 		<>
-			<div className="flex items-center gap-2">
+			<div className="flex items-center gap-2 text-xs">
 				{(validationSummary["error"] ?? 0) > 0 && (
-					<button type="button" className="text-red-500 underline-offset-2 hover:underline cursor-pointer" onClick={handleErrorClick}>
-						{t("status-bar.validation-errors", { count: validationSummary["error"] ?? 0 })}
+					<button type="button" className="text-red-500 underline-offset-2 hover:underline cursor-pointer flex" onClick={handleErrorClick}>
+						{mobile ? (
+							<span className="flex items-center gap-0.5">
+								{validationSummary["error"] ?? 0} <CircleXIcon className="size-3.5" />
+							</span>
+						) : (
+							t("status-bar.validation-errors", { count: validationSummary["error"] ?? 0 })
+						)}
 					</button>
 				)}
 				{(validationSummary["warning"] ?? 0) > 0 && (
@@ -52,11 +58,15 @@ export function StatusBarRight() {
 						className="text-yellow-500 underline-offset-2 hover:underline cursor-pointer"
 						onClick={handleWarningClick}
 					>
-						{t("status-bar.validation-warnings", { count: validationSummary["warning"] ?? 0 })}
+						{mobile ? (
+							<span className="flex items-center gap-0.5">
+								{validationSummary["warning"] ?? 0} <TriangleAlertIcon className="size-3.5" />
+							</span>
+						) : (
+							t("status-bar.validation-warnings", { count: validationSummary["warning"] ?? 0 })
+						)}
 					</button>
 				)}
-				<FileJson className="h-3 w-3" />
-				<Image className="h-3 w-3" />
 			</div>
 			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 				<DialogContent>
