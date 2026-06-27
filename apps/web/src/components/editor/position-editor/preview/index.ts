@@ -4,3 +4,4 @@ export { EnginePreview } from "./EnginePreview";
 export { ShootPreview } from "./ShootPreview";
 export { PartPreview } from "./PartPreview";
 export { DrawRegionPreview } from "./DrawRegionPreview";
+export { HitboxPreview } from "./HitboxPreview";

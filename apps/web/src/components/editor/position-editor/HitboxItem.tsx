@@ -42,7 +42,7 @@ export function HitboxItem({
 	);
 
 	return (
-		<Group x={0} y={0} onClick={handleClick} onTap={handleClick}>
+		<Group x={0} y={0}>
 			{isSelected && (
 				<Rect
 					x={-half - 4}
@@ -52,6 +52,7 @@ export function HitboxItem({
 					stroke="#eab308"
 					strokeWidth={2}
 					dash={[4, 4]}
+					listening={false}
 				/>
 			)}
 			<Rect
@@ -62,6 +63,7 @@ export function HitboxItem({
 				stroke="#ef4444"
 				strokeWidth={2}
 				fill="transparent"
+				listening={false}
 			/>
 			<Rect
 				x={half - 4}
@@ -72,6 +74,8 @@ export function HitboxItem({
 				stroke="#ef4444"
 				strokeWidth={2}
 				draggable
+				onClick={handleClick}
+				onTap={handleClick}
 				onDragMove={handleResizeDragMove}
 				onDragEnd={handleResizeDragEnd}
 			/>

@@ -4,6 +4,7 @@ import { EnginePreview } from "./EnginePreview";
 import { ShootPreview } from "./ShootPreview";
 import { PartPreview } from "./PartPreview";
 import { DrawRegionPreview } from "./DrawRegionPreview";
+import { HitboxPreview } from "./HitboxPreview";
 
 export function PositionPreview({
 	sprite,
@@ -34,6 +35,15 @@ export function PositionPreview({
 		case "draw-region":
 			return (
 				<DrawRegionPreview
+					sprite={sprite}
+					hidden={hidden}
+					onToggleVisibility={onToggleVisibility}
+					isSelected={isSelected}
+				/>
+			);
+		case "hitbox":
+			return (
+				<HitboxPreview
 					sprite={sprite}
 					hidden={hidden}
 					onToggleVisibility={onToggleVisibility}

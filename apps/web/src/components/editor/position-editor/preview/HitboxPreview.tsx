@@ -1,29 +1,25 @@
-import type { ShootPositionData } from "@project/schema";
+import type { HitboxPositionData } from "@project/schema";
 import { PreviewContainer } from "./PreviewContainer";
 
-export function ShootPreview({
+export function HitboxPreview({
 	sprite,
 	hidden,
 	onToggleVisibility,
 	isSelected,
 }: {
-	sprite: ShootPositionData;
+	sprite: HitboxPositionData;
 	hidden?: boolean;
 	onToggleVisibility?: () => void;
 	isSelected?: boolean;
 }) {
-	const name = sprite.weaponName;
 	return (
 		<PreviewContainer
 			hidden={hidden}
 			onToggleVisibility={onToggleVisibility}
 			isSelected={isSelected}
 		>
-			{sprite.mirror && (
-				<span className="text-xs text-nowrap text-muted-foreground">mirror</span>
-			)}
 			<span className="text-xs text-muted-foreground">
-				[shoot] weapon={name}
+				[hitbox] size={sprite.size.value}
 			</span>
 		</PreviewContainer>
 	);

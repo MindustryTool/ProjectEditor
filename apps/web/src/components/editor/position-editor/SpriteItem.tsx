@@ -1,5 +1,6 @@
 import type { PositionData } from "@project/schema";
-import { updatePositionData } from "#/components/editor/position-editor/utils";
+import { HJSON } from "@project/hjson";
+import { useMemo } from "react";
 import { PositionImage } from "./PositionImage";
 import { EnginePositionPlaceholder, PositionPlaceholder } from "./PositionPlaceholder";
 import { HitboxItem } from "./HitboxItem";
@@ -16,8 +17,12 @@ export function SpriteItem({
 	onSelect?: (key: string) => void;
 	selectedKey?: string | null;
 }) {
+	const patch = useMemo(() => HJSON.patch(write), [write]);
 	const handleDrag = (x: number, y: number) => {
-		write((prev) => updatePositionData(prev ?? "", region.position.x.path, region.position.y.path, x, y) ?? prev ?? "");
+		const px = Math.round(x * 10000) / 10000;
+		const py = Math.round(y * 10000) / 10000;
+		patch(region.position.x.path, (node, original, key) => node.patchValue(original, key, px));
+		patch(region.position.y.path, (node, original, key) => node.patchValue(original, key, py));
 	};
 
 	const key = region.position.x.path;

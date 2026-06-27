@@ -18,9 +18,9 @@ export function EnginePreview({
 			onToggleVisibility={onToggleVisibility}
 			isSelected={isSelected}
 		>
-			<div className="text-muted-foreground text-xs">
-				r={sprite.radius.value} rot={sprite.rotation.value}
-			</div>
+			<span className="text-xs text-muted-foreground">
+				[engine] r={sprite.radius.value} rot={sprite.rotation.value}
+			</span>
 		</PreviewContainer>
 	);
 }

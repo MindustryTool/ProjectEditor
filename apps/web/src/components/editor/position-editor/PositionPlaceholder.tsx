@@ -1,7 +1,7 @@
 import type { EnginePositionData, PositionData, ShootPositionData } from "@project/schema";
 import type Konva from "konva";
 import { useCallback, useEffect, useState } from "react";
-import { Arc, Circle, Group, Line, Rect, Text } from "react-konva";
+import { Circle, Group, Line, Rect, Text } from "react-konva";
 
 const REGION_COLORS: Record<string, string> = {
 	part: "#3b82f6",
@@ -57,6 +57,10 @@ export function EnginePositionPlaceholder({
 		onDrag,
 	);
 	const r = region.radius.value * 4;
+	const rad = Math.max(r, 16);
+	const rotRad = (region.rotation.value * Math.PI) / 180;
+	const innerOffX = -Math.cos(rotRad) * (rad / 4);
+	const innerOffY = -Math.sin(rotRad) * (rad / 4);
 
 	const handleClick = useCallback(() => {
 		onSelect?.(region.position.x.path);
@@ -65,21 +69,10 @@ export function EnginePositionPlaceholder({
 	return (
 		<Group x={localX} y={localY} draggable={!!onDrag} onDragMove={handleDragMove} onDragEnd={handleDragEnd} onClick={handleClick} onTap={handleClick}>
 			{isSelected && (
-				<Circle radius={Math.max(r, 16) + 4} stroke="#eab308" strokeWidth={2} dash={[4, 4]} />
+				<Circle radius={rad + 4} stroke="#eab308" strokeWidth={2} dash={[4, 4]} />
 			)}
-			<Circle radius={Math.max(r, 16)} fill="#eab308" stroke="#a16207" strokeWidth={2} opacity={0.7} />
-			<Arc angle={region.rotation.value} innerRadius={0} outerRadius={Math.max(r, 16)} fill="#fef08a" opacity={0.5} />
-			<Text
-				text="engine"
-				fontSize={9}
-				fill="#713f12"
-				width={40}
-				height={16}
-				offsetX={20}
-				offsetY={8}
-				align="center"
-				verticalAlign="middle"
-			/>
+			<Circle radius={rad} fill="#ffd37f" stroke="#d9a404" strokeWidth={2} opacity={0.7} />
+			<Circle x={innerOffX} y={innerOffY} radius={rad / 2} fill="#fef08a" opacity={0.6} />
 		</Group>
 	);
 }

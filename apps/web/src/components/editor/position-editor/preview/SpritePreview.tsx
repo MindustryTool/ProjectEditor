@@ -24,9 +24,7 @@ export function SpritePreview({
 			isSelected={isSelected}
 		>
 			<span className="text-xs text-muted-foreground flex gap-1">
-				<span>
-					{size[0]}x{size[1]}
-				</span>
+				<span>[sprite] {size[0]}x{size[1]}</span>
 				{sprite.mirror && <span className="text-xs text-muted-foreground">mirror</span>}
 			</span>
 			<ImageFilePreview className="object-contain w-fit m-auto py-4" path={sprite.path} onSize={handleSize} />

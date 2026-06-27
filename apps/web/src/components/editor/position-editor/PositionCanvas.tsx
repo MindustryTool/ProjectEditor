@@ -51,6 +51,8 @@ export function PositionCanvas({ path }: { path: string }) {
 			const all = collectUnitPositions(findFileName, node);
 
 			all.sort((a, b) => {
+				if (a.type === "hitbox") return -1;
+				if (b.type === "hitbox") return 1;
 				if (a.type === "shoot" && b.type !== "shoot") return 1;
 				if (a.type !== "shoot" && b.type === "shoot") return -1;
 				return 0;
@@ -176,7 +178,7 @@ export function PositionCanvas({ path }: { path: string }) {
 							})}
 						</Layer>
 					</Stage>
-					{selectedData &&
+					{selectedData && selectedData.type !== "hitbox" &&
 						(() => {
 							const stage = stageRef.current;
 							if (!stage) return null;
