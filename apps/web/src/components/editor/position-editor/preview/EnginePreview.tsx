@@ -19,7 +19,7 @@ export function EnginePreview({
 			isSelected={isSelected}
 		>
 			<span className="text-xs text-muted-foreground">
-				[engine] r={sprite.radius.value} rot={sprite.rotation.value}
+				[engine] x={sprite.position.x.value} y={sprite.position.y.value} radius={sprite.radius.value} rotation={sprite.rotation.value}
 			</span>
 		</PreviewContainer>
 	);

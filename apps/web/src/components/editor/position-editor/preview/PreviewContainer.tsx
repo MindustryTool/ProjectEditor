@@ -16,21 +16,21 @@ export function PreviewContainer({
 	isSelected?: boolean;
 }) {
 	return (
-		<div className={`w-full border rounded bg-card ${hidden ? "opacity-40" : ""} ${isSelected ? "ring-2 ring-primary" : ""}`}>
-			<div className="relative flex p-2 flex-col" onClick={onClick}>
-				<Button
-					variant="ghost"
-					size="icon"
-					className="absolute top-0 right-0"
-					onClick={(e) => {
-						e.stopPropagation();
-						onToggleVisibility?.();
-					}}
-				>
-					{hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-				</Button>
+		<div className={`w-full flex border rounded bg-card p-2 ${hidden ? "opacity-40" : ""} ${isSelected ? "ring-2 ring-primary" : ""}`}>
+			<div className="relative flex flex-col" onClick={onClick}>
 				{children}
 			</div>
+			<Button
+                className="ml-auto"
+				variant="ghost"
+				size="icon-sm"
+				onClick={(e) => {
+					e.stopPropagation();
+					onToggleVisibility?.();
+				}}
+			>
+				{hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+			</Button>
 		</div>
 	);
 }
