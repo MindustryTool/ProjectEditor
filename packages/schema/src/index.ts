@@ -40,6 +40,7 @@ export { UnitHjsonSchema } from "./unit";
 export {
 	CachedSchema,
 	collectEnginePositions,
+	collectHitboxPosition,
 	collectPartPositions,
 	collectUnitPositions,
 	collectWaveTrailPositions,
@@ -61,6 +62,7 @@ export type {
 	BasePosition,
 	DrawPositionData,
 	EnginePositionData,
+	HitboxPositionData,
 	PartPositionData,
 	PositionData,
 	SchemaFn,

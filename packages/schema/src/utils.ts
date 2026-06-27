@@ -469,6 +469,12 @@ export type WaveTrailPositionData = {
 	mirror: true;
 };
 
+export type HitboxPositionData = {
+	type: "hitbox";
+	position: BasePosition;
+	size: { value: number; path: string };
+};
+
 export type UnknownPositionData = {
 	type: "unknown";
 	position: BasePosition;
@@ -481,6 +487,7 @@ export type PositionData =
 	| PartPositionData
 	| DrawPositionData
 	| WaveTrailPositionData
+	| HitboxPositionData
 	| UnknownPositionData;
 
 export function collectEnginePositions(basePath: string, engines: unknown[] | undefined): EnginePositionData[] {
@@ -592,6 +599,19 @@ export function collectWaveTrailPositions(raw: Record<string, unknown>): WaveTra
 	];
 }
 
+export function collectHitboxPosition(raw: Record<string, unknown>): HitboxPositionData[] {
+	return [
+		{
+			type: "hitbox",
+			position: {
+				x: { value: 0, path: "hitSize" },
+				y: { value: 0, path: "hitSize" },
+			},
+			size: { value: (raw.hitSize as number) ?? 6, path: "hitSize" },
+		},
+	];
+}
+
 export function collectUnitPositions(findFileWithName: (filename: string) => string | undefined, node: HjsonObjectNode): PositionData[] {
 	const raw = node.valueOf() as Record<string, unknown>;
 	const engines = raw.engines as unknown[] | undefined;
@@ -603,6 +623,7 @@ export function collectUnitPositions(findFileWithName: (filename: string) => str
 		...collectWeaponPositions(findFileWithName, "weapons", weapons),
 		...collectPartPositions(findFileWithName, "parts", parts),
 		...collectWaveTrailPositions(raw),
+		...collectHitboxPosition(raw),
 	];
 }
 
