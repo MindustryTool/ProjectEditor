@@ -25,6 +25,10 @@ export const TexturesField = React.memo(function TexturesField({ name, path, jso
 
 	format = format || "$";
 
+    if (length === 0 || Number.isNaN(length)){
+        return null;
+    }
+
 	if (!length) {
 		throw new Error("Texture field length must be specified");
 	}
