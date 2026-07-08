@@ -9,7 +9,7 @@ dist/
 *.log
 .DS_Store
 Thumbs.db
-
+.mindustry
 # Generated
 *.tsbuildinfo
 *.gen.ts

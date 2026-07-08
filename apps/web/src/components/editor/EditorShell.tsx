@@ -30,6 +30,7 @@ import { EditorMenuList } from "./toolbar/EditorMenuList";
 import { Separator } from "#/components/ui/separator";
 import { ExportMenu } from "#/components/editor/toolbar/ExportMenu";
 import { EditMenu } from "#/components/editor/toolbar/EditMenu";
+import { PlanetPanel } from "#/components/editor/right/PlanetPanel";
 
 const PixelEditor = lazy(() => import("./pixel-editor/PixelEditor").then((m) => ({ default: m.PixelEditor })));
 const ModHjsonPanel = lazy(() => import("./right/ModHjsonPanel").then((m) => ({ default: m.ModHjsonPanel })));
@@ -61,6 +62,7 @@ type PropertiesRoute =
 	| { type: "sector"; path: string }
 	| { type: "status"; path: string }
 	| { type: "unit"; path: string }
+	| { type: "planet"; path: string }
 	| { type: "block"; path: string };
 
 function matchEditorRoute(entry: PathEntry | null, treeEntry: { kind: string } | undefined): EditorRoute {
@@ -128,6 +130,10 @@ function matchPropertiesRoute(entry: PathEntry | null): PropertiesRoute {
 
 	if (path.startsWith("content/blocks") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
 		return { type: "block", path };
+	}
+
+    if (path.startsWith("content/planets") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
+		return { type: "planet", path };
 	}
 
 	if (path.startsWith("content")) {
@@ -217,6 +223,12 @@ function PropertiesPanel({ route }: { route: PropertiesRoute }) {
 			return (
 				<Suspense fallback={panelFallback}>
 					<UnitPanel path={route.path} />
+				</Suspense>
+			);
+        case "planet":
+			return (
+				<Suspense fallback={panelFallback}>
+					<PlanetPanel path={route.path} />
 				</Suspense>
 			);
 		case "block":

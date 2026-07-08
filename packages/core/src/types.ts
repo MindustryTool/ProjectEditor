@@ -45,6 +45,7 @@ export class TreeSnapshot {
 	readonly blocks: FileEntry[];
 	readonly liquids: FileEntry[];
 	readonly sectors: FileEntry[];
+	readonly planets: FileEntry[];
 	readonly statuses: FileEntry[];
 	readonly units: FileEntry[];
 	readonly sounds: FileEntry[];
@@ -58,6 +59,7 @@ export class TreeSnapshot {
 		const blocks: FileEntry[] = [];
 		const liquids: FileEntry[] = [];
 		const sectors: FileEntry[] = [];
+		const planets: FileEntry[] = [];
 		const statuses: FileEntry[] = [];
 		const units: FileEntry[] = [];
 		const sounds: FileEntry[] = [];
@@ -73,6 +75,8 @@ export class TreeSnapshot {
 					liquids.push(entry);
 				} else if (entry.path.includes("content/sectors") && entry.name.endsWith(".json")) {
 					sectors.push(entry);
+				} else if (entry.path.includes("content/planets") && entry.name.endsWith(".json")) {
+					planets.push(entry);
 				} else if (entry.path.includes("content/status") && entry.name.endsWith(".json")) {
 					statuses.push(entry);
 				} else if (entry.path.includes("content/units") && entry.name.endsWith(".json")) {
@@ -121,6 +125,12 @@ export class TreeSnapshot {
 				this.sectors = sectors;
 			}
 
+			if (compare(planets, this.old.planets)) {
+				this.planets = this.old.planets;
+			} else {
+				this.planets = planets;
+			}
+
 			if (compare(statuses, this.old.statuses)) {
 				this.statuses = this.old.statuses;
 			} else {
@@ -149,6 +159,7 @@ export class TreeSnapshot {
 			this.blocks = blocks;
 			this.liquids = liquids;
 			this.sectors = sectors;
+			this.planets = planets;
 			this.statuses = statuses;
 			this.units = units;
 			this.sounds = sounds;

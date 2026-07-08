@@ -29,6 +29,7 @@ export { AppSettingsSchema, ProjectRecordSchema } from "./project";
 export type { AppSettings, ProjectRecord } from "./project";
 export { ResearchSchema } from "./research";
 export type { Research } from "./research";
+export { PlanetHjsonSchema, PlanetSchema } from "./planet";
 export { SectorHjsonSchema } from "./sector";
 export { SoundHjsonSchema } from "./sound";
 export { SpriteFieldSchema } from "./sprite";
