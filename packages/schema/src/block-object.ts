@@ -408,7 +408,7 @@ export const blockObjectSchema = () =>
 				v.optional(v.number(), 0),
 				metadata({ name: "editor.block.variants", description: "editor.block.variants-description" }),
 			),
-			variantRegions: ArrayTextureSchema("@-#", variants),
+			variantRegions: ArrayTextureSchema("@#", variants),
 			drawArrow: v.pipe(
 				v.optional(v.boolean(), true),
 				metadata({
