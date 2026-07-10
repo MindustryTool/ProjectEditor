@@ -25,19 +25,19 @@ export const TexturesField = React.memo(function TexturesField({ name, path, jso
 
 	format = format || "$";
 
-    if (length === 0 || Number.isNaN(length)){
-        return null;
-    }
+	if (length === 0 || Number.isNaN(length)) {
+		return null;
+	}
 
 	if (!length) {
 		throw new Error("Texture field length must be specified");
 	}
 
-	const spritePath = path.replace("contents", "sprites").replace(filename, format.replace("@", contentName)) + ".png";
+	const spritePath = path.replace("content", "sprites").replace(filename, format.replace("@", contentName)) + ".png";
 
 	const spritePaths = Array.isArray(length)
 		? generatePattern(spritePath, length)
-		: Array.from({ length }).map((_, index) => spritePath.replace("#", index.toString()));
+		: Array.from({ length }).map((_, index) => spritePath.replace("#", (index + 1).toString()));
 
 	if (format === "$") {
 		return null;
@@ -73,7 +73,7 @@ function Item({ spritePath }: { spritePath: string }) {
 
 	return (
 		<div className="grid gap-1">
-			<span className="text-xs">{filename}</span>
+			<span className="text-xs">{spritePath}</span>
 			{exists ? <SpriteViewer path={spritePath} /> : <SpriteUploader path={spritePath} />}
 		</div>
 	);
