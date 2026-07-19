@@ -19,7 +19,7 @@ export function useLiquids(metadata: ModHjsonData): ContentEntry[] {
 
 		items.push(
 			...projectItems.map((i) => ({
-				name: metadata.name + "-" + i.name.replace(".json", ""),
+				name: metadata.name + "-" + i.name.replace(".json", "").replace(".hjson", ""),
 				type: "project" as const,
 				path: i.path,
 				contentType: "liquids",

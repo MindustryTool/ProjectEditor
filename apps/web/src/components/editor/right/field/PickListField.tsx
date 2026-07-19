@@ -36,8 +36,8 @@ export const PickListField = React.memo(function PickListField({
 		}, [filter, unwrappedSchema.options, render]);
 
 		const stringValue = useMemo(
-			() => (typeof value === "string" ? value : value ? String(value) : String((defaultValue ?? options[0]) || "")),
-			[value, defaultValue, options],
+			() => (typeof value === "string" ? value : value ? String(value) : defaultValue ? String(defaultValue) : undefined),
+			[value, defaultValue],
 		);
 
 		const handleScroll = useCallback((event: React.UIEvent) => {
@@ -53,7 +53,11 @@ export const PickListField = React.memo(function PickListField({
 					<Dialog>
 						<DialogTrigger asChild>
 							<Button className="w-full justify-between" variant="outline">
-								{!!stringValue ? <span>{stringValue}</span> : <span className="text-muted-foreground">{String(defaultValue)}</span>}
+								{!!stringValue ? (
+									<span>{stringValue}</span>
+								) : (
+									<span className="text-muted-foreground">{String(defaultValue || "Pick a value")}</span>
+								)}
 								<ChevronDown />
 							</Button>
 						</DialogTrigger>

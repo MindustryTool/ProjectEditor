@@ -65,21 +65,25 @@ export class TreeSnapshot {
 		const sounds: FileEntry[] = [];
 		const sprites: FileEntry[] = [];
 
+		const isContentFile = (entry: FileEntry) => {
+			return entry.name.endsWith(".json") || entry.name.endsWith(".hjson");
+		};
+
 		for (const entry of this.entries) {
 			if (entry.kind === "file") {
-				if (entry.path.includes("content/items") && entry.name.endsWith(".json")) {
+				if (entry.path.includes("content/items") && isContentFile(entry)) {
 					items.push(entry);
-				} else if (entry.path.includes("content/blocks") && entry.name.endsWith(".json")) {
+				} else if (entry.path.includes("content/blocks") && isContentFile(entry)) {
 					blocks.push(entry);
-				} else if (entry.path.includes("content/liquids") && entry.name.endsWith(".json")) {
+				} else if (entry.path.includes("content/liquids") && isContentFile(entry)) {
 					liquids.push(entry);
-				} else if (entry.path.includes("content/sectors") && entry.name.endsWith(".json")) {
+				} else if (entry.path.includes("content/sectors") && isContentFile(entry)) {
 					sectors.push(entry);
-				} else if (entry.path.includes("content/planets") && entry.name.endsWith(".json")) {
+				} else if (entry.path.includes("content/planets") && isContentFile(entry)) {
 					planets.push(entry);
-				} else if (entry.path.includes("content/status") && entry.name.endsWith(".json")) {
+				} else if (entry.path.includes("content/status") && isContentFile(entry)) {
 					statuses.push(entry);
-				} else if (entry.path.includes("content/units") && entry.name.endsWith(".json")) {
+				} else if (entry.path.includes("content/units") && isContentFile(entry)) {
 					units.push(entry);
 				} else if (
 					entry.path.includes("sounds/") &&
