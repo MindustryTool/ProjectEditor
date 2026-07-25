@@ -48,7 +48,7 @@ export const ItemRequirementField = React.memo(function ItemRequirementField({
 									{itemName}
 								</span>
 							) : (
-								itemName
+								(itemName || 'Select Item')
 							)}
 						</Button>
 					</DialogTrigger>

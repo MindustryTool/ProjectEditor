@@ -17,7 +17,6 @@ export const ItemStackSchema = cached((context: ProjectContents) =>
 			if (typeof input === "string") {
 				return v.pipe(
 					v.string(),
-					metadata({ type: "item-stack" }),
 					v.check((value) => {
 						if (!value.includes("/")) {
 							return false;
@@ -44,8 +43,10 @@ export const ItemStackSchema = cached((context: ProjectContents) =>
 
 						return true;
 					}, "Invalid item requirement, must be in the format 'item/number'"),
+					metadata({ type: "item-stack" }),
 				);
 			}
+
 			return v.pipe(
 				v.object({
 					item: ItemStackItemFieldSchema(context),
@@ -53,5 +54,6 @@ export const ItemStackSchema = cached((context: ProjectContents) =>
 				}),
 			);
 		}),
+		metadata({ type: "item-stack" }),
 	),
 );
