@@ -2,7 +2,7 @@ import * as v from "valibot";
 import { CachedSchema, metadata } from "./utils";
 import { Order } from "./order";
 
-export const ArrayTextureSchema = CachedSchema((format: string, length: number | number[]) =>
+export const ArrayTextureSchema = CachedSchema((format: string, length: number | number[], annotation?: boolean) =>
 	v.nullish(
 		v.pipe(
 			v.string(),
@@ -12,7 +12,7 @@ export const ArrayTextureSchema = CachedSchema((format: string, length: number |
 				type: "textures",
                 order: Order.TEXTURE,
 			}),
-			v.metadata({ format, length }),
+			v.metadata({ format, length, annotation }),
 		),
 	),
 );

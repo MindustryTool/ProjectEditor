@@ -21,7 +21,7 @@ export const TexturesField = React.memo(function TexturesField({ name, path, jso
 	const { name: contentName } = useFieldContext();
 
 	let { format } = metadata as SchemaMetadata & { format?: string };
-	const { length } = metadata as SchemaMetadata & { length?: number[] | number };
+	const { length, annotation } = metadata as SchemaMetadata & { length?: number[] | number; annotation?: boolean };
 
 	format = format || "$";
 
@@ -34,10 +34,11 @@ export const TexturesField = React.memo(function TexturesField({ name, path, jso
 	}
 
 	const spritePath = path.replace("content", "sprites").replace(filename, format.replace("@", contentName)) + ".png";
+    const startAt = annotation ? 0 : 1
 
 	const spritePaths = Array.isArray(length)
 		? generatePattern(spritePath, length)
-		: Array.from({ length }).map((_, index) => spritePath.replace("#", (index + 1).toString()));
+		: Array.from({ length }).map((_, index) => spritePath.replace("#", (index + startAt).toString()));
 
 	if (format === "$") {
 		return null;
