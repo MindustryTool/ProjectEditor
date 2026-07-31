@@ -34,7 +34,7 @@ export const TexturesField = React.memo(function TexturesField({ name, path, jso
 	}
 
 	const spritePath = path.replace("content", "sprites").replace(filename, format.replace("@", contentName)) + ".png";
-    const startAt = annotation ? 0 : 1
+    const startAt = annotation === undefined || annotation === true ? 0 : 1;
 
 	const spritePaths = Array.isArray(length)
 		? generatePattern(spritePath, length)

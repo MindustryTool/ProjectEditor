@@ -8,9 +8,11 @@ import { ResearchSchema } from "./research";
 import type { SchemaFn } from "./utils";
 import type { ProjectContents } from "@project/types";
 
+const meshTypes= ["NoiseMesh", "SunMesh", "HexSkyMesh", "MatMesh", "MultiMesh"];
+
 const NoiseMeshSchema = v.pipe(
 	v.object({
-		type: v.pipe(v.optional(v.picklist(["NoiseMesh"])), metadata({ name: "editor.planet.mesh.type" })),
+		type: v.pipe(v.optional(v.picklist(meshTypes), "NoiseMesh"), metadata({ name: "editor.planet.mesh.type" })),
 		seed: v.pipe(
 			v.optional(v.number(), 0),
 			metadata({ name: "editor.planet.mesh.seed", description: "editor.planet.mesh.seed-description" }),
@@ -69,7 +71,7 @@ const NoiseMeshSchema = v.pipe(
 
 const SunMeshSchema = v.pipe(
 	v.object({
-		type: v.pipe(v.optional(v.picklist(["SunMesh"])), metadata({ name: "editor.planet.mesh.type" })),
+		type: v.pipe(v.optional(v.picklist(meshTypes), "SunMesh"), metadata({ name: "editor.planet.mesh.type" })),
 		divisions: v.pipe(
 			v.optional(v.pipe(v.number(), v.integer(), v.minValue(1)), 1),
 			metadata({ name: "editor.planet.mesh.divisions", description: "editor.planet.mesh.divisions-description" }),
@@ -108,7 +110,7 @@ const SunMeshSchema = v.pipe(
 
 const HexSkyMeshSchema = v.pipe(
 	v.object({
-		type: v.pipe(v.optional(v.picklist(["HexSkyMesh"])), metadata({ name: "editor.planet.mesh.type" })),
+		type: v.pipe(v.optional(v.picklist(meshTypes), "HexSkyMesh"), metadata({ name: "editor.planet.mesh.type" })),
 		seed: v.pipe(
 			v.optional(v.number(), 0),
 			metadata({ name: "editor.planet.mesh.seed", description: "editor.planet.mesh.seed-description" }),
@@ -151,7 +153,7 @@ const HexSkyMeshSchema = v.pipe(
 
 const MatMeshSchema = v.pipe(
 	v.object({
-		type: v.pipe(v.optional(v.picklist(["MatMesh"])), metadata({ name: "editor.planet.mesh.type" })),
+		type: v.pipe(v.optional(v.picklist(meshTypes), "MatMesh"), metadata({ name: "editor.planet.mesh.type" })),
 		mesh: v.pipe(v.optional(v.any()), metadata({ name: "editor.planet.mesh.mesh", description: "editor.planet.mesh.mesh-description" })),
 		mat: v.pipe(
 			v.optional(v.object({})),
@@ -163,7 +165,7 @@ const MatMeshSchema = v.pipe(
 
 const MultiMeshObjectSchema = v.pipe(
 	v.object({
-		type: v.pipe(v.optional(v.picklist(["MultiMesh"])), metadata({ name: "editor.planet.mesh.type" })),
+		type: v.pipe(v.optional(v.picklist(meshTypes), "MultiMesh"), metadata({ name: "editor.planet.mesh.type" })),
 		meshes: v.pipe(
 			v.optional(v.array(v.any())),
 			metadata({ name: "editor.planet.mesh.meshes", description: "editor.planet.mesh.meshes-description" }),

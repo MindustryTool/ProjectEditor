@@ -1,6 +1,7 @@
 import * as v from "valibot";
 import { TextureFieldSchema } from "./texture";
 import { metadata } from "./utils";
+import { AttributeSchema } from "./attributes";
 
 export const powerBlockObjectSchema = v.object({});
 
@@ -185,7 +186,7 @@ export const thermalGeneratorObjectSchema = v.object({
 		}),
 	),
 	attribute: v.pipe(
-		v.optional(v.string(), "heat"),
+		v.optional(AttributeSchema, "heat"),
 		metadata({
 			name: "editor.block-thermal-generator.attribute",
 			description: "editor.block-thermal-generator.attribute-description",

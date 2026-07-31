@@ -2,6 +2,7 @@ import * as v from "valibot"
 import { TextureFieldSchema } from "./texture"
 import { ArrayTextureSchema } from "./textures"
 import { metadata } from "./utils"
+import { AttributeSchema } from "./attributes";
 
 export const liquidBlockObjectSchema = v.object({
 	liquidRegion: TextureFieldSchema("@-liquid"),
@@ -97,7 +98,7 @@ export const solidPumpObjectSchema = v.object({
 		}),
 	),
 	attribute: v.pipe(
-		v.optional(v.string()),
+		v.optional(AttributeSchema, 'water'),
 		metadata({
 			name: "editor.block-solid-pump.attribute",
 			description: "editor.block-solid-pump.attribute-description",

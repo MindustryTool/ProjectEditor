@@ -4,6 +4,8 @@ import { metadata } from "./utils"
 import { ItemStackSchema } from "./item-stack"
 import { LiquidStackSchema } from "./liquid-stack"
 import type { ProjectContents } from "@project/types"
+import { DrawFieldSchema } from "./draw"
+import { AttributeSchema } from "./attributes"
 
 // Production variant schemas
 export const genericCrafterObjectSchema = (context: ProjectContents) =>
@@ -85,6 +87,7 @@ export const genericCrafterObjectSchema = (context: ProjectContents) =>
 				description: "editor.block-generic-crafter.warmup-speed-description",
 			}),
 		),
+		drawer: v.pipe(v.optional(DrawFieldSchema(context))),
 	});
 
 export const heatCrafterObjectSchema = (context: ProjectContents) =>
@@ -117,7 +120,7 @@ export const attributeCrafterObjectSchema = (context: ProjectContents) =>
 	v.object({
 		...genericCrafterObjectSchema(context).entries,
 		attribute: v.pipe(
-			v.optional(v.string(), "heat"),
+			v.optional(AttributeSchema, 'heat'),
 			metadata({
 				name: "editor.block-attribute-crafter.attribute",
 				description: "editor.block-attribute-crafter.attribute-description",
@@ -539,7 +542,7 @@ export const wallCrafterObjectSchema = v.object({
 		}),
 	),
 	attribute: v.pipe(
-		v.optional(v.string(), "sand"),
+		v.optional(AttributeSchema),
 		metadata({
 			name: "editor.block-wall-crafter.attribute",
 			description: "editor.block-wall-crafter.attribute-description",
