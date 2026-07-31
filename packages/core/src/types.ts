@@ -50,6 +50,7 @@ export class TreeSnapshot {
 	readonly units: FileEntry[];
 	readonly sounds: FileEntry[];
 	readonly sprites: FileEntry[];
+	readonly weathers: FileEntry[];
 
 	constructor(
 		private readonly entries: FileEntry[],
@@ -64,6 +65,7 @@ export class TreeSnapshot {
 		const units: FileEntry[] = [];
 		const sounds: FileEntry[] = [];
 		const sprites: FileEntry[] = [];
+		const weathers: FileEntry[] = [];
 
 		const isContentFile = (entry: FileEntry) => {
 			return entry.name.endsWith(".json") || entry.name.endsWith(".hjson");
@@ -92,6 +94,8 @@ export class TreeSnapshot {
 					sounds.push(entry);
 				} else if (entry.path.includes("sprites") && entry.name.endsWith(".png")) {
 					sprites.push(entry);
+				} else if (entry.path.includes("content/weathers") && isContentFile(entry)) {
+					weathers.push(entry);
 				}
 			}
 		}
@@ -158,6 +162,12 @@ export class TreeSnapshot {
 			} else {
 				this.sprites = sprites;
 			}
+
+			if (compare(weathers, this.old.weathers)) {
+				this.weathers = this.old.weathers;
+			} else {
+				this.weathers = weathers;
+			}
 		} else {
 			this.items = items;
 			this.blocks = blocks;
@@ -168,6 +178,7 @@ export class TreeSnapshot {
 			this.units = units;
 			this.sounds = sounds;
 			this.sprites = sprites;
+			this.weathers = weathers;
 		}
 	}
 

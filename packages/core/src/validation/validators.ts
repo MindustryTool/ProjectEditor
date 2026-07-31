@@ -27,6 +27,11 @@ const defaultValidatorRegistrations: readonly ValidatorRegistration[] = [
 		validate: createValibotValidator(() => import("@project/schema").then((mod) => mod.LiquidHjsonSchema)),
 	},
 	{
+		name: "weathers-hjson",
+		pattern: (path) => path.startsWith("content/weather") && (path.endsWith(".json") || path.endsWith(".hjson")),
+		validate: createValibotValidator(() => import("@project/schema").then((mod) => mod.WeatherHjsonSchema)),
+	},
+	{
 		name: "sectors-hjson",
 		pattern: (path) => path.startsWith("content/sector") && (path.endsWith(".json") || path.endsWith(".hjson")),
 		validate: createValibotValidator(() => import("@project/schema").then((mod) => mod.SectorHjsonSchema)),

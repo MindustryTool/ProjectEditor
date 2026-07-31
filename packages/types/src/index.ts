@@ -59,6 +59,13 @@ export type Sound = {
 	name: string;
 };
 
+export type Weather = {
+	name: string;
+	type: "project" | "base";
+	path: string;
+	contentType: string;
+};
+
 
 
 export interface ProjectContents {
@@ -71,5 +78,6 @@ export interface ProjectContents {
 	readonly sprites: readonly Sprite[];
 	readonly effects: readonly Effect[];
     readonly sounds: readonly Sound[];
+	readonly weathers: readonly Weather[];
 	readonly name: string;
 }

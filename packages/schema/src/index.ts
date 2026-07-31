@@ -22,6 +22,7 @@ export { ItemHjsonSchema } from "./item";
 export { ItemStackSchema } from "./item-stack";
 export { LiquidHjsonSchema } from "./liquid";
 export { LiquidStackSchema } from "./liquid-stack";
+export { WeatherHjsonSchema } from "./weather";
 export { MindustryHexColorSchema } from "./mindustry-hex-color";
 export { ModHjsonSchema } from "./mod-hjson";
 export type { ModHjsonData } from "./mod-hjson";

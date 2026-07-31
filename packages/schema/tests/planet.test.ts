@@ -13,6 +13,7 @@ const mockContext: ProjectContents = {
 	sprites: [],
 	effects: [],
 	sounds: [],
+	weathers: [],
 	name: "test-mod",
 };
 

@@ -7,6 +7,7 @@ import { useSounds } from "#/hooks/use-sounds";
 import { useSprites } from "#/hooks/use-sprites";
 import { useStatuses } from "#/hooks/use-statuses";
 import { useUnits } from "#/hooks/use-units";
+import { useWeathers } from "#/hooks/use-weathers";
 import { useFileStore, useFileString, useProjectSession } from "@project/core";
 import { HJSON, HjsonObjectNode } from "@project/hjson";
 import { type ModHjsonData } from "@project/schema";
@@ -102,6 +103,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 	const effects = useEffects(metadata);
 	const sprites = useSprites();
 	const sounds = useSounds();
+	const weathers = useWeathers(metadata);
 
 	const contents = useMemo<ProjectContents>(
 		() => ({
@@ -115,8 +117,9 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 			sprites,
 			effects,
 			sounds,
+			weathers,
 		}),
-		[items, blocks, liquids, sectors, statuses, units, sprites, effects, sounds, metadata.name],
+		[items, blocks, liquids, sectors, statuses, units, sprites, effects, sounds, weathers, metadata.name],
 	);
 
 	const findContent = useCallback(

@@ -40,6 +40,7 @@ const SectorPanel = lazy(() => import("./right/SectorPanel").then((m) => ({ defa
 const StatusPanel = lazy(() => import("./right/StatusPanel").then((m) => ({ default: m.StatusPanel })));
 const UnitPanel = lazy(() => import("./right/UnitPanel").then((m) => ({ default: m.UnitPanel })));
 const BlockPanel = lazy(() => import("./right/BlockPanel").then((m) => ({ default: m.BlockPanel })));
+const WeatherPanel = lazy(() => import("./right/WeatherPanel").then((m) => ({ default: m.WeatherPanel })));
 const UnitPositionEditor = lazy(() =>
 	import("#/components/editor/position-editor/UnitPositionEditor").then((mod) => ({ default: mod.UnitPositionEditor })),
 );
@@ -63,7 +64,8 @@ type PropertiesRoute =
 	| { type: "status"; path: string }
 	| { type: "unit"; path: string }
 	| { type: "planet"; path: string }
-	| { type: "block"; path: string };
+	| { type: "block"; path: string }
+    | { type: "weather"; path: string };
 
 function matchEditorRoute(entry: PathEntry | null, treeEntry: { kind: string } | undefined): EditorRoute {
 	if (entry === null || treeEntry === undefined) return { type: "empty" };
@@ -134,6 +136,10 @@ function matchPropertiesRoute(entry: PathEntry | null): PropertiesRoute {
 
     if (path.startsWith("content/planets") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
 		return { type: "planet", path };
+	}
+
+    if (path.startsWith("content/weathers") && (path.endsWith(".json") || path.endsWith(".hjson"))) {
+		return { type: "weather", path };
 	}
 
 	if (path.startsWith("content")) {
@@ -237,6 +243,12 @@ function PropertiesPanel({ route }: { route: PropertiesRoute }) {
 					<BlockPanel path={route.path} />
 				</Suspense>
 			);
+        case "weather":
+			return (
+				<Suspense fallback={panelFallback}>
+					<WeatherPanel path={route.path} />
+				</Suspense>
+			);
 	}
 }
 
@@ -314,7 +326,7 @@ function EditorMobileLayout() {
 							{t("editor.menu")}
 						</Button>
 					</SheetTrigger>
-					<SheetContent side="bottom" className="h-[320px] p-0 gap-0 overflow-hidden" showCloseButton={false}>
+					<SheetContent side="bottom" className="h-80 p-0 gap-0 overflow-hidden" showCloseButton={false}>
 						<EditorMenuList onClose={() => setSheetOpen(false)} />
 					</SheetContent>
 				</Sheet>
