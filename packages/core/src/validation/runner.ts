@@ -40,6 +40,7 @@ export function createValidationRunner(registry: ValidatorRegistry): ValidationR
 				const validatorResults = await v.validate({ path, content: resolvedContent, context });
 				results.push(...validatorResults);
 			} catch (err) {
+                console.error(err);
 				results.push({
 					path,
 					severity: "error",

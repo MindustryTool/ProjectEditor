@@ -216,7 +216,7 @@ function createValibotValidator<const T extends v.BaseSchema<unknown, unknown, v
 						problems.push({
 							path,
 							severity: "error",
-                            code: ValidationCode.INVALID_FIELD,
+							code: ValidationCode.INVALID_FIELD,
 							messageKey: "validation.content.invalid-field",
 							field,
 							messageParams: { field, error: subIssue.message },

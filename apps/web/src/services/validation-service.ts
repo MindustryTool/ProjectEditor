@@ -137,7 +137,7 @@ class ValidationService {
 
 		const key = cacheKey(projectId, path);
 		const existing = this.timers.get(key);
-        
+
 		if (existing) {
 			clearTimeout(existing);
 		}

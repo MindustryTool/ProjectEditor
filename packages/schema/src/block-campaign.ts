@@ -1,18 +1,12 @@
 import * as v from "valibot";
 import { TextureFieldSchema } from "./texture";
-import { metadata, fixed } from "./utils";
-import { blockObjectSchema } from "./block-object";
+import { metadata } from "./utils";
 
 // Campaign variant schemas
 export const launchPadObjectSchema = v.object({
 	lightTexture: TextureFieldSchema("@-light"),
 	podTexture: TextureFieldSchema("@-pod"),
 	previewTexture: TextureFieldSchema("@-preview", "@"),
-	hasItems: fixed(blockObjectSchema, "hasItems", true),
-	solid: fixed(blockObjectSchema, "solid", true),
-	update: fixed(blockObjectSchema, "update", true),
-	configurable: fixed(blockObjectSchema, "configurable", true),
-	flags: fixed(blockObjectSchema, "flags", ["launchPad"]),
 	launchTime: v.pipe(
 		v.optional(v.number(), 1),
 		metadata({
@@ -59,14 +53,6 @@ export const launchPadObjectSchema = v.object({
 
 export const landingPadObjectSchema = v.object({
 	podTexture: TextureFieldSchema("@-pod", "advanced-launch-pad-pod"),
-	hasItems: fixed(blockObjectSchema, "hasItems", true),
-	hasLiquids: fixed(blockObjectSchema, "hasLiquids", true),
-	solid: fixed(blockObjectSchema, "solid", true),
-	update: fixed(blockObjectSchema, "update", true),
-	configurable: fixed(blockObjectSchema, "configurable", true),
-	acceptsItems: fixed(blockObjectSchema, "acceptsItems", false),
-	emitLight: fixed(blockObjectSchema, "emitLight", true),
-	lightRadius: fixed(blockObjectSchema, "lightRadius", 90),
 
 	arrivalDuration: v.pipe(
 		v.optional(v.number(), 150),
@@ -114,15 +100,6 @@ export const landingPadObjectSchema = v.object({
 
 export const acceleratorObjectSchema = v.object({
 	launchArrowTexture: TextureFieldSchema("@-launch-arrow"),
-	update: fixed(blockObjectSchema, "update", true),
-	solid: fixed(blockObjectSchema, "solid", true),
-	hasItems: fixed(blockObjectSchema, "hasItems", true),
-	hasPower: fixed(blockObjectSchema, "hasPower", true),
-	itemCapacity: fixed(blockObjectSchema, "itemCapacity", 8000),
-	configurable: fixed(blockObjectSchema, "configurable", true),
-	emitLight: fixed(blockObjectSchema, "emitLight", true),
-	lightRadius: fixed(blockObjectSchema, "lightRadius", 70),
-	lightColor: fixed(blockObjectSchema, "lightColor"),
 	lightningSoundVolume: v.pipe(
 		v.optional(v.number(), 0.85),
 		metadata({

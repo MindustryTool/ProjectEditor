@@ -1,24 +1,15 @@
 import * as v from "valibot";
 import { TextureFieldSchema } from "./texture";
-import { fixed, metadata } from "./utils";
+import {  metadata } from "./utils";
 import { ShootPatternHjsonSchema } from "./shoot-pattern";
 import { EffectFieldSchema } from "./effect";
 import { BulletHjsonSchema } from "./bullet";
-import { TargetPriority } from "./target-priority";
 import type { ProjectContents } from "@project/types";
-import { blockObjectSchema } from "./block-object";
 import { MindustryHexColorSchema } from "./mindustry-hex-color";
 import { SoundHjsonSchema } from "./sound";
 
 // Turret variant schemas
 export const baseTurretObjectSchema = v.object({
-	update: fixed(blockObjectSchema, "update", true),
-	solid: fixed(blockObjectSchema, "solid", true),
-	outlineIcon: fixed(blockObjectSchema, "outlineIcon", true),
-	attacks: fixed(blockObjectSchema, "attacks", true),
-	priority: fixed(blockObjectSchema, "priority", TargetPriority.turret),
-	group: fixed(blockObjectSchema, "group", "turrets"),
-	flags: fixed(blockObjectSchema, "flags", ["turret"]),
 	range: v.pipe(
 		v.optional(v.number(), 80),
 		metadata({
