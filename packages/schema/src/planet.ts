@@ -8,7 +8,7 @@ import { ResearchSchema } from "./research";
 import type { AnySchema, SchemaFn } from "./utils";
 import type { ProjectContents } from "@project/types";
 
-const meshTypes= ["NoiseMesh", "SunMesh", "HexSkyMesh", "MatMesh", "MultiMesh"];
+const meshTypes = ["NoiseMesh", "SunMesh", "HexSkyMesh", "MatMesh", "MultiMesh"];
 
 const NoiseMeshSchema = v.pipe(
 	v.object({
@@ -151,16 +151,59 @@ const HexSkyMeshSchema = v.pipe(
 	metadata({ option: "HexSkyMesh" }),
 );
 
+const mat3dTranslateSchema = v.pipe(
+	v.object({
+		x: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.planet.mesh.mat.x" })),
+		y: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.planet.mesh.mat.y" })),
+		z: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.planet.mesh.mat.z" })),
+	}),
+	metadata({ option: "translate" }),
+);
+
+const mat3dArraySchema = v.pipe(v.optional(v.array(v.number()), []), metadata({ option: "array" }));
+
+const mat3dTransformSchema = v.pipe(
+	v.object({
+		translate: v.pipe(v.optional(v.boolean()), metadata({ name: "editor.planet.mesh.mat.translate" })),
+		trans: v.pipe(v.optional(v.boolean()), metadata({ name: "editor.planet.mesh.mat.trans" })),
+		scale: v.pipe(v.optional(v.boolean()), metadata({ name: "editor.planet.mesh.mat.scale" })),
+		scl: v.pipe(v.optional(v.boolean()), metadata({ name: "editor.planet.mesh.mat.scl" })),
+		rotate: v.pipe(v.optional(v.boolean()), metadata({ name: "editor.planet.mesh.mat.rotate" })),
+		rot: v.pipe(v.optional(v.boolean()), metadata({ name: "editor.planet.mesh.mat.rot" })),
+		multiply: v.pipe(v.optional(v.boolean()), metadata({ name: "editor.planet.mesh.mat.multiply" })),
+		mul: v.pipe(v.optional(v.boolean()), metadata({ name: "editor.planet.mesh.mat.mul" })),
+		degrees: v.pipe(v.optional(v.number(), 0), metadata({ name: "editor.planet.mesh.mat.degrees" })),
+		x: v.pipe(v.optional(v.number()), metadata({ name: "editor.planet.mesh.mat.x" })),
+		y: v.pipe(v.optional(v.number()), metadata({ name: "editor.planet.mesh.mat.y" })),
+		z: v.pipe(v.optional(v.number()), metadata({ name: "editor.planet.mesh.mat.z" })),
+	}),
+	metadata({ option: "transform" }),
+);
+
+const mat3dSchema = v.pipe(
+	v.lazy((input) => {
+		if (Array.isArray(input)) {
+			return mat3dArraySchema;
+		}
+
+		if (input && typeof input === "object" && "x" in input && "y" in input && "z" in input) {
+			return mat3dTranslateSchema;
+		}
+
+		return mat3dTransformSchema;
+	}),
+);
+
 let meshObjectSchema: AnySchema = NoiseMeshSchema;
 
 const MatMeshSchema = v.pipe(
 	v.object({
 		type: v.pipe(v.optional(v.picklist(meshTypes), "MatMesh"), metadata({ name: "editor.planet.mesh.type" })),
-		mesh: v.pipe(v.optional(meshObjectSchema), metadata({ name: "editor.planet.mesh.mesh", description: "editor.planet.mesh.mesh-description" })),
-		mat: v.pipe(
-			v.optional(v.object({})),
-			metadata({ name: "editor.planet.mesh.mat", description: "editor.planet.mesh.mat-description" }),
+		mesh: v.pipe(
+			v.optional(meshObjectSchema),
+			metadata({ name: "editor.planet.mesh.mesh", description: "editor.planet.mesh.mesh-description" }),
 		),
+		mat: v.pipe(v.optional(mat3dSchema), metadata({ name: "editor.planet.mesh.mat", description: "editor.planet.mesh.mat-description" })),
 	}),
 	metadata({ option: "MatMesh" }),
 );
@@ -169,7 +212,7 @@ const MultiMeshObjectSchema = v.pipe(
 	v.object({
 		type: v.pipe(v.optional(v.picklist(meshTypes), "MultiMesh"), metadata({ name: "editor.planet.mesh.type" })),
 		meshes: v.pipe(
-			v.optional(v.array(meshObjectSchema)),
+			v.optional(v.array(v.lazy(() => meshObjectSchema))),
 			metadata({ name: "editor.planet.mesh.meshes", description: "editor.planet.mesh.meshes-description" }),
 		),
 	}),
