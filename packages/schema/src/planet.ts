@@ -5,7 +5,7 @@ import { SectorFieldSchema } from "./sector";
 import { MindustryHexColorSchema } from "./mindustry-hex-color";
 import { AttributesSchema } from "./attributes";
 import { ResearchSchema } from "./research";
-import type { SchemaFn } from "./utils";
+import type { AnySchema, SchemaFn } from "./utils";
 import type { ProjectContents } from "@project/types";
 
 const meshTypes= ["NoiseMesh", "SunMesh", "HexSkyMesh", "MatMesh", "MultiMesh"];
@@ -151,10 +151,12 @@ const HexSkyMeshSchema = v.pipe(
 	metadata({ option: "HexSkyMesh" }),
 );
 
+let meshObjectSchema: AnySchema = NoiseMeshSchema;
+
 const MatMeshSchema = v.pipe(
 	v.object({
 		type: v.pipe(v.optional(v.picklist(meshTypes), "MatMesh"), metadata({ name: "editor.planet.mesh.type" })),
-		mesh: v.pipe(v.optional(v.any()), metadata({ name: "editor.planet.mesh.mesh", description: "editor.planet.mesh.mesh-description" })),
+		mesh: v.pipe(v.optional(meshObjectSchema), metadata({ name: "editor.planet.mesh.mesh", description: "editor.planet.mesh.mesh-description" })),
 		mat: v.pipe(
 			v.optional(v.object({})),
 			metadata({ name: "editor.planet.mesh.mat", description: "editor.planet.mesh.mat-description" }),
@@ -167,16 +169,17 @@ const MultiMeshObjectSchema = v.pipe(
 	v.object({
 		type: v.pipe(v.optional(v.picklist(meshTypes), "MultiMesh"), metadata({ name: "editor.planet.mesh.type" })),
 		meshes: v.pipe(
-			v.optional(v.array(v.any())),
+			v.optional(v.array(meshObjectSchema)),
 			metadata({ name: "editor.planet.mesh.meshes", description: "editor.planet.mesh.meshes-description" }),
 		),
 	}),
 	metadata({ option: "MultiMesh" }),
 );
 
-const meshObjectSchema = v.pipe(
+meshObjectSchema = v.pipe(
 	v.lazy((input) => {
 		const type = input && typeof input === "object" && "type" in input ? String(input.type) : "NoiseMesh";
+
 		switch (type) {
 			case "SunMesh":
 				return SunMeshSchema;
