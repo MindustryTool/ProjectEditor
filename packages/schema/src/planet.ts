@@ -1,155 +1,150 @@
 import * as v from "valibot";
 import { databaseContent } from "./content";
-import { cached, metadata } from "./utils";
+import { CachedSchema, cached, metadata } from "./utils";
 import { SectorFieldSchema } from "./sector";
 import { MindustryHexColorSchema } from "./mindustry-hex-color";
 import { AttributesSchema } from "./attributes";
 import { ResearchSchema } from "./research";
-import type { AnySchema, SchemaFn } from "./utils";
+import { ClassMap, classSchema } from "./class";
+import type { SchemaFn } from "./utils";
 import type { ProjectContents } from "@project/types";
 
-const meshTypes = ["NoiseMesh", "SunMesh", "HexSkyMesh", "MatMesh", "MultiMesh"];
+const meshTypes = ["NoiseMesh", "SunMesh", "HexSkyMesh", "MatMesh", "MultiMesh"] as const;
 
-const NoiseMeshSchema = v.pipe(
-	v.object({
-		type: v.pipe(v.optional(v.picklist(meshTypes), "NoiseMesh"), metadata({ name: "editor.planet.mesh.type" })),
-		seed: v.pipe(
-			v.optional(v.number(), 0),
-			metadata({ name: "editor.planet.mesh.seed", description: "editor.planet.mesh.seed-description" }),
-		),
-		divisions: v.pipe(
-			v.optional(v.pipe(v.number(), v.integer(), v.minValue(1)), 1),
-			metadata({ name: "editor.planet.mesh.divisions", description: "editor.planet.mesh.divisions-description" }),
-		),
-		radius: v.pipe(
-			v.optional(v.pipe(v.number(), v.gtValue(0)), 1),
-			metadata({ name: "editor.planet.mesh.radius", description: "editor.planet.mesh.radius-description" }),
-		),
-		octaves: v.pipe(
-			v.optional(v.pipe(v.number(), v.integer(), v.minValue(1)), 1),
-			metadata({ name: "editor.planet.mesh.octaves", description: "editor.planet.mesh.octaves-description" }),
-		),
-		persistence: v.pipe(
-			v.optional(v.number(), 0.5),
-			metadata({ name: "editor.planet.mesh.persistence", description: "editor.planet.mesh.persistence-description" }),
-		),
-		scale: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({ name: "editor.planet.mesh.scale", description: "editor.planet.mesh.scale-description" }),
-		),
-		mag: v.pipe(
-			v.optional(v.number(), 0.5),
-			metadata({ name: "editor.planet.mesh.mag", description: "editor.planet.mesh.mag-description" }),
-		),
-		color1: v.pipe(
-			v.optional(MindustryHexColorSchema),
-			metadata({ name: "editor.planet.mesh.color1", description: "editor.planet.mesh.color1-description" }),
-		),
-		color2: v.pipe(
-			v.optional(MindustryHexColorSchema),
-			metadata({ name: "editor.planet.mesh.color2", description: "editor.planet.mesh.color2-description" }),
-		),
-		colorOct: v.pipe(
-			v.optional(v.pipe(v.number(), v.integer(), v.minValue(1)), 1),
-			metadata({ name: "editor.planet.mesh.color-oct", description: "editor.planet.mesh.color-oct-description" }),
-		),
-		colorPersistence: v.pipe(
-			v.optional(v.number(), 0.5),
-			metadata({ name: "editor.planet.mesh.color-persistence", description: "editor.planet.mesh.color-persistence-description" }),
-		),
-		colorScale: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({ name: "editor.planet.mesh.color-scale", description: "editor.planet.mesh.color-scale-description" }),
-		),
-		colorThreshold: v.pipe(
-			v.optional(v.number(), 0.5),
-			metadata({ name: "editor.planet.mesh.color-threshold", description: "editor.planet.mesh.color-threshold-description" }),
-		),
-	}),
-	metadata({ option: "NoiseMesh" }),
-);
+export type MeshType = (typeof meshTypes)[number];
 
-const SunMeshSchema = v.pipe(
-	v.object({
-		type: v.pipe(v.optional(v.picklist(meshTypes), "SunMesh"), metadata({ name: "editor.planet.mesh.type" })),
-		divisions: v.pipe(
-			v.optional(v.pipe(v.number(), v.integer(), v.minValue(1)), 1),
-			metadata({ name: "editor.planet.mesh.divisions", description: "editor.planet.mesh.divisions-description" }),
-		),
-		octaves: v.pipe(
-			v.optional(v.pipe(v.number(), v.integer(), v.minValue(1)), 1),
-			metadata({ name: "editor.planet.mesh.octaves", description: "editor.planet.mesh.octaves-description" }),
-		),
-		persistence: v.pipe(
-			v.optional(v.number(), 0.5),
-			metadata({ name: "editor.planet.mesh.persistence", description: "editor.planet.mesh.persistence-description" }),
-		),
-		scl: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({ name: "editor.planet.mesh.scl", description: "editor.planet.mesh.scl-description" }),
-		),
-		pow: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({ name: "editor.planet.mesh.pow", description: "editor.planet.mesh.pow-description" }),
-		),
-		mag: v.pipe(
-			v.optional(v.number(), 0.5),
-			metadata({ name: "editor.planet.mesh.mag", description: "editor.planet.mesh.mag-description" }),
-		),
-		colorScale: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({ name: "editor.planet.mesh.color-scale", description: "editor.planet.mesh.color-scale-description" }),
-		),
-		colors: v.pipe(
-			v.optional(v.array(MindustryHexColorSchema)),
-			metadata({ name: "editor.planet.mesh.colors", description: "editor.planet.mesh.colors-description" }),
-		),
-	}),
-	metadata({ option: "SunMesh" }),
-);
+const meshBaseObjectSchema = v.object({
+	type: v.pipe(classSchema(meshTypes, "NoiseMesh"), metadata({ name: "editor.planet.mesh.type" })),
+});
 
-const HexSkyMeshSchema = v.pipe(
-	v.object({
-		type: v.pipe(v.optional(v.picklist(meshTypes), "HexSkyMesh"), metadata({ name: "editor.planet.mesh.type" })),
-		seed: v.pipe(
-			v.optional(v.number(), 0),
-			metadata({ name: "editor.planet.mesh.seed", description: "editor.planet.mesh.seed-description" }),
-		),
-		speed: v.pipe(
-			v.optional(v.number(), 0),
-			metadata({ name: "editor.planet.mesh.speed", description: "editor.planet.mesh.speed-description" }),
-		),
-		radius: v.pipe(
-			v.optional(v.pipe(v.number(), v.gtValue(0)), 1),
-			metadata({ name: "editor.planet.mesh.radius", description: "editor.planet.mesh.radius-description" }),
-		),
-		divisions: v.pipe(
-			v.optional(v.pipe(v.number(), v.integer(), v.minValue(3)), 3),
-			metadata({ name: "editor.planet.mesh.divisions", description: "editor.planet.mesh.divisions-description" }),
-		),
-		color: v.pipe(
-			v.optional(MindustryHexColorSchema),
-			metadata({ name: "editor.planet.mesh.color", description: "editor.planet.mesh.color-description" }),
-		),
-		octaves: v.pipe(
-			v.optional(v.pipe(v.number(), v.integer(), v.minValue(1)), 1),
-			metadata({ name: "editor.planet.mesh.octaves", description: "editor.planet.mesh.octaves-description" }),
-		),
-		persistence: v.pipe(
-			v.optional(v.number(), 0.5),
-			metadata({ name: "editor.planet.mesh.persistence", description: "editor.planet.mesh.persistence-description" }),
-		),
-		scale: v.pipe(
-			v.optional(v.number(), 1),
-			metadata({ name: "editor.planet.mesh.scale", description: "editor.planet.mesh.scale-description" }),
-		),
-		thresh: v.pipe(
-			v.optional(v.number(), 0.5),
-			metadata({ name: "editor.planet.mesh.thresh", description: "editor.planet.mesh.thresh-description" }),
-		),
-	}),
-	metadata({ option: "HexSkyMesh" }),
-);
+const noiseMeshObjectSchema = v.object({
+	seed: v.pipe(
+		v.optional(v.number(), 0),
+		metadata({ name: "editor.planet.mesh.seed", description: "editor.planet.mesh.seed-description" }),
+	),
+	divisions: v.pipe(
+		v.optional(v.pipe(v.number(), v.integer(), v.minValue(1)), 1),
+		metadata({ name: "editor.planet.mesh.divisions", description: "editor.planet.mesh.divisions-description" }),
+	),
+	radius: v.pipe(
+		v.optional(v.pipe(v.number(), v.gtValue(0)), 1),
+		metadata({ name: "editor.planet.mesh.radius", description: "editor.planet.mesh.radius-description" }),
+	),
+	octaves: v.pipe(
+		v.optional(v.pipe(v.number(), v.integer(), v.minValue(1)), 1),
+		metadata({ name: "editor.planet.mesh.octaves", description: "editor.planet.mesh.octaves-description" }),
+	),
+	persistence: v.pipe(
+		v.optional(v.number(), 0.5),
+		metadata({ name: "editor.planet.mesh.persistence", description: "editor.planet.mesh.persistence-description" }),
+	),
+	scale: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({ name: "editor.planet.mesh.scale", description: "editor.planet.mesh.scale-description" }),
+	),
+	mag: v.pipe(
+		v.optional(v.number(), 0.5),
+		metadata({ name: "editor.planet.mesh.mag", description: "editor.planet.mesh.mag-description" }),
+	),
+	color1: v.pipe(
+		v.optional(MindustryHexColorSchema),
+		metadata({ name: "editor.planet.mesh.color1", description: "editor.planet.mesh.color1-description" }),
+	),
+	color2: v.pipe(
+		v.optional(MindustryHexColorSchema),
+		metadata({ name: "editor.planet.mesh.color2", description: "editor.planet.mesh.color2-description" }),
+	),
+	colorOct: v.pipe(
+		v.optional(v.pipe(v.number(), v.integer(), v.minValue(1)), 1),
+		metadata({ name: "editor.planet.mesh.color-oct", description: "editor.planet.mesh.color-oct-description" }),
+	),
+	colorPersistence: v.pipe(
+		v.optional(v.number(), 0.5),
+		metadata({ name: "editor.planet.mesh.color-persistence", description: "editor.planet.mesh.color-persistence-description" }),
+	),
+	colorScale: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({ name: "editor.planet.mesh.color-scale", description: "editor.planet.mesh.color-scale-description" }),
+	),
+	colorThreshold: v.pipe(
+		v.optional(v.number(), 0.5),
+		metadata({ name: "editor.planet.mesh.color-threshold", description: "editor.planet.mesh.color-threshold-description" }),
+	),
+});
+
+const sunMeshObjectSchema = v.object({
+	divisions: v.pipe(
+		v.optional(v.pipe(v.number(), v.integer(), v.minValue(1)), 1),
+		metadata({ name: "editor.planet.mesh.divisions", description: "editor.planet.mesh.divisions-description" }),
+	),
+	octaves: v.pipe(
+		v.optional(v.pipe(v.number(), v.integer(), v.minValue(1)), 1),
+		metadata({ name: "editor.planet.mesh.octaves", description: "editor.planet.mesh.octaves-description" }),
+	),
+	persistence: v.pipe(
+		v.optional(v.number(), 0.5),
+		metadata({ name: "editor.planet.mesh.persistence", description: "editor.planet.mesh.persistence-description" }),
+	),
+	scl: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({ name: "editor.planet.mesh.scl", description: "editor.planet.mesh.scl-description" }),
+	),
+	pow: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({ name: "editor.planet.mesh.pow", description: "editor.planet.mesh.pow-description" }),
+	),
+	mag: v.pipe(
+		v.optional(v.number(), 0.5),
+		metadata({ name: "editor.planet.mesh.mag", description: "editor.planet.mesh.mag-description" }),
+	),
+	colorScale: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({ name: "editor.planet.mesh.color-scale", description: "editor.planet.mesh.color-scale-description" }),
+	),
+	colors: v.pipe(
+		v.optional(v.array(MindustryHexColorSchema)),
+		metadata({ name: "editor.planet.mesh.colors", description: "editor.planet.mesh.colors-description" }),
+	),
+});
+
+const hexSkyMeshObjectSchema = v.object({
+	seed: v.pipe(
+		v.optional(v.number(), 0),
+		metadata({ name: "editor.planet.mesh.seed", description: "editor.planet.mesh.seed-description" }),
+	),
+	speed: v.pipe(
+		v.optional(v.number(), 0),
+		metadata({ name: "editor.planet.mesh.speed", description: "editor.planet.mesh.speed-description" }),
+	),
+	radius: v.pipe(
+		v.optional(v.pipe(v.number(), v.gtValue(0)), 1),
+		metadata({ name: "editor.planet.mesh.radius", description: "editor.planet.mesh.radius-description" }),
+	),
+	divisions: v.pipe(
+		v.optional(v.pipe(v.number(), v.integer(), v.minValue(3)), 3),
+		metadata({ name: "editor.planet.mesh.divisions", description: "editor.planet.mesh.divisions-description" }),
+	),
+	color: v.pipe(
+		v.optional(MindustryHexColorSchema),
+		metadata({ name: "editor.planet.mesh.color", description: "editor.planet.mesh.color-description" }),
+	),
+	octaves: v.pipe(
+		v.optional(v.pipe(v.number(), v.integer(), v.minValue(1)), 1),
+		metadata({ name: "editor.planet.mesh.octaves", description: "editor.planet.mesh.octaves-description" }),
+	),
+	persistence: v.pipe(
+		v.optional(v.number(), 0.5),
+		metadata({ name: "editor.planet.mesh.persistence", description: "editor.planet.mesh.persistence-description" }),
+	),
+	scale: v.pipe(
+		v.optional(v.number(), 1),
+		metadata({ name: "editor.planet.mesh.scale", description: "editor.planet.mesh.scale-description" }),
+	),
+	thresh: v.pipe(
+		v.optional(v.number(), 0.5),
+		metadata({ name: "editor.planet.mesh.thresh", description: "editor.planet.mesh.thresh-description" }),
+	),
+});
 
 const mat3dTranslateSchema = v.pipe(
 	v.object({
@@ -160,7 +155,7 @@ const mat3dTranslateSchema = v.pipe(
 	metadata({ option: "translate" }),
 );
 
-const mat3dArraySchema = v.pipe(v.optional(v.array(v.number()), []), metadata({ option: "array" }));
+const mat3dArraySchema = v.pipe(v.array(v.number()), metadata({ option: "array" }));
 
 const mat3dTransformSchema = v.pipe(
 	v.object({
@@ -192,78 +187,58 @@ const mat3dSchema = v.pipe(
 
 		return mat3dTransformSchema;
 	}),
-);
-
-let meshObjectSchema: AnySchema = NoiseMeshSchema;
-
-const MatMeshSchema = v.pipe(
-	v.object({
-		type: v.pipe(v.optional(v.picklist(meshTypes), "MatMesh"), metadata({ name: "editor.planet.mesh.type" })),
-		mesh: v.pipe(
-			v.optional(meshObjectSchema),
-			metadata({ name: "editor.planet.mesh.mesh", description: "editor.planet.mesh.mesh-description" }),
-		),
-		mat: v.pipe(v.optional(mat3dSchema), metadata({ name: "editor.planet.mesh.mat", description: "editor.planet.mesh.mat-description" })),
-	}),
-	metadata({ option: "MatMesh" }),
-);
-
-const MultiMeshObjectSchema = v.pipe(
-	v.object({
-		type: v.pipe(v.optional(v.picklist(meshTypes), "MultiMesh"), metadata({ name: "editor.planet.mesh.type" })),
-		meshes: v.pipe(
-			v.optional(v.array(v.lazy(() => meshObjectSchema))),
-			metadata({ name: "editor.planet.mesh.meshes", description: "editor.planet.mesh.meshes-description" }),
-		),
-	}),
-	metadata({ option: "MultiMesh" }),
-);
-
-meshObjectSchema = v.pipe(
-	v.lazy((input) => {
-		const type = input && typeof input === "object" && "type" in input ? String(input.type) : "NoiseMesh";
-
-		switch (type) {
-			case "SunMesh":
-				return SunMeshSchema;
-			case "HexSkyMesh":
-				return HexSkyMeshSchema;
-			case "MatMesh":
-				return MatMeshSchema;
-			case "MultiMesh":
-				return MultiMeshObjectSchema;
-			default:
-				return NoiseMeshSchema;
-		}
-	}),
 	metadata({
 		type: "options",
-		options: [NoiseMeshSchema, SunMeshSchema, HexSkyMeshSchema, MatMeshSchema, MultiMeshObjectSchema],
+		options: [mat3dTranslateSchema, mat3dArraySchema, mat3dTransformSchema],
 	}),
 );
 
-const singleMeshSchema = meshObjectSchema;
-const multiMeshSchema = v.pipe(v.array(singleMeshSchema), metadata({ option: "multimesh" }));
+export const MeshHjsonSchema: SchemaFn = new ClassMap<MeshType>(
+	{
+		NoiseMesh: () => noiseMeshObjectSchema.entries,
+		SunMesh: () => sunMeshObjectSchema.entries,
+		HexSkyMesh: () => hexSkyMeshObjectSchema.entries,
+		MatMesh: (context) => ({
+			mesh: v.pipe(
+				v.optional(MeshFieldSchema(context)),
+				metadata({ name: "editor.planet.mesh.mesh", description: "editor.planet.mesh.mesh-description" }),
+			),
+			mat: v.pipe(v.optional(mat3dSchema), metadata({ name: "editor.planet.mesh.mat", description: "editor.planet.mesh.mat-description" })),
+		}),
+		MultiMesh: (context) => ({
+			meshes: v.pipe(
+				v.optional(v.array(MeshHjsonSchema(context))),
+				metadata({ name: "editor.planet.mesh.meshes", description: "editor.planet.mesh.meshes-description" }),
+			),
+		}),
+	},
+	{
+		baseSchema: meshBaseObjectSchema.entries,
+		defaultType: "NoiseMesh",
+	},
+).schema;
 
-const meshSchema = v.pipe(
-	v.lazy((input) => {
-		if (Array.isArray(input)) {
-			return multiMeshSchema;
-		}
+export const MeshFieldSchema: SchemaFn = CachedSchema((context) =>
+	v.pipe(
+		v.lazy((input) => {
+			if (Array.isArray(input)) {
+				return v.pipe(v.array(MeshHjsonSchema(context)), metadata({ option: "multimesh" }));
+			}
 
-		return singleMeshSchema;
-	}),
-	metadata({
-		type: "options",
-		options: [singleMeshSchema, multiMeshSchema],
-	}),
+			return MeshHjsonSchema(context);
+		}),
+		metadata({
+			type: "options",
+			options: [MeshHjsonSchema(context), v.pipe(v.array(MeshHjsonSchema(context)), metadata({ option: "multimesh" }))],
+		}),
+	),
 );
 
 export const PlanetSchema = cached((context: ProjectContents) =>
 	v.object({
 		...databaseContent,
-		mesh: v.optional(meshSchema),
-		cloudMesh: v.optional(meshSchema),
+		mesh: v.optional(MeshFieldSchema(context)),
+		cloudMesh: v.optional(MeshFieldSchema(context)),
 		radius: v.optional(v.pipe(v.number(), v.gtValue(0)), 1),
 		sectorSize: v.optional(v.pipe(v.number(), v.minValue(0), v.integer()), 0),
 		rules: v.optional(v.object({})),

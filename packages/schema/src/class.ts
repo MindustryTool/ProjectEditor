@@ -47,6 +47,7 @@ export class ClassMap<K extends string> {
 				| ((context: ProjectContents) => Record<string, AnySchema>)
 				| ((context: ProjectContents) => v.LazySchema<v.ObjectSchema<v.ObjectEntries, v.ErrorMessage<v.ObjectIssue> | undefined>>);
 			type?: string;
+			defaultType?: NoInfer<K>;
 			extra?: (context: ProjectContents) => Record<string, AnySchema>;
 		},
 	) {}
@@ -96,6 +97,15 @@ export class ClassMap<K extends string> {
 				resolveKey(key);
 			} catch {
 				console.error(this.map[key]);
+			}
+		} else if (this.options.defaultType) {
+			const key = this.options.defaultType;
+			const entries = this.map[key]?.(context);
+			if (entries) {
+				for (const [entryKey, schema] of Object.entries(entries)) {
+					if (entryKey === "className") continue;
+					result[entryKey] = schema;
+				}
 			}
 		}
 		return result;

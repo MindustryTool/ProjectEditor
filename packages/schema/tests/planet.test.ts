@@ -230,9 +230,10 @@ describe("Planet mesh schemas", () => {
 		const result = v.safeParse(schema, planet);
 		expect(result.success).toBe(true);
 		if (result.success) {
-			expect(result.output.mesh.seed).toBe(0);
-			expect(result.output.mesh.radius).toBe(1);
-			expect(result.output.mesh.persistence).toBe(0.5);
+			const mesh = result.output.mesh as { seed: number; radius: number; persistence: number };
+			expect(mesh.seed).toBe(0);
+			expect(mesh.radius).toBe(1);
+			expect(mesh.persistence).toBe(0.5);
 		}
 	});
 
@@ -265,8 +266,9 @@ describe("Planet mesh schemas", () => {
 		const result = v.safeParse(schema, planet);
 		expect(result.success).toBe(true);
 		if (result.success) {
-			expect(result.output.mesh.divisions).toBe(1);
-			expect(result.output.mesh.persistence).toBe(0.5);
+			const mesh = result.output.mesh as { divisions: number; persistence: number };
+			expect(mesh.divisions).toBe(1);
+			expect(mesh.persistence).toBe(0.5);
 		}
 	});
 
@@ -289,8 +291,9 @@ describe("Planet mesh schemas", () => {
 		const result = v.safeParse(schema, planet);
 		expect(result.success).toBe(true);
 		if (result.success) {
-			expect(result.output.mesh.divisions).toBe(3);
-			expect(result.output.mesh.radius).toBe(1);
+			const mesh = result.output.mesh as { divisions: number; radius: number };
+			expect(mesh.divisions).toBe(3);
+			expect(mesh.radius).toBe(1);
 		}
 	});
 

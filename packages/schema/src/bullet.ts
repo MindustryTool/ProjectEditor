@@ -1453,5 +1453,6 @@ export const BulletHjsonSchema: SchemaFn = new ClassMap<BulletClass>(
 	},
 	{
 		baseSchema: (ctx) => createBulletBaseObjectSchema(ctx).entries,
+		defaultType: "BasicBulletType",
 	},
 ).schema;
